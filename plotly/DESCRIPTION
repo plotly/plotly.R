@@ -1,0 +1,18 @@
+Package: plotly
+Type: Package
+Title: Graphs in a browser! An API to generate plots and graphs on
+    https://plot.ly from R. Example graph: https://plot.ly/~chris/407/
+Version: 0.3
+Author: Chris P <chris@plot.ly>
+Maintainer: Chris P <chris@plot.ly>
+Description: Plotly (https://plot.ly) is a browser-based data visualization tool that creates interactive and publication quality figures. This API allows R users to generate Plotly graphs from their desktop R environment. Graphs made through this package are viewed and shared interactively in your browser. See https://plot.ly/API for examples and documentation.
+Imports:
+    RCurl,
+    RJSONIO
+Depends:
+    RCurl,
+    RJSONIO
+License: MIT
+Collate:
+    'plotly.R'
+    'signup.R'
