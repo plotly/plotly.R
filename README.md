@@ -1,7 +1,4 @@
-R-api
-=====
-
-Plotly: Data Visualization and Analytics 
+R-api: Data Visualization and Analytics 
 ======
 
 Plotly's scientific graphing libraries let you make and share interactive, publication-quality graphs
