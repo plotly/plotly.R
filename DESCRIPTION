@@ -1,7 +1,7 @@
 Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online. Example graph:
-        https://plot.ly/~chris/1638/
+    https://plot.ly/~chris/1638/
 Version: 0.3
 Author: Chris P <chris@plot.ly>
 Maintainer: Chris P <chris@plot.ly>
@@ -11,8 +11,13 @@ Description: An interface to plotly's online graphing tools with desktop R
     share data and graphs publicly with a url or privately among other plotly
     members; access your graphs from anywhere.
 URL: https://plot.ly/api/r
-Imports: RCurl, RJSONIO
-Depends: RCurl, RJSONIO
+Imports:
+    RCurl,
+    RJSONIO
+Depends:
+    RCurl,
+    RJSONIO
 License: MIT
-Collate: 'plotly.R' 'signup.R'
-Built: R 3.0.1; ; 2013-11-27 21:05:49 UTC; unix
+Collate:
+    'plotly.R'
+    'signup.R'

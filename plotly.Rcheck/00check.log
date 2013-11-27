@@ -1,4 +1,4 @@
-* using log directory ‘/Users/chris/variety_pack/plotly/apiv0.3/R/plotly.Rcheck’
+* using log directory ‘/Users/chris/plotlygithub/R-api/plotly.Rcheck’
 * using R version 3.0.1 (2013-05-16)
 * using platform: x86_64-apple-darwin10.8.0 (64-bit)
 * using session charset: UTF-8
@@ -13,6 +13,8 @@
 * checking for hidden files and directories ... NOTE
 Found the following hidden files and directories:
   .DS_Store
+  R/.DS_Store
+  R/.Rapp.history
   man/.Rapp.history
 These were most likely included in error. See section ‘Package
 structure’ in the ‘Writing R Extensions’ manual.
@@ -33,7 +35,6 @@ structure’ in the ‘Writing R Extensions’ manual.
 * checking whether the package can be unloaded cleanly ... OK
 * checking whether the namespace can be loaded with stated dependencies ... OK
 * checking whether the namespace can be unloaded cleanly ... OK
-* checking loading without being on the library search path ... OK
 * checking for unstated dependencies in R code ... OK
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
@@ -56,5 +57,5 @@ prepare_Rd: signup.Rd:31-32: Dropping empty section \seealso
 * checking PDF version of manual ... OK
 NOTE: There were 2 notes.
 See
-  ‘/Users/chris/variety_pack/plotly/apiv0.3/R/plotly.Rcheck/00check.log’
+  ‘/Users/chris/plotlygithub/R-api/plotly.Rcheck/00check.log’
 for details.

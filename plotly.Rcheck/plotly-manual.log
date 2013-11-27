@@ -1,13 +1,13 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  9 JUL 2013 12:26
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  27 NOV 2013 16:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/private/var/folders/d2/2kh4pl7x4nj8l7ty5hb5fk9h0000gn/T/RtmpG5AHZb/Rd2pdf89e
-25d07fd59/Rd2.tex
+**/private/var/folders/d2/2kh4pl7x4nj8l7ty5hb5fk9h0000gn/T/RtmpFust7o/Rd2pdf4eb
+067151287/Rd2.tex
 
-(/private/var/folders/d2/2kh4pl7x4nj8l7ty5hb5fk9h0000gn/T/RtmpG5AHZb/Rd2pdf89e2
-5d07fd59/Rd2.tex
+(/private/var/folders/d2/2kh4pl7x4nj8l7ty5hb5fk9h0000gn/T/RtmpFust7o/Rd2pdf4eb0
+67151287/Rd2.tex
 LaTeX2e <2011/06/27>
 Babel <3.9f> and hyphenation patterns for 78 languages loaded.
 
@@ -687,14 +687,14 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 11.
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <20.74> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 11.
-LaTeX Font Info:    Try loading font information for T1+fi4 on input line 21.
+LaTeX Font Info:    Try loading font information for T1+fi4 on input line 20.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/inconsolata/t1fi4.fd
 File: t1fi4.fd 2009/05/28 T1/Inconsolata
 )
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 29.
-LaTeX Font Info:    Try loading font information for T1+phv on input line 29.
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 33.
+LaTeX Font Info:    Try loading font information for T1+phv on input line 33.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2001/06/04 scalable font definitions for T1/phv.
@@ -717,19 +717,19 @@ File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/utf8.def
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 )
-Overfull \hbox (129.78088pt too wide) in paragraph at lines 78--78
+Overfull \hbox (129.78088pt too wide) in paragraph at lines 82--82
  []\T1/fi4/m/n/10 # 1 - Plotting: py$plotly(x1, y1[,x2,y2,...], kwargs=kw) or p
 y$plotly({data1[,data2,...]}, kwargs=kwargs)[] 
  []
 
 [2]
-Overfull \hbox (117.78088pt too wide) in paragraph at lines 117--117
+Overfull \hbox (117.78088pt too wide) in paragraph at lines 121--121
  []\T1/fi4/m/n/9 ## send data to Plotly. Plotly will render an interactive grap
 h and will return a URL where you can view your plot[] 
  []
 
 
-Overfull \hbox (207.78088pt too wide) in paragraph at lines 118--118
+Overfull \hbox (207.78088pt too wide) in paragraph at lines 122--122
  []\T1/fi4/m/n/9 # response <- py$plot(x,y) # sends data to Plotly, Plotly rend
 ers an interactive graph, and returns a URL where you can view your plot[] 
  []
@@ -737,7 +737,7 @@ ers an interactive graph, and returns a URL where you can view your plot[]
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/utf8.def
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 )
-Overfull \hbox (25.68538pt too wide) in paragraph at lines 126--127
+Overfull \hbox (25.68538pt too wide) in paragraph at lines 130--131
 []\T1/ptm/m/n/10 A sign up in-ter-face to Plotly through the R Con-sole. See do
 c-u-men-ta-tion and ex-am-ples at https://plot.ly/API 
  []
@@ -749,14 +749,14 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <12> not available
 
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 180.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 180.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 184.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 184.
  (./Rd2.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 180.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 180.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 184.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 184.
 Package rerunfilecheck Info: File `Rd2.out' has not changed.
 (rerunfilecheck)             Checksum: D07752C3D484B00F7B8C82ACAA3A8466;192.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 180.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 184.
  ) 
 Here is how much of TeX's memory you used:
  6314 strings out of 493315
@@ -765,7 +765,7 @@ Here is how much of TeX's memory you used:
  9630 multiletter control sequences out of 15000+600000
  40684 words of font info for 49 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,5n,27p,488b,505s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,5n,27p,305b,505s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/t
 exlive/2013/texmf-dist/fonts/enc/dvips/inconsolata/fi4-ec.enc}</usr/local/texli
 ve/2013/texmf-dist/fonts/type1/public/inconsolata/Inconsolata.pfb></usr/local/t
@@ -775,7 +775,7 @@ xlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2
 dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts
 /type1/urw/times/utmr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw
 /times/utmri8a.pfb>
-Output written on Rd2.pdf (5 pages, 72890 bytes).
+Output written on Rd2.pdf (5 pages, 72635 bytes).
 PDF statistics:
  121 PDF objects out of 1000 (max. 8388607)
  105 compressed objects within 2 object streams

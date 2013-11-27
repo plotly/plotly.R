@@ -96,7 +96,7 @@ Loading required package: RJSONIO
 > ###
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  0.315 0.007 0.374 0 0 
+Time elapsed:  0.326 0.01 0.404 0 0 
 > grDevices::dev.off()
 null device 
           1 
