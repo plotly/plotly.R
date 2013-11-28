@@ -28,9 +28,9 @@ function(username, key){
 								kwargs=toJSON(kwargs,collapse=''))
 		resp=fromJSON(respst, simplify=FALSE)
 		if(!is.null(resp$filename)) pub$filename = resp$filename
-		if(!is.null(resp$error)) print(resp$err)
-		if(!is.null(resp$warning)) print(resp$warning)
-		if(!is.null(resp$message)) print(resp$message)
+		if(!is.null(resp$error)) cat(resp$err)
+		if(!is.null(resp$warning)) cat(resp$warning)
+		if(!is.null(resp$message)) cat(resp$message)
 		return(resp)
 	}
 
@@ -46,7 +46,7 @@ function(username, key){
 	
 	pub$style = function(..., kwargs=list(filename=pub$filename,fileopt=NULL)){
 		args = list(...)
-		print(kwargs)
+		cat(kwargs)
 		return(pub$makecall(args=args,kwargs=kwargs,origin='style'))
 	}
 
