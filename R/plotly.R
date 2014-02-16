@@ -1,17 +1,16 @@
 plotly <-
 function(username, key){
 
-	# pub attributes/methods that the user has access to
+	# public attributes/methods that the user has access to
 	pub = list(
 		username = username,
 		key = key,
 		filename='from api',
 		fileopt=NULL,
-		version = '0.3'
+		version = '0.3.1'
 	)
 
 	priv = list()
-
 
 	pub$makecall = function(args,kwargs,origin){
 		if(is.null(kwargs$filename)) kwargs$filename=pub$filename
@@ -34,17 +33,48 @@ function(username, key){
 		return(resp)
 	}
 
-	pub$plotly = function(..., kwargs=list(filename=pub$filename,fileopt=NULL)){
+	priv$plotly_hook = function(before, options, envir){
+		if(!before){
+			# set width and height from options or defaults
+			if(is.null(options[['width']])) w = '100%'
+			else w = options[['width']]
+			if(is.null(options[['height']])) h = '600'
+			else h = options[['height']]
+			paste('<iframe height="',h,'" id="igraph" scrolling="no" seamless="seamless"
+				src="', options[['url']],'" width="',w,'"></iframe>',sep='')
+		}
+
+	}
+
+	pub$plotly = function(..., kwargs=list(filename=NULL,fileopt=NULL)){
 		args = list(...)
 		return(pub$makecall(args=args,kwargs=kwargs,origin='plot'))
 	}
 
-	pub$layout = function(..., kwargs=list(filename=pub$filename,fileopt=NULL)){
+	pub$iplot = function(..., kwargs=list(filename=NULL, fileopt=NULL)){
+		# Embed plotly graphs as iframes for knitr documents
+		r = pub$plotly(..., kwargs=kwargs)
+		# bind url to the knitr options and pass into the plotly knitr hook
+		knit_hooks$set(plotly=function(before,options,envir){
+			options[['url']] = r[['url']]
+			priv$plotly_hook(before,options,envir)
+		})
+	}
+
+	pub$embed = function(url){
+		# knitr hook
+		knit_hooks$set(plotly = function(before,options,envir){
+			options[['url']] = url
+			priv$plotly_hook(before,options,envir)
+		})
+	}
+
+	pub$layout = function(..., kwargs=list(filename=NULL,fileopt=NULL)){
 		args = list(...)
 		return(pub$makecall(args=args,kwargs=kwargs,origin='layout'))
 	}
 	
-	pub$style = function(..., kwargs=list(filename=pub$filename,fileopt=NULL)){
+	pub$style = function(..., kwargs=list(filename=NULL,fileopt=NULL)){
 		args = list(...)
 		cat(kwargs)
 		return(pub$makecall(args=args,kwargs=kwargs,origin='style'))
