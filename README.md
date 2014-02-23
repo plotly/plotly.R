@@ -55,3 +55,6 @@ Feedback
 
 "@plotlygraphs Continues to kick ass with their latest release of their plotting api. Multiple coordinated charts rock!" -Stanford robotics guru
 
+---
+
+[![](http://ropensci.org/public_images/github_footer.png)](http://ropensci.org)
