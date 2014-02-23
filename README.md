@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
+
 
 plotly: Scientific Graphing Library 
 ======
