@@ -10,7 +10,8 @@ Description: An interface to plotly's online graphing tools with desktop R
     browser. Style the graphs with code or with plotly's online interface;
     share data and graphs publicly with a url or privately among other plotly
     members; access your graphs from anywhere.
-URL: https://plot.ly/api/r
+URL: https://github.com/ropensci/plotly
+BugReports: https://github.com/ropensci/plotly/issues
 Imports:
     RCurl,
     RJSONIO
