@@ -1,4 +1,6 @@
-R-API: Scientific Graphing Library 
+[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
+
+plotly: Scientific Graphing Library 
 ======
 
 Plotly's scientific graphing libraries let you make and share interactive, publication-quality graphs
