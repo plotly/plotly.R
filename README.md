@@ -4,6 +4,17 @@ R-API: Scientific Graphing Library
 Plotly's scientific graphing libraries let you make and share interactive, publication-quality graphs
 in your browser. Plotly's online graphing tools can interface with your desktop environment, allowing you to import or stream data. Then, style beautiful graphs with code and Plotly's online interface. Easily share your data and graphs publicly with a URL or privately with your team.
 
+Installation
+-------------
+
+To install the GitHub version of this package:
+
+```coffee
+library(devtools)
+install_github("ropensci/plotly")
+```
+
+
 Gallery Examples
 -------------
 
