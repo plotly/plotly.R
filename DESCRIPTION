@@ -2,8 +2,10 @@ Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online.
 Version: 0.3.4
-Author: Chris Parmer <chris@plot.ly>
-Maintainer: Chris Parmer <chris@plot.ly>
+Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
+    email = "chris@plot.ly"),
+    person("Scott", "Chamberlain", role = "aut",
+    email = "myrmecocystus@gmail.com"))
 License: MIT + file LICENSE
 Description: An interface to plotly's online graphing tools with desktop R
     environments. Send data to a plotly account and view the graphs in a web
