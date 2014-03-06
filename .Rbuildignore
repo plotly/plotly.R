@@ -1,0 +1,7 @@
+.travis.yml
+kr_local.R
+Makefile
+man-roxygen
+man-roxygen/^.*\.Rproj$
+^\.Rproj\.user$
+vignettes/margins.sty
