@@ -5,9 +5,9 @@
 signup(username, email)
 }
 \arguments{
-  \item{username}{desired username}
+  \item{username}{Desired username}
 
-  \item{email}{desired email}
+  \item{email}{Desired email}
 }
 \value{
 \itemize{ \item api_key key to use with the api \item

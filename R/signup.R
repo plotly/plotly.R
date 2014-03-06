@@ -4,8 +4,8 @@
 #' examples at https://plot.ly/API
 #' 
 #' @import RCurl RJSONIO
-#' @param username desired username
-#' @param email desired email
+#' @param username Desired username
+#' @param email Desired email
 #' @details See documentation and examples at https://plot.ly/API
 #' @return
 #' \itemize{
@@ -24,9 +24,9 @@
 #' response$tmp_pw # temporary password to access your plotly account
 #' }
 
-signup <- function(username,email){
+signup <- function(username, email){
   platform = 'R'
-  version = '0.3'
+  version = packageVersion("plotly")
   url = 'https://plot.ly/apimkacct'
   options(RCurlOptions = list(sslversion=3, cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
   respst = postForm(url,
@@ -34,7 +34,7 @@ signup <- function(username,email){
             version=version,
             email=email,
             un=username)
-  resp=fromJSON(respst, simplify=FALSE)	
+  resp <- fromJSON(respst, simplify=FALSE)
   if(!is.null(resp$filename)) pub$filename = resp$filename
   if(!is.null(resp$error)) cat(resp$err)
   if(!is.null(resp$warning)) cat(resp$warning)
