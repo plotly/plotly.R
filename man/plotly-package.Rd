@@ -10,7 +10,7 @@ desktop R environment.
 }
 \details{
 Here is an example of an interactive graph made from the R
-API: https://plot.ly/ ~chris/407/
+API: https://plot.ly/~chris/407/
 
 \itemize{ \item Package: plotly \item Type: Package \item
 Version: 0.3.4 \item Date: 2014-03-06 \item License: MIT }
