@@ -1,2 +1,4 @@
 export(plotly)
 export(signup)
+import(RCurl)
+import(RJSONIO)

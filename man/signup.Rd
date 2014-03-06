@@ -1,40 +1,43 @@
 \name{signup}
 \alias{signup}
-\title{Sign up to plotly}
-\description{A sign up interface to Plotly through the R Console. See documentation and examples at https://plot.ly/API}
-\usage{signup(username, email)}
+\title{Sign up to plotly.}
+\usage{
+signup(username, email)
+}
 \arguments{
-  \item{username}{
- desired username
-}
-  \item{email}{
-   desired email
-}
-}
-\details{
- See documentation and examples at https://plot.ly/API
+  \item{username}{desired username}
+
+  \item{email}{desired email}
 }
 \value{
-  \item{api_key }{key to use with the api}
-  \item{tmp_pw }{temporary password to access your plotly account}
+\itemize{ \item{api_key }{key to use with the api}
+\item{tmp_pw }{temporary password to access your plotly
+account} }
 }
-\references{
- https://plot.ly/API
+\description{
+A sign up interface to Plotly through the R Console. See
+documentation and examples at https://plot.ly/API}
 }
-\author{
-  <chris@plot.ly>
+\details{
+See documentation and examples at https://plot.ly/API
 }
 \note{
-  https://plot.ly/API
-}
-
-\seealso{
+https://plot.ly/API
 }
 \examples{
+\dontrun{
 # See up-to-date documentation and examples at https://plot.ly/API
-# username <- 'anna.lyst'
-# email <- 'anna.lyst@plot.ly'
-# response <- signup(username, email)
-# response$api_key # key to access plotly with
-# response$tmp_pw # temporary password to access your plotly account
+username <- 'anna.lyst'
+email <- 'anna.lyst@plot.ly'
+response <- signup(username, email)
+response$api_key # key to access plotly with
+response$tmp_pw # temporary password to access your plotly account
 }
+}
+\author{
+Chris Parmer chris@plot.ly
+}
+\references{
+https://plot.ly/API
+}
+
