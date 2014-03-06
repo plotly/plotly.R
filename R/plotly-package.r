@@ -2,7 +2,7 @@
 #' quality figures. This API allows R users to generate plot.ly graphs from their desktop 
 #' R environment.
 #' 
-#' Here is an example of an interactive graph made from the R API: https://plot.ly/	~chris/407/
+#' Here is an example of an interactive graph made from the R API: https://plot.ly/~chris/407/
 #' 
 #' \itemize{
 #'  \item Package: plotly
@@ -18,4 +18,4 @@
 #' @docType package
 #' @title A R API for plot.ly
 #' @keywords package
-NULL
+NULL 
