@@ -1,5 +1,5 @@
 .travis.yml
-kr_local.R
+Karthik_local.R
 Makefile
 man-roxygen
 man-roxygen/^.*\.Rproj$
