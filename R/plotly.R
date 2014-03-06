@@ -12,6 +12,7 @@
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
 #' }
 #' 
+#' @import knitr
 #' @param username plotly username
 #' @param key plotly API key
 #' 

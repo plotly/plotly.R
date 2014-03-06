@@ -4,7 +4,7 @@ Title: Interactive, publication-quality graphs online.
 Version: 0.3.4
 Author: Chris Parmer <chris@plot.ly>
 Maintainer: Chris Parmer <chris@plot.ly>
-License: MIT
+License: MIT + file LICENSE
 Description: An interface to plotly's online graphing tools with desktop R
     environments. Send data to a plotly account and view the graphs in a web
     browser. Style the graphs with code or with plotly's online interface;
@@ -16,3 +16,5 @@ BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     RCurl,
     RJSONIO
+Imports:
+    knitr

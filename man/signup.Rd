@@ -10,13 +10,12 @@ signup(username, email)
   \item{email}{desired email}
 }
 \value{
-\itemize{ \item{api_key }{key to use with the api}
-\item{tmp_pw }{temporary password to access your plotly
-account} }
+\itemize{ \item api_key key to use with the api \item
+tmp_pw temporary password to access your plotly account }
 }
 \description{
 A sign up interface to Plotly through the R Console. See
-documentation and examples at https://plot.ly/API}
+documentation and examples at https://plot.ly/API
 }
 \details{
 See documentation and examples at https://plot.ly/API
@@ -26,7 +25,6 @@ https://plot.ly/API
 }
 \examples{
 \dontrun{
-# See up-to-date documentation and examples at https://plot.ly/API
 username <- 'anna.lyst'
 email <- 'anna.lyst@plot.ly'
 response <- signup(username, email)
