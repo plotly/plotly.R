@@ -40,14 +40,20 @@
 #' browseURL(url)
 #' }
 
-plotly <- function(username, key){
+plotly <- function(username=NULL, key=NULL){
+
+  if(is.null(username))
+    username <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
+  if(is.null(key))
+    key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
+  
 	# public attributes/methods that the user has access to
 	pub = list(
 		username = username,
 		key = key,
 		filename='from api',
 		fileopt=NULL,
-		version = '0.3.1'
+		version = as.character(packageVersion("plotly"))
 	)
 
 	priv = list()

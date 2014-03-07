@@ -2,7 +2,7 @@
 \alias{signup}
 \title{Sign up to plotly.}
 \usage{
-signup(username, email)
+signup(username = NULL, email = NULL)
 }
 \arguments{
   \item{username}{Desired username}

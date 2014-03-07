@@ -24,9 +24,14 @@
 #' response$tmp_pw # temporary password to access your plotly account
 #' }
 
-signup <- function(username, email){
+signup <- function(username=NULL, email=NULL){
+  if(is.null(username))
+    key <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
+  if(is.null(key))
+    key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
+  
   platform = 'R'
-  version = packageVersion("plotly")
+  version = as.character(packageVersion("plotly"))
   url = 'https://plot.ly/apimkacct'
   options(RCurlOptions = list(sslversion=3, cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
   respst = postForm(url,

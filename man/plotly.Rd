@@ -2,7 +2,7 @@
 \alias{plotly}
 \title{Main interface to plotly}
 \usage{
-plotly(username, key)
+plotly(username = NULL, key = NULL)
 }
 \arguments{
   \item{username}{plotly username}
