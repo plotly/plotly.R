@@ -10,7 +10,8 @@ plotly(username = NULL, key = NULL)
   \item{key}{plotly API key}
 }
 \value{
-An object of class PlotlyClass
+An object of class PlotlyClass, except for the final object
+after adding layers becomes a list class.
 }
 \description{
 A call to \code{plotly(username, key)} creates an object of

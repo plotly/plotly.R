@@ -16,7 +16,8 @@
 #' @param username plotly username
 #' @param key plotly API key
 #' 
-#' @return An object of class PlotlyClass
+#' @return An object of class PlotlyClass, except for the final object after adding
+#' layers becomes a list class.
 #' @details See documentation and examples at https://plot.ly/API
 #' @references https://plot.ly/API
 #' @author Chris Parmer chris@@plot.ly
@@ -36,8 +37,8 @@
 #' ## This call sends data to Plotly, Plotly renders an interactive 
 #' ##    graph, and returns a URL where you can view your plot
 #' response <- py$plot(x,y)
-#' url = response$url # view your plot at this URL
-#' browseURL(url)
+#' response$url # view your plot at this URL
+#' browseURL(response$url) # use browseURL to go to the URL in your browser
 #' }
 
 plotly <- function(username=NULL, key=NULL){
