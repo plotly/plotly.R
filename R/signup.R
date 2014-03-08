@@ -23,7 +23,6 @@
 #' response$api_key # key to access plotly with
 #' response$tmp_pw # temporary password to access your plotly account
 #' }
-
 signup <- function(username=NULL, email=NULL){
   if(is.null(username))
     key <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
@@ -32,17 +31,19 @@ signup <- function(username=NULL, email=NULL){
   
   platform = 'R'
   version = as.character(packageVersion("plotly"))
-  url = 'https://plot.ly/apimkacct'
-  options(RCurlOptions = list(sslversion=3, cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
-  respst = postForm(url,
-            platform=platform,
-            version=version,
-            email=email,
-            un=username)
-  resp <- fromJSON(respst, simplify=FALSE)
-  if(!is.null(resp$filename)) pub$filename = resp$filename
-  if(!is.null(resp$error)) cat(resp$err)
-  if(!is.null(resp$warning)) cat(resp$warning)
-  if(!is.null(resp$message)) cat(resp$message)
+  url <- "https://plot.ly/apimkacct"
+  options(RCurlOptions = list(sslversion = 3, cainfo = system.file("CurlSSL", "cacert.pem", 
+                                                                   package = "RCurl")))
+  respst <- postForm(url, platform = platform, version = version, email = email, 
+                     un = username)
+  resp <- fromJSON(respst, simplify = FALSE)
+  if (!is.null(resp$filename)) 
+    pub$filename <- resp$filename
+  if (!is.null(resp$error)) 
+    cat(resp$err)
+  if (!is.null(resp$warning)) 
+    cat(resp$warning)
+  if (!is.null(resp$message)) 
+    cat(resp$message)
   return(resp)
-}
+} 

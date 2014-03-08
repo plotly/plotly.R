@@ -1,11 +1,13 @@
 Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online.
-Version: 0.3.4
+Version: 0.3.5
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
-    email = "myrmecocystus@gmail.com"))
+    email = "myrmecocystus@gmail.com"),
+    person("Karthik", "Ram", role = "aut",
+    email = "karthik.ram@gmail.com"))
 License: MIT + file LICENSE
 Description: An interface to plotly's online graphing tools with desktop R
     environments. Send data to a plotly account and view the graphs in a web
