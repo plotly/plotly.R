@@ -45,6 +45,17 @@ y <- c(10,11,12)
 response <- py$plot(x,y)
 response$url # view your plot at this URL
 browseURL(response$url) # use browseURL to go to the URL in your browser
+
+## Export ggplots directly to plot.ly.
+ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
+py$ggplotly(ggiris)
+data(canada.cities, package="maps")
+viz <- ggplot(canada.cities, aes(long, lat))+
+  borders(regions="canada", name="borders")+
+  coord_equal()+
+  geom_point(aes(text=name, size=pop), colour="red",
+               alpha=1/2, name="cities")
+ py$ggplotly(viz)
 }
 }
 \author{

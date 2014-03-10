@@ -40,7 +40,19 @@
 #' response <- py$plot(x,y)
 #' response$url # view your plot at this URL
 #' browseURL(response$url) # use browseURL to go to the URL in your browser
+#'
+#' ## Export ggplots directly to plot.ly.
+#' ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
+#' py$ggplotly(ggiris)
+#' data(canada.cities, package="maps")
+#' viz <- ggplot(canada.cities, aes(long, lat))+
+#'   borders(regions="canada", name="borders")+
+#'   coord_equal()+
+#'   geom_point(aes(text=name, size=pop), colour="red",
+#'                alpha=1/2, name="cities")
+#'  py$ggplotly(viz)
 #' }
+
 
 plotly <- function(username=NULL, key=NULL){
 
@@ -90,6 +102,17 @@ plotly <- function(username=NULL, key=NULL){
   pub$plotly <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     args <- list(...)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
+  }
+  pub$ggplotly <- function(gg){
+    if(!is.ggplot(gg)){
+      stop("gg must be a ggplot")
+    }
+    pargs <- gg2list(gg)
+    resp <- do.call(pub$plotly, pargs)
+    if(interactive()){
+      browseURL(resp$url)
+    }
+    invisible(list(data=pargs, response=resp))
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
