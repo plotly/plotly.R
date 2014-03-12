@@ -10,10 +10,10 @@ desktop R environment.
 }
 \details{
 An example of an interactive graph made from the R API:
-https://plot.ly/ ~chris/407/
+https://plot.ly/~chris/407/
 
 \itemize{ \item Package: plotly \item Type: Package \item
-Version: 0.3.4 \item Date: 2014-03-06 \item License: MIT }
+Version: 0.3.4 \item Date: 2014-03-07 \item License: MIT }
 }
 \section{Authentication}{
   There are a few different options. First, you can pass in
