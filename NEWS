@@ -1,3 +1,11 @@
+0.3.7 -- 14 March 2014.
+
+For ggplotly:
+
+- if on the command line, open a web browser (as before).
+
+- if in knitr/Rmd in a chunk with plotly=TRUE, embed the plot.
+
 0.3.6 -- 10 March 2014.
 
 Merge ggplotly code.

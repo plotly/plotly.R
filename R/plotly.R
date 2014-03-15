@@ -108,11 +108,13 @@ plotly <- function(username=NULL, key=NULL){
       stop("gg must be a ggplot")
     }
     pargs <- gg2list(gg)
-    resp <- do.call(pub$plotly, pargs)
-    if(interactive()){
+    if(interactive()){ # we are on the command line.
+      resp <- do.call(pub$plotly, pargs)
       browseURL(resp$url)
+      invisible(list(data=pargs, response=resp))
+    }else{ # we are in knitr/RStudio.
+      do.call(pub$iplot, pargs)
     }
-    invisible(list(data=pargs, response=resp))
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
