@@ -1,8 +1,8 @@
-\name{layer2list}
-\alias{layer2list}
-\title{Convert a layer to a list. Called from gg2list()}
+\name{layer2traces}
+\alias{layer2traces}
+\title{Convert a layer to a list of traces. Called from gg2list()}
 \usage{
-layer2list(l, d, ranges)
+layer2traces(l, d, ranges)
 }
 \arguments{
   \item{l}{one layer of the ggplot object}
@@ -17,6 +17,6 @@ list representing a layer, with corresponding aesthetics,
 ranges, and groups.
 }
 \description{
-Convert a layer to a list. Called from gg2list()
+Convert a layer to a list of traces. Called from gg2list()
 }
 

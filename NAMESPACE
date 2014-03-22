@@ -1,6 +1,6 @@
 export(getLegendList)
 export(gg2list)
-export(layer2list)
+export(layer2traces)
 export(plotly)
 export(signup)
 export(toRGB)
