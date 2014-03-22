@@ -1,5 +1,7 @@
 0.3.8 -- 21 March 2014.
 
+ggplotly takes the last_plot() by default.
+
 Support for ggplotly layout elements title, tickcolor, gridcolor,
 showlegend, plot_bgcolor, paper_bgcolor, tickangle, axis titles, plot
 border colors.

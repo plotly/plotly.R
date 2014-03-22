@@ -103,7 +103,7 @@ plotly <- function(username=NULL, key=NULL){
     args <- list(...)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
   }
-  pub$ggplotly <- function(gg){
+  pub$ggplotly <- function(gg=last_plot()){
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
