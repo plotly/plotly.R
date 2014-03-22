@@ -1,3 +1,8 @@
+0.3.8 -- 21 March 2014.
+
+Support for ggplotly layout elements title, tickcolor, gridcolor,
+showlegend, plot_bgcolor, paper_bgcolor.
+
 0.3.7 -- 14 March 2014.
 
 For ggplotly:

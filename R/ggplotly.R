@@ -86,7 +86,8 @@ gg2list <- function(p){
   ## Always use identity size scale so that plot.ly gets the real
   ## units for the size variables.
   p <- p+scale_size_identity()
-  plist <- list()
+  layout <- list()
+  trace.list <- list()
   ## Before building the ggplot, we would like to add aes(name) to
   ## figure out what the object group is later.
   for(layer.i in seq_along(p$layers)){
@@ -106,53 +107,24 @@ gg2list <- function(p){
     }
     p$layers[[layer.i]]$mapping$name <- group.var
   }
-  plistextra <- ggplot2::ggplot_build(p)
-  ## NOTE: data from ggplot_build have scales already applied. This
-  ## may be a bad thing for log scales.
-  for(sc in plistextra$plot$scales$scales){
-    if(sc$scale_name == "manual"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(0)
-    }else if(sc$scale_name == "brewer"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(length(sc$range$range))
-    }else if(sc$scale_name == "hue"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(length(sc$range$range))
-    }else if(sc$scale_name == "linetype_d"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(length(sc$range$range))
-    }else if(sc$scale_name == "alpha_c"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(sc$range$range)
-    }else if(sc$scale_name == "size_c"){
-      plist$scales[[sc$aesthetics]] <- sc$palette(sc$range$range)
-    }else if(sc$scale_name == "gradient"){
-      plist$scales[[sc$aesthetics]] <- ggplot2:::scale_map(sc, ggplot2:::scale_breaks(sc))
-    }
-  }
-  for(i in seq_along(plistextra$plot$layers)){
+  ## Extract data from built ggplots 
+  built <- ggplot2::ggplot_build(p)
+  ranges <- built$panel$ranges[[1]]
+  for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
-    L <- plistextra$plot$layers[[i]]
+    L <- built$plot$layers[[i]]
 
     ## for each layer, there is a correpsonding data.frame which
     ## evaluates the aesthetic mapping.
-    df <- plistextra$data[[i]]
+    df <- built$data[[i]]
 
     ## This extracts essential info for this geom/layer.
-    g <- layer2list(L, df, plistextra$panel$ranges[[1]])
-    
-    ## Idea: use the ggplot2:::coord_transform(coords, data, scales)
-    ## function to handle cases like coord_flip. scales is a list of
-    ## 12, coords is a list(limits=list(x=NULL,y=NULL)) with class
-    ## e.g. c("cartesian","coord"). The result is a transformed data
-    ## frame where all the data values are between 0 and 1.
-    
-    ## TODO: coord_transform maybe won't work for 
-    ## geom_dotplot|rect|segment and polar/log transformations, which
-    ## could result in something nonlinear. For the time being it is
-    ## best to just ignore this, but you can look at the source of
-    ## e.g. geom-rect.r in ggplot2 to see how they deal with this by
-    ## doing a piecewise linear interpolation of the shape.
+    traces <- layer2traces(L, df, ranges)
 
-    g$data <- ggplot2:::coord_transform(plistextra$plot$coord, g$data,
-                                        plistextra$panel$ranges[[1]])
-    plist$geoms[[i]] <- g
+    ## Do we really need to coord_transform?
+    ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
+    ##                                     built$panel$ranges[[1]])
+    trace.list <- c(trace.list, traces)
   }
   # Export axis specification as a combination of breaks and
   # labels, on the relevant axis scale (i.e. so that it can
@@ -164,64 +136,53 @@ gg2list <- function(p){
   ## Flip labels if coords are flipped - transform does not take care
   ## of this. Do this BEFORE checking if it is blank or not, so that
   ## individual axes can be hidden appropriately, e.g. #1.
-  ranges <- plistextra$panel$ranges[[1]]
-  if("flip"%in%attr(plistextra$plot$coordinates, "class")){
-    temp <- plistextra$plot$labels$x
-    plistextra$plot$labels$x <- plistextra$plot$labels$y
-    plistextra$plot$labels$y <- temp
-  }
+  ## ranges <- built$panel$ranges[[1]]
+  ## if("flip"%in%attr(built$plot$coordinates, "class")){
+  ##   temp <- built$plot$labels$x
+  ##   built$plot$labels$x <- built$plot$labels$y
+  ##   built$plot$labels$y <- temp
+  ## }
   is.blank <- function(el.name){
     x <- ggplot2::calc_element(el.name, p$theme)
     "element_blank"%in%attr(x,"class")
   }
-  plist$axis <- list()
   for(xy in c("x","y")){
+    ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
-    plist$axis[[xy]] <- ranges[[s("%s.major")]]
-    plist$axis[[s("%slab")]] <- if(is.blank(s("axis.text.%s"))){
-      NULL
-    }else{
-      ranges[[s("%s.labels")]]
-    }
-    plist$axis[[s("%srange")]] <- ranges[[s("%s.range")]]
-    plist$axis[[s("%sname")]] <- if(is.blank(s("axis.title.%s"))){
-      ""
-    }else{
-      plistextra$plot$labels[[xy]]
-    }
-    plist$axis[[s("%sline")]] <- !is.blank(s("axis.line.%s"))
-    plist$axis[[s("%sticks")]] <- !is.blank(s("axis.ticks.%s"))
+    ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
+    ax.list$gridcolor <- toRGB(theme.pars$panel.grid.major$colour)
+    ## Some other params that we used in animint but we don't yet
+    ## translate to plotly:
+    ranges[[s("%s.major")]]
+    ranges[[s("%s.labels")]]
+    ranges[[s("%s.range")]]
+    built$plot$labels[[xy]]
+    !is.blank(s("axis.line.%s"))
+    !is.blank(s("axis.ticks.%s"))
+    layout[[s("%saxis")]] <- ax.list
   }
   
-  plist$legend <- getLegendList(plistextra)
-  if(length(plist$legend)>0){
-    plist$legend <- plist$legend[which(sapply(plist$legend, function(i) length(i)>0))]
-  }  # only pass out legends that have guide = "legend" or guide="colorbar"
-  
-  # Remove legend if theme has no legend position
-  if(theme.pars$legend.position=="none") plist$legend <- NULL
-  
-  if("element_blank"%in%attr(theme.pars$plot.title, "class")){
-    plist$title <- ""
-  } else {
-    plist$title <- plistextra$plot$labels$title
-  }
+  ## Remove legend if theme has no legend position
+  if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
 
-  pargs <- list()
-  for(g in plist$geoms){
-    pargs <- c(pargs, g$traces)
-  }
-  pargs$kwargs <- list()
-  pargs
+  ## Main plot title.
+  layout$title <- built$plot$labels$title
+
+  ## Background color.
+  layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
+  layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
+
+  trace.list$kwargs <- list(layout=layout)
+  trace.list
 }
 
-#' Convert a layer to a list. Called from gg2list()
+#' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
 #' @param ranges axes ranges
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2list <- function(l, d, ranges){
+layer2traces <- function(l, d, ranges){
   g <- list(geom=l$geom$objname,
             data=d)
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k))) # needed for when group, etc. is an expression
@@ -396,7 +357,6 @@ layer2list <- function(l, d, ranges){
     warning(sprintf("geom_%s with size=0 will be invisible",g$geom))
   }
 
-  g$traces <- list()
   group.vars <- c("group",
                   "color", "colour",
                   "fill") #TODO.
@@ -426,7 +386,7 @@ layer2list <- function(l, d, ranges){
     tr$name <- as.character(tr$name[1])
     g$traces[[group.i]] <- tr
   }
-  g
+  g$traces
 }
 
 getMarker <- function(df, params, aesConverter, defaults, only=NULL){
