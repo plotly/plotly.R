@@ -231,7 +231,7 @@ layer2traces <- function(l, d, ranges){
   ## non-ggplot2 params like name are useful for plot.ly and ggplot2
   ## places them into stat_params.
   for(p.name in names(g$params)){
-    names(g$params[[p.name]]) <- NULL
+    names(g$params[[p.name]]) <- NULL #why?
   }
 
   ## Convert complex ggplot2 geoms so that they are treated as special
@@ -414,6 +414,7 @@ layer2traces <- function(l, d, ranges){
   }else{
     list(g$data)
   }
+  ## Construct a list of traces.
   for(group.i in seq_along(group.list)){
     group.data <- group.list[[group.i]]
     tr <- group2trace(group.data, g$params, g$geom)
@@ -439,6 +440,9 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
     }
     take.from <- as.list(take.from)
     to.write <- take.from[[name]]
+    if(plotly.name == "color"){ # convert from R to RGB codes.
+      to.write <- toRGB(to.write)
+    }
     ## if(is.null(to.write)){
     ##   print(take.from)
     ##   stop("undefined marker ", name)

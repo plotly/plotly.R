@@ -33,3 +33,5 @@ test_that("angled ticks are translated correctly", {
   info <- gg2list(ggiris)
   expect_identical(info$kwargs$layout$xaxis$tickangle, -45)
 })
+
+##TODO: test label colors.

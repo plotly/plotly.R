@@ -81,7 +81,7 @@ for(group.i in seq_along(group.list)){
   g <- group.list[[group.i]]
   AllBlack.expected[[group.i]] <-
     list(x=g$x, y=g$y, type="scatter", mode="lines",
-         line=list(color="black"))
+         line=list(color=toRGB("black")))
 }
 ## A ggplot with 6 different automatic types should be converted to
 ## plotly's 6 types.
@@ -127,7 +127,7 @@ normalize <- function(x, m, M){
 DefaultCities.expected <-
   list(list(x=line.df$long, y=line.df$lat,
             type="scatter", mode="lines", name="borders",
-            line=list(dash="solid", color="grey50")),
+            line=list(dash="solid", color=toRGB("grey50"))),
        with(canada.cities,{
          list(x=long, y=lat, text=name, type="scatter", mode="markers",
               name="cities",
