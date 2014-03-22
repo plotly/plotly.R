@@ -382,14 +382,6 @@ layer2traces <- function(l, d, ranges){
     g$data <- poly.na.df
   }
 
-  ## Check g$data for color/fill - convert to hexadecimal so JS can
-  ## parse correctly.
-  for(color.var in c("colour", "color", "fill")){
-    if(color.var %in% names(g$data)){
-      g$data[,color.var] <- toRGB(g$data[,color.var])
-    }
-  }
-
   if(any(g$data$size == 0, na.rm=TRUE)){
     warning(sprintf("geom_%s with size=0 will be invisible",g$geom))
   }
@@ -441,6 +433,7 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
     take.from <- as.list(take.from)
     to.write <- take.from[[name]]
     if(plotly.name == "color"){ # convert from R to RGB codes.
+      ## TODO: fill?
       to.write <- toRGB(to.write)
     }
     ## if(is.null(to.write)){
