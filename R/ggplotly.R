@@ -142,21 +142,58 @@ gg2list <- function(p){
   ##   built$plot$labels$x <- built$plot$labels$y
   ##   built$plot$labels$y <- temp
   ## }
+  e <- function(el.name){
+    ggplot2::calc_element(el.name, p$theme)
+  }
   is.blank <- function(el.name){
-    x <- ggplot2::calc_element(el.name, p$theme)
-    "element_blank"%in%attr(x,"class")
+    "element_blank"%in%attr(e(el.name),"class")
   }
   for(xy in c("x","y")){
     ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     ax.list$gridcolor <- toRGB(theme.pars$panel.grid.major$colour)
+    ## These numeric length variables are not easily convertible.
+    ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
+    ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
+    ax.list$tickwidth <- theme.pars$axis.ticks$size
+    tick.text.name <- s("axis.text.%s")
+    ax.list$showticklabels <- ifelse(is.blank(tick.text.name), FALSE, TRUE)
+    tick.text <- e(tick.text.name)
+    ax.list$tickangle <- if(is.numeric(tick.text$angle)){
+      -tick.text$angle
+    }
+    theme2font <- function(text){
+      if(!is.null(text)){
+        with(text, {
+          list(family=family,
+               size=size,
+               color=toRGB(colour))
+        })
+      }
+    }
+    ## Translate axes labels.
+    scale.i <- which(p$scales$find(xy))
+    ax.list$title <- if(length(scale.i)){
+      sc <- p$scales$scales[[scale.i]]
+      if(!is.null(sc$name)){
+        sc$name
+      }else{
+        p$labels[[xy]]
+      }
+    }else{
+      p$labels[[xy]]
+    }
+    ax.list$tickfont <- theme2font(tick.text)
+    title.text <- e(s("axis.title.%s"))
+    ax.list$titlefont <- theme2font(title.text)
+    ax.list$type <- "linear" ## TODO: log scales?
+    ## Lines drawn around the plot border:
+    ax.list$showline <- ifelse(is.blank("panel.border"), FALSE, TRUE)
+    ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
+    ax.list$linewidth <- theme.pars$panel.border$size
     ## Some other params that we used in animint but we don't yet
     ## translate to plotly:
-    ranges[[s("%s.major")]]
-    ranges[[s("%s.labels")]]
-    ranges[[s("%s.range")]]
-    built$plot$labels[[xy]]
     !is.blank(s("axis.line.%s"))
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
