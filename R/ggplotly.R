@@ -209,6 +209,10 @@ gg2list <- function(p){
   layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
 
+  ## Legend.
+  layout$margin$r <- 10
+  layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
+
   trace.list$kwargs <- list(layout=layout)
   trace.list
 }
@@ -586,6 +590,7 @@ getLegend <- function(mb){
 #' @return hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
 #' @export
 toRGB <- function(x){
+  if(is.null(x))return(x)
   rgb.matrix <- col2rgb(x)
   rgb.text <- apply(rgb.matrix, 2, paste, collapse=",")
   rgb.css <- sprintf("rgb(%s)", rgb.text)
