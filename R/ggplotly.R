@@ -77,6 +77,26 @@ coded.lty <-
 #' Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
+toBasic <-
+  list(segment=function(g){
+    ## Every row is one segment, we convert to a line with several
+    ## groups which can be efficiently drawn by adding NA rows.
+    g$data$group <- 1:nrow(g$data)
+    used <- c("x", "y", "xend", "yend")
+    others <- g$data[!names(g$data) %in% used]
+    g$data <- with(g$data, {
+      rbind(cbind(x, y, others),
+            cbind(x=xend, y=yend, others))
+    })
+    g
+  })
+
+markLegends <-
+  list(point=c("colour", "fill", "size", "shape"),
+       line=c("linetype", "size", "colour"))
+
+markUnique <- as.character(unique(unlist(markLegends)))
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
@@ -91,35 +111,43 @@ gg2list <- function(p){
   ## Before building the ggplot, we would like to add aes(name) to
   ## figure out what the object group is later.
   for(layer.i in seq_along(p$layers)){
-    a <- c(p$layers[[layer.i]]$mapping, p$mapping)
-    group.vars <- c("colour", "color", "col",
-                    "fill",
-                    "linetype", "lty",
-                    "shape", "pch")
-    group.var <- a$name
-    for(gv in group.vars){
-      if(is.null(group.var)){
-        g.expr <- a[[gv]]
-        if(!is.null(g.expr)){
-          group.var <- g.expr
-        }
-      }
-    }
-    p$layers[[layer.i]]$mapping$name <- group.var
+    layer.aes <- p$layers[[layer.i]]$mapping
+    to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
+    layer.aes[to.copy] <- p$mapping[to.copy]
+    mark.names <- markUnique[markUnique %in% names(layer.aes)]
+    name.names <- sprintf("%s.name", mark.names)
+    layer.aes[name.names] <- layer.aes[mark.names]
+    p$layers[[layer.i]]$mapping <- layer.aes
   }
   ## Extract data from built ggplots 
   built <- ggplot2::ggplot_build(p)
   ranges <- built$panel$ranges[[1]]
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
-    L <- built$plot$layers[[i]]
+    L <- p$layers[[i]]
 
     ## for each layer, there is a correpsonding data.frame which
     ## evaluates the aesthetic mapping.
     df <- built$data[[i]]
 
+    ## Test fill and color to see if they encode a quantitative
+    ## variable. In that case, we do not make traces for separate
+    ## colors, since there are too many!
+    is.continuous <- c()
+    for(a in c("fill", "colour")){
+      fun.name <- sprintf("scale_%s_continuous", a)
+      fun <- get(fun.name)
+      is.continuous[[a]] <- tryCatch({
+        with.scale <- p+fun()
+        ggplot2::ggplot_build(with.scale)
+        TRUE
+      }, error=function(e){
+        FALSE
+      })
+    }
+    
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, ranges)
+    traces <- layer2traces(L, df, is.continuous)
 
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -223,10 +251,11 @@ gg2list <- function(p){
 #' @param ranges axes ranges
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, ranges){
+layer2traces <- function(l, d, is.continuous){
   g <- list(geom=l$geom$objname,
             data=d)
-  g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k))) # needed for when group, etc. is an expression
+  ## needed for when group, etc. is an expression.
+  g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k))) 
 
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
@@ -235,7 +264,11 @@ layer2traces <- function(l, d, ranges){
   ## non-ggplot2 params like name are useful for plot.ly and ggplot2
   ## places them into stat_params.
   for(p.name in names(g$params)){
-    names(g$params[[p.name]]) <- NULL #why?
+    ## c("foo") is translated to "foo" in JSON, so instead we use
+    ## list("foo") which becomes ["foo"]. However we need to make sure
+    ## that the list does not have names since list(bar="foo") becomes
+    ## {"bar":"foo"}
+    names(g$params[[p.name]]) <- NULL 
   }
 
   ## Convert complex ggplot2 geoms so that they are treated as special
@@ -256,126 +289,67 @@ layer2traces <- function(l, d, ranges){
   ## symbol=circle,square,diamond,cross,x,
   ## triangle-up,triangle-down,triangle-left,triangle-right
 
-  geom <- function(...){
-    gnames <- c(...)
-    g$geom %in% gnames
-  }
-  g$geom <- if(geom("abline")){
-    # "Trick" ggplot coord_transform into transforming the slope and intercept
-    g$data[,"x"] <- ranges$x.range[1]
-    g$data[,"xend"] <- ranges$x.range[2]
-    g$data[,"y"] <- g$data$slope*ranges$x.range[1]+g$data$intercept
-    g$data[,"yend"] <-  g$data$slope*ranges$x.range[2]+g$data$intercept
-    g$data <- as.data.frame(g$data)
-    if(g$aes[["group"]]=="1"){ 
-      # ggplot2 defaults to adding a group attribute
-      # which misleads for situations where there are 
-      # multiple lines with the same group. 
-      # if the group attribute conveys no additional 
-      # information, remove it.
-      ## TODO: Figure out a better way to handle this...
-      g$aes <- g$aes[-which(names(g$aes)=="group")]
-    } 
-    "segment"
-  } else if(geom("point")){
-    g$data$group <- 1
-    # Fill set to match ggplot2 default of filled in circle. 
-    if(!"fill"%in%names(g$data) & "colour"%in%names(g$data)){
-      g$data[["fill"]] <- g$data[["colour"]]
-    }
-    "point"
-  } else if(geom("ribbon")){
-    # Color set to match ggplot2 default of fill with no outside border.
-    if("fill"%in%names(g$data) & !"colour"%in%names(g$data)){
-      g$data[["colour"]] <- g$data[["fill"]]
-    }
-    "ribbon"
-  } else if(geom("density") | geom("area")){
-    "ribbon"
-  } else if(geom("tile") | geom("raster") | geom("histogram") ){
-    # Color set to match ggplot2 default of tile with no outside border.
-    if(!"colour"%in%names(g$data) & "fill"%in%names(g$data)){
-      g$data[["colour"]] <- g$data[["fill"]]
-      # Make outer border of 0 size if size isn't already specified.
-      if(!"size"%in%names(g$data)) g$data[["size"]] <- 0 
-    }
-    "rect"
-  } else if(geom("bar")){
-    "rect"
-  } else if(g$geom=="bin2d"){
-    stop("TODO")
-  } else if(geom("boxplot")){
-    stop("boxplots are not supported. Workaround: rects, lines, and points")
-    ## TODO: boxplot support. But it is hard since boxplots are drawn
-    ## using multiple geoms and it is not straightforward to deal with
-    ## that using our current JS code. There is a straightforward
-    ## workaround: combine working geoms (rects, lines, and points).
-
-    g$data$outliers <- sapply(g$data$outliers, FUN=paste, collapse=" @ ") 
-    # outliers are specified as a list... 
-  } else if(geom("violin")){
-    x <- g$data$x
-    vw <- g$data$violinwidth
-    xmin <- g$data$xmin
-    xmax <- g$data$xmax
-    g$data$xminv <- x-vw*(x-xmin)
-    g$data$xmaxv <- x+vw*(xmax-x)
-    newdata <- ddply(g$data, .(group), function(df){
-      rbind(arrange(transform(df, x=xminv), y), arrange(transform(df, x=xmaxv), -y))
-                })
-    newdata <- ddply(newdata, .(group), function(df) rbind(df, df[1,]))
-    g$data <- newdata
-    "polygon"
-  } else if(geom("step")){
-    datanames <- names(g$data)
-    g$data <- ddply(g$data, .(group), function(df) ggplot2:::stairstep(df))
-    "path"
-  } else if(geom("contour") | g$geom=="density2d"){
-    g$aes[["group"]] <- "piece"
-    "path"
-  } else if(geom("freqpoly")){
-    "line"
-  } else if(geom("quantile")){
-    "path"
-  } else if(geom("hex")){
-    ## TODO: for interactivity we will run into the same problems as
-    ## we did with histograms. Again, if we put several
-    ## clickSelects/showSelected values in the same hexbin, then
-    ## clicking/hiding hexbins doesn't really make sense. Need to stop
-    ## with an error if showSelected/clickSelects is used with hex.
-    g$aes[["group"]] <- "group"
-    dx <- ggplot2::resolution(g$data$x, FALSE)
-    dy <- ggplot2::resolution(g$data$y, FALSE) / sqrt(3) / 2 * 1.15
-    hex <- as.data.frame(hexcoords(dx, dy))[,1:2]
-    hex <- rbind(hex, hex[1,]) # to join hexagon back to first point
-    g$data$group <- as.numeric(interaction(g$data$group, 1:nrow(g$data)))
-    ## this has the potential to be a bad assumption - 
-    ##   by default, group is identically 1, if the user 
-    ##   specifies group, polygons aren't possible to plot
-    ##   using d3, because group will have a different meaning
-    ##   than "one single polygon".
-    newdata <- ddply(g$data, .(group), function(df){
-      df$xcenter <- df$x
-      df$ycenter <- df$y
-      cbind(x=df$x+hex$x, y=df$y+hex$y, df[,-which(names(df)%in%c("x", "y"))])
-    })
-    g$data <- newdata
-    # Color set to match ggplot2 default of tile with no outside border.
-    if(!"colour"%in%names(g$data) & "fill"%in%names(g$data)){
-      g$data[["colour"]] <- g$data[["fill"]]
-      # Make outer border of 0 size if size isn't already specified.
-      if(!"size"%in%names(g$data)) g$data[["size"]] <- 0 
-    }
-    "polygon"
-  } else if(geom("polygon", "line", "segment")) {
-    ## all other geoms are basic, and keep the same name.
-    g$geom
-  } else {
-    stop("unsupported geom ", g$geom)
+  ## First convert to a "basic" geom, e.g. segments become lines.
+  basic <- if(g$geom %in% names(toBasic)){
+    toBasic(g)
+  }else{
+    g
   }
 
-  ## For ggplot2 polygons, change convert groups to vectors with NA.
-  if(geom("polygon")){
+  ## Then split on visual characteristics that will get different
+  ## legend entries.
+  data.list <- if(basic$geom %in% names(markLegends)){
+    mark.names <- markLegends[[basic$geom]]
+    to.erase <- names(is.continuous)[is.continuous]
+    mark.names <- mark.names[mark.names != to.erase]
+    name.names <- sprintf("%s.name", mark.names)
+    is.split <- names(basic$data) %in% name.names
+    data.i <- which(is.split)
+    matched.names <- names(basic$data)[data.i]
+    name.i <- which(name.names %in% matched.names)
+    invariable.names <- cbind(name.names, mark.names)[name.i,]
+    other.names <- !names(basic$data) %in% invariable.names
+    if(any(is.split)){
+      vec.list <- basic$data[is.split]
+      df.list <- split(basic$data, vec.list, drop=TRUE)
+      lapply(df.list, function(df){
+        params <- basic$params
+        params[invariable.names] <- df[1, invariable.names]
+        list(data=df[other.names],
+             params=params)
+      })
+    }
+  }
+  ## Case of no legend:
+  if(is.null(data.list)){
+    data.list <-
+      structure(list(list(data=basic$data, params=basic$params)),
+                names=basic$params$name)
+  }
+
+  getTrace <- geom2trace[[basic$geom]]
+  if(is.null(getTrace)){
+    stop("conversion not implemented for geom_",
+         g$geom, " (basic geom_", basic$geom, ")")
+  }
+  
+  traces <- NULL
+  for(data.i in seq_along(data.list)){
+    data.params <- data.list[[data.i]]
+    tr <- do.call(getTrace, data.params)
+    traces <- c(traces, tr)
+  }
+  traces
+}
+
+geom2trace <-
+  list()
+
+group2NA <- function(){
+  ## Drawing ggplot2 geoms with a group aesthetic is most efficient in
+  ## plotly when we convert groups of things that look the same to
+  ## vectors with NA.
+  if(geom("polygon", "line", "ribbon", "path")){
     poly.list <- split(g$data, g$data$group)
     is.group <- names(g$data) == "group"
     poly.na.df <- data.frame()
@@ -385,45 +359,9 @@ layer2traces <- function(l, d, ranges){
     }
     g$data <- poly.na.df
   }
+}  
 
-  if(any(g$data$size == 0, na.rm=TRUE)){
-    warning(sprintf("geom_%s with size=0 will be invisible",g$geom))
-  }
-
-  group.vars <- c("group",
-                  "color", "colour",
-                  "fill") #TODO.
-  group.var <- NULL
-  found.groups <- 0
-  for(gv in group.vars){
-    if(is.null(group.var)){
-      g.col <- g$data[[gv]]
-      n.groups <- length(unique(g.col))
-      if(n.groups > 1){
-        group.var <- g.col
-        found.groups <- n.groups
-      }
-    }
-  }
-  group.list <- if(found.groups){
-    split(g$data, group.var)
-  }else{
-    list(g$data)
-  }
-  ## Construct a list of traces.
-  for(group.i in seq_along(group.list)){
-    group.data <- group.list[[group.i]]
-    tr <- group2trace(group.data, g$params, g$geom)
-    if(is.null(tr$name)){
-      tr$name <- group.data$name
-    }
-    tr$name <- as.character(tr$name[1])
-    g$traces[[group.i]] <- tr
-  }
-  g$traces
-}
-
-getMarker <- function(df, params, aesConverter, defaults, only=NULL){
+getMarker <- function(data, params, aesConverter, defaults, only=NULL){
   marker <- list()
   for(name in names(aesConverter)){
     plotly.name <- aesConverter[[name]]
@@ -460,131 +398,6 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
   marker
 }
 
-##' Convert 1 ggplot2 group to 1 plotly trace.
-##' @param df data.frame.
-##' @param params list of defaults.
-##' @param geom length 1 character.
-##' @return a list to be passed to plotly().
-##' @author Toby Dylan Hocking
-group2trace <- function(df, params, geom){
-  ## Add plotly type/mode info based on geom type.
-  tr <- if(geom == "point"){
-    marker <- getMarker(df, params, aes2marker, marker.defaults)
-    list(type="scatter",
-         mode="markers",
-         marker=marker)
-  }else if(geom %in% c("line", "polygon")){
-    list(type="scatter",
-         mode="lines",
-         line=getMarker(df, params, aes2line, line.defaults, 1))
-  }else{
-    stop("group2trace does not support geom ", geom)
-  }
-  ## Copy data to output trace
-  for(name in c("x", "y", "text", "name")){
-    take.from <- if(name %in% names(df)){
-      df
-    }else if(name %in% names(params)){
-      params
-    }
-    tr[[name]] <- take.from[[name]]
-  }
-  tr
-}
-#' Get legend information.
-#' @import plyr
-#' @param plistextra output from ggplot2::ggplot_build(p)
-#' @return list containing information for each legend
-#' @export
-getLegendList <- function(plistextra){
-  plot <- plistextra$plot
-  scales <- plot$scales
-  layers <- plot$layers
-  default_mapping <- plot$mapping
-  theme <- ggplot2:::plot_theme(plot)
-  position <- theme$legend.position
-  # by default, guide boxes are vertically aligned
-  theme$legend.box <- if(is.null(theme$legend.box)) "vertical" else theme$legend.box
-  
-  # size of key (also used for bar in colorbar guide)
-  theme$legend.key.width <- if(is.null(theme$legend.key.width)) theme$legend.key.size
-  theme$legend.key.height <- if(is.null(theme$legend.key.height)) theme$legend.key.size
-  # by default, direction of each guide depends on the position of the guide.
-  theme$legend.direction <- if(is.null(theme$legend.direction)){
-    if (length(position) == 1 && position %in% c("top", "bottom", "left", "right"))
-      switch(position[1], top =, bottom = "horizontal", left =, right = "vertical")
-    else
-      "vertical"
-  }
-  # justification of legend boxes
-  theme$legend.box.just <-
-    if(is.null(theme$legend.box.just)) {
-      if (length(position) == 1 && position %in% c("top", "bottom", "left", "right"))
-        switch(position, bottom =, top = c("center", "top"), left =, right = c("left", "top"))
-      else
-        c("center", "center")
-    } 
-  
-  position <- theme$legend.position
-  guides <- plyr::defaults(plot$guides, guides(colour="legend", fill="legend"))
-  labels <- plot$labels
-  gdefs <- ggplot2:::guides_train(scales = scales, theme = theme, guides = guides, labels = labels)
-  if (length(gdefs) != 0) {
-    gdefs <- ggplot2:::guides_merge(gdefs)
-    gdefs <- ggplot2:::guides_geom(gdefs, layers, default_mapping)
-  } else (ggplot2:::zeroGrob())
-  names(gdefs) <- sapply(gdefs, function(i) i$title)
-  lapply(gdefs, getLegend)
-}
-
-#' Function to get legend information for each scale
-#' @param mb single entry from ggplot2:::guides_merge() list of legend data
-#' @return list of legend information, NULL if guide=FALSE.
-getLegend <- function(mb){
-  guidetype <- mb$name
-  ## The main idea of legends:
-  
-  ## 1. Here in getLegend I export the legend entries as a list of
-  ## rows that can be used in a data() bind in D3.
-
-  ## 2. In add_legend in the JS code I create a <table> for every
-  ## legend, and then I bind the legend entries to <tr>, <td>, and
-  ## <svg> elements.
-  geoms <- sapply(mb$geoms, function(i) i$geom$objname)
-  cleanData <- function(data, key, geom, params){
-    if(nrow(data)==0) return(data.frame()); # if no rows, return an empty df.
-    if("guide"%in%names(params)){
-      if(params[["guide"]]=="none") return(data.frame()); # if no guide, return an empty df
-    } 
-    data$order <- 1:nrow(data)
-    data <- merge(data, key)
-    data <- data[order(data$order),]
-    if(!".label"%in%names(data)) return(data.frame()); # if there are no labels, return an empty df.
-    if(nrow(data)==0) return(data.frame());
-    data <- data[,which(colSums(!is.na(data))>0)] # remove cols that are entirely na
-    if("colour"%in%names(data)) data[["colour"]] <- toRGB(data[["colour"]]) # color hex values
-    if("fill"%in%names(data)) data[["fill"]] <- toRGB(data[["fill"]]) # fill hex values
-    names(data) <- paste(geom, names(data), sep="") # aesthetics by geom
-    names(data) <- gsub(paste(geom, ".", sep=""), "", names(data), fixed=TRUE) # label isn't geom-specific
-    data
-  }
-  dataframes <- lapply(mb$geoms, function(i) cleanData(i$data, mb$key, i$geom$objname, i$params))
-  dataframes <- dataframes[which(sapply(dataframes, nrow)>0)]
-  # Check to make sure datframes is non-empty. If it is empty, return NULL.
-  if(length(dataframes)>0) {
-    data <- merge_recurse(dataframes)
-  } else return(NULL)
-  data <- lapply(nrow(data):1, function(i) as.list(data[i,]))
-  if(guidetype=="none"){
-    NULL
-  } else{
-    list(guide = guidetype, 
-         geoms = geoms, 
-         title = mb$title, 
-         entries = data)
-  }
-}
-
 #' Convert R colors to RGB hexadecimal color values
 #' @param x character
 #' @return hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
@@ -595,23 +408,5 @@ toRGB <- function(x){
   rgb.text <- apply(rgb.matrix, 2, paste, collapse=",")
   rgb.css <- sprintf("rgb(%s)", rgb.text)
   ifelse(is.na(x), "none", rgb.css)
-}
-
-#' Function to merge a list of data frames (from the reshape package)
-#' @param dfs list of data frames
-#' @param ... other arguments to merge
-#' @return data frame of merged lists
-merge_recurse = function (dfs, ...) 
-{
-  if (length(dfs) == 1) {
-    dfs[[1]]
-  }
-  else if (length(dfs) == 2) {
-    merge(dfs[[1]], dfs[[2]], all.x = TRUE, sort = FALSE, ...)
-  }
-  else {
-    merge(dfs[[1]], Recall(dfs[-1]), all.x = TRUE, sort = FALSE, 
-          ...)
-  }
 }
 

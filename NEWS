@@ -1,3 +1,7 @@
+0.3.9 -- 2 April 2014.
+
+Re-write geom to trace conversion code.
+
 0.3.8 -- 21 March 2014.
 
 ggplotly takes the last_plot() by default.
