@@ -113,7 +113,10 @@ toBasic <-
     })
     g$geom <- "path"
     group2NA(g)
-  },polygon=group2NA,line=group2NA,ribbon=function(g){
+  },polygon=group2NA,line=function(g){
+    g$data <- g$data[order(g$data$x),]
+    group2NA(g)
+  },ribbon=function(g){
     stop("TODO")
   })
 
