@@ -1,7 +1,7 @@
 Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online.
-Version: 0.3.8
+Version: 0.4
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
@@ -22,8 +22,7 @@ BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     RCurl,
     RJSONIO,
-    ggplot2,
-    plyr
+    ggplot2
 Imports:
     knitr
 Suggests:

@@ -2,7 +2,7 @@
 \alias{layer2traces}
 \title{Convert a layer to a list of traces. Called from gg2list()}
 \usage{
-layer2traces(l, d, ranges)
+layer2traces(l, d, is.continuous)
 }
 \arguments{
   \item{l}{one layer of the ggplot object}
@@ -10,7 +10,7 @@ layer2traces(l, d, ranges)
   \item{d}{one layer of calculated data from
   ggplot2::ggplot_build(p)}
 
-  \item{ranges}{axes ranges}
+  \item{is.continuous}{logical vector.}
 }
 \value{
 list representing a layer, with corresponding aesthetics,

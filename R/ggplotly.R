@@ -1,3 +1,24 @@
+##' Drawing ggplot2 geoms with a group aesthetic is most efficient in
+##' plotly when we convert groups of things that look the same to
+##' vectors with NA.
+##' @param g list of geom info with g$data$group.
+##' @param geom change g$geom to this.
+##' @export
+##' @return list of geom info.
+##' @author Toby Dylan Hocking
+group2NA <- function(g, geom="path"){
+  poly.list <- split(g$data, g$data$group)
+  is.group <- names(g$data) == "group"
+  poly.na.df <- data.frame()
+  for(i in seq_along(poly.list)){
+    no.group <- poly.list[[i]][,!is.group,drop=FALSE]
+    poly.na.df <- rbind(poly.na.df, no.group, NA)
+  }
+  g$data <- poly.na.df[-nrow(poly.na.df),]
+  g$geom <- geom
+  g
+}
+
 #' Convert R pch point codes to plotly "symbol" codes.
 pch2symbol <- c("0"="square",
                 "1"="circle",
@@ -22,21 +43,14 @@ pch2symbol <- c("0"="square",
 
 #' Convert ggplot2 aes to plotly "marker" codes.
 aes2marker <- c(alpha="opacity",
-                pch="symbol",
                 colour="color",
                 size="size",
-                ##TODO="line", ## line color, size, and dash
-                shape="symbol",
-                text="text")
+                shape="symbol")
+
 marker.defaults <- c(alpha=1,
                      shape="o",
-                     pch="o",
+                     size=5,
                      colour="black")
-#' Convert ggplot2 aes to line parameters.
-aes2line <- c(linetype="dash",
-              colour="color",
-              size="width",
-              text="text")
 line.defaults <-
   list(linetype="solid",
        colour="black",
@@ -77,6 +91,15 @@ coded.lty <-
 #' Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
+aesConverters <-
+  list(linetype=function(lty){
+    lty2dash[as.character(lty)]
+  },colour=function(col){
+    toRGB(col)
+  },size=identity,alpha=identity,shape=function(pch){
+    pch2symbol[as.character(pch)]
+  })
+
 toBasic <-
   list(segment=function(g){
     ## Every row is one segment, we convert to a line with several
@@ -88,12 +111,20 @@ toBasic <-
       rbind(cbind(x, y, others),
             cbind(x=xend, y=yend, others))
     })
-    g
+    g$geom <- "path"
+    group2NA(g)
+  },polygon=group2NA,line=group2NA,ribbon=function(g){
+    stop("TODO")
   })
 
+#' Convert ggplot2 aes to line parameters.
+aes2line <- c(linetype="dash",
+              colour="color",
+              size="width")
+
 markLegends <-
-  list(point=c("colour", "fill", "size", "shape"),
-       line=c("linetype", "size", "colour"))
+  list(point=c("colour", "fill", "shape"),
+       path=c("linetype", "size", "colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -133,21 +164,31 @@ gg2list <- function(p){
     ## Test fill and color to see if they encode a quantitative
     ## variable. In that case, we do not make traces for separate
     ## colors, since there are too many!
-    is.continuous <- c()
+    misc <- list()
     for(a in c("fill", "colour")){
       fun.name <- sprintf("scale_%s_continuous", a)
       fun <- get(fun.name)
-      is.continuous[[a]] <- tryCatch({
-        with.scale <- p+fun()
+      misc$is.continuous[[a]] <- tryCatch({
+        suppressMessages({
+          with.scale <- p+fun()
+        })
         ggplot2::ggplot_build(with.scale)
         TRUE
       }, error=function(e){
         FALSE
       })
     }
+
+    ## scales are needed for legend ordering.
+    for(sc in p$scales$scales){
+      br <- sc$breaks
+      ranks <- seq_along(br)
+      names(ranks) <- br
+      misc$breaks[[sc$aesthetics]] <- ranks
+    }
     
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, is.continuous)
+    traces <- layer2traces(L, df, misc)
 
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -248,10 +289,10 @@ gg2list <- function(p){
 #' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
-#' @param ranges axes ranges
+#' @param misc named list.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, is.continuous){
+layer2traces <- function(l, d, misc){
   g <- list(geom=l$geom$objname,
             data=d)
   ## needed for when group, etc. is an expression.
@@ -290,18 +331,19 @@ layer2traces <- function(l, d, is.continuous){
   ## triangle-up,triangle-down,triangle-left,triangle-right
 
   ## First convert to a "basic" geom, e.g. segments become lines.
-  basic <- if(g$geom %in% names(toBasic)){
-    toBasic(g)
-  }else{
+  convert <- toBasic[[g$geom]]
+  basic <- if(is.null(convert)){
     g
+  }else{
+    convert(g)
   }
 
   ## Then split on visual characteristics that will get different
   ## legend entries.
   data.list <- if(basic$geom %in% names(markLegends)){
     mark.names <- markLegends[[basic$geom]]
-    to.erase <- names(is.continuous)[is.continuous]
-    mark.names <- mark.names[mark.names != to.erase]
+    to.erase <- names(misc$is.continuous)[misc$is.continuous]
+    mark.names <- mark.names[!mark.names %in% to.erase]
     name.names <- sprintf("%s.name", mark.names)
     is.split <- names(basic$data) %in% name.names
     data.i <- which(is.split)
@@ -337,63 +379,88 @@ layer2traces <- function(l, d, is.continuous){
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
-    traces <- c(traces, tr)
+    name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
+    if(length(name.names)){
+      for(a.name in name.names){
+        a <- sub("[.]name$", "", a.name)
+        a.value <- as.character(data.params$params[[a.name]])
+        ranks <- misc$breaks[[a]]
+        tr$sort[[a.name]] <- ranks[[a.value]]
+      }
+      name.list <- data.params$params[name.names]
+      tr$name <- paste(unlist(name.list), collapse=".")
+    }
+    traces <- c(traces, list(tr))
   }
-  traces
+  sort.val <- sapply(traces, function(tr){
+    rank.val <- unlist(tr$sort)
+    if(is.null(rank.val)){
+      0
+    }else if(length(rank.val)==1){
+      rank.val
+    }else{
+      0
+    }
+  })
+  ord <- order(sort.val)
+  no.sort <- traces[ord]
+  for(tr.i in seq_along(no.sort)){
+    no.sort[[tr.i]]$sort <- NULL
+  }
+  no.sort
 }
 
 geom2trace <-
-  list()
-
-group2NA <- function(){
-  ## Drawing ggplot2 geoms with a group aesthetic is most efficient in
-  ## plotly when we convert groups of things that look the same to
-  ## vectors with NA.
-  if(geom("polygon", "line", "ribbon", "path")){
-    poly.list <- split(g$data, g$data$group)
-    is.group <- names(g$data) == "group"
-    poly.na.df <- data.frame()
-    for(i in seq_along(poly.list)){
-      no.group <- poly.list[[i]][,!is.group,drop=FALSE]
-      poly.na.df <- rbind(poly.na.df, no.group, NA)
+  list(path=function(data, params){
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         text=data$text,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
+  },point=function(data, params){
+    L <- list(x=data$x,
+              y=data$y,
+              name=params$name,
+              text=data$text,
+              type="scatter",
+              mode="markers",
+              marker=paramORdefault(params, aes2marker, marker.defaults))
+    if("size" %in% names(data)){
+      L$marker$sizeref <- min(data$size)
+      L$marker$sizemode <- "area"
+      L$marker$size <- data$size
     }
-    g$data <- poly.na.df
-  }
-}  
+    L
+  })
 
-getMarker <- function(data, params, aesConverter, defaults, only=NULL){
+##' convert ggplot params to plotly.
+##' @param params named list ggplot names -> values.
+##' @param aesVec vector mapping ggplot names to plotly names.
+##' @param defaults named list ggplot names -> values.
+##' @export
+##' @return named list.
+##' @author Toby Dylan Hocking
+paramORdefault <- function(params, aesVec, defaults){
   marker <- list()
-  for(name in names(aesConverter)){
-    plotly.name <- aesConverter[[name]]
-    take.from <- if(name %in% names(params)){
-      params
-    } else if(name %in% names(df)){
-      df
-    } else {
-      defaults
+  for(ggplot.name in names(aesVec)){
+    plotly.name <- aesVec[[ggplot.name]]
+    ggplot.value <- params[[ggplot.name]]
+    if(is.null(ggplot.value)){
+      ggplot.value <- defaults[[ggplot.name]]
     }
-    take.from <- as.list(take.from)
-    to.write <- take.from[[name]]
-    if(plotly.name == "color"){ # convert from R to RGB codes.
-      ## TODO: fill?
-      to.write <- toRGB(to.write)
+    if(is.null(ggplot.value)){
+      print(defaults)
+      stop("no ggplot default for ", ggplot.name)
     }
-    ## if(is.null(to.write)){
-    ##   print(take.from)
-    ##   stop("undefined marker ", name)
-    ## }
-    marker[[plotly.name]] <- if(!is.null(only)){
-      to.write[only]
-    }else{
-      to.write
+    convert <- aesConverters[[ggplot.name]]
+    if(is.null(convert)){
+      stop("no ggplot converter for ", ggplot.name)
     }
-  }
-  if(length(marker$size) > 1){
-    marker$sizeref <- min(marker$size)
-    marker$sizemode <- "area"
-  }
-  if("dash" %in% names(marker)){
-    marker$dash <- lty2dash[[marker$dash]]
+    plotly.value <- convert(ggplot.value)
+    names(plotly.value) <- NULL
+    marker[[plotly.name]] <- plotly.value
   }
   marker
 }
