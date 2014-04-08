@@ -150,7 +150,7 @@ gg2list <- function(p){
     layer.aes[name.names] <- layer.aes[mark.names]
     p$layers[[layer.i]]$mapping <- layer.aes
   }
-  ## Extract data from built ggplots 
+  ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
   ranges <- built$panel$ranges[[1]]
   for(i in seq_along(built$plot$layers)){
@@ -181,12 +181,15 @@ gg2list <- function(p){
 
     ## scales are needed for legend ordering.
     for(sc in p$scales$scales){
-      br <- sc$breaks
-      ranks <- seq_along(br)
-      names(ranks) <- br
-      misc$breaks[[sc$aesthetics]] <- ranks
+      a <- sc$aesthetics
+      if(length(a) == 1){
+        br <- sc$breaks
+        ranks <- seq_along(br)
+        names(ranks) <- br
+        misc$breaks[[sc$aesthetics]] <- ranks
+      }
     }
-    
+
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
 
@@ -197,11 +200,11 @@ gg2list <- function(p){
   }
   # Export axis specification as a combination of breaks and
   # labels, on the relevant axis scale (i.e. so that it can
-  # be passed into d3 on the x axis scale instead of on the 
-  # grid 0-1 scale). This allows transformations to be used 
-  # out of the box, with no additional d3 coding. 
-  theme.pars <- ggplot2:::plot_theme(p)  
-  
+  # be passed into d3 on the x axis scale instead of on the
+  # grid 0-1 scale). This allows transformations to be used
+  # out of the box, with no additional d3 coding.
+  theme.pars <- ggplot2:::plot_theme(p)
+
   ## Flip labels if coords are flipped - transform does not take care
   ## of this. Do this BEFORE checking if it is blank or not, so that
   ## individual axes can be hidden appropriately, e.g. #1.
@@ -267,7 +270,7 @@ gg2list <- function(p){
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-  
+
   ## Remove legend if theme has no legend position
   if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
 
@@ -296,7 +299,7 @@ layer2traces <- function(l, d, misc){
   g <- list(geom=l$geom$objname,
             data=d)
   ## needed for when group, etc. is an expression.
-  g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k))) 
+  g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
@@ -309,7 +312,7 @@ layer2traces <- function(l, d, misc){
     ## list("foo") which becomes ["foo"]. However we need to make sure
     ## that the list does not have names since list(bar="foo") becomes
     ## {"bar":"foo"}
-    names(g$params[[p.name]]) <- NULL 
+    names(g$params[[p.name]]) <- NULL
   }
 
   ## Convert complex ggplot2 geoms so that they are treated as special
@@ -374,7 +377,7 @@ layer2traces <- function(l, d, misc){
     stop("conversion not implemented for geom_",
          g$geom, " (basic geom_", basic$geom, ")")
   }
-  
+
   traces <- NULL
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
