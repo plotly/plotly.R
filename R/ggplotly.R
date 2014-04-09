@@ -6,15 +6,17 @@
 ##' @export
 ##' @return list of geom info.
 ##' @author Toby Dylan Hocking
-group2NA <- function(g, geom="path"){
+group2NA <- function(g, geom){
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
   poly.na.df <- data.frame()
   for(i in seq_along(poly.list)){
     no.group <- poly.list[[i]][,!is.group,drop=FALSE]
-    poly.na.df <- rbind(poly.na.df, no.group, NA)
+    na.row <- no.group[1,]
+    na.row[,c("x", "y")] <- NA
+    poly.na.df <- rbind(poly.na.df, no.group, na.row)
   }
-  g$data <- poly.na.df[-nrow(poly.na.df),]
+  g$data <- poly.na.df
   g$geom <- geom
   g
 }
@@ -49,7 +51,7 @@ aes2marker <- c(alpha="opacity",
 
 marker.defaults <- c(alpha=1,
                      shape="o",
-                     size=5,
+                     size=1,
                      colour="black")
 line.defaults <-
   list(linetype="solid",
@@ -111,13 +113,58 @@ toBasic <-
       rbind(cbind(x, y, others),
             cbind(x=xend, y=yend, others))
     })
-    g$geom <- "path"
-    group2NA(g)
-  },polygon=group2NA,line=function(g){
+    group2NA(g, "path")
+  },polygon=function(g){
+    if(is.null(g$params$fill)){
+      g
+    }else if(is.na(g$params$fill)){
+      group2NA(g, "path")
+    }else{
+      g
+    }
+  },path=function(g){
+    group2NA(g, "path")
+  },line=function(g){
     g$data <- g$data[order(g$data$x),]
-    group2NA(g)
+    group2NA(g, "path")
   },ribbon=function(g){
     stop("TODO")
+  })
+
+#' Convert basic geoms to traces.
+geom2trace <-
+  list(path=function(data, params){
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         text=data$text,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
+  },polygon=function(data, params){
+    list(x=c(data$x, data$x[1]),
+         y=c(data$y, data$y[1]),
+         name=params$name,
+         text=data$text,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults),
+         fill="tonextx",
+         fillcolor=toRGB(params$fill))
+  },point=function(data, params){
+    L <- list(x=data$x,
+              y=data$y,
+              name=params$name,
+              text=data$text,
+              type="scatter",
+              mode="markers",
+              marker=paramORdefault(params, aes2marker, marker.defaults))
+    if("size" %in% names(data)){
+      L$marker$sizeref <- min(data$size)
+      L$marker$sizemode <- "area"
+      L$marker$size <- data$size
+    }
+    L
   })
 
 #' Convert ggplot2 aes to line parameters.
@@ -127,7 +174,8 @@ aes2line <- c(linetype="dash",
 
 markLegends <-
   list(point=c("colour", "fill", "shape"),
-       path=c("linetype", "size", "colour"))
+       path=c("linetype", "size", "colour"),
+       polygon=c("colour", "fill", "linetype", "size", "group"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -139,7 +187,15 @@ markUnique <- as.character(unique(unlist(markLegends)))
 gg2list <- function(p){
   ## Always use identity size scale so that plot.ly gets the real
   ## units for the size variables.
-  p <- p+scale_size_identity()
+  p <- tryCatch({
+    ## this will be an error for discrete variables.
+    suppressMessages({
+      ggplot2::ggplot_build(p+scale_size_continuous())
+      p+scale_size_identity()
+    })
+  },error=function(e){
+    p
+  })
   layout <- list()
   trace.list <- list()
   ## Before building the ggplot, we would like to add aes(name) to
@@ -348,16 +404,23 @@ layer2traces <- function(l, d, misc){
   ## legend entries.
   data.list <- if(basic$geom %in% names(markLegends)){
     mark.names <- markLegends[[basic$geom]]
-    to.erase <- names(misc$is.continuous)[misc$is.continuous]
-    mark.names <- mark.names[!mark.names %in% to.erase]
+    ## However, continuously colored points are an exception: they do
+    ## not need a legend entry, and they can be efficiently rendered
+    ## using just 1 trace.
+
+    ## Maybe it is nice to show a legend for continuous points?
+    ## if(basic$geom == "point"){
+    ##   to.erase <- names(misc$is.continuous)[misc$is.continuous]
+    ##   mark.names <- mark.names[!mark.names %in% to.erase]
+    ## }
     name.names <- sprintf("%s.name", mark.names)
     is.split <- names(basic$data) %in% name.names
-    data.i <- which(is.split)
-    matched.names <- names(basic$data)[data.i]
-    name.i <- which(name.names %in% matched.names)
-    invariable.names <- cbind(name.names, mark.names)[name.i,]
-    other.names <- !names(basic$data) %in% invariable.names
     if(any(is.split)){
+      data.i <- which(is.split)
+      matched.names <- names(basic$data)[data.i]
+      name.i <- which(name.names %in% matched.names)
+      invariable.names <- cbind(name.names, mark.names)[name.i,]
+      other.names <- !names(basic$data) %in% invariable.names
       vec.list <- basic$data[is.split]
       df.list <- split(basic$data, vec.list, drop=TRUE)
       lapply(df.list, function(df){
@@ -368,11 +431,10 @@ layer2traces <- function(l, d, misc){
       })
     }
   }
-  ## Case of no legend:
+  ## case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
-    data.list <-
-      structure(list(list(data=basic$data, params=basic$params)),
-                names=basic$params$name)
+    data.list <- structure(list(list(data=basic$data, params=basic$params)),
+                           names=basic$params$name)
   }
 
   getTrace <- geom2trace[[basic$geom]]
@@ -380,7 +442,6 @@ layer2traces <- function(l, d, misc){
     stop("conversion not implemented for geom_",
          g$geom, " (basic geom_", basic$geom, ")")
   }
-
   traces <- NULL
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
@@ -391,7 +452,9 @@ layer2traces <- function(l, d, misc){
         a <- sub("[.]name$", "", a.name)
         a.value <- as.character(data.params$params[[a.name]])
         ranks <- misc$breaks[[a]]
-        tr$sort[[a.name]] <- ranks[[a.value]]
+        if(length(ranks)){
+          tr$sort[[a.name]] <- ranks[[a.value]]
+        }
       }
       name.list <- data.params$params[name.names]
       tr$name <- paste(unlist(name.list), collapse=".")
@@ -415,31 +478,6 @@ layer2traces <- function(l, d, misc){
   }
   no.sort
 }
-
-geom2trace <-
-  list(path=function(data, params){
-    list(x=data$x,
-         y=data$y,
-         name=params$name,
-         text=data$text,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
-  },point=function(data, params){
-    L <- list(x=data$x,
-              y=data$y,
-              name=params$name,
-              text=data$text,
-              type="scatter",
-              mode="markers",
-              marker=paramORdefault(params, aes2marker, marker.defaults))
-    if("size" %in% names(data)){
-      L$marker$sizeref <- min(data$size)
-      L$marker$sizemode <- "area"
-      L$marker$size <- data$size
-    }
-    L
-  })
 
 ##' convert ggplot params to plotly.
 ##' @param params named list ggplot names -> values.
