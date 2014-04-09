@@ -4,7 +4,7 @@
 plotly when we convert groups of things that look the same to
 vectors with NA.}
 \usage{
-group2NA(g, geom = "path")
+group2NA(g, geom)
 }
 \arguments{
   \item{g}{list of geom info with g$data$group.}
