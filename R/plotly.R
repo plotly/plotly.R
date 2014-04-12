@@ -90,11 +90,9 @@ plotly <- function(username=NULL, key=NULL){
   }
   priv$plotly_hook <- function(before, options, envir) {
     if (!before) {
-      # set width and height from options or defaults
-      if (is.null(options[["width"]])) 
-        w <- "100%" else w <- options[["width"]]
-      if (is.null(options[["height"]])) 
-        h <- "600" else h <- options[["height"]]
+      # set width and height from options or default square
+      w <- if(is.null(options[["width"]])) "600" else options[["width"]]
+      h <- if(is.null(options[["height"]])) "600" else options[["height"]]
       paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
             options[["url"]], "\" width=\"", w, "\"></iframe>", sep = "")
     }

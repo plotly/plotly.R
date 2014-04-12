@@ -1,0 +1,24 @@
+\name{paramORdefault}
+\alias{paramORdefault}
+\title{convert ggplot params to plotly.}
+\usage{
+paramORdefault(params, aesVec, defaults)
+}
+\arguments{
+  \item{params}{named list ggplot names -> values.}
+
+  \item{aesVec}{vector mapping ggplot names to plotly
+  names.}
+
+  \item{defaults}{named list ggplot names -> values.}
+}
+\value{
+named list.
+}
+\description{
+convert ggplot params to plotly.
+}
+\author{
+Toby Dylan Hocking
+}
+
