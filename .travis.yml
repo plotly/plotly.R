@@ -7,6 +7,4 @@ before_script:
 - ./travis-tool.sh install_deps
  - ./travis-tool.sh install_r RCurl RJSONIO
 notifications:
-  hipchat:
-    rooms:
-      secure: aeV2r8L8WTt1/FcRZgl0UHyZSxiQJgXyNAPuqEkmUGKV6bhGuQ5I36d7xOnlI8v8MAPUqH9co5t0uupY+81Etp+NE3hk+1J5bTqXfY6l/Bz2l6B51HAWnS6Wo25Bz0BPJdSfGqKYmlM4k+2khR15CSXlbxNimgFrvQ4WNndXPp0=
+ slack: ropensci:wh30e1MP9Am3wXb2wJx1ZRFi
