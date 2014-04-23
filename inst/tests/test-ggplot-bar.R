@@ -13,7 +13,7 @@ test_that("position_dodge is translated to barmode=group", {
   L <- gg2list(gg.dodge)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
-  stopifnot(c("Math", "Bio") %in% trace.names)
+  expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "group")
 })
 
@@ -22,7 +22,7 @@ test_that("position_stack is translated to barmode=stack", {
   gg2list(gg.stack)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
-  stopifnot(c("Math", "Bio") %in% trace.names)
+  expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "stack")
 })
 
@@ -31,7 +31,7 @@ test_that("position_identity is translated to barmode=overlay", {
   gg2list(gg.identity)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
-  stopifnot(c("Math", "Bio") %in% trace.names)
+  expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "overlay")
 })
 
