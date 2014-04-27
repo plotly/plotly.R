@@ -170,7 +170,6 @@ geom2trace <-
     list(x=data$x,
          y=data$y,
          name=params$name,
-         text=data$text,
          type="bar")
   }
   )
