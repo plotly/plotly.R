@@ -9,7 +9,7 @@ researchers <-
 gg <- ggplot(researchers, aes(country, papers, fill=field))
 
 test_that("position_dodge is translated to barmode=group", {
-  gg.dodge <- gg+geom_bar(stat="identity", position="dodge")
+  gg.dodge <- gg + geom_bar(stat="identity", position="dodge")
   L <- gg2list(gg.dodge)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
