@@ -208,7 +208,9 @@ gg2list <- function(p){
   layout <- list()
   trace.list <- list()
   ## Before building the ggplot, we would like to add aes(name) to
-  ## figure out what the object group is later.
+  ## figure out what the object group is later. This also copies any
+  ## needed global aes/data values to each layer, so we do not have to
+  ## worry about combining global and layer-specific aes/data later.
   for(layer.i in seq_along(p$layers)){
     layer.aes <- p$layers[[layer.i]]$mapping
     to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
@@ -217,6 +219,9 @@ gg2list <- function(p){
     name.names <- sprintf("%s.name", mark.names)
     layer.aes[name.names] <- layer.aes[mark.names]
     p$layers[[layer.i]]$mapping <- layer.aes
+    if(!is.data.frame(p$layers[[layer.i]]$data)){
+      p$layers[[layer.i]]$data <- p$data
+    }
   }
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
@@ -230,10 +235,14 @@ gg2list <- function(p){
     df <- built$data[[i]]
     
     ## Test fill and color to see if they encode a quantitative
-    ## variable. In that case, we do not make traces for separate
-    ## colors, since there are too many!
+    ## variable. This may be useful for several reasons: (1) it is
+    ## sometimes possible to plot several different colors in the same
+    ## trace (e.g. points), and that is faster for large numbers of
+    ## data points and colors; (2) factors on x or y axes should be
+    ## sent to plotly as characters, not as numeric data (which is
+    ## what ggplot_build gives us).
     misc <- list()
-    for(a in c("fill", "colour")){
+    for(a in c("fill", "colour", "x", "y")){
       fun.name <- sprintf("scale_%s_continuous", a)
       fun <- get(fun.name)
       misc$is.continuous[[a]] <- tryCatch({
@@ -327,7 +336,11 @@ gg2list <- function(p){
     ax.list$tickfont <- theme2font(tick.text)
     title.text <- e(s("axis.title.%s"))
     ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- "linear" ## TODO: log scales?
+    ax.list$type <- if(misc$is.continuous[[xy]]){
+      "linear"
+    }else{## TODO: time scales?
+      "category"
+    }
     ## Lines drawn around the plot border:
     ax.list$showline <- ifelse(is.blank("panel.border"), FALSE, TRUE)
     ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
@@ -368,7 +381,19 @@ layer2traces <- function(l, d, misc){
             data=d)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
-  
+
+  ## For factors on the axes, we should take the values from the
+  ## original data.
+  for(axis.name in c("x", "y")){
+    if(!misc$is.continuous[[axis.name]]){
+      aes.names <- paste0(axis.name, c("", "end", "min", "max"))
+      aes.used <- aes.names[aes.names %in% names(g$aes)]
+      if(length(aes.used)){
+        col.used <- g$aes[aes.used]
+        g$data[aes.used] <- l$data[col.used]
+      }
+    }
+  }
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
@@ -455,6 +480,12 @@ layer2traces <- function(l, d, misc){
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
+    for(v.name in c("x", "y")){
+      vals <- tr[[v.name]]
+      if(is.na(vals[length(vals)])){
+        tr[[v.name]] <- vals[-length(vals)]
+      }
+    }
     name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
     if(length(name.names)){
       for(a.name in name.names){
