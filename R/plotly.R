@@ -94,7 +94,7 @@ plotly <- function(username=NULL, key=NULL){
       w <- if(is.null(options[["width"]])) "600" else options[["width"]]
       h <- if(is.null(options[["height"]])) "600" else options[["height"]]
       paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
-            options[["url"]], "\" width=\"", w, "\"></iframe>", sep = "")
+            options[["url"]], "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep = "")
     }
   }
   pub$plotly <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {

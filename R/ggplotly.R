@@ -165,7 +165,15 @@ geom2trace <-
       L$marker$size <- data$size
     }
     L
-  })
+  },
+  bar=function(data, params) {
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         type="bar")
+  }
+  )
+
 
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
@@ -175,7 +183,8 @@ aes2line <- c(linetype="dash",
 markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
-       polygon=c("colour", "fill", "linetype", "size", "group"))
+       polygon=c("colour", "fill", "linetype", "size", "group"),
+       bar=c("fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -220,11 +229,11 @@ gg2list <- function(p){
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
-
+    
     ## for each layer, there is a correpsonding data.frame which
     ## evaluates the aesthetic mapping.
     df <- built$data[[i]]
-
+    
     ## Test fill and color to see if they encode a quantitative
     ## variable. This may be useful for several reasons: (1) it is
     ## sometimes possible to plot several different colors in the same
@@ -249,7 +258,7 @@ gg2list <- function(p){
         })
       }
     }
-
+    
     ## scales are needed for legend ordering.
     for(sc in p$scales$scales){
       a <- sc$aesthetics
@@ -260,10 +269,10 @@ gg2list <- function(p){
         misc$breaks[[sc$aesthetics]] <- ranks
       }
     }
-
+    
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
-
+    
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
     ##                                     built$panel$ranges[[1]])
@@ -275,7 +284,7 @@ gg2list <- function(p){
   # grid 0-1 scale). This allows transformations to be used
   # out of the box, with no additional d3 coding.
   theme.pars <- ggplot2:::plot_theme(p)
-
+  
   ## Flip labels if coords are flipped - transform does not take care
   ## of this. Do this BEFORE checking if it is blank or not, so that
   ## individual axes can be hidden appropriately, e.g. #1.
@@ -349,21 +358,21 @@ gg2list <- function(p){
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-
+  
   ## Remove legend if theme has no legend position
   if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
-
+  
   ## Main plot title.
   layout$title <- built$plot$labels$title
-
+  
   ## Background color.
   layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
-
+  
   ## Legend.
   layout$margin$r <- 10
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
-
+  
   trace.list$kwargs <- list(layout=layout)
   trace.list
 }
@@ -409,25 +418,25 @@ layer2traces <- function(l, d, misc){
     ## {"bar":"foo"}
     names(g$params[[p.name]]) <- NULL
   }
-
+  
   ## Convert complex ggplot2 geoms so that they are treated as special
   ## cases of basic geoms. In ggplot2, this processing is done in the
   ## draw method of the geoms.
-
+  
   ## Every plotly trace has one of these types
   ## type=scatter,bar,box,histogramx,histogram2d,heatmap
-
+  
   ## for type=scatter, you can define
   ## mode=none,markers,lines,lines+markers where "lines" is the
   ## default for 20 or more points, "lines+markers" is the default for
   ## <20 points. "none" is useful mainly if fill is used to make area
   ## plots with no lines.
-
+  
   ## marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
-
+  
   ## symbol=circle,square,diamond,cross,x,
   ## triangle-up,triangle-down,triangle-left,triangle-right
-
+  
   ## First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
@@ -435,7 +444,7 @@ layer2traces <- function(l, d, misc){
   }else{
     convert(g)
   }
-
+  
   ## Then split on visual characteristics that will get different
   ## legend entries.
   data.list <- if(basic$geom %in% names(markLegends)){
@@ -443,7 +452,7 @@ layer2traces <- function(l, d, misc){
     ## However, continuously colored points are an exception: they do
     ## not need a legend entry, and they can be efficiently rendered
     ## using just 1 trace.
-
+    
     ## Maybe it is nice to show a legend for continuous points?
     ## if(basic$geom == "point"){
     ##   to.erase <- names(misc$is.continuous)[misc$is.continuous]
@@ -472,7 +481,7 @@ layer2traces <- function(l, d, misc){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-
+  
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     stop("conversion not implemented for geom_",

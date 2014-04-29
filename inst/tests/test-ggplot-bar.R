@@ -9,7 +9,7 @@ researchers <-
 gg <- ggplot(researchers, aes(country, papers, fill=field))
 
 test_that("position_dodge is translated to barmode=group", {
-  gg.dodge <- gg+geom_bar(stat="identity", position="dodge")
+  gg.dodge <- gg + geom_bar(stat="identity", position="dodge")
   L <- gg2list(gg.dodge)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
@@ -18,8 +18,8 @@ test_that("position_dodge is translated to barmode=group", {
 })
 
 test_that("position_stack is translated to barmode=stack", {
-  gg.stack <- gg+geom_bar(stat="identity", position="stack")
-  gg2list(gg.stack)
+  gg.stack <- gg + geom_bar(stat="identity", position="stack")
+  L <- gg2list(gg.stack)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
@@ -27,8 +27,8 @@ test_that("position_stack is translated to barmode=stack", {
 })
 
 test_that("position_identity is translated to barmode=overlay", {
-  gg.identity <- gg+geom_bar(stat="identity", position="identity")
-  gg2list(gg.identity)
+  gg.identity <- gg + geom_bar(stat="identity", position="identity")
+  L <- gg2list(gg.identity)
   expect_equal(length(L), 3)
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
