@@ -234,17 +234,20 @@ gg2list <- function(p){
     ## what ggplot_build gives us).
     misc <- list()
     for(a in c("fill", "colour", "x", "y")){
-      fun.name <- sprintf("scale_%s_continuous", a)
-      fun <- get(fun.name)
-      misc$is.continuous[[a]] <- tryCatch({
-        suppressMessages({
-          with.scale <- p+fun()
+      for(data.type in c("continuous", "date", "datetime", "discrete")){
+        fun.name <- sprintf("scale_%s_%s", a, data.type)
+        misc.name <- paste0("is.", data.type)
+        misc[[misc.name]][[a]] <- tryCatch({
+          fun <- get(fun.name)
+          suppressMessages({
+            with.scale <- p+fun()
+          })
+          ggplot2::ggplot_build(with.scale)
+          TRUE
+        }, error=function(e){
+          FALSE
         })
-        ggplot2::ggplot_build(with.scale)
-        TRUE
-      }, error=function(e){
-        FALSE
-      })
+      }
     }
 
     ## scales are needed for legend ordering.
@@ -329,8 +332,12 @@ gg2list <- function(p){
     ax.list$titlefont <- theme2font(title.text)
     ax.list$type <- if(misc$is.continuous[[xy]]){
       "linear"
-    }else{## TODO: time scales?
+    }else if(misc$is.discrete[[xy]]){
       "category"
+    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
+      "date"
+    }else{
+      stop("unrecognized data type for ", xy, " axis")
     }
     ## Lines drawn around the plot border:
     ax.list$showline <- ifelse(is.blank("panel.border"), FALSE, TRUE)
@@ -373,15 +380,19 @@ layer2traces <- function(l, d, misc){
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
-  ## For factors on the axes, we should take the values from the
-  ## original data.
+  ## For non-numeric data on the axes, we should take the values from
+  ## the original data.
   for(axis.name in c("x", "y")){
     if(!misc$is.continuous[[axis.name]]){
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
-      if(length(aes.used)){
-        col.used <- g$aes[aes.used]
-        g$data[aes.used] <- l$data[col.used]
+      for(a in aes.used){
+        col.name <- g$aes[aes.used]
+        data.vec <- l$data[[col.name]]
+        if(inherits(data.vec, "POSIXt")){
+          data.vec <- strftime(data.vec, "%Y-%m-%d %H:%M:%S")
+        }
+        g$data[[a]] <- data.vec
       }
     }
   }
