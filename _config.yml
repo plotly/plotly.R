@@ -9,6 +9,7 @@ permalink:        pretty
 title:            plotly
 tagline:          'An R wrapper to the Plot.ly API'
 description:      'Interactive graphics'
+url:              http://ropensci.github.io/plotly
 
 author:
   name:           'jane doe'
