@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
  <title>plotly</title>
- <link href="https://plot.ly//atom.xml" rel="self"/>
- <link href="https://plot.ly//"/>
- <updated>2014-05-05T12:17:14-07:00</updated>
- <id>https://plot.ly/</id>
+ <link href="/atom.xml" rel="self"/>
+ <link href="/"/>
+ <updated>2014-05-05T12:34:48-07:00</updated>
+ <id></id>
  <author>
    <name>jane doe</name>
    <email></email>
@@ -14,9 +14,9 @@
  
  <entry>
    <title>Introducing plotly</title>
-   <link href="https://plot.ly//2013/12/28/introducing-hyde/"/>
+   <link href="/2013/12/28/introducing-hyde/"/>
    <updated>2013-12-28T00:00:00-08:00</updated>
-   <id>https://plot.ly//2013/12/28/introducing-hyde</id>
+   <id>/2013/12/28/introducing-hyde</id>
    <content type="html">&lt;p&gt;plotly is awesome!&lt;/p&gt;
 
 &lt;h3&gt;What&amp;#39;s Plot.ly?&lt;/h3&gt;
