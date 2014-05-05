@@ -1,3 +1,5 @@
-# Plotly github page
+# Plotly R pacakge website
 
-XXXXX
+Site at [http://ropensci.github.io/plotly/](http://ropensci.github.io/plotly/)
+
+.....
