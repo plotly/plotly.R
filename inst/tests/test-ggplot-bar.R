@@ -34,4 +34,3 @@ test_that("position_identity is translated to barmode=overlay", {
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "overlay")
 })
-

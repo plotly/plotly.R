@@ -100,6 +100,8 @@ aesConverters <-
     toRGB(col)
   },size=identity,alpha=identity,shape=function(pch){
     pch2symbol[as.character(pch)]
+  }, barmode=function(bm) {
+    position2barmode[bm][[1]]
   })
 
 toBasic <-
@@ -170,7 +172,10 @@ geom2trace <-
     list(x=data$x,
          y=data$y,
          name=params$name,
-         type="bar")
+         text=data$text,
+         type="bar",
+         # barmode=paramORdefault(...),
+         fillcolor=toRGB(params$fill))
   }
   )
 
@@ -184,7 +189,7 @@ markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill"))
+       bar=c("fill", "barmode"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -373,6 +378,8 @@ gg2list <- function(p){
   layout$margin$r <- 10
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
+  ## Barmode.
+  # layout$barmode <- position2barmode[...][[1]]
   trace.list$kwargs <- list(layout=layout)
   trace.list
 }
@@ -572,3 +579,7 @@ toRGB <- function(x){
   ifelse(is.na(x), "none", rgb.css)
 }
 
+#' Convert R position to plotly barmode
+position2barmode <- c("stack"="stack",
+                      "dodge"="group",
+                      "identity"="overlay")
