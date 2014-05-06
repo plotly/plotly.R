@@ -100,8 +100,6 @@ aesConverters <-
     toRGB(col)
   },size=identity,alpha=identity,shape=function(pch){
     pch2symbol[as.character(pch)]
-  }, barmode=function(bm) {
-    position2barmode[bm][[1]]
   })
 
 toBasic <-
@@ -174,7 +172,6 @@ geom2trace <-
          name=params$name,
          text=data$text,
          type="bar",
-         # barmode=paramORdefault(...),
          fillcolor=toRGB(params$fill))
   }
   )
@@ -189,7 +186,7 @@ markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill", "barmode"))
+       bar=c("fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -226,6 +223,19 @@ gg2list <- function(p){
     p$layers[[layer.i]]$mapping <- layer.aes
     if(!is.data.frame(p$layers[[layer.i]]$data)){
       p$layers[[layer.i]]$data <- p$data
+    }
+    geom_type <- p$layers[[layer.i]]$geom
+    geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
+    geom_type <- strsplit(geom_type, ": ")[[1]]
+    ## Barmode.
+    layout$barmode <- "group"
+    if (geom_type == "bar") {
+      pos <- capture.output(p$layers[[layer.i]]$position)
+      if (length(grep("identity", pos)) > 0) {
+        layout$barmode <- "overlay"
+      } else if (length(grep("stack", pos)) > 0) {
+        layout$barmode <- "stack"
+      }
     }
   }
   ## Extract data from built ggplots
@@ -378,8 +388,6 @@ gg2list <- function(p){
   layout$margin$r <- 10
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
-  ## Barmode.
-  # layout$barmode <- position2barmode[...][[1]]
   trace.list$kwargs <- list(layout=layout)
   trace.list
 }
