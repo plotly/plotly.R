@@ -171,7 +171,9 @@ geom2trace <-
     list(x=data$x,
          y=data$y,
          name=params$name,
-         type="bar")
+         text=data$text,
+         type="bar",
+         fillcolor=toRGB(params$fill))
   },
   step=function(data, params) {
     list(x=data$x,
@@ -231,6 +233,19 @@ gg2list <- function(p){
     p$layers[[layer.i]]$mapping <- layer.aes
     if(!is.data.frame(p$layers[[layer.i]]$data)){
       p$layers[[layer.i]]$data <- p$data
+    }
+    geom_type <- p$layers[[layer.i]]$geom
+    geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
+    geom_type <- strsplit(geom_type, ": ")[[1]]
+    ## Barmode.
+    layout$barmode <- "group"
+    if (geom_type == "bar") {
+      pos <- capture.output(p$layers[[layer.i]]$position)
+      if (length(grep("identity", pos)) > 0) {
+        layout$barmode <- "overlay"
+      } else if (length(grep("stack", pos)) > 0) {
+        layout$barmode <- "stack"
+      }
     }
   }
   ## Extract data from built ggplots
@@ -582,3 +597,7 @@ toRGB <- function(x){
   ifelse(is.na(x), "none", rgb.css)
 }
 
+#' Convert R position to plotly barmode
+position2barmode <- c("stack"="stack",
+                      "dodge"="group",
+                      "identity"="overlay")
