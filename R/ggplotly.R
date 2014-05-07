@@ -165,7 +165,17 @@ geom2trace <-
       L$marker$size <- data$size
     }
     L
-  })
+  },
+  bar=function(data, params) {
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         text=data$text,
+         type="bar",
+         fillcolor=toRGB(params$fill))
+  }
+  )
+
 
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
@@ -175,7 +185,8 @@ aes2line <- c(linetype="dash",
 markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
-       polygon=c("colour", "fill", "linetype", "size", "group"))
+       polygon=c("colour", "fill", "linetype", "size", "group"),
+       bar=c("fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -199,7 +210,9 @@ gg2list <- function(p){
   layout <- list()
   trace.list <- list()
   ## Before building the ggplot, we would like to add aes(name) to
-  ## figure out what the object group is later.
+  ## figure out what the object group is later. This also copies any
+  ## needed global aes/data values to each layer, so we do not have to
+  ## worry about combining global and layer-specific aes/data later.
   for(layer.i in seq_along(p$layers)){
     layer.aes <- p$layers[[layer.i]]$mapping
     to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
@@ -208,6 +221,22 @@ gg2list <- function(p){
     name.names <- sprintf("%s.name", mark.names)
     layer.aes[name.names] <- layer.aes[mark.names]
     p$layers[[layer.i]]$mapping <- layer.aes
+    if(!is.data.frame(p$layers[[layer.i]]$data)){
+      p$layers[[layer.i]]$data <- p$data
+    }
+    geom_type <- p$layers[[layer.i]]$geom
+    geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
+    geom_type <- strsplit(geom_type, ": ")[[1]]
+    ## Barmode.
+    layout$barmode <- "group"
+    if (geom_type == "bar") {
+      pos <- capture.output(p$layers[[layer.i]]$position)
+      if (length(grep("identity", pos)) > 0) {
+        layout$barmode <- "overlay"
+      } else if (length(grep("stack", pos)) > 0) {
+        layout$barmode <- "stack"
+      }
+    }
   }
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
@@ -215,29 +244,36 @@ gg2list <- function(p){
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
-
+    
     ## for each layer, there is a correpsonding data.frame which
     ## evaluates the aesthetic mapping.
     df <- built$data[[i]]
-
+    
     ## Test fill and color to see if they encode a quantitative
-    ## variable. In that case, we do not make traces for separate
-    ## colors, since there are too many!
+    ## variable. This may be useful for several reasons: (1) it is
+    ## sometimes possible to plot several different colors in the same
+    ## trace (e.g. points), and that is faster for large numbers of
+    ## data points and colors; (2) factors on x or y axes should be
+    ## sent to plotly as characters, not as numeric data (which is
+    ## what ggplot_build gives us).
     misc <- list()
-    for(a in c("fill", "colour")){
-      fun.name <- sprintf("scale_%s_continuous", a)
-      fun <- get(fun.name)
-      misc$is.continuous[[a]] <- tryCatch({
-        suppressMessages({
-          with.scale <- p+fun()
+    for(a in c("fill", "colour", "x", "y")){
+      for(data.type in c("continuous", "date", "datetime", "discrete")){
+        fun.name <- sprintf("scale_%s_%s", a, data.type)
+        misc.name <- paste0("is.", data.type)
+        misc[[misc.name]][[a]] <- tryCatch({
+          fun <- get(fun.name)
+          suppressMessages({
+            with.scale <- p+fun()
+          })
+          ggplot2::ggplot_build(with.scale)
+          TRUE
+        }, error=function(e){
+          FALSE
         })
-        ggplot2::ggplot_build(with.scale)
-        TRUE
-      }, error=function(e){
-        FALSE
-      })
+      }
     }
-
+    
     ## scales are needed for legend ordering.
     for(sc in p$scales$scales){
       a <- sc$aesthetics
@@ -248,10 +284,10 @@ gg2list <- function(p){
         misc$breaks[[sc$aesthetics]] <- ranks
       }
     }
-
+    
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
-
+    
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
     ##                                     built$panel$ranges[[1]])
@@ -263,7 +299,7 @@ gg2list <- function(p){
   # grid 0-1 scale). This allows transformations to be used
   # out of the box, with no additional d3 coding.
   theme.pars <- ggplot2:::plot_theme(p)
-
+  
   ## Flip labels if coords are flipped - transform does not take care
   ## of this. Do this BEFORE checking if it is blank or not, so that
   ## individual axes can be hidden appropriately, e.g. #1.
@@ -318,7 +354,15 @@ gg2list <- function(p){
     ax.list$tickfont <- theme2font(tick.text)
     title.text <- e(s("axis.title.%s"))
     ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- "linear" ## TODO: log scales?
+    ax.list$type <- if(misc$is.continuous[[xy]]){
+      "linear"
+    }else if(misc$is.discrete[[xy]]){
+      "category"
+    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
+      "date"
+    }else{
+      stop("unrecognized data type for ", xy, " axis")
+    }
     ## Lines drawn around the plot border:
     ax.list$showline <- ifelse(is.blank("panel.border"), FALSE, TRUE)
     ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
@@ -329,21 +373,21 @@ gg2list <- function(p){
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-
+  
   ## Remove legend if theme has no legend position
   if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
-
+  
   ## Main plot title.
   layout$title <- built$plot$labels$title
-
+  
   ## Background color.
   layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
-
+  
   ## Legend.
   layout$margin$r <- 10
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
-
+  
   trace.list$kwargs <- list(layout=layout)
   trace.list
 }
@@ -360,6 +404,22 @@ layer2traces <- function(l, d, misc){
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
+  ## For non-numeric data on the axes, we should take the values from
+  ## the original data.
+  for(axis.name in c("x", "y")){
+    if(!misc$is.continuous[[axis.name]]){
+      aes.names <- paste0(axis.name, c("", "end", "min", "max"))
+      aes.used <- aes.names[aes.names %in% names(g$aes)]
+      for(a in aes.used){
+        col.name <- g$aes[aes.used]
+        data.vec <- l$data[[col.name]]
+        if(inherits(data.vec, "POSIXt")){
+          data.vec <- strftime(data.vec, "%Y-%m-%d %H:%M:%S")
+        }
+        g$data[[a]] <- data.vec
+      }
+    }
+  }
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
@@ -373,25 +433,25 @@ layer2traces <- function(l, d, misc){
     ## {"bar":"foo"}
     names(g$params[[p.name]]) <- NULL
   }
-
+  
   ## Convert complex ggplot2 geoms so that they are treated as special
   ## cases of basic geoms. In ggplot2, this processing is done in the
   ## draw method of the geoms.
-
+  
   ## Every plotly trace has one of these types
   ## type=scatter,bar,box,histogramx,histogram2d,heatmap
-
+  
   ## for type=scatter, you can define
   ## mode=none,markers,lines,lines+markers where "lines" is the
   ## default for 20 or more points, "lines+markers" is the default for
   ## <20 points. "none" is useful mainly if fill is used to make area
   ## plots with no lines.
-
+  
   ## marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
-
+  
   ## symbol=circle,square,diamond,cross,x,
   ## triangle-up,triangle-down,triangle-left,triangle-right
-
+  
   ## First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
@@ -399,7 +459,7 @@ layer2traces <- function(l, d, misc){
   }else{
     convert(g)
   }
-
+  
   ## Then split on visual characteristics that will get different
   ## legend entries.
   data.list <- if(basic$geom %in% names(markLegends)){
@@ -407,7 +467,7 @@ layer2traces <- function(l, d, misc){
     ## However, continuously colored points are an exception: they do
     ## not need a legend entry, and they can be efficiently rendered
     ## using just 1 trace.
-
+    
     ## Maybe it is nice to show a legend for continuous points?
     ## if(basic$geom == "point"){
     ##   to.erase <- names(misc$is.continuous)[misc$is.continuous]
@@ -436,7 +496,7 @@ layer2traces <- function(l, d, misc){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-
+  
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     stop("conversion not implemented for geom_",
@@ -446,6 +506,12 @@ layer2traces <- function(l, d, misc){
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
+    for(v.name in c("x", "y")){
+      vals <- tr[[v.name]]
+      if(is.na(vals[length(vals)])){
+        tr[[v.name]] <- vals[-length(vals)]
+      }
+    }
     name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
     if(length(name.names)){
       for(a.name in name.names){
@@ -521,3 +587,7 @@ toRGB <- function(x){
   ifelse(is.na(x), "none", rgb.css)
 }
 
+#' Convert R position to plotly barmode
+position2barmode <- c("stack"="stack",
+                      "dodge"="group",
+                      "identity"="overlay")
