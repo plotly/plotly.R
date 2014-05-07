@@ -196,7 +196,8 @@ markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill"))
+       bar=c("fill"),
+       step=c("linetype", "size", "colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
