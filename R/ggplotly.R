@@ -56,7 +56,8 @@ marker.defaults <- c(alpha=1,
 line.defaults <-
   list(linetype="solid",
        colour="black",
-       size=2)
+       size=2,
+       direction="linear")
 
 numeric.lty <-
   c("1"="solid",
@@ -100,7 +101,7 @@ aesConverters <-
     toRGB(col)
   },size=identity,alpha=identity,shape=function(pch){
     pch2symbol[as.character(pch)]
-  })
+  }, direction=identity)
 
 toBasic <-
   list(segment=function(g){
@@ -173,6 +174,14 @@ geom2trace <-
          text=data$text,
          type="bar",
          fillcolor=toRGB(params$fill))
+  },
+  step=function(data, params) {
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
   }
   )
 
@@ -180,13 +189,15 @@ geom2trace <-
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
               colour="color",
-              size="width")
+              size="width",
+              direction="shape")
 
 markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill"))
+       bar=c("fill"),
+       step=c("linetype", "size", "colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
