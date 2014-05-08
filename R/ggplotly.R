@@ -235,20 +235,26 @@ gg2list <- function(p){
     if(!is.data.frame(p$layers[[layer.i]]$data)){
       p$layers[[layer.i]]$data <- p$data
     }
-    geom_type <- p$layers[[layer.i]]$geom
-    geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
-    geom_type <- strsplit(geom_type, ": ")[[1]]
-    ## Barmode.
-    layout$barmode <- "group"
-    if (geom_type == "bar") {
-      pos <- capture.output(p$layers[[layer.i]]$position)
-      if (length(grep("identity", pos)) > 0) {
-        layout$barmode <- "overlay"
-      } else if (length(grep("stack", pos)) > 0) {
-        layout$barmode <- "stack"
-      }
+  }
+  geom_type <- p$layers[[layer.i]]$geom
+  geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
+  geom_type <- strsplit(geom_type, ": ")[[1]]
+  ## Barmode.
+  layout$barmode <- "group"
+  if (geom_type == "bar") {
+    stat_type <- capture.output(p$layers[[layer.i]]$stat)
+    stat_type <- strsplit(stat_type, ": ")[[1]]
+    if (length(grep("identity", stat_type)) <= 0) {
+      stop("Conversion not implemented for ", stat_type)
+    }
+    pos <- capture.output(p$layers[[layer.i]]$position)
+    if (length(grep("identity", pos)) > 0) {
+      layout$barmode <- "overlay"
+    } else if (length(grep("stack", pos)) > 0) {
+      layout$barmode <- "stack"
     }
   }
+  
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
   ranges <- built$panel$ranges[[1]]
