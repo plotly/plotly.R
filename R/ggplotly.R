@@ -244,13 +244,13 @@ gg2list <- function(p){
   if (geom_type == "bar") {
     stat_type <- capture.output(p$layers[[layer.i]]$stat)
     stat_type <- strsplit(stat_type, ": ")[[1]]
-    if (length(grep("identity", stat_type)) <= 0) {
+    if (!grepl("identity", stat_type)) {
       stop("Conversion not implemented for ", stat_type)
     }
     pos <- capture.output(p$layers[[layer.i]]$position)
-    if (length(grep("identity", pos)) > 0) {
+    if (grepl("identity", pos)) {
       layout$barmode <- "overlay"
-    } else if (length(grep("stack", pos)) > 0) {
+    } else if (grepl("stack", pos)) {
       layout$barmode <- "stack"
     }
   }
