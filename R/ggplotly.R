@@ -207,7 +207,7 @@ markUnique <- as.character(unique(unlist(markLegends)))
 #' @return list representing a ggplot.
 #' @export
 gg2list <- function(p){
-  if(length(p$layers)==0){
+  if(length(p$layers) == 0) {
     stop("No layers in plot")
   }
   ## Always use identity size scale so that plot.ly gets the real
@@ -522,9 +522,9 @@ layer2traces <- function(l, d, misc){
   
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
-    warning("conversion not implemented for geom_",
+    warning("Conversion not implemented for geom_",
             g$geom, " (basic geom_", basic$geom, "), ignoring. ",
-            "Please create a new issue with your example code at ",
+            "Please open an issue with your example code at ",
             "https://github.com/ropensci/plotly/issues")
     return(list())
   }
