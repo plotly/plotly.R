@@ -169,7 +169,7 @@ geom2trace <-
   },
   bar=function(data, params) {
     list(x=data$x,
-         y=data$y,
+         y=(data$y - data$ymin),
          name=params$name,
          text=data$text,
          type="bar",
