@@ -1,22 +1,22 @@
-#' Main interface to plotly 
-#' 
+#' Main interface to plotly
+#'
 #' Plotly interface object. See up-to-date documentation and examples at https://plot.ly/API
-#' 
+#'
 #' @description
-#' A call to \code{plotly(username, key)} creates an object of class 'PlotlyClass', which 
+#' A call to \code{plotly(username, key)} creates an object of class 'PlotlyClass', which
 #' has 3 methods:
 #' \itemize{
-#'  \item Plotting: py$plotly(x1, y1[,x2,y2,...], kwargs=kw) or 
-#'    py$plotly({data1[,data2,...]}, kwargs=kwargs) 
+#'  \item Plotting: py$plotly(x1, y1[,x2,y2,...], kwargs=kw) or
+#'    py$plotly({data1[,data2,...]}, kwargs=kwargs)
 #'  \item Styling Data: py$style(data1,data2,..., kwargs=kwargs)
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
 #' }
-#' 
+#'
 #' @import knitr
 #' @import RJSONIO
 #' @param username plotly username
 #' @param key plotly API key
-#' 
+#'
 #' @return An object of class PlotlyClass, except for the final object after adding
 #' layers becomes a list class.
 #' @details See documentation and examples at https://plot.ly/API
@@ -25,17 +25,17 @@
 #' @export
 #' @examples \dontrun{
 #' ## View https://plot.ly/API for more examples
-#' ## Generate a simple plot 
+#' ## Generate a simple plot
 #' username <- 'anna.lyst' # fill in with your plotly username
 #' api_key <- 'y37zkd' # fill in with your plotly API key
 #' py <- plotly(username, api_key)
 #' ## generate some data
 #' x <- c(0,1,2)
 #' y <- c(10,11,12)
-#' 
-#' ## Send data to Plotly. Plotly will render an interactive graph and will return a 
+#'
+#' ## Send data to Plotly. Plotly will render an interactive graph and will return a
 #' ## URL where you can view your plot
-#' ## This call sends data to Plotly, Plotly renders an interactive 
+#' ## This call sends data to Plotly, Plotly renders an interactive
 #' ##    graph, and returns a URL where you can view your plot
 #' response <- py$plot(x,y)
 #' response$url # view your plot at this URL
@@ -60,31 +60,31 @@ plotly <- function(username=NULL, key=NULL){
     username <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
   if(is.null(key))
     key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
-  
-	# public attributes/methods that the user has access to
-	pub <- list(username = username, key = key, filename = "from api", fileopt = NULL, 
-        version = "0.3.1")
+
+  # public attributes/methods that the user has access to
+  pub <- list(username = username, key = key, filename = "from api", fileopt = NULL,
+        version = "0.5.0")
   priv <- list()
 
   pub$makecall <- function(args, kwargs, origin) {
-    if (is.null(kwargs$filename)) 
+    if (is.null(kwargs$filename))
       kwargs$filename <- pub$filename
-    if (is.null(kwargs$fileopt)) 
+    if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
     url <- "https://plot.ly/clientresp"
-    options(RCurlOptions = list(sslversion = 3, cainfo = system.file("CurlSSL", 
+    options(RCurlOptions = list(sslversion = 3, cainfo = system.file("CurlSSL",
                                                                      "cacert.pem", package = "RCurl")))
-    respst <- postForm(url, platform = "R", version = pub$version, args = toJSON(args, 
-                                                                                 collapse = ""), un = pub$username, key = pub$key, origin = origin, kwargs = toJSON(kwargs, 
+    respst <- postForm(url, platform = "R", version = pub$version, args = toJSON(args,
+                                                                                 collapse = ""), un = pub$username, key = pub$key, origin = origin, kwargs = toJSON(kwargs,
                                                                                                                                                                     collapse = ""))
     resp <- fromJSON(respst, simplify = FALSE)
-    if (!is.null(resp$filename)) 
+    if (!is.null(resp$filename))
       pub$filename <- resp$filename
-    if (!is.null(resp$error)) 
+    if (!is.null(resp$error))
       cat(resp$err)
-    if (!is.null(resp$warning)) 
+    if (!is.null(resp$warning))
       cat(resp$warning)
-    if (!is.null(resp$message)) 
+    if (!is.null(resp$message))
       cat(resp$message)
     return(resp)
   }
@@ -93,7 +93,7 @@ plotly <- function(username=NULL, key=NULL){
       # set width and height from options or default square
       w <- if(is.null(options[["width"]])) "600" else options[["width"]]
       h <- if(is.null(options[["height"]])) "600" else options[["height"]]
-      paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
+      paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"",
             options[["url"]], "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep = "")
     }
   }
@@ -113,6 +113,80 @@ plotly <- function(username=NULL, key=NULL){
     }else{ # we are in knitr/RStudio.
       do.call(pub$iplot, pargs)
     }
+  }
+  pub$get_figure <- function(file_owner, file_id) {
+    headers = c("plotly-username"=pub$username,
+                "plotly-apikey"=pub$key,
+                "plotly-version"=pub$version,
+                "plotly-platform"="R")
+    response_handler = basicTextGatherer()
+    header_handler = basicTextGatherer()
+    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id, sep="/"),
+                httpheader=headers,
+                writefunction=response_handler$update,
+                headerfunction = header_handler$update)
+    resp_header = as.list(parseHTTPHeader(header_handler$value()))
+
+    # Parse status
+    if (resp_header$status != "200") {
+        print(resp_header$statusMsg)
+        stop(resp_header$status)
+    }
+
+    body_string = response_handler$value()
+    resp = RJSONIO::fromJSON(body_string)
+    if (!is.null(resp$error) && resp$error != "")
+      stop(resp$err)
+    if (!is.null(resp$warning) && resp$error != "")
+      cat(resp$warning)
+    if (!is.null(resp$message) && resp$error != "")
+      cat(resp$message)
+
+    fig = resp$payload$figure
+
+    return(fig)
+  }
+  pub$save_image <- function(data_or_figure, filename) {
+    headers = c("plotly-username"=pub$username,
+                "plotly-apikey"=pub$key,
+                "plotly-version"=pub$version,
+                "plotly-platform"="R")
+    if("data" %in% names(data_or_figure)){ # TODO: check
+      figure = data_or_figure
+    } else {
+      figure = list(data=data)
+    }
+    payload = RJSONIO::toJSON(figure, collapse = "")
+    response_handler = basicTextGatherer()
+    header_handler = basicTextGatherer()
+    curlPerform(url="https://plot.ly/apigenimage/",
+                postfields=payload,
+                httpheader=headers,
+                writefunction=response_handler$update,
+                headerfunction = header_handler$update)
+    resp_header = as.list(parseHTTPHeader(header_handler$value()))
+
+    # Parse status
+    if (resp_header$status != "200") {
+        print(resp_header$statusMsg)
+        stop(resp_header$status)
+    }
+
+    body_string = response_handler$value()
+    resp = as.list(RJSONIO::fromJSON(body_string))
+
+    if (!is.null(resp$error) && resp$error != "")
+      stop(resp$err)
+    if (!is.null(resp$warning) && resp$error != "")
+      cat(resp$warning)
+    if (!is.null(resp$message) && resp$error != "")
+      cat(resp$message)
+
+    b64image = resp$payload
+    if(substr(filename, nchar(filename)-4+1, nchar(filename))  != ".png") {
+      filename = paste(filename, ".png", sep="")
+    }
+    writeBin(base64Decode(b64image, "raw"), filename)
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
@@ -143,4 +217,4 @@ plotly <- function(username=NULL, key=NULL){
   pub <- list2env(pub)
   class(pub) <- "PlotlyClass"
   return(pub)
-} 
+}
