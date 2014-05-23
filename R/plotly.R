@@ -54,18 +54,26 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL){
-
-  if(is.null(username))
-    username <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
-  if(is.null(key))
-    key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
+plotly <- function(username=NULL, key=NULL) {
   
-	# public attributes/methods that the user has access to
-	pub <- list(username = username, key = key, filename = "from api", fileopt = NULL, 
-        version = "0.3.1")
+  if (is.null(username)) {
+    username <- get_credentials_file(c("username", "api_key"))$username
+  }
+  if (is.null(key)) {
+    key <- get_credentials_file(c("username", "api_key"))$api_key
+  }
+  if (is.null(username) || username == "" || is.null(key) || key == "") {
+    stop("Credentials Not Found!\n
+It looks like you haven't set up your Plotly account credentials yet.\n
+To get started, save your plotly username and API key by calling:\n
+> set_credentials_file(UserName, ApiKey)\n
+For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
+  }
+  
+  # public attributes/methods that the user has access to
+  pub <- list(username=username, key=key, filename="from api", fileopt=NULL)
   priv <- list()
-
+  
   pub$makecall <- function(args, kwargs, origin) {
     if (is.null(kwargs$filename)) 
       kwargs$filename <- pub$filename
