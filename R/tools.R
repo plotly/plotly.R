@@ -1,6 +1,7 @@
 # Functions that USERS will possibly want access to.
 
-PLOTLY_DIR <- file.path("~/.plotly")
+
+PLOTLY_DIR <- file.path(path.expand("~"), ".plotly")
 CREDENTIALS_FILE <- file.path(PLOTLY_DIR, ".credentials")
 # PLOT_OPTIONS_FILE <- file.path(PLOTLY_DIR, ".plot_options")
 # THEMES_FILE <- file.path(PLOTLY_DIR, ".themes")
