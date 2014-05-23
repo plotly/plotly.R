@@ -61,9 +61,9 @@ plotly <- function(username=NULL, key=NULL){
   if(is.null(key))
     key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
 
-	# public attributes/methods that the user has access to
-	pub <- list(username = username, key = key, filename = "from api", fileopt = NULL,
-        version = "0.3.1")
+  # public attributes/methods that the user has access to
+  pub <- list(username = username, key = key, filename = "from api", fileopt = NULL,
+        version = "0.4.0")
   priv <- list()
 
   pub$makecall <- function(args, kwargs, origin) {
@@ -113,6 +113,38 @@ plotly <- function(username=NULL, key=NULL){
     }else{ # we are in knitr/RStudio.
       do.call(pub$iplot, pargs)
     }
+  }
+  pub$get_figure <- function(file_owner, file_id) {
+    headers = c("plotly-username"=pub$username,
+                "plotly-apikey"=pub$key,
+                "plotly-version"=pub$version,
+                "plotly-platform"="R")
+    response_handler = basicTextGatherer()
+    header_handler = basicTextGatherer()
+    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id, sep="/"),
+                httpheader=headers,
+                writefunction=response_handler$update,
+                headerfunction = header_handler$update)
+    resp_header = as.list(parseHTTPHeader(header_handler$value()))
+
+    # Parse status
+    if (resp_header$status != "200") {
+        print(resp_header$statusMsg)
+        stop(resp_header$status)
+    }
+
+    body_string = response_handler$value()
+    resp = RJSONIO::fromJSON(body_string)
+    if (!is.null(resp$error) && resp$error != "")
+      stop(resp$err)
+    if (!is.null(resp$warning) && resp$error != "")
+      cat(resp$warning)
+    if (!is.null(resp$message) && resp$error != "")
+      cat(resp$message)
+
+    fig = resp$payload$figure
+
+    return(fig)
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
