@@ -63,7 +63,7 @@ plotly <- function(username=NULL, key=NULL){
 
 	# public attributes/methods that the user has access to
 	pub <- list(username = username, key = key, filename = "from api", fileopt = NULL,
-        version = "0.3.1")
+        version = "0.5.0")
   priv <- list()
 
   pub$makecall <- function(args, kwargs, origin) {
@@ -113,6 +113,48 @@ plotly <- function(username=NULL, key=NULL){
     }else{ # we are in knitr/RStudio.
       do.call(pub$iplot, pargs)
     }
+  }
+  pub$save_image <- function(data_or_figure, filename) {
+    headers = c("plotly-username"=pub$username,
+                "plotly-apikey"=pub$key,
+                "plotly-version"=pub$version,
+                "plotly-platform"="R")
+    if("data" %in% data_or_figure){
+      figure = data_or_figure
+    } else {
+      figure = list(data=data)
+    }
+    payload = RJSONIO::toJSON(figure, collapse = "")
+    response_handler = basicTextGatherer()
+    header_handler = basicTextGatherer()
+    curlPerform(url="https://plot.ly/apigenimage/",
+                postfields=payload,
+                httpheader=headers,
+                writefunction=response_handler$update,
+                headerfunction = header_handler$update)
+    resp_header = as.list(parseHTTPHeader(header_handler$value()))
+
+    # Parse status
+    if (resp_header$status != "200") {
+        print(resp_header$statusMsg)
+        stop(resp_header$status)
+    }
+
+    body_string = response_handler$value()
+    resp = as.list(RJSONIO::fromJSON(body_string))
+
+    if (!is.null(resp$error) && resp$error != "")
+      stop(resp$err)
+    if (!is.null(resp$warning) && resp$error != "")
+      cat(resp$warning)
+    if (!is.null(resp$message) && resp$error != "")
+      cat(resp$message)
+
+    b64image = resp$payload
+    if(substr(s, nchar(s)-4+1, nchar(s))  != ".png") {
+      filename = paste(s, ".png", "")
+    }
+    writeBin(base64Decode(b64image, "raw"), filename)
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
