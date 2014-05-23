@@ -151,7 +151,7 @@ plotly <- function(username=NULL, key=NULL){
                 "plotly-apikey"=pub$key,
                 "plotly-version"=pub$version,
                 "plotly-platform"="R")
-    if("data" %in% data_or_figure){
+    if("data" %in% names(data_or_figure)){ # TODO: check
       figure = data_or_figure
     } else {
       figure = list(data=data)
@@ -183,8 +183,8 @@ plotly <- function(username=NULL, key=NULL){
       cat(resp$message)
 
     b64image = resp$payload
-    if(substr(s, nchar(s)-4+1, nchar(s))  != ".png") {
-      filename = paste(s, ".png", "")
+    if(substr(filename, nchar(filename)-4+1, nchar(filename))  != ".png") {
+      filename = paste(filename, ".png", sep="")
     }
     writeBin(base64Decode(b64image, "raw"), filename)
   }
