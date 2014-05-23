@@ -66,18 +66,17 @@ set_credentials_file <- function(username="", api_key="",
                                  stream_ids=list("", "")) {
   credentials_data <- show_credentials_file()
   new_credentials <- list()
-  if (is.null(credentials_data$username) || credentials_data$username == "") {
+  if (username != "") {
     new_credentials$username <- username
   } else {
     new_credentials$username <- credentials_data$username
   }
-  if (is.null(credentials_data$api_key) || credentials_data$api_key == "") {
+  if (api_key != "") {
     new_credentials$api_key <- api_key
   } else {
     new_credentials$api_key <- credentials_data$api_key
   }
-  if (is.null(credentials_data$stream_ids) ||
-        credentials_data$stream_ids[[1]] == "") {
+  if (stream_ids[[1]] != "") {
     new_credentials$stream_ids <- stream_ids
   } else {
     new_credentials$stream_ids <- credentials_data$stream_ids
