@@ -1,10 +1,11 @@
 #' Main interface to plotly 
 #' 
-#' Plotly interface object. See up-to-date documentation and examples at https://plot.ly/API
+#' Plotly interface object. See up-to-date documentation and examples at
+#' https://plot.ly/API
 #' 
 #' @description
-#' A call to \code{plotly(username, key)} creates an object of class 'PlotlyClass', which 
-#' has 3 methods:
+#' A call to \code{plotly(username, key)} creates an object of class
+#' 'PlotlyClass', which has 3 methods:
 #' \itemize{
 #'  \item Plotting: py$plotly(x1, y1[,x2,y2,...], kwargs=kw) or 
 #'    py$plotly({data1[,data2,...]}, kwargs=kwargs) 
@@ -17,8 +18,8 @@
 #' @param username plotly username
 #' @param key plotly API key
 #' 
-#' @return An object of class PlotlyClass, except for the final object after adding
-#' layers becomes a list class.
+#' @return An object of class PlotlyClass, except for the final object after
+#' adding layers becomes a list class.
 #' @details See documentation and examples at https://plot.ly/API
 #' @references https://plot.ly/API
 #' @author Chris Parmer chris@@plot.ly
@@ -33,8 +34,8 @@
 #' x <- c(0,1,2)
 #' y <- c(10,11,12)
 #' 
-#' ## Send data to Plotly. Plotly will render an interactive graph and will return a 
-#' ## URL where you can view your plot
+#' ## Send data to Plotly. Plotly will render an interactive graph and will
+#' ## return a URL where you can view your plot
 #' ## This call sends data to Plotly, Plotly renders an interactive 
 #' ##    graph, and returns a URL where you can view your plot
 #' response <- py$plot(x,y)
@@ -54,29 +55,39 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL){
-
-  if(is.null(username))
-    username <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
-  if(is.null(key))
-    key <- getOption("plotlyKey", stop("you need an API key for Plot.ly - See the signup function"))
+plotly <- function(username=NULL, key=NULL) {
   
-	# public attributes/methods that the user has access to
-	pub <- list(username = username, key = key, filename = "from api", fileopt = NULL, 
-        version = "0.3.1")
+  if (is.null(username)) {
+    username <- get_credentials_file(c("username", "api_key"))$username
+  }
+  if (is.null(key)) {
+    key <- get_credentials_file(c("username", "api_key"))$api_key
+  }
+  if (is.null(username) || username == "" || is.null(key) || key == "") {
+    stop("Credentials Not Found!\n
+It looks like you haven't set up your Plotly account credentials yet.\n
+To get started, save your plotly username and API key by calling:\n
+> set_credentials_file(UserName, ApiKey)\n
+For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
+  }
+  
+  # public attributes/methods that the user has access to
+  pub <- list(username=username, key=key, filename="from api", fileopt=NULL)
   priv <- list()
-
+  
   pub$makecall <- function(args, kwargs, origin) {
     if (is.null(kwargs$filename)) 
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt)) 
       kwargs$fileopt <- NULL
     url <- "https://plot.ly/clientresp"
-    options(RCurlOptions = list(sslversion = 3, cainfo = system.file("CurlSSL", 
-                                                                     "cacert.pem", package = "RCurl")))
-    respst <- postForm(url, platform = "R", version = pub$version, args = toJSON(args, 
-                                                                                 collapse = ""), un = pub$username, key = pub$key, origin = origin, kwargs = toJSON(kwargs, 
-                                                                                                                                                                    collapse = ""))
+    options(RCurlOptions=list(sslversion=3,
+                              cainfo=system.file("CurlSSL", "cacert.pem",
+                                                 package="RCurl")))
+    respst <- postForm(url, platform="R", version=pub$version,
+                       args=toJSON(args, collapse=""), un=pub$username,
+                       key=pub$key, origin=origin,
+                       kwargs=toJSON(kwargs, collapse=""))
     resp <- fromJSON(respst, simplify = FALSE)
     if (!is.null(resp$filename)) 
       pub$filename <- resp$filename
@@ -93,8 +104,10 @@ plotly <- function(username=NULL, key=NULL){
       # set width and height from options or default square
       w <- if(is.null(options[["width"]])) "600" else options[["width"]]
       h <- if(is.null(options[["height"]])) "600" else options[["height"]]
-      paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
-            options[["url"]], "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep = "")
+      paste("<iframe height=\"", h,
+            "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"",
+            options[["url"]], "\" width=\"", w,
+            "\" frameBorder=\"0\"></iframe>", sep="")
     }
   }
   pub$plotly <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
