@@ -11,7 +11,7 @@
 #'    py$plotly({data1[, data2, ...]}, kwargs=kwargs), py$ggplotly()
 #'  \item Styling Data: py$style(data1,data2,..., kwargs=kwargs)
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
-#'  \item Utilities: py$get_figure()
+#'  \item Utilities: py$get_figure(file_owner, file_id)
 #' }
 #'
 #' @import knitr
