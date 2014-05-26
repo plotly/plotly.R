@@ -158,7 +158,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if (!is.null(resp$message) && resp$error != "")
       cat(resp$message)
     
-    fig <- resp$payload$figure
+    resp$payload$figure
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
