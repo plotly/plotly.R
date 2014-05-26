@@ -5,14 +5,15 @@
 #' 
 #' @description
 #' A call to \code{plotly(username, key)} creates an object of class
-#' 'PlotlyClass', which has 3 methods:
+#' 'PlotlyClass', which has methods:
 #' \itemize{
-#'  \item Plotting: py$plotly(x1, y1[,x2,y2,...], kwargs=kw) or 
-#'    py$plotly({data1[,data2,...]}, kwargs=kwargs) 
+#'  \item Plotting: py$plotly(x1, y1[, x2, y2, ...], kwargs=kwargs) or
+#'    py$plotly({data1[, data2, ...]}, kwargs=kwargs), py$ggplotly()
 #'  \item Styling Data: py$style(data1,data2,..., kwargs=kwargs)
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
+#'  \item Utilities: py$get_figure()
 #' }
-#' 
+#'
 #' @import knitr
 #' @import RJSONIO
 #' @param username plotly username
@@ -26,29 +27,29 @@
 #' @export
 #' @examples \dontrun{
 #' ## View https://plot.ly/API for more examples
-#' ## Generate a simple plot 
+#' ## Generate a simple plot
 #' username <- 'anna.lyst' # fill in with your plotly username
 #' api_key <- 'y37zkd' # fill in with your plotly API key
 #' py <- plotly(username, api_key)
 #' ## generate some data
-#' x <- c(0,1,2)
-#' y <- c(10,11,12)
+#' x <- c(0, 1, 2)
+#' y <- c(10, 11, 12)
 #' 
 #' ## Send data to Plotly. Plotly will render an interactive graph and will
 #' ## return a URL where you can view your plot
 #' ## This call sends data to Plotly, Plotly renders an interactive 
-#' ##    graph, and returns a URL where you can view your plot
-#' response <- py$plot(x,y)
-#' response$url # view your plot at this URL
-#' browseURL(response$url) # use browseURL to go to the URL in your browser
+#' ## graph, and returns a URL where you can view your plot
+#' response <- py$plot(x, y)
+#' response$url  # view your plot at this URL
+#' browseURL(response$url)  # use browseURL to go to the URL in your browser
 #'
 #' ## Export ggplots directly to plot.ly.
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
 #' py$ggplotly(ggiris)
 #' data(canada.cities, package="maps")
-#' viz <- ggplot(canada.cities, aes(long, lat))+
-#'   borders(regions="canada", name="borders")+
-#'   coord_equal()+
+#' viz <- ggplot(canada.cities, aes(long, lat)) +
+#'   borders(regions="canada", name="borders") +
+#'   coord_equal() +
 #'   geom_point(aes(text=name, size=pop), colour="red",
 #'                alpha=1/2, name="cities")
 #'  py$ggplotly(viz)
@@ -72,13 +73,14 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   }
   
   # public attributes/methods that the user has access to
-  pub <- list(username=username, key=key, filename="from api", fileopt=NULL)
+  pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
+              version="0.4.0")
   priv <- list()
   
   pub$makecall <- function(args, kwargs, origin) {
-    if (is.null(kwargs$filename)) 
+    if (is.null(kwargs$filename))
       kwargs$filename <- pub$filename
-    if (is.null(kwargs$fileopt)) 
+    if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
     url <- "https://plot.ly/clientresp"
     options(RCurlOptions=list(sslversion=3,
@@ -89,13 +91,13 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                        key=pub$key, origin=origin,
                        kwargs=toJSON(kwargs, collapse=""))
     resp <- fromJSON(respst, simplify = FALSE)
-    if (!is.null(resp$filename)) 
+    if (!is.null(resp$filename))
       pub$filename <- resp$filename
-    if (!is.null(resp$error)) 
+    if (!is.null(resp$error))
       cat(resp$err)
-    if (!is.null(resp$warning)) 
+    if (!is.null(resp$warning))
       cat(resp$warning)
-    if (!is.null(resp$message)) 
+    if (!is.null(resp$message))
       cat(resp$message)
     return(resp)
   }
@@ -127,6 +129,38 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       do.call(pub$iplot, pargs)
     }
   }
+  pub$get_figure <- function(file_owner, file_id) {
+    headers = c("plotly-username"=pub$username,
+                "plotly-apikey"=pub$key,
+                "plotly-version"=pub$version,
+                "plotly-platform"="R")
+    response_handler = basicTextGatherer()
+    header_handler = basicTextGatherer()
+    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id, sep="/"),
+                httpheader=headers,
+                writefunction=response_handler$update,
+                headerfunction = header_handler$update)
+    resp_header = as.list(parseHTTPHeader(header_handler$value()))
+
+    # Parse status
+    if (resp_header$status != "200") {
+        print(resp_header$statusMsg)
+        stop(resp_header$status)
+    }
+
+    body_string = response_handler$value()
+    resp = RJSONIO::fromJSON(body_string)
+    if (!is.null(resp$error) && resp$error != "")
+      stop(resp$err)
+    if (!is.null(resp$warning) && resp$error != "")
+      cat(resp$warning)
+    if (!is.null(resp$message) && resp$error != "")
+      cat(resp$message)
+
+    fig = resp$payload$figure
+
+    return(fig)
+  }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
     r <- pub$plotly(..., kwargs = kwargs)
@@ -156,4 +190,4 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   pub <- list2env(pub)
   class(pub) <- "PlotlyClass"
   return(pub)
-} 
+}
