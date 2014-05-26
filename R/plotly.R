@@ -130,36 +130,35 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
-    headers = c("plotly-username"=pub$username,
-                "plotly-apikey"=pub$key,
-                "plotly-version"=pub$version,
-                "plotly-platform"="R")
-    response_handler = basicTextGatherer()
-    header_handler = basicTextGatherer()
-    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id, sep="/"),
+    headers <- c("plotly-username"=pub$username,
+                 "plotly-apikey"=pub$key,
+                 "plotly-version"=pub$version,
+                 "plotly-platform"="R")
+    response_handler <- basicTextGatherer()
+    header_handler <- basicTextGatherer()
+    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id,
+                          sep="/"),
                 httpheader=headers,
                 writefunction=response_handler$update,
-                headerfunction = header_handler$update)
-    resp_header = as.list(parseHTTPHeader(header_handler$value()))
-
+                headerfunction=header_handler$update)
+    resp_header <- as.list(parseHTTPHeader(header_handler$value()))
+    
     # Parse status
     if (resp_header$status != "200") {
-        print(resp_header$statusMsg)
-        stop(resp_header$status)
+      cat(resp_header$statusMsg)
+      stop(resp_header$status)
     }
-
-    body_string = response_handler$value()
-    resp = RJSONIO::fromJSON(body_string)
+    
+    body_string <- response_handler$value()
+    resp <- RJSONIO::fromJSON(body_string)
     if (!is.null(resp$error) && resp$error != "")
       stop(resp$err)
     if (!is.null(resp$warning) && resp$error != "")
       cat(resp$warning)
     if (!is.null(resp$message) && resp$error != "")
       cat(resp$message)
-
-    fig = resp$payload$figure
-
-    return(fig)
+    
+    fig <- resp$payload$figure
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes for knitr documents
