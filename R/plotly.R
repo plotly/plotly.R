@@ -13,7 +13,7 @@
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
 #'  \item Utilities: py$get_figure(file_owner, file_id)
 #' }
-#'
+#' 
 #' @import knitr
 #' @import RJSONIO
 #' @param username plotly username
@@ -28,8 +28,8 @@
 #' @examples \dontrun{
 #' ## View https://plot.ly/API for more examples
 #' ## Generate a simple plot
-#' username <- 'anna.lyst' # fill in with your plotly username
-#' api_key <- 'y37zkd' # fill in with your plotly API key
+#' username <- 'anna.lyst'  # fill in with your plotly username
+#' api_key <- 'y37zkd'  # fill in with your plotly API key
 #' py <- plotly(username, api_key)
 #' ## generate some data
 #' x <- c(0, 1, 2)
@@ -43,7 +43,7 @@
 #' response$url  # view your plot at this URL
 #' browseURL(response$url)  # use browseURL to go to the URL in your browser
 #'
-#' ## Export ggplots directly to plot.ly.
+#' ## Export ggplots directly to plot.ly
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
 #' py$ggplotly(ggiris)
 #' data(canada.cities, package="maps")
