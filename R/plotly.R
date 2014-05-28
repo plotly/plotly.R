@@ -71,7 +71,7 @@ plotly <- function(username=NULL, key=NULL, url="https://plot.ly/clientresp"){
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt)) 
       kwargs$fileopt <- NULL
-    url <- "https://plot.ly/clientresp"
+
     options(RCurlOptions = list(sslversion = 3, cainfo = system.file("CurlSSL", 
                                                                      "cacert.pem", package = "RCurl")))
     respst <- postForm(url, platform = "R", version = pub$version, args = toJSON(args, 
