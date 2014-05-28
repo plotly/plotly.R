@@ -47,12 +47,19 @@ pch2symbol <- c("0"="square",
 aes2marker <- c(alpha="opacity",
                 colour="color",
                 size="size",
+                sizeref="sizeref",
+                sizemode="sizemode",
                 shape="symbol")
 
-marker.defaults <- c(alpha=1,
-                     shape="o",
-                     size=1,
-                     colour="black")
+default.marker.sizeref = 1
+marker.size.mult <- 10
+
+marker.defaults <- list(alpha=1,
+                        shape="o",
+                        size=marker.size.mult,
+                        sizeref=default.marker.sizeref,
+                        sizemode="area",
+                        colour="black")
 line.defaults <-
   list(linetype="solid",
        colour="black",
@@ -96,12 +103,19 @@ lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
 aesConverters <-
   list(linetype=function(lty){
-    lty2dash[as.character(lty)]
-  },colour=function(col){
-    toRGB(col)
-  },size=identity,alpha=identity,shape=function(pch){
-    pch2symbol[as.character(pch)]
-  }, direction=identity)
+         lty2dash[as.character(lty)]
+       },
+       colour=function(col){
+         toRGB(col)
+       },
+       size=identity,
+       sizeref=identity,
+       sizemode=identity,
+       alpha=identity,
+       shape=function(pch){
+         pch2symbol[as.character(pch)]
+       },
+       direction=identity)
 
 toBasic <-
   list(segment=function(g){
@@ -132,6 +146,7 @@ toBasic <-
     stop("TODO")
   })
 
+
 #' Convert basic geoms to traces.
 geom2trace <-
   list(path=function(data, params){
@@ -161,9 +176,10 @@ geom2trace <-
               mode="markers",
               marker=paramORdefault(params, aes2marker, marker.defaults))
     if("size" %in% names(data)){
-      L$marker$sizeref <- min(data$size)
-      L$marker$sizemode <- "area"
-      L$marker$size <- data$size
+      L$marker$sizeref <- default.marker.sizeref
+      ## Make sure sizes are passed as a list even when there is only one element.
+      marker.size <- data$size * marker.size.mult
+      L$marker$size <- if (length(marker.size) > 1) marker.size else list(marker.size)
     }
     L
   },
@@ -193,6 +209,8 @@ aes2line <- c(linetype="dash",
               direction="shape")
 
 markLegends <-
+  ## NOTE: Do we also want to split on size?
+##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
@@ -260,7 +278,6 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
-  ranges <- built$panel$ranges[[1]]
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
@@ -304,8 +321,15 @@ gg2list <- function(p){
         misc$breaks[[sc$aesthetics]] <- ranks
       }
     }
-    
+
+    ## get gglayout now because we need some of its info in layer2traces
+    gglayout <- built$panel$layout
+    ## invert rows so that plotly and ggplot2 show panels in the same order
+    gglayout$plotly.row <- max(gglayout$ROW) - gglayout$ROW + 1
+    ## Add ROW and COL to df: needed to link axes to traces
+    df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
     ## This extracts essential info for this geom/layer.
+    
     traces <- layer2traces(L, df, misc)
     
     ## Do we really need to coord_transform?
@@ -313,11 +337,12 @@ gg2list <- function(p){
     ##                                     built$panel$ranges[[1]])
     trace.list <- c(trace.list, traces)
   }
-  # Export axis specification as a combination of breaks and
-  # labels, on the relevant axis scale (i.e. so that it can
-  # be passed into d3 on the x axis scale instead of on the
-  # grid 0-1 scale). This allows transformations to be used
-  # out of the box, with no additional d3 coding.
+
+  ## Export axis specification as a combination of breaks and labels, on
+  ## the relevant axis scale (i.e. so that it can be passed into d3 on the
+  ## x axis scale instead of on the grid 0-1 scale). This allows
+  ## transformations to be used out of the box, with no additional d3
+  ## coding.
   theme.pars <- ggplot2:::plot_theme(p)
   
   ## Flip labels if coords are flipped - transform does not take care
@@ -393,6 +418,126 @@ gg2list <- function(p){
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
+
+  ## copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
+  xaxis.title <- layout$xaxis$title
+  yaxis.title <- layout$yaxis$title
+  inner.margin <- 0.01 ## between facets
+  outer.margin <- 0.05 ## to put titles outside of the plots
+  orig.xaxis <- layout$xaxis
+  orig.yaxis <- layout$yaxis
+  if (nrow(gglayout) > 1)
+    {
+      row.size <- 1. / max(gglayout$ROW)
+      col.size <- 1. / max(gglayout$COL)
+      for (i in seq_len(nrow(gglayout)))
+        {
+          panel <- as.numeric(gglayout[i, "PANEL"])
+          # invert rows so that plotly and ggplot2 show panels in the same order
+          row <- gglayout[i, "plotly.row"] 
+          col <- gglayout[i, "COL"] 
+          x <- col * col.size
+          xmin <- x - col.size
+          xmax <- x - inner.margin
+          y <- row * row.size
+          ymin <- y - row.size
+          ymax <- y - inner.margin
+
+          if (panel == 1)
+            {
+              xaxis.name <- "xaxis"
+              yaxis.name <- "yaxis"
+            }
+          else
+            {
+              xaxis.name <- paste0("xaxis", col)
+              yaxis.name <- paste0("yaxis", row)
+            }
+          layout[[xaxis.name]] <- orig.xaxis
+          layout[[xaxis.name]]$domain <- c(xmin, xmax)
+          layout[[xaxis.name]]$anchor <- "y"
+          layout[[xaxis.name]]$title <- NULL
+          if (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_y")
+            {
+              layout[[xaxis.name]]$range <- built$panel$ranges[[i]]$x.range
+              layout[[xaxis.name]]$autorange <- FALSE
+            }
+
+          layout[[yaxis.name]] <- orig.yaxis
+          layout[[yaxis.name]]$domain <- c(ymin, ymax)
+          layout[[yaxis.name]]$anchor <- "x"
+          layout[[yaxis.name]]$title <- NULL
+          if (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_x")
+            {
+              layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
+              layout[[yaxis.name]]$autorange <- FALSE
+            }
+
+        }
+
+      ## add panel titles as annotations
+      annotations <- list()
+      nann <- 1
+      make.label <- function(text, x, y)
+        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+      
+      if ("grid" %in% class(p$facet))
+        {
+          frows <- names(p$facet$rows)
+          nann <- 1
+          
+          for (i in seq_len(max(gglayout$ROW)))
+            {
+              text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
+                                   as.character),
+                            collapse=", ")
+              annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
+              nann <- nann + 1
+            }
+          
+          fcols <- names(p$facet$cols)
+          for (i in seq_len(max(gglayout$COL)))
+            {
+              text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
+                                   as.character),
+                            collapse=", ")
+              annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
+              nann <- nann + 1
+            }
+
+          ## add empty traces everywhere so that the background shows even if there
+          ## is no data for a facet
+          for (r in seq_len(max(gglayout$ROW)))
+            for (c in seq_len(max(gglayout$COL)))
+              trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
+        }
+      else if ("wrap" %in% class(p$facet))
+        {
+          facets <- names(p$facet$facets)
+          for (i in seq_len(max(as.numeric(gglayout$PANEL))))
+            {
+              ix <- gglayout$PANEL == i
+              row <- gglayout$ROW[ix]
+              col <- gglayout$COL[ix]
+              text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
+                                   as.character),
+                            collapse=", ")
+              annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
+                                                row.size * (max(gglayout$ROW) - row + 1))
+              nann <- nann + 1
+            }
+          }
+
+      ## axes titles
+      annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
+      nann <- nann + 1
+      annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
+      nann <- nann + 1
+      
+      layout$annotations <- annotations
+
+    #  layout$showlegend <- FALSE
+    }
   
   ## Remove legend if theme has no legend position
   if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
@@ -482,7 +627,6 @@ layer2traces <- function(l, d, misc){
   }else{
     convert(g)
   }
-  
   ## Then split on visual characteristics that will get different
   ## legend entries.
   data.list <- if(basic$geom %in% names(markLegends)){
@@ -497,18 +641,19 @@ layer2traces <- function(l, d, misc){
     ##   mark.names <- mark.names[!mark.names %in% to.erase]
     ## }
     name.names <- sprintf("%s.name", mark.names)
-    is.split <- names(basic$data) %in% name.names
+    ## split on 'PANEL' to support facets
+    is.split <- names(basic$data) %in% c(name.names, "PANEL")
     if(any(is.split)){
       data.i <- which(is.split)
       matched.names <- names(basic$data)[data.i]
-      name.i <- which(name.names %in% matched.names)
+      name.i <- name.names %in% matched.names
       invariable.names <- cbind(name.names, mark.names)[name.i,]
       other.names <- !names(basic$data) %in% invariable.names
       vec.list <- basic$data[is.split]
       df.list <- split(basic$data, vec.list, drop=TRUE)
       lapply(df.list, function(df){
         params <- basic$params
-        params[invariable.names] <- df[1, invariable.names]
+        params[invariable.names] <- if (ncol(x <- df[1, invariable.names]) > 0) x else NULL
         list(data=df[other.names],
              params=params)
       })
@@ -519,7 +664,6 @@ layer2traces <- function(l, d, misc){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-  
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     warning("Conversion not implemented for geom_",
@@ -529,6 +673,8 @@ layer2traces <- function(l, d, misc){
     return(list())
   }
   traces <- NULL
+  names.in.legend <- NULL
+  
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
@@ -551,8 +697,22 @@ layer2traces <- function(l, d, misc){
       name.list <- data.params$params[name.names]
       tr$name <- paste(unlist(name.list), collapse=".")
     }
+
+    dpd <- data.params$data
+    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0 &&
+        as.numeric(dpd[1, "PANEL"]) > 1)
+      {
+        tr$xaxis <- paste0("x", dpd[1, "COL"])
+        tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
+      }
+
+    if (is.null(tr$name) || tr$name %in% names.in.legend)
+        tr$showlegend <- FALSE
+    names.in.legend <- c(names.in.legend, tr$name)
+    
     traces <- c(traces, list(tr))
   }
+
   sort.val <- sapply(traces, function(tr){
     rank.val <- unlist(tr$sort)
     if(is.null(rank.val)){
@@ -563,6 +723,7 @@ layer2traces <- function(l, d, misc){
       0
     }
   })
+
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){
@@ -587,7 +748,6 @@ paramORdefault <- function(params, aesVec, defaults){
       ggplot.value <- defaults[[ggplot.name]]
     }
     if(is.null(ggplot.value)){
-      print(defaults)
       stop("no ggplot default for ", ggplot.name)
     }
     convert <- aesConverters[[ggplot.name]]

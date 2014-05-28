@@ -54,7 +54,7 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL){
+plotly <- function(username=NULL, key=NULL, url="https://plot.ly/clientresp"){
 
   if(is.null(username))
     username <- getOption("plotlyUsername", stop("you need a user name for Plot.ly - See the signup function"))
