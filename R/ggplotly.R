@@ -128,7 +128,16 @@ toBasic <-
   },line=function(g){
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
-  },ribbon=function(g){
+  },
+  histogram=function(g) {
+    xdim <- g$aes
+    x1 <- xdim[["x"]]
+    g$data <- NULL
+    g$data$x <- g$plot[[x1]]
+    g$plot <- NULL
+    g
+  },
+  ribbon=function(g){
     stop("TODO")
   })
 
@@ -182,6 +191,13 @@ geom2trace <-
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
+  },
+  histogram=function(data, params) {
+    list(x=data$x,
+         xbins=list(size=params$binwidth),
+         name=params$name,
+         text=data$text,
+         type="histogram")
   }
   )
 
@@ -197,7 +213,8 @@ markLegends <-
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("fill"),
-       step=c("linetype", "size", "colour"))
+       step=c("linetype", "size", "colour"),
+       histogram=c("colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -242,6 +259,7 @@ gg2list <- function(p){
   geom_type <- p$layers[[layer.i]]$geom
   geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
   geom_type <- strsplit(geom_type, ": ")[[1]]
+  
   ## Barmode.
   layout$barmode <- "group"
   if (geom_type == "bar") {
@@ -260,6 +278,12 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
+  
+  if (geom_type == "histogram") {  # or "bar" with stat_bin
+    # Need actual data (distribution)
+    trace.list$plot <- built$plot$data
+  }
+  
   ranges <- built$panel$ranges[[1]]
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
@@ -306,7 +330,7 @@ gg2list <- function(p){
     }
     
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc)
+    traces <- layer2traces(L, df, misc, trace.list$plot)
     
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -412,6 +436,7 @@ gg2list <- function(p){
   if(length(trace.list) == 1){
     stop("No exportable traces")
   }
+  trace.list$plot <- NULL
   trace.list
 }
 
@@ -421,9 +446,10 @@ gg2list <- function(p){
 #' @param misc named list.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, misc){
+layer2traces <- function(l, d, misc, plot=NULL){
   g <- list(geom=l$geom$objname,
-            data=d)
+            data=d,
+            plot=plot)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
@@ -532,9 +558,9 @@ layer2traces <- function(l, d, misc){
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
-    for(v.name in c("x", "y")){
+    for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
-      if(is.na(vals[length(vals)])){
+      if (length(vals) > 0 && is.na(vals[length(vals)])) {
         tr[[v.name]] <- vals[-length(vals)]
       }
     }
