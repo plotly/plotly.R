@@ -56,11 +56,12 @@ show_credentials_file <- function(args=c()) {
 #' @param username
 #' @param api_key
 #' @param stream_ids
+#' @param extra
 #' @return List of keyword-value pairs (credentials)
 #' @export
 #' @examples
 #' \dontrun{
-#' set_credentials_file("username", "api_key", list("foo", "bar))
+#' set_credentials_file("your_plotly_username", "your_plotly_api_key")
 #' }
 set_credentials_file <- function(username="", api_key="",
                                  stream_ids=list("", ""),
