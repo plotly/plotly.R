@@ -1,8 +1,8 @@
-#' Main interface to plotly 
-#' 
+#' Main interface to plotly
+#'
 #' Plotly interface object. See up-to-date documentation and examples at
 #' https://plot.ly/API
-#' 
+#'
 #' @description
 #' A call to \code{plotly(username, key)} creates an object of class
 #' 'PlotlyClass', which has methods:
@@ -13,12 +13,12 @@
 #'  \item Styling Layout: py$layout(layout, kwargs=kwargs)
 #'  \item Utilities: py$get_figure(file_owner, file_id)
 #' }
-#' 
+#'
 #' @import knitr
 #' @import RJSONIO
 #' @param username plotly username
 #' @param key plotly API key
-#' 
+#'
 #' @return An object of class PlotlyClass, except for the final object after
 #' adding layers becomes a list class.
 #' @details See documentation and examples at https://plot.ly/API
@@ -34,10 +34,10 @@
 #' ## generate some data
 #' x <- c(0, 1, 2)
 #' y <- c(10, 11, 12)
-#' 
+#'
 #' ## Send data to Plotly. Plotly will render an interactive graph and will
 #' ## return a URL where you can view your plot
-#' ## This call sends data to Plotly, Plotly renders an interactive 
+#' ## This call sends data to Plotly, Plotly renders an interactive
 #' ## graph, and returns a URL where you can view your plot
 #' response <- py$plot(x, y)
 #' response$url  # view your plot at this URL
@@ -57,7 +57,7 @@
 
 
 plotly <- function(username=NULL, key=NULL) {
-  
+
   if (is.null(username)) {
     username <- get_credentials_file(c("username", "api_key"))$username
   }
@@ -71,18 +71,22 @@ To get started, save your plotly username and API key by calling:\n
 > set_credentials_file(UserName, ApiKey)\n
 For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   }
-  
+  if(is.null(get_credentials_file(c("plotly_rest_url"))$plotly_rest_url)) {
+    plotly_rest_url = "https://plot.ly"
+  } else{
+    plotly_rest_url = get_credentials_file(c("plotly_rest_url"))$plotly_rest_url
+  }
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
               version="0.4.0")
-  priv <- list()
-  
+  priv <- list(plotly_rest_url=plotly_rest_url)
+
   pub$makecall <- function(args, kwargs, origin) {
     if (is.null(kwargs$filename))
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
-    url <- "https://plot.ly/clientresp"
+    url <- paste(priv$plotly_rest_url, "/clientresp", sep="")
     options(RCurlOptions=list(sslversion=3,
                               cainfo=system.file("CurlSSL", "cacert.pem",
                                                  package="RCurl")))
@@ -136,19 +140,19 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                  "plotly-platform"="R")
     response_handler <- basicTextGatherer()
     header_handler <- basicTextGatherer()
-    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id,
+    curlPerform(url=paste(priv$plotly_rest_url, "apigetfile", file_owner, file_id,
                           sep="/"),
                 httpheader=headers,
                 writefunction=response_handler$update,
                 headerfunction=header_handler$update)
     resp_header <- as.list(parseHTTPHeader(header_handler$value()))
-    
+
     # Parse status
     if (resp_header$status != "200") {
       cat(resp_header$statusMsg)
       stop(resp_header$status)
     }
-    
+
     body_string <- response_handler$value()
     resp <- RJSONIO::fromJSON(body_string)
     if (!is.null(resp$error) && resp$error != "")
@@ -157,7 +161,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       cat(resp$warning)
     if (!is.null(resp$message) && resp$error != "")
       cat(resp$message)
-    
+
     resp$payload$figure
   }
   pub$iplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
