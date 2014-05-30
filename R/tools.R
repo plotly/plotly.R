@@ -63,25 +63,28 @@ show_credentials_file <- function(args=c()) {
 #' set_credentials_file("username", "api_key", list("foo", "bar))
 #' }
 set_credentials_file <- function(username="", api_key="",
-                                 stream_ids=list("", "")) {
+                                 stream_ids=list("", ""),
+                                 extra=list()) {
   credentials_data <- show_credentials_file()
-  new_credentials <- list()
   if (username != "") {
-    new_credentials$username <- username
-  } else {
-    new_credentials$username <- credentials_data$username
+    credentials_data$username <- username
   }
   if (api_key != "") {
-    new_credentials$api_key <- api_key
-  } else {
-    new_credentials$api_key <- credentials_data$api_key
+    credentials_data$api_key <- api_key
   }
   if (stream_ids[[1]] != "") {
-    new_credentials$stream_ids <- stream_ids
-  } else {
-    new_credentials$stream_ids <- credentials_data$stream_ids
+    credentials_data$stream_ids <- stream_ids
   }
-  writeLines(toJSON(new_credentials), CREDENTIALS_FILE)
-  print("Now,")
+
+  # Update credentials with extra
+  keys = unique(c(names(credentials_data), names(extra)))
+  # Replicating Python's dict update...
+  credentials_data <- as.list(setNames(mapply(function(...){tail(c(...),n=1)},
+                                              credentials_data[keys],
+                                              extra[keys]),
+                                       keys))
+
+  writeLines(toJSON(credentials_data), CREDENTIALS_FILE)
+
   show_credentials_file()
 }
