@@ -6,6 +6,11 @@
 ##' @export
 ##' @return list of geom info.
 ##' @author Toby Dylan Hocking
+
+## calc. the epoch
+now <- Sys.time()
+the.epoch <- now - as.numeric(now)
+
 group2NA <- function(g, geom){
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
@@ -233,7 +238,6 @@ gg2list <- function(p){
   p <- tryCatch({
     ## this will be an error for discrete variables.
     suppressMessages({
-      ggplot2::ggplot_build(p+scale_size_continuous())
       p+scale_size_identity()
     })
   },error=function(e){
@@ -257,6 +261,7 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
+  
   geom_type <- p$layers[[layer.i]]$geom
   geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
   geom_type <- strsplit(geom_type, ": ")[[1]]
@@ -326,10 +331,14 @@ gg2list <- function(p){
     gglayout <- built$panel$layout
     ## invert rows so that plotly and ggplot2 show panels in the same order
     gglayout$plotly.row <- max(gglayout$ROW) - gglayout$ROW + 1
-    ## Add ROW and COL to df: needed to link axes to traces
-    df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
-    ## This extracts essential info for this geom/layer.
     
+    ## Add ROW and COL to df: needed to link axes to traces; keep df's
+    ## original ordering while merging.
+    df$order <- seq_len(nrow(df))
+    df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
+    df <- df[order(df$order),]
+    df$order <- NULL
+    ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
     ## Do we really need to coord_transform?
@@ -432,8 +441,6 @@ gg2list <- function(p){
       col.size <- 1. / max(gglayout$COL)
       for (i in seq_len(nrow(gglayout)))
         {
-          panel <- as.numeric(gglayout[i, "PANEL"])
-          # invert rows so that plotly and ggplot2 show panels in the same order
           row <- gglayout[i, "plotly.row"] 
           col <- gglayout[i, "COL"] 
           x <- col * col.size
@@ -442,22 +449,14 @@ gg2list <- function(p){
           y <- row * row.size
           ymin <- y - row.size
           ymax <- y - inner.margin
-
-          if (panel == 1)
-            {
-              xaxis.name <- "xaxis"
-              yaxis.name <- "yaxis"
-            }
-          else
-            {
-              xaxis.name <- paste0("xaxis", col)
-              yaxis.name <- paste0("yaxis", row)
-            }
+          yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
+          xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
           layout[[xaxis.name]] <- orig.xaxis
           layout[[xaxis.name]]$domain <- c(xmin, xmax)
           layout[[xaxis.name]]$anchor <- "y"
           layout[[xaxis.name]]$title <- NULL
-          if (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_y")
+          if (orig.xaxis$type == "linear" && # range only makes sense for numeric data
+              (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_y"))
             {
               layout[[xaxis.name]]$range <- built$panel$ranges[[i]]$x.range
               layout[[xaxis.name]]$autorange <- FALSE
@@ -467,14 +466,14 @@ gg2list <- function(p){
           layout[[yaxis.name]]$domain <- c(ymin, ymax)
           layout[[yaxis.name]]$anchor <- "x"
           layout[[yaxis.name]]$title <- NULL
-          if (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_x")
+          if (orig.yaxis$type == "linear" && # range only makes sense for numeric data
+              (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_x"))
             {
               layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
               layout[[yaxis.name]]$autorange <- FALSE
             }
 
         }
-
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
@@ -535,8 +534,6 @@ gg2list <- function(p){
       nann <- nann + 1
       
       layout$annotations <- annotations
-
-    #  layout$showlegend <- FALSE
     }
   
   ## Remove legend if theme has no legend position
@@ -574,20 +571,29 @@ layer2traces <- function(l, d, misc){
 
   ## For non-numeric data on the axes, we should take the values from
   ## the original data.
-  for(axis.name in c("x", "y")){
-    if(!misc$is.continuous[[axis.name]]){
+  for (axis.name in c("x", "y")){
+    if (!misc$is.continuous[[axis.name]]){
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used){
         col.name <- g$aes[aes.used]
         data.vec <- l$data[[col.name]]
         if(inherits(data.vec, "POSIXt")){
-          data.vec <- strftime(data.vec, "%Y-%m-%d %H:%M:%S")
+          ## Re-create dates from nb. seconds
+          data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
+                               "%Y-%m-%d %H:%M:%S")
         }
+        else if(inherits(data.vec, "factor"))
+          {
+            ## Re-order data so that Plotly displays it in the same order as ggplot2.
+            g$data <- g$data[order(g$data[[a]]),]
+            data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
+          }
         g$data[[a]] <- data.vec
       }
     }
   }
+
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
@@ -659,6 +665,7 @@ layer2traces <- function(l, d, misc){
       })
     }
   }
+
   ## case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
@@ -674,7 +681,6 @@ layer2traces <- function(l, d, misc){
   }
   traces <- NULL
   names.in.legend <- NULL
-  
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
@@ -700,7 +706,7 @@ layer2traces <- function(l, d, misc){
 
     dpd <- data.params$data
     if ("PANEL" %in% names(dpd) && nrow(dpd) > 0 &&
-        as.numeric(dpd[1, "PANEL"]) > 1)
+        (as.numeric(dpd[1, "COL"]) > 1 || as.numeric(dpd[1, "plotly.row"]) > 1))
       {
         tr$xaxis <- paste0("x", dpd[1, "COL"])
         tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
