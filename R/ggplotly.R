@@ -274,6 +274,7 @@ gg2list <- function(p){
     stat_type <- strsplit(stat_type, ": ")[[1]]
     if (grepl("bin", stat_type)) {
       geom_type <- "histogram"
+      warning("You may want to use geom_histogram.")
     }
     pos <- capture.output(p$layers[[layer.i]]$position)
     if (grepl("identity", pos)) {
