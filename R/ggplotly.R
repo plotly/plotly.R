@@ -130,11 +130,15 @@ toBasic <-
     group2NA(g, "path")
   },
   histogram=function(g) {
+    bin_start <- min(g$data$xmin)
+    bin_end <- max(g$data$xmax)
     xdim <- g$aes
     x1 <- xdim[["x"]]
     g$data <- NULL
     g$data$x <- g$plot[[x1]]
     g$plot <- NULL
+    g$params$xstart <- bin_start
+    g$params$xend <- bin_end
     g
   },
   ribbon=function(g){
@@ -194,10 +198,13 @@ geom2trace <-
   },
   histogram=function(data, params) {
     list(x=data$x,
-         xbins=list(size=params$binwidth),
+         xbins=list(start=params$xstart,
+                    end=params$xend,
+                    size=params$binwidth),
          name=params$name,
          text=data$text,
-         type="histogram")
+         type="histogram",
+         autobinx=FALSE)
   }
   )
 
