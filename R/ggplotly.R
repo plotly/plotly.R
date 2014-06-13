@@ -132,10 +132,9 @@ toBasic <-
   histogram=function(g) {
     bin_start <- min(g$data$xmin)
     bin_end <- max(g$data$xmax)
-    xdim <- g$aes
-    x1 <- xdim[["x"]]
+    xdim <- g$aes[["x"]]
     g$data <- NULL
-    g$data$x <- g$plot[[x1]]
+    g$data$x <- g$plot[[xdim]]
     g$plot <- NULL
     g$params$xstart <- bin_start
     g$params$xend <- bin_end
