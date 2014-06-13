@@ -269,11 +269,11 @@ gg2list <- function(p){
   
   ## Barmode.
   layout$barmode <- "group"
-  if (geom_type == "bar") {
+  if (geom_type == "bar" || geom_type == "histogram") {
     stat_type <- capture.output(p$layers[[layer.i]]$stat)
     stat_type <- strsplit(stat_type, ": ")[[1]]
-    if (!grepl("identity", stat_type)) {
-      stop("Conversion not implemented for ", stat_type)
+    if (grepl("bin", stat_type)) {
+      geom_type <- "histogram"
     }
     pos <- capture.output(p$layers[[layer.i]]$position)
     if (grepl("identity", pos)) {
@@ -286,7 +286,7 @@ gg2list <- function(p){
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
   
-  if (geom_type == "histogram") {  # or "bar" with stat_bin
+  if (geom_type == "histogram") {
     # Need actual data (distribution)
     trace.list$plot <- built$plot$data
   }
@@ -471,6 +471,10 @@ layer2traces <- function(l, d, misc, plot=NULL){
         data.vec <- l$data[[col.name]]
         if(inherits(data.vec, "POSIXt")){
           data.vec <- strftime(data.vec, "%Y-%m-%d %H:%M:%S")
+        } else if (inherits(data.vec, "factor")) {
+          ## Re-order data so that Plotly gets it right from ggplot2.
+          g$data <- g$data[order(g$data[[a]]),]
+          data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
         }
         g$data[[a]] <- data.vec
       }
