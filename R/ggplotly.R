@@ -196,14 +196,20 @@ geom2trace <-
          line=paramORdefault(params, aes2line, line.defaults))
   },
   histogram=function(data, params) {
-    list(x=data$x,
-         xbins=list(start=params$xstart,
-                    end=params$xend,
-                    size=params$binwidth),
-         name=params$name,
-         text=data$text,
-         type="histogram",
-         autobinx=FALSE)
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              type="histogram",
+              fillcolor=toRGB(params$fill))
+    if (is.null(params$binwidth)) {
+      L$autobinx <- TRUE
+    } else {
+      L$autobinx <- FALSE
+      L$xbins=list(start=params$xstart,
+                   end=params$xend,
+                   size=params$binwidth)
+    }
+    L
   }
   )
 
@@ -220,7 +226,7 @@ markLegends <-
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("fill"),
        step=c("linetype", "size", "colour"),
-       histogram=c("colour"))
+       histogram=c("fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -262,10 +268,8 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
-  geom_type <- p$layers[[layer.i]]$geom
-  geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
-  geom_type <- strsplit(geom_type, ": ")[[1]]
   
+  geom_type <- p$layers[[layer.i]]$geom$objname
   ## Barmode.
   layout$barmode <- "group"
   if (geom_type == "bar" || geom_type == "histogram") {
@@ -273,6 +277,7 @@ gg2list <- function(p){
     stat_type <- strsplit(stat_type, ": ")[[1]]
     if (grepl("bin", stat_type)) {
       geom_type <- "histogram"
+      p$layers[[layer.i]]$geom$objname <- "histogram"
       warning("You may want to use geom_histogram.")
     }
     pos <- capture.output(p$layers[[layer.i]]$position)
