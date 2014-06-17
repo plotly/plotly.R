@@ -272,13 +272,15 @@ gg2list <- function(p){
   geom_type <- p$layers[[layer.i]]$geom$objname
   ## Barmode.
   layout$barmode <- "group"
-  if (geom_type == "bar" || geom_type == "histogram") {
+  if (geom_type == "bar") {
     stat_type <- capture.output(p$layers[[layer.i]]$stat)
     stat_type <- strsplit(stat_type, ": ")[[1]]
     if (grepl("bin", stat_type)) {
       geom_type <- "histogram"
       warning("You may want to use geom_histogram.")
     }
+  }
+  if (geom_type == "bar" || geom_type == "histogram") {
     pos <- capture.output(p$layers[[layer.i]]$position)
     if (grepl("identity", pos)) {
       layout$barmode <- "overlay"
