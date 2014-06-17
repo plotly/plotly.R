@@ -128,7 +128,19 @@ toBasic <-
   },line=function(g){
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
-  },ribbon=function(g){
+  },
+  histogram=function(g) {
+    bin_start <- min(g$data$xmin)
+    bin_end <- max(g$data$xmax)
+    xdim <- g$aes[["x"]]
+    g$data <- NULL
+    g$data$x <- g$plot[[xdim]]
+    g$plot <- NULL
+    g$params$xstart <- bin_start
+    g$params$xend <- bin_end
+    g
+  },
+  ribbon=function(g){
     stop("TODO")
   })
 
@@ -182,6 +194,22 @@ geom2trace <-
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
+  },
+  histogram=function(data, params) {
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              type="histogram",
+              fillcolor=toRGB(params$fill))
+    if (is.null(params$binwidth)) {
+      L$autobinx <- TRUE
+    } else {
+      L$autobinx <- FALSE
+      L$xbins=list(start=params$xstart,
+                   end=params$xend,
+                   size=params$binwidth)
+    }
+    L
   }
   )
 
@@ -197,7 +225,8 @@ markLegends <-
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("fill"),
-       step=c("linetype", "size", "colour"))
+       step=c("linetype", "size", "colour"),
+       histogram=c("colour", "fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -239,17 +268,19 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
-  geom_type <- p$layers[[layer.i]]$geom
-  geom_type <- strsplit(capture.output(geom_type), "geom_")[[1]][2]
-  geom_type <- strsplit(geom_type, ": ")[[1]]
+  
+  geom_type <- p$layers[[layer.i]]$geom$objname
   ## Barmode.
   layout$barmode <- "group"
   if (geom_type == "bar") {
     stat_type <- capture.output(p$layers[[layer.i]]$stat)
     stat_type <- strsplit(stat_type, ": ")[[1]]
-    if (!grepl("identity", stat_type)) {
-      stop("Conversion not implemented for ", stat_type)
+    if (grepl("bin", stat_type)) {
+      geom_type <- "histogram"
+      warning("You may want to use geom_histogram.")
     }
+  }
+  if (geom_type == "bar" || geom_type == "histogram") {
     pos <- capture.output(p$layers[[layer.i]]$position)
     if (grepl("identity", pos)) {
       layout$barmode <- "overlay"
@@ -260,6 +291,12 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot2::ggplot_build(p)
+  
+  if (geom_type == "histogram") {
+    # Need actual data (distribution)
+    trace.list$plot <- built$plot$data
+  }
+  
   ranges <- built$panel$ranges[[1]]
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
@@ -306,7 +343,7 @@ gg2list <- function(p){
     }
     
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc)
+    traces <- layer2traces(L, df, misc, trace.list$plot)
     
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -412,6 +449,7 @@ gg2list <- function(p){
   if(length(trace.list) == 1){
     stop("No exportable traces")
   }
+  trace.list$plot <- NULL
   trace.list
 }
 
@@ -421,9 +459,10 @@ gg2list <- function(p){
 #' @param misc named list.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, misc){
+layer2traces <- function(l, d, misc, plot=NULL){
   g <- list(geom=l$geom$objname,
-            data=d)
+            data=d,
+            plot=plot)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
@@ -438,6 +477,10 @@ layer2traces <- function(l, d, misc){
         data.vec <- l$data[[col.name]]
         if(inherits(data.vec, "POSIXt")){
           data.vec <- strftime(data.vec, "%Y-%m-%d %H:%M:%S")
+        } else if (inherits(data.vec, "factor")) {
+          ## Re-order data so that Plotly gets it right from ggplot2.
+          g$data <- g$data[order(g$data[[a]]),]
+          data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
         }
         g$data[[a]] <- data.vec
       }
@@ -532,9 +575,9 @@ layer2traces <- function(l, d, misc){
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
     tr <- do.call(getTrace, data.params)
-    for(v.name in c("x", "y")){
+    for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
-      if(is.na(vals[length(vals)])){
+      if (length(vals) > 0 && is.na(vals[length(vals)])) {
         tr[[v.name]] <- vals[-length(vals)]
       }
     }
