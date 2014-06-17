@@ -116,17 +116,18 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     args <- list(...)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
   }
-  pub$ggplotly <- function(gg=last_plot()){
+  pub$ggplotly <- function(gg=last_plot(), kwargs=list(filename=NULL,
+                                                       fileopt=NULL)) {
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
     pargs <- gg2list(gg)
     if(interactive()){ # we are on the command line.
-      resp <- do.call(pub$plotly, pargs)
+      resp <- do.call(pub$plotly, list(pargs, kwargs=kwargs))
       browseURL(resp$url)
       invisible(list(data=pargs, response=resp))
     }else{ # we are in knitr/RStudio.
-      do.call(pub$iplot, pargs)
+      do.call(pub$iplot, list(pargs, kwargs=kwargs))
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
