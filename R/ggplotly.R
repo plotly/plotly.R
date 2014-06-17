@@ -226,7 +226,7 @@ markLegends <-
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("fill"),
        step=c("linetype", "size", "colour"),
-       histogram=c("fill"))
+       histogram=c("colour", "fill"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
