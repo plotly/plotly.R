@@ -29,7 +29,7 @@ Find these examples and the code used to create them [here](https://plot.ly/api)
 Documentation and Feedback 
 -------------
 
-- Online documentation is available [here](https://plot.ly/api).
+- Online documentation is available [here](https://github.com/plotly/R-User-Guide#demos-for-ggplotly).
 
 - Have questions, thoughts, bugs to report, or suggestions? Contact feedback [at] plot [dot] ly, or connect with us on [Facebook](facebook.com/plotly), [Twitter](https://twitter.com/plotlygraphs), or [Google +](https://plus.google.com/+PlotLy).
 
