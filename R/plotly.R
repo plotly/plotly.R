@@ -123,11 +123,13 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }
     pargs <- gg2list(gg)
     if(interactive()){ # we are on the command line.
-      resp <- do.call(pub$plotly, list(pargs, kwargs=kwargs))
+      pargs$kwargs <- kwargs
+      resp <- do.call(pub$plotly, pargs)
       browseURL(resp$url)
       invisible(list(data=pargs, response=resp))
     }else{ # we are in knitr/RStudio.
-      do.call(pub$iplot, list(pargs, kwargs=kwargs))
+      pargs$kwargs <- kwargs
+      do.call(pub$iplot, pargs)
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
