@@ -122,13 +122,12 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       stop("gg must be a ggplot")
     }
     pargs <- gg2list(gg)
+    pargs$kwargs <- c(pargs$kwargs, kwargs)
     if(interactive()){ # we are on the command line.
-      pargs$kwargs <- kwargs
       resp <- do.call(pub$plotly, pargs)
       browseURL(resp$url)
       invisible(list(data=pargs, response=resp))
     }else{ # we are in knitr/RStudio.
-      pargs$kwargs <- kwargs
       do.call(pub$iplot, pargs)
     }
   }
