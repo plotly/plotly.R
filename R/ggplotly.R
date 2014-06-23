@@ -267,6 +267,7 @@ gg2list <- function(p){
   p <- tryCatch({
     ## this will be an error for discrete variables.
     suppressMessages({
+      ggplot2::ggplot_build(p+scale_size_continuous())
       p+scale_size_identity()
     })
   },error=function(e){
