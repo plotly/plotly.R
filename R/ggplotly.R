@@ -742,13 +742,12 @@ layer2traces <- function(l, d, misc, plot=NULL){
     }
 
     dpd <- data.params$data
-    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0 &&
-        (as.numeric(dpd[1, "COL"]) > 1 || as.numeric(dpd[1, "plotly.row"]) > 1))
+    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0)
       {
         tr$xaxis <- paste0("x", dpd[1, "COL"])
         tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
       }
-
+    
     if (is.null(tr$name) || tr$name %in% names.in.legend)
         tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
