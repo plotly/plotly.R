@@ -1,7 +1,5 @@
 context("Facets")
 
-require(lattice)
-
 test_that("6 facets becomes 6 panels", {
   gg <- qplot(yield, variety, data=barley, color=year, facets=site~., pch=I(1))+
     theme_bw()+
