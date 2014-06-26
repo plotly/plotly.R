@@ -56,7 +56,7 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL) {
+plotly <- function(username=NULL, key=NULL, base.url="https://plot.ly") {
   
   if (is.null(username)) {
     username <- get_credentials_file(c("username", "api_key"))$username
@@ -82,7 +82,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
-    url <- "https://plot.ly/clientresp"
+    url <- paste(base.url, "/clientresp", sep="")
     options(RCurlOptions=list(sslversion=3,
                               cainfo=system.file("CurlSSL", "cacert.pem",
                                                  package="RCurl")))
@@ -138,7 +138,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                  "plotly-platform"="R")
     response_handler <- basicTextGatherer()
     header_handler <- basicTextGatherer()
-    curlPerform(url=paste("https://plot.ly/apigetfile", file_owner, file_id,
+    curlPerform(url=paste(base.url, "apigetfile", file_owner, file_id,
                           sep="/"),
                 httpheader=headers,
                 writefunction=response_handler$update,
