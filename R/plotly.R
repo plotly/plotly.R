@@ -112,6 +112,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
             "\" frameBorder=\"0\"></iframe>", sep="")
     }
   }
+  
   pub$plotly <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     args <- list(...)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
@@ -128,7 +129,9 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       browseURL(resp$url)
       invisible(list(data=pargs, response=resp))
     }else{ # we are in knitr/RStudio.
-      do.call(pub$iplot, pargs)
+      # do.call(pub$iplot, pargs)
+      # we are in the IR notebook
+      do.call(pub$irplot, pargs)
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
@@ -170,6 +173,16 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       options[["url"]] <- r[["url"]]
       priv$plotly_hook(before, options, envir)
     })
+  }
+  pub$irplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
+    # Embed plotly graphs as iframes in IR notebooks
+    r <- pub$plotly(..., kwargs = kwargs)
+    print(r$url)
+    require(IRdisplay)
+    w <- "600"
+    h <- "600"
+    paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
+          r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
   }
   pub$embed <- function(url) {
     # knitr hook
