@@ -177,12 +177,12 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   pub$irplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     # Embed plotly graphs as iframes in IR notebooks
     r <- pub$plotly(..., kwargs = kwargs)
-    print(r$url)
-    require(IRdisplay)
     w <- "600"
     h <- "600"
-    paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
-          r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
+    html <- paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
+                  r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
+    require(IRdisplay)
+    display_html(html)
   }
   pub$embed <- function(url) {
     # knitr hook
