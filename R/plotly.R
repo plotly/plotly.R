@@ -82,10 +82,6 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
-    if (is.null(kwargs$width))
-      kwargs$width <- NULL
-    if (is.null(kwargs$height))
-      kwargs$height <- NULL
     url <- paste(base.url, "/clientresp", sep="")
     options(RCurlOptions=list(sslversion=3,
                               cainfo=system.file("CurlSSL", "cacert.pem",
@@ -184,8 +180,8 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                                           width=NULL, height=NULL)) {
     # Embed plotly graphs as iframes in IR notebooks
     r <- pub$plotly(..., kwargs=kwargs)
-    w <- if (is.null(kwargs$width)) "100%" else width
-    h <- if (is.null(kwargs$height)) "525" else height
+    w <- if (is.null(kwargs$width)) "100%" else kwargs$width
+    h <- if (is.null(kwargs$height)) "525" else kwargs$height
     html <- paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
                   r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
     require(IRdisplay)
