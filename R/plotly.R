@@ -177,9 +177,11 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     })
   }
   pub$irplot <- function(..., kwargs=list(filename=NULL, fileopt=NULL,
-                                          w=width, h=height)) {
+                                          width=width, height=height)) {
     # Embed plotly graphs as iframes in IR notebooks
     r <- pub$plotly(..., kwargs = kwargs)
+    w <- width
+    h <- height
     html <- paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
                   r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
     require(IRdisplay)
