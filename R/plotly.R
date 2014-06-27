@@ -118,7 +118,9 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
   }
   pub$ggplotly <- function(gg=last_plot(), kwargs=list(filename=NULL,
-                                                       fileopt=NULL)) {
+                                                       fileopt=NULL,
+                                                       width="100%",
+                                                       height=525)) {
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
@@ -174,11 +176,10 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       priv$plotly_hook(before, options, envir)
     })
   }
-  pub$irplot <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
+  pub$irplot <- function(..., kwargs=list(filename=NULL, fileopt=NULL,
+                                          w=width, h=height)) {
     # Embed plotly graphs as iframes in IR notebooks
     r <- pub$plotly(..., kwargs = kwargs)
-    w <- "600"
-    h <- "600"
     html <- paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
                   r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
     require(IRdisplay)
