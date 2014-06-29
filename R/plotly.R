@@ -133,7 +133,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }else{ # we are in knitr/RStudio.
       # do.call(pub$iplot, pargs)
       # we are in the IR notebook
-      do.call(pub$irplot, pargs)
+      resp <- do.call(pub$irplot, pargs)
       invisible(list(data=pargs, response=resp))
     }
   }
