@@ -134,6 +134,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       # do.call(pub$iplot, pargs)
       # we are in the IR notebook
       do.call(pub$irplot, pargs)
+      invisible(list(data=pargs, response=resp))
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
