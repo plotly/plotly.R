@@ -133,8 +133,8 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }else{ # we are in knitr/RStudio.
       # do.call(pub$iplot, pargs)
       # we are in the IR notebook
-      resp <- do.call(pub$irplot, pargs)
-      invisible(list(data=pargs, response=resp))
+      do.call(pub$irplot, pargs)
+      invisible(list(data=pargs))
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
