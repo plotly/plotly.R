@@ -112,12 +112,15 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
             "\" frameBorder=\"0\"></iframe>", sep="")
     }
   }
+  
   pub$plotly <- function(..., kwargs = list(filename = NULL, fileopt = NULL)) {
     args <- list(...)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "plot"))
   }
   pub$ggplotly <- function(gg=last_plot(), kwargs=list(filename=NULL,
-                                                       fileopt=NULL)) {
+                                                       fileopt=NULL,
+                                                       width=NULL,
+                                                       height=NULL)) {
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
@@ -129,6 +132,9 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       invisible(list(data=pargs, response=resp))
     }else{ # we are in knitr/RStudio.
       do.call(pub$iplot, pargs)
+      # we are in the IR notebook
+      # do.call(pub$irplot, pargs)
+      invisible(list(data=pargs))
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
@@ -170,6 +176,17 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       options[["url"]] <- r[["url"]]
       priv$plotly_hook(before, options, envir)
     })
+  }
+  pub$irplot <- function(..., kwargs=list(filename=NULL, fileopt=NULL,
+                                          width=NULL, height=NULL)) {
+    # Embed plotly graphs as iframes in IR notebooks
+    r <- pub$plotly(..., kwargs=kwargs)
+    w <- if (is.null(kwargs$width)) "100%" else kwargs$width
+    h <- if (is.null(kwargs$height)) "525" else kwargs$height
+    html <- paste("<iframe height=\"", h, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"", 
+                  r$url, "\" width=\"", w, "\" frameBorder=\"0\"></iframe>", sep="")
+    require(IRdisplay)
+    display_html(html)
   }
   pub$embed <- function(url) {
     # knitr hook
