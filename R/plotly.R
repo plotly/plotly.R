@@ -192,3 +192,20 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   class(pub) <- "PlotlyClass"
   return(pub)
 }
+
+
+
+update.plotly <- function()
+{
+  if (!require(devtools))
+  {
+    install.packages("devtools")
+    if (!require(devtools))
+      stop("Could not load package 'devtools' which is needed to update plotly.")
+  }
+  install_github("ropensci/plotly")
+  detach("package:plotly", unload=TRUE)
+  library(plotly)
+}
+
+
