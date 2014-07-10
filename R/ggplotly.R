@@ -314,7 +314,7 @@ gg2list <- function(p){
   }
   
   ## Extract data from built ggplots
-  built <- ggplot2::ggplot_build(p)
+  built <- ggplot2::ggplot_build(p, TRUE)
   if (geom_type == "histogram") {
     # Need actual data (distribution)
     trace.list$plot <- built$plot$data
