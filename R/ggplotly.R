@@ -574,7 +574,7 @@ gg2list <- function(p){
     }
   
   ## Remove legend if theme has no legend position
-  if(theme.pars$legend.position=="none") layout$showlegend <- FALSE
+  layout$showlegend <- !(theme.pars$legend.position=="none")
   
   ## Main plot title.
   layout$title <- built$plot$labels$title
