@@ -425,11 +425,9 @@ gg2list <- function(p){
     }
     theme2font <- function(text){
       if(!is.null(text)){
-        with(text, {
-          list(family=family,
-               size=size,
-               color=toRGB(colour))
-        })
+        list(family=text$family,
+             size=text$size,
+             color=toRGB(text$colour))
       }
     }
     ## Translate axes labels.
