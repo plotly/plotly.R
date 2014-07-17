@@ -403,8 +403,10 @@ gg2list <- function(p){
   e <- function(el.name){
     ggplot2::calc_element(el.name, p$theme)
   }
-  is.blank <- function(el.name){
-    "element_blank"%in%attr(e(el.name),"class")
+  is.blank <- function(el.name, null.is.blank=FALSE) {
+    ## NULL shows ticks and hides borders
+    cls <- attr(e(el.name),"class")
+    "element_blank" %in% cls || null.is.blank && is.null(cls)
   }
   for(xy in c("x","y")){
     ax.list <- list()
@@ -416,7 +418,7 @@ gg2list <- function(p){
     ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
     ax.list$tickwidth <- theme.pars$axis.ticks$size
     tick.text.name <- s("axis.text.%s")
-    ax.list$showticklabels <- ifelse(is.blank(tick.text.name), FALSE, TRUE)
+    ax.list$showticklabels <- !is.blank(tick.text.name)
     tick.text <- e(tick.text.name)
     ax.list$tickangle <- if(is.numeric(tick.text$angle)){
       -tick.text$angle
@@ -455,7 +457,7 @@ gg2list <- function(p){
       stop("unrecognized data type for ", xy, " axis")
     }
     ## Lines drawn around the plot border:
-    ax.list$showline <- ifelse(is.blank("panel.border"), FALSE, TRUE)
+    ax.list$showline <- !is.blank("panel.border", TRUE)
     ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
     ax.list$linewidth <- theme.pars$panel.border$size
     ## Some other params that we used in animint but we don't yet
