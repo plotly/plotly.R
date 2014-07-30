@@ -18,6 +18,7 @@
 #' @import RJSONIO
 #' @param username plotly username
 #' @param key plotly API key
+#' @param base.url plotly server
 #' 
 #' @return An object of class PlotlyClass, except for the final object after
 #' adding layers becomes a list class.
