@@ -125,7 +125,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       stop("gg must be a ggplot")
     }
     pargs <- gg2list(gg)
-    if (!length(kwargs$auto_open)) {
+    if (!"auto_open" %in% names(kwargs)) {
       kwargs <- c(kwargs, auto_open=TRUE)
     }
     pargs$kwargs <- c(pargs$kwargs, kwargs)
