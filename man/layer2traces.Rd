@@ -3,7 +3,7 @@
 \alias{layer2traces}
 \title{Convert a layer to a list of traces. Called from gg2list()}
 \usage{
-layer2traces(l, d, misc)
+layer2traces(l, d, misc, plot = NULL)
 }
 \arguments{
 \item{l}{one layer of the ggplot object}
