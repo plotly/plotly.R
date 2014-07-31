@@ -7,10 +7,6 @@
 ##' @return list of geom info.
 ##' @author Toby Dylan Hocking
 
-## calc. the epoch
-now <- Sys.time()
-the.epoch <- now - as.numeric(now)
-
 group2NA <- function(g, geom){
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
@@ -618,6 +614,8 @@ layer2traces <- function(l, d, misc, plot=NULL){
         col.name <- g$aes[aes.used]
         data.vec <- l$data[[col.name]]
         if (inherits(data.vec, "POSIXt")) {
+          ## calc. the epoch
+          the.epoch <- Sys.time() - as.numeric(Sys.time())
           ## Re-create dates from nb seconds
           data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
