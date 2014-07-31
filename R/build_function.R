@@ -1,7 +1,7 @@
 #' ggplot build function with enhanced return
 #'
 #' This function builds on top of ggplot2::ggplot_build by
-#' Hadley Wickham <h.wickham@gmail.com> and Winston Chang <winston@stdout.org>
+#' Hadley Wickham <h.wickham@@gmail.com> and Winston Chang <winston@@stdout.org>
 #' (http://ggplot2.org, https://github.com/hadley/ggplot2).
 #'
 #' @param plot ggplot2 plot
