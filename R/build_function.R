@@ -8,7 +8,7 @@
 #' @return List with (data, panel, plot, prestats.data) where prestats.data
 #' is the data as it is prior to calculate_stats() call
 #' @keywords internal
-ggplot_build2 <- function(plot) {
+make_ggplot_build2 <- function(plot) {
   # Get body of the original function, in list form
   ggplot_build2 <- ggplot2::ggplot_build
   g_b <- as.list(body(ggplot_build2))
@@ -28,4 +28,17 @@ ggplot_build2 <- function(plot) {
   # Assign the modified body back into the function
   body(ggplot_build2) <- as.call(g_b2)
   ggplot_build2(plot)
+}
+
+#' wrapper for build function
+#'
+#' It would be inefficient to perform each step found in make_ggplot_build2()
+#' every time we want to make use of its output.
+#'
+#' @param plot ggplot2 plot
+#' @return List with (data, panel, plot, prestats.data) where prestats.data
+#' is the data as it is prior to calculate_stats() call
+#' @keywords internal
+ggplot_build2 <- function(plot) {
+  make_ggplot_build2(plot)
 }
