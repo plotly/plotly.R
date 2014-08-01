@@ -84,13 +84,16 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
     url <- paste(base.url, "/clientresp", sep="")
-    options(RCurlOptions=list(sslversion=3,
-                              cainfo=system.file("CurlSSL", "cacert.pem",
-                                                 package="RCurl")))
-    respst <- postForm(url, platform="R", version=pub$version,
+
+    respst <- postForm(url, platform="R", version=pub$version, 
                        args=toJSON(args, collapse=""), un=pub$username,
                        key=pub$key, origin=origin,
-                       kwargs=toJSON(kwargs, collapse=""))
+                       kwargs=toJSON(kwargs, collapse=""),
+                       .opts=list(sslversion=3, cainfo=system.file("CurlSSL", "cacert.pem", package="RCurl")))
+    if (is.raw(respst)) {
+        respst <- rawToChar(respst)
+    }
+
     resp <- fromJSON(respst, simplify = FALSE)
     if (!is.null(resp$filename))
       pub$filename <- resp$filename
