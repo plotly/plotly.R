@@ -108,8 +108,8 @@ lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
 aesConverters <-
   list(linetype=function(lty){
-         lty2dash[as.character(lty)]
-       },
+    lty2dash[as.character(lty)]
+  },
        colour=function(col){
          toRGB(col)
        },
@@ -148,20 +148,20 @@ toBasic <-
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
-  histogram=function(g) {
-    bin_start <- min(g$data$xmin)
-    bin_end <- max(g$data$xmax)
-    xdim <- g$aes[["x"]]
-    g$data <- NULL
-    g$data$x <- g$plot[[xdim]]
-    g$plot <- NULL
-    g$params$xstart <- bin_start
-    g$params$xend <- bin_end
-    g
-  },
-  ribbon=function(g){
-    stop("TODO")
-  })
+       histogram=function(g) {
+         bin_start <- min(g$data$xmin)
+         bin_end <- max(g$data$xmax)
+         xdim <- g$aes[["x"]]
+         g$data <- NULL
+         g$data$x <- g$plot[[xdim]]
+         g$plot <- NULL
+         g$params$xstart <- bin_start
+         g$params$xend <- bin_end
+         g
+       },
+       ribbon=function(g){
+         stop("TODO")
+       })
 
 
 #' Convert basic geoms to traces.
@@ -200,38 +200,38 @@ geom2trace <-
     }
     L
   },
-  bar=function(data, params) {
-    list(x=data$x,
-         y=(data$y - data$ymin),
-         name=params$name,
-         text=data$text,
-         type="bar",
-         fillcolor=toRGB(params$fill))
-  },
-  step=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
-  },
-  histogram=function(data, params) {
-    L <- list(x=data$x,
+       bar=function(data, params) {
+         list(x=data$x,
+              y=(data$y - data$ymin),
               name=params$name,
               text=data$text,
-              type="histogram",
+              type="bar",
               fillcolor=toRGB(params$fill))
-    if (is.null(params$binwidth)) {
-      L$autobinx <- TRUE
-    } else {
-      L$autobinx <- FALSE
-      L$xbins=list(start=params$xstart,
-                   end=params$xend,
-                   size=params$binwidth)
-    }
-    L
-  }
+       },
+       step=function(data, params) {
+         list(x=data$x,
+              y=data$y,
+              name=params$name,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults))
+       },
+       histogram=function(data, params) {
+         L <- list(x=data$x,
+                   name=params$name,
+                   text=data$text,
+                   type="histogram",
+                   fillcolor=toRGB(params$fill))
+         if (is.null(params$binwidth)) {
+           L$autobinx <- TRUE
+         } else {
+           L$autobinx <- FALSE
+           L$xbins=list(start=params$xstart,
+                        end=params$xend,
+                        size=params$binwidth)
+         }
+         L
+       }
   )
 
 
@@ -243,7 +243,7 @@ aes2line <- c(linetype="dash",
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
-##  list(point=c("colour", "fill", "shape", "size"),
+  ##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
@@ -363,7 +363,7 @@ gg2list <- function(p){
         misc$breaks[[sc$aesthetics]] <- ranks
       }
     }
-
+    
     ## get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
     ## invert rows so that plotly and ggplot2 show panels in the same order
@@ -383,7 +383,7 @@ gg2list <- function(p){
     ##                                     built$panel$ranges[[1]])
     trace.list <- c(trace.list, traces)
   }
-
+  
   ## Export axis specification as a combination of breaks and labels, on
   ## the relevant axis scale (i.e. so that it can be passed into d3 on the
   ## x axis scale instead of on the grid 0-1 scale). This allows
@@ -464,7 +464,7 @@ gg2list <- function(p){
     !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-
+  
   ## copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title
   yaxis.title <- layout$yaxis$title
@@ -473,105 +473,105 @@ gg2list <- function(p){
   orig.xaxis <- layout$xaxis
   orig.yaxis <- layout$yaxis
   if (nrow(gglayout) > 1)
+  {
+    row.size <- 1. / max(gglayout$ROW)
+    col.size <- 1. / max(gglayout$COL)
+    for (i in seq_len(nrow(gglayout)))
     {
-      row.size <- 1. / max(gglayout$ROW)
-      col.size <- 1. / max(gglayout$COL)
-      for (i in seq_len(nrow(gglayout)))
-        {
-          row <- gglayout[i, "plotly.row"] 
-          col <- gglayout[i, "COL"] 
-          x <- col * col.size
-          xmin <- x - col.size
-          xmax <- x - inner.margin
-          y <- row * row.size
-          ymin <- y - row.size
-          ymax <- y - inner.margin
-          yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
-          xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
-          layout[[xaxis.name]] <- orig.xaxis
-          layout[[xaxis.name]]$domain <- c(xmin, xmax)
-          layout[[xaxis.name]]$anchor <- "y"
-          layout[[xaxis.name]]$title <- NULL
-          if (orig.xaxis$type == "linear" && # range only makes sense for numeric data
-              (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_y"))
-            {
-              layout[[xaxis.name]]$range <- built$panel$ranges[[i]]$x.range
-              layout[[xaxis.name]]$autorange <- FALSE
-            }
-
-          layout[[yaxis.name]] <- orig.yaxis
-          layout[[yaxis.name]]$domain <- c(ymin, ymax)
-          layout[[yaxis.name]]$anchor <- "x"
-          layout[[yaxis.name]]$title <- NULL
-          if (orig.yaxis$type == "linear" && # range only makes sense for numeric data
-              (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_x"))
-            {
-              layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
-              layout[[yaxis.name]]$autorange <- FALSE
-            }
-
-        }
-      ## add panel titles as annotations
-      annotations <- list()
-      nann <- 1
-      make.label <- function(text, x, y)
-        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+      row <- gglayout[i, "plotly.row"] 
+      col <- gglayout[i, "COL"] 
+      x <- col * col.size
+      xmin <- x - col.size
+      xmax <- x - inner.margin
+      y <- row * row.size
+      ymin <- y - row.size
+      ymax <- y - inner.margin
+      yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
+      xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
+      layout[[xaxis.name]] <- orig.xaxis
+      layout[[xaxis.name]]$domain <- c(xmin, xmax)
+      layout[[xaxis.name]]$anchor <- "y"
+      layout[[xaxis.name]]$title <- NULL
+      if (orig.xaxis$type == "linear" && # range only makes sense for numeric data
+            (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_y"))
+      {
+        layout[[xaxis.name]]$range <- built$panel$ranges[[i]]$x.range
+        layout[[xaxis.name]]$autorange <- FALSE
+      }
       
-      if ("grid" %in% class(p$facet))
-        {
-          frows <- names(p$facet$rows)
-          nann <- 1
-          
-          for (i in seq_len(max(gglayout$ROW)))
-            {
-              text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
-                                   as.character),
-                            collapse=", ")
-              annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
-              nann <- nann + 1
-            }
-          
-          fcols <- names(p$facet$cols)
-          for (i in seq_len(max(gglayout$COL)))
-            {
-              text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
-                                   as.character),
-                            collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
-              nann <- nann + 1
-            }
-
-          ## add empty traces everywhere so that the background shows even if there
-          ## is no data for a facet
-          for (r in seq_len(max(gglayout$ROW)))
-            for (c in seq_len(max(gglayout$COL)))
-              trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
-        }
-      else if ("wrap" %in% class(p$facet))
-        {
-          facets <- names(p$facet$facets)
-          for (i in seq_len(max(as.numeric(gglayout$PANEL))))
-            {
-              ix <- gglayout$PANEL == i
-              row <- gglayout$ROW[ix]
-              col <- gglayout$COL[ix]
-              text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
-                                   as.character),
-                            collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
-                                                row.size * (max(gglayout$ROW) - row + 1))
-              nann <- nann + 1
-            }
-          }
-
-      ## axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
-      nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
-      nann <- nann + 1
+      layout[[yaxis.name]] <- orig.yaxis
+      layout[[yaxis.name]]$domain <- c(ymin, ymax)
+      layout[[yaxis.name]]$anchor <- "x"
+      layout[[yaxis.name]]$title <- NULL
+      if (orig.yaxis$type == "linear" && # range only makes sense for numeric data
+            (is.null(p$facet$scales) || p$facet$scales == "fixed" || p$facet$scales == "free_x"))
+      {
+        layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
+        layout[[yaxis.name]]$autorange <- FALSE
+      }
       
-      layout$annotations <- annotations
     }
+    ## add panel titles as annotations
+    annotations <- list()
+    nann <- 1
+    make.label <- function(text, x, y)
+      list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+    
+    if ("grid" %in% class(p$facet))
+    {
+      frows <- names(p$facet$rows)
+      nann <- 1
+      
+      for (i in seq_len(max(gglayout$ROW)))
+      {
+        text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
+                             as.character),
+                      collapse=", ")
+        annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
+        nann <- nann + 1
+      }
+      
+      fcols <- names(p$facet$cols)
+      for (i in seq_len(max(gglayout$COL)))
+      {
+        text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
+                             as.character),
+                      collapse=", ")
+        annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
+        nann <- nann + 1
+      }
+      
+      ## add empty traces everywhere so that the background shows even if there
+      ## is no data for a facet
+      for (r in seq_len(max(gglayout$ROW)))
+        for (c in seq_len(max(gglayout$COL)))
+          trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
+    }
+    else if ("wrap" %in% class(p$facet))
+    {
+      facets <- names(p$facet$facets)
+      for (i in seq_len(max(as.numeric(gglayout$PANEL))))
+      {
+        ix <- gglayout$PANEL == i
+        row <- gglayout$ROW[ix]
+        col <- gglayout$COL[ix]
+        text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
+                             as.character),
+                      collapse=", ")
+        annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
+                                          row.size * (max(gglayout$ROW) - row + 1))
+        nann <- nann + 1
+      }
+    }
+    
+    ## axes titles
+    annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
+    nann <- nann + 1
+    annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
+    nann <- nann + 1
+    
+    layout$annotations <- annotations
+  }
   
   ## Remove legend if theme has no legend position
   layout$showlegend <- !(theme.pars$legend.position=="none")
@@ -630,7 +630,7 @@ layer2traces <- function(l, d, misc, plot=NULL){
       }
     }
   }
-
+  
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
@@ -702,7 +702,7 @@ layer2traces <- function(l, d, misc, plot=NULL){
       })
     }
   }
-
+  
   ## case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
@@ -740,21 +740,21 @@ layer2traces <- function(l, d, misc, plot=NULL){
       name.list <- data.params$params[name.names]
       tr$name <- paste(unlist(name.list), collapse=".")
     }
-
+    
     dpd <- data.params$data
     if ("PANEL" %in% names(dpd) && nrow(dpd) > 0)
-      {
-        tr$xaxis <- paste0("x", dpd[1, "COL"])
-        tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
-      }
+    {
+      tr$xaxis <- paste0("x", dpd[1, "COL"])
+      tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
+    }
     
     if (is.null(tr$name) || tr$name %in% names.in.legend)
-        tr$showlegend <- FALSE
+      tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
     
     traces <- c(traces, list(tr))
   }
-
+  
   sort.val <- sapply(traces, function(tr){
     rank.val <- unlist(tr$sort)
     if(is.null(rank.val)){
@@ -765,7 +765,7 @@ layer2traces <- function(l, d, misc, plot=NULL){
       0
     }
   })
-
+  
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){
