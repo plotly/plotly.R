@@ -7,7 +7,7 @@
 ##' @return list of geom info.
 ##' @author Toby Dylan Hocking
 
-## calc. the epoch
+## calculate the epoch
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
