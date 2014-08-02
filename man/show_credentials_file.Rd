@@ -6,7 +6,7 @@
 show_credentials_file(args = c())
 }
 \arguments{
-\item{args}{character vector of credentials}
+\item{Character}{vector of keys you are looking up}
 }
 \value{
 List of keyword-value pairs (credentials)
