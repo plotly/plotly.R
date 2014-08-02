@@ -46,7 +46,7 @@ get_credentials_file <- function(args=c()) {
 
 #' Read and print Plotly credentials file, wrapping get_credentials_file()
 #' @param args character vector of credentials
-#' @return print plotly user credentials data
+#' @return List of keyword-value pairs (credentials)
 #' @export
 show_credentials_file <- function(args=c()) {
   print("Your credentials file:")

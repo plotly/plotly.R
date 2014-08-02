@@ -9,7 +9,7 @@ show_credentials_file(args = c())
 \item{args}{character vector of credentials}
 }
 \value{
-print plotly user credentials data
+List of keyword-value pairs (credentials)
 }
 \description{
 Read and print Plotly credentials file, wrapping get_credentials_file()
