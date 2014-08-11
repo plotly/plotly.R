@@ -30,7 +30,6 @@ ensure_local_plotly_files_exist <- function() {
 #' get_credentials_file(c("username", "api_key"))
 #' }
 get_credentials_file <- function(args=c()) {
-  require(RJSONIO)
   ensure_local_plotly_files_exist()
   if (file.info(CREDENTIALS_FILE)$size) {
     credentials_data <- fromJSON(CREDENTIALS_FILE)
