@@ -1,3 +1,7 @@
+## calc. the epoch
+now <- Sys.time()
+the.epoch <- now - as.numeric(now)
+
 ##' Drawing ggplot2 geoms with a group aesthetic is most efficient in
 ##' plotly when we convert groups of things that look the same to
 ##' vectors with NA.
@@ -6,11 +10,6 @@
 ##' @export
 ##' @return list of geom info.
 ##' @author Toby Dylan Hocking
-
-## calc. the epoch
-now <- Sys.time()
-the.epoch <- now - as.numeric(now)
-
 group2NA <- function(g, geom){
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
