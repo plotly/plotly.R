@@ -10,6 +10,8 @@ layer2traces(l, d, misc, plot = NULL)
 
 \item{d}{one layer of calculated data from ggplot2::ggplot_build(p)}
 
+\item{plot}{one layer of plot data}
+
 \item{misc}{named list.}
 }
 \value{
