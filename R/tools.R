@@ -30,7 +30,6 @@ ensure_local_plotly_files_exist <- function() {
 #' get_credentials_file(c("username", "api_key"))
 #' }
 get_credentials_file <- function(args=c()) {
-  require(RJSONIO)
   ensure_local_plotly_files_exist()
   if (file.info(CREDENTIALS_FILE)$size) {
     credentials_data <- fromJSON(CREDENTIALS_FILE)
@@ -45,6 +44,8 @@ get_credentials_file <- function(args=c()) {
 
 
 #' Read and print Plotly credentials file, wrapping get_credentials_file()
+#' @param args Character vector of keys you are looking up
+#' @return List of keyword-value pairs (credentials)
 #' @export
 show_credentials_file <- function(args=c()) {
   print("Your credentials file:")
@@ -53,9 +54,9 @@ show_credentials_file <- function(args=c()) {
 
 
 #' Set the keyword-value pairs in Plotly credentials file
-#' @param username
-#' @param api_key
-#' @param stream_ids
+#' @param username plotly username
+#' @param api_key plotly API key
+#' @param stream_ids stream ids
 #' @return List of keyword-value pairs (credentials)
 #' @export
 #' @examples

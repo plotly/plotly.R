@@ -4,12 +4,12 @@
 \alias{geom2trace}
 \title{Convert basic geoms to traces.}
 \format{\preformatted{List of 6
- $ path     :function (data, params)
- $ polygon  :function (data, params)
- $ point    :function (data, params)
- $ bar      :function (data, params)
- $ step     :function (data, params)
- $ histogram:function (data, params)
+ $ path     :function (data, params)  
+ $ polygon  :function (data, params)  
+ $ point    :function (data, params)  
+ $ bar      :function (data, params)  
+ $ step     :function (data, params)  
+ $ histogram:function (data, params)  
 }}
 \usage{
 geom2trace
