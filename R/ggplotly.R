@@ -151,10 +151,6 @@ toBasic <-
     bin_start <- min(g$data$xmin)
     bin_end <- max(g$data$xmax)
     g$data <- g$prestats.data
-    # xdim <- g$aes[["x"]]
-    # g$data <- NULL
-    # g$data$x <- g$plot[[xdim]]
-    # g$plot <- NULL
     g$params$xstart <- bin_start
     g$params$xend <- bin_end
     g
@@ -267,7 +263,7 @@ gg2list <- function(p){
   p <- tryCatch({
     ## this will be an error for discrete variables.
     suppressMessages({
-      ggplot2::ggplot_build(p+scale_size_continuous())
+      ggplot_build(p+scale_size_continuous())
       p+scale_size_identity()
     })
   },error=function(e){
@@ -313,7 +309,6 @@ gg2list <- function(p){
   }
   
   ## Extract data from built ggplots
-#  built <- ggplot2::ggplot_build(p, TRUE)
   built <- ggplot_build2(p)
   if (geom_type == "histogram") {
     # Need actual data (distribution)
@@ -345,7 +340,7 @@ gg2list <- function(p){
           suppressMessages({
             with.scale <- p+fun()
           })
-          ggplot2::ggplot_build(with.scale)
+          ggplot_build(with.scale)
           TRUE
         }, error=function(e){
           FALSE
