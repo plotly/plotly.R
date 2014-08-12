@@ -8,6 +8,7 @@
 #' @return List with (data, panel, plot, prestats.data) where prestats.data
 #' is the data as it is prior to calculate_stats() call
 #' @keywords internal
+#' @export
 ggplot_build2 <- local({
   # Get body of the original function, in list form
   ggplot_build2 <- ggplot2::ggplot_build
