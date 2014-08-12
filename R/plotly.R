@@ -218,5 +218,3 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   class(pub) <- "PlotlyClass"
   return(pub)
 }
-
-
