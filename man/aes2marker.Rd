@@ -3,7 +3,7 @@
 \name{aes2marker}
 \alias{aes2marker}
 \title{Convert ggplot2 aes to plotly "marker" codes.}
-\format{\preformatted{ Named chr [1:6] "opacity" "color" "size" "sizeref" "sizemode" "symbol"
+\format{\preformatted{ Named chr [1:6] "opacity" "color" "size" "sizeref" "sizemode" ...
  - attr(*, "names")= chr [1:6] "alpha" "colour" "size" "sizeref" ...
 }}
 \usage{
