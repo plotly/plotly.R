@@ -150,10 +150,7 @@ toBasic <-
   histogram=function(g) {
     bin_start <- min(g$data$xmin)
     bin_end <- max(g$data$xmax)
-    xdim <- g$aes[["x"]]
-    g$data <- NULL
-    g$data$x <- g$plot[[xdim]]
-    g$plot <- NULL
+    g$data <- g$prestats.data
     g$params$xstart <- bin_start
     g$params$xend <- bin_end
     g
@@ -266,7 +263,7 @@ gg2list <- function(p){
   p <- tryCatch({
     ## this will be an error for discrete variables.
     suppressMessages({
-      ggplot2::ggplot_build(p+scale_size_continuous())
+      ggplot_build(p+scale_size_continuous())
       p+scale_size_identity()
     })
   },error=function(e){
@@ -312,8 +309,7 @@ gg2list <- function(p){
   }
   
   ## Extract data from built ggplots
-  built <- ggplot2::ggplot_build(p)
-  
+  built <- ggplot_build2(p)
   if (geom_type == "histogram") {
     # Need actual data (distribution)
     trace.list$plot <- built$plot$data
@@ -344,7 +340,7 @@ gg2list <- function(p){
           suppressMessages({
             with.scale <- p+fun()
           })
-          ggplot2::ggplot_build(with.scale)
+          ggplot_build(with.scale)
           TRUE
         }, error=function(e){
           FALSE
@@ -362,7 +358,7 @@ gg2list <- function(p){
         misc$breaks[[sc$aesthetics]] <- ranks
       }
     }
-
+    
     ## get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
     ## invert rows so that plotly and ggplot2 show panels in the same order
@@ -374,6 +370,9 @@ gg2list <- function(p){
     df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
     df <- df[order(df$order),]
     df$order <- NULL
+
+    misc$prestats.data <- merge(built$prestats.data[[i]], gglayout[,c("PANEL","plotly.row","COL")])
+
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc, trace.list$plot)
     
@@ -604,7 +603,8 @@ gg2list <- function(p){
 layer2traces <- function(l, d, misc, plot=NULL){
   g <- list(geom=l$geom$objname,
             data=d,
-            plot=plot)
+            plot=plot,
+            prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   
@@ -662,7 +662,7 @@ layer2traces <- function(l, d, misc, plot=NULL){
   
   ## symbol=circle,square,diamond,cross,x,
   ## triangle-up,triangle-down,triangle-left,triangle-right
-  
+
   ## First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
