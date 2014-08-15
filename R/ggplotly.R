@@ -227,6 +227,16 @@ geom2trace <-
                    size=params$binwidth)
     }
     L
+  },
+  tile=function(data, params) {
+    list(x=unique(data$x),
+         y=unique(data$y),
+         z=t(matrix(data$fill.name, nrow=length(unique(data$x)),
+                    ncol=length(unique(data$y)))),
+         name=params$name,
+         type="heatmap",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
   }
   )
 
