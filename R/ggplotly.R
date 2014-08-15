@@ -155,6 +155,10 @@ toBasic <-
     g$params$xend <- bin_end
     g
   },
+  boxplot=function(g) {
+    g$data <- g$prestats.data
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   })
@@ -237,6 +241,11 @@ geom2trace <-
          type="heatmap",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
+  },
+  boxplot=function(data, params) {
+    list(y=data$y,
+         name=params$name,
+         type="box")
   }
   )
 
@@ -255,7 +264,8 @@ markLegends <-
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("fill"),
        step=c("linetype", "size", "colour"),
-       histogram=c("colour", "fill"))
+       histogram=c("colour", "fill"),
+       boxplot=c("x"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
