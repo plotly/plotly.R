@@ -124,7 +124,8 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   pub$ggplotly <- function(gg=last_plot(), kwargs=list(filename=NULL,
                                                        fileopt=NULL,
                                                        width=NULL,
-                                                       height=NULL)) {
+                                                       height=NULL),
+                           session="interactive") {
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
@@ -133,17 +134,20 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs <- c(kwargs, auto_open=TRUE)
     }
     pargs$kwargs <- c(pargs$kwargs, kwargs)
-    if(interactive()){ # we are on the command line.
+    if (session == "interactive") {  # we are on the command line
       resp <- do.call(pub$plotly, pargs)
       if (pargs$kwargs$auto_open) {
         browseURL(resp$url)
       }
       invisible(list(data=pargs, response=resp))
-    }else{ # we are in knitr/RStudio.
-      do.call(pub$iplot, pargs)
-      # we are in the IR notebook
-      # do.call(pub$irplot, pargs)
+    } else if (session == "notebook") {  # we are in the IR notebook
+      do.call(pub$irplot, pargs)
       invisible(list(data=pargs))
+    } else if (session == "knitr") {  # we are in knitr/RStudio
+      do.call(pub$iplot, pargs)
+      invisible(list(data=pargs))
+    } else {
+      stop("Value of session can be: 'interactive', 'notebook', or 'knitr'.")
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
