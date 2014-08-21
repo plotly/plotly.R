@@ -140,14 +140,14 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
         browseURL(resp$url)
       }
       invisible(list(data=pargs, response=resp))
-    } else if (session == "ipynb") {  # we are in the IR notebook
+    } else if (session == "notebook") {  # we are in the IR notebook
       do.call(pub$irplot, pargs)
       invisible(list(data=pargs))
     } else if (session == "knitr") {  # we are in knitr/RStudio
       do.call(pub$iplot, pargs)
       invisible(list(data=pargs))
     } else {
-      stop("Value of session can be: 'interactive', 'ipynb', or 'knitr'.")
+      stop("Value of session can be: 'interactive', 'notebook', or 'knitr'.")
     }
   }
   pub$get_figure <- function(file_owner, file_id) {
