@@ -159,6 +159,10 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
+  contour=function(g) {
+    g$data <- g$prestats.data
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   })
@@ -246,6 +250,17 @@ geom2trace <-
     list(y=data$y,
          name=params$name,
          type="box")
+  },
+  contour=function(data, params) {
+    L <- list(x=unique(data$x),
+              y=unique(data$y),
+              z=t(matrix(data$z, nrow=length(unique(data$x)),
+                         ncol=length(unique(data$y)))),
+              name=params$name,
+              type="contour",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$contours=list(coloring="lines")
+    L
   }
   )
 
