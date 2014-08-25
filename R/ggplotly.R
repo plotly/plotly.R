@@ -261,6 +261,15 @@ geom2trace <-
               line=paramORdefault(params, aes2line, line.defaults))
     L$contours=list(coloring="lines")
     L
+  },
+  errorbar=function(data, params) {
+    list(error_y=list(arrayminus=data$y-data$ymin, array=data$ymax-data$y),
+         x=data$x,
+         y=data$y,
+         name=params$name,
+         type="scatter",
+         mode="markers", # invisible markers for error bars
+         marker=list(alpha=0, shape='x'))
   }
   )
 
