@@ -169,8 +169,8 @@ toBasic <-
 
 
 #' Convert basic geoms to traces.
-geom2trace <-
-  list(path=function(data, params){
+geom2trace <- list(
+  path=function(data, params){
     list(x=data$x,
          y=data$y,
          name=params$name,
