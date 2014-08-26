@@ -159,6 +159,10 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
+  bar=function(g) {
+    g$data <- g$prestats.data
+    g
+  },
   contour=function(g) {
     g$data <- g$prestats.data
     g
@@ -206,7 +210,7 @@ geom2trace <-
   },
   bar=function(data, params) {
     list(x=data$x,
-         y=(data$y - data$ymin),
+         y=data$y,
          name=params$name,
          text=data$text,
          type="bar",
