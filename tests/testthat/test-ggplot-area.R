@@ -10,6 +10,6 @@ L <- gg2list(ar)
 test_that("geom_area is translated to type=area", {
   expect_equal(length(L), 2)
   expect_identical(L[[1]]$type, "area")
-  expect_equal(L[[1]]$x, huron$year)
-  expect_equal(L[[1]]$y, huron$level)
+  expect_equal(L[[1]]$x, c(huron$year[1], huron$year, huron$year[length(huron$year)]))
+  expect_equal(L[[1]]$y, c(0, huron$level, 0))
 })
