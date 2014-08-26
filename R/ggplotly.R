@@ -163,6 +163,10 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
+  density2d=function(g) {
+    g$data <- g$prestats.data
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   })
