@@ -163,6 +163,9 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
+  area=function(g) {
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   })
