@@ -863,7 +863,3 @@ toRGB <- function(x){
   ifelse(is.na(x), "none", rgb.css)
 }
 
-#' Convert R position to plotly barmode
-position2barmode <- c("stack"="stack",
-                      "dodge"="group",
-                      "identity"="overlay")
