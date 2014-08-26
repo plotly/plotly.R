@@ -163,9 +163,6 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
-  density2d=function(g) {
-    g
-  },
   ribbon=function(g){
     stop("TODO")
   })
@@ -266,12 +263,10 @@ geom2trace <-
     L
   },
   density2d=function(data, params) {
-    L <- list(x=unique(data$x),
-              y=unique(data$y),
-              z=t(matrix(data$level, nrow=length(unique(data$x)),
-                         ncol=length(unique(data$y)))),
+    L <- list(x=data$x,
+              y=data$y,
               name=params$name,
-              type="contour",
+              type="histogram2dcontour",
               line=paramORdefault(params, aes2line, line.defaults))
     L$contours=list(coloring="lines")
     L
