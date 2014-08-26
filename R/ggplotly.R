@@ -163,14 +163,17 @@ toBasic <-
     g$data <- g$prestats.data
     g
   },
+  area=function(g) {
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   })
 
 
 #' Convert basic geoms to traces.
-geom2trace <-
-  list(path=function(data, params){
+geom2trace <- list(
+  path=function(data, params){
     list(x=data$x,
          y=data$y,
          name=params$name,
@@ -270,8 +273,15 @@ geom2trace <-
          type="scatter",
          mode="markers", # invisible markers for error bars
          marker=list(alpha=0, shape='x'))
+  },
+  area=function(data, params) {
+    list(x=c(data$x[1], data$x, tail(data$x, n=1)),
+         y=c(0, data$y, 0), 
+         name=params$name,
+         type="scatter",
+         fill="tonexty")
   }
-  )
+)
 
 
 #' Convert ggplot2 aes to line parameters.
