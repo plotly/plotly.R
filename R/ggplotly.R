@@ -274,6 +274,13 @@ geom2trace <-
          type="scatter",
          mode="markers", # invisible markers for error bars
          marker=list(alpha=0, shape='x'))
+  },
+  area=function(data, params) {
+    list(x=c(data$x[1], data$x, tail(data$x, n=1)),
+         y=c(0, data$y, 0), 
+         name=params$name,
+         type="scatter",
+         fill="tozeroy")
   }
   )
 
