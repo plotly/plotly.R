@@ -361,10 +361,6 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
-  if (geom_type == "histogram") {
-    # Need actual data (distribution)
-    trace.list$plot <- built$plot$data
-  }
   
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
