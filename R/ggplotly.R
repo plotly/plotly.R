@@ -641,21 +641,19 @@ gg2list <- function(p){
   if(length(trace.list) == 1){
     stop("No exportable traces")
   }
-  trace.list$plot <- NULL
+  
   trace.list
 }
 
 #' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
-#' @param plot one layer of plot data
 #' @param misc named list.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, misc, plot=NULL){
+layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=d,
-            plot=plot,
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
