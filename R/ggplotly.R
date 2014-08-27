@@ -121,8 +121,8 @@ aesConverters <-
        },
        direction=identity)
 
-toBasic <-
-  list(segment=function(g){
+toBasic <- list(
+  segment=function(g){
     ## Every row is one segment, we convert to a line with several
     ## groups which can be efficiently drawn by adding NA rows.
     g$data$group <- 1:nrow(g$data)
@@ -133,7 +133,8 @@ toBasic <-
             cbind(x=xend, y=yend, others))
     })
     group2NA(g, "path")
-  },polygon=function(g){
+  },
+  polygon=function(g){
     if(is.null(g$params$fill)){
       g
     }else if(is.na(g$params$fill)){
@@ -141,7 +142,8 @@ toBasic <-
     }else{
       g
     }
-  },path=function(g){
+  },
+  path=function(g){
     group2NA(g, "path")
   },line=function(g){
     g$data <- g$data[order(g$data$x),]
@@ -165,12 +167,13 @@ toBasic <-
   },
   ribbon=function(g){
     stop("TODO")
-  })
+  }
+)
 
 
 #' Convert basic geoms to traces.
-geom2trace <-
-  list(path=function(data, params){
+geom2trace <- list(
+  path=function(data, params){
     list(x=data$x,
          y=data$y,
          name=params$name,
@@ -178,7 +181,8 @@ geom2trace <-
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
-  },polygon=function(data, params){
+  },
+  polygon=function(data, params){
     list(x=c(data$x, data$x[1]),
          y=c(data$y, data$y[1]),
          name=params$name,
@@ -188,7 +192,8 @@ geom2trace <-
          line=paramORdefault(params, aes2line, line.defaults),
          fill="tonextx",
          fillcolor=toRGB(params$fill))
-  },point=function(data, params){
+  },
+  point=function(data, params){
     L <- list(x=data$x,
               y=data$y,
               name=params$name,
@@ -278,7 +283,7 @@ geom2trace <-
          type="scatter",
          fill="tozeroy")
   }
-  )
+)
 
 
 #' Convert ggplot2 aes to line parameters.
