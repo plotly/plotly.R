@@ -167,6 +167,7 @@ toBasic <- list(
   },
   density2d=function(g) {
     g$data <- g$prestats.data
+    g
   },
   abline=function(g) {
     g$params$xstart <- min(g$prestats.data$globxmin)
