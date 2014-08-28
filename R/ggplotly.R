@@ -426,7 +426,7 @@ gg2list <- function(p){
     misc$prestats.data <- merge(built$prestats.data[[i]], gglayout[,c("PANEL","plotly.row","COL")])
 
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc, trace.list$plot)
+    traces <- layer2traces(L, df, misc)
     
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
