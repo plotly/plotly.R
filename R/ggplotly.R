@@ -149,15 +149,14 @@ toBasic <- list(
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
-  histogram=function(g) {
-    bin_start <- min(g$data$xmin)
-    bin_end <- max(g$data$xmax)
+  boxplot=function(g) {
     g$data <- g$prestats.data
-    g$params$xstart <- bin_start
-    g$params$xend <- bin_end
     g
   },
-  boxplot=function(g) {
+  bar=function(g) {
+    g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
+    g$params$xstart <- min(g$data$xmin)
+    g$params$xend <- max(g$data$xmax)
     g$data <- g$prestats.data
     g
   },
@@ -219,12 +218,34 @@ geom2trace <- list(
     L
   },
   bar=function(data, params) {
-    list(x=data$x,
-         y=(data$y - data$ymin),
-         name=params$name,
-         text=data$text,
-         type="bar",
-         fillcolor=toRGB(params$fill))
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              marker=list(color=toRGB(params$fill)))
+
+    if (!is.null(params$colour)) {
+      L$marker$line <- list(color=toRGB(params$colour))
+      L$marker$line$width <- if (is.null(params$size)) 1 else params$size
+    }
+    
+    if (!is.null(params$alpha))
+      L$opacity <- params$alpha
+    
+    if (params$stat.type == "bin") {
+      L$type <- "histogram"
+      if (is.null(params$binwidth)) {
+        L$autobinx <- TRUE
+      } else {
+        L$autobinx <- FALSE
+        L$xbins=list(start=params$xstart,
+          end=params$xend,
+          size=params$binwidth)
+      }
+    } else {
+      L$y <- data$y
+      L$type <- "bar"
+    }
+    L
   },
   step=function(data, params) {
     list(x=data$x,
@@ -233,22 +254,6 @@ geom2trace <- list(
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
-  },
-  histogram=function(data, params) {
-    L <- list(x=data$x,
-              name=params$name,
-              text=data$text,
-              type="histogram",
-              fillcolor=toRGB(params$fill))
-    if (is.null(params$binwidth)) {
-      L$autobinx <- TRUE
-    } else {
-      L$autobinx <- FALSE
-      L$xbins=list(start=params$xstart,
-                   end=params$xend,
-                   size=params$binwidth)
-    }
-    L
   },
   tile=function(data, params) {
     list(x=unique(data$x),
@@ -325,9 +330,8 @@ markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill"),
+       bar=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       histogram=c("colour", "fill"),
        boxplot=c("x"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
@@ -358,7 +362,7 @@ gg2list <- function(p){
   ## figure out what the object group is later. This also copies any
   ## needed global aes/data values to each layer, so we do not have to
   ## worry about combining global and layer-specific aes/data later.
-  for(layer.i in seq_along(p$layers)){
+  for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
     to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
     layer.aes[to.copy] <- p$mapping[to.copy]
@@ -368,26 +372,6 @@ gg2list <- function(p){
     p$layers[[layer.i]]$mapping <- layer.aes
     if(!is.data.frame(p$layers[[layer.i]]$data)){
       p$layers[[layer.i]]$data <- p$data
-    }
-  }
-  
-  geom_type <- p$layers[[layer.i]]$geom$objname
-  ## Barmode.
-  layout$barmode <- "group"
-  if (geom_type == "bar") {
-    stat_type <- capture.output(p$layers[[layer.i]]$stat)
-    stat_type <- strsplit(stat_type, ": ")[[1]]
-    if (grepl("bin", stat_type)) {
-      geom_type <- "histogram"
-      warning("You may want to use geom_histogram.")
-    }
-  }
-  if (geom_type == "bar" || geom_type == "histogram") {
-    pos <- capture.output(p$layers[[layer.i]]$position)
-    if (grepl("identity", pos)) {
-      layout$barmode <- "overlay"
-    } else if (grepl("stack", pos)) {
-      layout$barmode <- "stack"
     }
   }
   
@@ -453,12 +437,12 @@ gg2list <- function(p){
     ## Add ROW and COL to df: needed to link axes to traces; keep df's
     ## original ordering while merging.
     df$order <- seq_len(nrow(df))
-    df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
+    df <- merge(df, gglayout[, c("PANEL", "plotly.row", "COL")])
     df <- df[order(df$order),]
     df$order <- NULL
 
     misc$prestats.data <- merge(built$prestats.data[[i]],
-                                gglayout[, c("PANEL","plotly.row","COL")])
+                                gglayout[, c("PANEL", "plotly.row", "COL")])
     
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
@@ -473,6 +457,17 @@ gg2list <- function(p){
     trace.list <- c(trace.list, traces)
   }
 
+  ## for barcharts, verify that all traces have the same barmode; we don't
+  ## support different barmodes on the same plot yet.
+  barmodes <- do.call(c, lapply(trace.list, function (x) x$barmode))
+  barmodes <- barmodes[!is.null(barmodes)]
+  if (length(barmodes) > 0) {    
+    layout$barmode <- barmodes[1]
+    if (!all(barmodes == barmodes[1]))
+      warning(paste0("You have multiple barcharts or histograms with different positions; ",
+                     "Plotly's layout barmode will be '", layout$barmode, "'."))
+  }
+  
   ## Export axis specification as a combination of breaks and labels, on
   ## the relevant axis scale (i.e. so that it can be passed into d3 on the
   ## x axis scale instead of on the grid 0-1 scale). This allows
@@ -696,7 +691,22 @@ layer2traces <- function(l, d, misc) {
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
-  
+
+  ## Barmode.
+  barmode <- "group"
+  if (g$geom == "bar" || g$geom == "histogram") {
+    if (l$stat$objname == "bin" && g$geom != "histogram") {
+      warning("You may want to use geom_histogram.")
+    }
+    g$geom <- "bar"  # histogram is just an alias for geom_bar + stat_bin
+    pos <- l$position$.super$objname
+    if (pos == "identity") {
+      barmode <- "overlay"
+    } else if (pos == "stack") {
+      barmode <- "stack"
+    }
+  }
+
   ## For non-numeric data on the axes, we should take the values from
   ## the original data.
   for (axis.name in c("x", "y")){
@@ -809,6 +819,7 @@ layer2traces <- function(l, d, misc) {
   names.in.legend <- NULL
   for(data.i in seq_along(data.list)){
     data.params <- data.list[[data.i]]
+    data.params$params$stat.type <- l$stat$objname
     tr <- do.call(getTrace, data.params)
     for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
@@ -841,6 +852,8 @@ layer2traces <- function(l, d, misc) {
         tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
     
+    if (g$geom == "bar")
+      tr$barmode <- barmode
     traces <- c(traces, list(tr))
   }
 
@@ -904,7 +917,3 @@ toRGB <- function(x){
   ifelse(is.na(x), "none", rgb.css)
 }
 
-#' Convert R position to plotly barmode
-position2barmode <- c("stack"="stack",
-                      "dodge"="group",
-                      "identity"="overlay")
