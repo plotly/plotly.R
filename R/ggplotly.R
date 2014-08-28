@@ -149,14 +149,6 @@ toBasic <- list(
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
-  # histogram=function(g) {
-  #   bin_start <- min(g$data$xmin)
-  #   bin_end <- max(g$data$xmax)
-  #   g$data <- g$prestats.data
-  #   g$params$xstart <- bin_start
-  #   g$params$xend <- bin_end
-  #   g
-  # },
   boxplot=function(g) {
     g$data <- g$prestats.data
     g
@@ -254,22 +246,6 @@ geom2trace <- list(
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
   },
-  # histogram=function(data, params) {
-  #   L <- list(x=data$x,
-  #             name=params$name,
-  #             text=data$text,
-  #             type="histogram",
-  #             fillcolor=toRGB(params$fill))
-  #   if (is.null(params$binwidth)) {
-  #     L$autobinx <- TRUE
-  #   } else {
-  #     L$autobinx <- FALSE
-  #     L$xbins=list(start=params$xstart,
-  #                  end=params$xend,
-  #                  size=params$binwidth)
-  #   }
-  #   L
-  # },
   tile=function(data, params) {
     list(x=unique(data$x),
          y=unique(data$y),
@@ -338,7 +314,6 @@ markLegends <-
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       #histogram=c("colour", "fill"),
        boxplot=c("x"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
@@ -381,34 +356,6 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
-#browser()  
-  # geom.type <- p$layers[[layer.i]]$geom$objname
-  # ## Barmode.
-  # layout$barmode <- "group"
-  # if (geom.type == "bar" || geom.type == "histogram") {
-  #   geom.type <- "bar" # histogram is just an alias for geom_bar + stat_bin
-  #   #stat_type <- capture.output(p$layers[[layer.i]]$stat)
-  #   stat.type <- p$layers[[layer.i]]$stat$objname #strsplit(stat_type, ": ")[[1]]
-  #   #if (grepl("bin", stat_type)) {
-  #   if (stat.type == "bin") {
-  #     #geom_type <- "histogram"
-  #     warning("You may want to use geom_histogram.")
-  #   }
-  #   pos <- p$layers[[layer.i]]$position$.super$objname
-  #   if (pos == "identity") {
-  #     layout$barmode <- "overlay"
-  #   } else if (pos == "stack") {
-  #     layout$barmode <- "stack"
-  #   }
-  # }
-  # if (geom.type == "bar" || geom.type == "histogram") {
-  #   #pos <- capture.output(p$layers[[layer.i]]$position)
-  #   if (grepl("identity", pos)) {
-  #     layout$barmode <- "overlay"
-  #   } else if (grepl("stack", pos)) {
-  #     layout$barmode <- "stack"
-  #   }
-  # }
   
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
