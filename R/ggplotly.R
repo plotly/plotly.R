@@ -165,6 +165,10 @@ toBasic <- list(
     g$data <- g$prestats.data
     g
   },
+  density2d=function(g) {
+    g$data <- g$prestats.data
+    g
+  },
   abline=function(g) {
     g$params$xstart <- min(g$prestats.data$globxmin)
     g$params$xend <- max(g$prestats.data$globxmax)
@@ -272,14 +276,23 @@ geom2trace <- list(
     L$contours=list(coloring="lines")
     L
   },
+  density2d=function(data, params) {
+    L <- list(x=data$x,
+              y=data$y,
+              name=params$name,
+              type="histogram2dcontour",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$contours=list(coloring="lines")
+    L
+  },
   errorbar=function(data, params) {
     list(error_y=list(arrayminus=data$y-data$ymin, array=data$ymax-data$y),
          x=data$x,
          y=data$y,
          name=params$name,
          type="scatter",
-         mode="markers", # invisible markers for error bars
-         marker=list(alpha=0, shape='x'))
+         mode="markers",  # invisible markers for error bars
+         marker=list(alpha=0, shape="x"))
   },
   area=function(data, params) {
     list(x=c(data$x[1], data$x, tail(data$x, n=1)),
