@@ -1,6 +1,9 @@
 [![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
 
 
+![](http://i.imgur.com/gp0muqe.gif)
+
+
 Interactive R and ggplot2 figures in your web browser
 ---
 
@@ -16,19 +19,12 @@ py <- plotly()
 py$ggplotly()
 ```
 
-![](http://i.imgur.com/gp0muqe.gif)
-
-[Click to view the interactive graph](https://plot.ly/~chris/2703)
 [![](https://plot.ly/~chris/2703.png)](https://plot.ly/~chris/2703)
+View the interactive version: [https://plot.ly/~chris/2703](https://plot.ly/~chris/2703)
 
-Installation
+
+[Get started](https://plot.ly/ggplot2/)
 -------------
-
-
-```coffee
-library(devtools)
-install_github("ropensci/plotly")
-```
 
 
 Learn More
