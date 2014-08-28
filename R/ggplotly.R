@@ -121,8 +121,8 @@ aesConverters <-
        },
        direction=identity)
 
-toBasic <-
-  list(segment=function(g){
+toBasic <- list(
+  segment=function(g){
     ## Every row is one segment, we convert to a line with several
     ## groups which can be efficiently drawn by adding NA rows.
     g$data$group <- 1:nrow(g$data)
@@ -133,7 +133,8 @@ toBasic <-
             cbind(x=xend, y=yend, others))
     })
     group2NA(g, "path")
-  },polygon=function(g){
+  },
+  polygon=function(g){
     if(is.null(g$params$fill)){
       g
     }else if(is.na(g$params$fill)){
@@ -141,7 +142,8 @@ toBasic <-
     }else{
       g
     }
-  },path=function(g){
+  },
+  path=function(g){
     group2NA(g, "path")
   },line=function(g){
     g$data <- g$data[order(g$data$x),]
@@ -165,16 +167,21 @@ toBasic <-
   },
   density2d=function(g) {
     g$data <- g$prestats.data
+  },
+  abline=function(g) {
+    g$params$xstart <- min(g$prestats.data$globxmin)
+    g$params$xend <- max(g$prestats.data$globxmax)
     g
   },
   ribbon=function(g){
     stop("TODO")
-  })
+  }
+)
 
 
 #' Convert basic geoms to traces.
-geom2trace <-
-  list(path=function(data, params){
+geom2trace <- list(
+  path=function(data, params){
     list(x=data$x,
          y=data$y,
          name=params$name,
@@ -182,7 +189,8 @@ geom2trace <-
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
-  },polygon=function(data, params){
+  },
+  polygon=function(data, params){
     list(x=c(data$x, data$x[1]),
          y=c(data$y, data$y[1]),
          name=params$name,
@@ -192,7 +200,8 @@ geom2trace <-
          line=paramORdefault(params, aes2line, line.defaults),
          fill="tonextx",
          fillcolor=toRGB(params$fill))
-  },point=function(data, params){
+  },
+  point=function(data, params){
     L <- list(x=data$x,
               y=data$y,
               name=params$name,
@@ -283,8 +292,24 @@ geom2trace <-
          type="scatter",
          mode="markers",  # invisible markers for error bars
          marker=list(alpha=0, shape="x"))
+  },
+  area=function(data, params) {
+    list(x=c(data$x[1], data$x, tail(data$x, n=1)),
+         y=c(0, data$y, 0), 
+         name=params$name,
+         type="scatter",
+         fill="tozeroy")
+  },
+  abline=function(data, params) {
+    list(x=c(params$xstart, params$xend),
+         y=c(params$intercept + params$xstart * params$slope,
+             params$intercept + params$xend * params$slope),
+      name=params$name,
+      type="scatter",
+      mode="lines",
+      line=paramORdefault(params, aes2line, line.defaults))
   }
-  )
+)
 
 
 #' Convert ggplot2 aes to line parameters.
@@ -367,10 +392,13 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
-  if (geom_type == "histogram") {
-    # Need actual data (distribution)
-    trace.list$plot <- built$plot$data
-  }
+  
+  # Get global x-range now because we need some of its info in layer2traces
+  ggranges <- built$panel$ranges
+  # Extract x.range
+  xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
+  ggxmin <- min(sapply(xrange, min))
+  ggxmax <- max(sapply(xrange, max))
   
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
@@ -428,10 +456,15 @@ gg2list <- function(p){
     df <- df[order(df$order),]
     df$order <- NULL
 
-    misc$prestats.data <- merge(built$prestats.data[[i]], gglayout[,c("PANEL","plotly.row","COL")])
+    misc$prestats.data <- merge(built$prestats.data[[i]],
+                                gglayout[, c("PANEL","plotly.row","COL")])
+    
+    # Add global x-range info
+    misc$prestats.data$globxmin <- ggxmin
+    misc$prestats.data$globxmax <- ggxmax
 
     ## This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc, trace.list$plot)
+    traces <- layer2traces(L, df, misc)
     
     ## Do we really need to coord_transform?
     ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -646,21 +679,19 @@ gg2list <- function(p){
   if(length(trace.list) == 1){
     stop("No exportable traces")
   }
-  trace.list$plot <- NULL
+  
   trace.list
 }
 
 #' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
-#' @param plot one layer of plot data
 #' @param misc named list.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
-layer2traces <- function(l, d, misc, plot=NULL){
+layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=d,
-            plot=plot,
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
