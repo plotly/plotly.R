@@ -20,7 +20,7 @@ py$ggplotly()
 ```
 
 [![](https://plot.ly/~chris/2703.png)](https://plot.ly/~chris/2703)
-View the interactive version: [https://plot.ly/~chris/2703](https://plot.ly/~chris/2703)
+Interact with the Plotly figure: [https://plot.ly/~chris/2703](https://plot.ly/~chris/2703)
 
 
 [Get started](https://plot.ly/ggplot2/)
