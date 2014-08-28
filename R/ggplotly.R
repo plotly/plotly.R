@@ -165,6 +165,11 @@ toBasic <- list(
     g$data <- g$prestats.data
     g
   },
+  abline=function(g) {
+    g$params$xstart <- min(g$prestats.data$globxmin)
+    g$params$xend <- max(g$prestats.data$globxmax)
+    g
+  },
   ribbon=function(g){
     stop("TODO")
   }
@@ -282,6 +287,15 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          fill="tozeroy")
+  },
+  abline=function(data, params) {
+    list(x=c(params$xstart, params$xend),
+         y=c(params$intercept + params$xstart * params$slope,
+             params$intercept + params$xend * params$slope),
+      name=params$name,
+      type="scatter",
+      mode="lines",
+      line=paramORdefault(params, aes2line, line.defaults))
   }
 )
 
@@ -367,6 +381,13 @@ gg2list <- function(p){
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
   
+  # Get global x-range now because we need some of its info in layer2traces
+  ggranges <- built$panel$ranges
+  # Extract x.range
+  xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
+  ggxmin <- min(sapply(xrange, min))
+  ggxmax <- max(sapply(xrange, max))
+  
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
@@ -423,7 +444,12 @@ gg2list <- function(p){
     df <- df[order(df$order),]
     df$order <- NULL
 
-    misc$prestats.data <- merge(built$prestats.data[[i]], gglayout[,c("PANEL","plotly.row","COL")])
+    misc$prestats.data <- merge(built$prestats.data[[i]],
+                                gglayout[, c("PANEL","plotly.row","COL")])
+    
+    # Add global x-range info
+    misc$prestats.data$globxmin <- ggxmin
+    misc$prestats.data$globxmax <- ggxmax
 
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
