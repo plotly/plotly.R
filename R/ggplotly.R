@@ -154,7 +154,7 @@ toBasic <- list(
     g
   },
   bar=function(g) {
-    g$prestats.data$fill <- g$data$fill[g$prestats.data$group %in% g$data$group]
+    g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
     g$params$xstart <- min(g$data$xmin)
     g$params$xend <- max(g$data$xmax)
     g$data <- g$prestats.data
@@ -214,12 +214,21 @@ geom2trace <- list(
     L
   },
   bar=function(data, params) {
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              marker=list(color=toRGB(params$fill)))
+
+    if (!is.null(params$colour)) {
+      L$marker$line <- list(color=toRGB(params$colour))
+      L$marker$line$width <- if (is.null(params$size)) 1 else params$size
+    }
+    
+    if (!is.null(params$alpha))
+      L$opacity <- params$alpha
+    
     if (params$stat.type == "bin") {
-      L <- list(x=data$x,
-                name=params$name,
-                text=data$text,
-                type="histogram",
-                fillcolor=toRGB(params$fill))
+      L$type <- "histogram"
       if (is.null(params$binwidth)) {
         L$autobinx <- TRUE
       } else {
@@ -228,15 +237,11 @@ geom2trace <- list(
           end=params$xend,
           size=params$binwidth)
       }
-      L
+    } else {
+      L$y <- data$y
+      L$type <- "bar"
     }
-    else
-      list(x=data$x, 
-           y=data$y,
-           name=params$name,
-           text=data$text,
-           type="bar",
-           fillcolor=toRGB(params$fill))
+    L
   },
   step=function(data, params) {
     list(x=data$x,
@@ -419,12 +424,12 @@ gg2list <- function(p){
     ## Add ROW and COL to df: needed to link axes to traces; keep df's
     ## original ordering while merging.
     df$order <- seq_len(nrow(df))
-    df <- merge(df, gglayout[,c("PANEL","plotly.row","COL")])
+    df <- merge(df, gglayout[, c("PANEL", "plotly.row", "COL")])
     df <- df[order(df$order),]
     df$order <- NULL
 
     misc$prestats.data <- merge(built$prestats.data[[i]],
-                                gglayout[, c("PANEL","plotly.row","COL")])
+                                gglayout[, c("PANEL", "plotly.row", "COL")])
     
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
@@ -446,8 +451,8 @@ gg2list <- function(p){
   if (length(barmodes) > 0) {    
     layout$barmode <- barmodes[1]
     if (!all(barmodes == barmodes[1]))
-      warning(paste("You have multiple barcharts or histograms with different positions; ",
-                    "Plotly's layout barmode will be '", layout$barmode, "'.", sep=""))
+      warning(paste0("You have multiple barcharts or histograms with different positions; ",
+                     "Plotly's layout barmode will be '", layout$barmode, "'."))
   }
   
   ## Export axis specification as a combination of breaks and labels, on
@@ -677,10 +682,10 @@ layer2traces <- function(l, d, misc) {
   ## Barmode.
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
-    if (l$stat$objname == "bin" && g$geom == "histogram") {
+    if (l$stat$objname == "bin" && g$geom != "histogram") {
       warning("You may want to use geom_histogram.")
     }
-    g$geom <- "bar" # histogram is just an alias for geom_bar + stat_bin
+    g$geom <- "bar"  # histogram is just an alias for geom_bar + stat_bin
     pos <- l$position$.super$objname
     if (pos == "identity") {
       barmode <- "overlay"
