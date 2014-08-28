@@ -147,19 +147,21 @@ toBasic <-
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
-  histogram=function(g) {
-    bin_start <- min(g$data$xmin)
-    bin_end <- max(g$data$xmax)
-    g$data <- g$prestats.data
-    g$params$xstart <- bin_start
-    g$params$xend <- bin_end
-    g
-  },
+  # histogram=function(g) {
+  #   bin_start <- min(g$data$xmin)
+  #   bin_end <- max(g$data$xmax)
+  #   g$data <- g$prestats.data
+  #   g$params$xstart <- bin_start
+  #   g$params$xend <- bin_end
+  #   g
+  # },
   boxplot=function(g) {
     g$data <- g$prestats.data
     g
   },
-  bar=function(g) {
+       bar=function(g) {
+#         browser()
+    g$prestats.data$fill <- g$data$fill[g$prestats.data$group %in% g$data$group]
     g$data <- g$prestats.data
     g
   },
@@ -224,22 +226,22 @@ geom2trace <-
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
   },
-  histogram=function(data, params) {
-    L <- list(x=data$x,
-              name=params$name,
-              text=data$text,
-              type="histogram",
-              fillcolor=toRGB(params$fill))
-    if (is.null(params$binwidth)) {
-      L$autobinx <- TRUE
-    } else {
-      L$autobinx <- FALSE
-      L$xbins=list(start=params$xstart,
-                   end=params$xend,
-                   size=params$binwidth)
-    }
-    L
-  },
+  # histogram=function(data, params) {
+  #   L <- list(x=data$x,
+  #             name=params$name,
+  #             text=data$text,
+  #             type="histogram",
+  #             fillcolor=toRGB(params$fill))
+  #   if (is.null(params$binwidth)) {
+  #     L$autobinx <- TRUE
+  #   } else {
+  #     L$autobinx <- FALSE
+  #     L$xbins=list(start=params$xstart,
+  #                  end=params$xend,
+  #                  size=params$binwidth)
+  #   }
+  #   L
+  # },
   tile=function(data, params) {
     list(x=unique(data$x),
          y=unique(data$y),
@@ -297,9 +299,9 @@ markLegends <-
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
-       bar=c("fill"),
+       bar=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       histogram=c("colour", "fill"),
+       #histogram=c("colour", "fill"),
        boxplot=c("x"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
@@ -330,7 +332,7 @@ gg2list <- function(p){
   ## figure out what the object group is later. This also copies any
   ## needed global aes/data values to each layer, so we do not have to
   ## worry about combining global and layer-specific aes/data later.
-  for(layer.i in seq_along(p$layers)){
+  for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
     to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
     layer.aes[to.copy] <- p$mapping[to.copy]
@@ -342,33 +344,41 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
-  
-  geom_type <- p$layers[[layer.i]]$geom$objname
-  ## Barmode.
-  layout$barmode <- "group"
-  if (geom_type == "bar") {
-    stat_type <- capture.output(p$layers[[layer.i]]$stat)
-    stat_type <- strsplit(stat_type, ": ")[[1]]
-    if (grepl("bin", stat_type)) {
-      geom_type <- "histogram"
-      warning("You may want to use geom_histogram.")
-    }
-  }
-  if (geom_type == "bar" || geom_type == "histogram") {
-    pos <- capture.output(p$layers[[layer.i]]$position)
-    if (grepl("identity", pos)) {
-      layout$barmode <- "overlay"
-    } else if (grepl("stack", pos)) {
-      layout$barmode <- "stack"
-    }
-  }
+#browser()  
+  # geom.type <- p$layers[[layer.i]]$geom$objname
+  # ## Barmode.
+  # layout$barmode <- "group"
+  # if (geom.type == "bar" || geom.type == "histogram") {
+  #   geom.type <- "bar" # histogram is just an alias for geom_bar + stat_bin
+  #   #stat_type <- capture.output(p$layers[[layer.i]]$stat)
+  #   stat.type <- p$layers[[layer.i]]$stat$objname #strsplit(stat_type, ": ")[[1]]
+  #   #if (grepl("bin", stat_type)) {
+  #   if (stat.type == "bin") {
+  #     #geom_type <- "histogram"
+  #     warning("You may want to use geom_histogram.")
+  #   }
+  #   pos <- p$layers[[layer.i]]$position$.super$objname
+  #   if (pos == "identity") {
+  #     layout$barmode <- "overlay"
+  #   } else if (pos == "stack") {
+  #     layout$barmode <- "stack"
+  #   }
+  # }
+  # if (geom.type == "bar" || geom.type == "histogram") {
+  #   #pos <- capture.output(p$layers[[layer.i]]$position)
+  #   if (grepl("identity", pos)) {
+  #     layout$barmode <- "overlay"
+  #   } else if (grepl("stack", pos)) {
+  #     layout$barmode <- "stack"
+  #   }
+  # }
   
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
-  if (geom_type == "histogram") {
-    # Need actual data (distribution)
-    trace.list$plot <- built$plot$data
-  }
+  # if (geom_type == "histogram") {
+  #   # Need actual data (distribution)
+  #   trace.list$plot <- built$plot$data
+  # }
   
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
@@ -437,6 +447,17 @@ gg2list <- function(p){
     trace.list <- c(trace.list, traces)
   }
 
+  ## for barcharts, verify that all traces have the same barmode; we don't
+  ## support different barmodes on the same plot yet.
+  barmodes <- do.call(c, lapply(trace.list, function (x) x$barmode))
+  barmodes <- barmodes[!is.null(barmodes)]
+  if (length(barmodes) > 0) {    
+    layout$barmode <- barmodes[1]
+    if (!all(barmodes == barmodes[1]))
+      warning(paste("You have multiple barcharts or histograms with different positions; ",
+                    "Plotly's layout barmode will be '", layout$barmode, "'.", sep=""))
+  }
+  
   ## Export axis specification as a combination of breaks and labels, on
   ## the relevant axis scale (i.e. so that it can be passed into d3 on the
   ## x axis scale instead of on the grid 0-1 scale). This allows
@@ -656,13 +677,30 @@ gg2list <- function(p){
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc, plot=NULL){
+#  browser()
   g <- list(geom=l$geom$objname,
             data=d,
             plot=plot,
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
-  
+
+  ## Barmode.
+  barmode <- "group"
+  if (g$geom == "bar" || g$geom == "histogram") {
+    g$geom <- "bar" # histogram is just an alias for geom_bar + stat_bin
+    stat.type <- l$stat$objname #strsplit(stat_type, ": ")[[1]]
+    if (stat.type == "bin") {
+      warning("You may want to use geom_histogram.")
+    }
+    pos <- l$position$.super$objname
+    if (pos == "identity") {
+      barmode <- "overlay"
+    } else if (pos == "stack") {
+      barmode <- "stack"
+    }
+  }
+
   ## For non-numeric data on the axes, we should take the values from
   ## the original data.
   for (axis.name in c("x", "y")){
@@ -807,6 +845,8 @@ layer2traces <- function(l, d, misc, plot=NULL){
         tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
     
+    if (g$geom == "bar")
+      tr$barmode <- barmode
     traces <- c(traces, list(tr))
   }
 
