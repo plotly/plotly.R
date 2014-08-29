@@ -3,6 +3,7 @@
 
 PLOTLY_DIR <- file.path(path.expand("~"), ".plotly")
 CREDENTIALS_FILE <- file.path(PLOTLY_DIR, ".credentials")
+CONFIG_FILE <- file.path(PLOTLY_DIR, ".config")
 # PLOT_OPTIONS_FILE <- file.path(PLOTLY_DIR, ".plot_options")
 # THEMES_FILE <- file.path(PLOTLY_DIR, ".themes")
 
@@ -85,4 +86,76 @@ set_credentials_file <- function(username="", api_key="",
   writeLines(toJSON(new_credentials), CREDENTIALS_FILE)
   print("Now,")
   show_credentials_file()
+}
+
+
+### Config Tools ###
+
+#' Read Plotly config file (which is a JSON) and create one if nonexistent
+#' @param args Character vector of keys you are looking up
+#' @return List of keyword-value pairs (config)
+#' @examples
+#' \dontrun{
+#' get_config_file(c("plotly_domain", "plotly_streaming_domain"))
+#' }
+get_config_file <- function(args=c()) {
+  if (!file.exists(CONFIG_FILE)) {
+    file.create(CONFIG_FILE)
+  }
+  if (file.info(CONFIG_FILE)$size) {
+    config_data <- fromJSON(CONFIG_FILE)
+    if (!is.null(args)) {
+      config_data <- config_data[args]
+    }
+  } else {
+    config_data <- NULL
+  }
+  return(as.list(config_data))
+}
+
+
+#' Read and print Plotly config file, wrapping get_credentials_file()
+#' @param args Character vector of keys you are looking up
+#' @return List of keyword-value pairs (credentials)
+#' @export
+show_config_file <- function(args=c()) {
+  print("Your config file:")
+  print(get_config_file(args))
+}
+
+
+
+settings = get_config_file()
+if isinstance(plotly_domain, six.string_types):
+  settings['plotly_domain'] = plotly_domain
+if isinstance(plotly_streaming_domain, six.string_types):
+  settings['plotly_streaming_domain'] = plotly_streaming_domain
+utils.save_json_dict(CONFIG_FILE, settings)
+ensure_local_plotly_files() # make sure what we just put there is OK
+
+#' Set keyword-value pairs in Plotly config file
+#' @param plotly_domain plotly domain
+#' @param plotly_streaming_domain plotly streaming domain
+#' @return List of keyword-value pairs (config)
+#' @export
+#' @examples
+#' \dontrun{
+#' set_config_file("https://kitty.plot.ly", "stream.kitty.plot.ly")
+#' }
+set_config_file <- function(plotly_domain="", plotly_streaming_domain="") {
+  config_data <- show_config_file()
+  new_config <- list()
+  if (plotly_domain != "") {
+    new_config$plotly_domain <- plotly_domain
+  } else {
+    new_config$plotly_domain <- "https://plot.ly"
+  }
+  if (plotly_streaming_domain != "") {
+    new_config$plotly_streaming_domain <- plotly_streaming_domain
+  } else {
+    new_config$plotly_streaming_domain <- "stream.plot.ly"
+  }
+  writeLines(toJSON(new_config), CONFIG_FILE)
+  print("Now,")
+  show_config_file()
 }
