@@ -124,15 +124,6 @@ show_config_file <- function(args=c()) {
 }
 
 
-
-settings = get_config_file()
-if isinstance(plotly_domain, six.string_types):
-  settings['plotly_domain'] = plotly_domain
-if isinstance(plotly_streaming_domain, six.string_types):
-  settings['plotly_streaming_domain'] = plotly_streaming_domain
-utils.save_json_dict(CONFIG_FILE, settings)
-ensure_local_plotly_files() # make sure what we just put there is OK
-
 #' Set keyword-value pairs in Plotly config file
 #' @param plotly_domain plotly domain
 #' @param plotly_streaming_domain plotly streaming domain
