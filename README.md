@@ -38,7 +38,7 @@ Learn More
 Stay in touch
 ---
 - <feedback@plot.ly>
-- [@plotlygraphs](twitter.com/plotlygraphs)
+- [@plotlygraphs](https://twitter.com/plotlygraphs)
 
 
 ---
