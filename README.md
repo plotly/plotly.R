@@ -29,7 +29,7 @@ Interact with the Plotly figure: [https://plot.ly/~chris/2703](https://plot.ly/~
 
 Learn More
 ---
-- [Getting started with ggplot2 and plotly](https://plot.ly/ggplot2/)
+- [Getting started with ggplot2 and plotly](https://plot.ly/ggplot2/getting-started/)
 - [A Brief Introduction to Plotly « Bad Hessian](http://badhessian.org/2014/08/a-brief-introduction-to-plotly/)
 - [Plot with ggplot2, interact, collaborate, and share online « Bayesian Biologist](http://bayesianbiologist.com/2014/07/31/plot-with-ggplot2-interact-collaborate-and-share-online/)
 - [A Rosetta Stone for R, ggplot2, Python, MATLAB, and Excel Plotting](http://nbviewer.ipython.org/gist/msund/61cdbd5b22c103fffb84)
