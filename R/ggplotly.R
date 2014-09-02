@@ -570,6 +570,8 @@ gg2list <- function(p){
           y <- row * row.size
           ymin <- y - row.size
           ymax <- y - inner.margin
+          if ("wrap" %in% class(p$facet))
+            ymax <- ymax - 0.04
           yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
           xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
           layout[[xaxis.name]] <- orig.xaxis
@@ -598,8 +600,10 @@ gg2list <- function(p){
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
-      make.label <- function(text, x, y)
-        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+      make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
+        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
+             xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
+             textangle=textangle)
       
       if ("grid" %in% class(p$facet))
         {
@@ -611,8 +615,15 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
-              nann <- nann + 1
+              if (text != "") {  # to not create extra annotations
+                increase_margin_r <- TRUE
+                annotations[[nann]] <- make.label(text,
+                                                  1 + outer.margin - 0.04,
+                                                  row.size * (max(gglayout$ROW)-i+0.5),
+                                                  xanchor="center",
+                                                  textangle=90)
+                nann <- nann + 1
+              }
             }
           
           fcols <- names(p$facet$cols)
@@ -621,8 +632,12 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
-              nann <- nann + 1
+              if (text!="") {
+                annotations[[nann]] <- make.label(text,
+                                                  col.size * (i-0.5) - inner.margin/2,
+                                                  1 + outer.margin)
+                nann <- nann + 1
+              }
             }
 
           ## add empty traces everywhere so that the background shows even if there
@@ -642,16 +657,24 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
-                                                row.size * (max(gglayout$ROW) - row + 1))
+              annotations[[nann]] <- make.label(text, 
+                                                col.size * (col-0.5) - inner.margin/2,
+                                                row.size * (max(gglayout$ROW) - row + 0.985),
+                                                yanchor="top")
               nann <- nann + 1
             }
           }
 
       ## axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
+      annotations[[nann]] <- make.label(xaxis.title, 
+                                        0.5, 
+                                        -outer.margin,
+                                        yanchor="top")
       nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
+      annotations[[nann]] <- make.label(yaxis.title, 
+                                        -outer.margin, 
+                                        0.5,
+                                        textangle=-90)
       nann <- nann + 1
       
       layout$annotations <- annotations
@@ -669,6 +692,9 @@ gg2list <- function(p){
   
   ## Legend.
   layout$margin$r <- 10
+  if (exists("increase_margin_r")) {
+    layout$margin$r <- 60
+  }
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
   trace.list$kwargs <- list(layout=layout)
