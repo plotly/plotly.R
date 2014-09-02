@@ -570,6 +570,8 @@ gg2list <- function(p){
           y <- row * row.size
           ymin <- y - row.size
           ymax <- y - inner.margin
+          if ("wrap" %in% class(p$facet))
+            ymax <- ymax - 0.04
           yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
           xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
           layout[[xaxis.name]] <- orig.xaxis
@@ -598,8 +600,9 @@ gg2list <- function(p){
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
-      make.label <- function(text, x, y)
-        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+      make.label <- function(text, x, y, yanchor="auto")
+        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
+             xref="paper", yref="paper", yanchor=yanchor)
       
       if ("grid" %in% class(p$facet))
         {
@@ -642,8 +645,10 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
-                                                row.size * (max(gglayout$ROW) - row + 1))
+              annotations[[nann]] <- make.label(text, 
+                                                col.size * (col-0.5) - inner.margin/2,
+                                                row.size * (max(gglayout$ROW) - row + 0.985),
+                                                yanchor="top")
               nann <- nann + 1
             }
           }
