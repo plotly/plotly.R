@@ -676,7 +676,7 @@ gg2list <- function(p){
       annotations[[nann]] <- make.label(yaxis.title, 
                                         -outer.margin, 
                                         0.5,
-                                        textangle=-90")
+                                        textangle=-90)
       nann <- nann + 1
       
       layout$annotations <- annotations
