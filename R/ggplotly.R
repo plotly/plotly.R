@@ -615,7 +615,7 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              if (text!="") {  # to not create extra annotations
+              if (text != "") {  # to not create extra annotations
                 increase_margin_r <- TRUE
                 annotations[[nann]] <- make.label(text,
                                                   1 + outer.margin - 0.04,
