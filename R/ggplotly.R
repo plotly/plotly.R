@@ -615,8 +615,8 @@ gg2list <- function(p){
                                    as.character),
                             collapse=", ")
               if (text!="") {  # to not create extra annotations
-                annotations[[nann]] <- make.label(text, 
-                                                  1 + outer.margin, 
+                annotations[[nann]] <- make.label(text,
+                                                  1 + outer.margin,
                                                   row.size * (max(gglayout$ROW)-i+0.5))
                 nann <- nann + 1
               }
@@ -628,8 +628,12 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
-              nann <- nann + 1
+              if (text!="") {
+                annotations[[nann]] <- make.label(text,
+                                                  col.size * (i-0.5) - inner.margin/2,
+                                                  1 + outer.margin)
+                nann <- nann + 1
+              }
             }
 
           ## add empty traces everywhere so that the background shows even if there
