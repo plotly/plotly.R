@@ -487,8 +487,19 @@ gg2list <- function(p){
                      "Plotly's layout barmode will be '", layout$barmode, "'."))
   }
   
-  ## Bar Gap for histograms should be 0
-  # layout$bargap <- 0
+  # Bar Gap for histograms should be 0
+  bargaps <- do.call(c, lapply(trace.list, function (x) x$bargap))
+  if (length(bargaps) > 0) {
+    if (any(bargaps == 0)) {
+      layout$bargap <- 0
+      if (!all(bargaps == 0)) {
+        warning("You have multiple bar charts and histograms;\n
+              Plotly's layout bargap will be 0 for all of them.")
+      }
+    } else {
+      bargaps <- NULL  # Do not specify anything
+    }
+  }
   
   ## Export axis specification as a combination of breaks and labels, on
   ## the relevant axis scale (i.e. so that it can be passed into d3 on the
@@ -714,11 +725,16 @@ layer2traces <- function(l, d, misc) {
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
 
-  ## Barmode.
+  ## Barmode and bargap
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
-    if (l$stat$objname == "bin" && g$geom != "histogram") {
-      warning("You may want to use geom_histogram.")
+    if (l$stat$objname == "bin") {
+      bargap <- 0
+      if (g$geom != "histogram") {
+        warning("You may want to use geom_histogram.")
+      }
+    } else {
+      bargap <- "default"
     }
     g$geom <- "bar"  # histogram is just an alias for geom_bar + stat_bin
     pos <- l$position$.super$objname
@@ -727,6 +743,9 @@ layer2traces <- function(l, d, misc) {
     } else if (pos == "stack") {
       barmode <- "stack"
     }
+  }
+  if (g$geom == "density") {
+    bargap <- 0
   }
 
   ## For non-numeric data on the axes, we should take the values from
@@ -876,8 +895,14 @@ layer2traces <- function(l, d, misc) {
     
     if (g$geom == "bar")
       tr$barmode <- barmode
+    
+    # Bar Gap
+    if (exists("bargap")) {
+      tr$bargap <- bargap
+    }
     traces <- c(traces, list(tr))
   }
+  
 
   sort.val <- sapply(traces, function(tr){
     rank.val <- unlist(tr$sort)
