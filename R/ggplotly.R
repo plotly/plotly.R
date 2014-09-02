@@ -164,6 +164,13 @@ toBasic <- list(
     g$data <- g$prestats.data
     g
   },
+  density=function(g) {
+    g$params$xstart <- min(g$data$x)
+    g$params$xend <- max(g$data$x)
+    g$params$binwidth <- (max(g$data$x) - min(g$data$x))/30
+    g$data <- g$prestats.data
+    g
+  },
   density2d=function(g) {
     g$data <- g$prestats.data
     g
@@ -280,6 +287,18 @@ geom2trace <- list(
               line=paramORdefault(params, aes2line, line.defaults))
     L$contours=list(coloring="lines")
     L
+  },
+  density=function(data, params) {
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              marker=list(color=toRGB(params$fill)),
+              type="histogram",
+              autobinx=FALSE,
+              xbins=list(start=params$xstart,
+                         end=params$xend,
+                         size=params$binwidth),
+              histnorm="probability density")
   },
   density2d=function(data, params) {
     L <- list(x=data$x,
@@ -467,6 +486,9 @@ gg2list <- function(p){
       warning(paste0("You have multiple barcharts or histograms with different positions; ",
                      "Plotly's layout barmode will be '", layout$barmode, "'."))
   }
+  
+  ## Bar Gap for histograms should be 0
+  # layout$bargap <- 0
   
   ## Export axis specification as a combination of breaks and labels, on
   ## the relevant axis scale (i.e. so that it can be passed into d3 on the
