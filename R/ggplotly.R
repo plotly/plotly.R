@@ -600,9 +600,10 @@ gg2list <- function(p){
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
-      make.label <- function(text, x, y, yanchor="auto", textangle=0)
+      make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
         list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
-             xref="paper", yref="paper", yanchor=yanchor, textangle=textangle)
+             xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
+             textangle=textangle)
       
       if ("grid" %in% class(p$facet))
         {
@@ -615,9 +616,11 @@ gg2list <- function(p){
                                    as.character),
                             collapse=", ")
               if (text!="") {  # to not create extra annotations
+                increase_margin_r <- TRUE
                 annotations[[nann]] <- make.label(text,
-                                                  1 + outer.margin,
+                                                  1 + outer.margin - 0.04,
                                                   row.size * (max(gglayout$ROW)-i+0.5),
+                                                  xanchor="center",
                                                   textangle=90)
                 nann <- nann + 1
               }
@@ -688,6 +691,9 @@ gg2list <- function(p){
   
   ## Legend.
   layout$margin$r <- 10
+  if (exists("increase_margin_r")) {
+    layout$margin$r <- 60
+  }
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
   trace.list$kwargs <- list(layout=layout)
