@@ -600,9 +600,9 @@ gg2list <- function(p){
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
-      make.label <- function(text, x, y, yanchor="auto")
+      make.label <- function(text, x, y, yanchor="auto", textangle=0)
         list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
-             xref="paper", yref="paper", yanchor=yanchor)
+             xref="paper", yref="paper", yanchor=yanchor, textangle=textangle)
       
       if ("grid" %in% class(p$facet))
         {
@@ -662,9 +662,14 @@ gg2list <- function(p){
           }
 
       ## axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
+      annotations[[nann]] <- make.label(xaxis.title, 
+                                        0.5, 
+                                        -outer.margin)
       nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
+      annotations[[nann]] <- make.label(yaxis.title, 
+                                        -outer.margin, 
+                                        0.5,
+                                        textangle=-90)
       nann <- nann + 1
       
       layout$annotations <- annotations
