@@ -668,7 +668,8 @@ gg2list <- function(p){
       ## axes titles
       annotations[[nann]] <- make.label(xaxis.title, 
                                         0.5, 
-                                        -outer.margin)
+                                        -outer.margin,
+                                        yanchor="top")
       nann <- nann + 1
       annotations[[nann]] <- make.label(yaxis.title, 
                                         -outer.margin, 
