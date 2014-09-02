@@ -635,7 +635,8 @@ gg2list <- function(p){
               if (text!="") {
                 annotations[[nann]] <- make.label(text,
                                                   col.size * (i-0.5) - inner.margin/2,
-                                                  1 + outer.margin)
+                                                  1 + outer.margin,
+                                                  xanchor="center")
                 nann <- nann + 1
               }
             }
@@ -660,6 +661,7 @@ gg2list <- function(p){
               annotations[[nann]] <- make.label(text, 
                                                 col.size * (col-0.5) - inner.margin/2,
                                                 row.size * (max(gglayout$ROW) - row + 0.985),
+                                                xanchor="center",
                                                 yanchor="top")
               nann <- nann + 1
             }
@@ -674,7 +676,7 @@ gg2list <- function(p){
       annotations[[nann]] <- make.label(yaxis.title, 
                                         -outer.margin, 
                                         0.5,
-                                        textangle=-90)
+                                        textangle=-90")
       nann <- nann + 1
       
       layout$annotations <- annotations
