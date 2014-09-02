@@ -614,8 +614,12 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
-              nann <- nann + 1
+              if (text!="") {  # to not create extra annotations
+                annotations[[nann]] <- make.label(text, 
+                                                  1 + outer.margin, 
+                                                  row.size * (max(gglayout$ROW)-i+0.5))
+                nann <- nann + 1
+              }
             }
           
           fcols <- names(p$facet$cols)
