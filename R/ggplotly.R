@@ -291,13 +291,18 @@ geom2trace <- list(
     L
   },
   errorbar=function(data, params) {
-    list(error_y=list(arrayminus=data$y-data$ymin, array=data$ymax-data$y),
-         x=data$x,
+    list(x=data$x,
          y=data$y,
-         name=params$name,
-         type="scatter",
-         mode="markers",  # invisible markers for error bars
-         marker=list(alpha=0, shape="x"))
+         error_y=list(arrayminus=data$y-data$ymin,
+                      array=data$ymax-data$y,
+                      color=toRGB(data$colour)))
+  },
+  errorbarh=function(data, params) {
+    list(x=data$x,
+         y=data$y,
+         error_x=list(arrayminus=data$x-data$xmin,
+                      array=data$xmax-data$x,
+                      color=toRGB(data$colour)))
   },
   area=function(data, params) {
     list(x=c(data$x[1], data$x, tail(data$x, n=1)),
@@ -451,10 +456,29 @@ gg2list <- function(p){
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    ## Do we really need to coord_transform?
-    ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-    ##                                     built$panel$ranges[[1]])
-    trace.list <- c(trace.list, traces)
+    # Associate error bars with previous traces
+    if (grepl("errorbar", L$geom$objname)) {
+      for (j in 1:length(trace.list)) {
+        temp <- list()
+        ind <- traces[[1]]$x %in% trace.list[[j]]$x
+        only_ind <- function(x) x[ind]
+        if ("errorbarh" %in% L$geom$objname) {
+          temp <- lapply(traces[[1]]$error_x, only_ind)
+          # Colour of error bar has to be one string
+          if (length(temp$color) > 1) temp$color <- temp$color[1]
+          trace.list[[j]]["error_x"] <- list(temp)
+        } else {
+          temp <- lapply(traces[[1]]$error_y, only_ind)
+          if (length(temp$color) > 1) temp$color <- temp$color[1]
+          trace.list[[j]]["error_y"] <- list(temp)
+        }
+      }
+    } else {
+      # Do we really need to coord_transform?
+      # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
+      #                                     built$panel$ranges[[1]])
+      trace.list <- c(trace.list, traces)
+    }
   }
 
   ## for barcharts, verify that all traces have the same barmode; we don't
