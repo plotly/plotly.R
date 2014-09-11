@@ -145,7 +145,8 @@ toBasic <- list(
   },
   path=function(g){
     group2NA(g, "path")
-  },line=function(g){
+  },
+  line=function(g){
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
@@ -743,6 +744,13 @@ layer2traces <- function(l, d, misc) {
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
+  
+  # Partial conversion for geom_violin (Plotly does not offer KDE yet)
+  if (g$geom == "violin") {
+    g$geom <- "boxplot"
+    warning("Converting violin plot into boxplot:\n
+            probability density estimation is not supported in Plotly yet.")
+  }
 
   ## Barmode.
   barmode <- "group"
