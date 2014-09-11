@@ -13,3 +13,17 @@ test_that("geom_boxplot gives a boxplot", {
   expect_identical(sort(L[[1]]$y),
                    sort(mtcars$mpg[mtcars$cyl == 4]))
 })
+
+test_that("geom_violin is equated to geom_boxplot for now", {
+  gg <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_violin()
+  
+  L <- gg2list(gg)
+  
+  # right nb. traces
+  expect_equal(length(L), 4)
+  # right type for 1st trace
+  expect_identical(L[[1]]$type, "box")
+  # right data for 1st trace
+  expect_identical(sort(L[[1]]$y),
+                   sort(mtcars$mpg[mtcars$cyl == 4]))
+})
