@@ -364,6 +364,14 @@ gg2list <- function(p){
   })
   layout <- list()
   trace.list <- list()
+  
+  # Convert Date objects into POSIXct objects if any
+  for (i in seq_along(names(p$data))) {
+    if (inherits(p$data[[i]], "Date")) {
+      p$data[[i]] <- as.POSIXct(as.character(p$data[[i]]))
+    }
+  }
+  
   ## Before building the ggplot, we would like to add aes(name) to
   ## figure out what the object group is later. This also copies any
   ## needed global aes/data values to each layer, so we do not have to

@@ -15,3 +15,14 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
     expect_identical(trace$x, out.str)
   }
 })
+
+test_that("Class Date is supported", {
+  df <- data.frame(x=c("2013-01-01", "2013-01-02", "2013-01-03"),
+                   y=c(2, 3, 2.5))
+  df$x <- as.Date(df$x)
+  gg <- ggplot(df) + geom_line(aes(x=x, y=y))
+  info <- gg2list(gg)
+  expect_equal(length(info), 2)
+  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(info[[1]]$x[1], "2013-01-01 00:00:00")
+})
