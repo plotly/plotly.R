@@ -365,13 +365,6 @@ gg2list <- function(p){
   layout <- list()
   trace.list <- list()
   
-  # Convert Date objects into POSIXct objects if any
-  for (i in seq_along(names(p$data))) {
-    if (inherits(p$data[[i]], "Date")) {
-      p$data[[i]] <- as.POSIXct(as.character(p$data[[i]]))
-    }
-  }
-  
   ## Before building the ggplot, we would like to add aes(name) to
   ## figure out what the object group is later. This also copies any
   ## needed global aes/data values to each layer, so we do not have to
@@ -787,6 +780,10 @@ layer2traces <- function(l, d, misc) {
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
           data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
+                               "%Y-%m-%d %H:%M:%S")
+        } else if (inherits(data.vec, "Date")) {
+          ## Re-create dates from nb days
+          data.vec <- strftime(as.Date(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
           ## Re-order data so that Plotly gets it right from ggplot2.
