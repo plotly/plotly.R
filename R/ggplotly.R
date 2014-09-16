@@ -774,34 +774,38 @@ layer2traces <- function(l, d, misc) {
     if (!misc$is.continuous[[axis.name]]){
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
-      for(a in aes.used){
+      for(a in aes.used) {
         col.name <- g$aes[aes.used]
         data.vec <- l$data[[col.name]]
-        temp <- 0  # Check whether reformatting takes place.
+        
+        # For some plot types, we overwrite `data` with `prestats.data`.
+        pdata.vec <- misc$prestats.data[[a]]
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
           data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
-          temp <- temp + 1
+          pdata.vec <- strftime(as.POSIXlt(g$prestats.data[[a]],
+                                           origin=the.epoch),
+                                "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "Date")) {
           ## Re-create dates from nb days
           data.vec <- strftime(as.Date(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
-          temp <- temp + 1
+          pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
+                                "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
           ## Re-order data so that Plotly gets it right from ggplot2.
           g$data <- g$data[order(g$data[[a]]),]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
-          temp <- temp + 1
+          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]),]
+          pdata.vec <- data.vec[match(g$prestats.data[[a]],
+                                      as.numeric(pdata.vec))]
         }
         g$data[[a]] <- data.vec
-        # For some plot types, we overwrite `data` with `prestats.data`.
-        if (temp)
-          g$prestats.data[[a]] <- data.vec
+        g$prestats.data[[a]] <- pdata.vec
       }
     }
   }
-
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
