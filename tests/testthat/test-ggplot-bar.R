@@ -34,3 +34,19 @@ test_that("position_identity is translated to barmode=overlay", {
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "overlay")
 })
+
+test_that("dates work well with bar charts", {
+  
+  researchers$month <- c("2012-01-01", "2012-01-01", "2012-02-01", "2012-02-01")
+  researchers$month <- as.Date(researchers$month)
+  
+  gd <- ggplot(researchers, aes(month, papers, fill=field)) +
+    geom_bar(stat="identity")
+  
+  L <- gg2list(gd)
+  
+  expect_equal(length(L), 3)  # 2 traces + layout
+  expect_identical(L$kwargs$layout$xaxis$type, "date")
+  expect_identical(L[[1]]$x[1], "2012-01-01 00:00:00")
+  expect_identical(L[[1]]$x[2], "2012-02-01 00:00:00")
+})

@@ -777,20 +777,27 @@ layer2traces <- function(l, d, misc) {
       for(a in aes.used){
         col.name <- g$aes[aes.used]
         data.vec <- l$data[[col.name]]
+        temp <- 0  # Check whether reformatting takes place.
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
           data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
+          temp <- temp + 1
         } else if (inherits(data.vec, "Date")) {
           ## Re-create dates from nb days
           data.vec <- strftime(as.Date(g$data[[a]], origin=the.epoch),
                                "%Y-%m-%d %H:%M:%S")
+          temp <- temp + 1
         } else if (inherits(data.vec, "factor")) {
           ## Re-order data so that Plotly gets it right from ggplot2.
           g$data <- g$data[order(g$data[[a]]),]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
+          temp <- temp + 1
         }
         g$data[[a]] <- data.vec
+        # For some plot types, we overwrite `data` with `prestats.data`.
+        if (temp)
+          g$prestats.data[[a]] <- data.vec
       }
     }
   }
