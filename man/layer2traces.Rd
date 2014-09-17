@@ -3,14 +3,12 @@
 \alias{layer2traces}
 \title{Convert a layer to a list of traces. Called from gg2list()}
 \usage{
-layer2traces(l, d, misc, plot = NULL)
+layer2traces(l, d, misc)
 }
 \arguments{
 \item{l}{one layer of the ggplot object}
 
 \item{d}{one layer of calculated data from ggplot2::ggplot_build(p)}
-
-\item{plot}{one layer of plot data}
 
 \item{misc}{named list.}
 }
