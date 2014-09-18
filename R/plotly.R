@@ -57,7 +57,7 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL, base.url="https://plot.ly") {
+plotly <- function(username=NULL, key=NULL, base.url=NULL) {
   
   if (is.null(username)) {
     username <- get_credentials_file(c("username", "api_key"))$username
@@ -83,6 +83,14 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
+    if (is.null(base.url)) {
+      base.url <- get_config_file("plotly_domain")$plotly_domain
+    } else {
+      base.url <- base.url
+    }
+    if (is.null(base.url)) {
+      base.url <- "https://plot.ly"
+    }
     url <- paste(base.url, "/clientresp", sep="")
 
     respst <- postForm(url, platform="R", version=pub$version, 
