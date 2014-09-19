@@ -99,6 +99,7 @@ set_credentials_file <- function(username="", api_key="",
 #' get_config_file(c("plotly_domain", "plotly_streaming_domain"))
 #' }
 get_config_file <- function(args=c()) {
+  config_data <- list()
   if (!file.exists(CONFIG_FILE)) {
     file.create(CONFIG_FILE)
   }

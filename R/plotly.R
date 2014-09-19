@@ -83,12 +83,11 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
+    # Plotly server
     if (is.null(base.url)) {
       base.url <- get_config_file("plotly_domain")$plotly_domain
-    } else {
-      base.url <- base.url
     }
-    if (is.null(base.url)) {
+    if (is.null(base.url) || base.url == "") {
       base.url <- "https://plot.ly"
     }
     url <- paste(base.url, "/clientresp", sep="")
