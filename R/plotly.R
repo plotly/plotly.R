@@ -72,6 +72,13 @@ To get started, save your plotly username and API key by calling:\n
 > set_credentials_file(UserName, ApiKey)\n
 For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   }
+  # Plotly server
+  if (is.null(base.url)) {
+    base.url <- get_config_file("plotly_domain")$plotly_domain
+  }
+  if (is.null(base.url) || base.url == "") {
+    base.url <- "https://plot.ly"
+  }
   
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
@@ -83,13 +90,6 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
-    # Plotly server
-    if (is.null(base.url)) {
-      base.url <- get_config_file("plotly_domain")$plotly_domain
-    }
-    if (is.null(base.url) || base.url == "") {
-      base.url <- "https://plot.ly"
-    }
     url <- paste(base.url, "/clientresp", sep="")
 
     respst <- postForm(url, platform="R", version=pub$version, 
