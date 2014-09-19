@@ -8,16 +8,15 @@ CONFIG_FILE <- file.path(PLOTLY_DIR, ".config")
 # THEMES_FILE <- file.path(PLOTLY_DIR, ".themes")
 
 
-#' Create Plotly credentials file if nonexistent
-ensure_local_plotly_files_exist <- function() {
-  if (!file.exists(PLOTLY_DIR)) {
-    dir.create(PLOTLY_DIR)
+#' Create file if nonexistent
+#' @param abspath Character vector of file path
+#' @return NULL
+ensure_file_exist <- function(abspath) {
+  if (!file.exists(abspath)) {
+    dir.create(dirname(abspath), showWarnings=FALSE, recursive=TRUE)
+    file.create(abspath)
   }
-  for (filename in c(CREDENTIALS_FILE)) {  # , PLOT_OPTIONS_FILE, THEMES_FILE
-    if (!file.exists(filename)) {
-      file.create(filename)
-    }
-  }
+  invisible()
 }
 
 
@@ -31,7 +30,7 @@ ensure_local_plotly_files_exist <- function() {
 #' get_credentials_file(c("username", "api_key"))
 #' }
 get_credentials_file <- function(args=c()) {
-  ensure_local_plotly_files_exist()
+  ensure_file_exist(CREDENTIALS_FILE)
   if (file.info(CREDENTIALS_FILE)$size) {
     credentials_data <- fromJSON(CREDENTIALS_FILE)
     if (!is.null(args)) {
@@ -99,9 +98,7 @@ set_credentials_file <- function(username="", api_key="",
 #' get_config_file(c("plotly_domain", "plotly_streaming_domain"))
 #' }
 get_config_file <- function(args=c()) {
-  if (!file.exists(CONFIG_FILE)) {
-    file.create(CONFIG_FILE)
-  }
+  ensure_file_exist(CONFIG_FILE)
   if (file.info(CONFIG_FILE)$size) {
     config_data <- fromJSON(CONFIG_FILE)
     if (!is.null(args)) {

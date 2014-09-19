@@ -3,7 +3,7 @@
 \alias{plotly}
 \title{Main interface to plotly}
 \usage{
-plotly(username = NULL, key = NULL, base.url = "https://plot.ly")
+plotly(username = NULL, key = NULL, base.url = NULL)
 }
 \arguments{
 \item{username}{plotly username}

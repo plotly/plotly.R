@@ -3,13 +3,20 @@
 \name{geom2trace}
 \alias{geom2trace}
 \title{Convert basic geoms to traces.}
-\format{\preformatted{List of 6
- $ path     :function (data, params)  
- $ polygon  :function (data, params)  
- $ point    :function (data, params)  
- $ bar      :function (data, params)  
- $ step     :function (data, params)  
- $ histogram:function (data, params)  
+\format{\preformatted{List of 13
+ $ path     :function (data, params)
+ $ polygon  :function (data, params)
+ $ point    :function (data, params)
+ $ bar      :function (data, params)
+ $ step     :function (data, params)
+ $ tile     :function (data, params)
+ $ boxplot  :function (data, params)
+ $ contour  :function (data, params)
+ $ density2d:function (data, params)
+ $ errorbar :function (data, params)
+ $ errorbarh:function (data, params)
+ $ area     :function (data, params)
+ $ abline   :function (data, params)
 }}
 \usage{
 geom2trace
