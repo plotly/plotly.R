@@ -782,15 +782,15 @@ layer2traces <- function(l, d, misc) {
         pdata.vec <- misc$prestats.data[[a]]
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
-          data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
-                               "%Y-%m-%d %H:%M:%S")
+          data.vec <- try(strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
+                                   "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.POSIXlt(g$prestats.data[[a]],
                                            origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "Date")) {
           ## Re-create dates from nb days
-          data.vec <- strftime(as.Date(g$data[[a]], origin=the.epoch),
-                               "%Y-%m-%d %H:%M:%S")
+          data.vec <- try(strftime(as.Date(g$data[[a]], origin=the.epoch),
+                                   "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
