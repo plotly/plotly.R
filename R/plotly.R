@@ -93,9 +93,9 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     url <- paste(base.url, "/clientresp", sep="")
 
     respst <- postForm(url, platform="R", version=pub$version, 
-                       args=toJSON(args, collapse=""), un=pub$username,
+                       args=toJSON(args, digits=50, collapse=""), un=pub$username,
                        key=pub$key, origin=origin,
-                       kwargs=toJSON(kwargs, collapse=""),
+                       kwargs=toJSON(kwargs, digits=50, collapse=""),
                        .opts=list(sslversion=3, cainfo=system.file("CurlSSL", "cacert.pem", package="RCurl")))
     if (is.raw(respst)) {
         respst <- rawToChar(respst)
