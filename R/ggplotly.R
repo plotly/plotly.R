@@ -218,6 +218,20 @@ geom2trace <- list(
     }
     L
   },
+  text=function(data, params){
+    L <- list(x=data$x,
+              y=data$y,
+              text=data$label,
+              type="scatter",
+              mode="text")
+    if (!is.null(params$size)) {
+      L$textfont$size <- params$size
+    }
+    if (!is.null(data$colour)) {
+      L$textfont$color <- data$colour
+    }
+    L
+  },
   bar=function(data, params) {
     L <- list(x=data$x,
               name=params$name,
