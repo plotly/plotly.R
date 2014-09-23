@@ -798,8 +798,10 @@ layer2traces <- function(l, d, misc) {
           g$data <- g$data[order(g$data[[a]]),]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
           g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]),]
-          pdata.vec <- data.vec[match(g$prestats.data[[a]],
-                                      as.numeric(pdata.vec))]
+          pdata.vec <- pdata.vec[match(g$prestats.data[[a]],
+                                       as.numeric(pdata.vec))]
+          if (length(pdata.vec) == length(data.vec))
+            pdata.vec <- data.vec
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
