@@ -173,9 +173,6 @@ toBasic <- list(
     g$params$xstart <- min(g$prestats.data$globxmin)
     g$params$xend <- max(g$prestats.data$globxmax)
     g
-  },
-  ribbon=function(g){
-    stop("TODO")
   }
 )
 
@@ -325,6 +322,12 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          fill="tozeroy")
+  },
+  ribbon=function(data, params) {
+    list(x=c(data$x[1], data$x, rev(data$x)),
+         y=c(data$ymin[1], data$ymax, rev(data$ymin)),
+         type="scatter",
+         fill="tonexty")
   },
   abline=function(data, params) {
     list(x=c(params$xstart, params$xend),
