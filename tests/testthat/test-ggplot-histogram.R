@@ -23,3 +23,18 @@ test_that("binwidth is translated into xbins.size", {
   expect_equal(length(L), 2)
   expect_equal(L[[1]]$xbins$size, bw)
 })
+
+# Non-numeric (date) data
+noram <- data.frame(month=c("2012-01-01", "2012-02-01", "2012-01-01",
+                            "2012-01-01", "2012-03-01", "2012-02-01"))
+noram$month <- as.Date(noram$month)
+
+test_that("dates work well with histograms", {
+  hist <- ggplot(noram, aes(month)) + geom_histogram()
+  L <- gg2list(hist)
+  expect_equal(length(L), 2)  # 1 trace + layout
+  expect_identical(L$kwargs$layout$barmode, "stack")
+  expect_identical(L$kwargs$layout$xaxis$type, "date")
+  expect_identical(L[[1]]$x[1], "2012-01-01 00:00:00")
+  expect_identical(L[[1]]$x[2], "2012-02-01 00:00:00")
+})
