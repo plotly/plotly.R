@@ -208,10 +208,14 @@ geom2trace <- list(
               mode="markers",
               marker=paramORdefault(params, aes2marker, marker.defaults))
     if("size" %in% names(data)){
+      L$text <- paste("size:", data$size)
       L$marker$sizeref <- default.marker.sizeref
       ## Make sure sizes are passed as a list even when there is only one element.
-      marker.size <- data$size * marker.size.mult
+      s <- data$size
+      marker.size <- ((s - min(s)) * (5.25 - 0.25))/(max(s) - min(s)) + 0.25
       L$marker$size <- if (length(marker.size) > 1) marker.size else list(marker.size)
+      L$marker$size <- L$marker$size * marker.size.mult
+      L$marker$line$width <- 0
     }
     L
   },
@@ -349,7 +353,8 @@ aes2line <- c(linetype="dash",
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
-##  list(point=c("colour", "fill", "shape", "size"),
+  ## Legends based on sizes not implemented yet in Plotly
+  ##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
