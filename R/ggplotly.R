@@ -353,8 +353,8 @@ aes2line <- c(linetype="dash",
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
-  ## Legends based on sizes not implemented yet in plotly
-##  list(point=c("colour", "fill", "shape", "size"),
+  ## Legends based on sizes not implemented yet in Plotly
+  ##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
