@@ -55,7 +55,7 @@ aes2marker <- c(alpha="opacity",
                 sizemode="sizemode",
                 shape="symbol")
 
-default.marker.sizeref = 1
+default.marker.sizeref <- 1
 marker.size.mult <- 10
 
 marker.defaults <- list(alpha=1,
@@ -173,6 +173,13 @@ toBasic <- list(
     g$params$xstart <- min(g$prestats.data$globxmin)
     g$params$xend <- max(g$prestats.data$globxmax)
     g
+  },
+  point=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g
   }
 )
 
@@ -212,9 +219,9 @@ geom2trace <- list(
       L$marker$sizeref <- default.marker.sizeref
       ## Make sure sizes are passed as a list even when there is only one element.
       s <- data$size
-      marker.size <- ((s - min(s)) * (5.25 - 0.25))/(max(s) - min(s)) + 0.25
-      L$marker$size <- if (length(marker.size) > 1) marker.size else list(marker.size)
-      L$marker$size <- L$marker$size * marker.size.mult
+      marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
+      marker.size <- marker.size * marker.size.mult
+      L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
       L$marker$line$width <- 0
     }
     L
@@ -414,6 +421,13 @@ gg2list <- function(p){
   ggxmin <- min(sapply(xrange, min))
   ggxmax <- max(sapply(xrange, max))
   
+  # Get global size range because we need some of its info in layer2traces
+  if ("size.name" %in% name.names) {
+    sizerange <- sapply(built$prestats.data, `[[`, "size")
+    ggsizemin <- min(unlist(sizerange))
+    ggsizemax <- max(unlist(sizerange))
+  }
+  
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
@@ -476,6 +490,12 @@ gg2list <- function(p){
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
     misc$prestats.data$globxmax <- ggxmax
+    
+    # Add global size info if relevant
+    if ("size.name" %in% name.names) {
+      misc$prestats.data$globsizemin <- ggsizemin
+      misc$prestats.data$globsizemax <- ggsizemax
+    }
 
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
@@ -767,7 +787,6 @@ layer2traces <- function(l, d, misc) {
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
-  
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
   if (g$geom == "violin") {
     g$geom <- "boxplot"
