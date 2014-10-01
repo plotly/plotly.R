@@ -790,13 +790,11 @@ gg2list <- function(p){
       layout$title <- paste0("<b>", layout$title, "</b>")
       layout$yaxis$title <- paste0("<b>", layout$yaxis$title, "</b>")
       layout$xaxis$title <- paste0("<b>", layout$xaxis$title, "</b>")
-    } 
-    if (text_face=="italic") {
+    } else if (text_face=="italic") {
       layout$title <- paste0("<i>", layout$title, "</i>")
       layout$yaxis$title <- paste0("<i>", layout$yaxis$title, "</i>")
       layout$xaxis$title <- paste0("<i>", layout$xaxis$title, "</i>")
-    } 
-    if (text_face=="bold.italic") {
+    } else if (text_face=="bold.italic") {
       layout$title <- paste0("<b><i>", layout$title, "</i></b>")
       layout$yaxis$title <- paste0("<b><i>", layout$yaxis$title, "</i></b>")
       layout$xaxis$title <- paste0("<b><i>", layout$xaxis$title, "</i></b>")
@@ -808,11 +806,9 @@ gg2list <- function(p){
   if (!is.null(title_face)) {
     if (title_face=="bold") {
       layout$title <- paste0("<b>", layout$title, "</b>")
-    } 
-    if (title_face=="italic") {
+    } else if (title_face=="italic") {
       layout$title <- paste0("<i>", layout$title, "</i>")
-    } 
-    if (title_face=="bold.italic") {
+    } else if (title_face=="bold.italic") {
       layout$title <- paste0("<b><i>", layout$title, "</i></b>")
     }
   }
@@ -822,19 +818,17 @@ gg2list <- function(p){
                      theme.pars$axis.title.x$face)
   sub_elem <- c("yaxis", "xaxis")
   
-  for (i in c(1:length(title_face))) {
+  for (i in seq_along(title_face)) {
     if (!is.null(title_face[[i]])) {
       if (title_face[[i]]=="bold") {
         layout[[sub_elem[i]]]["title"] <- paste0("<b>",
                                                  layout[[sub_elem[i]]]["title"],
                                                  "</b>")
-      } 
-      if (title_face[[i]]=="italic") {
+      } else if (title_face[[i]]=="italic") {
         layout[[sub_elem[i]]]["title"] <- paste0("<i>",
                                                  layout[[sub_elem[i]]]["title"],
                                                  "</i>")
-      } 
-      if (title_face[[i]]=="bold.italic") {
+      } else if (title_face[[i]]=="bold.italic") {
         layout[[sub_elem[i]]]["title"] <- paste0("<b><i>",
                                                  layout[[sub_elem[i]]]["title"],
                                                  "</b></i>")
@@ -843,7 +837,7 @@ gg2list <- function(p){
   }
   
   trace.list$kwargs <- list(layout=layout)
-  if(length(trace.list) == 1){
+  if(length(trace.list) < 2){
     stop("No exportable traces")
   }
   
