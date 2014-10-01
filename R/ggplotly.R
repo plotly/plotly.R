@@ -767,6 +767,81 @@ gg2list <- function(p){
   }
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
+  ## Family font for text
+  if (!is.null(theme.pars$text$family)) {
+    layout$titlefont$family   <- theme.pars$text$family
+    layout$legend$font$family <- theme.pars$text$family
+  }
+  
+  ## Family font for title
+  if (!is.null(theme.pars$plot.title$family)) {
+    layout$titlefont$family <- theme.pars$plot.title$family
+  }
+  
+  ## Family font for legend
+  if (!is.null(theme.pars$legend.text$family)) {
+    layout$legend$font$family <- theme.pars$legend.text$family
+  }
+  
+  ## Bold, italic and bold.italic face for text
+  text_face <- theme.pars$text$face
+  if (!is.null(text_face)) {
+    if (text_face=="bold") {
+      layout$title <- paste0("<b>", layout$title, "</b>")
+      layout$yaxis$title <- paste0("<b>", layout$yaxis$title, "</b>")
+      layout$xaxis$title <- paste0("<b>", layout$xaxis$title, "</b>")
+    } 
+    if (text_face=="italic") {
+      layout$title <- paste0("<i>", layout$title, "</i>")
+      layout$yaxis$title <- paste0("<i>", layout$yaxis$title, "</i>")
+      layout$xaxis$title <- paste0("<i>", layout$xaxis$title, "</i>")
+    } 
+    if (text_face=="bold.italic") {
+      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
+      layout$yaxis$title <- paste0("<b><i>", layout$yaxis$title, "</i></b>")
+      layout$xaxis$title <- paste0("<b><i>", layout$xaxis$title, "</i></b>")
+    }
+  }
+  
+  ## Bold, italic and bold.italic face for title
+  title_face <- theme.pars$plot.title$face
+  if (!is.null(title_face)) {
+    if (title_face=="bold") {
+      layout$title <- paste0("<b>", layout$title, "</b>")
+    } 
+    if (title_face=="italic") {
+      layout$title <- paste0("<i>", layout$title, "</i>")
+    } 
+    if (title_face=="bold.italic") {
+      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
+    }
+  }
+  
+  ## Bold, italic, and bold.italic face for axis title
+  title_face <- list(theme.pars$axis.title.y$face,
+                     theme.pars$axis.title.x$face)
+  sub_elem <- c("yaxis", "xaxis")
+  
+  for (i in c(1:length(title_face))) {
+    if (!is.null(title_face[[i]])) {
+      if (title_face[[i]]=="bold") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<b>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</b>")
+      } 
+      if (title_face[[i]]=="italic") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<i>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</i>")
+      } 
+      if (title_face[[i]]=="bold.italic") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<b><i>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</b></i>")
+      }
+    }
+  }
+  
   trace.list$kwargs <- list(layout=layout)
   if(length(trace.list) == 1){
     stop("No exportable traces")
