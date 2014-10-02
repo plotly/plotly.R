@@ -565,6 +565,7 @@ gg2list <- function(p){
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     ax.list$gridcolor <- toRGB(theme.pars$panel.grid.major$colour)
+    ax.list$showgrid <- !is.blank(s("panel.grid.major.%s"))
     ## These numeric length variables are not easily convertible.
     ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
     ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
