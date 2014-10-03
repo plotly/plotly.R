@@ -294,10 +294,7 @@ geom2trace <- list(
               text=data$text,
               marker=list(color=toRGB(params$fill)),
               type="histogram",
-              autobinx=FALSE,
-              xbins=list(start=params$xstart,
-                         end=params$xend,
-                         size=params$binwidth),
+              autobinx=TRUE,
               histnorm="probability density")
   },
   density2d=function(data, params) {
