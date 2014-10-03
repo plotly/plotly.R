@@ -57,7 +57,7 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL, base.url="https://plot.ly") {
+plotly <- function(username=NULL, key=NULL, base.url=NULL) {
   
   if (is.null(username)) {
     username <- get_credentials_file(c("username", "api_key"))$username
@@ -71,6 +71,13 @@ It looks like you haven't set up your Plotly account credentials yet.\n
 To get started, save your plotly username and API key by calling:\n
 > set_credentials_file(UserName, ApiKey)\n
 For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
+  }
+  # Plotly server
+  if (is.null(base.url)) {
+    base.url <- get_config_file("plotly_domain")$plotly_domain
+  }
+  if (is.null(base.url) || base.url == "") {
+    base.url <- "https://plot.ly"
   }
   
   # public attributes/methods that the user has access to
@@ -86,9 +93,9 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     url <- paste(base.url, "/clientresp", sep="")
 
     respst <- postForm(url, platform="R", version=pub$version, 
-                       args=toJSON(args, collapse=""), un=pub$username,
+                       args=toJSON(args, digits=50, collapse=""), un=pub$username,
                        key=pub$key, origin=origin,
-                       kwargs=toJSON(kwargs, collapse=""),
+                       kwargs=toJSON(kwargs, digits=50, collapse=""),
                        .opts=list(sslversion=3, cainfo=system.file("CurlSSL", "cacert.pem", package="RCurl")))
     if (is.raw(respst)) {
         respst <- rawToChar(respst)

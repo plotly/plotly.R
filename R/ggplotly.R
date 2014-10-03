@@ -55,7 +55,7 @@ aes2marker <- c(alpha="opacity",
                 sizemode="sizemode",
                 shape="symbol")
 
-default.marker.sizeref = 1
+default.marker.sizeref <- 1
 marker.size.mult <- 10
 
 marker.defaults <- list(alpha=1,
@@ -145,7 +145,8 @@ toBasic <- list(
   },
   path=function(g){
     group2NA(g, "path")
-  },line=function(g){
+  },
+  line=function(g){
     g$data <- g$data[order(g$data$x),]
     group2NA(g, "path")
   },
@@ -180,8 +181,12 @@ toBasic <- list(
     g$params$xend <- max(g$prestats.data$globxmax)
     g
   },
-  ribbon=function(g){
-    stop("TODO")
+  point=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g
   }
 )
 
@@ -217,10 +222,28 @@ geom2trace <- list(
               mode="markers",
               marker=paramORdefault(params, aes2marker, marker.defaults))
     if("size" %in% names(data)){
+      L$text <- paste("size:", data$size)
       L$marker$sizeref <- default.marker.sizeref
       ## Make sure sizes are passed as a list even when there is only one element.
-      marker.size <- data$size * marker.size.mult
-      L$marker$size <- if (length(marker.size) > 1) marker.size else list(marker.size)
+      s <- data$size
+      marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
+      marker.size <- marker.size * marker.size.mult
+      L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
+      L$marker$line$width <- 0
+    }
+    L
+  },
+  text=function(data, params){
+    L <- list(x=data$x,
+              y=data$y,
+              text=data$label,
+              type="scatter",
+              mode="text")
+    if (!is.null(params$size)) {
+      L$textfont$size <- params$size
+    }
+    if (!is.null(data$colour)) {
+      L$textfont$color <- data$colour
     }
     L
   },
@@ -307,13 +330,18 @@ geom2trace <- list(
     L
   },
   errorbar=function(data, params) {
-    list(error_y=list(arrayminus=data$y-data$ymin, array=data$ymax-data$y),
-         x=data$x,
+    list(x=data$x,
          y=data$y,
-         name=params$name,
-         type="scatter",
-         mode="markers",  # invisible markers for error bars
-         marker=list(alpha=0, shape="x"))
+         error_y=list(arrayminus=data$y-data$ymin,
+                      array=data$ymax-data$y,
+                      color=toRGB(data$colour)))
+  },
+  errorbarh=function(data, params) {
+    list(x=data$x,
+         y=data$y,
+         error_x=list(arrayminus=data$x-data$xmin,
+                      array=data$xmax-data$x,
+                      color=toRGB(data$colour)))
   },
   area=function(data, params) {
     list(x=c(data$x[1], data$x, tail(data$x, n=1)),
@@ -321,6 +349,12 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          fill="tozeroy")
+  },
+  ribbon=function(data, params) {
+    list(x=c(data$x[1], data$x, rev(data$x)),
+         y=c(data$ymin[1], data$ymax, rev(data$ymin)),
+         type="scatter",
+         fill="tonexty")
   },
   abline=function(data, params) {
     list(x=c(params$xstart, params$xend),
@@ -342,7 +376,8 @@ aes2line <- c(linetype="dash",
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
-##  list(point=c("colour", "fill", "shape", "size"),
+  ## Legends based on sizes not implemented yet in Plotly
+  ##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
@@ -374,6 +409,7 @@ gg2list <- function(p){
   })
   layout <- list()
   trace.list <- list()
+  
   ## Before building the ggplot, we would like to add aes(name) to
   ## figure out what the object group is later. This also copies any
   ## needed global aes/data values to each layer, so we do not have to
@@ -400,6 +436,13 @@ gg2list <- function(p){
   xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
   ggxmin <- min(sapply(xrange, min))
   ggxmax <- max(sapply(xrange, max))
+  
+  # Get global size range because we need some of its info in layer2traces
+  if ("size.name" %in% name.names) {
+    sizerange <- sapply(built$prestats.data, `[[`, "size")
+    ggsizemin <- min(unlist(sizerange))
+    ggsizemax <- max(unlist(sizerange))
+  }
   
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
@@ -463,14 +506,39 @@ gg2list <- function(p){
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
     misc$prestats.data$globxmax <- ggxmax
+    
+    # Add global size info if relevant
+    if ("size.name" %in% name.names) {
+      misc$prestats.data$globsizemin <- ggsizemin
+      misc$prestats.data$globsizemax <- ggsizemax
+    }
 
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    ## Do we really need to coord_transform?
-    ##g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-    ##                                     built$panel$ranges[[1]])
-    trace.list <- c(trace.list, traces)
+    # Associate error bars with previous traces
+    if (grepl("errorbar", L$geom$objname)) {
+      for (j in 1:length(trace.list)) {
+        temp <- list()
+        ind <- traces[[1]]$x %in% trace.list[[j]]$x
+        only_ind <- function(x) x[ind]
+        if ("errorbarh" %in% L$geom$objname) {
+          temp <- lapply(traces[[1]]$error_x, only_ind)
+          # Colour of error bar has to be one string
+          if (length(temp$color) > 1) temp$color <- temp$color[1]
+          trace.list[[j]]["error_x"] <- list(temp)
+        } else {
+          temp <- lapply(traces[[1]]$error_y, only_ind)
+          if (length(temp$color) > 1) temp$color <- temp$color[1]
+          trace.list[[j]]["error_y"] <- list(temp)
+        }
+      }
+    } else {
+      # Do we really need to coord_transform?
+      # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
+      #                                     built$panel$ranges[[1]])
+      trace.list <- c(trace.list, traces)
+    }
   }
 
   ## for barcharts, verify that all traces have the same barmode; we don't
@@ -527,6 +595,7 @@ gg2list <- function(p){
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     ax.list$gridcolor <- toRGB(theme.pars$panel.grid.major$colour)
+    ax.list$showgrid <- !is.blank(s("panel.grid.major.%s"))
     ## These numeric length variables are not easily convertible.
     ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
     ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
@@ -600,6 +669,8 @@ gg2list <- function(p){
           y <- row * row.size
           ymin <- y - row.size
           ymax <- y - inner.margin
+          if ("wrap" %in% class(p$facet))
+            ymax <- ymax - 0.04
           yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
           xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
           layout[[xaxis.name]] <- orig.xaxis
@@ -628,8 +699,10 @@ gg2list <- function(p){
       ## add panel titles as annotations
       annotations <- list()
       nann <- 1
-      make.label <- function(text, x, y)
-        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, xref="paper", yref="paper")
+      make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
+        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
+             xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
+             textangle=textangle)
       
       if ("grid" %in% class(p$facet))
         {
@@ -641,8 +714,15 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, 1 + outer.margin, row.size * (max(gglayout$ROW)-i+0.5))
-              nann <- nann + 1
+              if (text != "") {  # to not create extra annotations
+                increase_margin_r <- TRUE
+                annotations[[nann]] <- make.label(text,
+                                                  1 + outer.margin - 0.04,
+                                                  row.size * (max(gglayout$ROW)-i+0.5),
+                                                  xanchor="center",
+                                                  textangle=90)
+                nann <- nann + 1
+              }
             }
           
           fcols <- names(p$facet$cols)
@@ -651,8 +731,13 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (i-0.5) - inner.margin/2, 1 + outer.margin)
-              nann <- nann + 1
+              if (text!="") {
+                annotations[[nann]] <- make.label(text,
+                                                  col.size * (i-0.5) - inner.margin/2,
+                                                  1 + outer.margin,
+                                                  xanchor="center")
+                nann <- nann + 1
+              }
             }
 
           ## add empty traces everywhere so that the background shows even if there
@@ -672,16 +757,25 @@ gg2list <- function(p){
               text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
                                    as.character),
                             collapse=", ")
-              annotations[[nann]] <- make.label(text, col.size * (col-0.5) - inner.margin/2,
-                                                row.size * (max(gglayout$ROW) - row + 1))
+              annotations[[nann]] <- make.label(text, 
+                                                col.size * (col-0.5) - inner.margin/2,
+                                                row.size * (max(gglayout$ROW) - row + 0.985),
+                                                xanchor="center",
+                                                yanchor="top")
               nann <- nann + 1
             }
           }
 
       ## axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 0.5, -outer.margin)
+      annotations[[nann]] <- make.label(xaxis.title, 
+                                        0.5, 
+                                        -outer.margin,
+                                        yanchor="top")
       nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, -outer.margin, 0.5)
+      annotations[[nann]] <- make.label(yaxis.title, 
+                                        -outer.margin, 
+                                        0.5,
+                                        textangle=-90)
       nann <- nann + 1
       
       layout$annotations <- annotations
@@ -699,10 +793,82 @@ gg2list <- function(p){
   
   ## Legend.
   layout$margin$r <- 10
+  if (exists("increase_margin_r")) {
+    layout$margin$r <- 60
+  }
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
+  ## Family font for text
+  if (!is.null(theme.pars$text$family)) {
+    layout$titlefont$family   <- theme.pars$text$family
+    layout$legend$font$family <- theme.pars$text$family
+  }
+  
+  ## Family font for title
+  if (!is.null(theme.pars$plot.title$family)) {
+    layout$titlefont$family <- theme.pars$plot.title$family
+  }
+  
+  ## Family font for legend
+  if (!is.null(theme.pars$legend.text$family)) {
+    layout$legend$font$family <- theme.pars$legend.text$family
+  }
+  
+  ## Bold, italic and bold.italic face for text
+  text_face <- theme.pars$text$face
+  if (!is.null(text_face)) {
+    if (text_face=="bold") {
+      layout$title <- paste0("<b>", layout$title, "</b>")
+      layout$yaxis$title <- paste0("<b>", layout$yaxis$title, "</b>")
+      layout$xaxis$title <- paste0("<b>", layout$xaxis$title, "</b>")
+    } else if (text_face=="italic") {
+      layout$title <- paste0("<i>", layout$title, "</i>")
+      layout$yaxis$title <- paste0("<i>", layout$yaxis$title, "</i>")
+      layout$xaxis$title <- paste0("<i>", layout$xaxis$title, "</i>")
+    } else if (text_face=="bold.italic") {
+      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
+      layout$yaxis$title <- paste0("<b><i>", layout$yaxis$title, "</i></b>")
+      layout$xaxis$title <- paste0("<b><i>", layout$xaxis$title, "</i></b>")
+    }
+  }
+  
+  ## Bold, italic and bold.italic face for title
+  title_face <- theme.pars$plot.title$face
+  if (!is.null(title_face)) {
+    if (title_face=="bold") {
+      layout$title <- paste0("<b>", layout$title, "</b>")
+    } else if (title_face=="italic") {
+      layout$title <- paste0("<i>", layout$title, "</i>")
+    } else if (title_face=="bold.italic") {
+      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
+    }
+  }
+  
+  ## Bold, italic, and bold.italic face for axis title
+  title_face <- list(theme.pars$axis.title.y$face,
+                     theme.pars$axis.title.x$face)
+  sub_elem <- c("yaxis", "xaxis")
+  
+  for (i in seq_along(title_face)) {
+    if (!is.null(title_face[[i]])) {
+      if (title_face[[i]]=="bold") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<b>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</b>")
+      } else if (title_face[[i]]=="italic") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<i>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</i>")
+      } else if (title_face[[i]]=="bold.italic") {
+        layout[[sub_elem[i]]]["title"] <- paste0("<b><i>",
+                                                 layout[[sub_elem[i]]]["title"],
+                                                 "</b></i>")
+      }
+    }
+  }
+  
   trace.list$kwargs <- list(layout=layout)
-  if(length(trace.list) == 1){
+  if(length(trace.list) < 2){
     stop("No exportable traces")
   }
   
@@ -721,6 +887,12 @@ layer2traces <- function(l, d, misc) {
             prestats.data=misc$prestats.data)
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
+  # Partial conversion for geom_violin (Plotly does not offer KDE yet)
+  if (g$geom == "violin") {
+    g$geom <- "boxplot"
+    warning("Converting violin plot into boxplot:\n
+            probability density estimation is not supported in Plotly yet.")
+  }
 
   ## Barmode and bargap
   barmode <- "group"
@@ -751,23 +923,40 @@ layer2traces <- function(l, d, misc) {
     if (!misc$is.continuous[[axis.name]]){
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
-      for(a in aes.used){
+      for(a in aes.used) {
         col.name <- g$aes[aes.used]
         data.vec <- l$data[[col.name]]
+        
+        # For some plot types, we overwrite `data` with `prestats.data`.
+        pdata.vec <- misc$prestats.data[[a]]
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
-          data.vec <- strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
-                               "%Y-%m-%d %H:%M:%S")
+          data.vec <- try(strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
+                                   "%Y-%m-%d %H:%M:%S"), silent=TRUE)
+          pdata.vec <- strftime(as.POSIXlt(g$prestats.data[[a]],
+                                           origin=the.epoch),
+                                "%Y-%m-%d %H:%M:%S")
+        } else if (inherits(data.vec, "Date")) {
+          ## Re-create dates from nb days
+          data.vec <- try(strftime(as.Date(g$data[[a]], origin=the.epoch),
+                                   "%Y-%m-%d %H:%M:%S"), silent=TRUE)
+          pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
+                                "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
           ## Re-order data so that Plotly gets it right from ggplot2.
           g$data <- g$data[order(g$data[[a]]),]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
+          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]),]
+          pdata.vec <- pdata.vec[match(g$prestats.data[[a]],
+                                       as.numeric(pdata.vec))]
+          if (length(pdata.vec) == length(data.vec))
+            pdata.vec <- data.vec
         }
         g$data[[a]] <- data.vec
+        g$prestats.data[[a]] <- pdata.vec
       }
     }
   }
-
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
