@@ -606,6 +606,7 @@ gg2list <- function(p){
     ax.list$tickangle <- if(is.numeric(tick.text$angle)){
       -tick.text$angle
     }
+    
     theme2font <- function(text){
       if(!is.null(text)){
         list(family=text$family,
@@ -865,6 +866,17 @@ gg2list <- function(p){
                                                  "</b></i>")
       }
     }
+  }
+
+  # If background elements are NULL, and background rect (rectangle) is defined:
+  rect_fill <- theme.pars$rect$fill
+  if (!is.null(rect_fill)) {
+    if (is.null(layout$plot_bgcolor))
+      layout$plot_bgcolor <- toRGB(s(rect_fill))
+    if (is.null(layout$paper_bgcolor))
+      layout$paper_bgcolor <- toRGB(s(rect_fill))
+    if (is.null(layout$legend$bgcolor))
+      layout$legend$bgcolor <- toRGB(s(rect_fill))
   }
   
   trace.list$kwargs <- list(layout=layout)
