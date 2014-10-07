@@ -24,6 +24,17 @@ test_that("grid/ticks translated correctly",{
   }
 })
 
+test_that("dotted/dashed grid translated as line with alpha=0.1",{
+  ggiris <- ggplot(iris)+
+    geom_point(aes(Petal.Width, Sepal.Width))+
+    theme(panel.grid.major=element_line(linetype="dashed"))
+  info <- gg2list(ggiris)
+  for(xy in c("x", "y")){
+    ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
+    expect_identical(ax.list$gridcolor, toRGB("white", 0.1))
+  }
+})
+
 test_that("plot panel border is translated correctly", {
   ggiris <- ggplot(iris)+
     geom_point(aes(Petal.Width, Sepal.Width))+
