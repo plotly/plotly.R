@@ -598,7 +598,7 @@ gg2list <- function(p){
     ## When gridlines are dotted or dashed:
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
-    if (!is.null(grid$linetype) || !is.null(grid.major$linetype) || 
+    if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
           c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
       ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                  toRGB(grid$colour, 0.1),
