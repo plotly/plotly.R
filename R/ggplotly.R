@@ -598,8 +598,9 @@ gg2list <- function(p){
     ## When gridlines are dotted or dashed:
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
-    if (c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
-      ax.list$gridcolor<- ifelse(is.null(grid.major$colour),
+    if (!is.null(grid$linetype) || !is.null(grid.major$linetype) || 
+          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+      ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                  toRGB(grid$colour, 0.1),
                                  toRGB(grid.major$colour, 0.1))
     } else {
@@ -1162,8 +1163,8 @@ paramORdefault <- function(params, aesVec, defaults){
 }
 
 #' Convert R colors to RGBA hexadecimal color values
-#' @param x character
-#' @param alpha integer
+#' @param x character for color, for example: "white"
+#' @param alpha alpha
 #' @return hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
 #' @export
 toRGB <- function(x, alpha = 1){
