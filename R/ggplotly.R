@@ -52,9 +52,21 @@ pch2symbol <- c("0"="square-open",
                 "23"="diamond",
                 "24"="triangle-up",
                 "25"="triangle-down",
-                "o"="circle",
-                "O"="circle",
-                "+"="cross")
+                "32"="circle",
+                "35"="hash-open",
+                "42"="asterisk-open",
+                "43"="cross-thin-open",
+                "45"="line-ew-open",
+                "47"="line-ne-open",
+                "48"="circle-open",
+                "79"="circle-open",
+                "88"="x-thin-open",
+                "92"="line-nw-open",
+                "95"="line-ew-open",
+                "111"="circle-open",
+                "o"="circle-open",
+                "O"="circle-open",
+                "+"="cross-thin-open")
 
 #' Convert ggplot2 aes to plotly "marker" codes.
 aes2marker <- c(alpha="opacity",
@@ -62,7 +74,8 @@ aes2marker <- c(alpha="opacity",
                 size="size",
                 sizeref="sizeref",
                 sizemode="sizemode",
-                shape="symbol")
+                shape="symbol")#,
+                #fill="color")
 
 default.marker.sizeref <- 1
 marker.size.mult <- 10
@@ -239,6 +252,13 @@ geom2trace <- list(
       marker.size <- marker.size * marker.size.mult
       L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
       L$marker$line$width <- 0
+    } 
+    if (params$shape %in% c(21:25)) {
+      L$marker$color <- toRGB(params$fill) # ="black"){$$$fill$$$}
+      L$marker$line$width <- 0.5
+    }
+    if (params$shape %in% c(26:32)) {
+      L$visible <- FALSE
     }
     L
   },
