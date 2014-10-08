@@ -74,8 +74,7 @@ aes2marker <- c(alpha="opacity",
                 size="size",
                 sizeref="sizeref",
                 sizemode="sizemode",
-                shape="symbol")#,
-                #fill="color")
+                shape="symbol")
 
 default.marker.sizeref <- 1
 marker.size.mult <- 10
@@ -253,15 +252,13 @@ geom2trace <- list(
       L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
       L$marker$line$width <- 0
     } 
-    print(data)
-    print(params)
-    if (params$shape %in% c(21:25)) {
+    if (!is.null(params$shape) && params$shape %in% c(21:25)) {
       L$marker$color <- ifelse(!is.null(params$fill), toRGB(params$fill), "rgba(0,0,0,0)")
       if (!is.null(params$colour))
         L$marker$line$color <- toRGB(params$colour)
       L$marker$line$width <- 1
     }
-    if (params$shape %in% c(32)) {
+    if (!is.null(params$shape) && params$shape %in% c(32)) {
       L$visible <- FALSE
     }
     L
