@@ -27,7 +27,7 @@ group2NA <- function(g, geom){
 
 #' Convert R pch point codes to plotly "symbol" codes.
 pch2symbol <- c("0"="square",
-                "1"="circle",
+                "1"="circle-open",
                 "2"="triangle-up",
                 "3"="cross",
                 "4"="x",
