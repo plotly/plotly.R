@@ -6,9 +6,9 @@
 toRGB(x, alpha = 1)
 }
 \arguments{
-\item{x}{character}
+\item{x}{character for color, for example: "white"}
 
-\item{alpha}{integer}
+\item{alpha}{alpha}
 }
 \value{
 hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
