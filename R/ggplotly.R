@@ -253,11 +253,15 @@ geom2trace <- list(
       L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
       L$marker$line$width <- 0
     } 
+    print(data)
+    print(params)
     if (params$shape %in% c(21:25)) {
-      L$marker$color <- toRGB(params$fill) # ="black"){$$$fill$$$}
-      L$marker$line$width <- 0.5
+      L$marker$color <- ifelse(!is.null(params$fill), toRGB(params$fill), "rgba(0,0,0,0)")
+      if (!is.null(params$colour))
+        L$marker$line$color <- toRGB(params$colour)
+      L$marker$line$width <- 1
     }
-    if (params$shape %in% c(26:32)) {
+    if (params$shape %in% c(32)) {
       L$visible <- FALSE
     }
     L
