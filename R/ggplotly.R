@@ -594,7 +594,19 @@ gg2list <- function(p){
     ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
-    ax.list$gridcolor <- toRGB(theme.pars$panel.grid.major$colour)
+    
+    ## When gridlines are dotted or dashed:
+    grid <- theme.pars$panel.grid
+    grid.major <- theme.pars$panel.grid.major
+    if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
+          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+      ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
+                                 toRGB(grid$colour, 0.1),
+                                 toRGB(grid.major$colour, 0.1))
+    } else {
+       ax.list$gridcolor <- toRGB(grid.major$colour)
+    }
+    
     ax.list$showgrid <- !is.blank(s("panel.grid.major.%s"))
     ## These numeric length variables are not easily convertible.
     ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
@@ -1150,15 +1162,23 @@ paramORdefault <- function(params, aesVec, defaults){
   marker
 }
 
-#' Convert R colors to RGB hexadecimal color values
-#' @param x character
+#' Convert R colors to RGBA hexadecimal color values
+#' @param x character for color, for example: "white"
+#' @param alpha alpha
 #' @return hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
 #' @export
-toRGB <- function(x){
+toRGB <- function(x, alpha=1) {
   if(is.null(x))return(x)
-  rgb.matrix <- col2rgb(x)
+  if (alpha!=1) {
+    rgb.matrix <- col2rgb(x, TRUE)
+    rgb.matrix["alpha", 1] <- alpha
+    ch.vector <- "rgba(%s)"
+  } else {
+    rgb.matrix <- col2rgb(x)
+    ch.vector <- "rgb(%s)"
+  }
   rgb.text <- apply(rgb.matrix, 2, paste, collapse=",")
-  rgb.css <- sprintf("rgb(%s)", rgb.text)
+  rgb.css <- sprintf(ch.vector, rgb.text)
   ifelse(is.na(x), "none", rgb.css)
 }
 
