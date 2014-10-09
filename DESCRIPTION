@@ -10,6 +10,8 @@ Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     email = "karthik.ram@gmail.com"),
     person("Toby", "Hocking", role="aut",
     email="tdhock5@gmail.com"))
+Author: Chris Parmer
+Maintainer: Marianne Corvellec <marianne@plot.ly>
 License: MIT + file LICENSE
 Description: An interface to plotly's online graphing tools with desktop R
     environments. Send data to a plotly account and view the graphs in a web
@@ -28,3 +30,14 @@ Imports:
 Suggests:
     maps,
     testthat
+Collate:
+    'one_to_one_corr.R'
+    'build_function.R'
+    'colour_conversion.R'
+    'ggplotly.R'
+    'marker_conversion.R'
+    'plotly-package.r'
+    'plotly.R'
+    'signup.R'
+    'tools.R'
+    'trace_generation.R'
