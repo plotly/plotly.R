@@ -6,7 +6,7 @@ default.marker.sizeref <- 1
 marker.size.mult <- 10
 
 marker.defaults <- list(alpha=1,
-                        shape="16",
+                        shape="o",
                         size=marker.size.mult,
                         sizeref=default.marker.sizeref,
                         sizemode="area",
