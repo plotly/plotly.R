@@ -110,7 +110,7 @@
             "marker": {
                 "color": "rgb(248,118,109)", 
                 "size": 10, 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"
@@ -229,7 +229,7 @@
             "marker": {
                 "color": "rgb(0,186,56)", 
                 "size": 10, 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"
@@ -348,7 +348,7 @@
             "marker": {
                 "color": "rgb(97,156,255)", 
                 "size": 10, 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"

@@ -15,7 +15,7 @@
                 "size": [
                     2.5
                 ], 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "line": {
                     "width": 0
                 }, 
@@ -42,7 +42,7 @@
                 "size": [
                     15.26595744680851
                 ], 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "line": {
                     "width": 0
                 }, 
@@ -69,7 +69,7 @@
                 "size": [
                     52.5
                 ], 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "line": {
                     "width": 0
                 }, 

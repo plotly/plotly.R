@@ -25,7 +25,7 @@
             "marker": {
                 "color": "rgb(248,118,109)", 
                 "size": 10, 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"
@@ -59,7 +59,7 @@
             "marker": {
                 "color": "rgb(0,191,196)", 
                 "size": 10, 
-                "symbol": "circle-open", 
+                "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"
