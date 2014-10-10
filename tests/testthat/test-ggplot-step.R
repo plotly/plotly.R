@@ -12,6 +12,8 @@ test_that("direction of geom_line is translated to shape=linear", {
   L <- gg2list(gg.linear)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "linear")
+
+  save_outputs(gg.linear, "step-gg.linear-geom_line")
 })
 
 test_that("direction of geom_path is translated to shape=linear", {
@@ -19,6 +21,8 @@ test_that("direction of geom_path is translated to shape=linear", {
   L <- gg2list(gg.lin)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "linear")
+
+  save_outputs(gg.lin, "step-gg.linear-geom_path")
 })
 
 test_that("direction hv is translated to shape=hv", {
@@ -26,6 +30,8 @@ test_that("direction hv is translated to shape=hv", {
   L <- gg2list(gg.hv)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "hv")
+
+  save_outputs(gg.hv, "step-gg.hv")
 })
 
 test_that("direction vh is translated to shape=vh", {
@@ -33,6 +39,8 @@ test_that("direction vh is translated to shape=vh", {
   L <- gg2list(gg.vh)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "vh")
+
+  save_outputs(gg.vh, "step-gg.vh")
 })
 
 test_that("direction hvh is translated to shape=hvh", {
@@ -40,6 +48,8 @@ test_that("direction hvh is translated to shape=hvh", {
   L <- gg2list(gg.hvh)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "hvh")
+
+  save_outputs(gg.hvh, "step-gg.hvh", TRUE)
 })
 
 test_that("direction vhv is translated to shape=vhv", {
@@ -47,4 +57,6 @@ test_that("direction vhv is translated to shape=vhv", {
   L <- gg2list(gg.vhv)
   expect_equal(length(L), 3)
   expect_identical(L[[1]]$line$shape, "vhv")
+
+  save_outputs(gg.vhv, "step-gg.vhv", TRUE)
 })

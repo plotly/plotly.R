@@ -7,6 +7,8 @@ test_that("size is not a vector if it is not specified", {
   m <- L[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) <= 1)
+
+  save_outputs(gg, "size-not-a-vector")
 })
 
 test_that("size is a vector if it is specified", {
@@ -16,6 +18,8 @@ test_that("size is a vector if it is specified", {
   m <- L[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
+
+  save_outputs(gg, "size-is-a-vector")
 })
 
 countrypop <- data.frame(country=c("Paraguay", "Peru", "Philippines"),
@@ -32,3 +36,5 @@ test_that("global scaling works for sizes over different traces", {
   expect_true(as.numeric(L[[1]]$marker$size) < as.numeric(L[[2]]$marker$size))
   expect_true(as.numeric(L[[2]]$marker$size) < as.numeric(L[[3]]$marker$size))
 })
+
+save_outputs(gg, "size-global-scaling")

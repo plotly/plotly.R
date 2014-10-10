@@ -1,0 +1,96 @@
+{
+    "data": [
+        {
+            "x": [
+                1, 
+                2, 
+                null, 
+                1, 
+                2
+            ], 
+            "y": [
+                1, 
+                1, 
+                null, 
+                2, 
+                2
+            ], 
+            "mode": "lines", 
+            "name": "positive", 
+            "line": {
+                "color": "rgb(248,118,109)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                -1, 
+                -2, 
+                null, 
+                -1, 
+                -2
+            ], 
+            "y": [
+                -2, 
+                -2, 
+                null, 
+                -1, 
+                -1
+            ], 
+            "mode": "lines", 
+            "name": "negative", 
+            "line": {
+                "color": "rgb(0,191,196)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "x", 
+            "type": "linear", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "y", 
+            "type": "linear", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)"
+    }
+}

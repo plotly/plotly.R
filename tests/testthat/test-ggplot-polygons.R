@@ -14,6 +14,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$x, c(12, 13, 13, 12, 12))
   expect_equal(info[[2]]$y, c(10, 10, 11, 11, 10))
 
+  save_outputs(gg, "polygons-filled-polygons")
+
   first.color <- rgb(0.23, 0.45, 0.67)
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, color=lab), fill="grey")+
@@ -31,6 +33,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$line$color, toRGB("springgreen3"))
   expect_equal(info[[2]]$name, "name2")
 
+  save_outputs(gg, "polygons-springgreen3")
+
 
   first.color <- rgb(0.23, 0.45, 0.67)
   gg <- ggplot(poly.df)+
@@ -46,6 +50,9 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$y, c(10, 10, 11, 11, 10))
   expect_equal(info[[2]]$fillcolor, toRGB("springgreen3"))
   expect_equal(info[[2]]$name, "name2")
+
+  save_outputs(gg, "polygons-springgreen3-lab")
+
 
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, linetype=lab), fill="red", colour="blue")+
@@ -65,6 +72,9 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$line$dash, "dash")
   expect_equal(info[[2]]$name, "name2")
 
+  save_outputs(gg, "polygons-dashed")
+
+
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, size=lab), fill="orange", colour="black")+
     scale_size_manual(values=c(name1=2, name2=3))
@@ -80,6 +90,10 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$fillcolor, toRGB("orange"))
   expect_equal(info[[2]]$line$width, 3)
   expect_equal(info[[2]]$name, "name2")
+
+
+  save_outputs(gg, "polygons-halloween")
+
 })
 
 test_that("borders become one trace with NA", {
@@ -91,4 +105,6 @@ test_that("borders become one trace with NA", {
   expect_identical(length(info), 2L)
   tr <- info[[1]]
   expect_true(any(is.na(tr$x)))
+
+  save_outputs(gg, "polygons-borders")
 })

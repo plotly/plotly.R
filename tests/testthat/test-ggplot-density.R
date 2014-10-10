@@ -11,3 +11,5 @@ test_that("geom_density is translated to a normalized histogram", {
   expect_identical(L[[1]]$histnorm, "probability density")
   expect_equal(L[[2]]$layout$bargap, 0)
 })
+
+save_outputs(m, "density")

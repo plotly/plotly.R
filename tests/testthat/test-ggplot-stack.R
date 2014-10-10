@@ -20,4 +20,6 @@ test_that("y value is non-cumulative in stacked bar charts", {
   expect_equal(L[[3]]$y[1], instructors$number[3])
   expect_equal(L[[2]]$y[2], instructors$number[5])
   expect_equal(L[[3]]$y[2], instructors$number[6])
+
+  save_outputs(gg, "stack")
 })

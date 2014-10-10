@@ -12,6 +12,8 @@ test_that("lines are different from paths", {
   l.tr <- gg2list(l)[[1]]
   expect_identical(l.tr$x[1:3], c(1, 2, 3))
   expect_identical(l.tr$y[1:3], c(0, 1, 0))
+
+  save_outputs(p, "path-lines-diff-from-paths")
 })
 
 two.paths <- data.frame(x=c(1, 2, 1, 2),
@@ -40,6 +42,8 @@ test_that("paths with different colors become different traces", {
   expect_identical(info[[2]]$x[1:2], c(1,2))
   expect_identical(info[[1]]$y[1:2], c(1,1))
   expect_identical(info[[2]]$y[1:2], c(2,2))
+
+  save_outputs(gg, "path-colors")
 })
 
 four.paths <- rbind(data.frame(two.paths, g="positive"),
@@ -56,4 +60,6 @@ test_that("paths with the same color but different groups stay together", {
   expect_true(any(is.na(info[[1]]$y)))
   expect_true(any(is.na(info[[2]]$x)))
   expect_true(any(is.na(info[[2]]$y)))
+
+  save_outputs(gg, "path-colored-groups-stay-together")
 })

@@ -1,6 +1,6 @@
 context("text")
 
-gg <- ggplot(mtcars, aes(x=wt, y=mpg, label=rownames(mtcars))) + 
+gg <- ggplot(mtcars, aes(x=wt, y=mpg, label=rownames(mtcars))) +
   geom_text(size=18)
 info <- gg2list(gg)
 
@@ -16,3 +16,5 @@ test_that("position is translated correctly", {
 test_that("textsize is translated correctly", {
   expect_identical(info[[1]]$textfont$size, 18)
 })
+
+save_outputs(gg, "text")

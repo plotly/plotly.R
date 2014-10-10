@@ -15,11 +15,13 @@ test_that("6 different automatic lty converted to plotly's 6 types", {
   generated <- sapply(info[1:6], function(L) L$line$dash)
   expect_true(all(generated %in% expected))
   expect_true(all(expected %in% generated))
+
+  save_outputs(gg, "linetype-types")
 })
 
 test_that("different colored lines become different colored traces", {
   ## http://stackoverflow.com/questions/2564258/plot-2-graphs-in-same-plot-in-r/19039094#19039094
-  
+
   ## original data in a 'wide' format
   x  <- seq(-2, 2, 0.05)
   y1 <- pnorm(x)
@@ -39,4 +41,6 @@ test_that("different colored lines become different colored traces", {
   expect_identical(info[[2]]$line$color, toRGB("red"))
   expect_identical(info[[2]]$y[1:n], y2)
   expect_identical(info[[2]]$x[1:n], x)
+
+  save_outputs(gg, "linetype-colors")
 })

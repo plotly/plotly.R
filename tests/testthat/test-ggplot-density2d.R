@@ -12,3 +12,5 @@ test_that("geom_density2d is translated to type=histogram2dcontour", {
 test_that("geom_density2d uses line contours by default", {
   expect_identical(L[[1]]$contours$coloring, "lines")
 })
+
+save_outputs(m, "density2d")

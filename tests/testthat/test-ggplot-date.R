@@ -14,6 +14,8 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
   for(trace in info[1:2]){
     expect_identical(trace$x, out.str)
   }
+
+  save_outputs(gg, "date-strings")
 })
 
 test_that("class Date is supported", {
@@ -25,6 +27,8 @@ test_that("class Date is supported", {
   expect_equal(length(info), 2)
   expect_identical(info$kwargs$layout$xaxis$type, "date")
   expect_identical(info[[1]]$x[1], "2013-01-01 00:00:00")
+
+  save_outputs(gg, "date-class-Date")
 })
 
 test_that("scale_x_date and irregular time series work", {
@@ -49,4 +53,6 @@ test_that("scale_x_date and irregular time series work", {
   expect_identical(info$kwargs$layout$xaxis$type, "date")
   expect_identical(info_w_scale$kwargs$layout$xaxis$type, "date")
   expect_equal(length(info_w_scale[[2]]), length(info[[2]]))  # similar layout
+
+  save_outputs(dt, "date-irregular-time-series")
 })
