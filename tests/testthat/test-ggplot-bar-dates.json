@@ -1,45 +1,38 @@
 {
     "data": [
         {
-            "z": [
-                [
-                    1, 
-                    20, 
-                    30, 
-                    50, 
-                    1
-                ], 
-                [
-                    20, 
-                    1, 
-                    60, 
-                    80, 
-                    30
-                ], 
-                [
-                    30, 
-                    60, 
-                    1, 
-                    -10, 
-                    20
-                ]
-            ], 
             "x": [
-                "Monday", 
-                "Tuesday", 
-                "Wednesday", 
-                "Thursday", 
-                "Friday"
+                "2012-01-01 00:00:00", 
+                "2012-02-01 00:00:00"
             ], 
             "y": [
-                "Morning", 
-                "Afternoon", 
-                "Evening"
+                14, 
+                37
             ], 
+            "name": "Bio", 
+            "marker": {
+                "color": "rgb(248,118,109)"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
-            "showlegend": false, 
-            "type": "heatmap"
+            "type": "bar"
+        }, 
+        {
+            "x": [
+                "2012-01-01 00:00:00", 
+                "2012-02-01 00:00:00"
+            ], 
+            "y": [
+                23, 
+                20
+            ], 
+            "name": "Math", 
+            "marker": {
+                "color": "rgb(0,191,196)"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
         }
     ], 
     "layout": {
@@ -48,8 +41,8 @@
         }, 
         "showlegend": true, 
         "xaxis": {
-            "title": "Var1", 
-            "type": "category", 
+            "title": "month", 
+            "type": "date", 
             "showgrid": true, 
             "showline": false, 
             "showticklabels": true, 
@@ -57,8 +50,8 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "yaxis": {
-            "title": "Var2", 
-            "type": "category", 
+            "title": "papers", 
+            "type": "linear", 
             "showgrid": true, 
             "showline": false, 
             "showticklabels": true, 
@@ -78,6 +71,7 @@
             "r": 10
         }, 
         "paper_bgcolor": "rgb(255,255,255)", 
-        "plot_bgcolor": "rgb(229,229,229)"
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "barmode": "stack"
     }
 }
