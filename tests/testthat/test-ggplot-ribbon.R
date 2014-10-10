@@ -11,3 +11,5 @@ test_that("sanity check for geom_ribbon", {
   expect_equal(L[[1]]$x, c(huron$year[1], huron$year, rev(huron$year)))
   expect_equal(L[[1]]$y, c(huron$level[1]-1, huron$level+1, rev(huron$level-1)))
 })
+
+save_outputs(rb, "ribbon")

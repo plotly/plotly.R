@@ -10,4 +10,6 @@ test_that("name param is passed to plotly", {
   info <- gg2list(gg)
   expect_identical(info[[1]]$name, "borders")
   expect_identical(info[[2]]$name, "cities")
+
+  save_outputs(gg, "names")
 })

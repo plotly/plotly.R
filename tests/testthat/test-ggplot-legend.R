@@ -6,6 +6,8 @@ test_that("legend can be hidden", {
     theme(legend.position="none")
   info <- gg2list(ggiris)
   expect_identical(info$kwargs$layout$showlegend, FALSE)
+
+  save_outputs(ggiris, "legend-hidden")
 })
 
 test_that("legend entries appear in the correct order", {
@@ -24,4 +26,6 @@ test_that("legend entries appear in the correct order", {
   ggbreaks <- ggiris+scale_color_discrete(breaks=breaks)
   info.breaks <- gg2list(ggbreaks)
   expect_identical(getnames(info.breaks), breaks)
+
+  save_outputs(ggiris, "legend-order")
 })

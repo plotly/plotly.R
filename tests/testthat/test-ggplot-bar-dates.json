@@ -1,0 +1,77 @@
+{
+    "data": [
+        {
+            "x": [
+                "2012-01-01 00:00:00", 
+                "2012-02-01 00:00:00"
+            ], 
+            "y": [
+                14, 
+                37
+            ], 
+            "name": "Bio", 
+            "marker": {
+                "color": "rgb(248,118,109)"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }, 
+        {
+            "x": [
+                "2012-01-01 00:00:00", 
+                "2012-02-01 00:00:00"
+            ], 
+            "y": [
+                23, 
+                20
+            ], 
+            "name": "Math", 
+            "marker": {
+                "color": "rgb(0,191,196)"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "month", 
+            "type": "date", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "papers", 
+            "type": "linear", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "barmode": "stack"
+    }
+}

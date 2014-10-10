@@ -9,6 +9,8 @@ test_that("background translated correctly",{
   L <- info$kwargs$layout
   expect_identical(L$plot_bgcolor, toRGB("blue"))
   expect_identical(L$paper_bgcolor, toRGB("green"))
+
+  save_outputs(ggiris, "theme-background")
 })
 
 test_that("grid/ticks translated correctly",{
@@ -20,6 +22,8 @@ test_that("grid/ticks translated correctly",{
     expect_identical(ax.list$tickcolor, toRGB("red"))
     expect_identical(ax.list$gridcolor, toRGB("violet"))
   }
+
+  save_outputs(ggiris, "theme-ticks-and-grids")
 })
 
 test_that("dotted/dashed grid translated as line with alpha=0.1",{
@@ -30,6 +34,8 @@ test_that("dotted/dashed grid translated as line with alpha=0.1",{
     expect_identical(ax.list$gridcolor, toRGB("white", 0.1))
     expect_identical(ax.list$gridcolor, "rgba(255,255,255,0.1)")
   }
+
+    save_outputs(ggiris, "theme-dashed-grid-lines")
 })
 
 test_that("plot panel border is translated correctly", {
@@ -39,6 +45,9 @@ test_that("plot panel border is translated correctly", {
     ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
     expect_identical(ax.list$showline, FALSE)
   }
+
+  save_outputs(ggiris, "theme-panel-border-1")
+
   red <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width)) +
     theme(panel.border=element_rect(colour="red"))
@@ -48,4 +57,6 @@ test_that("plot panel border is translated correctly", {
     expect_identical(ax.list$showline, TRUE)
     expect_identical(ax.list$linecolor, toRGB("red"))
   }
+
+  save_outputs(red, "theme-panel-border-2")
 })

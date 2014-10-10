@@ -15,6 +15,8 @@ test_that("position_dodge is translated to barmode=group", {
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "group")
+  
+  save_outputs(gg.dodge, "bar-dodge")
 })
 
 test_that("position_stack is translated to barmode=stack", {
@@ -24,6 +26,8 @@ test_that("position_stack is translated to barmode=stack", {
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "stack")
+  
+  save_outputs(gg.stack, "bar-stack")
 })
 
 test_that("position_identity is translated to barmode=overlay", {
@@ -33,6 +37,8 @@ test_that("position_identity is translated to barmode=overlay", {
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "overlay")
+  
+  save_outputs(gg.identity, "bar-identity")
 })
 
 test_that("dates work well with bar charts", {
@@ -49,4 +55,6 @@ test_that("dates work well with bar charts", {
   expect_identical(L$kwargs$layout$xaxis$type, "date")
   expect_identical(L[[1]]$x[1], "2012-01-01 00:00:00")
   expect_identical(L[[1]]$x[2], "2012-02-01 00:00:00")
+  
+  save_outputs(gd, "bar-dates")
 })

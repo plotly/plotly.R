@@ -11,4 +11,6 @@ test_that("segments become one path", {
   tr <- info[[1]]
   expect_true(any(is.na(tr$x)))
   expect_true(any(is.na(tr$y)))
+
+  save_outputs(gg, "segment")
 })

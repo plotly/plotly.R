@@ -12,6 +12,8 @@ test_that("geom_boxplot gives a boxplot", {
   # right data for 1st trace
   expect_identical(sort(L[[1]]$y),
                    sort(mtcars$mpg[mtcars$cyl == 4]))
+  
+  save_outputs(gg, "boxplot")
 })
 
 test_that("geom_violin is equated to geom_boxplot for now", {
@@ -26,6 +28,8 @@ test_that("geom_violin is equated to geom_boxplot for now", {
   # right data for 1st trace
   expect_identical(sort(L[[1]]$y),
                    sort(mtcars$mpg[mtcars$cyl == 4]))
+  
+  save_outputs(gg, "violin")
 })
 
 test_that("you can make a boxplot for a distribution of datetimes", {
@@ -41,4 +45,6 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   expect_equal(length(L), 2)  # 1 trace + layout
   expect_identical(L[[1]]$type, "box")
   expect_identical(L[[1]]$y, as.character(df$y))
+  
+  save_outputs(bp, "boxplot-datetime")
 })

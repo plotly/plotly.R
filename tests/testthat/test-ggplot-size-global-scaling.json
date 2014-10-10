@@ -1,0 +1,123 @@
+{
+    "data": [
+        {
+            "x": [
+                4.2
+            ], 
+            "y": [
+                0.38
+            ], 
+            "mode": "markers", 
+            "name": "Paraguay", 
+            "text": "size: 7", 
+            "marker": {
+                "color": "rgb(248,118,109)", 
+                "size": [
+                    2.5
+                ], 
+                "symbol": "circle-open", 
+                "line": {
+                    "width": 0
+                }, 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                1.75
+            ], 
+            "y": [
+                1.67
+            ], 
+            "mode": "markers", 
+            "name": "Peru", 
+            "text": "size: 31", 
+            "marker": {
+                "color": "rgb(0,186,56)", 
+                "size": [
+                    15.26595744680851
+                ], 
+                "symbol": "circle-open", 
+                "line": {
+                    "width": 0
+                }, 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                1.33
+            ], 
+            "y": [
+                0.43
+            ], 
+            "mode": "markers", 
+            "name": "Philippines", 
+            "text": "size: 101", 
+            "marker": {
+                "color": "rgb(97,156,255)", 
+                "size": [
+                    52.5
+                ], 
+                "symbol": "circle-open", 
+                "line": {
+                    "width": 0
+                }, 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "edu", 
+            "type": "linear", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "illn", 
+            "type": "linear", 
+            "showgrid": true, 
+            "showline": false, 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)"
+    }
+}
