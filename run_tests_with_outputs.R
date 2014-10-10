@@ -1,6 +1,6 @@
 library(testthat)
 
-setwd('tests')
+setwd("tests")
 
 save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
   print(paste("running", name))
@@ -20,3 +20,4 @@ save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
 }
 
 test_check("plotly")
+setwd("..")

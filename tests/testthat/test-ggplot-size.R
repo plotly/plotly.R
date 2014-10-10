@@ -8,7 +8,7 @@ test_that("size is not a vector if it is not specified", {
   expect_that(m, is_a("list"))
   expect_true(length(m$size) <= 1)
 
-  save_outputs(gg, "size-not-a-vector")
+  save_outputs(iplot, "size-not-a-vector")
 })
 
 test_that("size is a vector if it is specified", {
@@ -19,7 +19,7 @@ test_that("size is a vector if it is specified", {
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
 
-  save_outputs(gg, "size-is-a-vector")
+  save_outputs(iplot, "size-is-a-vector")
 })
 
 countrypop <- data.frame(country=c("Paraguay", "Peru", "Philippines"),
