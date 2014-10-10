@@ -1,6 +1,7 @@
 library(testthat)
 
 save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
+  print(paste("running", name))
   py <- plotly("TestBot", "r1neazxo9w")
   u <- py$ggplotly(gg, kwargs=list(filename=paste0("ggplot2/", name),
                                    fileopt="overwrite", auto_open=FALSE))
