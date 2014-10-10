@@ -8,6 +8,8 @@ test_that("axis type=category when we plot factors", {
   l <- info$kwargs$layout
   expect_identical(l$xaxis$type, "category")
   expect_identical(l$yaxis$type, "linear")
+  
+  save_outputs(gg, "bar-factor-category")
 })
 
 test_that("Bar charts of type=category show category names", {
@@ -20,4 +22,6 @@ test_that("Bar charts of type=category show category names", {
   expect_identical(info$kwargs$layout$yaxis$type, "linear")
   expect_true(all(c("Fair", "Good", "Very Good", "Premium", "Ideal") %in%
                     info[[1]]$x))
+  
+  save_outputs(gbar, "bar-category-names")
 })
