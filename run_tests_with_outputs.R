@@ -1,5 +1,7 @@
 library(testthat)
 
+setwd('tests')
+
 save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
   print(paste("running", name))
   py <- plotly("TestBot", "r1neazxo9w")
