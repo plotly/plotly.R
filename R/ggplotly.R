@@ -281,13 +281,13 @@ gg2list <- function(p){
              color=toRGB(text$colour))
       }
     }
-    ## Ticks.
-    if (is.blank(s("axis.ticks.%s"))) {
+    # Ticks.
+    if (is.blank("axis.ticks")) {
       ax.list$ticks <- ""
-    } else if (is.blank("axis.ticks")) {
+    } else if (is.blank(s("axis.ticks.%s"))) {
       ax.list$ticks <- ""
     } else {
-      ax.list$ticks <- "outside" # by default plots in ggplot2 have ticks
+      ax.list$ticks <- "outside"  # by default ggplot2 plots have ticks
     } 
     ax.list$tickwidth <- theme.pars$axis.ticks$size
     tick.text.name <- s("axis.text.%s")
