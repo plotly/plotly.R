@@ -26,7 +26,7 @@ test_that("grid/ticks translated correctly",{
   save_outputs(ggiris, "theme-ticks-and-grids")
 })
 
-test_that("like in ggplot2, show ticks as 'outside' by default", {
+test_that("show ticks as 'outside' by default", {
   ggiris <- iris.base
   info <- gg2list(ggiris)
   for (xy in c("x", "y")) {
