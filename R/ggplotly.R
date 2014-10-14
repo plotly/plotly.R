@@ -273,13 +273,6 @@ gg2list <- function(p){
     ## These numeric length variables are not easily convertible.
     ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
     ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
-    ax.list$tickwidth <- theme.pars$axis.ticks$size
-    tick.text.name <- s("axis.text.%s")
-    ax.list$showticklabels <- !is.blank(tick.text.name)
-    tick.text <- e(tick.text.name)
-    ax.list$tickangle <- if(is.numeric(tick.text$angle)){
-      -tick.text$angle
-    }
     
     theme2font <- function(text){
       if(!is.null(text)){
@@ -288,6 +281,23 @@ gg2list <- function(p){
              color=toRGB(text$colour))
       }
     }
+    ## Ticks.
+    if (is.blank(s("axis.ticks.%s"))) {
+      ax.list$ticks <- ""
+    } else if (is.blank("axis.ticks")) {
+      ax.list$ticks <- ""
+    } else {
+      ax.list$ticks <- "outside" # by default plots in ggplot2 have ticks
+    } 
+    ax.list$tickwidth <- theme.pars$axis.ticks$size
+    tick.text.name <- s("axis.text.%s")
+    ax.list$showticklabels <- !is.blank(tick.text.name)
+    tick.text <- e(tick.text.name)
+    ax.list$tickangle <- if(is.numeric(tick.text$angle)){
+      -tick.text$angle
+    }
+    ax.list$tickfont <- theme2font(tick.text)
+    
     ## Translate axes labels.
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
@@ -300,7 +310,6 @@ gg2list <- function(p){
     }else{
       p$labels[[xy]]
     }
-    ax.list$tickfont <- theme2font(tick.text)
     title.text <- e(s("axis.title.%s"))
     ax.list$titlefont <- theme2font(title.text)
     ax.list$type <- if(misc$is.continuous[[xy]]){
@@ -319,7 +328,6 @@ gg2list <- function(p){
     ## Some other params that we used in animint but we don't yet
     ## translate to plotly:
     !is.blank(s("axis.line.%s"))
-    !is.blank(s("axis.ticks.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
 

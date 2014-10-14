@@ -26,6 +26,17 @@ test_that("grid/ticks translated correctly",{
   save_outputs(ggiris, "theme-ticks-and-grids")
 })
 
+test_that("like in ggplot2, show ticks as 'outside' by default", {
+  ggiris <- iris.base
+  info <- gg2list(ggiris)
+  for (xy in c("x", "y")) {
+    ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
+    expect_identical(ax.list$ticks, "outside")
+  }
+  
+  save_outputs(ggiris, "theme-ticks-default")
+})
+
 test_that("dotted/dashed grid translated as line with alpha=0.1",{
   ggiris <- iris.base + theme(panel.grid.major=element_line(linetype="dashed"))
   info <- gg2list(ggiris)
