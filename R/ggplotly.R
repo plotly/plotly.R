@@ -293,7 +293,7 @@ gg2list <- function(p){
     tick.text.name <- s("axis.text.%s")
     ax.list$showticklabels <- !is.blank(tick.text.name)
     tick.text <- e(tick.text.name)
-    ax.list$tickangle <- if(is.numeric(tick.text$angle)){
+    ax.list$tickangle <- if(is.numeric(tick.text$angle)) {
       -tick.text$angle
     }
     ax.list$tickfont <- theme2font(tick.text)
