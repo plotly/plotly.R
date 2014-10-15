@@ -294,6 +294,11 @@ toBasic <- list(
     g$params$xend <- max(g$prestats.data$globxmax)
     g
   },
+  hline=function(g) {
+    g$params$xstart <- min(g$prestats.data$globxmin)
+    g$params$xend <- max(g$prestats.data$globxmax)
+    g
+  },
   point=function(g) {
     if ("size" %in% names(g$data)) {
       g$params$sizemin <- min(g$prestats.data$globsizemin)
@@ -506,6 +511,14 @@ geom2trace <- list(
     list(x=c(params$xstart, params$xend),
          y=c(params$intercept + params$xstart * params$slope,
              params$intercept + params$xend * params$slope),
+         name=params$name,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
+  },
+  hline=function(data, params) {
+    list(x=c(params$xstart, params$xend),
+         y=c(data$yintercept, data$yintercept),
          name=params$name,
          type="scatter",
          mode="lines",
