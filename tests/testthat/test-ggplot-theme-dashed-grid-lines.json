@@ -330,6 +330,7 @@
             "type": "linear", 
             "showgrid": true, 
             "showline": false, 
+            "ticks": "outside", 
             "showticklabels": true, 
             "tickcolor": "rgb(127,127,127)", 
             "gridcolor": "rgba(255,255,255,0.1)"
@@ -339,6 +340,7 @@
             "type": "linear", 
             "showgrid": true, 
             "showline": false, 
+            "ticks": "outside", 
             "showticklabels": true, 
             "tickcolor": "rgb(127,127,127)", 
             "gridcolor": "rgba(255,255,255,0.1)"
