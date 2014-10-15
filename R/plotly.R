@@ -96,11 +96,14 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                        args=toJSON(args, digits=50, collapse=""), un=pub$username,
                        key=pub$key, origin=origin,
                        kwargs=toJSON(kwargs, digits=50, collapse=""),
-                       .opts=list(sslversion=3, cainfo=system.file("CurlSSL", "cacert.pem", package="RCurl")))
+                       .opts=list(sslversion=1,  # 1 is for TLSv1
+                                  cainfo=system.file("CurlSSL",
+                                                     "cacert.pem",
+                                                     package="RCurl")))
     if (is.raw(respst)) {
         respst <- rawToChar(respst)
     }
-
+    
     resp <- fromJSON(respst, simplify = FALSE)
     if (!is.null(resp$filename))
       pub$filename <- resp$filename
