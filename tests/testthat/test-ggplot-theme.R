@@ -37,6 +37,17 @@ test_that("show ticks as 'outside' by default", {
   save_outputs(ggiris, "theme-ticks-default")
 })
 
+test_that("do not show zeroline by default", {
+  ggiris <- iris.base
+  info <- gg2list(ggiris)
+  for (xy in c("x", "y")) {
+    ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
+    expect_identical(ax.list$zeroline, FALSE)
+  }
+  
+  save_outputs(ggiris, "theme-zeroline-default")
+})
+
 test_that("dotted/dashed grid translated as line with alpha=0.1",{
   ggiris <- iris.base + theme(panel.grid.major=element_line(linetype="dashed"))
   info <- gg2list(ggiris)
