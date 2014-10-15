@@ -323,7 +323,7 @@ gg2list <- function(p){
     }
     
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
-    ## Lines drawn around the plot border.
+    # Lines drawn around the plot border.
     ax.list$showline <- !is.blank("panel.border", TRUE)
     ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
     ax.list$linewidth <- theme.pars$panel.border$size
