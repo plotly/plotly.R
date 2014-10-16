@@ -1,0 +1,82 @@
+{
+    "data": [
+        {
+            "x": [
+                "control", 
+                "treatment"
+            ], 
+            "autobinx": true, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "histogram"
+        }, 
+        {
+            "x": [
+                0.4, 
+                2.6
+            ], 
+            "y": [
+                12, 
+                12, 
+                12, 
+                12
+            ], 
+            "mode": "lines", 
+            "line": {
+                "color": "rgb(153,0,0)", 
+                "width": 2, 
+                "dash": "dash", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "cond", 
+            "type": "category", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "result", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "barmode": "group", 
+        "bargap": 0
+    }
+}

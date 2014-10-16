@@ -1,0 +1,112 @@
+{
+    "data": [
+        {
+            "x": [
+                null
+            ], 
+            "y": [
+                13.53, 
+                16.81
+            ], 
+            "name": "Female", 
+            "marker": {
+                "color": "rgb(248,118,109)", 
+                "line": {
+                    "color": "rgb(0,0,0)", 
+                    "width": 0.3
+                }
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }, 
+        {
+            "x": [
+                null
+            ], 
+            "y": [
+                16.24, 
+                17.42
+            ], 
+            "name": "Male", 
+            "marker": {
+                "color": "rgb(0,191,196)", 
+                "line": {
+                    "color": "rgb(0,0,0)", 
+                    "width": 0.3
+                }
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }
+    ], 
+    "layout": {
+        "title": "Average bill for 2 people", 
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "Time of day", 
+            "titlefont": {
+                "family": "", 
+                "size": 12, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "type": "category", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": true, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(0,0,0)", 
+            "tickangle": 0, 
+            "tickfont": {
+                "family": "", 
+                "size": 9.600000000000001, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "gridcolor": "rgb(229,229,229)", 
+            "linecolor": "rgb(127,127,127)"
+        }, 
+        "yaxis": {
+            "title": "Total bill", 
+            "titlefont": {
+                "family": "", 
+                "size": 12, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": true, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(0,0,0)", 
+            "tickangle": 0, 
+            "tickfont": {
+                "family": "", 
+                "size": 9.600000000000001, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "gridcolor": "rgb(229,229,229)", 
+            "linecolor": "rgb(127,127,127)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(255,255,255)", 
+        "barmode": "group"
+    }
+}

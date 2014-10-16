@@ -1,0 +1,170 @@
+{
+    "data": [
+        {
+            "x": [
+                "Lunch", 
+                "Dinner"
+            ], 
+            "y": [
+                13.53, 
+                16.81
+            ], 
+            "mode": "lines", 
+            "name": "Female.Female", 
+            "line": {
+                "color": "rgb(145,12,0)", 
+                "width": 1, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                "Lunch", 
+                "Dinner"
+            ], 
+            "y": [
+                16.24, 
+                17.42
+            ], 
+            "mode": "lines", 
+            "name": "Male.Male", 
+            "line": {
+                "color": "rgb(0,105,110)", 
+                "width": 1, 
+                "dash": "dash", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                "Lunch", 
+                "Dinner"
+            ], 
+            "y": [
+                13.53, 
+                16.81
+            ], 
+            "mode": "markers", 
+            "name": "Female.Female", 
+            "marker": {
+                "color": "rgb(255,255,255)", 
+                "size": 3, 
+                "symbol": "square", 
+                "line": {
+                    "color": "rgb(145,12,0)", 
+                    "width": 1
+                }, 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                "Lunch", 
+                "Dinner"
+            ], 
+            "y": [
+                16.24, 
+                17.42
+            ], 
+            "mode": "markers", 
+            "name": "Male.Male", 
+            "marker": {
+                "color": "rgb(255,255,255)", 
+                "size": 3, 
+                "symbol": "circle", 
+                "line": {
+                    "color": "rgb(0,105,110)", 
+                    "width": 1
+                }, 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "title": "Average bill for 2 people", 
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": [
+            true, 
+            true
+        ], 
+        "xaxis": {
+            "title": "Time of day", 
+            "titlefont": {
+                "family": "", 
+                "size": 12, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "type": "category", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": true, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(0,0,0)", 
+            "tickangle": 0, 
+            "tickfont": {
+                "family": "", 
+                "size": 9.600000000000001, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "gridcolor": "rgb(229,229,229)", 
+            "linecolor": "rgb(127,127,127)"
+        }, 
+        "yaxis": {
+            "title": "Total bill", 
+            "titlefont": {
+                "family": "", 
+                "size": 12, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": true, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(0,0,0)", 
+            "tickangle": 0, 
+            "tickfont": {
+                "family": "", 
+                "size": 9.600000000000001, 
+                "color": "rgb(0,0,0)"
+            }, 
+            "gridcolor": "rgb(229,229,229)", 
+            "linecolor": "rgb(127,127,127)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(255,255,255)"
+    }
+}

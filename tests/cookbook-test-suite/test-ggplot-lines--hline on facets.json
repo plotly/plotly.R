@@ -1,0 +1,285 @@
+{
+    "data": [
+        {
+            "x": [
+                11.5, 
+                9.3, 
+                8, 
+                11.5, 
+                8.6, 
+                9.9, 
+                8.8, 
+                11.7, 
+                9.7, 
+                9.8
+            ], 
+            "y": [
+                10.8, 
+                12.9, 
+                9.9, 
+                10.1, 
+                8.3, 
+                9.5, 
+                8.7, 
+                10.1, 
+                9.3, 
+                12
+            ], 
+            "mode": "markers", 
+            "name": "control", 
+            "marker": {
+                "color": "rgb(248,118,109)", 
+                "size": 10, 
+                "symbol": "circle", 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                10.4, 
+                12.1, 
+                11.2, 
+                10, 
+                12.9, 
+                9.1, 
+                13.4, 
+                11.6, 
+                11.5, 
+                12
+            ], 
+            "y": [
+                10.6, 
+                8.6, 
+                11, 
+                8.8, 
+                9.5, 
+                10, 
+                9.6, 
+                9.8, 
+                9.8, 
+                10.6
+            ], 
+            "mode": "markers", 
+            "name": "treatment", 
+            "marker": {
+                "color": "rgb(0,191,196)", 
+                "size": 10, 
+                "symbol": "circle", 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x2", 
+            "yaxis": "y1", 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                7.73, 
+                13.67
+            ], 
+            "y": [
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10, 
+                10
+            ], 
+            "mode": "lines", 
+            "line": {
+                "color": "rgb(0,0,0)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }, 
+        {
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }, 
+        {
+            "xaxis": "x2", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "range": [
+                7.73, 
+                13.67
+            ], 
+            "domain": [
+                0, 
+                0.49
+            ], 
+            "type": "linear", 
+            "autorange": false, 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)", 
+            "anchor": "y"
+        }, 
+        "yaxis": {
+            "range": [
+                8.07, 
+                13.13
+            ], 
+            "domain": [
+                0, 
+                0.99
+            ], 
+            "type": "linear", 
+            "autorange": false, 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)", 
+            "anchor": "x"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "annotations": [
+            {
+                "x": 0.245, 
+                "y": 1.05, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "control", 
+                "showarrow": false, 
+                "xanchor": "center", 
+                "yanchor": "auto", 
+                "ax": 0, 
+                "ay": 0, 
+                "textangle": 0
+            }, 
+            {
+                "x": 0.745, 
+                "y": 1.05, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "treatment", 
+                "showarrow": false, 
+                "xanchor": "center", 
+                "yanchor": "auto", 
+                "ax": 0, 
+                "ay": 0, 
+                "textangle": 0
+            }, 
+            {
+                "x": 0.5, 
+                "y": -0.05, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "xval", 
+                "showarrow": false, 
+                "xanchor": "auto", 
+                "yanchor": "top", 
+                "ax": 0, 
+                "ay": 0, 
+                "textangle": 0
+            }, 
+            {
+                "x": -0.05, 
+                "y": 0.5, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "yval", 
+                "showarrow": false, 
+                "xanchor": "auto", 
+                "yanchor": "auto", 
+                "ax": 0, 
+                "ay": 0, 
+                "textangle": -90
+            }
+        ], 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "xaxis2": {
+            "range": [
+                7.73, 
+                13.67
+            ], 
+            "domain": [
+                0.5, 
+                0.99
+            ], 
+            "type": "linear", 
+            "autorange": false, 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)", 
+            "anchor": "y"
+        }
+    }
+}
