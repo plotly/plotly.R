@@ -1,15 +1,8 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 df <- data.frame(time = factor(c("Lunch","Dinner"), levels=c("Lunch","Dinner")),
                  total_bill = c(14.89, 17.23))
 #   time total_bill
 #  Lunch      14.89
 # Dinner      17.23
-
-# Load the ggplot2 library
-library(ggplot2)
 
 # Very basic bar graph
 g <- ggplot(data=df, aes(x=time, y=total_bill)) + geom_bar(stat="identity")

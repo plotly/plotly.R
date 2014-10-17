@@ -1,7 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 df <- ToothGrowth
 #  len supp dose
 #  4.2   VC  0.5
@@ -9,8 +5,6 @@ df <- ToothGrowth
 #  ...
 # 29.4   OJ    2
 # 23.0   OJ    2
-
-library(ggplot2)
 
 # summarySE provides the standard deviation, standard error of the mean, and a (default 95%) confidence interval
 

@@ -1,9 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
-library(ggplot2)
-
 bp <- ggplot(PlantGrowth, aes(x=group, y=weight)) + geom_boxplot()
 
 bp1 <- bp + coord_flip()

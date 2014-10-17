@@ -1,8 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
-library(ggplot2)
 bp <- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplot()
 
 # Remove legend for a particular aesthetic (fill)

@@ -1,7 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 set.seed(1234)
 df <- data.frame(cond = factor( rep(c("A","B"), each=200) ),
                    rating = c(rnorm(200),rnorm(200, mean=.8)))
@@ -13,8 +9,6 @@ df <- data.frame(cond = factor( rep(c("A","B"), each=200) ),
 #    B  1.3388331
 #    B  0.8146431
 #    B -0.1164891
-
-library(ggplot2)
 
 
 # Basic histogram from the vector "rating". Each bin is .5 wide.

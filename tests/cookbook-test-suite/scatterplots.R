@@ -1,7 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 set.seed(955)
 # Make some noisily increasing data
 dat <- data.frame(cond = rep(c("A", "B"), each=10),
@@ -13,8 +9,6 @@ dat <- data.frame(cond = rep(c("A", "B"), each=10),
 #   ...
 #    B 17.793359218 19.718587761
 #    B 19.319909163 19.647899863
-
-library(ggplot2)
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
     geom_point(shape=1)      # Use hollow circles

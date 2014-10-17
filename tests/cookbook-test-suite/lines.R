@@ -1,15 +1,9 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 # Some sample data
 df <- read.table(header=T, text='
      cond result
   control     10
 treatment   11.5
 ')
-
-library(ggplot2)
 
 # Basic bar plot
 bp <- ggplot(df, aes(x=cond, y=result)) + geom_bar(position=position_dodge())
