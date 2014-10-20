@@ -12,53 +12,53 @@ dat <- data.frame(cond = rep(c("A", "B"), each=10),
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
     geom_point(shape=1)      # Use hollow circles
-save_outputs(g, 'scatterplots/scatterplots with hollow circles', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots with hollow circles", file_prefix="")
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
     geom_point(shape=1) +    # Use hollow circles
     geom_smooth(method=lm)   # Add linear regression line
                              #  (by default includes 95% confidence region)
-save_outputs(g, 'scatterplots/scatterplots with shading and regression line', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots with shading and regression line", file_prefix="")
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
     geom_point(shape=1) +    # Use hollow circles
     geom_smooth(method=lm,   # Add linear regression line
-                se=FALSE)    # Don't add shaded confidence region
-save_outputs(g, 'scatterplots/scatterplots without shading and regression line', file_prefix="")
+                se=FALSE)    # Don"t add shaded confidence region
+save_outputs(g, "scatterplots/scatterplots without shading and regression line", file_prefix="")
 
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
     geom_point(shape=1) +    # Use hollow circles
     geom_smooth()            # Add a loess smoothed fit curve with confidence region
-save_outputs(g, 'scatterplots/scatterplots shading and smoothed fit curve', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots shading and smoothed fit curve", file_prefix="")
 
 # Set color by cond
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1)
-save_outputs(g, 'scatterplots/scatterplots colored by condition', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots colored by condition", file_prefix="")
 
 # Same, but with different colors and add regression lines
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1) +
     scale_colour_hue(l=50) + # Use a slightly darker palette than normal
     geom_smooth(method=lm,   # Add linear regression lines
-                se=FALSE)    # Don't add shaded confidence region
-save_outputs(g, 'scatterplots/scatterplots colored by condition with regression line', file_prefix="")
+                se=FALSE)    # Don"t add shaded confidence region
+save_outputs(g, "scatterplots/scatterplots colored by condition with regression line", file_prefix="")
 
 # Extend the regression lines beyond the domain of the data
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1) +
     scale_colour_hue(l=50) + # Use a slightly darker palette than normal
     geom_smooth(method=lm,   # Add linear regression lines
-                se=FALSE,    # Don't add shaded confidence region
+                se=FALSE,    # Don"t add shaded confidence region
                 fullrange=T) # Extend regression lines
-save_outputs(g, 'scatterplots/scatterplots colored by condition with extended regression line', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots colored by condition with extended regression line", file_prefix="")
 
 # Set shape by cond
 g <- ggplot(dat, aes(x=xvar, y=yvar, shape=cond)) + geom_point()
-save_outputs(g, 'scatterplots/scatterplots shaped by condition', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots shaped by condition", file_prefix="")
 
 # Same, but with different shapes
 g <- ggplot(dat, aes(x=xvar, y=yvar, shape=cond)) + geom_point() +
     scale_shape_manual(values=c(1,2))  # Use a hollow circle and triangle
-save_outputs(g, 'scatterplots/scatterplots hollow shapes by condition', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots hollow shapes by condition", file_prefix="")
 
 # Round xvar and yvar to the nearest 5
 dat$xrnd <- round(dat$xvar/5)*5
@@ -69,11 +69,11 @@ dat$yrnd <- round(dat$yvar/5)*5
 g <- ggplot(dat, aes(x=xrnd, y=yrnd)) +
     geom_point(shape=19,      # Use solid circles
                alpha=1/4)     # 1/4 opacity
-save_outputs(g, 'scatterplots/scatterplots with overlapped points', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots with overlapped points", file_prefix="")
 
 # Jitter the points
 # Jitter range is 1 on the x-axis, .5 on the y-axis
 g <- ggplot(dat, aes(x=xrnd, y=yrnd)) +
     geom_point(shape=1,      # Use hollow circles
                position=position_jitter(width=1,height=.5))
-save_outputs(g, 'scatterplots/scatterplots with jittered points', file_prefix="")
+save_outputs(g, "scatterplots/scatterplots with jittered points", file_prefix="")

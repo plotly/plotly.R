@@ -17,15 +17,15 @@ df <- data.frame(cond = factor( rep(c("A","B"), each=200) ),
 # These both do the same thing:
 qplot(df$rating, binwidth=.5)
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5)
-save_outputs(g, 'distributions/basic-histogram', file_prefix="")
+save_outputs(g, "distributions/basic-histogram", file_prefix="")
 
 # Draw with black outline, white fill
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fill="white")
-save_outputs(g, 'distributions/basic-histogram-white-filling', file_prefix="")
+save_outputs(g, "distributions/basic-histogram-white-filling", file_prefix="")
 
 # Density curve
 g <- ggplot(df, aes(x=rating)) + geom_density()
-save_outputs(g, 'distributions/basic-density-curve', file_prefix="")
+save_outputs(g, "distributions/basic-density-curve", file_prefix="")
 
 # Histogram overlaid with kernel density curve
 g <- ggplot(df, aes(x=rating)) +
@@ -33,28 +33,28 @@ g <- ggplot(df, aes(x=rating)) +
                    binwidth=.5,
                    colour="black", fill="white") +
     geom_density(alpha=.2, fill="#FF6666")  # Overlay with transparent density plot
-save_outputs(g, 'distributions/basic-density-curve-with-histogram', file_prefix="")
+save_outputs(g, "distributions/basic-density-curve-with-histogram", file_prefix="")
 
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fill="white") +
     geom_vline(aes(xintercept=mean(rating, na.rm=T)),   # Ignore NA values for mean
                color="red", linetype="dashed", size=1)
-save_outputs(g, 'distributions/histogram-with-vertical-line', file_prefix="")
+save_outputs(g, "distributions/histogram-with-vertical-line", file_prefix="")
 
 # Overlaid histograms
 g <- ggplot(df, aes(x=rating, fill=cond)) + geom_histogram(binwidth=.5, alpha=.5, position="identity")
-save_outputs(g, 'distributions/overlaid-histograms', file_prefix="")
+save_outputs(g, "distributions/overlaid-histograms", file_prefix="")
 
 # Interleaved histograms
 g <- ggplot(df, aes(x=rating, fill=cond)) + geom_histogram(binwidth=.5, position="dodge")
-save_outputs(g, 'distributions/grouped-histograms', file_prefix="")
+save_outputs(g, "distributions/grouped-histograms", file_prefix="")
 
 # Density plots
 g <- ggplot(df, aes(x=rating, colour=cond)) + geom_density()
-save_outputs(g, 'distributions/multiple-density-plots', file_prefix="")
+save_outputs(g, "distributions/multiple-density-plots", file_prefix="")
 
 # Density plots with semi-transparent fill
 g <- ggplot(df, aes(x=rating, fill=cond)) + geom_density(alpha=.3)
-save_outputs(g, 'distributions/filled-density-plots', file_prefix="")
+save_outputs(g, "distributions/filled-density-plots", file_prefix="")
 
 # Find the mean of each group
 library(plyr)
@@ -69,49 +69,49 @@ g <- ggplot(df, aes(x=rating, fill=cond)) +
     geom_histogram(binwidth=.5, alpha=.5, position="identity") +
     geom_vline(data=cdf, aes(xintercept=rating.mean,  colour=cond),
                linetype="dashed", size=1)
-## TODO: uncomment when fixed: error 'rating' not found
-# save_outputs(g, 'distributions/overlaid-histograms-with-means', file_prefix="")
+## TODO: uncomment when fixed: error "rating" not found
+# save_outputs(g, "distributions/overlaid-histograms-with-means", file_prefix="")
 
 # Density plots with means
 g <- ggplot(df, aes(x=rating, colour=cond)) + geom_density() +
     geom_vline(data=cdf, aes(xintercept=rating.mean,  colour=cond),
                linetype="dashed", size=1)
-## TODO: uncomment when fixed: error 'rating' not found
-# save_outputs(g, 'distributions/density-plot-with-means', file_prefix="")
+## TODO: uncomment when fixed: error "rating" not found
+# save_outputs(g, "distributions/density-plot-with-means", file_prefix="")
 
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fill="white") +
     facet_grid(cond ~ .)
-save_outputs(g, 'distributions/faceted-histograms', file_prefix="")
+save_outputs(g, "distributions/faceted-histograms", file_prefix="")
 
 # With mean lines, using cdf from above
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fill="white") +
     facet_grid(cond ~ .) +
     geom_vline(data=cdf, aes(xintercept=rating.mean),
                linetype="dashed", size=1, colour="red")
-## TODO: uncomment when fixed: error 'rating' not found
-# save_outputs(g, 'distributions/faceted-histograms-with-mean-lines', file_prefix="")
+## TODO: uncomment when fixed: error "rating" not found
+# save_outputs(g, "distributions/faceted-histograms-with-mean-lines", file_prefix="")
 
 # A basic box plot
 g <- ggplot(df, aes(x=cond, y=rating)) + geom_boxplot()
-save_outputs(g, 'distributions/basic-box-plot', file_prefix="")
+save_outputs(g, "distributions/basic-box-plot", file_prefix="")
 
 # A basic box with the conditions colored
 g <- ggplot(df, aes(x=cond, y=rating, fill=cond)) + geom_boxplot()
-save_outputs(g, 'distributions/box-plot-with-conditions-colored', file_prefix="")
+save_outputs(g, "distributions/box-plot-with-conditions-colored", file_prefix="")
 
 # The above adds a redundant legend. With the legend removed:
 g <- ggplot(df, aes(x=cond, y=rating, fill=cond)) + geom_boxplot() +
     guides(fill=FALSE)
-save_outputs(g, 'distributions/box-plot-with-legend-removed', file_prefix="")
+save_outputs(g, "distributions/box-plot-with-legend-removed", file_prefix="")
 
 # With flipped axes
 g <- ggplot(df, aes(x=cond, y=rating, fill=cond)) + geom_boxplot() +
     guides(fill=FALSE) + coord_flip()
-save_outputs(g, 'distributions/box-plot-with-flipped-axes', file_prefix="")
+save_outputs(g, "distributions/box-plot-with-flipped-axes", file_prefix="")
 
 # Add a diamond at the mean, and make it larger
 g <- ggplot(df, aes(x=cond, y=rating)) + geom_boxplot() +
     stat_summary(fun.y=mean, geom="point", shape=5, size=4)
-save_outputs(g, 'distributions/box-plot-with-diamond-means', file_prefix="")
+save_outputs(g, "distributions/box-plot-with-diamond-means", file_prefix="")
 
 
