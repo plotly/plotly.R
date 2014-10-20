@@ -190,7 +190,7 @@ layer2traces <- function(l, d, misc) {
       name.list <- data.params$params[name.names]
       tr$name <- paste(unlist(name.list), collapse=".")
       if (length(unique(name.list)) < 2)
-        tr$name <- name.list[[1]]
+        tr$name <- as.character(name.list[[1]])
     }
     
     dpd <- data.params$data
