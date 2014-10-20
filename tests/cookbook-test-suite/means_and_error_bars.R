@@ -160,7 +160,7 @@ g <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
     geom_point()
 
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/basic-error-bars')
+# save_outputs(g, 'means-and-error-bars/basic-error-bars', file_prefix="")
 
 # The errorbars overlapped, so use position_dodge to move them horizontally
 pd <- position_dodge(.1) # move them .05 to the left and right
@@ -171,7 +171,7 @@ g <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
     geom_point(position=pd)
 
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/error-bars-dodged-position')
+# save_outputs(g, 'means-and-error-bars/error-bars-dodged-position', file_prefix="")
 
 # Use 95% confidence interval instead of SEM
 g <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
@@ -180,7 +180,7 @@ g <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
     geom_point(position=pd)
 
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/error-bars-95-confidence')
+# save_outputs(g, 'means-and-error-bars/error-bars-95-confidence', file_prefix="")
 
 # Black error bars - notice the mapping of 'group=supp' -- without it, the error
 # bars won't be dodged!
@@ -189,7 +189,7 @@ g <- ggplot(dfc, aes(x=dose, y=len, colour=supp, group=supp)) +
     geom_line(position=pd) +
     geom_point(position=pd, size=3)
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/black-error-bars')
+# save_outputs(g, 'means-and-error-bars/black-error-bars', file_prefix="")
 
 g <- ggplot(dfc, aes(x=dose, y=len, colour=supp, group=supp)) +
     geom_errorbar(aes(ymin=len-se, ymax=len+se), colour="black", width=.1, position=pd) +
@@ -207,7 +207,7 @@ g <- ggplot(dfc, aes(x=dose, y=len, colour=supp, group=supp)) +
     theme_bw() +
     theme(legend.justification=c(1,0), legend.position=c(1,0)) # Position legend in bottom right
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/fully-styled-error-bars')
+# save_outputs(g, 'means-and-error-bars/fully-styled-error-bars', file_prefix="")
 
 # Use dose as a factor rather than numeric
 dfc2 <- dfc
@@ -219,7 +219,7 @@ g <- ggplot(dfc2, aes(x=dose, y=len, fill=supp)) +
     geom_errorbar(aes(ymin=len-se, ymax=len+se),
                   width=.2,                    # Width of the error bars
                   position=position_dodge(.9))
-save_outputs(g, 'means-and-error-bars/bar-graph-with-error-bars')
+save_outputs(g, 'means-and-error-bars/bar-graph-with-error-bars', file_prefix="")
 
 # Use 95% confidence intervals instead of SEM
 g <- ggplot(dfc2, aes(x=dose, y=len, fill=supp)) +
@@ -227,7 +227,7 @@ g <- ggplot(dfc2, aes(x=dose, y=len, fill=supp)) +
     geom_errorbar(aes(ymin=len-ci, ymax=len+ci),
                   width=.2,                    # Width of the error bars
                   position=position_dodge(.9))
-save_outputs(g, 'means-and-error-bars/bar-graph-with-95-error-bars')
+save_outputs(g, 'means-and-error-bars/bar-graph-with-95-error-bars', file_prefix="")
 
 g <- ggplot(dfc2, aes(x=dose, y=len, fill=supp)) +
     geom_bar(position=position_dodge(), stat="identity",
@@ -245,7 +245,7 @@ g <- ggplot(dfc2, aes(x=dose, y=len, fill=supp)) +
     ggtitle("The Effect of Vitamin C on\nTooth Growth in Guinea Pigs") +
     scale_y_continuous(breaks=0:20*4) +
     theme_bw()
-save_outputs(g, 'means-and-error-bars/bar-graph-with-error-bars-fully-styled')
+save_outputs(g, 'means-and-error-bars/bar-graph-with-error-bars-fully-styled', file_prefix="")
 
 dfw <- read.table(header=T, text='
  subject pretest posttest
@@ -305,7 +305,7 @@ g <- ggplot(dfwc, aes(x=condition, y=value, group=1)) +
     geom_errorbar(width=.1, aes(ymin=value-ci, ymax=value+ci)) +
     geom_point(shape=21, size=3, fill="white") +
     ylim(40,60)
-save_outputs(g, 'means-and-error-bars/within-subject-error-bars')
+save_outputs(g, 'means-and-error-bars/within-subject-error-bars', file_prefix="")
 
 # Use a consistent y range
 ymax <- max(dfw.long$value)
@@ -315,7 +315,7 @@ ymin <- min(dfw.long$value)
 g <- ggplot(dfw.long, aes(x=condition, y=value, colour=subject, group=subject)) +
     geom_line() + geom_point(shape=21, fill="white") +
     ylim(ymin,ymax)
-save_outputs(g, 'means-and-error-bars/multiple-lines-1')
+save_outputs(g, 'means-and-error-bars/multiple-lines-1', file_prefix="")
 
 # Create the normed version of the data
 dfwNorm.long <- normDataWithin(data=dfw.long, idvar="subject", measurevar="value")
@@ -324,7 +324,7 @@ dfwNorm.long <- normDataWithin(data=dfw.long, idvar="subject", measurevar="value
 g <- ggplot(dfwNorm.long, aes(x=condition, y=value_norm, colour=subject, group=subject)) +
     geom_line() + geom_point(shape=21, fill="white") +
     ylim(ymin,ymax)
-save_outputs(g, 'means-and-error-bars/multiple-lines-2')
+save_outputs(g, 'means-and-error-bars/multiple-lines-2', file_prefix="")
 
 # Instead of summarySEwithin, use summarySE, which treats condition as though it were a between-subjects variable
 dfwc.between <- summarySE(data=dfw.long, measurevar="value", groupvars="condition", na.rm=FALSE, conf.interval=.95)
@@ -339,7 +339,7 @@ g <- ggplot(dfwc.between, aes(x=condition, y=value, group=1)) +
     geom_errorbar(width=.1, aes(ymin=value-ci, ymax=value+ci), data=dfwc) +
     geom_point(shape=21, size=3, fill="white") +
     ylim(ymin,ymax)
-save_outputs(g, 'means-and-error-bars/black-and-red-error-bars')
+save_outputs(g, 'means-and-error-bars/black-and-red-error-bars', file_prefix="")
 
 data <- read.table(header=T, text='
  Subject RoundMono SquareMono RoundColor SquareColor
@@ -408,4 +408,4 @@ g <- ggplot(datac, aes(x=Shape, y=Time, fill=ColorScheme)) +
     geom_hline(yintercept=38)
 
 ## TODO: uncomment when fixed
-# save_outputs(g, 'means-and-error-bars/two-subject-error-bars')
+# save_outputs(g, 'means-and-error-bars/two-subject-error-bars', file_prefix="")

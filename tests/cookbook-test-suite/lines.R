@@ -11,11 +11,11 @@ bp
 
 # Add a horizontal line
 temp <- bp + geom_hline(aes(yintercept=12))
-save_outputs(temp, 'lines/basic horizontal line')
+save_outputs(temp, 'lines/basic horizontal line', file_prefix="")
 
 # Make the line red and dashed
 temp <- bp + geom_hline(aes(yintercept=12), colour="#990000", linetype="dashed")
-save_outputs(temp, 'lines/dashed red line')
+save_outputs(temp, 'lines/dashed red line', file_prefix="")
 
 # Draw separate hlines for each bar. First add another column to df
 df$hline <- c(9,12)
@@ -104,16 +104,16 @@ sp <- ggplot(df, aes(x=xval, y=yval, colour=cond)) + geom_point()
 
 # Add a horizontal line
 temp <- sp + geom_hline(aes(yintercept=10))
-save_outputs(temp, 'lines/hline on scatter')
+save_outputs(temp, 'lines/hline on scatter', file_prefix="")
 
 # Add a red dashed vertical line
 temp <- sp + geom_hline(aes(yintercept=10)) + geom_vline(aes(xintercept=11.5), colour="#BB0000", linetype="dashed")
-save_outputs(temp, 'lines/hline n vline on scatter')
+save_outputs(temp, 'lines/hline n vline on scatter', file_prefix="")
 
 # Add colored lines for the mean xval of each group
 temp <- sp + geom_hline(aes(yintercept=10)) +
      geom_line(stat="vline", xintercept="mean")
-save_outputs(temp, 'lines/colored lines on scatter')
+save_outputs(temp, 'lines/colored lines on scatter', file_prefix="")
 
 # Facet, based on cond
 spf <- sp + facet_grid(. ~ cond)
@@ -121,7 +121,7 @@ spf
 
 # Draw a horizontal line in all of the facets at the same value
 temp <- spf + geom_hline(aes(yintercept=10))
-save_outputs(temp, 'lines/hline on facets')
+save_outputs(temp, 'lines/hline on facets', file_prefix="")
 
 df.vlines <- data.frame(cond=levels(df$cond), xval=c(10,11.5))
 #      cond xval
