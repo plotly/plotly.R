@@ -1,3 +1,20 @@
+0.5.3 -- 20 October 2014.
+
+Support conversion of geom_bar() with position_dodge().
+
+0.5.2 -- 18 October 2014.
+
+Support aesthetic shape in geom_path() and, hence, geom_line() (conversion).
+
+0.5.1 -- 15 October 2014.
+
+Do not show zero lines by default (as in ggplot2 plots).
+
+0.5.0 -- 15 October 2014.
+
+From now on, version numbers are meaningful again...
+Many changes meanwhile, especially support for more geoms.
+
 0.4 -- 7 April 2014.
 
 Re-write geom to trace conversion code.
@@ -22,4 +39,4 @@ For ggplotly:
 
 Merge ggplotly code.
 
-0.3.5 
+0.3.5
