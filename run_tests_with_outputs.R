@@ -1,9 +1,11 @@
 library(testthat)
+library(plotly)
 
 setwd("tests")
 
 save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
   filesystem_name <- gsub('/', '--', name)
+  filesystem_name <- gsub(' ', '_', filesystem_name)
   print(paste("running", name))
   py <- plotly("TestBot", "r1neazxo9w")
   u <- py$ggplotly(gg, kwargs=list(filename=paste0("ggplot2/", name),
