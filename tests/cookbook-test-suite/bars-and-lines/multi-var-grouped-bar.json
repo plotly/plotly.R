@@ -2,7 +2,8 @@
     "data": [
         {
             "x": [
-                null
+                "Lunch", 
+                "Dinner"
             ], 
             "y": [
                 13.53, 
@@ -18,7 +19,8 @@
         }, 
         {
             "x": [
-                null
+                "Lunch", 
+                "Dinner"
             ], 
             "y": [
                 16.24, 

@@ -3,19 +3,14 @@
         {
             "x": [
                 "Lunch", 
-                "Dinner", 
-                null, 
-                "Lunch", 
                 "Dinner"
             ], 
             "y": [
                 13.53, 
-                16.81, 
-                null, 
-                16.24, 
-                17.42
+                16.81
             ], 
             "mode": "lines", 
+            "name": "Female", 
             "line": {
                 "color": "rgb(0,0,0)", 
                 "width": 2, 
@@ -24,7 +19,27 @@
             }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
-            "showlegend": false, 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                "Lunch", 
+                "Dinner"
+            ], 
+            "y": [
+                16.24, 
+                17.42
+            ], 
+            "mode": "lines", 
+            "name": "Male", 
+            "line": {
+                "color": "rgb(0,0,0)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
             "type": "scatter"
         }, 
         {

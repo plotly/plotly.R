@@ -2,7 +2,8 @@
     "data": [
         {
             "x": [
-                null
+                "Female", 
+                "Male"
             ], 
             "y": [
                 13.53, 
@@ -22,7 +23,8 @@
         }, 
         {
             "x": [
-                null
+                "Female", 
+                "Male"
             ], 
             "y": [
                 16.81, 

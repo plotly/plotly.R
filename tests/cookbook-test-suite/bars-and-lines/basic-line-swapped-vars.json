@@ -10,7 +10,7 @@
                 16.24
             ], 
             "mode": "lines", 
-            "name": "Lunch", 
+            "name": "Lunch.Lunch", 
             "line": {
                 "color": "rgb(248,118,109)", 
                 "width": 2, 
@@ -31,7 +31,7 @@
                 17.42
             ], 
             "mode": "lines", 
-            "name": "Dinner", 
+            "name": "Dinner.Dinner", 
             "line": {
                 "color": "rgb(0,191,196)", 
                 "width": 2, 
