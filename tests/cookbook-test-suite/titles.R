@@ -1,7 +1,3 @@
-library(plotly)
-set_credentials_file("ggplot2-cookbook", "gzcn4660jr")
-py <- plotly();
-
 bp <- ggplot(PlantGrowth, aes(x=group, y=weight)) + geom_boxplot()
 save_outputs(bp, 'titles/no title')
 

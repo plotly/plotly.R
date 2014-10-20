@@ -26,7 +26,7 @@ save_outputs(bp5, 'axes/setting tick mark labels')
 
 # Hide x tick marks, labels, and grid lines
 bp6 <- bp + scale_x_discrete(breaks=NULL)
-save_outputs(bp6, 'axes/hidden tick marks, labels, gridline')
+save_outputs(bp6, 'axes/hidden tick marks labels gridline')
 
 # Hide all tick marks and labels (on X axis), but keep the gridlines
 bp7 <- bp + theme(axis.ticks = element_blank(), axis.text.x = element_blank())
@@ -70,7 +70,7 @@ save_outputs(bp15, 'axes/uneven tick marks')
 
 # Suppress ticks and gridlines
 bp16 <- bp + scale_y_continuous(breaks=NULL)
-save_outputs(bp16, 'axes/suppress y ticks, labels, and gridlines')
+save_outputs(bp16, 'axes/suppress y ticks labels and gridlines')
 
 # Hide tick marks and labels (on Y axis), but keep the gridlines
 bp17 <- bp + theme(axis.ticks = element_blank(), axis.text.y = element_blank())

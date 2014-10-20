@@ -23,7 +23,7 @@ save_outputs(sp2, 'facets/horizontal facet_grid')
 
 # Divide with "sex" vertical, "day" horizontal
 sp3 <- sp + facet_grid(sex ~ day)
-save_outputs(sp3, 'facets/2x4 facet_grid: "sex" vertical, "day" horizontal')
+save_outputs(sp3, 'facets/2x4 facet_grid - sex-vertical day-horizontal')
 
 # Divide by day, going horizontally and wrapping with 2 columns
 sp4 <- sp + facet_wrap( ~ day, ncol=2)
@@ -71,4 +71,4 @@ save_outputs(sp8, 'facets/histogram facets with free_y')
 
 # With panels that have the same scaling, but different range (and therefore different physical sizes)
 sp9 <- hp + facet_grid(sex ~ smoker, scales="free", space="free")
-save_outputs(sp9, 'facets/histogram facets with scales=free, space=free')
+save_outputs(sp9, 'facets/histogram facets with scales=free')

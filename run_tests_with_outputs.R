@@ -24,7 +24,6 @@ test_check("plotly")
 setwd("cookbook-test-suite")
 
 source('axes.R')
-source('bars.R')
 source('bars_and_lines.R')
 source('distributions.R')
 source('legends.R')

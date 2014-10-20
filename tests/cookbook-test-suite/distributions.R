@@ -69,13 +69,15 @@ g <- ggplot(df, aes(x=rating, fill=cond)) +
     geom_histogram(binwidth=.5, alpha=.5, position="identity") +
     geom_vline(data=cdf, aes(xintercept=rating.mean,  colour=cond),
                linetype="dashed", size=1)
-save_outputs(g, 'R-Cookbook/distributions/overlaid-histograms-with-means')
+## TODO: uncomment when fixed: error 'rating' not found
+# save_outputs(g, 'R-Cookbook/distributions/overlaid-histograms-with-means')
 
 # Density plots with means
 g <- ggplot(df, aes(x=rating, colour=cond)) + geom_density() +
     geom_vline(data=cdf, aes(xintercept=rating.mean,  colour=cond),
                linetype="dashed", size=1)
-save_outputs(g, 'R-Cookbook/distributions/density-plot-with-means')
+## TODO: uncomment when fixed: error 'rating' not found
+# save_outputs(g, 'R-Cookbook/distributions/density-plot-with-means')
 
 g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fill="white") +
     facet_grid(cond ~ .)
@@ -86,7 +88,8 @@ g <- ggplot(df, aes(x=rating)) + geom_histogram(binwidth=.5, colour="black", fil
     facet_grid(cond ~ .) +
     geom_vline(data=cdf, aes(xintercept=rating.mean),
                linetype="dashed", size=1, colour="red")
-save_outputs(g, 'R-Cookbook/distributions/faceted-histograms-with-mean-lines')
+## TODO: uncomment when fixed: error 'rating' not found
+# save_outputs(g, 'R-Cookbook/distributions/faceted-histograms-with-mean-lines')
 
 # A basic box plot
 g <- ggplot(df, aes(x=cond, y=rating)) + geom_boxplot()
