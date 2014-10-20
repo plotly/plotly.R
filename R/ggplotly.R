@@ -41,7 +41,7 @@ markLegends <-
   ## Legends based on sizes not implemented yet in Plotly
   ##  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
-       path=c("linetype", "size", "colour"),
+       path=c("linetype", "size", "colour", "shape"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("colour", "fill"),
        step=c("linetype", "size", "colour"),

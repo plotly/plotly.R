@@ -63,3 +63,24 @@ test_that("paths with the same color but different groups stay together", {
 
   save_outputs(gg, "path-colored-groups-stay-together")
 })
+
+test_that("lines work with aesthetic shape", {
+  df1 <- data.frame(sex = factor(c("Female", "Female", "Male", "Male")),
+                    time = factor(c("Lunch", "Dinner", "Lunch", "Dinner"),
+                                  levels=c("Lunch", "Dinner")),
+                    total_bill = c(13.53, 16.81, 16.24, 17.42))
+  gg <- ggplot(data=df1, aes(x=time, y=total_bill, group=sex, shape=sex)) +
+    geom_line() +
+    geom_point()
+  info <- gg2list(gg)
+  expect_equal(length(info), 5)  # 2 lines and 2 sets of points for each group
+  expect_identical(info[[3]]$name, "Female")
+  expect_identical(info[[3]]$marker$symbol, "circle")
+  expect_identical(info[[4]]$name, "Male")
+  expect_identical(info[[4]]$marker$symbol, "triangle-up")
+  # Layout
+  expect_identical(info[[5]]$layout$xaxis$title, "time")
+  expect_identical(info[[5]]$layout$xaxis$type, "category")
+  
+  save_outputs(gg, "path-line-symbols")
+})
