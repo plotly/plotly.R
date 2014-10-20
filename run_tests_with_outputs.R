@@ -1,4 +1,5 @@
 library(testthat)
+devtools::install_github("ropensci/plotly", ref="marianne-fix-bar-null")
 library(plotly)
 
 setwd("tests")
