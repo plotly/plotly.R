@@ -10,7 +10,7 @@
                 16.24
             ], 
             "mode": "lines", 
-            "name": "Lunch.Lunch", 
+            "name": "Lunch", 
             "line": {
                 "color": "rgb(248,118,109)", 
                 "width": 2, 
@@ -31,7 +31,7 @@
                 17.42
             ], 
             "mode": "lines", 
-            "name": "Dinner.Dinner", 
+            "name": "Dinner", 
             "line": {
                 "color": "rgb(0,191,196)", 
                 "width": 2, 
@@ -52,7 +52,7 @@
                 16.24
             ], 
             "mode": "markers", 
-            "name": "Lunch.Lunch", 
+            "name": "Lunch", 
             "marker": {
                 "color": "rgb(248,118,109)", 
                 "size": 10, 
@@ -75,7 +75,7 @@
                 17.42
             ], 
             "mode": "markers", 
-            "name": "Dinner.Dinner", 
+            "name": "Dinner", 
             "marker": {
                 "color": "rgb(0,191,196)", 
                 "size": 10, 

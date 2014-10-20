@@ -10,7 +10,7 @@
                 16.81
             ], 
             "mode": "lines", 
-            "name": "Female.Female.Female", 
+            "name": "Female", 
             "line": {
                 "color": "rgb(145,12,0)", 
                 "width": 1, 
@@ -31,7 +31,7 @@
                 17.42
             ], 
             "mode": "lines", 
-            "name": "Male.Male.Male", 
+            "name": "Male", 
             "line": {
                 "color": "rgb(0,105,110)", 
                 "width": 1, 
@@ -52,7 +52,7 @@
                 16.81
             ], 
             "mode": "markers", 
-            "name": "Female.Female", 
+            "name": "Female", 
             "marker": {
                 "color": "rgb(255,255,255)", 
                 "size": 3, 
@@ -79,7 +79,7 @@
                 17.42
             ], 
             "mode": "markers", 
-            "name": "Male.Male", 
+            "name": "Male", 
             "marker": {
                 "color": "rgb(255,255,255)", 
                 "size": 3, 
