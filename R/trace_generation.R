@@ -268,7 +268,7 @@ toBasic <- list(
     g
   },
   bar=function(g) {
-    if (all(is.na(g$prestats.data$x)))
+    if (any(is.na(g$prestats.data$x)))
       g$prestats.data$x <- g$prestats.data$x.name
     g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
     g$params$xstart <- min(g$data$xmin)
