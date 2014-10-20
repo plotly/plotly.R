@@ -14,9 +14,10 @@ save_outputs <- function(gg, name, ignore_ggplot=FALSE) {
   if (!ignore_ggplot) {
     ggsave(paste0("test-ggplot-", name, "-ggplot2.png"), plot=gg, w=7, h=5)
   }
-
-  # save the json
-  writeLines(getURL(paste0(plotlyUrl, ".json")), paste0("test-ggplot-", name, ".json"))
+  
+  # Save the json
+  writeLines(getURL(paste0(plotlyUrl, ".json")), paste0("test-ggplot-", name,
+                                                        ".json"))
 }
 
 test_check("plotly")
