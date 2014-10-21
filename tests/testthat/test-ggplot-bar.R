@@ -15,6 +15,11 @@ test_that("position_dodge is translated to barmode=group", {
   trace.names <- sapply(L[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
   expect_identical(L$kwargs$layout$barmode, "group")
+  # Check x values
+  expect_identical(as.character(L[[1]]$x[1]), "Canada")
+  expect_identical(as.character(L[[1]]$x[2]), "Germany")
+  expect_identical(as.character(L[[2]]$x[1]), "Canada")
+  expect_identical(as.character(L[[2]]$x[2]), "USA")
   
   save_outputs(gg.dodge, "bar-dodge")
 })

@@ -178,7 +178,7 @@ layer2traces <- function(l, d, misc) {
       }
     }
     name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
-    if(length(name.names)){
+    if (length(name.names)) {
       for(a.name in name.names){
         a <- sub("[.]name$", "", a.name)
         a.value <- as.character(data.params$params[[a.name]])
@@ -189,6 +189,8 @@ layer2traces <- function(l, d, misc) {
       }
       name.list <- data.params$params[name.names]
       tr$name <- paste(unlist(name.list), collapse=".")
+      if (length(unique(name.list)) < 2)
+        tr$name <- as.character(name.list[[1]])
     }
     
     dpd <- data.params$data
@@ -268,6 +270,8 @@ toBasic <- list(
     g
   },
   bar=function(g) {
+    if (any(is.na(g$prestats.data$x)))
+      g$prestats.data$x <- g$prestats.data$x.name
     g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
     g$params$xstart <- min(g$data$xmin)
     g$params$xend <- max(g$data$xmax)
