@@ -1,4 +1,4 @@
-0.5.3 -- 20 October 2014.
+0.5.3 -- 21 October 2014.
 
 Support conversion of geom_bar() with position_dodge().
 
