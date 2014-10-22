@@ -12,7 +12,7 @@ test_that("second trace be the vline", {
   L <- gg2list(gg)
   
   expect_equal(length(L), 3)
-  expect_equal(L[[2]]x[1], 1.1)
+  expect_equal(L[[2]]$x[1], 1.1)
   expect_true(L[[2]]$y[1] <= 0)
   expect_true(L[[2]]$y[2] >= 3.325)
   expect_identical(L[[2]]$mode, "lines")
@@ -23,7 +23,7 @@ test_that("second trace be the vline", {
   save_outputs(gg, "vline")
 })
 
-test_that("vector yintercept results in multiple vertical lines", {
+test_that("vector xintercept results in multiple vertical lines", {
   gg <- gg + geom_vline(xintercept=1:2, colour="blue", size=3)
   
   L <- gg2list(gg)
