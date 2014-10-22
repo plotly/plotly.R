@@ -24,14 +24,6 @@ g <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
     guides(fill=FALSE)
 save_outputs(g, "bars-and-lines/basic-bar-fill-colors-black-outline-no-legend", file_prefix="")
 
-# Add title, narrower bars, gray fill, and change axis labels
-g <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
-    geom_bar(colour="black", fill="#DD8888", width=.7, stat="identity") +
-    guides(fill=FALSE) +
-    xlab("Time of day") + ylab("Total bill") +
-    ggtitle("Average bill for 2 people")
-save_outputs(g, "bars-and-lines/basic-bar-fully-styled", file_prefix="")
-
 library(reshape2)
 tips
 # total_bill   tip    sex smoker  day   time size
@@ -187,3 +179,11 @@ save_outputs(g, "bars-and-lines/bar-categorical-numerical-labels", file_prefix="
 # Use the original data frame, but put factor() directly in the plot specification
 g <- ggplot(data=dfn, aes(x=factor(dose), y=length, fill=supp)) + geom_bar(stat="identity", position=position_dodge())
 save_outputs(g, "bars-and-lines/bar-categorical-numerical-labels-with-factor", file_prefix="")
+
+# Add title, narrower bars, gray fill, and change axis labels
+g <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(colour="black", fill="#DD8888", width=.7, stat="identity") +
+    guides(fill=FALSE) +
+    xlab("Time of day") + ylab("Total bill") +
+    ggtitle("Average bill for 2 people")
+save_outputs(g, "bars-and-lines/basic-bar-fully-styled", file_prefix="")
