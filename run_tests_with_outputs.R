@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="marianne-fix-bar-null")
+devtools::install_github("ropensci/plotly", ref="marianne-geom-vline")
 library(plotly)
 
 setwd("tests")
