@@ -98,6 +98,10 @@ gg2list <- function(p){
   xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
   ggxmin <- min(sapply(xrange, min))
   ggxmax <- max(sapply(xrange, max))
+  # Extract y.range
+  yrange <- sapply(ggranges, `[[`, "y.range", simplify=FALSE, USE.NAMES=FALSE)
+  ggymin <- min(sapply(yrange, min))
+  ggymax <- max(sapply(yrange, max))
   
   # Get global size range because we need some of its info in layer2traces
   if ("size.name" %in% name.names) {
@@ -168,6 +172,9 @@ gg2list <- function(p){
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
     misc$prestats.data$globxmax <- ggxmax
+    # Add global y-range info
+    misc$prestats.data$globymin <- ggymin
+    misc$prestats.data$globymax <- ggymax
     
     # Add global size info if relevant
     if ("size.name" %in% name.names) {
