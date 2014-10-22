@@ -121,7 +121,7 @@ layer2traces <- function(l, d, misc) {
   }
   ## Then split on visual characteristics that will get different
   ## legend entries.
-  data.list <- if(basic$geom %in% names(markLegends)){
+  data.list <- if (basic$geom %in% names(markLegends)) {
     mark.names <- markLegends[[basic$geom]]
     ## However, continuously colored points are an exception: they do
     ## not need a legend entry, and they can be efficiently rendered
@@ -152,11 +152,24 @@ layer2traces <- function(l, d, misc) {
     }
   }
   
+  # Split hline and vline when multiple
+  if (g$geom == "hline" || g$geom == "vline") {
+    if (nrow(g$data) > 1) {
+      df.list <- split(basic$data, rep(1:nrow(g$data))) #, drop=TRUE)
+      data.list <- lapply(df.list, function(df) {
+        params <- basic$params
+        list(data=df,
+             params=params)
+      })
+    }
+  }
+  
   ## case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
+  
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     warning("Conversion not implemented for geom_",
@@ -167,7 +180,8 @@ layer2traces <- function(l, d, misc) {
   }
   traces <- NULL
   names.in.legend <- NULL
-  for(data.i in seq_along(data.list)){
+  
+  for (data.i in seq_along(data.list)) {
     data.params <- data.list[[data.i]]
     data.params$params$stat.type <- l$stat$objname
     tr <- do.call(getTrace, data.params)
@@ -301,6 +315,11 @@ toBasic <- list(
   hline=function(g) {
     g$params$xstart <- min(g$prestats.data$globxmin)
     g$params$xend <- max(g$prestats.data$globxmax)
+    g
+  },
+  vline=function(g) {
+    g$params$ystart <- min(g$prestats.data$globymin)
+    g$params$yend <- max(g$prestats.data$globymax)
     g
   },
   point=function(g) {
@@ -523,6 +542,14 @@ geom2trace <- list(
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),
          y=c(data$yintercept, data$yintercept),
+         name=params$name,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
+  },
+  vline=function(data, params) {
+    list(x=c(data$xintercept, data$xintercept),
+         y=c(params$ystart, params$yend),
          name=params$name,
          type="scatter",
          mode="lines",
