@@ -1,3 +1,7 @@
+0.5.4 -- 22 October 2014.
+
+Support conversion of geom_vline().
+
 0.5.3 -- 21 October 2014.
 
 Support conversion of geom_bar() with position_dodge().
