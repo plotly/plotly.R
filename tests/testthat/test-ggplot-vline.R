@@ -29,8 +29,8 @@ test_that("vector xintercept results in multiple vertical lines", {
   L <- gg2list(gg)
   
   expect_equal(length(L), 4)
-  expect_equal(L[[2]]x[1], 1)
-  expect_equal(L[[3]]x[1], 2)
+  expect_equal(L[[2]]$x[1], 1)
+  expect_equal(L[[3]]$x[1], 2)
   expect_true(L[[3]]$y[1] <= 0)
   expect_true(L[[3]]$y[2] >= 3.325)
   expect_identical(L[[3]]$mode, "lines")
