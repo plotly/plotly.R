@@ -2,57 +2,26 @@
     "data": [
         {
             "x": [
-                "Lunch", 
-                "Dinner"
+                0, 
+                0.5, 
+                1, 
+                1.5, 
+                2, 
+                2.5, 
+                3, 
+                3.5
             ], 
             "y": [
-                13.53, 
-                16.81
-            ], 
-            "mode": "lines", 
-            "name": "Female", 
-            "line": {
-                "color": "rgb(0,0,0)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Lunch", 
-                "Dinner"
-            ], 
-            "y": [
-                16.24, 
-                17.42
-            ], 
-            "mode": "lines", 
-            "name": "Male", 
-            "line": {
-                "color": "rgb(0,0,0)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Lunch", 
-                "Dinner"
-            ], 
-            "y": [
-                13.53, 
-                16.81
+                0, 
+                0.475, 
+                0.95, 
+                1.4249999999999998, 
+                1.9, 
+                2.375, 
+                2.8499999999999996, 
+                3.3249999999999997
             ], 
             "mode": "markers", 
-            "name": "Female", 
             "marker": {
                 "color": "rgb(0,0,0)", 
                 "size": 10, 
@@ -63,29 +32,49 @@
             }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
+            "showlegend": false, 
             "type": "scatter"
         }, 
         {
             "x": [
-                "Lunch", 
-                "Dinner"
+                1, 
+                1
             ], 
             "y": [
-                16.24, 
-                17.42
+                -0.16625, 
+                3.49125
             ], 
-            "mode": "markers", 
-            "name": "Male", 
-            "marker": {
-                "color": "rgb(0,0,0)", 
-                "size": 10, 
-                "symbol": "triangle-up", 
-                "opacity": 1, 
-                "sizeref": 1, 
-                "sizemode": "area"
+            "mode": "lines", 
+            "line": {
+                "color": "rgb(0,0,255)", 
+                "width": 3, 
+                "dash": "solid", 
+                "shape": "linear"
             }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                2, 
+                2
+            ], 
+            "y": [
+                -0.16625, 
+                3.49125
+            ], 
+            "mode": "lines", 
+            "line": {
+                "color": "rgb(0,0,255)", 
+                "width": 3, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
             "type": "scatter"
         }
     ], 
@@ -95,8 +84,8 @@
         }, 
         "showlegend": true, 
         "xaxis": {
-            "title": "time", 
-            "type": "category", 
+            "title": "x1", 
+            "type": "linear", 
             "showgrid": true, 
             "zeroline": false, 
             "showline": false, 
@@ -106,7 +95,7 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "yaxis": {
-            "title": "total_bill", 
+            "title": "x2", 
             "type": "linear", 
             "showgrid": true, 
             "zeroline": false, 

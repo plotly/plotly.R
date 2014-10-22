@@ -5,11 +5,14 @@
                 "control", 
                 "treatment"
             ], 
-            "autobinx": true, 
+            "y": [
+                10, 
+                11.5
+            ], 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "showlegend": false, 
-            "type": "histogram"
+            "type": "bar"
         }, 
         {
             "x": [
@@ -18,7 +21,26 @@
             ], 
             "y": [
                 12, 
-                12, 
+                12
+            ], 
+            "mode": "lines", 
+            "line": {
+                "color": "rgb(153,0,0)", 
+                "width": 2, 
+                "dash": "dash", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }, 
+        {
+            "x": [
+                0.4, 
+                2.6
+            ], 
+            "y": [
                 12, 
                 12
             ], 
@@ -76,7 +98,6 @@
         }, 
         "paper_bgcolor": "rgb(255,255,255)", 
         "plot_bgcolor": "rgb(229,229,229)", 
-        "barmode": "group", 
-        "bargap": 0
+        "barmode": "group"
     }
 }

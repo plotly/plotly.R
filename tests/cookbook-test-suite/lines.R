@@ -6,7 +6,8 @@ treatment   11.5
 ")
 
 # Basic bar plot
-bp <- ggplot(df, aes(x=cond, y=result)) + geom_bar(position=position_dodge())
+bp <- ggplot(df, aes(x=cond, y=result)) +
+  geom_bar(position="dodge", stat="identity")
 bp
 
 # Add a horizontal line
