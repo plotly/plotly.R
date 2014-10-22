@@ -155,7 +155,7 @@ layer2traces <- function(l, d, misc) {
   # Split hline and vline when multiple
   if (g$geom == "hline" || g$geom == "vline") {
     if (nrow(g$data) > 1) {
-      df.list <- split(basic$data, rep(1:nrow(g$data))) #, drop=TRUE)
+      df.list <- split(basic$data, rep(1:nrow(g$data)))
       data.list <- lapply(df.list, function(df) {
         params <- basic$params
         list(data=df,
