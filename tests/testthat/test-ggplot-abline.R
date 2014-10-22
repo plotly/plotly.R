@@ -17,7 +17,7 @@ test_that("Second trace be the a-b line", {
   expect_true(L[[2]]$x[2] >= 3.5)
   expect_identical(L[[2]]$mode, "lines")
   expect_identical(L[[2]]$line$shape, "linear")
-  expect_equal(L[[2]]$line$width, 4)
+  expect_equal(L[[2]]$line$width, 8)
   
   save_outputs(gg, "abline")
 })

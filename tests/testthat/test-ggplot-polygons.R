@@ -83,12 +83,12 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[1]]$x, c(10, 11, 11, 10, 10))
   expect_equal(info[[1]]$y, c(10, 10, 11, 11, 10))
   expect_equal(info[[1]]$fillcolor, toRGB("orange"))
-  expect_equal(info[[1]]$line$width, 2)
+  expect_equal(info[[1]]$line$width, 4)
   expect_equal(info[[1]]$name, "name1")
   expect_equal(info[[2]]$x, c(12, 13, 13, 12, 12))
   expect_equal(info[[2]]$y, c(10, 10, 11, 11, 10))
   expect_equal(info[[2]]$fillcolor, toRGB("orange"))
-  expect_equal(info[[2]]$line$width, 3)
+  expect_equal(info[[2]]$line$width, 6)
   expect_equal(info[[2]]$name, "name2")
 
 
