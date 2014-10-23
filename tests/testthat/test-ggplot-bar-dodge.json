@@ -2,7 +2,7 @@
     "data": [
         {
             "x": [
-                null, 
+                "Canada", 
                 "Germany"
             ], 
             "y": [
@@ -19,7 +19,7 @@
         }, 
         {
             "x": [
-                null, 
+                "Canada", 
                 "USA"
             ], 
             "y": [
