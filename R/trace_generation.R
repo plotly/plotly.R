@@ -456,12 +456,14 @@ geom2trace <- list(
     L
   },
   step=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    L <- list(x=data$x,
+              y=data$y,
+              name=params$name,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
+    L
   },
   tile=function(data, params) {
     list(x=unique(data$x),
@@ -486,6 +488,7 @@ geom2trace <- list(
               name=params$name,
               type="contour",
               line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
     L$contours=list(coloring="lines")
     L
   },
@@ -504,6 +507,7 @@ geom2trace <- list(
               name=params$name,
               type="histogram2dcontour",
               line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
     L$contours=list(coloring="lines")
     L
   },
