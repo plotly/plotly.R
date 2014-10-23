@@ -73,11 +73,11 @@ layer2traces <- function(l, d, misc) {
                                        as.numeric(pdata.vec))]
           if (length(pdata.vec) == length(data.vec))
             pdata.vec <- data.vec
+          if (!is.factor(pdata.vec))
+            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
-        if (!is.factor(g$prestats.data[[a]]))
-          g$prestats.data[[a]] <- g$prestats.data[[paste0(a, ".name")]]
       }
     }
   }
