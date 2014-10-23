@@ -55,7 +55,7 @@
             "name": "Female", 
             "marker": {
                 "color": "rgb(0,0,0)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
@@ -78,7 +78,7 @@
             "name": "Male", 
             "marker": {
                 "color": "rgb(0,0,0)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "triangle-up", 
                 "opacity": 1, 
                 "sizeref": 1, 

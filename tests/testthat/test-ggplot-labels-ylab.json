@@ -308,7 +308,7 @@
             "mode": "markers", 
             "marker": {
                 "color": "rgb(0,0,0)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 

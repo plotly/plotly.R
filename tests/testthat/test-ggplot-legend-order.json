@@ -109,7 +109,7 @@
             "name": "setosa", 
             "marker": {
                 "color": "rgb(248,118,109)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
@@ -228,7 +228,7 @@
             "name": "versicolor", 
             "marker": {
                 "color": "rgb(0,186,56)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
@@ -347,7 +347,7 @@
             "name": "virginica", 
             "marker": {
                 "color": "rgb(97,156,255)", 
-                "size": 20, 
+                "size": 10, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
