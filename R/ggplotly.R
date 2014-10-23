@@ -4,7 +4,6 @@ the.epoch <- now - as.numeric(now)
 
 default.marker.sizeref <- 1
 marker.size.mult <- 10
-line.size.mult <- 2
 
 marker.defaults <- list(alpha=1,
                         shape="16",
@@ -27,9 +26,7 @@ aesConverters <- list(linetype=function(lty) {
                       colour=function(col) {
                         toRGB(col)
                       },
-                      size=function(size) {
-                        line.size.mult * size
-                      },
+                      size=identity,
                       sizeref=identity,
                       sizemode=identity,
                       alpha=identity,

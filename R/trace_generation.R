@@ -358,25 +358,29 @@ group2NA <- function(g, geom){
 
 # Convert basic geoms to traces.
 geom2trace <- list(
-  path=function(data, params){
-    list(x=data$x,
-         y=data$y,
-         name=params$name,
-         text=data$text,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+  path=function(data, params) {
+    L <- list(x=data$x,
+              y=data$y,
+              name=params$name,
+              text=data$text,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
+    L
   },
   polygon=function(data, params){
-    list(x=c(data$x, data$x[1]),
-         y=c(data$y, data$y[1]),
-         name=params$name,
-         text=data$text,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults),
-         fill="tonextx",
-         fillcolor=toRGB(params$fill))
+    L <- list(x=c(data$x, data$x[1]),
+              y=c(data$y, data$y[1]),
+              name=params$name,
+              text=data$text,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults),
+              fill="tonextx",
+              fillcolor=toRGB(params$fill))
+    L$line$width <- L$line$width * 2
+    L
   },
   point=function(data, params){
     L <- list(x=data$x,
@@ -531,28 +535,34 @@ geom2trace <- list(
          fill="tonexty")
   },
   abline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(params$intercept + params$xstart * params$slope,
-             params$intercept + params$xend * params$slope),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    L <- list(x=c(params$xstart, params$xend),
+              y=c(params$intercept + params$xstart * params$slope,
+                  params$intercept + params$xend * params$slope),
+              name=params$name,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
+    L
   },
   hline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
+    L <- list(x=c(params$xstart, params$xend),
          y=c(data$yintercept, data$yintercept),
          name=params$name,
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
+    L
   },
   vline=function(data, params) {
-    list(x=c(data$xintercept, data$xintercept),
-         y=c(params$ystart, params$yend),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    L <- list(x=c(data$xintercept, data$xintercept),
+              y=c(params$ystart, params$yend),
+              name=params$name,
+              type="scatter",
+              mode="lines",
+              line=paramORdefault(params, aes2line, line.defaults))
+    L$line$width <- L$line$width * 2
+    L
   }
 )
