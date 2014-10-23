@@ -17,7 +17,7 @@ test_that("second trace be the vline", {
   expect_true(L[[2]]$y[2] >= 3.325)
   expect_identical(L[[2]]$mode, "lines")
   expect_identical(L[[2]]$line$shape, "linear")
-  expect_equal(L[[2]]$line$width, 3)
+  expect_equal(L[[2]]$line$width, 6)
   expect_identical(L[[2]]$line$color, "rgb(0,255,0)")
   
   save_outputs(gg, "vline")
@@ -35,7 +35,7 @@ test_that("vector xintercept results in multiple vertical lines", {
   expect_true(L[[3]]$y[2] >= 3.325)
   expect_identical(L[[3]]$mode, "lines")
   expect_identical(L[[3]]$line$shape, "linear")
-  expect_equal(L[[3]]$line$width, 3)
+  expect_equal(L[[3]]$line$width, 6)
   expect_identical(L[[3]]$line$color, "rgb(0,0,255)")
   
   save_outputs(gg, "vline-multiple")

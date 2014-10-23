@@ -28,7 +28,7 @@ aesConverters <- list(linetype=function(lty) {
                         toRGB(col)
                       },
                       size=function(size) {
-                        line.size.mult*size
+                        line.size.mult * size
                       },
                       sizeref=identity,
                       sizemode=identity,
