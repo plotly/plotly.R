@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="pd-line-styles-and-width")
+devtools::install_github("ropensci/plotly", ref="marianne-let-bargarp")
 library(plotly)
 
 setwd("tests")
