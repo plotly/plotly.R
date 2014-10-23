@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="marianne-geom-vline")
+devtools::install_github("ropensci/plotly", ref="pd-line-styles-and-width")
 library(plotly)
 
 setwd("tests")

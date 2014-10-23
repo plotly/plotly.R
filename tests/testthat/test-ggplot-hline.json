@@ -24,7 +24,7 @@
             "mode": "markers", 
             "marker": {
                 "color": "rgb(0,0,0)", 
-                "size": 10, 
+                "size": 20, 
                 "symbol": "circle", 
                 "opacity": 1, 
                 "sizeref": 1, 
@@ -47,7 +47,7 @@
             "mode": "lines", 
             "line": {
                 "color": "rgb(0,255,0)", 
-                "width": 3, 
+                "width": 6, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
