@@ -21,7 +21,6 @@ layer2traces <- function(l, d, misc) {
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
     if (l$stat$objname == "bin") {
-      bargap <- 0
       if (g$geom != "histogram") {
         warning("You may want to use geom_histogram.")
       }
@@ -67,13 +66,15 @@ layer2traces <- function(l, d, misc) {
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
           ## Re-order data so that Plotly gets it right from ggplot2.
-          g$data <- g$data[order(g$data[[a]]),]
+          g$data <- g$data[order(g$data[[a]]), ]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
-          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]),]
+          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
           pdata.vec <- pdata.vec[match(g$prestats.data[[a]],
                                        as.numeric(pdata.vec))]
           if (length(pdata.vec) == length(data.vec))
             pdata.vec <- data.vec
+          if (!is.factor(pdata.vec))
+            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
