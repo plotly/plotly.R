@@ -13,7 +13,7 @@
             "name": "Female", 
             "line": {
                 "color": "rgb(0,0,0)", 
-                "width": 3, 
+                "width": 1.5, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
@@ -34,7 +34,7 @@
             "name": "Male", 
             "line": {
                 "color": "rgb(0,0,0)", 
-                "width": 3, 
+                "width": 1.5, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
