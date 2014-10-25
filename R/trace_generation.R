@@ -359,7 +359,7 @@ group2NA <- function(g, geom){
 
 # Convert basic geoms to traces.
 geom2trace <- list(
-  path=function(data, params) {
+  path=function(data, params){
     list(x=data$x,
          y=data$y,
          name=params$name,
@@ -487,13 +487,13 @@ geom2trace <- list(
     L
   },
   density=function(data, params) {
-    list(x=data$x,
-         name=params$name,
-         text=data$text,
-         marker=list(color=toRGB(params$fill)),
-         type="histogram",
-         autobinx=TRUE,
-         histnorm="probability density")
+    L <- list(x=data$x,
+              name=params$name,
+              text=data$text,
+              marker=list(color=toRGB(params$fill)),
+              type="histogram",
+              autobinx=TRUE,
+              histnorm="probability density")
   },
   density2d=function(data, params) {
     L <- list(x=data$x,

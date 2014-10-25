@@ -47,7 +47,7 @@
             "mode": "lines", 
             "line": {
                 "color": "rgb(255,0,0)", 
-                "width": 8, 
+                "width": 4, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 

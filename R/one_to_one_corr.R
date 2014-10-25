@@ -50,8 +50,7 @@ aes2marker <- c(alpha="opacity",
                 shape="symbol")
 
 # Convert numeric line type.
-numeric.lty <- c("0"="none",
-                 "1"="solid",
+numeric.lty <- c("1"="solid",
                  "2"="dash",
                  "3"="dot",
                  "4"="dashdot",
@@ -59,13 +58,13 @@ numeric.lty <- c("0"="none",
                  "6"="longdashdot")
 
 # Convert named line type.
-named.lty <- c("blank"="none",
-               "solid"="solid",
+named.lty <- c("solid"="solid",
+               "blank"="none",
                "dashed"="dash",
-               "dotted"="dot",
+               "dotted"="dotted",
                "dotdash"="dashdot",
                "longdash"="longdash",
-               "twodash"="longdashdot")
+               "twodash"="dash")
 
 # Convert coded line type.
 coded.lty <- c("22"="dash",
