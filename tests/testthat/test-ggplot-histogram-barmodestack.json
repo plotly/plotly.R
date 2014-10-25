@@ -2,12 +2,12 @@
     "data": [
         {
             "x": [
-                "CDN", 
-                "CDN", 
-                "MEX", 
-                "MEX", 
-                "MEX", 
-                "USA"
+                1, 
+                1, 
+                2, 
+                2, 
+                2, 
+                3
             ], 
             "autobinx": true, 
             "xaxis": "x1", 
@@ -57,6 +57,7 @@
         }, 
         "paper_bgcolor": "rgb(255,255,255)", 
         "plot_bgcolor": "rgb(229,229,229)", 
-        "barmode": "stack"
+        "barmode": "stack", 
+        "bargap": 0
     }
 }
