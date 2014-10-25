@@ -1,0 +1,85 @@
+{
+    "data": [
+        {
+            "x": [
+                "Lunch"
+            ], 
+            "y": [
+                14.89
+            ], 
+            "name": "Lunch", 
+            "marker": {
+                "color": "rgb(248,118,109)", 
+                "line": {
+                    "color": "rgb(0,0,0)", 
+                    "width": 1
+                }
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }, 
+        {
+            "x": [
+                "Dinner"
+            ], 
+            "y": [
+                17.23
+            ], 
+            "name": "Dinner", 
+            "marker": {
+                "color": "rgb(0,191,196)", 
+                "line": {
+                    "color": "rgb(0,0,0)", 
+                    "width": 1
+                }
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "time", 
+            "type": "category", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "total_bill", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "barmode": "stack"
+    }
+}

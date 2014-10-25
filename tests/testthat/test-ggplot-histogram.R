@@ -8,6 +8,9 @@ test_that("default position is translated to barmode=stack", {
   L <- gg2list(hist)
   expect_equal(length(L), 2)
   expect_identical(L$kwargs$layout$barmode, "stack")
+  expect_identical(L$kwargs$layout$xaxis$type, "category")
+  expect_identical(L[[1]]$type, "histogram")
+  expect_true(L[[1]]$x[1] %in% c("CDN", "MEX", "USA"))
 
   save_outputs(hist, "histogram-barmodestack")
 })
