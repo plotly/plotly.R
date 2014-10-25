@@ -19,7 +19,7 @@
             "name": "name1", 
             "line": {
                 "color": "rgb(0,0,0)", 
-                "width": 2, 
+                "width": 4, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
@@ -48,7 +48,7 @@
             "name": "name2", 
             "line": {
                 "color": "rgb(0,0,0)", 
-                "width": 3, 
+                "width": 6, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 

@@ -23,7 +23,7 @@
             "name": "1", 
             "line": {
                 "color": "rgb(248,118,109)", 
-                "width": 2, 
+                "width": 1, 
                 "dash": "solid", 
                 "shape": "vhv"
             }, 
@@ -54,7 +54,7 @@
             "name": "2", 
             "line": {
                 "color": "rgb(0,191,196)", 
-                "width": 2, 
+                "width": 1, 
                 "dash": "solid", 
                 "shape": "vhv"
             }, 

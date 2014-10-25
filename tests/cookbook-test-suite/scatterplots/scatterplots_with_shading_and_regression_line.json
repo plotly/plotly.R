@@ -1,0 +1,105 @@
+{
+    "data": [
+        {
+            "x": [
+                1.475957, 
+                -3.423712, 
+                1.966129, 
+                5.575364, 
+                2.954719, 
+                2.768286, 
+                3.507499, 
+                6.945, 
+                12.13505, 
+                10.231673, 
+                13.040393, 
+                12.231689, 
+                13.506993, 
+                13.590874, 
+                15.455178, 
+                28.431185, 
+                17.758937, 
+                24.730797, 
+                22.954238, 
+                21.122766
+            ], 
+            "y": [
+                -1.315387, 
+                3.323239, 
+                4.452183, 
+                4.597885, 
+                5.697203, 
+                5.991221, 
+                5.764561, 
+                10.163165, 
+                14.805634, 
+                11.447913, 
+                12.163597, 
+                10.930851, 
+                13.491366, 
+                11.800783, 
+                19.246991, 
+                13.870457, 
+                11.031923, 
+                22.700302, 
+                24.877547, 
+                22.520114
+            ], 
+            "mode": "markers", 
+            "marker": {
+                "color": "rgb(0,0,0)", 
+                "size": 10, 
+                "symbol": "circle-open", 
+                "opacity": 1, 
+                "sizeref": 1, 
+                "sizemode": "area"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "showlegend": false, 
+            "type": "scatter"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "xvar", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "yvar", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)"
+    }
+}

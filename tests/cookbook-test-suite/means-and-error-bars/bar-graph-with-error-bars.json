@@ -1,0 +1,119 @@
+{
+    "data": [
+        {
+            "x": [
+                null, 
+                null
+            ], 
+            "y": [
+                13.23, 
+                22.7, 
+                26.06
+            ], 
+            "name": "OJ", 
+            "error_y": {
+                "array": [
+                    1.4102836594104033, 
+                    0.8685620300243384, 
+                    1.236752018617942, 
+                    0.7954104461080327, 
+                    0.8396030808264889, 
+                    1.5171757387403169
+                ], 
+                "arrayminus": [
+                    1.4102836594104033, 
+                    0.8685620300243384, 
+                    1.236752018617942, 
+                    0.7954104461080309, 
+                    0.8396030808264889, 
+                    1.5171757387403169
+                ]
+            }, 
+            "marker": {
+                "color": "rgb(248,118,109)"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }, 
+        {
+            "x": [
+                null, 
+                null
+            ], 
+            "y": [
+                7.9799999999999995, 
+                16.77, 
+                26.14
+            ], 
+            "name": "VC", 
+            "error_y": {
+                "array": [
+                    1.4102836594104033, 
+                    0.8685620300243384, 
+                    1.236752018617942, 
+                    0.7954104461080327, 
+                    0.8396030808264889, 
+                    1.5171757387403169
+                ], 
+                "arrayminus": [
+                    1.4102836594104033, 
+                    0.8685620300243384, 
+                    1.236752018617942, 
+                    0.7954104461080309, 
+                    0.8396030808264889, 
+                    1.5171757387403169
+                ]
+            }, 
+            "marker": {
+                "color": "rgb(0,191,196)"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "bar"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": true, 
+        "xaxis": {
+            "title": "dose", 
+            "type": "category", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "len", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 100, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)", 
+        "barmode": "group"
+    }
+}

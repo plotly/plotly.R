@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>nginx/1.4.6 (Ubuntu)</center>
+</body>
+</html>
+
+=======
 {
     "data": [
         {
@@ -57,7 +67,7 @@
         }, 
         "paper_bgcolor": "rgb(255,255,255)", 
         "plot_bgcolor": "rgb(229,229,229)", 
-        "barmode": "stack", 
-        "bargap": 0
+        "barmode": "stack"
     }
 }
+>>>>>>> FETCH_HEAD

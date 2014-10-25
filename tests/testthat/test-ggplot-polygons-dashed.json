@@ -20,7 +20,7 @@
             "line": {
                 "color": "rgb(0,0,255)", 
                 "width": 2, 
-                "dash": "dotted", 
+                "dash": "dot", 
                 "shape": "linear"
             }, 
             "fill": "tonextx", 
