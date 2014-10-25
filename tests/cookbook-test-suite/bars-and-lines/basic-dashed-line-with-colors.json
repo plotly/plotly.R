@@ -12,8 +12,8 @@
             "mode": "lines", 
             "line": {
                 "color": "rgb(255,0,0)", 
-                "width": 3, 
-                "dash": "dot", 
+                "width": 1.5, 
+                "dash": "dotted", 
                 "shape": "linear"
             }, 
             "xaxis": "x1", 
