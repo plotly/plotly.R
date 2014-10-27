@@ -314,8 +314,13 @@ toBasic <- list(
     g
   },
   hline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
+    if (is.factor(g$data$x)) {
+      g$params$xstart <- as.character(sort(g$data$x)[1])
+      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
+    } else {
+      g$params$xstart <- min(g$prestats.data$globxmin)
+      g$params$xend <- max(g$prestats.data$globxmax)
+    }
     g
   },
   vline=function(g) {
