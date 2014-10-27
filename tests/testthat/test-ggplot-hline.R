@@ -17,7 +17,7 @@ test_that("second trace be the hline", {
   expect_true(L[[2]]$x[2] >= 3.5)
   expect_identical(L[[2]]$mode, "lines")
   expect_identical(L[[2]]$line$shape, "linear")
-  expect_equal(L[[2]]$line$width, 3)
+  expect_equal(L[[2]]$line$width, 6)
   expect_identical(L[[2]]$line$color, "rgb(0,255,0)")
   
   save_outputs(gg, "hline")

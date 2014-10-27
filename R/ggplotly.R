@@ -4,6 +4,7 @@ the.epoch <- now - as.numeric(now)
 
 default.marker.sizeref <- 1
 marker.size.mult <- 10
+line.size.mult <- 2
 
 marker.defaults <- list(alpha=1,
                         shape="16",
@@ -14,7 +15,7 @@ marker.defaults <- list(alpha=1,
 
 line.defaults <- list(linetype="solid",
                       colour="black",
-                      size=2,
+                      size=1,
                       direction="linear")
 
 # Convert R lty line type codes to plotly "dash" codes.

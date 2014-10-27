@@ -5,19 +5,22 @@
 ##' @export
 ##' @return named list.
 ##' @author Toby Dylan Hocking
-paramORdefault <- function(params, aesVec, defaults){
+paramORdefault <- function(params, aesVec, defaults) {
   marker <- list()
-  for(ggplot.name in names(aesVec)){
+  for (ggplot.name in names(aesVec)) {
     plotly.name <- aesVec[[ggplot.name]]
     ggplot.value <- params[[ggplot.name]]
-    if(is.null(ggplot.value)){
+    if (is.null(ggplot.value)) {
       ggplot.value <- defaults[[ggplot.name]]
     }
-    if(is.null(ggplot.value)){
+    if (plotly.name=="width") {
+      ggplot.value <- ggplot.value * 2
+    }
+    if (is.null(ggplot.value)) {
       stop("no ggplot default for ", ggplot.name)
     }
     convert <- aesConverters[[ggplot.name]]
-    if(is.null(convert)){
+    if (is.null(convert)) {
       stop("no ggplot converter for ", ggplot.name)
     }
     plotly.value <- convert(ggplot.value)
