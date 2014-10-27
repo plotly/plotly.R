@@ -36,7 +36,7 @@ test_that("vector yintercept results in multiple horizontal lines", {
   expect_true(L[[4]]$x[2] >= 3.325)
   expect_identical(L[[3]]$mode, "lines")
   expect_identical(L[[3]]$line$shape, "linear")
-  expect_equal(L[[3]]$line$width, 3)
+  expect_equal(L[[3]]$line$width, 6)
   expect_identical(L[[3]]$line$color, "rgb(255,0,0)")
   
   save_outputs(gg, "hline-multiple")
