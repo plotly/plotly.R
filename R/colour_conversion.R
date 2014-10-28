@@ -17,3 +17,10 @@ toRGB <- function(x, alpha=1) {
   rgb.css <- sprintf(ch.vector, rgb.text)
   ifelse(is.na(x), "none", rgb.css)
 }
+
+#' Use default ggplot color for fill (gray20) if not declared
+#' @param x character for color
+#' @return hexadecimal color value
+toFill <- function(x) {
+  ifelse(!is.null(x), toRGB(x), toRGB("gray20"))
+}
