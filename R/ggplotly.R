@@ -17,6 +17,9 @@ line.defaults <- list(linetype="solid",
                       size=1,
                       direction="linear")
 
+ribbon.line.defaults <- line.defaults
+ribbon.line.defaults$size <- 0
+
 # Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
