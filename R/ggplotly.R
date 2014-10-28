@@ -11,30 +11,29 @@ marker.defaults <- list(alpha=1,
                         sizeref=default.marker.sizeref,
                         sizemode="area",
                         colour="black")
-line.defaults <-
-  list(linetype="solid",
-       colour="black",
-       size=2,
-       direction="linear")
+
+line.defaults <- list(linetype="solid",
+                      colour="black",
+                      size=1,
+                      direction="linear")
 
 # Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
-aesConverters <-
-  list(linetype=function(lty){
-         lty2dash[as.character(lty)]
-       },
-       colour=function(col){
-         toRGB(col)
-       },
-       size=identity,
-       sizeref=identity,
-       sizemode=identity,
-       alpha=identity,
-       shape=function(pch){
-         pch2symbol[as.character(pch)]
-       },
-       direction=identity)
+aesConverters <- list(linetype=function(lty) {
+                        lty2dash[as.character(lty)]
+                      },
+                      colour=function(col) {
+                        toRGB(col)
+                      },
+                      size=identity,
+                      sizeref=identity,
+                      sizemode=identity,
+                      alpha=identity,
+                      shape=function(pch) {
+                        pch2symbol[as.character(pch)]
+                      },
+                      direction=identity)
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
