@@ -13,7 +13,7 @@ paramORdefault <- function(params, aesVec, defaults) {
     if (is.null(ggplot.value)) {
       ggplot.value <- defaults[[ggplot.name]]
     }
-    if (plotly.name=="width") {
+    if (plotly.name == "width") {
       ggplot.value <- ggplot.value * 2
     }
     if (is.null(ggplot.value)) {
