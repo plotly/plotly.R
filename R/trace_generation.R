@@ -281,6 +281,7 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
+    # Preserve default colour values usign fill:
     if (!is.null(g$data$fill)) {
       levels(g$prestats.data$fill) <- g$data$fill
       g$prestats.data$fill <- as.character(g$prestats.data$fill)
