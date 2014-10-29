@@ -1,3 +1,7 @@
+0.5.7 -- 29 October 2014.
+
+Default colours for geom_area() and geom_ribbon()
+
 0.5.6 -- 28 October 2014.
 
 Convert line size faithfully.

@@ -1,7 +1,7 @@
-#' Convert R colors to RGBA hexadecimal color values
-#' @param x character for color, for example: "white"
+#' Convert R colours to RGBA hexadecimal colour values
+#' @param x character for colour, for example: "white"
 #' @param alpha alpha
-#' @return hexadecimal color value (if is.na(x), return "none" for compatibility with JavaScript)
+#' @return hexadecimal colour value (if is.na(x), return "none" for compatibility with JavaScript)
 #' @export
 toRGB <- function(x, alpha=1) {
   if(is.null(x))return(x)
@@ -16,4 +16,11 @@ toRGB <- function(x, alpha=1) {
   rgb.text <- apply(rgb.matrix, 2, paste, collapse=",")
   rgb.css <- sprintf(ch.vector, rgb.text)
   ifelse(is.na(x), "none", rgb.css)
+}
+
+#' Use default ggplot colour for fill (gray20) if not declared
+#' @param x character for colour
+#' @return hexadecimal colour value
+toFill <- function(x) {
+  ifelse(!is.null(x), toRGB(x), toRGB("gray20"))
 }
