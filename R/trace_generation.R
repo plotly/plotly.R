@@ -281,7 +281,12 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
+    print(g$data)
+    if (!is.null(data$fill)) {
+      level(prestats.data$data) <-
+    }
     g$data <- g$prestats.data
+    print(g$data)
     g
   },
   bar=function(g) {
@@ -471,9 +476,13 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   boxplot=function(data, params) {
+    #print(data)
+    #print(params)
     list(y=data$y,
          name=params$name,
-         type="box")
+         type="box",
+         line=paramORdefault(params, aes2line, boxplot.defaults),
+         fillcolor=ifelse(!is.null(params$fill), toRGB(params$fill), toRGB("white")))
   },
   contour=function(data, params) {
     L <- list(x=unique(data$x),

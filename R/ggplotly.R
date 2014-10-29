@@ -17,6 +17,9 @@ line.defaults <- list(linetype="solid",
                       size=1,
                       direction="linear")
 
+boxplot.defaults <- line.defaults
+boxplot.defaults$colour <- "grey20"
+
 # Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
