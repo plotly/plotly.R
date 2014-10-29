@@ -153,9 +153,11 @@ layer2traces <- function(l, d, misc) {
     }
   }
   
-  # Split hline and vline when multiple
+  # Split hline and vline when multiple intercepts
   if (g$geom == "hline" || g$geom == "vline") {
-    if (nrow(g$data) > 1) {
+    cept <- paste0("g$data$", ifelse(g$geom == "hline", "y", "x"), "intercept")
+    intercept <- eval(parse(text=cept))
+    if (length(unique(intercept)) > 1) {
       df.list <- split(basic$data, rep(1:nrow(g$data)))
       data.list <- lapply(df.list, function(df) {
         params <- basic$params
@@ -547,7 +549,7 @@ geom2trace <- list(
   },
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),
-         y=c(data$yintercept, data$yintercept),
+         y=c(unique(data$yintercept), unique(data$yintercept)),
          name=params$name,
          type="scatter",
          mode="lines",
