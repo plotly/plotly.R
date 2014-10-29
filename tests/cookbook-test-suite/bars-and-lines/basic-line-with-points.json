@@ -3,17 +3,11 @@
         {
             "x": [
                 "Lunch", 
-                "Dinner", 
-                null, 
-                "Lunch", 
                 "Dinner"
             ], 
             "y": [
-                13.53, 
-                16.81, 
-                null, 
-                16.24, 
-                17.42
+                14.89, 
+                17.23
             ], 
             "mode": "lines", 
             "line": {
@@ -30,15 +24,11 @@
         {
             "x": [
                 "Lunch", 
-                "Lunch", 
-                "Dinner", 
                 "Dinner"
             ], 
             "y": [
-                13.53, 
-                16.24, 
-                16.81, 
-                17.42
+                14.89, 
+                17.23
             ], 
             "mode": "markers", 
             "marker": {

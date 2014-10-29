@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="marianne-let-bargarp")
+devtools::install_github("ropensci/plotly", ref="marianne-xrange-factors")
 library(plotly)
 
 setwd("tests")

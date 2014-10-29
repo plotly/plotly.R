@@ -41,3 +41,15 @@ test_that("vector yintercept results in multiple horizontal lines", {
   
   save_outputs(gg, "hline-multiple")
 })
+
+test_that("hline can be drawn over range of factors", {
+  df <- data.frame(cond=c("control", "treatment"), result=c(10, 11.5))
+  gg <- ggplot(df, aes(x=cond, y=result)) +
+    geom_bar(position="dodge", stat="identity") +
+    geom_hline(aes(yintercept=12))
+  L <- gg2list(gg)
+  expect_equal(length(L), 3)  # 1 trace for bar chart, 1 trace for hline, layout
+  expect_true(all(c("control", "treatment") %in% L[[2]]$x))
+  
+  save_outputs(gg, "hline-factor")
+})
