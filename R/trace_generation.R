@@ -530,13 +530,17 @@ geom2trace <- list(
          y=c(0, data$y, 0),
          name=params$name,
          type="scatter",
-         fill="tozeroy")
+         line=paramORdefault(params, aes2line, ribbon.line.defaults),
+         fill="tozeroy",
+         fillcolor=toFill(params$fill))
   },
   ribbon=function(data, params) {
     list(x=c(data$x[1], data$x, rev(data$x)),
          y=c(data$ymin[1], data$ymax, rev(data$ymin)),
          type="scatter",
-         fill="tonexty")
+         line=paramORdefault(params, aes2line, ribbon.line.defaults),
+         fill="tonexty",
+         fillcolor=toFill(params$fill))
   },
   abline=function(data, params) {
     list(x=c(params$xstart, params$xend),
