@@ -387,8 +387,8 @@ geom2trace <- list(
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, polygon.line.defaults),
-         fill="tonextx",
-         fillcolor=toRGB(params$fill))
+         fill="tozerox",
+         fillcolor=toFill(params$fill))
   },
   point=function(data, params){
     L <- list(x=data$x,
