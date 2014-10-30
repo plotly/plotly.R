@@ -14,6 +14,13 @@
                 5.14
             ], 
             "name": "ctrl", 
+            "fillcolor": "rgb(248,118,109)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -32,6 +39,13 @@
                 4.69
             ], 
             "name": "trt1", 
+            "fillcolor": "rgb(0,186,56)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -50,6 +64,13 @@
                 5.26
             ], 
             "name": "trt2", 
+            "fillcolor": "rgb(97,156,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"

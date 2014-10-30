@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="marianne-xrange-factors")
+devtools::install_github("ropensci/plotly", ref="pedro-ggplot-colour-boxplot")
 library(plotly)
 
 setwd("tests")

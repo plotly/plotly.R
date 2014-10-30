@@ -11,6 +11,13 @@
                 "2014-09-19 10:00:11"
             ], 
             "name": "0", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"

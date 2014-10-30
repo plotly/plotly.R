@@ -204,6 +204,13 @@
                 0.19384888
             ], 
             "name": "A", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -412,6 +419,13 @@
                 0.19384888
             ], 
             "name": "B", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
