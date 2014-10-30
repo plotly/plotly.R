@@ -11,7 +11,7 @@ toRGB(x, alpha = 1)
 \item{alpha}{alpha}
 }
 \value{
-hexadecimal colour value (if is.na(x), return "none" for compatibility with JavaScript)
+hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 }
 \description{
 Convert R colours to RGBA hexadecimal colour values
