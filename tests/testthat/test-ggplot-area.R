@@ -11,6 +11,7 @@ test_that("sanity check for geom_area", {
   expect_identical(L[[1]]$type, "scatter")
   expect_equal(L[[1]]$x, c(huron$year[1], huron$year, tail(huron$year, n=1)))
   expect_equal(L[[1]]$y, c(0, huron$level, 0))
+  expect_identical(L[[1]]$line$color, "transparent")
 })
 
 save_outputs(ar, "area")
