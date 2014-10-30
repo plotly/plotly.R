@@ -400,8 +400,8 @@
                 579.38
             ], 
             "line": {
-                "color": "rgb(0,0,0)", 
-                "width": 0, 
+                "color": "transparent", 
+                "width": 2, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 

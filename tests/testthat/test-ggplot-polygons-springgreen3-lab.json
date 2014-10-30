@@ -18,7 +18,7 @@
             "mode": "lines", 
             "name": "name1", 
             "line": {
-                "color": "rgb(0,0,0)", 
+                "color": "transparent", 
                 "width": 2, 
                 "dash": "solid", 
                 "shape": "linear"
@@ -47,7 +47,7 @@
             "mode": "lines", 
             "name": "name2", 
             "line": {
-                "color": "rgb(0,0,0)", 
+                "color": "transparent", 
                 "width": 2, 
                 "dash": "solid", 
                 "shape": "linear"
