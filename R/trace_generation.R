@@ -282,6 +282,11 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
+    # Preserve default colour values usign fill:
+    if (!is.null(g$data$fill)) {
+      levels(g$prestats.data$fill) <- g$data$fill
+      g$prestats.data$fill <- as.character(g$prestats.data$fill)
+    }
     g$data <- g$prestats.data
     g
   },
@@ -479,7 +484,9 @@ geom2trace <- list(
   boxplot=function(data, params) {
     list(y=data$y,
          name=params$name,
-         type="box")
+         type="box",
+         line=paramORdefault(params, aes2line, boxplot.defaults),
+         fillcolor=ifelse(!is.null(data$fill), toRGB(data$fill), toRGB("white")))
   },
   contour=function(data, params) {
     L <- list(x=unique(data$x),

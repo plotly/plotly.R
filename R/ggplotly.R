@@ -17,6 +17,9 @@ line.defaults <- list(linetype="solid",
                       size=1,
                       direction="linear")
 
+boxplot.defaults <- line.defaults
+boxplot.defaults$colour <- "grey20"
+
 ribbon.line.defaults <- line.defaults
 ribbon.line.defaults$size <- 0
 
