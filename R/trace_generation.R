@@ -153,16 +153,17 @@ layer2traces <- function(l, d, misc) {
     }
   }
   
-  # Split hline and vline when multiple
+  # Split hline and vline when multiple panels or intercepts:
+  # Need multiple traces accordingly.
   if (g$geom == "hline" || g$geom == "vline") {
-    if (nrow(g$data) > 1) {
-      df.list <- split(basic$data, rep(1:nrow(g$data)))
-      data.list <- lapply(df.list, function(df) {
-        params <- basic$params
-        list(data=df,
-             params=params)
-      })
-    }
+    intercept <- paste0(ifelse(g$geom == "hline", "y", "x"), "intercept")
+    vec.list <- basic$data[c("PANEL", intercept)]
+    df.list <- split(basic$data, vec.list, drop=TRUE)
+    data.list <- lapply(df.list, function(df) {
+      params <- basic$params
+      list(data=df,
+           params=params)
+    })
   }
   
   ## case of no legend, if either of the two ifs above failed.
@@ -319,8 +320,13 @@ toBasic <- list(
     g
   },
   hline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
+    if (is.factor(g$data$x)) {
+      g$params$xstart <- as.character(sort(g$data$x)[1])
+      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
+    } else {
+      g$params$xstart <- min(g$prestats.data$globxmin)
+      g$params$xend <- max(g$prestats.data$globxmax)
+    }
     g
   },
   vline=function(g) {
@@ -553,7 +559,7 @@ geom2trace <- list(
   },
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),
-         y=c(data$yintercept, data$yintercept),
+         y=c(unique(data$yintercept), unique(data$yintercept)),
          name=params$name,
          type="scatter",
          mode="lines",
