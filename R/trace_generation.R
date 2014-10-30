@@ -153,18 +153,17 @@ layer2traces <- function(l, d, misc) {
     }
   }
   
-  # Split hline and vline when multiple intercepts
+  # Split hline and vline when multiple panels or intercepts:
+  # Need multiple traces accordingly.
   if (g$geom == "hline" || g$geom == "vline") {
-    cept <- paste0("g$data$", ifelse(g$geom == "hline", "y", "x"), "intercept")
-    intercept <- eval(parse(text=cept))
-    if (length(unique(intercept)) > 1) {
-      df.list <- split(basic$data, rep(1:nrow(g$data)))
-      data.list <- lapply(df.list, function(df) {
-        params <- basic$params
-        list(data=df,
-             params=params)
-      })
-    }
+    intercept <- paste0(ifelse(g$geom == "hline", "y", "x"), "intercept")
+    vec.list <- basic$data[c("PANEL", intercept)]
+    df.list <- split(basic$data, vec.list, drop=TRUE)
+    data.list <- lapply(df.list, function(df) {
+      params <- basic$params
+      list(data=df,
+           params=params)
+    })
   }
   
   ## case of no legend, if either of the two ifs above failed.
