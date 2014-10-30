@@ -23,7 +23,7 @@
                 "dash": "solid", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(59,115,171)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
@@ -52,7 +52,7 @@
                 "dash": "solid", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(0,205,102)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
