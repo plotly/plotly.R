@@ -21,7 +21,10 @@ boxplot.defaults <- line.defaults
 boxplot.defaults$colour <- "grey20"
 
 ribbon.line.defaults <- line.defaults
-ribbon.line.defaults$size <- 0
+ribbon.line.defaults$colour <- NA
+
+polygon.line.defaults <- line.defaults
+polygon.line.defaults$colour <- NA
 
 # Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)

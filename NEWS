@@ -1,3 +1,7 @@
+0.5.9 -- 3 November 2014.
+
+Default colours for geom_polygon().
+
 0.5.8 -- 30 October 2014.
 
 Support hline over a factor x range.

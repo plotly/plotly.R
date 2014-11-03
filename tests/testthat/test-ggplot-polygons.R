@@ -13,7 +13,9 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[1]]$y, c(10, 10, 11, 11, 10))
   expect_equal(info[[2]]$x, c(12, 13, 13, 12, 12))
   expect_equal(info[[2]]$y, c(10, 10, 11, 11, 10))
-
+  expect_identical(info[[1]]$line$color, "transparent")
+  expect_identical(info[[2]]$line$color, "transparent")
+  
   save_outputs(gg, "polygons-filled-polygons")
 
   first.color <- rgb(0.23, 0.45, 0.67)

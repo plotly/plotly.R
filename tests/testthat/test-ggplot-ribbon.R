@@ -10,6 +10,7 @@ test_that("sanity check for geom_ribbon", {
   expect_identical(L[[1]]$type, "scatter")
   expect_equal(L[[1]]$x, c(huron$year[1], huron$year, rev(huron$year)))
   expect_equal(L[[1]]$y, c(huron$level[1]-1, huron$level+1, rev(huron$level-1)))
+  expect_identical(L[[1]]$line$color, "transparent")
 })
 
 save_outputs(rb, "ribbon")
