@@ -512,6 +512,21 @@ gg2list <- function(p){
     }
     legend.title <- paste0("<b>", legend.title, "</b>")
 
+    # Create legend title element as an annotation
+    if (exists("annotations")) {
+      nann <- nann + 1
+    } else {
+      annotations <- list()
+      nann <- 1
+    }
+    annotations[[nann]] <- list(text=legend.title,
+                                x=layout$legend$x * 1.012,
+                                y=layout$legend$y * (1.06 + (length(traces) * 0.04)),
+                                showarrow=FALSE,
+                                xref="paper", yref="paper",
+                                xanchor="left", yanchor="top",
+                                textangle=0)
+    layout$annotations <- annotations
   }
 
   ## Family font for text
