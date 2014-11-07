@@ -459,7 +459,7 @@
         "titlefont": {
             "family": ""
         }, 
-        "showlegend": true, 
+        "showlegend": false, 
         "xaxis": {
             "range": [
                 -3.9, 
@@ -501,7 +501,7 @@
             "anchor": "x"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1, 
             "y": 0.5, 
             "font": {
                 "family": ""

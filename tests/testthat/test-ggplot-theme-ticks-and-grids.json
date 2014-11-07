@@ -324,7 +324,7 @@
         "titlefont": {
             "family": ""
         }, 
-        "showlegend": true, 
+        "showlegend": false, 
         "xaxis": {
             "title": "Petal.Width", 
             "type": "linear", 
@@ -348,7 +348,7 @@
             "gridcolor": "rgb(238,130,238)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1, 
             "y": 0.5, 
             "font": {
                 "family": ""
