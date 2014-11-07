@@ -1,10 +1,10 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="pedro-ggplot-colour-boxplot")
+devtools::install_github("ropensci/plotly")
 library(plotly)
 
 setwd("tests")
 
-save_outputs <- function(gg, name, ignore_ggplot=FALSE, file_prefix="test-ggplot-") {
+save_outputs <- function(gg, name, ignore_ggplot=TRUE, file_prefix="test-ggplot-") {
   filesystem_name <- gsub(' ', '_', name)
   print(paste("running", name))
   py <- plotly("TestBot", "r1neazxo9w")

@@ -478,7 +478,6 @@
         }, 
         "paper_bgcolor": "rgb(255,255,255)", 
         "plot_bgcolor": "rgb(229,229,229)", 
-        "barmode": "overlay", 
-        "bargap": 0
+        "barmode": "overlay"
     }
 }
