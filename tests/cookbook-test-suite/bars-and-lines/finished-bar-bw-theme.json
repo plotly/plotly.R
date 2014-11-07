@@ -96,7 +96,7 @@
             "linecolor": "rgb(127,127,127)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1, 
             "y": 0.5, 
             "font": {
                 "family": ""
