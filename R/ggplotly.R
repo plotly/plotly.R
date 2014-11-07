@@ -495,7 +495,7 @@ gg2list <- function(p){
   if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
+  layout$legend <- list(bordercolor="transparent", x=1, y=1/2)
   
   # Workaround for removing unnecessary legends.
   # [markUnique != "x"] is for boxplot's particular case.
