@@ -476,7 +476,6 @@ gg2list <- function(p){
                                         -outer.margin, 
                                         0.5,
                                         textangle=-90)
-      nann <- nann + 1
       
       layout$annotations <- annotations
     }
@@ -496,8 +495,13 @@ gg2list <- function(p){
   if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
+  layout$legend <- list(bordercolor="transparent", x=1, y=1/2)
   
+  # Workaround for removing unnecessary legends.
+  # [markUnique != "x"] is for boxplot's particular case.
+  if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
+    layout$showlegend <- FALSE
+
   ## Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
