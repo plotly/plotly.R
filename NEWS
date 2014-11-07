@@ -1,3 +1,7 @@
+0.5.10 -- 7 November 2014.
+
+Improve showlegend and fix legend’s ’x’ position.
+
 0.5.9 -- 3 November 2014.
 
 Default colours for geom_polygon().
