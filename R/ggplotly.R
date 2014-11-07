@@ -497,6 +497,11 @@ gg2list <- function(p){
   }
   layout$legend <- list(bordercolor="transparent", x=100, y=1/2)
   
+  # Workaround for removing unnecessary legends.
+  # [markUnique != "x"] is for boxplot's particular case.
+  if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
+    layout$showlegend <- FALSE
+
   ## Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
