@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly")
+devtools::install_github("ropensci/plotly", ref="pedro-ggplot-legend-title-2of2")
 library(plotly)
 
 setwd("tests")

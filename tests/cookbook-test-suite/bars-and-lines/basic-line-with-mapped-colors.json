@@ -125,6 +125,19 @@
             "bgcolor": "rgb(255,255,255)", 
             "bordercolor": "transparent"
         }, 
+        "annotations": [
+            {
+                "x": 1.012, 
+                "y": 0.5700000000000001, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "<b>sex</b>", 
+                "showarrow": false, 
+                "xanchor": "left", 
+                "yanchor": "top", 
+                "textangle": 0
+            }
+        ], 
         "margin": {
             "r": 10
         }, 

@@ -239,6 +239,17 @@
                 "ax": 0, 
                 "ay": 0, 
                 "textangle": -90
+            }, 
+            {
+                "x": 1.012, 
+                "y": 0.5700000000000001, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "<b></b>", 
+                "showarrow": false, 
+                "xanchor": "left", 
+                "yanchor": "top", 
+                "textangle": 0
             }
         ], 
         "margin": {
