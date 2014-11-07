@@ -502,6 +502,18 @@ gg2list <- function(p){
   if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
     layout$showlegend <- FALSE
 
+  if (layout$showlegend == TRUE && length(p$data)>0) {
+    # Retrieve legend title
+    legend.elements <- sapply(traces, "[[", "name")
+    legend.title <- ""
+    for (i in 1:ncol(p$data)) {
+      if (all(legend.elements %in% unique(p$data[, i])))
+        legend.title <- colnames(p$data)[i]
+    }
+    legend.title <- paste0("<b>", legend.title, "</b>")
+
+  }
+
   ## Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
