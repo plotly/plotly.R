@@ -502,7 +502,7 @@ gg2list <- function(p){
   if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
     layout$showlegend <- FALSE
 
-  if (layout$showlegend == TRUE && length(p$data)>0) {
+  if (layout$showlegend && length(p$data)) {
     # Retrieve legend title
     legend.elements <- sapply(traces, "[[", "name")
     legend.title <- ""
