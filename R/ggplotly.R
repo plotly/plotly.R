@@ -520,8 +520,8 @@ gg2list <- function(p){
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x=layout$legend$x * 1.012,
-                                y=layout$legend$y * (1.06 + (length(traces) * 0.04)),
+                                x=layout$legend$x * 1.013,
+                                y=layout$legend$y * (1 + (length(traces) * 0.04)) + 0.04,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
                                 xanchor="left", yanchor="top",
