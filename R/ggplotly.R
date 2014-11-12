@@ -496,7 +496,7 @@ gg2list <- function(p){
     layout$margin$r <- 60
   }
   layout$legend <- list(bordercolor="transparent", 
-                        x=1.04, y=1/2,
+                        x=1.05, y=1/2,
                         xanchor="center", yanchor="top")
   
   # Workaround for removing unnecessary legends.
