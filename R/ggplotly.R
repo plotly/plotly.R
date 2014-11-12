@@ -495,7 +495,9 @@ gg2list <- function(p){
   if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", x=1, y=1/2)
+  layout$legend <- list(bordercolor="transparent", 
+                        x=1.04, y=1/2,
+                        xanchor="center", yanchor="top")
   
   # Workaround for removing unnecessary legends.
   # [markUnique != "x"] is for boxplot's particular case.
@@ -520,11 +522,11 @@ gg2list <- function(p){
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x=layout$legend$x * 1.013,
-                                y=layout$legend$y * (1 + (length(traces) * 0.04)) + 0.04,
+                                x=layout$legend$x,
+                                y=layout$legend$y * 1.04,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
-                                xanchor="left", yanchor="top",
+                                xanchor="center",
                                 textangle=0)
     layout$annotations <- annotations
   }
