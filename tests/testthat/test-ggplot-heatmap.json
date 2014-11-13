@@ -70,24 +70,25 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 1, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
         "annotations": [
             {
-                "x": 1.013, 
-                "y": 0.56, 
+                "x": 1.05, 
+                "y": 0.52, 
                 "xref": "paper", 
                 "yref": "paper", 
                 "text": "<b></b>", 
                 "showarrow": false, 
-                "xanchor": "left", 
-                "yanchor": "top", 
+                "xanchor": "center", 
                 "textangle": 0
             }
         ], 
