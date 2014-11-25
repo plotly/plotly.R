@@ -9,49 +9,7 @@
                 13.53, 
                 16.81
             ], 
-            "mode": "lines", 
-            "name": "Female", 
-            "line": {
-                "color": "rgb(145,12,0)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Lunch", 
-                "Dinner"
-            ], 
-            "y": [
-                16.24, 
-                17.42
-            ], 
-            "mode": "lines", 
-            "name": "Male", 
-            "line": {
-                "color": "rgb(0,105,110)", 
-                "width": 2, 
-                "dash": "dash", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Lunch", 
-                "Dinner"
-            ], 
-            "y": [
-                13.53, 
-                16.81
-            ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "Female", 
             "marker": {
                 "color": "rgb(255,255,255)", 
@@ -78,7 +36,7 @@
                 16.24, 
                 17.42
             ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "Male", 
             "marker": {
                 "color": "rgb(255,255,255)", 

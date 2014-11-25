@@ -11,53 +11,7 @@
                 22.7, 
                 26.06
             ], 
-            "mode": "lines", 
-            "name": "OJ", 
-            "line": {
-                "color": "rgb(248,118,109)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                0.5, 
-                1, 
-                2
-            ], 
-            "y": [
-                7.98, 
-                16.77, 
-                26.14
-            ], 
-            "mode": "lines", 
-            "name": "VC", 
-            "line": {
-                "color": "rgb(0,191,196)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                0.5, 
-                1, 
-                2
-            ], 
-            "y": [
-                13.23, 
-                22.7, 
-                26.06
-            ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "OJ", 
             "marker": {
                 "color": "rgb(248,118,109)", 
@@ -82,7 +36,7 @@
                 16.77, 
                 26.14
             ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "VC", 
             "marker": {
                 "color": "rgb(0,191,196)", 

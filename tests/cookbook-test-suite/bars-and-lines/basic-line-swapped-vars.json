@@ -9,49 +9,7 @@
                 13.53, 
                 16.24
             ], 
-            "mode": "lines", 
-            "name": "Lunch", 
-            "line": {
-                "color": "rgb(248,118,109)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Female", 
-                "Male"
-            ], 
-            "y": [
-                16.81, 
-                17.42
-            ], 
-            "mode": "lines", 
-            "name": "Dinner", 
-            "line": {
-                "color": "rgb(0,191,196)", 
-                "width": 2, 
-                "dash": "solid", 
-                "shape": "linear"
-            }, 
-            "xaxis": "x1", 
-            "yaxis": "y1", 
-            "type": "scatter"
-        }, 
-        {
-            "x": [
-                "Female", 
-                "Male"
-            ], 
-            "y": [
-                13.53, 
-                16.24
-            ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "Lunch", 
             "marker": {
                 "color": "rgb(248,118,109)", 
@@ -74,7 +32,7 @@
                 16.81, 
                 17.42
             ], 
-            "mode": "markers", 
+            "mode": "lines+markers", 
             "name": "Dinner", 
             "marker": {
                 "color": "rgb(0,191,196)", 

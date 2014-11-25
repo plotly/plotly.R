@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly")
+devtools::install_github("ropensci/plotly", ref="marianne-merge-layersintotraces")
 library(plotly)
 
 setwd("tests")
