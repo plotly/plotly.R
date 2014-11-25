@@ -645,6 +645,7 @@ gg2list <- function(p){
           if (all(xcomp) && all(ycomp)) {
             # There is possibly more info in the trace "mode": "markers"
             trace.list[[lind[2]]]$mode <- "lines+markers"
+            trace.list[[lind[2]]]$line <- trace.list[[lind[1]]]$line
             trace.list <- trace.list[-lind[1]]
             # Update comparison table
             comp <- comp[-lind[1], ]
