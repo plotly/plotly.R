@@ -612,8 +612,44 @@ gg2list <- function(p){
   }
   
   trace.list$kwargs <- list(layout=layout)
-  if(length(trace.list) < 2){
+  
+  if (length(trace.list) < 2) {
     stop("No exportable traces")
+  }
+  
+  if (length(trace.list) > 2) {
+    # Maybe some traces should be merged.
+    nr <- length(trace.list) - 1
+    comp <- data.frame(matrix(ncol=2, nrow=nr))
+    colnames(comp) <- c("name", "mode")
+    
+    for (j in 1:nr) {
+      # Use lapply to be elegant?
+      for (d in colnames(comp)) {
+        comp[[d]][j] <- trace.list[[j]][[d]]
+      }
+    }
+    # Compare the "name"s of the traces (so far naively inherited from layers)
+    layernames <- unique(comp$name)
+    if (length(layernames) < nr) {
+      # Some traces (layers at this stage) have the same "name"s.
+      for (j in 1:length(layernames)) {
+        lind <- which(layernames[j] == comp$name)
+        lmod <- c("lines", "markers") %in% comp$mode[lind]
+        # Is there one with "mode": "lines" and another with "mode": "markers"?
+        if (all(lmod)) {
+          # Data comparison
+          xcomp <- (trace.list[[lind[1]]]$x == trace.list[[lind[2]]]$x)
+          ycomp <- (trace.list[[lind[1]]]$y == trace.list[[lind[2]]]$y)
+          if (all(xcomp) && all(ycomp)) {
+            trace.list[[lind[1]]]$mode <- "lines+markers"
+            trace.list <- trace.list[-lind[2]]
+            # Update comparison table
+            comp <- comp[-lind[2], ]
+          }
+        }
+      }
+    }
   }
   
   trace.list
