@@ -626,7 +626,8 @@ gg2list <- function(p){
     for (j in 1:nr) {
       # Use lapply to be elegant?
       for (d in colnames(comp)) {
-        comp[[d]][j] <- trace.list[[j]][[d]]
+        try(comp[[d]][j] <- trace.list[[j]][[d]], silent=TRUE)
+        # "names" might be NULL in trace.list
       }
     }
     # Compare the "name"s of the traces (so far naively inherited from layers)
@@ -642,10 +643,11 @@ gg2list <- function(p){
           xcomp <- (trace.list[[lind[1]]]$x == trace.list[[lind[2]]]$x)
           ycomp <- (trace.list[[lind[1]]]$y == trace.list[[lind[2]]]$y)
           if (all(xcomp) && all(ycomp)) {
-            trace.list[[lind[1]]]$mode <- "lines+markers"
-            trace.list <- trace.list[-lind[2]]
+            # There is possibly more info in the trace "mode": "markers"
+            trace.list[[lind[2]]]$mode <- "lines+markers"
+            trace.list <- trace.list[-lind[1]]
             # Update comparison table
-            comp <- comp[-lind[2], ]
+            comp <- comp[-lind[1], ]
           }
         }
       }
