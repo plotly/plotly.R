@@ -21,6 +21,12 @@
                 "sizeref": 1, 
                 "sizemode": "area"
             }, 
+            "line": {
+                "color": "rgb(248,118,109)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "scatter"
@@ -45,6 +51,12 @@
                 "opacity": 1, 
                 "sizeref": 1, 
                 "sizemode": "area"
+            }, 
+            "line": {
+                "color": "rgb(0,191,196)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
             }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
