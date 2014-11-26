@@ -643,12 +643,26 @@ gg2list <- function(p){
           xcomp <- (trace.list[[lind[1]]]$x == trace.list[[lind[2]]]$x)
           ycomp <- (trace.list[[lind[1]]]$y == trace.list[[lind[2]]]$y)
           if (all(xcomp) && all(ycomp)) {
-            # There is possibly more info in the trace "mode": "markers"
-            trace.list[[lind[2]]]$mode <- "lines+markers"
-            trace.list[[lind[2]]]$line <- trace.list[[lind[1]]]$line
-            trace.list <- trace.list[-lind[1]]
+            # Union of the two traces
+            keys <- unique(c(names(trace.list[[lind[1]]]),
+                             names(trace.list[[lind[2]]])))
+            temp <- setNames(mapply(c, trace.list[[lind[1]]][keys],
+                                    trace.list[[lind[2]]][keys]), keys)
+            # Info is duplicated in fields which are in common
+            temp <- lapply(temp, unique)
+            # But unique() is detrimental to line or marker sublist
+            temp$line <- trace.list[[lind[1]]]$line
+            temp$marker <- trace.list[[lind[2]]]$marker
+            # Overwrite x and y to be safe
+            temp$x <- trace.list[[lind[1]]]$x
+            temp$y <- trace.list[[lind[1]]]$y
+            # Specify new one mode
+            temp$mode <- "lines+markers"
+            # Keep one trace and remove the other one
+            trace.list[[lind[1]]] <- temp
+            trace.list <- trace.list[-lind[2]]
             # Update comparison table
-            comp <- comp[-lind[1], ]
+            comp <- comp[-lind[2], ]
           }
         }
       }
