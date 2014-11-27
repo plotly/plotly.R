@@ -3,14 +3,14 @@
 \alias{plotly}
 \title{Main interface to plotly}
 \usage{
-plotly(username = NULL, key = NULL, base.url = NULL)
+plotly(username = NULL, key = NULL, base_url = NULL)
 }
 \arguments{
 \item{username}{plotly username}
 
 \item{key}{plotly API key}
 
-\item{base.url}{plotly server}
+\item{base_url}{plotly server}
 }
 \value{
 An object of class PlotlyClass, except for the final object after
