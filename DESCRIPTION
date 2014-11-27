@@ -34,14 +34,3 @@ Imports:
 Suggests:
     maps,
     testthat
-Collate:
-    'one_to_one_corr.R'
-    'build_function.R'
-    'colour_conversion.R'
-    'ggplotly.R'
-    'marker_conversion.R'
-    'plotly-package.r'
-    'plotly.R'
-    'signup.R'
-    'tools.R'
-    'trace_generation.R'

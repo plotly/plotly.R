@@ -18,7 +18,7 @@
 #' @import RJSONIO
 #' @param username plotly username
 #' @param key plotly API key
-#' @param base.url plotly server
+#' @param base_url plotly server
 #' 
 #' @return An object of class PlotlyClass, except for the final object after
 #' adding layers becomes a list class.
@@ -57,7 +57,7 @@
 #' }
 
 
-plotly <- function(username=NULL, key=NULL, base.url=NULL) {
+plotly <- function(username=NULL, key=NULL, base_url=NULL) {
   
   if (is.null(username)) {
     username <- get_credentials_file(c("username", "api_key"))$username
@@ -73,11 +73,11 @@ To get started, save your plotly username and API key by calling:\n
 For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   }
   # Plotly server
-  if (is.null(base.url)) {
-    base.url <- get_config_file("plotly_domain")$plotly_domain
+  if (is.null(base_url)) {
+    base_url <- get_config_file("plotly_domain")$plotly_domain
   }
-  if (is.null(base.url) || base.url == "") {
-    base.url <- "https://plot.ly"
+  if (is.null(base_url) || base_url == "") {
+    base_url <- "https://plot.ly"
   }
   
   # public attributes/methods that the user has access to
@@ -90,7 +90,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
-    url <- paste(base.url, "/clientresp", sep="")
+    url <- paste(base_url, "/clientresp", sep="")
 
     respst <- postForm(url, platform="R", version=pub$version, 
                        args=toJSON(args, digits=50, collapse=""), un=pub$username,
@@ -167,7 +167,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                  "plotly-platform"="R")
     response_handler <- basicTextGatherer()
     header_handler <- basicTextGatherer()
-    curlPerform(url=paste(base.url, "apigetfile", file_owner, file_id,
+    curlPerform(url=paste(base_url, "apigetfile", file_owner, file_id,
                           sep="/"),
                 httpheader=headers,
                 writefunction=response_handler$update,
