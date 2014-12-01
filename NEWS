@@ -1,3 +1,7 @@
+0.5.14 -- 1 December 2014.
+
+Make layers geom_line + geom_point only one trace in Plotly.
+
 0.5.13 -- 27 November 2014.
 
 Rename translation file and server endpoint parameter to be hip.
@@ -12,7 +16,7 @@ Show legend title.
 
 0.5.10 -- 7 November 2014.
 
-Improve showlegend and fix legend’s ’x’ position.
+Improve showlegend and fix legend’s `x` position.
 
 0.5.9 -- 3 November 2014.
 

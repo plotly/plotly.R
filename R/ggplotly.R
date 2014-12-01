@@ -612,8 +612,61 @@ gg2list <- function(p){
   }
   
   trace.list$kwargs <- list(layout=layout)
-  if(length(trace.list) < 2){
+  
+  if (length(trace.list) < 2) {
     stop("No exportable traces")
+  }
+  
+  if (length(trace.list) > 2) {
+    # Maybe some traces should be merged.
+    nr <- length(trace.list) - 1
+    comp <- data.frame(matrix(ncol=2, nrow=nr))
+    colnames(comp) <- c("name", "mode")
+    
+    for (j in 1:nr) {
+      # Use lapply to be elegant?
+      for (d in colnames(comp)) {
+        try(comp[[d]][j] <- trace.list[[j]][[d]], silent=TRUE)
+        # "names" might be NULL in trace.list
+      }
+    }
+    # Compare the "name"s of the traces (so far naively inherited from layers)
+    layernames <- unique(comp$name)
+    if (length(layernames) < nr) {
+      # Some traces (layers at this stage) have the same "name"s.
+      for (j in 1:length(layernames)) {
+        lind <- which(layernames[j] == comp$name)
+        lmod <- c("lines", "markers") %in% comp$mode[lind]
+        # Is there one with "mode": "lines" and another with "mode": "markers"?
+        if (all(lmod)) {
+          # Data comparison
+          xcomp <- (trace.list[[lind[1]]]$x == trace.list[[lind[2]]]$x)
+          ycomp <- (trace.list[[lind[1]]]$y == trace.list[[lind[2]]]$y)
+          if (all(xcomp) && all(ycomp)) {
+            # Union of the two traces
+            keys <- unique(c(names(trace.list[[lind[1]]]),
+                             names(trace.list[[lind[2]]])))
+            temp <- setNames(mapply(c, trace.list[[lind[1]]][keys],
+                                    trace.list[[lind[2]]][keys]), keys)
+            # Info is duplicated in fields which are in common
+            temp <- lapply(temp, unique)
+            # But unique() is detrimental to line or marker sublist
+            temp$line <- trace.list[[lind[1]]]$line
+            temp$marker <- trace.list[[lind[2]]]$marker
+            # Overwrite x and y to be safe
+            temp$x <- trace.list[[lind[1]]]$x
+            temp$y <- trace.list[[lind[1]]]$y
+            # Specify new one mode
+            temp$mode <- "lines+markers"
+            # Keep one trace and remove the other one
+            trace.list[[lind[1]]] <- temp
+            trace.list <- trace.list[-lind[2]]
+            # Update comparison table
+            comp <- comp[-lind[2], ]
+          }
+        }
+      }
+    }
   }
   
   trace.list
