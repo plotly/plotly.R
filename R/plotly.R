@@ -82,7 +82,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
-              version="0.5.1")
+              version="0.5.14")
   priv <- list()
   
   pub$makecall <- function(args, kwargs, origin) {
@@ -91,7 +91,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if (is.null(kwargs$fileopt))
       kwargs$fileopt <- NULL
     url <- paste(base_url, "/clientresp", sep="")
-
+    
     respst <- postForm(url, platform="R", version=pub$version, 
                        args=toJSON(args, digits=50, collapse=""), un=pub$username,
                        key=pub$key, origin=origin,
@@ -101,7 +101,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                                                      "cacert.pem",
                                                      package="RCurl")))
     if (is.raw(respst)) {
-        respst <- rawToChar(respst)
+      respst <- rawToChar(respst)
     }
     
     resp <- fromJSON(respst, simplify = FALSE)
@@ -171,7 +171,10 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
                           sep="/"),
                 httpheader=headers,
                 writefunction=response_handler$update,
-                headerfunction=header_handler$update)
+                headerfunction=header_handler$update,
+                .opts=list(sslversion=1,  # 1 is for TLSv1
+                           cainfo=system.file("CurlSSL", "cacert.pem",
+                                              package="RCurl")))
     resp_header <- as.list(parseHTTPHeader(header_handler$value()))
     
     # Parse status
