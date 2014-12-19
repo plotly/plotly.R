@@ -1,3 +1,7 @@
+0.5.15 -- 19 December 2014.
+
+Use proper RCurlOptions in get_figure() method.
+
 0.5.14 -- 1 December 2014.
 
 Make layers geom_line + geom_point only one trace in Plotly.

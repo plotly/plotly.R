@@ -7,7 +7,7 @@
 #' \itemize{
 #'  \item Package: plotly
 #'  \item Type: Package
-#'  \item Version: 0.3.4
+#'  \item Version: 0.5.15
 #'  \item Date: 2014-03-07
 #'  \item License: MIT
 #' }
