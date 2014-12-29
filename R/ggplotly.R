@@ -53,7 +53,8 @@ markLegends <-
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       boxplot=c("x"))
+       boxplot=c("x"),
+       text=c("colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
