@@ -428,8 +428,8 @@ geom2trace <- list(
     if (!is.null(params$size)) {
       L$textfont$size <- params$size
     }
-    if (!is.null(data$colour)) {
-      L$textfont$color <- data$colour
+    if (!is.null(params$colour)) {
+      L$textfont$color <- params$colour
     }
     L
   },
