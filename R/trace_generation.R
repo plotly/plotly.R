@@ -456,6 +456,13 @@ geom2trace <- list(
         L$xbins=list(start=params$xstart,
                      end=params$xend,
                      size=params$binwidth)
+        if (inherits(data$x.name, "POSIXt")) {
+          # Convert seconds into milliseconds
+          L$xbins <- lapply(L$xbins, function(x) x * 1000)
+        } else if (inherits(data$x.name, "Date")) {
+          # Convert days into milliseconds
+          L$xbins <- lapply(L$xbins, function(x) x * 24 * 60 * 60 * 1000)
+        }
       }
     } else {
       L$y <- data$y
