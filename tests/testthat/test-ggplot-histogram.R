@@ -160,7 +160,7 @@ test_that("datetime binning for class POSIXt works in histograms", {
   expect_identical(L$kwargs$layout$xaxis$type, "date")
   expect_equal(L[[1]]$xbins$size, 2592000000)  # Bin size in ms
   
-  save_outputs(hist, "histogram-POSIXt-bins")
+  save_outputs(histP, "histogram-POSIXt-bins")
 })
 
 test_that("datetime binning for class Date works in histograms", {
@@ -174,5 +174,5 @@ test_that("datetime binning for class Date works in histograms", {
   expect_identical(L$kwargs$layout$xaxis$type, "date")
   expect_equal(L[[1]]$xbins$size, 2.592e+09)  # Number of ms in 30 days
   
-  save_outputs(hist, "histogram-Date-bins")
+  save_outputs(histD, "histogram-Date-bins")
 })
