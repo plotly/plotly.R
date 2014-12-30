@@ -11,7 +11,7 @@ test_that("default position is translated to barmode=stack", {
   expect_identical(L$kwargs$layout$xaxis$type, "category")
   expect_identical(L[[1]]$type, "histogram")
   expect_true(L[[1]]$x[1] %in% c("CDN", "MEX", "USA"))
-
+  
   save_outputs(hist, "histogram-barmodestack")
 })
 
@@ -27,7 +27,7 @@ test_that("binwidth is translated into xbins.size", {
   L <- gg2list(hist)
   expect_equal(length(L), 2)
   expect_equal(L[[1]]$xbins$size, bw)
-
+  
   save_outputs(hist, "histogram-binwidth")
 })
 
@@ -44,6 +44,135 @@ test_that("dates work well with histograms", {
   expect_identical(L$kwargs$layout$xaxis$type, "date")
   expect_identical(L[[1]]$x[1], "2012-01-01 00:00:00")
   expect_identical(L[[1]]$x[2], "2012-02-01 00:00:00")
-
+  
   save_outputs(hist, "histogram-dates")
+})
+
+# Non-numeric (date) data, specifying binwidth
+killed <- data.frame(date=c("2014-12-24",
+                            "2014-12-23",
+                            "2014-12-22",
+                            "2014-12-22",
+                            "2014-12-22",
+                            "2014-12-18",
+                            "2014-12-22",
+                            "2014-12-21",
+                            "2014-12-21",
+                            "2014-12-21",
+                            "2014-12-20",
+                            "2014-12-19",
+                            "2014-12-18",
+                            "2014-12-18",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2013-12-20",
+                            "2014-04-25",
+                            "2014-12-01",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2014-12-17",
+                            "2014-12-15",
+                            "2014-12-15",
+                            "2014-12-15",
+                            "2014-12-14",
+                            "2014-12-14",
+                            "2014-12-14",
+                            "2014-12-13",
+                            "2014-12-13",
+                            "2013-05-18",
+                            "2014-12-13",
+                            "2014-12-12",
+                            "2014-12-12",
+                            "2014-12-11",
+                            "2014-12-10",
+                            "2014-12-10",
+                            "2014-12-10",
+                            "2014-12-10",
+                            "2014-12-09",
+                            "2014-12-09",
+                            "2014-12-09",
+                            "2014-12-09",
+                            "2014-12-08",
+                            "2014-12-08",
+                            "2014-12-08",
+                            "2014-12-07",
+                            "2014-12-08",
+                            "2014-12-07",
+                            "2014-05-01",
+                            "2014-12-05",
+                            "2014-12-05",
+                            "2014-12-05",
+                            "2014-12-04",
+                            "2014-12-04",
+                            "2014-12-04",
+                            "2014-07-13",
+                            "2014-12-02",
+                            "2014-12-03",
+                            "2014-12-03",
+                            "2014-12-02",
+                            "2014-12-02",
+                            "2014-12-01",
+                            "2014-12-01",
+                            "2014-12-01",
+                            "2014-04-02",
+                            "2014-11-30",
+                            "2014-11-30",
+                            "2014-11-29",
+                            "2014-11-28",
+                            "2014-11-29",
+                            "2014-11-27",
+                            "2014-11-28",
+                            "2014-11-27",
+                            "2014-11-26",
+                            "2014-11-25",
+                            "2014-11-26",
+                            "2014-11-25",
+                            "2014-11-25",
+                            "2014-11-24",
+                            "2014-11-24",
+                            "2014-11-23",
+                            "2014-11-23",
+                            "2014-11-24",
+                            "2014-11-23",
+                            "2014-11-22",
+                            "2014-11-23",
+                            "2014-11-22",
+                            "2014-11-22",
+                            "2014-11-21",
+                            "2014-11-21",
+                            "2014-11-21",
+                            "2014-11-20",
+                            "2014-11-20",
+                            "2014-11-20",
+                            "2014-11-19"))
+
+test_that("datetime binning for class POSIXt works in histograms", {
+  kP <- killed
+  kP$date <- as.POSIXlt(kP$date)
+  histP <- ggplot(kP, aes(x=date)) + geom_histogram(binwidth=2592000)
+  
+  L <- gg2list(histP)
+  expect_equal(length(L), 2)  # 1 trace + layout
+  expect_false(L[[1]]$autobinx)  # No auto-binning
+  expect_identical(L$kwargs$layout$xaxis$type, "date")
+  expect_equal(L[[1]]$xbins$size, 2592000000)  # Bin size in ms
+  
+  save_outputs(hist, "histogram-POSIXt-bins")
+})
+
+test_that("datetime binning for class Date works in histograms", {
+  kD <- killed
+  kD$date <- as.Date(kD$date)
+  histD <- ggplot(kD, aes(x=date)) + geom_histogram(binwidth=30)
+  
+  L <- gg2list(histD)
+  expect_equal(length(L), 2)  # 1 trace + layout
+  expect_false(L[[1]]$autobinx)  # No auto-binning
+  expect_identical(L$kwargs$layout$xaxis$type, "date")
+  expect_equal(L[[1]]$xbins$size, 2.592e+09)  # Number of ms in 30 days
+  
+  save_outputs(hist, "histogram-Date-bins")
 })
