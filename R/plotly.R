@@ -105,8 +105,8 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }
     
     resp <- fromJSON(respst, simplify = FALSE)
-    if (!is.null(resp$filename))
-      pub$filename <- resp$filename
+    if (!is.null(kwargs$filename))
+      resp$filename <- kwargs$filename
     if (!is.null(resp$error))
       cat(resp$err)
     if (!is.null(resp$warning))
