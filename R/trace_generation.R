@@ -41,13 +41,24 @@ layer2traces <- function(l, d, misc) {
   
   ## For non-numeric data on the axes, we should take the values from
   ## the original data.
-  for (axis.name in c("x", "y")){
-    if (!misc$is.continuous[[axis.name]]){
+  for (axis.name in c("x", "y")) {
+    if (!misc$is.continuous[[axis.name]]) {
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {
         col.name <- g$aes[aes.used]
-        data.vec <- l$data[[col.name]]
+        dtemp <- l$data[[col.name]]
+        if (is.null(dtemp)) {
+          if (!inherits(g$data[[paste0(a, ".name")]], "NULL")) {
+            # Handle the case where as.Date() is passed in aes argument.
+            if (class(g$data[[a]]) != class(g$data[[paste0(a, ".name")]])) {
+              g$data[[a]] <- g$data[[paste0(a, ".name")]]
+              data.vec <- g$data[[a]]
+            }
+          }
+        } else {
+          data.vec <- dtemp
+        }
         
         # For some plot types, we overwrite `data` with `prestats.data`.
         pdata.vec <- misc$prestats.data[[a]]
@@ -274,11 +285,11 @@ toBasic <- list(
       g
     }
   },
-  path=function(g){
+  path=function(g) {
     group2NA(g, "path")
   },
-  line=function(g){
-    g$data <- g$data[order(g$data$x),]
+  line=function(g) {
+    g$data <- g$data[order(g$data$x), ]
     group2NA(g, "path")
   },
   boxplot=function(g) {
@@ -370,7 +381,7 @@ group2NA <- function(g, geom) {
 
 # Convert basic geoms to traces.
 geom2trace <- list(
-  path=function(data, params){
+  path=function(data, params) {
     list(x=data$x,
          y=data$y,
          name=params$name,
