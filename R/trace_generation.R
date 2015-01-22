@@ -352,14 +352,14 @@ toBasic <- list(
 #' @export
 #' @return list of geom info.
 #' @author Toby Dylan Hocking
-group2NA <- function(g, geom){
+group2NA <- function(g, geom) {
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
   poly.na.df <- data.frame()
-  for(i in seq_along(poly.list)){
-    no.group <- poly.list[[i]][,!is.group,drop=FALSE]
-    na.row <- no.group[1,]
-    na.row[,c("x", "y")] <- NA
+  for (i in seq_along(poly.list)) {
+    no.group <- poly.list[[i]][, !is.group, drop=FALSE]
+    na.row <- no.group[1, ]
+    na.row[, c("x", "y")] <- NA
     poly.na.df <- rbind(poly.na.df, no.group, na.row)
   }
   g$data <- poly.na.df
