@@ -82,7 +82,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
-              version="0.5.17")
+              version="0.5.18")
   priv <- list()
   
   pub$makecall <- function(args, kwargs, origin) {
@@ -105,8 +105,8 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     }
     
     resp <- fromJSON(respst, simplify = FALSE)
-    if (!is.null(resp$filename))
-      pub$filename <- resp$filename
+    if (!is.null(kwargs$filename))
+      resp$filename <- kwargs$filename
     if (!is.null(resp$error))
       cat(resp$err)
     if (!is.null(resp$warning))
