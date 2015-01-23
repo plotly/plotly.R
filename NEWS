@@ -1,3 +1,7 @@
+0.5.19 -- 23 January 2015.
+
+Support class conversion such as as.Date() within ggplot code.
+
 0.5.18 -- 22 January 2015.
 
 Return proper filepath when filename contains directories.

@@ -82,7 +82,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
-              version="0.5.18")
+              version="0.5.19")
   priv <- list()
   
   pub$makecall <- function(args, kwargs, origin) {
