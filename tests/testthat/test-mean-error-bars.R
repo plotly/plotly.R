@@ -8,6 +8,7 @@ one.line.df <-
     y = c(2, 1, 3, 4), 
     array = c(0.1, 0.2, 0.1, 0.1), 
     arrayminus = c(0.2, 0.4, 1, 0.2))
+
 one.line.json <- list(
   list(
     x = c(1, 2, 3, 4), 
@@ -28,9 +29,15 @@ test_that("asymmetric error bars, geom_errorbar last", {
     geom_point()+
     geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
   generated.json <- gg2list(one.line.gg)
+  ## BUG: lines do not appear in plotly.
+  generated.json[[2]]$mode <- "lines+markers"
+  ## when there is 1 trace with error bars, lines, and markers, plotly
+  ## shows error bars in the background, lines in the middle and
+  ## markers in front.
   is.trace <- names(generated.json) == ""
   traces <- generated.json[is.trace]
   expect_identical(length(traces), 1L)
+  ## TODO: check that data agrees in one.line.json and generated.json.
 })
 
 test_that("asymmetric error bars, geom_errorbar first", {
@@ -44,7 +51,36 @@ test_that("asymmetric error bars, geom_errorbar first", {
   expect_identical(length(traces), 1L)
 })
 
+colors.json <- list(
+  list(
+    x = c(1, 2, 3, 4), 
+    y = c(2, 1, 3, 4), 
+    error_y = list(
+      type = "data", 
+      symmetric = FALSE, 
+      array = c(0.1, 0.2, 0.1, 0.1), 
+      arrayminus = c(0.2, 0.4, 1, 0.2),
+      color="red"
+    ), 
+    type = "scatter",
+    marker=list(color="blue", size=14),
+    line=list(color="black")
+  )
+)
 
+test_that("different colors for error bars, points, and lines", {
+  one.line.gg <- ggplot(one.line.df, aes(x, y))+
+    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array), color="red")+
+    geom_line(color="black")+
+    geom_point(color="blue", size=14)
+  generated.json <- gg2list(one.line.gg)
+  is.trace <- names(generated.json) == ""
+  traces <- generated.json[is.trace]
+  expect_identical(length(traces), 1L)
+  ## TODO: check that colors agree in colors.json and generated.json.
+})
+
+if(FALSE){
 ## from https://github.com/chriddyp/ggplot2-plotly-cookbook/blob/a45f2c70b7adf484e0b0eb8810a1e59e018adbb8/means_and_error_bars.R#L162-L191
 df <- ToothGrowth
 
@@ -107,3 +143,4 @@ good.json[[1]]$error_y <-
        visible=TRUE,
        type="data")
 
+}
