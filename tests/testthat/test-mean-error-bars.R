@@ -70,7 +70,6 @@ test_that("asymmetric error bars, geom_errorbar last", {
   is.trace <- names(generated.json) == ""
   traces <- generated.json[is.trace]
   expect_identical(length(traces), 1L)
-  ## TODO: check that data agrees in one.line.json and generated.json.
 })
 
 test_that("asymmetric error bars, geom_errorbar first", {
@@ -82,6 +81,14 @@ test_that("asymmetric error bars, geom_errorbar first", {
   is.trace <- names(generated.json) == ""
   traces <- generated.json[is.trace]
   expect_identical(length(traces), 1L)
+  tr <- traces[[1]]
+  expect_identical(tr$mode, "lines+markers")
+  expect_identical(tr$type, "scatter")
+  ey <- tr$error_y
+  expect_identical(ey$type, "data")
+  expect_identical(ey$symmetric, FALSE)
+  expect_equal(ey$array, c(0.1, 0.2, 0.1, 0.1))
+  expect_equal(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
 })
 
 colors.json <- list(
