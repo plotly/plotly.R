@@ -9,6 +9,38 @@ one.line.df <-
     array = c(0.1, 0.2, 0.1, 0.1), 
     arrayminus = c(0.2, 0.4, 1, 0.2))
 
+none.json <- list(
+  list(
+    x = c(1, 2, 3, 4), 
+    y = c(2, 1, 3, 4), 
+    error_y = list(
+      type = "data", 
+      symmetric = FALSE, 
+      array = c(0.1, 0.2, 0.1, 0.1), 
+      arrayminus = c(0.2, 0.4, 1, 0.2)
+    ), 
+    type = "scatter",
+    mode = "none"
+  )
+)
+
+test_that("only asymmetric error bars", {
+  error.gg <- ggplot(one.line.df, aes(x, y))+
+    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
+  generated.json <- gg2list(error.gg)
+  is.trace <- names(generated.json) == ""
+  traces <- generated.json[is.trace]
+  expect_identical(length(traces), 1L)
+  tr <- traces[[1]]
+  expect_identical(tr$mode, "none")
+  expect_identical(tr$type, "scatter")
+  ey <- tr$error_y
+  expect_identical(ey$type, "data")
+  expect_identical(ey$symmetric, FALSE)
+  expect_identical(ey$array, c(0.1, 0.2, 0.1, 0.1))
+  expect_identical(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
+})
+
 one.line.json <- list(
   list(
     x = c(1, 2, 3, 4), 
@@ -30,7 +62,8 @@ test_that("asymmetric error bars, geom_errorbar last", {
     geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
   generated.json <- gg2list(one.line.gg)
   ## BUG: lines do not appear in plotly.
-  generated.json[[2]]$mode <- "lines+markers"
+  ##generated.json[[2]]$mode <- "lines+markers"
+  
   ## when there is 1 trace with error bars, lines, and markers, plotly
   ## shows error bars in the background, lines in the middle and
   ## markers in front.

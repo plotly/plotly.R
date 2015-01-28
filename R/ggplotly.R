@@ -612,13 +612,11 @@ gg2list <- function(p){
       layout$legend$bgcolor <- toRGB(s(rect_fill))
   }
   
-  trace.list$kwargs <- list(layout=layout)
-  
-  if (length(trace.list) < 2) {
+  if(length(trace.list) == 0) {
     stop("No exportable traces")
   }
   
-  if (length(trace.list) > 2) {
+  if(length(trace.list) > 1) {
     # Maybe some traces should be merged.
     nr <- length(trace.list) - 1
     comp <- data.frame(matrix(ncol=2, nrow=nr))
@@ -633,6 +631,7 @@ gg2list <- function(p){
     }
     # Compare the "name"s of the traces (so far naively inherited from layers)
     layernames <- unique(comp$name)
+    browser()
     if (length(layernames) < nr) {
       # Some traces (layers at this stage) have the same "name"s.
       for (j in 1:length(layernames)) {
@@ -665,10 +664,12 @@ gg2list <- function(p){
             # Update comparison table
             comp <- comp[-lind[2], ]
           }
-        }
-      }
-    }
-  }
+        }#all(lmod)
+      }#j in layernames
+    }#if layernames
+  }#if we have multiple traces2
+
+  trace.list$kwargs <- list(layout=layout)
   
   trace.list
 }
