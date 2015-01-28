@@ -539,15 +539,23 @@ geom2trace <- list(
   errorbar=function(data, params) {
     list(x=data$x,
          y=data$y,
+         type="scatter",
+         mode="none",
          error_y=list(arrayminus=data$y-data$ymin,
                       array=data$ymax-data$y,
+           type="data",
+           symmetric=FALSE,
                       color=toRGB(data$colour)))
   },
   errorbarh=function(data, params) {
     list(x=data$x,
          y=data$y,
+         type="scatter",
+         mode="none",
          error_x=list(arrayminus=data$x-data$xmin,
                       array=data$xmax-data$x,
+           type="data",
+           symmetric=FALSE,
                       color=toRGB(data$colour)))
   },
   area=function(data, params) {

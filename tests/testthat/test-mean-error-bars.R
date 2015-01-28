@@ -37,8 +37,8 @@ test_that("only asymmetric error bars", {
   ey <- tr$error_y
   expect_identical(ey$type, "data")
   expect_identical(ey$symmetric, FALSE)
-  expect_identical(ey$array, c(0.1, 0.2, 0.1, 0.1))
-  expect_identical(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
+  expect_equal(ey$array, c(0.1, 0.2, 0.1, 0.1))
+  expect_equal(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
 })
 
 one.line.json <- list(

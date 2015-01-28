@@ -195,7 +195,8 @@ gg2list <- function(p){
     traces <- layer2traces(L, df, misc)
     
     # Associate error bars with previous traces
-    if (grepl("errorbar", L$geom$objname)) {
+    ##if (grepl("errorbar", L$geom$objname)) { #TDH 28 Jan 2015.
+    if(FALSE){
       for (j in 1:length(trace.list)) {
         temp <- list()
         ind <- traces[[1]]$x %in% trace.list[[j]]$x
