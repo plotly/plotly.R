@@ -1,6 +1,6 @@
 #' Convert R colours to RGBA hexadecimal colour values
 #' @param x character for colour, for example: "white"
-#' @param alpha alpha
+#' @param alpha transparency alpha
 #' @return hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 #' @export
 toRGB <- function(x, alpha=1) {
@@ -20,7 +20,8 @@ toRGB <- function(x, alpha=1) {
 
 #' Use default ggplot colour for fill (gray20) if not declared
 #' @param x character for colour
+#' @param alpha transparency alpha
 #' @return hexadecimal colour value
-toFill <- function(x) {
-  ifelse(!is.null(x), toRGB(x), toRGB("gray20"))
+toFill <- function(x, alpha=1) {
+  ifelse(!is.null(x), toRGB(x, alpha), toRGB("gray20"))
 }
