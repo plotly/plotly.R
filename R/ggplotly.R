@@ -52,6 +52,7 @@ markLegends <-
        path=c("linetype", "size", "colour", "shape"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("colour", "fill"),
+       area=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
        boxplot=c("x"),
        text=c("colour"))
