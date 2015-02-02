@@ -390,16 +390,22 @@ make.errorbar <- function(data, params, xy){
   err.name <- paste0("error_", xy)
   min.name <- paste0(xy, "min")
   max.name <- paste0(xy, "max")
-  tr[[err.name]] <-
-    list(arrayminus=data[[xy]]-data[[min.name]],
-         array=data[[max.name]]-data[[xy]],
+  e <-
+    list(array=data[[max.name]]-data[[xy]],
          type="data",
-         symmetric=FALSE,
+         width=params$width,
+         symmetric=TRUE,
          color=if(!is.null(params$colour)){
            toRGB(params$colour)
          }else{
            toRGB(data$colour)
          })
+  arrayminus <- data[[xy]]-data[[min.name]]
+  if(!isTRUE(all.equal(e$array, arrayminus))){
+    e$arrayminus <- arrayminus
+    e$symmetric <- FALSE
+  }
+  tr[[err.name]] <- e    
   tr
 }
 

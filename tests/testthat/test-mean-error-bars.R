@@ -173,11 +173,32 @@ color.code <- c(OJ="orange", VC="violet")
 supp.list <- split(dfc, dfc$supp)
 
 test_that("errorbar(aes(color)) + other geoms", {
-  bad <-
+  before <-
     ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
       geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
       geom_line() +
+      scale_color_manual(values=color.code)+
       geom_point()
+
+  before.json <- gg2list(before)
+  is.trace <- names(before.json) == ""
+  traces <- before.json[is.trace]
+
+  expect_identical(length(traces), 2L)
+  for(tr in traces){
+    expected.color <- toRGB(color.code[[tr$name]])
+    expected.data <- supp.list[[tr$name]]
+    expect_identical(tr$mode, "lines+markers")
+    expect_identical(tr$type, "scatter")
+    expect_identical(tr$marker$color, expected.color)
+    expect_identical(tr$line$color, expected.color)
+    ey <- tr$error_y
+    expect_identical(ey$type, "data")
+    expect_identical(ey$color, expected.color)
+    expect_equal(ey$width, .1)
+    expect_identical(ey$symmetric, TRUE)
+    expect_equal(ey$array, expected.data$se)
+  }
 })
 
 test_that("other geoms + errorbar(aes(color))", {
@@ -193,7 +214,7 @@ test_that("other geoms + errorbar(aes(color))", {
   traces <- after.json[is.trace]
   
   expect_identical(length(traces), 2L)
-  for(tr in traces[1:2]){
+  for(tr in traces){
     expected.color <- toRGB(color.code[[tr$name]])
     expected.data <- supp.list[[tr$name]]
     expect_identical(tr$mode, "lines+markers")
