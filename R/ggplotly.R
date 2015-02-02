@@ -745,7 +745,7 @@ gg2list <- function(p){
       if(is.character(new.mode) && !is.na(new.mode)){
         tr$mode <- new.mode
       }
-      attrs <- c("error_y", "marker", "line")
+      attrs <- c("error_x", "error_y", "marker", "line")
       for(attr in attrs){
         if(!is.null(other[[attr]]) && is.null(tr[[attr]])){
           tr[[attr]] <- other[[attr]]

@@ -230,5 +230,4 @@ test_that("other geoms + errorbar(aes(color))", {
   }
 })
 
-Plotly$ggplotly(good)
 
