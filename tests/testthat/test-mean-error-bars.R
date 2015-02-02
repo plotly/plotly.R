@@ -136,10 +136,8 @@ test_that("different colors for error bars, points, and lines", {
   expect_equal(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
 })
 
-if(FALSE){
 ## from https://github.com/chriddyp/ggplot2-plotly-cookbook/blob/a45f2c70b7adf484e0b0eb8810a1e59e018adbb8/means_and_error_bars.R#L162-L191
 df <- ToothGrowth
-
 ## Summarizes data.
 ## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
 ## data: a data frame.
@@ -169,34 +167,47 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   datac$ci <- datac$se * ciMult
   return(datac)
 }
+
 dfc <- summarySE(df, measurevar="len", groupvars=c("supp","dose"))
-bad <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
-  geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
-  geom_line() +
-  geom_point()
+color.code <- c(OJ="orange", VC="violet")
+supp.list <- split(dfc, dfc$supp)
 
-good <- ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
-  geom_line() +
-  geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
-  geom_point()
-good.json <- gg2list(good)
-py$ggplotly(good, kwargs=list(fileopt='overwrite', filename='R-Cookbook/means-and-error-bars/basic-error-bars'))
+test_that("errorbar(aes(color)) + other geoms", {
+  bad <-
+    ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
+      geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
+      geom_line() +
+      geom_point()
+})
 
-## The conversion from geom_errorbar to plotly error bars is not
-## straightforward.
+test_that("other geoms + errorbar(aes(color))", {
+  after <-
+    ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
+      geom_line() +
+      geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
+      geom_point()+
+      scale_color_manual(values=color.code)
 
-## we need to make a plotly trace with list(error_y=list(array=c(1, 2,
-## 3), symmetric=FALSE, arrayminus=c(4.45, 3.91, 2.65))) -- and maybe
-## traceref=2 and tracerefminus=1, which are indices of other traces
-## that contain the same error bar data in the master trace list.
+  after.json <- gg2list(after)
+  is.trace <- names(after.json) == ""
+  traces <- after.json[is.trace]
+  
+  expect_identical(length(traces), 2L)
+  for(tr in traces[1:2]){
+    expected.color <- toRGB(color.code[[tr$name]])
+    expected.data <- supp.list[[tr$name]]
+    expect_identical(tr$mode, "lines+markers")
+    expect_identical(tr$type, "scatter")
+    expect_identical(tr$marker$color, expected.color)
+    expect_identical(tr$line$color, expected.color)
+    ey <- tr$error_y
+    expect_identical(ey$type, "data")
+    expect_identical(ey$color, expected.color)
+    expect_equal(ey$width, .1)
+    expect_identical(ey$symmetric, TRUE)
+    expect_equal(ey$array, expected.data$se)
+  }
+})
 
-## https://plot.ly/~tdhock/184 has some plotly error bars.
+Plotly$ggplotly(good)
 
-good.json[[1]]$error_y <-
-  list(array=c(1, 2, 3), arrayminus=c(4, 5, 6),
-       symmetric=FALSE,
-       traceref=1, tracerefminus=1,
-       visible=TRUE,
-       type="data")
-
-}
