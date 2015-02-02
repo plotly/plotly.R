@@ -379,6 +379,29 @@ group2NA <- function(g, geom) {
   g
 }
 
+### Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
+### error_x.
+make.errorbar <- function(data, params, xy){
+  tr <-
+    list(x=data$x,
+         y=data$y,
+         type="scatter",
+         mode="none")
+  err.name <- paste0("error_", xy)
+  min.name <- paste0(xy, "min")
+  max.name <- paste0(xy, "max")
+  tr[[err.name]] <-
+    list(arrayminus=data[[xy]]-data[[min.name]],
+         array=data[[max.name]]-data[[xy]],
+         type="data",
+         symmetric=FALSE,
+         color=if(!is.null(params$colour)){
+           toRGB(params$colour)
+         }else{
+           toRGB(data$colour)
+         })
+  tr
+}
 
 # Convert basic geoms to traces.
 geom2trace <- list(
@@ -537,26 +560,10 @@ geom2trace <- list(
     L
   },
   errorbar=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         type="scatter",
-         mode="none",
-         error_y=list(arrayminus=data$y-data$ymin,
-                      array=data$ymax-data$y,
-           type="data",
-           symmetric=FALSE,
-                      color=toRGB(data$colour)))
+    make.errorbar(data, params, "y")
   },
   errorbarh=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         type="scatter",
-         mode="none",
-         error_x=list(arrayminus=data$x-data$xmin,
-                      array=data$xmax-data$x,
-           type="data",
-           symmetric=FALSE,
-                      color=toRGB(data$colour)))
+    make.errorbar(data, params, "x")
   },
   area=function(data, params) {
     list(x=c(data$x[1], data$x, tail(data$x, n=1)),

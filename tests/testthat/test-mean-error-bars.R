@@ -109,20 +109,31 @@ colors.json <- list(
     ), 
     type = "scatter",
     marker=list(color="blue", size=14),
-    line=list(color="black")
+    line=list(color="violet")
   )
 )
 
 test_that("different colors for error bars, points, and lines", {
   one.line.gg <- ggplot(one.line.df, aes(x, y))+
     geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array), color="red")+
-    geom_line(color="black")+
+    geom_line(color="violet")+
     geom_point(color="blue", size=14)
   generated.json <- gg2list(one.line.gg)
   is.trace <- names(generated.json) == ""
   traces <- generated.json[is.trace]
   expect_identical(length(traces), 1L)
-  ## TODO: check that colors agree in colors.json and generated.json.
+  tr <- traces[[1]]
+  expect_identical(tr$mode, "lines+markers")
+  expect_identical(tr$type, "scatter")
+  expect_identical(tr$marker$color, toRGB("blue"))
+  expect_identical(tr$marker$size, 14)
+  expect_identical(tr$line$color, toRGB("violet"))
+  ey <- tr$error_y
+  expect_identical(ey$type, "data")
+  expect_identical(ey$color, toRGB("red"))
+  expect_identical(ey$symmetric, FALSE)
+  expect_equal(ey$array, c(0.1, 0.2, 0.1, 0.1))
+  expect_equal(ey$arrayminus, c(0.2, 0.4, 1, 0.2))
 })
 
 if(FALSE){
