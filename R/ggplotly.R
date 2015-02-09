@@ -51,6 +51,7 @@ markLegends <-
        bar=c("colour", "fill"),
        errorbar=c("colour", "linetype"),
        errorbarh=c("colour", "linetype"),
+       area=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
        boxplot=c("x"),
        text=c("colour"))
