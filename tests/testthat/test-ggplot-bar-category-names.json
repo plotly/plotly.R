@@ -115,7 +115,7 @@
         "titlefont": {
             "family": ""
         }, 
-        "showlegend": true, 
+        "showlegend": false, 
         "xaxis": {
             "title": "cut", 
             "type": "category", 
@@ -139,13 +139,15 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
         "margin": {
             "r": 10

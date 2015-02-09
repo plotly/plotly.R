@@ -1,0 +1,123 @@
+{
+    "data": [
+        {
+            "y": [
+                4.17, 
+                5.58, 
+                5.18, 
+                6.11, 
+                4.5, 
+                4.61, 
+                5.17, 
+                4.53, 
+                5.33, 
+                5.14
+            ], 
+            "name": "ctrl", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "box"
+        }, 
+        {
+            "y": [
+                4.81, 
+                4.17, 
+                4.41, 
+                3.59, 
+                5.87, 
+                3.83, 
+                6.03, 
+                4.89, 
+                4.32, 
+                4.69
+            ], 
+            "name": "trt1", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "box"
+        }, 
+        {
+            "y": [
+                6.31, 
+                5.12, 
+                5.54, 
+                5.5, 
+                5.37, 
+                5.29, 
+                4.92, 
+                6.15, 
+                5.8, 
+                5.26
+            ], 
+            "name": "trt2", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
+            "xaxis": "x1", 
+            "yaxis": "y1", 
+            "type": "box"
+        }
+    ], 
+    "layout": {
+        "titlefont": {
+            "family": ""
+        }, 
+        "showlegend": false, 
+        "xaxis": {
+            "title": "group", 
+            "type": "category", 
+            "showgrid": false, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "yaxis": {
+            "title": "weight", 
+            "type": "linear", 
+            "showgrid": true, 
+            "zeroline": false, 
+            "showline": false, 
+            "ticks": "outside", 
+            "showticklabels": true, 
+            "tickcolor": "rgb(127,127,127)", 
+            "gridcolor": "rgb(255,255,255)"
+        }, 
+        "legend": {
+            "x": 1.05, 
+            "y": 0.5, 
+            "font": {
+                "family": ""
+            }, 
+            "bgcolor": "rgb(255,255,255)", 
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
+        }, 
+        "margin": {
+            "r": 10
+        }, 
+        "paper_bgcolor": "rgb(255,255,255)", 
+        "plot_bgcolor": "rgb(229,229,229)"
+    }
+}

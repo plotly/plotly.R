@@ -18,12 +18,12 @@
             "mode": "lines", 
             "name": "name1", 
             "line": {
-                "color": "rgb(0,0,0)", 
+                "color": "transparent", 
                 "width": 2, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(59,115,171)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
@@ -47,12 +47,12 @@
             "mode": "lines", 
             "name": "name2", 
             "line": {
-                "color": "rgb(0,0,0)", 
+                "color": "transparent", 
                 "width": 2, 
                 "dash": "solid", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(0,205,102)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
@@ -87,14 +87,28 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
+        "annotations": [
+            {
+                "x": 1.05, 
+                "y": 0.52, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "<b>lab</b>", 
+                "showarrow": false, 
+                "xanchor": "center", 
+                "textangle": 0
+            }
+        ], 
         "margin": {
             "r": 10
         }, 

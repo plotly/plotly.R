@@ -205,7 +205,14 @@
                 579.96, 
                 0
             ], 
+            "line": {
+                "color": "transparent", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "fill": "tozeroy", 
+            "fillcolor": "rgb(51,51,51)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "showlegend": false, 
@@ -216,7 +223,7 @@
         "titlefont": {
             "family": ""
         }, 
-        "showlegend": true, 
+        "showlegend": false, 
         "xaxis": {
             "title": "year", 
             "type": "linear", 
@@ -240,13 +247,15 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
         "margin": {
             "r": 10

@@ -20,10 +20,10 @@
             "line": {
                 "color": "rgb(0,0,255)", 
                 "width": 2, 
-                "dash": "dotted", 
+                "dash": "dot", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(255,0,0)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
@@ -52,7 +52,7 @@
                 "dash": "dash", 
                 "shape": "linear"
             }, 
-            "fill": "tonextx", 
+            "fill": "tozerox", 
             "fillcolor": "rgb(255,0,0)", 
             "xaxis": "x1", 
             "yaxis": "y1", 
@@ -87,14 +87,28 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
+        "annotations": [
+            {
+                "x": 1.05, 
+                "y": 0.52, 
+                "xref": "paper", 
+                "yref": "paper", 
+                "text": "<b>lab</b>", 
+                "showarrow": false, 
+                "xanchor": "center", 
+                "textangle": 0
+            }
+        ], 
         "margin": {
             "r": 10
         }, 

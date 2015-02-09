@@ -31,7 +31,6 @@ test_that("geom_text splits along colour", {
                     Division=c("East South Central", "East South Central",
                                "East South Central", "East South Central",
                                "Mountain", "Mountain"))
-  
   gg <- ggplot(mds) +
     geom_text(aes(x=coord.1, y=coord.2, label=City, colour=Division))
   

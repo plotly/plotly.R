@@ -15,6 +15,13 @@
                 21.4
             ], 
             "name": "4", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -30,6 +37,13 @@
                 19.7
             ], 
             "name": "6", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -52,6 +66,13 @@
                 15
             ], 
             "name": "8", 
+            "fillcolor": "rgb(255,255,255)", 
+            "line": {
+                "color": "rgb(51,51,51)", 
+                "width": 2, 
+                "dash": "solid", 
+                "shape": "linear"
+            }, 
             "xaxis": "x1", 
             "yaxis": "y1", 
             "type": "box"
@@ -61,7 +82,7 @@
         "titlefont": {
             "family": ""
         }, 
-        "showlegend": true, 
+        "showlegend": false, 
         "xaxis": {
             "title": "factor(cyl)", 
             "type": "category", 
@@ -85,13 +106,15 @@
             "gridcolor": "rgb(255,255,255)"
         }, 
         "legend": {
-            "x": 100, 
+            "x": 1.05, 
             "y": 0.5, 
             "font": {
                 "family": ""
             }, 
             "bgcolor": "rgb(255,255,255)", 
-            "bordercolor": "transparent"
+            "bordercolor": "transparent", 
+            "xanchor": "center", 
+            "yanchor": "top"
         }, 
         "margin": {
             "r": 10
