@@ -23,5 +23,5 @@ toRGB <- function(x, alpha=1) {
 #' @param alpha transparency alpha
 #' @return hexadecimal colour value
 toFill <- function(x, alpha=1) {
-  ifelse(!is.null(x), toRGB(x, alpha), toRGB("gray20"))
+  ifelse(!is.null(x), toRGB(x, alpha), toRGB("gray20", alpha))
 }

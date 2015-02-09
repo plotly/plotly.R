@@ -15,3 +15,14 @@ test_that("sanity check for geom_area", {
 })
 
 save_outputs(ar, "area")
+
+# Test alpha transparency in fill color
+gg <- ggplot(huron) + geom_area(aes(x=year, y=level), alpha=0.4)
+L <- gg2list(gg)
+
+test_that("transparency alpha in geom_area is converted", {
+  expect_identical(L[[1]]$line$color, "transparent")
+  expect_identical(L[[1]]$fillcolor, "rgba(51,51,51,0.4)")
+})
+
+save_outputs(gg, "area-fillcolor")
