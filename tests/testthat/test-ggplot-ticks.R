@@ -90,7 +90,8 @@ test_that("Set continuous Y axis range", {
   boxes.range <- boxes + ylim(0,8)
   boxes.range <- boxes + scale_y_continuous(limits=c(0,8))
   info <- expect_traces(boxes.range, 3)
-  ## TODO: can plotly zoom be specified?
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$range, c(0, 8))
 })
 
 test_that("Reverse order of a continuous-valued axis", {
