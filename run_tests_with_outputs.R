@@ -1,5 +1,5 @@
 library(testthat)
-devtools::install_github("ropensci/plotly", ref="marianne-datetime-binning")
+devtools::install_github("ropensci/plotly", ref="marianne-area-colour")
 library(plotly)
 
 setwd("tests")
