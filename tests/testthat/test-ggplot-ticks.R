@@ -36,7 +36,6 @@ test_that("boxes with coord_flip()", {
   }
 })
 
-
 test_that("Manually set the order of a discrete-valued axis", {
   expected.order <- c("trt1", "ctrl", "trt2")
   boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
@@ -127,21 +126,33 @@ test_that("Set the X tick mark locations", {
   ## This will show tick marks on every 0.25 from 1 to 10. The scale will
   ## show only the ones that are within range (3.50-6.25 in this case)
   boxes.ticks <- boxes + scale_y_continuous(breaks=seq(1,10,1/4))
-  ##TODO
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$dtick, 0.25)
+  expect_identical(y.axis$autotick, FALSE)
 })
 
 test_that("The breaks can be spaced unevenly", {
-  boxes.uneven <- boxes + scale_y_continuous(breaks=c(4, 4.25, 4.5, 5, 6,8))
-  ##TODO
+  boxes.uneven <- boxes +
+    scale_y_continuous(breaks=c(4, 4.25, 4.5, 5, 6,8))
+  ##TODO: is this possible in plotly?
+  ## https://plot.ly/python/reference/#YAxis
 })
 
-test_that("Suppress ticks and gridlines", {
-  ticks.nobreaks <- boxes + scale_y_continuous(breaks=NULL)
-  ##TODO
+test_that("hide y ticks, lines, and labels", {
+  no.breaks <- boxes + scale_y_continuous(breaks=NULL)
+  info <- expect_traces(no.breaks, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_identical(y.axis[["showgrid"]], FALSE)
+  expect_identical(y.axis[["ticks"]], "")
+  expect_identical(y.axis[["showticklabels"]], FALSE)
 })
 
-test_that("Hide tick marks and labels (on Y axis), but keep the gridlines", {
+test_that("hide y ticks and labels, but keep the gridlines", {
   boxes.ygrid <- boxes +
     theme(axis.ticks = element_blank(), axis.text.y = element_blank())
-  ##TODO
+  info <- expect_traces(boxes.ygrid, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_identical(y.axis[["showgrid"]], TRUE)
+  expect_identical(y.axis[["ticks"]], "")
+  expect_identical(y.axis[["showticklabels"]], FALSE)
 })

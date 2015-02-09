@@ -1,5 +1,8 @@
 TO DISCUSS
 
+unevenly spaced ticks? 
+scale_y_continuous(breaks=c(4, 4.25, 4.5, 5, 6,8))
+
 R-GSOC project?
 
 Visual testing table instead of GitHub diffs?
