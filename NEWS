@@ -1,3 +1,8 @@
+0.5.20 -- 9 February 2015.
+
+Add alpha transparency to fill conversion.
+Let geom_area support colour and fill aesthetics.
+
 0.5.19 -- 23 January 2015.
 
 Support class conversion such as as.Date() within ggplot code.
