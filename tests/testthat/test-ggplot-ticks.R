@@ -13,6 +13,7 @@ expect_traces <- function(gg, n.traces){
 }
 
 plant.list <- split(PlantGrowth, PlantGrowth$group)
+weight.range <- range(PlantGrowth$weight)
 
 test_that("boxes without coord_flip()", {
   info <- expect_traces(boxes, 3)
@@ -76,7 +77,7 @@ test_that("hide x ticks, lines, and labels", {
   ##expect_identical(x[["autotick"]], FALSE) #not necessary
 })
 
-test_that("Hide X ticks and labels, but keep the gridlines" {
+test_that("Hide X ticks and labels, but keep the gridlines", {
   boxes.grid <- boxes +
     theme(axis.ticks = element_blank(), axis.text.x = element_blank())
   info <- expect_traces(boxes.grid, 3)
@@ -86,17 +87,40 @@ test_that("Hide X ticks and labels, but keep the gridlines" {
   expect_identical(x[["ticks"]], "")
 })
 
-test_that("Set continuous Y axis range", {
-  boxes.range <- boxes + ylim(0,8)
+test_that("scale_y_continuous(limits) means yaxis$ranges", {
   boxes.range <- boxes + scale_y_continuous(limits=c(0,8))
   info <- expect_traces(boxes.range, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_equal(y.axis$range, c(0, 8))
 })
 
-test_that("Reverse order of a continuous-valued axis", {
+test_that("ylim() means yaxis$ranges", {
+  boxes.range <- boxes + ylim(0,8)
+  info <- expect_traces(boxes.range, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$range, c(0, 8))
+})
+
+test_that("scale_y_reverse() -> yaxis$ranges reversed", {
   boxes.reverse <- boxes + scale_y_reverse()
-  ##TODO
+  info <- expect_traces(boxes.reverse, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$range, rev(weight.range))
+})
+
+test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
+  y.lim <- c(10, -2)
+  boxes.reverse <- boxes + scale_y_reverse(limits=y.lim)
+  info <- expect_traces(boxes.reverse, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$range, y.lim)
+})
+
+test_that("ylim(reversed) -> yaxis$ranges reversed", {
+  boxes.reverse <- boxes + ylim(7.5, -1)
+  info <- expect_traces(boxes.reverse, 3)
+  y.axis <- info$kwargs$layout$yaxis
+  expect_equal(y.axis$range, c(7.5, -1))
 })
 
 test_that("Set the X tick mark locations", {
