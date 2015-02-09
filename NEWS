@@ -1,3 +1,14 @@
+TO DISCUSS
+
+Visual testing table instead of GitHub diffs?
+http://sugiyama-www.cs.titech.ac.jp/~toby/flags/
+https://sjp.co.nz/projects/grimport2/
+https://dl.dropboxusercontent.com/u/54315147/import/state-table.html
+
+Can zoom = ggplot()+ylim(0,8) be specified in plotly?
+
+Use RSelenium for headless browser testing?
+
 0.5.19 -- 23 January 2015.
 
 Support class conversion such as as.Date() within ggplot code.
