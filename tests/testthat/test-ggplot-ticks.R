@@ -1,5 +1,7 @@
 context("ggplot ticks")
 
+PlantGrowth$type <-
+  ifelse(PlantGrowth$group=="ctrl", "control", "treatment")
 boxes <- ggplot(PlantGrowth, aes(x=group, y=weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces){
@@ -7,9 +9,13 @@ expect_traces <- function(gg, n.traces){
   stopifnot(is.numeric(n.traces))
   L <- gg2list(gg)
   is.trace <- names(L) == ""
-  traces <- L[is.trace]
-  expect_equal(length(traces), n.traces)
-  list(traces=traces, kwargs=L$kwargs)
+  all.traces <- L[is.trace]
+  no.data <- sapply(all.traces, function(tr) {
+    is.null(tr[["x"]]) && is.null(tr[["y"]])
+  })
+  has.data <- all.traces[!no.data]
+  expect_equal(length(has.data), n.traces)
+  list(traces=has.data, kwargs=L$kwargs)
 }
 
 plant.list <- split(PlantGrowth, PlantGrowth$group)
@@ -17,6 +23,48 @@ weight.range <- range(PlantGrowth$weight)
 
 test_that("boxes without coord_flip()", {
   info <- expect_traces(boxes, 3)
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }
+})
+
+test_that("boxes with facet_grid", {
+  facets <- boxes + facet_grid(. ~ type)
+  info <- expect_traces(facets, 3)
+  ## TODO: expect boxes of equal size.
+
+  ## TODO: expect empty space.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }
+})
+
+test_that('boxes with facet_grid(scales="free")', {
+  facets.scales <- boxes + facet_grid(. ~ type, scales="free")
+  info <- expect_traces(facets.scales, 3)
+  ## TODO: expect boxes of unequal size.
+
+  ## TODO: expect no empty space.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }
+})
+
+test_that('boxes with facet_grid(scales="free", space="free")', {
+  facets.space <- boxes + facet_grid(. ~ type, scales="free", space="free")
+  info <- expect_traces(facets.space, 3)
+  ## TODO: expect boxes of equal size.
+
+  ## TODO: expect no empty space.
   for(tr in info$traces){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
@@ -34,6 +82,41 @@ test_that("boxes with coord_flip()", {
     computed <- tr[["x"]]
     expect_equal(computed, expected)
   }
+})
+
+test_that("boxes with coord_flip()+facet_grid()", {
+  flip.facet <- flipped + facet_grid(type ~ .)
+  info <- expect_traces(flip.facet, 3)
+  for(tr in info$traces){
+    expect_true(is.null(tr[["y"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["x"]]
+    expect_equal(computed, expected)
+  }
+})
+
+test_that('boxes with coord_flip()+facet_grid(scales="free")', {
+  flip.facet.scales <- flipped + facet_grid(type ~ ., scales="free")
+  info <- expect_traces(flip.facet.scales, 3)
+  for(tr in info$traces){
+    expect_true(is.null(tr[["y"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["x"]]
+    expect_equal(computed, expected)
+  }
+})
+
+test_that('boxes+coord_flip()+facet_grid(scales="free", space="free")', {
+  flip.facet.space <- flipped +
+    facet_grid(type ~ ., scales="free", space="free")
+  ## BUG in ggplot2!
+})
+
+test_that('boxes+facet_grid(scales="free", space="free")+coord_flip()', {
+  flip.facet.space <- boxes +
+    facet_grid(type ~ ., scales="free", space="free")+
+    coord_flip()
+  ## BUG in ggplot2!
 })
 
 test_that("Manually set the order of a discrete-valued axis", {

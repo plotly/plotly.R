@@ -617,6 +617,9 @@ gg2list <- function(p){
     stop("No exportable traces")
   }
 
+  ## TODO: If coord_flip is defined, then flip x/y in each trace, and
+  ## in each axis...?
+
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
   mode.mat["markers", "lines"] <-
