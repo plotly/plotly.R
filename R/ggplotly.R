@@ -673,11 +673,15 @@ gg2list <- function(p){
   ## Put the traces in correct order, according to any manually
   ## specified scales.
   trace.order <- unlist(trace.order.list)
-  trace.order.score <- seq_along(trace.order)
-  names(trace.order.score) <- trace.order
-  trace.name <- sapply(merged.traces, "[[", "name")
-  trace.score <- trace.order.score[trace.name]
-  ordered.traces <- merged.traces[order(trace.score)]
+  ordered.traces <- if(length(trace.order)){
+    trace.order.score <- seq_along(trace.order)
+    names(trace.order.score) <- trace.order
+    trace.name <- sapply(merged.traces, "[[", "name")
+    trace.score <- trace.order.score[trace.name]
+    merged.traces[order(trace.score)]
+  }else{
+    merged.traces
+  }
 
   ordered.traces$kwargs <- list(layout=layout)
   
