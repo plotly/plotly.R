@@ -269,6 +269,7 @@ gg2list <- function(p){
     cls <- attr(e(el.name),"class")
     "element_blank" %in% cls || null.is.blank && is.null(cls)
   }
+  trace.order.list <- list()
   for(xy in c("x","y")){
     ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
@@ -319,6 +320,7 @@ gg2list <- function(p){
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
+      trace.order.list[[xy]] <- sc$limits
       if(!is.null(sc$name)){
         sc$name
       }else{
@@ -327,6 +329,7 @@ gg2list <- function(p){
     }else{
       p$labels[[xy]]
     }
+
     title.text <- e(s("axis.title.%s"))
     ax.list$titlefont <- theme2font(title.text)
     ax.list$type <- if(misc$is.continuous[[xy]]){
@@ -667,7 +670,16 @@ gg2list <- function(p){
     merged.traces[[length(merged.traces)+1]] <- tr
   }
 
-  merged.traces$kwargs <- list(layout=layout)
+  ## Put the traces in correct order, according to any manually
+  ## specified scales.
+  trace.order <- unlist(trace.order.list)
+  trace.order.score <- seq_along(trace.order)
+  names(trace.order.score) <- trace.order
+  trace.name <- sapply(merged.traces, "[[", "name")
+  trace.score <- trace.order.score[trace.name]
+  ordered.traces <- merged.traces[order(trace.score)]
+
+  ordered.traces$kwargs <- list(layout=layout)
   
-  merged.traces
+  ordered.traces
 }
