@@ -620,9 +620,6 @@ gg2list <- function(p){
     stop("No exportable traces")
   }
 
-  ## TODO: If coord_flip is defined, then flip x/y in each trace, and
-  ## in each axis...?
-
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
   mode.mat["markers", "lines"] <-
@@ -682,8 +679,30 @@ gg2list <- function(p){
   }else{
     merged.traces
   }
-
-  ordered.traces$kwargs <- list(layout=layout)
   
-  ordered.traces
+  ## If coord_flip is defined, then flip x/y in each trace, and in
+  ## each axis.
+  flipped.traces <- ordered.traces
+  flipped.layout <- layout
+  if("flip" %in% attr(built$plot$coordinates, "class")){
+    if(!inherits(p$facet, "null")){
+      stop("coord_flip + facet conversion not supported")
+    }
+    for(trace.i in seq_along(ordered.traces)){
+      tr <- ordered.traces[[trace.i]]
+      x <- tr[["x"]]
+      y <- tr[["y"]]
+      tr[["y"]] <- x
+      tr[["x"]] <- y
+      flipped.traces[[trace.i]] <- tr
+    }
+    x <- layout[["xaxis"]]
+    y <- layout[["yaxis"]]
+    flipped.layout[["xaxis"]] <- y
+    flipped.layout[["yaxis"]] <- x
+  }
+
+  flipped.traces$kwargs <- list(layout=flipped.layout)
+  
+  flipped.traces
 }
