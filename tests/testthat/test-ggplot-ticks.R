@@ -178,15 +178,15 @@ test_that("less breaks is fine", {
   ## TODO: can we make this in plotly?
 })
 
-expected.labels <- c("Treat 1", "Control", "Treat 2")
 boxes.labels <- boxes +
   scale_x_discrete(breaks=c("trt1", "ctrl", "trt2"),
-                   labels=expected.labels)
+                   labels=c("Treatment 1", "Control", "Treatment 2"))
 
 test_that("scale(labels) changes trace names", {
   info <- expect_traces(boxes.labels, 3)
   computed.labels <- sapply(info$traces, "[[", "name")
-  expect_identical(as.character(computed.labels), expected.labels)
+  expect_identical(as.character(computed.labels),
+                   c("Control", "Treatment 1", "Treatment 2"))
 })
 
 no.breaks <- boxes + scale_x_discrete(breaks=NULL)

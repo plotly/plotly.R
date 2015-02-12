@@ -681,17 +681,23 @@ gg2list <- function(p){
   }else{
     merged.traces
   }
+
+  named.traces <- ordered.traces
+  for(trace.i in seq_along(named.traces)){
+    tr.name <- named.traces[[trace.i]][["name"]]
+    named.traces[[trace.i]][["name"]] <- trace.name.map[[tr.name]]
+  }
   
   ## If coord_flip is defined, then flip x/y in each trace, and in
   ## each axis.
-  flipped.traces <- ordered.traces
+  flipped.traces <- named.traces
   flipped.layout <- layout
   if("flip" %in% attr(built$plot$coordinates, "class")){
     if(!inherits(p$facet, "null")){
       stop("coord_flip + facet conversion not supported")
     }
-    for(trace.i in seq_along(ordered.traces)){
-      tr <- ordered.traces[[trace.i]]
+    for(trace.i in seq_along(flipped.traces)){
+      tr <- flipped.traces[[trace.i]]
       x <- tr[["x"]]
       y <- tr[["y"]]
       tr[["y"]] <- x
