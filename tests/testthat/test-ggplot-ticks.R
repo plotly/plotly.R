@@ -232,6 +232,13 @@ test_that("ylim() means yaxis$ranges", {
   info <- expect_traces(boxes.range, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_equal(y.axis$range, c(0, 8))
+  ## ensure correct positive values without reverse scale.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }  
 })
 
 test_that("scale_y_reverse() -> yaxis$ranges reversed", {
@@ -239,6 +246,13 @@ test_that("scale_y_reverse() -> yaxis$ranges reversed", {
   info <- expect_traces(boxes.reverse, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_that(y.axis$range[2], is_less_than(y.axis$range[1]))
+  ## ensure correct positive values, despite the reverse scale.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }  
 })
 
 test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
@@ -247,6 +261,13 @@ test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
   info <- expect_traces(boxes.reverse, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_equal(y.axis$range, y.lim)
+  ## ensure correct positive values, despite the reverse scale.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }  
 })
 
 test_that("ylim(reversed) -> yaxis$ranges reversed", {
@@ -254,6 +275,13 @@ test_that("ylim(reversed) -> yaxis$ranges reversed", {
   info <- expect_traces(boxes.reverse, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_equal(y.axis$range, c(7.5, -1))
+  ## ensure correct positive values, despite the reverse scale.
+  for(tr in info$traces){
+    expect_true(is.null(tr[["x"]]))
+    expected <- plant.list[[tr$name]]$weight
+    computed <- tr[["y"]]
+    expect_equal(computed, expected)
+  }  
 })
 
 test_that("Set the X tick mark locations", {
