@@ -328,6 +328,14 @@ gg2list <- function(p){
         ax.list$showgrid <- FALSE
         ax.list$ticks <- ""
       }
+      if(is.numeric(sc$breaks)){
+        dticks <- diff(sc$breaks)
+        dt <- dticks[1]
+        if(all(dticks == dt)){
+          ax.list$dtick <- dt
+          ax.list$autotick <- FALSE
+        }
+      }
       ax.list$range <- if(!is.null(sc$limits)){
         sc$limits
       }else{

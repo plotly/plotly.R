@@ -260,6 +260,7 @@ test_that("Set the X tick mark locations", {
   ## This will show tick marks on every 0.25 from 1 to 10. The scale will
   ## show only the ones that are within range (3.50-6.25 in this case)
   boxes.ticks <- boxes + scale_y_continuous(breaks=seq(1,10,1/4))
+  info <- expect_traces(boxes.ticks, 3)
   y.axis <- info$kwargs$layout$yaxis
   expect_equal(y.axis$dtick, 0.25)
   expect_identical(y.axis$autotick, FALSE)
