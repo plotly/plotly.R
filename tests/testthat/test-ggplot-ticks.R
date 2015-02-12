@@ -238,7 +238,7 @@ test_that("scale_y_reverse() -> yaxis$ranges reversed", {
   boxes.reverse <- boxes + scale_y_reverse()
   info <- expect_traces(boxes.reverse, 3)
   y.axis <- info$kwargs$layout$yaxis
-  expect_equal(y.axis$range, rev(weight.range))
+  expect_that(y.axis$range[2], is_less_than(y.axis$range[1]))
 })
 
 test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {

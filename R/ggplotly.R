@@ -328,8 +328,13 @@ gg2list <- function(p){
         ax.list$showgrid <- FALSE
         ax.list$ticks <- ""
       }
-      if(!is.null(sc$limits)){
-        ax.list$range <- sc$limits
+      ax.list$range <- if(!is.null(sc$limits)){
+        sc$limits
+      }else{
+        ggranges[[1]][[s("%s.range")]] #TODO: facets!
+      }
+      if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
+        ax.list$range <- rev(ax.list$range)
       }
       if(!is.null(sc$name)){
         sc$name
