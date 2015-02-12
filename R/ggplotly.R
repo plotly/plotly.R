@@ -323,6 +323,11 @@ gg2list <- function(p){
       sc <- p$scales$scales[[scale.i]]
       trace.order.list[[xy]] <- sc$limits
       trace.name.map[sc$breaks] <- sc$labels
+      if(is.null(sc$breaks)){
+        ax.list$showticklabels <- FALSE
+        ax.list$showgrid <- FALSE
+        ax.list$ticks <- ""
+      }
       if(!is.null(sc$name)){
         sc$name
       }else{
