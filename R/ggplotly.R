@@ -342,7 +342,7 @@ gg2list <- function(p){
         ggranges[[1]][[s("%s.range")]] #TODO: facets!
       }
       if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
-        ax.list$range <- rev(ax.list$range)
+        ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
       }
       if(!is.null(sc$name)){
         sc$name
@@ -375,7 +375,6 @@ gg2list <- function(p){
     !is.blank(s("axis.line.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-
   ## copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title
   yaxis.title <- layout$yaxis$title
