@@ -682,10 +682,14 @@ gg2list <- function(p){
     merged.traces
   }
 
+  ## Translate scale(labels) to trace name.
   named.traces <- ordered.traces
   for(trace.i in seq_along(named.traces)){
     tr.name <- named.traces[[trace.i]][["name"]]
-    named.traces[[trace.i]][["name"]] <- trace.name.map[[tr.name]]
+    new.name <- trace.name.map[[tr.name]]
+    if(!is.null(new.name)){
+      named.traces[[trace.i]][["name"]] <- new.name
+    }
   }
   
   ## If coord_flip is defined, then flip x/y in each trace, and in
