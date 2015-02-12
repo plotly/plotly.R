@@ -270,6 +270,7 @@ gg2list <- function(p){
     "element_blank" %in% cls || null.is.blank && is.null(cls)
   }
   trace.order.list <- list()
+  trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
@@ -321,6 +322,7 @@ gg2list <- function(p){
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
       trace.order.list[[xy]] <- sc$limits
+      trace.name.map[sc$breaks] <- sc$labels
       if(!is.null(sc$name)){
         sc$name
       }else{

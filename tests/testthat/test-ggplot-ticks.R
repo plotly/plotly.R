@@ -73,8 +73,9 @@ test_that('boxes with facet_grid(scales="free", space="free")', {
   }
 })
 
+flipped <- boxes + coord_flip()
+
 test_that("boxes with coord_flip()", {
-  flipped <- boxes + coord_flip()
   info <- expect_traces(flipped, 3)
   for(tr in info$traces){
     expect_true(is.null(tr[["y"]]))
@@ -89,7 +90,7 @@ test_that("boxes with coord_flip()", {
 
 test_that("boxes with coord_flip()+facet_grid()", {
   flip.facet <- flipped + facet_grid(type ~ .)
-  info <- expect_traces(flip.facet, 3)
+  ##info <- expect_traces(flip.facet, 3)
   ## for(tr in info$traces){
   ##   expect_true(is.null(tr[["y"]]))
   ##   expected <- plant.list[[tr$name]]$weight
@@ -100,7 +101,7 @@ test_that("boxes with coord_flip()+facet_grid()", {
 
 test_that('boxes with coord_flip()+facet_grid(scales="free")', {
   flip.facet.scales <- flipped + facet_grid(type ~ ., scales="free")
-  info <- expect_traces(flip.facet.scales, 3)
+  ##info <- expect_traces(flip.facet.scales, 3)
   ## for(tr in info$traces){
   ##   expect_true(is.null(tr[["y"]]))
   ##   expected <- plant.list[[tr$name]]$weight
@@ -130,12 +131,59 @@ test_that("Manually set the order of a discrete-valued axis", {
   expect_identical(as.character(computed.order), expected.order)
 })
 
-expected.labels <- c("Control", "Treat 1", "Treat 2")
+test_that("limits can hide data", {
+  expected.order <- c("trt1", "ctrl")
+  boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
+  info <- expect_traces(boxes.limits, 2)
+  computed.order <- sapply(info$traces, "[[", "name")
+  expect_identical(as.character(computed.order), expected.order)
+})
+
+test_that("limits can create a gap", {
+  expected.order <- c("trt1", "trt2", "GAP", "ctrl")
+  boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
+  info <- expect_traces(boxes.limits, 3)
+  computed.order <- sapply(info$traces, "[[", "name")
+  ##expect_identical(as.character(computed.order), expected.order)
+
+  ## TODO: can we make this in plotly?
+})
+
+boxes.breaks <- boxes +
+  scale_x_discrete(breaks=c("trt1", "ctrl", "trt2"))
+
+test_that("setting breaks does not change order", {
+  info <- expect_traces(boxes.breaks, 3)
+  computed.labels <- sapply(info$traces, "[[", "name")
+  expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+})
+
+boxes.more <- boxes +
+  scale_x_discrete(breaks=c("trt1", "ctrl", "trt2", "FOO"))
+
+test_that("more breaks is fine", {
+  info <- expect_traces(boxes.more, 3)
+  computed.labels <- sapply(info$traces, "[[", "name")
+  expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+})
+
+boxes.less <- boxes +
+  scale_x_discrete(breaks=c("trt1", "ctrl"))
+
+test_that("less breaks is fine", {
+  info <- expect_traces(boxes.less, 3)
+  computed.labels <- sapply(info$traces, "[[", "name")
+  ##expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+
+  ## TODO: can we make this in plotly?
+})
+
+expected.labels <- c("Treat 1", "Control", "Treat 2")
 boxes.labels <- boxes +
-  scale_x_discrete(breaks=c("ctrl", "trt1", "trt2"),
+  scale_x_discrete(breaks=c("trt1", "ctrl", "trt2"),
                    labels=expected.labels)
 
-test_that("Manually set the order of a discrete-valued axis", {
+test_that("scale(labels) changes trace names", {
   info <- expect_traces(boxes.labels, 3)
   computed.labels <- sapply(info$traces, "[[", "name")
   expect_identical(as.character(computed.labels), expected.labels)
