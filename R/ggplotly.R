@@ -100,7 +100,6 @@ gg2list <- function(p){
   
   ## Extract data from built ggplots
   built <- ggplot_build2(p)
-  
   # Get global x-range now because we need some of its info in layer2traces
   ggranges <- built$panel$ranges
   # Extract x.range
@@ -161,7 +160,9 @@ gg2list <- function(p){
         names(ranks) <- br
         misc$breaks[[sc$aesthetics]] <- ranks
       }
+      misc$trans[sc$aesthetics] <- sc$trans$name
     }
+    reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
     
     ## get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
@@ -175,8 +176,16 @@ gg2list <- function(p){
     df <- df[order(df$order),]
     df$order <- NULL
 
-    misc$prestats.data <- merge(built$prestats.data[[i]],
-                                gglayout[, c("PANEL", "plotly.row", "COL")])
+    prestats <- built$prestats.data[[i]]
+    ## scale_reverse multiples x/y data by -1, so here we undo that so
+    ## that the actual data can be uploaded to plotly.
+    replace.aes <- intersect(names(prestats), reverse.aes)
+    for(a in replace.aes){
+      prestats[[a]] <- -1 * prestats[[a]]
+    }
+    misc$prestats.data <-
+      merge(prestats,
+            gglayout[, c("PANEL", "plotly.row", "COL")])
     
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
