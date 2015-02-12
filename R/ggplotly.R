@@ -328,6 +328,9 @@ gg2list <- function(p){
         ax.list$showgrid <- FALSE
         ax.list$ticks <- ""
       }
+      if(!is.null(sc$limits)){
+        ax.list$range <- sc$limits
+      }
       if(!is.null(sc$name)){
         sc$name
       }else{
