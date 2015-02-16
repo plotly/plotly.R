@@ -40,6 +40,9 @@ Stay in touch
 - <feedback@plot.ly>
 - [@plotlygraphs](https://twitter.com/plotlygraphs)
 
+Contributing
+---
+- Contributions welcome! Check out our [wiki](https://github.com/ropensci/plotly/wiki/Development-guidelines) for more information. 
 
 ---
 
