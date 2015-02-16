@@ -5,9 +5,14 @@
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
+  not.na <- function(df){
+    na.mat <- sapply(df, is.na)
+    to.exclude <- apply(na.mat, 1, any)
+    df[!to.exclude, ]
+  }
   g <- list(geom=l$geom$objname,
-            data=d,
-            prestats.data=misc$prestats.data)
+            data=not.na(d),
+            prestats.data=not.na(misc$prestats.data))
   ## needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -61,7 +66,7 @@ layer2traces <- function(l, d, misc) {
         }
         
         # For some plot types, we overwrite `data` with `prestats.data`.
-        pdata.vec <- misc$prestats.data[[a]]
+        pdata.vec <- g$prestats.data[[a]]
         if (inherits(data.vec, "POSIXt")) {
           ## Re-create dates from nb seconds
           data.vec <- try(strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
