@@ -88,8 +88,9 @@ test_that("plot panel border is translated correctly", {
   save_outputs(ggiris, "theme-panel-border-1")
 
   red <- ggplot(iris) +
+    theme_grey()+
     geom_point(aes(Petal.Width, Sepal.Width)) +
-    theme(panel.border=element_rect(colour="red"))
+    theme(panel.border=element_rect(colour="red", fill=NA))
   info <- gg2list(red)
   for (xy in c("x", "y")) {
     ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]

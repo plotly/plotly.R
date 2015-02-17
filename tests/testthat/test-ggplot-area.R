@@ -3,7 +3,9 @@ context("Area")
 huron <- data.frame(year=1875:1972, level=as.vector(LakeHuron))
 huron$decade <- plyr::round_any(huron$year, 10, floor)
 
-ar <- ggplot(huron) + geom_area(aes(x=year, y=level))
+ar <- ggplot(huron) +
+  theme_grey()+
+  geom_area(aes(x=year, y=level))
 L <- gg2list(ar)
 
 test_that("sanity check for geom_area", {
@@ -17,7 +19,9 @@ test_that("sanity check for geom_area", {
 save_outputs(ar, "area")
 
 # Test alpha transparency in fill color
-gg <- ggplot(huron) + geom_area(aes(x=year, y=level), alpha=0.4)
+gg <- ggplot(huron) +
+  theme_grey()+
+  geom_area(aes(x=year, y=level), alpha=0.4)
 L <- gg2list(gg)
 
 test_that("transparency alpha in geom_area is converted", {
