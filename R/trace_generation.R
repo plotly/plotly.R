@@ -6,7 +6,7 @@
 #' @export
 layer2traces <- function(l, d, misc) {
   not.na <- function(df){
-    na.mat <- sapply(df, is.na)
+    na.mat <- is.na(df)
     to.exclude <- apply(na.mat, 1, any)
     df[!to.exclude, ]
   }
