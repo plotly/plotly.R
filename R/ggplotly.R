@@ -29,20 +29,22 @@ polygon.line.defaults$colour <- NA
 # Convert R lty line type codes to plotly "dash" codes.
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
-aesConverters <- list(linetype=function(lty) {
-  lty2dash[as.character(lty)]
-},
-colour=function(col) {
-  toRGB(col)
-},
-size=identity,
-sizeref=identity,
-sizemode=identity,
-alpha=identity,
-shape=function(pch) {
-  pch2symbol[as.character(pch)]
-},
-direction=identity)
+aesConverters <- list(
+  linetype=function(lty) {
+    lty2dash[as.character(lty)]
+  },
+  colour=function(col) {
+    toRGB(col)
+  },
+  size=identity,
+  sizeref=identity,
+  sizemode=identity,
+  alpha=identity,
+  shape=function(pch) {
+    pch2symbol[as.character(pch)]
+  },
+  direction=identity
+)
 
 markLegends <-
   ## NOTE: Do we also want to split on size?
