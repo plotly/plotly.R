@@ -328,7 +328,11 @@ gg2list <- function(p){
       ax.list$range <- if(!is.null(sc$limits)){
         sc$limits
       }else{
-        ggranges[[1]][[s("%s.range")]] #TODO: facets!
+        if(misc$is.continuous[[xy]]){
+          ggranges[[1]][[s("%s.range")]] #TODO: facets!
+        }else{ # for a discrete scale, range should be NULL.
+          NULL
+        }
       }
       if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
         ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
