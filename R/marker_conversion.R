@@ -1,10 +1,10 @@
-##' Convert ggplot params to plotly.
-##' @param params named list ggplot names -> values.
-##' @param aesVec vector mapping ggplot names to plotly names.
-##' @param defaults named list ggplot names -> values.
-##' @export
-##' @return named list.
-##' @author Toby Dylan Hocking
+#' Convert ggplot params to plotly.
+#' @param params named list ggplot names -> values.
+#' @param aesVec vector mapping ggplot names to plotly names.
+#' @param defaults named list ggplot names -> values.
+#' @export
+#' @return named list.
+#' @author Toby Dylan Hocking
 paramORdefault <- function(params, aesVec, defaults) {
   marker <- list()
   for (ggplot.name in names(aesVec)) {
