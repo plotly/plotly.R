@@ -157,6 +157,9 @@ test_that("setting breaks does not change order", {
   info <- expect_traces(boxes.breaks, 3, "breaks-nochange")
   computed.labels <- sapply(info$traces, "[[", "name")
   expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+  ## For some reason plotly does not render the third box if range is
+  ## not NULL.
+  expect_identical(info$kwargs$layout$xaxis$range, NULL)
 })
 
 boxes.more <- boxes +
@@ -166,17 +169,33 @@ test_that("more breaks is fine", {
   info <- expect_traces(boxes.more, 3, "breaks-more")
   computed.labels <- sapply(info$traces, "[[", "name")
   expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+  ## For some reason plotly does not render the third box if range is
+  ## not NULL.
+  expect_identical(info$kwargs$layout$xaxis$range, NULL)
 })
 
 boxes.less <- boxes +
   scale_x_discrete(breaks=c("trt1", "ctrl"))
 
 test_that("less breaks is fine", {
+  ## L <- gg2list(boxes.less)
+  ## sendJSON(L) # 2 boxes
+  ## sendJSON(L[1:3]) # 3 boxes
+  ## no.xaxis <- L
+  ## no.xaxis$kwargs$layout$xaxis <- NULL
+  ## sendJSON(no.xaxis) # 3 boxes
+  ## no.xrange <- L
+  ## no.xrange$kwargs$layout$xaxis$range <- NULL
+  ## sendJSON(no.xrange) # 3 boxes
   info <- expect_traces(boxes.less, 3, "breaks-less")
   computed.labels <- sapply(info$traces, "[[", "name")
-  ##expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+  expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
+  ## For some reason plotly does not render the third box if range is
+  ## not NULL.
+  expect_identical(info$kwargs$layout$xaxis$range, NULL)
 
-  ## TODO: can we make this in plotly?
+  ## TODO: as of 20 Feb 2015 it is not possible to make this in
+  ## plotly. (no boxes but only 2 tick labels)
 })
 
 boxes.labels <- boxes +
@@ -188,6 +207,9 @@ test_that("scale(labels) changes trace names", {
   computed.labels <- sapply(info$traces, "[[", "name")
   expect_identical(as.character(computed.labels),
                    c("Control", "Treatment 1", "Treatment 2"))
+  ## For some reason plotly does not render the third box if range is
+  ## not NULL.
+  expect_identical(info$kwargs$layout$xaxis$range, NULL)
 })
 
 no.breaks <- boxes + scale_x_discrete(breaks=NULL)
@@ -209,6 +231,10 @@ test_that("hide x ticks, lines, and labels", {
   ## parameters can be declared with 'ticks', 'tick0', 'dtick0' and
   ## other tick-related key in this axis object.
   ##expect_identical(x[["autotick"]], FALSE) #not necessary
+
+  ## For some reason plotly does not render the third box if range is
+  ## not NULL.
+  expect_identical(info$kwargs$layout$xaxis$range, NULL)
 })
 
 test_that("Hide X ticks and labels, but keep the gridlines", {
