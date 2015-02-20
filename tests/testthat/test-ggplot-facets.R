@@ -51,7 +51,6 @@ test_that("3 facets becomes 3 panels", {
 # expect a certain number of _unique_ [x/y] axes
 expect_axes <- function(info, n, axis = "x") {
   pattern <- paste0("^", axis, "axis([0-9]+)?$")
-  #n.axes <- length(grep(pattern, names(info$kwargs$layout)))
   axes <- with(info$kwargs, layout[grepl(pattern, names(layout))])
   n.axes <- length(axes)
   ranges <- do.call("rbind", lapply(axes, function(x) x$range))
@@ -62,16 +61,19 @@ no_panels <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
 
 test_that("facet_wrap(..., scales = 'free') creates interior scales", {
   free_both <- no_panels + facet_wrap(~am+vs, scales = "free")
+  save_outputs(free_both, "facet_wrap_free")
   info <- gg2list(free_both)
   expect_axes(info, 4L)
   expect_axes(info, 4L, "y")
   
   free_y <- no_panels + facet_wrap(~am+vs, scales = "free_y")
+  save_outputs(free_y, "facet_wrap_free_y")
   info <- gg2list(free_y)
   expect_axes(info, 1L)
   expect_axes(info, 4L, "y")
   
   free_x <- no_panels + facet_wrap(~am+vs, scales = "free_x")
+  save_outputs(free_x, "facet_wrap_free_x")
   info <- gg2list(free_x)
   expect_axes(info, 4L)
   expect_axes(info, 1L, "y")
@@ -79,16 +81,19 @@ test_that("facet_wrap(..., scales = 'free') creates interior scales", {
 
 test_that("facet_grid(..., scales = 'free') doesnt create interior scales.", {
   free_both <- no_panels + facet_grid(vs~am, scales = "free")
+  save_outputs(free_both, "facet_grid_free")
   info <- gg2list(free_both)
   expect_axes(info, 2L)
   expect_axes(info, 2L, "y")
   
   free_y <- no_panels + facet_grid(vs~am, scales = "free_y")
+  save_outputs(free_y, "facet_grid_free_y")
   info <- gg2list(free_y)
   expect_axes(info, 1L)
   expect_axes(info, 2L, "y")
   
   free_x <- no_panels + facet_grid(vs~am, scales = "free_x")
+  save_outputs(free_x, "facet_grid_free_x")
   info <- gg2list(free_x)
   expect_axes(info, 2L)
   expect_axes(info, 1L, "y")
