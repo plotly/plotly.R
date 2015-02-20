@@ -1,4 +1,4 @@
-## calc. the epoch
+# calc. the epoch
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
@@ -47,9 +47,9 @@ aesConverters <- list(
 )
 
 markLegends <-
-  ## NOTE: Do we also want to split on size?
-  ## Legends based on sizes not implemented yet in Plotly
-  ##  list(point=c("colour", "fill", "shape", "size"),
+  # NOTE: Do we also want to split on size?
+  # Legends based on sizes not implemented yet in Plotly
+  #  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour", "shape"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
@@ -70,10 +70,10 @@ gg2list <- function(p){
   if(length(p$layers) == 0) {
     stop("No layers in plot")
   }
-  ## Always use identity size scale so that plot.ly gets the real
-  ## units for the size variables.
+  # Always use identity size scale so that plot.ly gets the real
+  # units for the size variables.
   p <- tryCatch({
-    ## this will be an error for discrete variables.
+    # this will be an error for discrete variables.
     suppressMessages({
       ggplot_build(p+scale_size_continuous())
       p+scale_size_identity()
@@ -84,10 +84,10 @@ gg2list <- function(p){
   layout <- list()
   trace.list <- list()
   
-  ## Before building the ggplot, we would like to add aes(name) to
-  ## figure out what the object group is later. This also copies any
-  ## needed global aes/data values to each layer, so we do not have to
-  ## worry about combining global and layer-specific aes/data later.
+  # Before building the ggplot, we would like to add aes(name) to
+  # figure out what the object group is later. This also copies any
+  # needed global aes/data values to each layer, so we do not have to
+  # worry about combining global and layer-specific aes/data later.
   for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
     to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
@@ -101,7 +101,7 @@ gg2list <- function(p){
     }
   }
   
-  ## Extract data from built ggplots
+  # Extract data from built ggplots
   built <- ggplot_build2(p)
   
   # Get global x-range now because we need some of its info in layer2traces
@@ -123,20 +123,20 @@ gg2list <- function(p){
   }
   
   for(i in seq_along(built$plot$layers)){
-    ## This is the layer from the original ggplot object.
+    # This is the layer from the original ggplot object.
     L <- p$layers[[i]]
     
-    ## for each layer, there is a correpsonding data.frame which
-    ## evaluates the aesthetic mapping.
+    # for each layer, there is a correpsonding data.frame which
+    # evaluates the aesthetic mapping.
     df <- built$data[[i]]
     
-    ## Test fill and color to see if they encode a quantitative
-    ## variable. This may be useful for several reasons: (1) it is
-    ## sometimes possible to plot several different colors in the same
-    ## trace (e.g. points), and that is faster for large numbers of
-    ## data points and colors; (2) factors on x or y axes should be
-    ## sent to plotly as characters, not as numeric data (which is
-    ## what ggplot_build gives us).
+    # Test fill and color to see if they encode a quantitative
+    # variable. This may be useful for several reasons: (1) it is
+    # sometimes possible to plot several different colors in the same
+    # trace (e.g. points), and that is faster for large numbers of
+    # data points and colors; (2) factors on x or y axes should be
+    # sent to plotly as characters, not as numeric data (which is
+    # what ggplot_build gives us).
     misc <- list()
     for(a in c("fill", "colour", "x", "y")){
       for(data.type in c("continuous", "date", "datetime", "discrete")){
@@ -155,7 +155,7 @@ gg2list <- function(p){
       }
     }
     
-    ## scales are needed for legend ordering.
+    # scales are needed for legend ordering.
     for(sc in p$scales$scales){
       a <- sc$aesthetics
       if(length(a) == 1){
@@ -166,16 +166,16 @@ gg2list <- function(p){
       }
     }
     
-    ## get gglayout now because we need some of its info in layer2traces
+    # get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
-    ## invert rows so that plotly and ggplot2 show panels in the same order
+    # invert rows so that plotly and ggplot2 show panels in the same order
     gglayout$plotly.row <- max(gglayout$ROW) - gglayout$ROW + 1
-    ## ugh, ggplot counts panel right-to-left & top-to-bottom
-    ## plotly count them right-to-left & *bottom-to-top*
+    # ugh, ggplot counts panel right-to-left & top-to-bottom
+    # plotly count them right-to-left & *bottom-to-top*
     gglayout$plotly.panel <- with(gglayout, order(plotly.row, COL))
     
-    ## Add ROW and COL to df: needed to link axes to traces; keep df's
-    ## original ordering while merging.
+    # Add ROW and COL to df: needed to link axes to traces; keep df's
+    # original ordering while merging.
     df$order <- seq_len(nrow(df))
     df <- merge(df, gglayout[, c("PANEL", "plotly.row", "COL")])
     df <- df[order(df$order),]
@@ -197,7 +197,7 @@ gg2list <- function(p){
       misc$prestats.data$globsizemax <- ggsizemax
     }
     
-    ## This extracts essential info for this geom/layer.
+    # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
     # Associate error bars with previous traces
@@ -225,8 +225,8 @@ gg2list <- function(p){
     }
   }
   
-  ## for barcharts, verify that all traces have the same barmode; we don't
-  ## support different barmodes on the same plot yet.
+  # for barcharts, verify that all traces have the same barmode; we don't
+  # support different barmodes on the same plot yet.
   barmodes <- do.call(c, lapply(trace.list, function (x) x$barmode))
   barmodes <- barmodes[!is.null(barmodes)]
   if (length(barmodes) > 0) {    
@@ -250,27 +250,27 @@ gg2list <- function(p){
     }
   }
   
-  ## Export axis specification as a combination of breaks and labels, on
-  ## the relevant axis scale (i.e. so that it can be passed into d3 on the
-  ## x axis scale instead of on the grid 0-1 scale). This allows
-  ## transformations to be used out of the box, with no additional d3
-  ## coding.
+  # Export axis specification as a combination of breaks and labels, on
+  # the relevant axis scale (i.e. so that it can be passed into d3 on the
+  # x axis scale instead of on the grid 0-1 scale). This allows
+  # transformations to be used out of the box, with no additional d3
+  # coding.
   theme.pars <- ggplot2:::plot_theme(p)
   
-  ## Flip labels if coords are flipped - transform does not take care
-  ## of this. Do this BEFORE checking if it is blank or not, so that
-  ## individual axes can be hidden appropriately, e.g. #1.
-  ## ranges <- built$panel$ranges[[1]]
-  ## if("flip"%in%attr(built$plot$coordinates, "class")){
-  ##   temp <- built$plot$labels$x
-  ##   built$plot$labels$x <- built$plot$labels$y
-  ##   built$plot$labels$y <- temp
-  ## }
+  # Flip labels if coords are flipped - transform does not take care
+  # of this. Do this BEFORE checking if it is blank or not, so that
+  # individual axes can be hidden appropriately, e.g. #1.
+  # ranges <- built$panel$ranges[[1]]
+  # if("flip"%in%attr(built$plot$coordinates, "class")){
+  #   temp <- built$plot$labels$x
+  #   built$plot$labels$x <- built$plot$labels$y
+  #   built$plot$labels$y <- temp
+  # }
   e <- function(el.name){
     ggplot2::calc_element(el.name, p$theme)
   }
   is.blank <- function(el.name, null.is.blank=FALSE) {
-    ## NULL shows ticks and hides borders
+    # NULL shows ticks and hides borders
     cls <- attr(e(el.name),"class")
     "element_blank" %in% cls || null.is.blank && is.null(cls)
   }
@@ -279,7 +279,7 @@ gg2list <- function(p){
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     
-    ## When gridlines are dotted or dashed:
+    # When gridlines are dotted or dashed:
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
     if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
@@ -292,9 +292,9 @@ gg2list <- function(p){
     }
     
     ax.list$showgrid <- !is.blank(s("panel.grid.major.%s"))
-    ## These numeric length variables are not easily convertible.
-    ##ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
-    ##ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
+    # These numeric length variables are not easily convertible.
+    #ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
+    #ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
     
     theme2font <- function(text){
       if(!is.null(text)){
@@ -320,7 +320,7 @@ gg2list <- function(p){
     }
     ax.list$tickfont <- theme2font(tick.text)
     
-    ## Translate axes labels.
+    # Translate axes labels.
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
@@ -349,16 +349,16 @@ gg2list <- function(p){
     ax.list$showline <- !is.blank("panel.border", TRUE)
     ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
     ax.list$linewidth <- theme.pars$panel.border$size
-    ## Some other params that we used in animint but we don't yet
-    ## translate to plotly:
+    # Some other params that we used in animint but we don't yet
+    # translate to plotly:
     !is.blank(s("axis.line.%s"))
     layout[[s("%saxis")]] <- ax.list
   }
-  ## copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
+  # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title
   yaxis.title <- layout$yaxis$title
-  inner.margin <- 0.01 ## between facets
-  outer.margin <- 0.05 ## to put titles outside of the plots
+  inner.margin <- 0.01 # between facets
+  outer.margin <- 0.05 # to put titles outside of the plots
   orig.xaxis <- layout$xaxis
   orig.yaxis <- layout$yaxis
   if (nrow(gglayout) > 1) {
@@ -428,7 +428,7 @@ gg2list <- function(p){
         layout[[yaxis.name]]$autorange <- FALSE
       }
     }
-    ## add panel titles as annotations
+    # add panel titles as annotations
     annotations <- list()
     nann <- 1
     make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
@@ -472,8 +472,8 @@ gg2list <- function(p){
         }
       }
       
-      ## add empty traces everywhere so that the background shows even if there
-      ## is no data for a facet
+      # add empty traces everywhere so that the background shows even if there
+      # is no data for a facet
       for (r in seq_len(max(gglayout$ROW)))
         for (c in seq_len(max(gglayout$COL)))
           trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
@@ -498,7 +498,7 @@ gg2list <- function(p){
       }
     }
     
-    ## axes titles
+    # axes titles
     annotations[[nann]] <- make.label(xaxis.title, 
                                       0.5, 
                                       -outer.margin,
@@ -512,17 +512,17 @@ gg2list <- function(p){
     layout$annotations <- annotations
   }
   
-  ## Remove legend if theme has no legend position
+  # Remove legend if theme has no legend position
   layout$showlegend <- !(theme.pars$legend.position=="none")
   
-  ## Main plot title.
+  # Main plot title.
   layout$title <- built$plot$labels$title
   
-  ## Background color.
+  # Background color.
   layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
   
-  ## Legend.
+  # Legend.
   layout$margin$r <- 10
   if (exists("increase_margin_r")) {
     layout$margin$r <- 60
@@ -563,23 +563,23 @@ gg2list <- function(p){
     layout$annotations <- annotations
   }
   
-  ## Family font for text
+  # Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
     layout$legend$font$family <- theme.pars$text$family
   }
   
-  ## Family font for title
+  # Family font for title
   if (!is.null(theme.pars$plot.title$family)) {
     layout$titlefont$family <- theme.pars$plot.title$family
   }
   
-  ## Family font for legend
+  # Family font for legend
   if (!is.null(theme.pars$legend.text$family)) {
     layout$legend$font$family <- theme.pars$legend.text$family
   }
   
-  ## Bold, italic and bold.italic face for text
+  # Bold, italic and bold.italic face for text
   text_face <- theme.pars$text$face
   if (!is.null(text_face)) {
     if (text_face=="bold") {
@@ -597,7 +597,7 @@ gg2list <- function(p){
     }
   }
   
-  ## Bold, italic and bold.italic face for title
+  # Bold, italic and bold.italic face for title
   title_face <- theme.pars$plot.title$face
   if (!is.null(title_face)) {
     if (title_face=="bold") {
@@ -609,7 +609,7 @@ gg2list <- function(p){
     }
   }
   
-  ## Bold, italic, and bold.italic face for axis title
+  # Bold, italic, and bold.italic face for axis title
   title_face <- list(theme.pars$axis.title.y$face,
                      theme.pars$axis.title.x$face)
   sub_elem <- c("yaxis", "xaxis")
