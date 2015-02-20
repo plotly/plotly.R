@@ -21,7 +21,7 @@ test_that("geom_errorbarh gives horizontal errorbars", {
   expect_identical(L[[2]]$marker$color, L[[2]]$error_x$color)
   # Expect given errorbar values
   expect_equal(L[[1]]$error_x$array, c(0.1, 0.3))
-  expect_equal(L[[1]]$error_x$symmetric, TRUE)
+  expect_true(L[[1]]$error_x$symmetric)
 
   save_outputs(g, "errorbar-horizontal")
 })

@@ -4,7 +4,6 @@ huron <- data.frame(year=1875:1972, level=as.vector(LakeHuron))
 huron$decade <- plyr::round_any(huron$year, 10, floor)
 
 ar <- ggplot(huron) +
-  theme_grey()+
   geom_area(aes(x=year, y=level))
 L <- gg2list(ar)
 

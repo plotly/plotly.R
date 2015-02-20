@@ -47,7 +47,7 @@ layer2traces <- function(l, d, misc) {
   # For non-numeric data on the axes, we should take the values from
   # the original data.
   for (axis.name in c("x", "y")) {    
-    if(!misc$is.continuous[[axis.name]]) {
+    if (!misc$is.continuous[[axis.name]]) {
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {

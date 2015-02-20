@@ -1,7 +1,5 @@
 context("means and error bars")
 
-library(ggplot2)
-
 one.line.df <-
   data.frame(
     x = c(1, 2, 3, 4), 
