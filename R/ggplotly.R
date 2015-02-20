@@ -180,7 +180,7 @@ gg2list <- function(p){
     # scale_reverse multiples x/y data by -1, so here we undo that so
     # that the actual data can be uploaded to plotly.
     replace.aes <- intersect(names(prestats), reverse.aes)
-    for(a in replace.aes){
+    for (a in replace.aes) {
       prestats[[a]] <- -1 * prestats[[a]]
     }
     misc$prestats.data <-
@@ -312,12 +312,12 @@ gg2list <- function(p){
       sc <- p$scales$scales[[scale.i]]
       trace.order.list[[xy]] <- sc$limits
       trace.name.map[sc$breaks] <- sc$labels
-      if(is.null(sc$breaks)){
+      if (is.null(sc$breaks)) {
         ax.list$showticklabels <- FALSE
         ax.list$showgrid <- FALSE
         ax.list$ticks <- ""
       }
-      if(is.numeric(sc$breaks)){
+      if (is.numeric(sc$breaks)) {
         dticks <- diff(sc$breaks)
         dt <- dticks[1]
         if(all(dticks == dt)){
@@ -631,7 +631,7 @@ gg2list <- function(p){
       layout$legend$bgcolor <- toRGB(s(rect_fill))
   }
   
-  if(length(trace.list) == 0) {
+  if (length(trace.list) == 0) {
     stop("No exportable traces")
   }
 

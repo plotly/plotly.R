@@ -203,7 +203,6 @@ layer2traces <- function(l, d, misc) {
     data.params <- data.list[[data.i]]
     data.params$params$stat.type <- l$stat$objname
     tr <- do.call(getTrace, data.params)
-    class(tr) <- "trace"
     for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
       if (length(vals) > 0 && is.na(vals[length(vals)])) {
