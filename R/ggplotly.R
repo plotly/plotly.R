@@ -203,30 +203,10 @@ gg2list <- function(p){
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    # Associate error bars with previous traces
-    ##if (grepl("errorbar", L$geom$objname)) { #TDH 28 Jan 2015.
-    if(FALSE){
-      for (j in 1:length(trace.list)) {
-        temp <- list()
-        ind <- traces[[1]]$x %in% trace.list[[j]]$x
-        only_ind <- function(x) x[ind]
-        if ("errorbarh" %in% L$geom$objname) {
-          temp <- lapply(traces[[1]]$error_x, only_ind)
-          # Colour of error bar has to be one string
-          if (length(temp$color) > 1) temp$color <- temp$color[1]
-          trace.list[[j]]["error_x"] <- list(temp)
-        } else {
-          temp <- lapply(traces[[1]]$error_y, only_ind)
-          if (length(temp$color) > 1) temp$color <- temp$color[1]
-          trace.list[[j]]["error_y"] <- list(temp)
-        }
-      }
-    } else {
-      # Do we really need to coord_transform?
-      # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-      #                                     built$panel$ranges[[1]])
-      trace.list <- c(trace.list, traces)
-    }
+    ## Do we really need to coord_transform?
+    ## g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
+    ##                                     built$panel$ranges[[1]])
+    trace.list <- c(trace.list, traces)
   }
 
   ## for barcharts, verify that all traces have the same barmode; we don't
