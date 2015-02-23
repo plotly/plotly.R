@@ -63,3 +63,75 @@ test_that("dates work well with bar charts", {
   
   save_outputs(gd, "bar-dates")
 })
+
+expect_traces <- function(gg, n.traces, name){
+  stopifnot(is.ggplot(gg))
+  stopifnot(is.numeric(n.traces))
+  save_outputs(gg, paste0("bar-", name))
+  L <- gg2list(gg)
+  is.trace <- names(L) == ""
+  all.traces <- L[is.trace]
+  no.data <- sapply(all.traces, function(tr) {
+    is.null(tr[["x"]]) && is.null(tr[["y"]])
+  })
+  has.data <- all.traces[!no.data]
+  expect_equal(length(has.data), n.traces)
+  list(traces=has.data, kwargs=L$kwargs)
+}
+
+## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
+df <- data.frame(time = factor(c("Lunch","Dinner"), levels=c("Lunch","Dinner")),
+                 total_bill = c(14.89, 17.23))
+
+test_that("Very basic bar graph", {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill)) +
+    geom_bar(stat="identity")
+  info <- expect_traces(gg, 1, "nocolor")
+  for(tr in info$traces){
+    expect_null(tr$marker$color)
+    expect_null(tr$marker$line$color)
+    expect_null(tr$marker$line$width)
+    expect_null(info$kwargs$layout$annotations)
+    expect_false(info$kwargs$layout$showlegend)
+  }
+})
+
+test_that("Map the time of day to different fill colors", {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(stat="identity")
+  info <- expect_traces(gg, 2, "color")
+  for(tr in info$traces){
+    expect_true(is.character(tr$marker$color))
+    expect_null(tr$marker$line$color)
+    expect_null(tr$marker$line$width)
+    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+    expect_true(info$kwargs$layout$showlegend)
+  }
+})
+
+test_that("Add a black outline", {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(colour="black", stat="identity")
+  info <- expect_traces(gg, 2, "black-outline")
+  for(tr in info$traces){
+    expect_true(is.character(tr$marker$color))
+    expect_identical(tr$marker$line$color, toRGB("black"))
+    expect_equal(tr$marker$line$width, 1)
+    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+    expect_true(info$kwargs$layout$showlegend)
+  }
+})
+
+test_that("No legend, since the information is redundant", {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(colour="black", stat="identity") +
+    guides(fill=FALSE)
+  info <- expect_traces(gg, 2, "black-outline")
+  for(tr in info$traces){
+    expect_true(is.character(tr$marker$color))
+    expect_identical(tr$marker$line$color, toRGB("black"))
+    expect_equal(tr$marker$line$width, 1)
+    expect_null(info$kwargs$layout$annotations)
+    expect_false(info$kwargs$layout$showlegend)
+  }
+})
