@@ -19,7 +19,6 @@ save_outputs(ar, "area")
 
 # Test alpha transparency in fill color
 gg <- ggplot(huron) +
-  theme_grey()+
   geom_area(aes(x=year, y=level), alpha=0.4)
 L <- gg2list(gg)
 
