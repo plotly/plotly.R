@@ -20,7 +20,7 @@ ensure_file_exist <- function(abspath) {
 }
 
 
-### Credentials Tools ###
+# Credentials Tools ###
 
 #' Read Plotly credentials file (which is a JSON)
 #' @param args Character vector of keys you are looking up
@@ -88,7 +88,7 @@ set_credentials_file <- function(username="", api_key="",
 }
 
 
-### Config Tools ###
+# Config Tools ###
 
 #' Read Plotly config file (which is a JSON) and create one if nonexistent
 #' @param args Character vector of keys you are looking up
