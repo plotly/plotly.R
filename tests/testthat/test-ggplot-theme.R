@@ -1,7 +1,7 @@
 context("ggplot themes")
 
 iris.base <- ggplot(iris) +
-  geom_point(aes(Petal.Width, Sepal.Width))+
+  geom_point(aes(Petal.Width, Sepal.Width)) +
   theme_grey()
 
 test_that("background translated correctly",{
