@@ -81,8 +81,12 @@ coded.lty <- c("22"="dash",
                "224282F2"="dash",
                "F1"="dash")
 
+# Convert R lty line type codes to plotly "dash" codes.
+lty2dash <- c(numeric.lty, named.lty, coded.lty)
+
 # Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
               colour="color",
               size="width",
               direction="shape")
+

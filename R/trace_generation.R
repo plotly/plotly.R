@@ -5,10 +5,15 @@
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
+  not.na <- function(df){
+    na.mat <- is.na(df)
+    to.exclude <- apply(na.mat, 1, any)
+    df[!to.exclude, ]
+  }
   g <- list(geom=l$geom$objname,
-            data=d,
-            prestats.data=misc$prestats.data)
-  ## needed for when group, etc. is an expression.
+            data=not.na(d),
+            prestats.data=not.na(misc$prestats.data))
+  # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
   if (g$geom == "violin") {
@@ -17,7 +22,7 @@ layer2traces <- function(l, d, misc) {
             probability density estimation is not supported in Plotly yet.")
   }
   
-  ## Barmode and bargap
+  # Barmode and bargap
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
     if (l$stat$objname == "bin") {
@@ -39,9 +44,9 @@ layer2traces <- function(l, d, misc) {
     bargap <- 0
   }
   
-  ## For non-numeric data on the axes, we should take the values from
-  ## the original data.
-  for (axis.name in c("x", "y")) {
+  # For non-numeric data on the axes, we should take the values from
+  # the original data.
+  for (axis.name in c("x", "y")) {    
     if (!misc$is.continuous[[axis.name]]) {
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
@@ -61,22 +66,22 @@ layer2traces <- function(l, d, misc) {
         }
         
         # For some plot types, we overwrite `data` with `prestats.data`.
-        pdata.vec <- misc$prestats.data[[a]]
+        pdata.vec <- g$prestats.data[[a]]
         if (inherits(data.vec, "POSIXt")) {
-          ## Re-create dates from nb seconds
+          # Re-create dates from nb seconds
           data.vec <- try(strftime(as.POSIXlt(g$data[[a]], origin=the.epoch),
                                    "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.POSIXlt(g$prestats.data[[a]],
                                            origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "Date")) {
-          ## Re-create dates from nb days
+          # Re-create dates from nb days
           data.vec <- try(strftime(as.Date(g$data[[a]], origin=the.epoch),
                                    "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
-          ## Re-order data so that Plotly gets it right from ggplot2.
+          # Re-order data so that Plotly gets it right from ggplot2.
           g$data <- g$data[order(g$data[[a]]), ]
           data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
           g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
@@ -92,60 +97,60 @@ layer2traces <- function(l, d, misc) {
       }
     }
   }
-  ## use un-named parameters so that they will not be exported
-  ## to JSON as a named object, since that causes problems with
-  ## e.g. colour.
+  # use un-named parameters so that they will not be exported
+  # to JSON as a named object, since that causes problems with
+  # e.g. colour.
   g$params <- c(l$geom_params, l$stat_params)
-  ## non-ggplot2 params like name are useful for plot.ly and ggplot2
-  ## places them into stat_params.
+  # non-ggplot2 params like name are useful for plot.ly and ggplot2
+  # places them into stat_params.
   for(p.name in names(g$params)){
-    ## c("foo") is translated to "foo" in JSON, so instead we use
-    ## list("foo") which becomes ["foo"]. However we need to make sure
-    ## that the list does not have names since list(bar="foo") becomes
-    ## {"bar":"foo"}
+    # c("foo") is translated to "foo" in JSON, so instead we use
+    # list("foo") which becomes ["foo"]. However we need to make sure
+    # that the list does not have names since list(bar="foo") becomes
+    # {"bar":"foo"}
     names(g$params[[p.name]]) <- NULL
   }
   
-  ## Convert complex ggplot2 geoms so that they are treated as special
-  ## cases of basic geoms. In ggplot2, this processing is done in the
-  ## draw method of the geoms.
+  # Convert complex ggplot2 geoms so that they are treated as special
+  # cases of basic geoms. In ggplot2, this processing is done in the
+  # draw method of the geoms.
   
-  ## Every plotly trace has one of these types
-  ## type=scatter,bar,box,histogramx,histogram2d,heatmap
+  # Every plotly trace has one of these types
+  # type=scatter,bar,box,histogramx,histogram2d,heatmap
   
-  ## for type=scatter, you can define
-  ## mode=none,markers,lines,lines+markers where "lines" is the
-  ## default for 20 or more points, "lines+markers" is the default for
-  ## <20 points. "none" is useful mainly if fill is used to make area
-  ## plots with no lines.
+  # for type=scatter, you can define
+  # mode=none,markers,lines,lines+markers where "lines" is the
+  # default for 20 or more points, "lines+markers" is the default for
+  # <20 points. "none" is useful mainly if fill is used to make area
+  # plots with no lines.
   
-  ## marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
+  # marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
   
-  ## symbol=circle,square,diamond,cross,x,
-  ## triangle-up,triangle-down,triangle-left,triangle-right
+  # symbol=circle,square,diamond,cross,x,
+  # triangle-up,triangle-down,triangle-left,triangle-right
   
-  ## First convert to a "basic" geom, e.g. segments become lines.
+  # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
     g
   }else{
     convert(g)
   }
-  ## Then split on visual characteristics that will get different
-  ## legend entries.
+  # Then split on visual characteristics that will get different
+  # legend entries.
   data.list <- if (basic$geom %in% names(markLegends)) {
     mark.names <- markLegends[[basic$geom]]
-    ## However, continuously colored points are an exception: they do
-    ## not need a legend entry, and they can be efficiently rendered
-    ## using just 1 trace.
-
-    ## Maybe it is nice to show a legend for continuous points?
-    ## if(basic$geom == "point"){
-    ##   to.erase <- names(misc$is.continuous)[misc$is.continuous]
-    ##   mark.names <- mark.names[!mark.names %in% to.erase]
-    ## }
+    # However, continuously colored points are an exception: they do
+    # not need a legend entry, and they can be efficiently rendered
+    # using just 1 trace.
+    
+    # Maybe it is nice to show a legend for continuous points?
+    # if(basic$geom == "point"){
+    #   to.erase <- names(misc$is.continuous)[misc$is.continuous]
+    #   mark.names <- mark.names[!mark.names %in% to.erase]
+    # }
     name.names <- sprintf("%s.name", mark.names)
-    ## split on 'PANEL' to support facets
+    # split on 'PANEL' to support facets
     is.split <- names(basic$data) %in% c(name.names, "PANEL")
     if(any(is.split)){
       data.i <- which(is.split)
@@ -177,7 +182,7 @@ layer2traces <- function(l, d, misc) {
     })
   }
   
-  ## case of no legend, if either of the two ifs above failed.
+  # case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
@@ -265,8 +270,8 @@ layer2traces <- function(l, d, misc) {
 # Preprocess data and params.
 toBasic <- list(
   segment=function(g){
-    ## Every row is one segment, we convert to a line with several
-    ## groups which can be efficiently drawn by adding NA rows.
+    # Every row is one segment, we convert to a line with several
+    # groups which can be efficiently drawn by adding NA rows.
     g$data$group <- 1:nrow(g$data)
     used <- c("x", "y", "xend", "yend")
     others <- g$data[!names(g$data) %in% used]
@@ -381,6 +386,35 @@ group2NA <- function(g, geom) {
   g
 }
 
+# Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
+# error_x.
+make.errorbar <- function(data, params, xy){
+  tr <-
+    list(x=data$x,
+         y=data$y,
+         type="scatter",
+         mode="none")
+  err.name <- paste0("error_", xy)
+  min.name <- paste0(xy, "min")
+  max.name <- paste0(xy, "max")
+  e <-
+    list(array=data[[max.name]]-data[[xy]],
+         type="data",
+         width=params$width,
+         symmetric=TRUE,
+         color=if(!is.null(params$colour)){
+           toRGB(params$colour)
+         }else{
+           toRGB(data$colour)
+         })
+  arrayminus <- data[[xy]]-data[[min.name]]
+  if(!isTRUE(all.equal(e$array, arrayminus))){
+    e$arrayminus <- arrayminus
+    e$symmetric <- FALSE
+  }
+  tr[[err.name]] <- e    
+  tr
+}
 
 # Convert basic geoms to traces.
 geom2trace <- list(
@@ -415,7 +449,7 @@ geom2trace <- list(
     if("size" %in% names(data)){
       L$text <- paste("size:", data$size)
       L$marker$sizeref <- default.marker.sizeref
-      ## Make sure sizes are passed as a list even when there is only one element.
+      # Make sure sizes are passed as a list even when there is only one element.
       s <- data$size
       marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
       marker.size <- marker.size * marker.size.mult
@@ -539,18 +573,10 @@ geom2trace <- list(
     L
   },
   errorbar=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         error_y=list(arrayminus=data$y-data$ymin,
-                      array=data$ymax-data$y,
-                      color=toRGB(data$colour)))
+    make.errorbar(data, params, "y")
   },
   errorbarh=function(data, params) {
-    list(x=data$x,
-         y=data$y,
-         error_x=list(arrayminus=data$x-data$xmin,
-                      array=data$xmax-data$x,
-                      color=toRGB(data$colour)))
+    make.errorbar(data, params, "x")
   },
   area=function(data, params) {
     list(x=c(data$x[1], data$x, tail(data$x, n=1)),

@@ -1,3 +1,7 @@
+0.5.21 -- 23 February 2015.
+
+Fixes for error bars and tick marks.
+
 0.5.20 -- 9 February 2015.
 
 Add alpha transparency to fill conversion.

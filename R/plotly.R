@@ -230,7 +230,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     cat(kwargs)
     return(pub$makecall(args = args, kwargs = kwargs, origin = "style"))
   }
-  ## wrap up the object
+  # wrap up the object
   pub <- list2env(pub)
   class(pub) <- "PlotlyClass"
   return(pub)
