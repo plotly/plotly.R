@@ -119,7 +119,8 @@ gg2list <- function(p){
     ggsizemin <- min(unlist(sizerange))
     ggsizemax <- max(unlist(sizerange))
   }
-  
+
+  layer.legends <- list()
   for(i in seq_along(built$plot$layers)){
     ## This is the layer from the original ggplot object.
     L <- p$layers[[i]]
@@ -194,6 +195,10 @@ gg2list <- function(p){
 
     ## This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
+
+    possible.legends <- markLegends[[L$geom$objname]]
+    actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
+    layer.legends[[paste(i)]] <- actual.legends
     
     # Associate error bars with previous traces
     if (grepl("errorbar", L$geom$objname)) {
@@ -505,6 +510,23 @@ gg2list <- function(p){
   # [markUnique != "x"] is for boxplot's particular case.
   if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
     layout$showlegend <- FALSE
+
+  ## Legend hiding when guides(fill="none").
+  legends.present <- unique(unlist(layer.legends))
+  is.false <- function(x){
+    is.logical(x) && length(x) == 1 && x == FALSE
+  }
+  is.none <- function(x){
+    is.character(x) && length(x) == 1 && x == "none"
+  }
+  is.hidden <- function(x){
+    is.false(x) || is.none(x)
+  }
+  for(a in legends.present){
+    if(is.hidden(p$guides[[a]])){
+      layout$showlegend <- FALSE
+    }
+  }
 
   if (layout$showlegend && length(p$data)) {
     # Retrieve legend title

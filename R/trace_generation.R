@@ -138,7 +138,7 @@ layer2traces <- function(l, d, misc) {
     ## However, continuously colored points are an exception: they do
     ## not need a legend entry, and they can be efficiently rendered
     ## using just 1 trace.
-    
+
     ## Maybe it is nice to show a legend for continuous points?
     ## if(basic$geom == "point"){
     ##   to.erase <- names(misc$is.continuous)[misc$is.continuous]
@@ -259,7 +259,7 @@ layer2traces <- function(l, d, misc) {
     no.sort[[tr.i]]$sort <- NULL
   }
   no.sort
-  }
+}#layer2traces
 
 
 # Preprocess data and params.
@@ -304,7 +304,10 @@ toBasic <- list(
   bar=function(g) {
     if (any(is.na(g$prestats.data$x)))
       g$prestats.data$x <- g$prestats.data$x.name
-    g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
+    for(a in c("fill", "colour")){
+      g$prestats.data[[a]] <-
+        g$data[[a]][match(g$prestats.data$group, g$data$group)]
+    }
     g$params$xstart <- min(g$data$xmin)
     g$params$xend <- max(g$data$xmax)
     g$data <- g$prestats.data
