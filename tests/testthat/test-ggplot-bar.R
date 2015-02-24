@@ -122,11 +122,11 @@ test_that("Add a black outline", {
   }
 })
 
-test_that("No legend, since the information is redundant", {
+test_that("guides(fill=FALSE) hides fill legend", {
   gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
     geom_bar(colour="black", stat="identity") +
     guides(fill=FALSE)
-  info <- expect_traces(gg, 2, "black-outline")
+  info <- expect_traces(gg, 2, "aes-fill-guides-fill-FALSE")
   for(tr in info$traces){
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
@@ -135,3 +135,46 @@ test_that("No legend, since the information is redundant", {
     expect_false(info$kwargs$layout$showlegend)
   }
 })
+
+test_that('guides(fill="none") hides fill legend', {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(colour="black", stat="identity") +
+    guides(fill="none")
+  info <- expect_traces(gg, 2, "aes-fill-guides-fill-none")
+  for(tr in info$traces){
+    expect_true(is.character(tr$marker$color))
+    expect_identical(tr$marker$line$color, toRGB("black"))
+    expect_equal(tr$marker$line$width, 1)
+    expect_null(info$kwargs$layout$annotations)
+    expect_false(info$kwargs$layout$showlegend)
+  }
+})
+
+test_that('guides(colour="none") does not affect fill legend', {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, fill=time)) +
+    geom_bar(color="black", stat="identity") +
+    guides(colour="none")
+  info <- expect_traces(gg, 2, "aes-fill-guides-color-none")
+  for(tr in info$traces){
+    expect_true(is.character(tr$marker$color))
+    expect_identical(tr$marker$line$color, toRGB("black"))
+    expect_equal(tr$marker$line$width, 1)
+    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+    expect_true(info$kwargs$layout$showlegend)
+  }
+})
+
+test_that("guides(fill=FALSE) does not affect colour legend", {
+  gg <- ggplot(data=df, aes(x=time, y=total_bill, colour=time)) +
+    geom_bar(fill="grey", stat="identity") +
+    guides(fill=FALSE)
+  info <- expect_traces(gg, 2, "aes-colour-guides-fill-FALSE")
+  for(tr in info$traces){
+    expect_identical(tr$marker$color, toRGB("grey"))
+    expect_true(is.character(tr$marker$line$color))
+    expect_equal(tr$marker$line$width, 1)
+    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+    expect_true(info$kwargs$layout$showlegend)
+  }
+})
+
