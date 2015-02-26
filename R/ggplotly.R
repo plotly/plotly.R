@@ -54,6 +54,8 @@ markLegends <-
        path=c("linetype", "size", "colour", "shape"),
        polygon=c("colour", "fill", "linetype", "size", "group"),
        bar=c("colour", "fill"),
+       errorbar=c("colour", "linetype"),
+       errorbarh=c("colour", "linetype"),
        area=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
        boxplot=c("x"),
@@ -103,7 +105,6 @@ gg2list <- function(p){
   
   # Extract data from built ggplots
   built <- ggplot_build2(p)
-  
   # Get global x-range now because we need some of its info in layer2traces
   ggranges <- built$panel$ranges
   # Extract x.range
@@ -164,7 +165,9 @@ gg2list <- function(p){
         names(ranks) <- br
         misc$breaks[[sc$aesthetics]] <- ranks
       }
+      misc$trans[sc$aesthetics] <- sc$trans$name
     }
+    reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
     
     # get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
@@ -181,8 +184,16 @@ gg2list <- function(p){
     df <- df[order(df$order),]
     df$order <- NULL
     
-    misc$prestats.data <- merge(built$prestats.data[[i]],
-                                gglayout[, c("PANEL", "plotly.row", "COL")])
+    prestats <- built$prestats.data[[i]]
+    # scale_reverse multiples x/y data by -1, so here we undo that so
+    # that the actual data can be uploaded to plotly.
+    replace.aes <- intersect(names(prestats), reverse.aes)
+    for (a in replace.aes) {
+      prestats[[a]] <- -1 * prestats[[a]]
+    }
+    misc$prestats.data <-
+      merge(prestats,
+            gglayout[, c("PANEL", "plotly.row", "COL")])
     
     # Add global x-range info
     misc$prestats.data$globxmin <- ggxmin
@@ -200,29 +211,10 @@ gg2list <- function(p){
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    # Associate error bars with previous traces
-    if (grepl("errorbar", L$geom$objname)) {
-      for (j in 1:length(trace.list)) {
-        temp <- list()
-        ind <- traces[[1]]$x %in% trace.list[[j]]$x
-        only_ind <- function(x) x[ind]
-        if ("errorbarh" %in% L$geom$objname) {
-          temp <- lapply(traces[[1]]$error_x, only_ind)
-          # Colour of error bar has to be one string
-          if (length(temp$color) > 1) temp$color <- temp$color[1]
-          trace.list[[j]]["error_x"] <- list(temp)
-        } else {
-          temp <- lapply(traces[[1]]$error_y, only_ind)
-          if (length(temp$color) > 1) temp$color <- temp$color[1]
-          trace.list[[j]]["error_y"] <- list(temp)
-        }
-      }
-    } else {
-      # Do we really need to coord_transform?
-      # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-      #                                     built$panel$ranges[[1]])
-      trace.list <- c(trace.list, traces)
-    }
+    # Do we really need to coord_transform?
+    # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
+    #                                     built$panel$ranges[[1]])
+    trace.list <- c(trace.list, traces)
   }
   
   # for barcharts, verify that all traces have the same barmode; we don't
@@ -274,6 +266,8 @@ gg2list <- function(p){
     cls <- attr(e(el.name),"class")
     "element_blank" %in% cls || null.is.blank && is.null(cls)
   }
+  trace.order.list <- list()
+  trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
     s <- function(tmp)sprintf(tmp, xy)
@@ -324,6 +318,33 @@ gg2list <- function(p){
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
+      trace.order.list[[xy]] <- sc$limits
+      trace.name.map[sc$breaks] <- sc$labels
+      if (is.null(sc$breaks)) {
+        ax.list$showticklabels <- FALSE
+        ax.list$showgrid <- FALSE
+        ax.list$ticks <- ""
+      }
+      if (is.numeric(sc$breaks)) {
+        dticks <- diff(sc$breaks)
+        dt <- dticks[1]
+        if(all(dticks == dt)){
+          ax.list$dtick <- dt
+          ax.list$autotick <- FALSE
+        }
+      }
+      ax.list$range <- if(!is.null(sc$limits)){
+        sc$limits
+      }else{
+        if(misc$is.continuous[[xy]]){
+          ggranges[[1]][[s("%s.range")]] #TODO: facets!
+        }else{ # for a discrete scale, range should be NULL.
+          NULL
+        }
+      }
+      if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
+        ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
+      }
       if(!is.null(sc$name)){
         sc$name
       }else{
@@ -436,80 +457,82 @@ gg2list <- function(p){
            xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
            textangle=textangle)
     
-    if ("grid" %in% class(p$facet))
-    {
+    if ("grid" %in% class(p$facet)) {
       frows <- names(p$facet$rows)
       nann <- 1
+      make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
+        list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
+             xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
+             textangle=textangle)
       
-      for (i in seq_len(max(gglayout$ROW)))
-      {
-        text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        if (text != "") {  # to not create extra annotations
-          increase_margin_r <- TRUE
-          annotations[[nann]] <- make.label(text,
-                                            1 + outer.margin - 0.04,
-                                            row.size * (max(gglayout$ROW)-i+0.5),
+      if ("grid" %in% class(p$facet)) {
+        frows <- names(p$facet$rows)
+        nann <- 1
+        
+        for (i in seq_len(max(gglayout$ROW))) {
+          text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
+                               as.character),
+                        collapse=", ")
+          if (text != "") {  # to not create extra annotations
+            increase_margin_r <- TRUE
+            annotations[[nann]] <- make.label(text,
+                                              1 + outer.margin - 0.04,
+                                              row.size * (max(gglayout$ROW)-i+0.5),
+                                              xanchor="center",
+                                              textangle=90)
+            nann <- nann + 1
+          }
+        }
+        fcols <- names(p$facet$cols)
+        for (i in seq_len(max(gglayout$COL))) {
+          text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
+                               as.character),
+                        collapse=", ")
+          if (text!="") {
+            annotations[[nann]] <- make.label(text,
+                                              col.size * (i-0.5) - inner.margin/2,
+                                              1 + outer.margin,
+                                              xanchor="center")
+            nann <- nann + 1
+          }
+        }
+        
+        # add empty traces everywhere so that the background shows even if there
+        # is no data for a facet
+        for (r in seq_len(max(gglayout$ROW)))
+          for (c in seq_len(max(gglayout$COL)))
+            trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
+      } else if ("wrap" %in% class(p$facet)) {
+        facets <- names(p$facet$facets)
+        for (i in seq_len(max(as.numeric(gglayout$PANEL)))) {
+          ix <- gglayout$PANEL == i
+          row <- gglayout$ROW[ix]
+          col <- gglayout$COL[ix]
+          text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
+                               as.character),
+                        collapse=", ")
+          annotations[[nann]] <- make.label(text, 
+                                            col.size * (col-0.5) - inner.margin/2,
+                                            row.size * (max(gglayout$ROW) - row + 0.985),
                                             xanchor="center",
-                                            textangle=90)
+                                            yanchor="top")
           nann <- nann + 1
         }
       }
       
-      fcols <- names(p$facet$cols)
-      for (i in seq_len(max(gglayout$COL)))
-      {
-        text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        if (text!="") {
-          annotations[[nann]] <- make.label(text,
-                                            col.size * (i-0.5) - inner.margin/2,
-                                            1 + outer.margin,
-                                            xanchor="center")
-          nann <- nann + 1
-        }
-      }
+      # axes titles
+      annotations[[nann]] <- make.label(xaxis.title, 
+                                        0.5, 
+                                        -outer.margin,
+                                        yanchor="top")
+      nann <- nann + 1
+      annotations[[nann]] <- make.label(yaxis.title, 
+                                        -outer.margin, 
+                                        0.5,
+                                        textangle=-90)
       
-      # add empty traces everywhere so that the background shows even if there
-      # is no data for a facet
-      for (r in seq_len(max(gglayout$ROW)))
-        for (c in seq_len(max(gglayout$COL)))
-          trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
+      layout$annotations <- annotations
     }
-    else if ("wrap" %in% class(p$facet))
-    {
-      facets <- names(p$facet$facets)
-      for (i in seq_len(max(as.numeric(gglayout$PANEL))))
-      {
-        ix <- gglayout$PANEL == i
-        row <- gglayout$ROW[ix]
-        col <- gglayout$COL[ix]
-        text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        annotations[[nann]] <- make.label(text, 
-                                          col.size * (col-0.5) - inner.margin/2,
-                                          row.size * (max(gglayout$ROW) - row + 0.985),
-                                          xanchor="center",
-                                          yanchor="top")
-        nann <- nann + 1
-      }
-    }
-    
-    # axes titles
-    annotations[[nann]] <- make.label(xaxis.title, 
-                                      0.5, 
-                                      -outer.margin,
-                                      yanchor="top")
-    nann <- nann + 1
-    annotations[[nann]] <- make.label(yaxis.title, 
-                                      -outer.margin, 
-                                      0.5,
-                                      textangle=-90)
-    
-    layout$annotations <- annotations
   }
   
   # Remove legend if theme has no legend position
@@ -643,63 +666,103 @@ gg2list <- function(p){
       layout$legend$bgcolor <- toRGB(s(rect_fill))
   }
   
-  trace.list$kwargs <- list(layout=layout)
-  
-  if (length(trace.list) < 2) {
+  if (length(trace.list) == 0) {
     stop("No exportable traces")
   }
   
-  if (length(trace.list) > 2) {
-    # Maybe some traces should be merged.
-    nr <- length(trace.list) - 1
-    comp <- data.frame(matrix(ncol=2, nrow=nr))
-    colnames(comp) <- c("name", "mode")
-    
-    for (j in 1:nr) {
-      # Use lapply to be elegant?
-      for (d in colnames(comp)) {
-        try(comp[[d]][j] <- trace.list[[j]][[d]], silent=TRUE)
-        # "names" might be NULL in trace.list
+  mode.mat <- matrix(NA, 3, 3)
+  rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
+  mode.mat["markers", "lines"] <-
+    mode.mat["lines", "markers"] <- "lines+markers"
+  mode.mat["markers", "none"] <- mode.mat["none", "markers"] <- "markers"
+  mode.mat["lines", "none"] <- mode.mat["none", "lines"] <- "lines"
+  merged.traces <- list()
+  not.merged <- trace.list
+  while(length(not.merged)){
+    tr <- not.merged[[1]]
+    not.merged <- not.merged[-1]
+    # Are there any traces that have not yet been merged, and can be
+    # merged with tr?
+    can.merge <- rep(FALSE, l=length(not.merged))
+    for(other.i in seq_along(not.merged)){
+      other <- not.merged[[other.i]]
+      criteria <- c()
+      for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
+        other.attr <- other[[must.be.equal]]
+        tr.attr <- tr[[must.be.equal]]
+        criteria[[must.be.equal]] <- isTRUE(all.equal(other.attr, tr.attr))
+      }
+      if(all(criteria)){
+        can.merge[[other.i]] <- TRUE
       }
     }
-    # Compare the "name"s of the traces (so far naively inherited from layers)
-    layernames <- unique(comp$name)
-    if (length(layernames) < nr) {
-      # Some traces (layers at this stage) have the same "name"s.
-      for (j in 1:length(layernames)) {
-        lind <- which(layernames[j] == comp$name)
-        lmod <- c("lines", "markers") %in% comp$mode[lind]
-        # Is there one with "mode": "lines" and another with "mode": "markers"?
-        if (all(lmod)) {
-          # Data comparison
-          xcomp <- (trace.list[[lind[1]]]$x == trace.list[[lind[2]]]$x)
-          ycomp <- (trace.list[[lind[1]]]$y == trace.list[[lind[2]]]$y)
-          if (all(xcomp) && all(ycomp)) {
-            # Union of the two traces
-            keys <- unique(c(names(trace.list[[lind[1]]]),
-                             names(trace.list[[lind[2]]])))
-            temp <- setNames(mapply(c, trace.list[[lind[1]]][keys],
-                                    trace.list[[lind[2]]][keys]), keys)
-            # Info is duplicated in fields which are in common
-            temp <- lapply(temp, unique)
-            # But unique() is detrimental to line or marker sublist
-            temp$line <- trace.list[[lind[1]]]$line
-            temp$marker <- trace.list[[lind[2]]]$marker
-            # Overwrite x and y to be safe
-            temp$x <- trace.list[[lind[1]]]$x
-            temp$y <- trace.list[[lind[1]]]$y
-            # Specify new one mode
-            temp$mode <- "lines+markers"
-            # Keep one trace and remove the other one
-            trace.list[[lind[1]]] <- temp
-            trace.list <- trace.list[-lind[2]]
-            # Update comparison table
-            comp <- comp[-lind[2], ]
-          }
+    to.merge <- not.merged[can.merge]
+    not.merged <- not.merged[!can.merge]
+    for(other in to.merge){
+      new.mode <- tryCatch({
+        mode.mat[tr$mode, other$mode]
+      }, error=function(e){
+        NA
+      })
+      if(is.character(new.mode) && !is.na(new.mode)){
+        tr$mode <- new.mode
+      }
+      attrs <- c("error_x", "error_y", "marker", "line")
+      for(attr in attrs){
+        if(!is.null(other[[attr]]) && is.null(tr[[attr]])){
+          tr[[attr]] <- other[[attr]]
         }
       }
     }
+    merged.traces[[length(merged.traces)+1]] <- tr
   }
   
-  trace.list
+  # Put the traces in correct order, according to any manually
+  # specified scales.
+  trace.order <- unlist(trace.order.list)
+  ordered.traces <- if(length(trace.order)){
+    trace.order.score <- seq_along(trace.order)
+    names(trace.order.score) <- trace.order
+    trace.name <- sapply(merged.traces, "[[", "name")
+    trace.score <- trace.order.score[trace.name]
+    merged.traces[order(trace.score)]
+  }else{
+    merged.traces
+  }
+  
+  # Translate scale(labels) to trace name.
+  named.traces <- ordered.traces
+  for(trace.i in seq_along(named.traces)){
+    tr.name <- named.traces[[trace.i]][["name"]]
+    new.name <- trace.name.map[[tr.name]]
+    if(!is.null(new.name)){
+      named.traces[[trace.i]][["name"]] <- new.name
+    }
+  }
+  
+  # If coord_flip is defined, then flip x/y in each trace, and in
+  # each axis.
+  flipped.traces <- named.traces
+  flipped.layout <- layout
+  if("flip" %in% attr(built$plot$coordinates, "class")){
+    if(!inherits(p$facet, "null")){
+      stop("coord_flip + facet conversion not supported")
+    }
+    for(trace.i in seq_along(flipped.traces)){
+      tr <- flipped.traces[[trace.i]]
+      x <- tr[["x"]]
+      y <- tr[["y"]]
+      tr[["y"]] <- x
+      tr[["x"]] <- y
+      flipped.traces[[trace.i]] <- tr
+    }
+    x <- layout[["xaxis"]]
+    y <- layout[["yaxis"]]
+    flipped.layout[["xaxis"]] <- y
+    flipped.layout[["yaxis"]] <- x
+  }
+  
+  flipped.traces$kwargs <- list(layout=flipped.layout)
+  
+  flipped.traces
 }

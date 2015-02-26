@@ -1,6 +1,8 @@
 context("ggplot themes")
 
-iris.base <- ggplot(iris) + geom_point(aes(Petal.Width, Sepal.Width))
+iris.base <- ggplot(iris) +
+  geom_point(aes(Petal.Width, Sepal.Width)) +
+  theme_grey()
 
 test_that("background translated correctly",{
   ggiris <- iris.base + theme(panel.background=element_rect(fill="blue")) +
@@ -54,10 +56,9 @@ test_that("dotted/dashed grid translated as line with alpha=0.1",{
   for (xy in c("x", "y")) {
     ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
     expect_identical(ax.list$gridcolor, toRGB("white", 0.1))
-    expect_identical(ax.list$gridcolor, "rgba(255,255,255,0.1)")
   }
 
-    save_outputs(ggiris, "theme-dashed-grid-lines")
+  save_outputs(ggiris, "theme-dashed-grid-lines")
 })
 
 countrypop <- data.frame(country=c("Paraguay", "Peru", "Philippines"),
@@ -87,8 +88,9 @@ test_that("plot panel border is translated correctly", {
   save_outputs(ggiris, "theme-panel-border-1")
 
   red <- ggplot(iris) +
+    theme_grey()+
     geom_point(aes(Petal.Width, Sepal.Width)) +
-    theme(panel.border=element_rect(colour="red"))
+    theme(panel.border=element_rect(colour="red", fill=NA))
   info <- gg2list(red)
   for (xy in c("x", "y")) {
     ax.list <- info$kwargs$layout[[paste0(xy, "axis")]]
