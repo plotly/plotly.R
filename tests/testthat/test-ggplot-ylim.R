@@ -29,5 +29,7 @@ expect_traces <- function(gg, n.traces, name){
 }
 
 test_that("ylim is respected for 1 trace", {
-  expect_traces(gg.ylim, 1, "one-trace")
+  info <- expect_traces(gg.ylim, 1, "one-trace")
+  expected.ylim <- c(0, max(df$total_bill))
+  expect_equal(info$kwargs$layout$yaxis$range, expected.ylim)
 })
