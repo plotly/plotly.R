@@ -160,7 +160,10 @@ gg2list <- function(p){
         names(ranks) <- br
         misc$breaks[[sc$aesthetics]] <- ranks
       }
-      misc$trans[sc$aesthetics] <- sc$trans$name
+      ## store if this is a reverse scale so we can undo that later.
+      if(is.character(sc$trans$name)){
+        misc$trans[sc$aesthetics] <- sc$trans$name
+      }
     }
     reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
     
