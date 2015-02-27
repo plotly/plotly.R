@@ -305,12 +305,28 @@ gg2list <- function(p){
       ax.list$tickangle <- -tick.text$angle
     }
     ax.list$tickfont <- theme2font(tick.text)
+
+    ## determine axis type first, since this information is used later
+    ## (trace.order.list is only used for type=category).
+    title.text <- e(s("axis.title.%s"))
+    ax.list$titlefont <- theme2font(title.text)
+    ax.list$type <- if(misc$is.continuous[[xy]]){
+      "linear"
+    }else if(misc$is.discrete[[xy]]){
+      "category"
+    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
+      "date"
+    }else{
+      stop("unrecognized data type for ", xy, " axis")
+    }
     
     # Translate axes labels.
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
-      trace.order.list[[xy]] <- sc$limits
+      if(ax.list$type == "category"){
+        trace.order.list[[xy]] <- sc$limits
+      }
       trace.name.map[sc$breaks] <- sc$labels
       if (is.null(sc$breaks)) {
         ax.list$showticklabels <- FALSE
@@ -346,18 +362,6 @@ gg2list <- function(p){
       p$labels[[xy]]
     }
 
-    title.text <- e(s("axis.title.%s"))
-    ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- if(misc$is.continuous[[xy]]){
-      "linear"
-    }else if(misc$is.discrete[[xy]]){
-      "category"
-    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
-      "date"
-    }else{
-      stop("unrecognized data type for ", xy, " axis")
-    }
-    
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
     ax.list$showline <- !is.blank("panel.border", TRUE)
