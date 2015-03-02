@@ -23,10 +23,10 @@ Rscript -e "devtools::install()"
 
 git checkout -b master
 git pull origin master
-echo "user, SHA1, label" >> ../code_commits.csv
-echo "${USER}, `git rev-parse HEAD`, master" >> ../code_commits.csv
+echo "user,SHA1,label" >> ../code_commits.csv
+echo "${USER},`git rev-parse HEAD`,master" >> ../code_commits.csv
 git checkout $TRAVIS_BRANCH
-echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> ../code_commits.csv
+echo "${USER},`git rev-parse HEAD`,${TRAVIS_BRANCH}" >> ../code_commits.csv
 
 cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
