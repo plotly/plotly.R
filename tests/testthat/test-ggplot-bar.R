@@ -104,6 +104,7 @@ test_that("Map the time of day to different fill colors", {
     expect_true(is.character(tr$marker$color))
     expect_null(tr$marker$line$color)
     expect_null(tr$marker$line$width)
+    expect_true(tr$showlegend)
   }
   expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
   expect_true(info$kwargs$layout$showlegend)
@@ -117,6 +118,7 @@ test_that("Add a black outline", {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
+    expect_true(tr$showlegend)
   }
   expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
   expect_true(info$kwargs$layout$showlegend)
@@ -159,6 +161,7 @@ test_that('guides(colour="none") does not affect fill legend', {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
+    expect_true(tr$showlegend)
   }
   expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
   expect_true(info$kwargs$layout$showlegend)
@@ -173,6 +176,7 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
     expect_identical(tr$marker$color, toRGB("grey"))
     expect_true(is.character(tr$marker$line$color))
     expect_equal(tr$marker$line$width, 1)
+    expect_true(tr$showlegend)
   }
   expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
   expect_true(info$kwargs$layout$showlegend)

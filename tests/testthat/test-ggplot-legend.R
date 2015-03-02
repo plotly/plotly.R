@@ -34,6 +34,9 @@ test_that("legend entries appear in the correct order", {
   ggiris <- ggplot(iris)+
     geom_point(aes(Petal.Width, Sepal.Width, color=Species))
   info <- expect_traces(ggiris, 3, "iris-default")
+  computed.showlegend <- sapply(info$traces, "[[", "showlegend")
+  expected.showlegend <- rep(TRUE, 3)
+  expect_identical(as.logical(computed.showlegend), expected.showlegend)
   ## Default is the same as factor levels.
   expect_identical(getnames(info$traces), levels(iris$Species))
   ## Custom breaks should be respected.
@@ -75,6 +78,7 @@ test_that("0 breaks -> 3 traces with showlegend=FALSE", {
     geom_point(aes(Petal.Width, Sepal.Width, color=Species))+
     scale_color_discrete(breaks=no.breaks)
   info <- expect_traces(no.legend.entries, 3, "iris-3traces-showlegend-FALSE")
+  expect_equal(length(info$kwargs$layout$annotations), 0)
   expected.names <- levels(iris$Species)
   expected.showlegend <- expected.names %in% no.breaks
   expect_identical(getnames(info$traces), expected.names)
