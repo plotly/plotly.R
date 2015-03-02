@@ -91,9 +91,9 @@ test_that("Very basic bar graph", {
     expect_null(tr$marker$color)
     expect_null(tr$marker$line$color)
     expect_null(tr$marker$line$width)
-    expect_null(info$kwargs$layout$annotations)
-    expect_false(info$kwargs$layout$showlegend)
   }
+  expect_null(info$kwargs$layout$annotations)
+  expect_false(info$kwargs$layout$showlegend)
 })
 
 test_that("Map the time of day to different fill colors", {
@@ -104,9 +104,9 @@ test_that("Map the time of day to different fill colors", {
     expect_true(is.character(tr$marker$color))
     expect_null(tr$marker$line$color)
     expect_null(tr$marker$line$width)
-    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-    expect_true(info$kwargs$layout$showlegend)
   }
+  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+  expect_true(info$kwargs$layout$showlegend)
 })
 
 test_that("Add a black outline", {
@@ -117,9 +117,9 @@ test_that("Add a black outline", {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
-    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-    expect_true(info$kwargs$layout$showlegend)
   }
+  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+  expect_true(info$kwargs$layout$showlegend)
 })
 
 test_that("guides(fill=FALSE) hides fill legend", {
@@ -131,9 +131,9 @@ test_that("guides(fill=FALSE) hides fill legend", {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
-    expect_null(info$kwargs$layout$annotations)
-    expect_false(info$kwargs$layout$showlegend)
   }
+  expect_null(info$kwargs$layout$annotations)
+  expect_false(info$kwargs$layout$showlegend)
 })
 
 test_that('guides(fill="none") hides fill legend', {
@@ -145,9 +145,9 @@ test_that('guides(fill="none") hides fill legend', {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
-    expect_null(info$kwargs$layout$annotations)
-    expect_false(info$kwargs$layout$showlegend)
   }
+  expect_null(info$kwargs$layout$annotations)
+  expect_false(info$kwargs$layout$showlegend)
 })
 
 test_that('guides(colour="none") does not affect fill legend', {
@@ -159,9 +159,9 @@ test_that('guides(colour="none") does not affect fill legend', {
     expect_true(is.character(tr$marker$color))
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
-    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-    expect_true(info$kwargs$layout$showlegend)
   }
+  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+  expect_true(info$kwargs$layout$showlegend)
 })
 
 test_that("guides(fill=FALSE) does not affect colour legend", {
@@ -173,8 +173,8 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
     expect_identical(tr$marker$color, toRGB("grey"))
     expect_true(is.character(tr$marker$line$color))
     expect_equal(tr$marker$line$width, 1)
-    expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-    expect_true(info$kwargs$layout$showlegend)
   }
+  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
+  expect_true(info$kwargs$layout$showlegend)
 })
 
