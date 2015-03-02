@@ -53,7 +53,7 @@ test_that("2 breaks -> 1 named trace with showlegend=FALSE", {
   expected.showlegend <- expected.names %in% two.breaks
   expect_identical(getnames(info$traces), expected.names)
   computed.showlegend <- sapply(info$traces, "[[", "showlegend")
-  expect_identical(computed.showlegend, expected.showlegend)
+  expect_identical(as.logical(computed.showlegend), expected.showlegend)
 })
 
 test_that("1 break -> 2 traces with showlegend=FALSE", {
@@ -66,7 +66,7 @@ test_that("1 break -> 2 traces with showlegend=FALSE", {
   expected.showlegend <- expected.names %in% one.break
   expect_identical(getnames(info$traces), expected.names)
   computed.showlegend <- sapply(info$traces, "[[", "showlegend")
-  expect_identical(computed.showlegend, expected.showlegend)
+  expect_identical(as.logical(computed.showlegend), expected.showlegend)
 })
 
 test_that("0 breaks -> 3 traces with showlegend=FALSE", {
@@ -79,5 +79,5 @@ test_that("0 breaks -> 3 traces with showlegend=FALSE", {
   expected.showlegend <- expected.names %in% no.breaks
   expect_identical(getnames(info$traces), expected.names)
   computed.showlegend <- sapply(info$traces, "[[", "showlegend")
-  expect_identical(computed.showlegend, expected.showlegend)
+  expect_identical(as.logical(computed.showlegend), expected.showlegend)
 })

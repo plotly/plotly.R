@@ -135,7 +135,7 @@ gg2list <- function(p){
     # sent to plotly as characters, not as numeric data (which is
     # what ggplot_build gives us).
     misc <- list()
-    for(a in c("fill", "colour", "x", "y")){
+    for(a in c("fill", "colour", "x", "y", "size")){
       for(data.type in c("continuous", "date", "datetime", "discrete")){
         fun.name <- sprintf("scale_%s_%s", a, data.type)
         misc.name <- paste0("is.", data.type)
@@ -153,9 +153,10 @@ gg2list <- function(p){
     }
     
     # scales are needed for legend ordering.
+    misc$breaks <- list()
     for(sc in p$scales$scales){
       a <- sc$aesthetics
-      if(length(a) == 1){
+      if (!misc$is.continuous[[a]]) {
         br <- sc$breaks
         ranks <- seq_along(br)
         names(ranks) <- br
@@ -705,7 +706,13 @@ gg2list <- function(p){
   }
 
   # Put the traces in correct order, according to any manually
-  # specified scales.
+  # specified scales. This seems to be repetitive with the trace$rank
+  # attribute in layer2traces (which is useful for sorting traces that
+  # get different legend entries but come from the same geom, as in
+  # test-ggplot-legend.R), but in fact this is better since it could
+  # be used for sorting traces that come from different geoms
+  # (currently we don't have a test for this). TODO: write such a
+  # test, delete the trace$rank code, and have it work here instead.
   trace.order <- unlist(trace.order.list)
   ordered.traces <- if(length(trace.order)){
     trace.order.score <- seq_along(trace.order)

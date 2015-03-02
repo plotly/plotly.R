@@ -215,8 +215,10 @@ layer2traces <- function(l, d, misc) {
         a <- sub("[.]name$", "", a.name)
         a.value <- as.character(data.params$params[[a.name]])
         ranks <- misc$breaks[[a]]
-        if(length(ranks)){
-          tr$sort[[a.name]] <- ranks[[a.value]]
+        tr$sort[[a.name]] <- if (a.value %in% names(ranks)){
+          ranks[[a.value]]
+        } else {
+          Inf # sorts to the end.
         }
       }
       name.list <- data.params$params[name.names]
@@ -257,10 +259,17 @@ layer2traces <- function(l, d, misc) {
       0
     }
   })
-  
+
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){
+    s <- no.sort[[tr.i]]$sort
+    no.sort[[tr.i]]$showlegend <-
+      if (is.numeric(s) && length(s) == 1 && s == Inf){
+        FALSE
+      } else {
+        TRUE
+      }
     no.sort[[tr.i]]$sort <- NULL
   }
   no.sort
