@@ -21,11 +21,12 @@ Rscript -e "devtools::install()"
 # Only build test table if $TRAVIS_PULL_REQUEST is false
 [ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
 
-MASTER_SHA1=`git checkout -b master && git pull origin master && git rev-parse HEAD`
+git checkout -b master
+git pull origin master
+echo "user, SHA1, label" >> ../code_commits.csv
+echo "${USER}, `git rev-parse HEAD`, master" >> ../code_commits.csv
 git checkout $TRAVIS_BRANCH
-echo "user, SHA1, label" >> code_commits.csv
-echo "${USER}, ${MASTER_SHA1}, master" >> code_commits.csv
-echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
+echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> ../code_commits.csv
 
 cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
@@ -34,7 +35,7 @@ git checkout gh-pages
 git config --global user.name "Travis Bot"
 git config --global user.email "cpsievert1@gmail.com"
 
-mv ../plotly/code_commits.csv .
+mv ../code_commits.csv .
 cat code_commits.csv
 make
 
