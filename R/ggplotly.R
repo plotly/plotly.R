@@ -155,8 +155,8 @@ gg2list <- function(p){
     # scales are needed for legend ordering.
     misc$breaks <- list()
     for(sc in p$scales$scales){
-      a <- sc$aesthetics
-      if (!misc$is.continuous[[a]]) {
+      a.vec <- sc$aesthetics
+      if (!any(misc$is.continuous[a.vec])) {
         br <- sc$breaks
         ranks <- seq_along(br)
         names(ranks) <- br
