@@ -22,15 +22,14 @@ echo $TRAVIS_BRANCH
 # Thus we have to checkout the appropriate branch
 # -----------------------------------------------------------------------
 
-if ["${TRAVIS_PULL_REQUEST}" = "false"]; then
-    MASTER_SHA1=`git checkout master && git rev-parse HEAD`
-    git checkout $TRAVIS_BRANCH
-    echo "user, SHA1, label" >> code_commits.csv
-    echo "${USER}, ${MASTER_SHA1}, master" >> code_commits.csv
-    echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
-else
-  exit 0
-fi
+# Only build test table if $TRAVIS_PULL_REQUEST is false
+[ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
+
+MASTER_SHA1=`git checkout master && git rev-parse HEAD`
+git checkout $TRAVIS_BRANCH
+echo "user, SHA1, label" >> code_commits.csv
+echo "${USER}, ${MASTER_SHA1}, master" >> code_commits.csv
+echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
 
 cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
