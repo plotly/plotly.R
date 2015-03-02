@@ -4,10 +4,6 @@
 pwd
 Rscript -e "devtools::install()"
 
-# just for my curiousity
-echo $TRAVIS_PULL_REQUEST
-echo $TRAVIS_BRANCH
-
 # -----------------------------------------------------------------------
 # When pushing to a pull request on GitHub, Travis does two builds:
 # (1) One for the pull request itself. In this case, $TRAVIS_PULL_REQUEST 
@@ -25,8 +21,8 @@ echo $TRAVIS_BRANCH
 # Only build test table if $TRAVIS_PULL_REQUEST is false
 [ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
 
-MASTER_SHA1=`git checkout master && git rev-parse HEAD`
-git checkout $TRAVIS_BRANCH
+MASTER_SHA1=`git checkout -f master && git rev-parse HEAD`
+git checkout -f $TRAVIS_BRANCH
 echo "user, SHA1, label" >> code_commits.csv
 echo "${USER}, ${MASTER_SHA1}, master" >> code_commits.csv
 echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
@@ -48,7 +44,5 @@ git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SL
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
-
-
 # remove comment when we're ready to deploy
 # git push --force --quiet $FULL_REPO master:gh-pages
