@@ -1,36 +1,37 @@
 #!/bin/bash
 
-# make sure we're in the plotly repo
+# make sure we're in the plotly repo & install it
 pwd
+Rscript -e "devtools::install()"
 
 # just for my curiousity
 echo $TRAVIS_PULL_REQUEST
 echo $TRAVIS_BRANCH
-echo $GH_TOKEN
 
 # -----------------------------------------------------------------------
-# Note that during build, Travis does a checkout by commit which leaves a
-# detached HEAD. Thus we have to checkout the appropriate branch
-# -----------------------------------------------------------------------
-
-echo "user, SHA1, label" >> code_commits.csv
-# Travis CI environment variables docs --
+# When pushing to a pull request on GitHub, Travis does two builds:
+# (1) One for the pull request itself. In this case, $TRAVIS_PULL_REQUEST 
+# is 'false' and $TRAVIS_BRANCH contains the branch name
+# (2) One to *simulate* a merge with master. In this case, $TRAVIS_PULL_REQUEST
+# is the pull ID number and $TRAVIS_BRANCH = 'master'
+# 
+# Read more about Travis environment variables --
 # http://docs.travis-ci.com/user/ci-environment/
-if ["${TRAVIS_PULL_REQUEST}"=="false"]; then
-if ["${TRAVIS_BRANCH}"=="master"]; then
-# If pushing directly to master, checkout master & build latest commit
-git checkout master
-echo "${USER}, `git rev-parse HEAD`, master" >> code_commits.csv
+#
+# Also, Travis does a checkout by commit which leaves a detached HEAD. 
+# Thus we have to checkout the appropriate branch
+# -----------------------------------------------------------------------
+
+if ["${TRAVIS_PULL_REQUEST}" = "false"]; then
+    MASTER_SHA1=`git checkout master && git rev-parse HEAD`
+    git checkout $TRAVIS_BRANCH
+    echo "user, SHA1, label" >> code_commits.csv
+    echo "${USER}, ${MASTER_SHA1}, master" >> code_commits.csv
+    echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
 else
-  echo "Unexpected case; not pushing anything to ropensci/plotly-test-table"
-exit 0
-fi
-else
-  git checkout $TRAVIS_BRANCH
-echo "${USER}, `git rev-parse HEAD`, ${TRAVIS_BRANCH}" >> code_commits.csv
+  exit 0
 fi
 
-git branch
 cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
