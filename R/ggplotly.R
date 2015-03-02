@@ -310,13 +310,13 @@ gg2list <- function(p){
     ## (trace.order.list is only used for type=category).
     title.text <- e(s("axis.title.%s"))
     ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- if(misc$is.continuous[[xy]]){
+    ax.list$type <- if (misc$is.continuous[[xy]]){
       "linear"
-    }else if(misc$is.discrete[[xy]]){
+    } else if (misc$is.discrete[[xy]]){
       "category"
-    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
+    } else if (misc$is.date[[xy]] || misc$is.datetime[[xy]]){
       "date"
-    }else{
+    } else {
       stop("unrecognized data type for ", xy, " axis")
     }
     
