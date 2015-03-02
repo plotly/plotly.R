@@ -1,8 +1,12 @@
 language: c
+env:
+  global:
+    - secure: "F37MSXo7yPuJ0J27GYewpy7QEL1ZbDu+yJqSykbqxC7MdpOxEPythAoQc65AbiIYcidmN2mAr+uir840H4n2d0zjbfZVogiBwT5pNRHnlXJZM8GZslZ7gMQJRDo6ZTF/eJxl90ULAg1qhQ93g/qJ0Va63aQ2A60uXVuSViDXzbw=" 
 script: "./travis-tool.sh run_tests"
 before_script:
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - chmod 755 ./travis-tool.sh
+- chmod 755 ./.push_test_table.sh
 - "./travis-tool.sh bootstrap"
 - "./travis-tool.sh install_deps - ./travis-tool.sh install_r RCurl RJSONIO lattice"
 notifications:
