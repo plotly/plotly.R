@@ -156,11 +156,11 @@ gg2list <- function(p){
     misc$breaks <- list()
     for(sc in p$scales$scales){
       a.vec <- sc$aesthetics
-      if (!any(misc$is.continuous[a.vec])) {
+      if (length(a.vec) == 1) { ##TODO: generalize for x/y scales too.
         br <- sc$breaks
         ranks <- seq_along(br)
         names(ranks) <- br
-        misc$breaks[[sc$aesthetics]] <- ranks
+        misc$breaks[[a.vec]] <- ranks
       }
       misc$trans[sc$aesthetics] <- sc$trans$name
     }
