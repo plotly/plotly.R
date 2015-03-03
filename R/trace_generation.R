@@ -210,8 +210,9 @@ layer2traces <- function(l, d, misc) {
       }
     }
     name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
-    if (length(name.names)) {
-      for(a.name in name.names){
+    not.group <- grep("group", name.names, value=TRUE, invert=TRUE)
+    if (length(not.group)) {
+      for(a.name in not.group){
         a <- sub("[.]name$", "", a.name)
         tr$sort[[a.name]] <- if (a %in% names(misc$breaks)){
           # Custom breaks were specified.
@@ -226,7 +227,7 @@ layer2traces <- function(l, d, misc) {
           1 # sort them all the same.
         }
       }
-      name.list <- data.params$params[name.names]
+      name.list <- data.params$params[not.group]
       tr$name <- paste(unlist(name.list), collapse=".")
       if (length(unique(name.list)) < 2)
         tr$name <- as.character(name.list[[1]])
