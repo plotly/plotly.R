@@ -9,9 +9,6 @@
 # 
 # Read more about Travis environment variables --
 # http://docs.travis-ci.com/user/ci-environment/
-#
-# Also, Travis does a checkout by commit which leaves a detached HEAD. 
-# Thus we have to checkout the appropriate branch
 # -----------------------------------------------------------------------
 
 # Only build test table if $TRAVIS_PULL_REQUEST is false
@@ -19,8 +16,11 @@
 
 git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
-# Travis only clones ${TRAVIS_BRANCH}, but we need master as well
-# AFAIK, it isn't possible to fetch branches that weren't cloned, so we re-clone
+
+# Since Travis does `git clone --branch=$TRAVIS_BRANCH --depth=50`, 
+# we can't simply `git checkout master`. As far as I can tell, we are
+# forced to re-clone -- https://gist.github.com/cpsievert/698c7f1404f972782e71
+
 cd ..
 rm -rf plotly/
 git clone https://github.com/ropensci/plotly.git
