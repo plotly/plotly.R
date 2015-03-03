@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# make sure we're in the plotly repo & install it
-pwd
-Rscript -e "devtools::install()"
-
 # -----------------------------------------------------------------------
 # When pushing to a pull request on GitHub, Travis does two builds:
 # (1) One for the pull request itself. In this case, $TRAVIS_PULL_REQUEST 
@@ -23,21 +19,21 @@ Rscript -e "devtools::install()"
 
 git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
-# Resolve detached HEAD caused by Travis
-git checkout $TRAVIS_BRANCH
-git fetch origin master
-git branch -avv
-git checkout -b master origin/master
-git branch
+# Travis only clones ${TRAVIS_BRANCH}, but we need master as well
+# AFAIK, it isn't possible to fetch branches that weren't cloned, so we re-clone
+cd ..
+rm -rf plotly/
+git clone --depth=20 https://github.com/ropensci/plotly.git
+cd plotly
 echo "user,SHA1,label" >> ../code_commits.csv
 echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
-git checkout $TRAVIS_BRANCH
+git checkout -b $TRAVIS_BRANCH origin/$TRAVIS_BRANCH
 echo "ropensci,`git rev-parse HEAD`,${TRAVIS_BRANCH}" >> ../code_commits.csv
+Rscript -e "devtools::install()"
 
 cd ..
-git clone https://github.com/ropensci/plotly-test-table.git
+git clone -branch=gh-pages https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
-git checkout gh-pages
 
 mv ../code_commits.csv .
 cat code_commits.csv
