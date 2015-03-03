@@ -554,7 +554,7 @@ gg2list <- function(p){
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
-  if (sum(trace.showlegend) > 0 && layout$showlegend && length(p$data)) {
+  if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
     # Retrieve legend title
     legend.elements <- sapply(traces, "[[", "name")
     legend.title <- ""
