@@ -48,4 +48,4 @@ git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SL
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
-git push --force --quiet $FULL_REPO master:gh-pages
+git push --force --quiet $FULL_REPO gh-pages
