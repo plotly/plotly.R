@@ -23,10 +23,9 @@ Rscript -e "devtools::install()"
 
 git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
-git remote -v
 # Resolve detached HEAD caused by Travis
 git checkout $TRAVIS_BRANCH
-git fetch origin/master
+git fetch origin master
 git branch -avv
 git checkout -b master origin/master
 git branch
