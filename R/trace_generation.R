@@ -213,12 +213,14 @@ layer2traces <- function(l, d, misc) {
     if (length(name.names)) {
       for(a.name in name.names){
         a <- sub("[.]name$", "", a.name)
-        a.value <- as.character(data.params$params[[a.name]])
-        ranks <- misc$breaks[[a]]
-        tr$sort[[a.name]] <- if (a.value %in% names(ranks)){
-          ranks[[a.value]]
-        } else {
-          Inf # sorts to the end.
+        if (a %in% names(misc$breaks)){
+          a.value <- as.character(data.params$params[[a.name]])
+          ranks <- misc$breaks[[a]]
+          tr$sort[[a.name]] <- if (a.value %in% names(ranks)){
+            ranks[[a.value]]
+          } else {
+            Inf # sorts to the end.
+          }
         }
       }
       name.list <- data.params$params[name.names]
