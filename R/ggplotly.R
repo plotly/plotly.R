@@ -69,6 +69,7 @@ gg2list <- function(p){
   }
   # Always use identity size scale so that plot.ly gets the real
   # units for the size variables.
+  original.p <- p
   p <- tryCatch({
     # this will be an error for discrete variables.
     suppressMessages({
@@ -142,7 +143,7 @@ gg2list <- function(p){
         misc[[misc.name]][[a]] <- tryCatch({
           fun <- get(fun.name)
           suppressMessages({
-            with.scale <- p+fun()
+            with.scale <- original.p + fun()
           })
           ggplot_build(with.scale)
           TRUE
@@ -156,7 +157,9 @@ gg2list <- function(p){
     misc$breaks <- list()
     for(sc in p$scales$scales){
       a.vec <- sc$aesthetics
-      if (length(a.vec) == 1) { ##TODO: generalize for x/y scales too.
+      default.breaks <- inherits(sc$breaks, "waiver")
+      if (length(a.vec) == 1 && (!default.breaks) ) {
+        # TODO: generalize for x/y scales too.
         br <- sc$breaks
         ranks <- seq_along(br)
         names(ranks) <- br
