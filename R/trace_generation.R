@@ -213,14 +213,17 @@ layer2traces <- function(l, d, misc) {
     if (length(name.names)) {
       for(a.name in name.names){
         a <- sub("[.]name$", "", a.name)
-        if (a %in% names(misc$breaks)){
+        tr$sort[[a.name]] <- if (a %in% names(misc$breaks)){
+          # Custom breaks were specified.
           a.value <- as.character(data.params$params[[a.name]])
           ranks <- misc$breaks[[a]]
-          tr$sort[[a.name]] <- if (a.value %in% names(ranks)){
+          if (a.value %in% names(ranks)){
             ranks[[a.value]]
           } else {
-            Inf # sorts to the end.
+            Inf # sorts to the end, when there are less breaks than classes.
           }
+        } else { # custom breaks were not specified.
+          1 # sort them all the same.
         }
       }
       name.list <- data.params$params[name.names]
@@ -267,10 +270,14 @@ layer2traces <- function(l, d, misc) {
   for(tr.i in seq_along(no.sort)){
     s <- no.sort[[tr.i]]$sort
     no.sort[[tr.i]]$showlegend <-
-      if (is.numeric(s) && length(s) == 1 && s == Inf){
+      if (is.numeric(s)) {
+        if (s == Inf){
+          FALSE
+        } else {
+          TRUE
+        }
+      } else { # no legend.
         FALSE
-      } else {
-        TRUE
       }
     no.sort[[tr.i]]$sort <- NULL
   }
