@@ -38,8 +38,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$line$color, toRGB("springgreen3"))
   expect_equal(info[[2]]$name, "name2")
 
-  expect_identical(L[[1]]$showlegend, TRUE)
-  expect_identical(L[[2]]$showlegend, TRUE)
+  expect_identical(info[[1]]$showlegend, TRUE)
+  expect_identical(info[[2]]$showlegend, TRUE)
 
   save_outputs(gg, "polygons-springgreen3")
 
@@ -59,8 +59,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$fillcolor, toRGB("springgreen3"))
   expect_equal(info[[2]]$name, "name2")
 
-  expect_identical(L[[1]]$showlegend, TRUE)
-  expect_identical(L[[2]]$showlegend, TRUE)
+  expect_identical(info[[1]]$showlegend, TRUE)
+  expect_identical(info[[2]]$showlegend, TRUE)
 
   save_outputs(gg, "polygons-springgreen3-lab")
 
@@ -83,8 +83,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$line$dash, "dash")
   expect_equal(info[[2]]$name, "name2")
 
-  expect_identical(L[[1]]$showlegend, TRUE)
-  expect_identical(L[[2]]$showlegend, TRUE)
+  expect_identical(info[[1]]$showlegend, TRUE)
+  expect_identical(info[[2]]$showlegend, TRUE)
 
   save_outputs(gg, "polygons-dashed")
 
@@ -105,8 +105,8 @@ test_that("filled polygons become several traces", {
   expect_equal(info[[2]]$line$width, 6)
   expect_equal(info[[2]]$name, "name2")
 
-  expect_identical(L[[1]]$showlegend, TRUE)
-  expect_identical(L[[2]]$showlegend, TRUE)
+  expect_identical(info[[1]]$showlegend, TRUE)
+  expect_identical(info[[2]]$showlegend, TRUE)
 
   save_outputs(gg, "polygons-halloween")
 
