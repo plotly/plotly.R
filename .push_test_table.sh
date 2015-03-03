@@ -21,13 +21,15 @@ Rscript -e "devtools::install()"
 # Only build test table if $TRAVIS_PULL_REQUEST is false
 [ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
 
-
-git config user.name "cpsievert"
-git config user.email "cpsievert1@gmail.com"
+git config --global user.name "cpsievert"
+git config --global user.email "cpsievert1@gmail.com"
+git remote -v
 # Resolve detached HEAD caused by Travis
 git checkout $TRAVIS_BRANCH
-git fetch origin
+git fetch origin/master
+git branch -avv
 git checkout -b master origin/master
+git branch
 echo "user,SHA1,label" >> ../code_commits.csv
 echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
 git checkout $TRAVIS_BRANCH
@@ -48,4 +50,4 @@ git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SL
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
-git push --force --quiet $FULL_REPO gh-pages
+git push $FULL_REPO gh-pages
