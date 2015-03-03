@@ -24,8 +24,7 @@ Rscript -e "devtools::install()"
 
 git config user.name "cpsievert"
 git config user.email "cpsievert1@gmail.com"
-git checkout -b master
-git pull origin master
+git checkout -b master origin/master
 echo "user,SHA1,label" >> ../code_commits.csv
 echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
 git checkout $TRAVIS_BRANCH
