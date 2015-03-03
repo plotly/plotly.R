@@ -72,6 +72,7 @@ test_that("marker default shape is a circle", {
   info <- gg2list(gg)
   for (i in c(1:3)) {
     expect_identical(info[[i]]$marker$symbol, "circle")
+    expect_true(info[[i]]$showlegend)
   }
   
   save_outputs(gg, "theme-marker-default")

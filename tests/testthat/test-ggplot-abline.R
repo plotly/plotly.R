@@ -11,7 +11,7 @@ test_that("Second trace be the a-b line", {
     geom_abline(intercept=1.1, slope=0.9, colour="red", size=4)
   
   L <- gg2list(gg)
-  
+
   expect_equal(length(L), 3)
   expect_true(L[[2]]$x[1] <= 0)
   expect_true(L[[2]]$x[2] >= 3.5)
@@ -19,5 +19,8 @@ test_that("Second trace be the a-b line", {
   expect_identical(L[[2]]$line$shape, "linear")
   expect_equal(L[[2]]$line$width, 8)
   
+  expect_identical(L[[1]]$showlegend, FALSE)
+  expect_identical(L[[2]]$showlegend, FALSE)
+
   save_outputs(gg, "abline")
 })

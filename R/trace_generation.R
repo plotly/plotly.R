@@ -210,16 +210,24 @@ layer2traces <- function(l, d, misc) {
       }
     }
     name.names <- grep("[.]name$", names(data.params$params), value=TRUE)
-    if (length(name.names)) {
-      for(a.name in name.names){
+    not.group <- grep("group", name.names, value=TRUE, invert=TRUE)
+    if (length(not.group)) {
+      for(a.name in not.group){
         a <- sub("[.]name$", "", a.name)
-        a.value <- as.character(data.params$params[[a.name]])
-        ranks <- misc$breaks[[a]]
-        if(length(ranks)){
-          tr$sort[[a.name]] <- ranks[[a.value]]
+        tr$sort[[a.name]] <- if (a %in% names(misc$breaks)){
+          # Custom breaks were specified.
+          a.value <- as.character(data.params$params[[a.name]])
+          ranks <- misc$breaks[[a]]
+          if (a.value %in% names(ranks)){
+            ranks[[a.value]]
+          } else {
+            Inf # sorts to the end, when there are less breaks than classes.
+          }
+        } else { # custom breaks were not specified.
+          1 # sort them all the same.
         }
       }
-      name.list <- data.params$params[name.names]
+      name.list <- data.params$params[not.group]
       tr$name <- paste(unlist(name.list), collapse=".")
       if (length(unique(name.list)) < 2)
         tr$name <- as.character(name.list[[1]])
@@ -257,14 +265,25 @@ layer2traces <- function(l, d, misc) {
       0
     }
   })
-  
+
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){
+    s <- no.sort[[tr.i]]$sort
+    no.sort[[tr.i]]$showlegend <-
+      if (is.numeric(s)) {
+        if (s == Inf){
+          FALSE
+        } else {
+          TRUE
+        }
+      } else { # no legend.
+        FALSE
+      }
     no.sort[[tr.i]]$sort <- NULL
   }
   no.sort
-  }
+}#layer2traces
 
 
 # Preprocess data and params.
@@ -309,7 +328,10 @@ toBasic <- list(
   bar=function(g) {
     if (any(is.na(g$prestats.data$x)))
       g$prestats.data$x <- g$prestats.data$x.name
-    g$prestats.data$fill <- g$data$fill[match(g$prestats.data$group, g$data$group)]
+    for(a in c("fill", "colour")){
+      g$prestats.data[[a]] <-
+        g$data[[a]][match(g$prestats.data$group, g$data$group)]
+    }
     g$params$xstart <- min(g$data$xmin)
     g$params$xend <- max(g$data$xmax)
     g$data <- g$prestats.data
