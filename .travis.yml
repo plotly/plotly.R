@@ -1,7 +1,7 @@
 language: c
 env:
   global:
-    - secure: "A6R+5QhNWyi/Mzn/z8BpYR/Omfkst4FU4pJ36omyYjs3AJLA3b3txXOxVsqiVDUB8hd9Xs70PSk9Qql+Dv+JeAvE1RD1Z0E8t5A7rjaqcjow5zqrETwtJj/GXs/rYwdsVWKAwRYmRe2ARPUxKHwYlhzE4IZiuLnR7lG2GVeIIyM="
+    - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
 before_script:
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - chmod 755 ./travis-tool.sh

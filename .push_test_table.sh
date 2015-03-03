@@ -21,6 +21,9 @@ Rscript -e "devtools::install()"
 # Only build test table if $TRAVIS_PULL_REQUEST is false
 [ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
 
+
+git config user.name "cpsievert"
+git config user.email "cpsievert1@gmail.com"
 git checkout -b master
 git pull origin master
 echo "user,SHA1,label" >> ../code_commits.csv
@@ -32,8 +35,6 @@ cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
 git checkout gh-pages
-git config --global user.name "Travis Bot"
-git config --global user.email "cpsievert1@gmail.com"
 
 mv ../code_commits.csv .
 cat code_commits.csv
