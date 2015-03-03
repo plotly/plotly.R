@@ -16,8 +16,8 @@ test_that("filled polygons become several traces", {
   expect_identical(info[[1]]$line$color, "transparent")
   expect_identical(info[[2]]$line$color, "transparent")
   
-  expect_identical(L[[1]]$showlegend, FALSE)
-  expect_identical(L[[2]]$showlegend, FALSE)
+  expect_identical(info[[1]]$showlegend, FALSE)
+  expect_identical(info[[2]]$showlegend, FALSE)
 
   save_outputs(gg, "polygons-filled-polygons")
 
