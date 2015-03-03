@@ -23,17 +23,19 @@ git config --global user.email "cpsievert1@gmail.com"
 # AFAIK, it isn't possible to fetch branches that weren't cloned, so we re-clone
 cd ..
 rm -rf plotly/
-git clone --depth=20 https://github.com/ropensci/plotly.git
+git clone https://github.com/ropensci/plotly.git
 cd plotly
+git branch -a
 echo "user,SHA1,label" >> ../code_commits.csv
 echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
-git checkout -b $TRAVIS_BRANCH origin/$TRAVIS_BRANCH
+git checkout $TRAVIS_BRANCH
 echo "ropensci,`git rev-parse HEAD`,${TRAVIS_BRANCH}" >> ../code_commits.csv
 Rscript -e "devtools::install()"
 
 cd ..
-git clone -branch=gh-pages https://github.com/ropensci/plotly-test-table.git
+git clone https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
+git checkout gh-pages
 
 mv ../code_commits.csv .
 cat code_commits.csv
