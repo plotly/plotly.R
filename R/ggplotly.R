@@ -274,6 +274,12 @@ gg2list <- function(p){
   trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
+    coord.lim <- p$coord$limits[[xy]]
+    if(is.numeric(coord.lim)){
+      ## TODO: maybe test for more exotic coord specification types
+      ## involving NA, Inf, etc?
+      ax.list$range <- coord.lim
+    }
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     
