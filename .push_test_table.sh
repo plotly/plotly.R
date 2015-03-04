@@ -25,7 +25,6 @@ cd ..
 rm -rf plotly/
 git clone https://github.com/ropensci/plotly.git
 cd plotly
-git branch -a
 echo "user,SHA1,label" >> ../code_commits.csv
 echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
 git checkout $TRAVIS_BRANCH
@@ -47,4 +46,5 @@ git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SL
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
+git pull $FULL_REPO gh-pages
 git push $FULL_REPO gh-pages
