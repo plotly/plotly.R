@@ -44,6 +44,7 @@ test_that("ylim hides points", {
 bp.scale.hide <- bp + scale_y_continuous(limits=c(5, 7.5))
 test_that("scale_y(limits) hides points", {
   info <- expect_traces(bp.scale.hide, 3, "scale.hide")
+  expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
 })
   
 bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
