@@ -1,18 +1,21 @@
-language: c
+language: r
+
 env:
   global:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
+
+r_packages:
+  - RCurl
+  - RJSONIO
+  - lattice
+  - xtable 
+
 before_script:
-- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-- chmod 755 ./travis-tool.sh
-- chmod 755 ./.push_test_table.sh
-- ./travis-tool.sh bootstrap
-- ./travis-tool.sh install_deps 
-- ./travis-tool.sh install_r RCurl RJSONIO lattice xtable
-script: 
-- ./travis-tool.sh run_tests
+  - chmod 755 ./.push_test_table.sh
+
 after_success:
-- ./.push_test_table.sh
+  - ./.push_test_table.sh
+
 notifications:
   slack:
     secure: YvyGtGRFC4HJGD4d2Vx6fHU93EliJCHbcf/k9/Rbpl3wtYFZfWKbKL1FHvPw/g3auVebonz8hScnYzR0uYnR3dHSlmj3QrJ3NOePv5QAZRHy7aY/XKRr5JR1Ji/vX1yfbrJDmiYuGMxJVE8l/kbu0TxwDdLletY5nJpwlkHfaW8=
