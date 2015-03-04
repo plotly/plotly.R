@@ -48,7 +48,8 @@ test_that("scale_y(limits) hides points", {
   
 bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
-  expect_traces(bp.coord, 3, "coord-ylim")
+  info <- expect_traces(bp.coord, 3, "coord-ylim")
+  expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
 })
 
 # Create some noisy exponentially-distributed data
