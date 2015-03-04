@@ -5,3 +5,5 @@ Rapp.history
 .Rhistory
 .RData
 Makefile
+.Rproj.user
+*.Rproj
