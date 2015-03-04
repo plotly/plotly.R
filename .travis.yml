@@ -11,6 +11,7 @@ before_script:
 - ./travis-tool.sh install_r RCurl RJSONIO lattice xtable
 script: 
 - ./travis-tool.sh run_tests
+after_success:
 - ./.push_test_table.sh
 notifications:
   slack:
