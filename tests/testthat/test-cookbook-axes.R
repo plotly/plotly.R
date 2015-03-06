@@ -148,6 +148,15 @@ bp.fonts <- bp +
 
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 3, "fonts")
+  x <- info$kwargs$layout$xaxis
+  xtitle <- x[["titlefont"]]
+  xtick <- x[["tickfont"]]
+  expect_identical(xtitle$color, toRGB("#990000"))
+  expect_equal(xtitle$size, 20)
+  ## TODO: does plotly support bold text?
+  expect_equal(x$tickangle, -90)
+  ## TODO: can we test for vjust?
+  expect_equal(xtick$size, 16)
 })
 
 # Label formatters
