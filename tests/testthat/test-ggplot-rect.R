@@ -15,6 +15,7 @@ expect_traces <- function(gg, n.traces, name){
   list(traces=has.data, kwargs=L$kwargs)
 }
 
+set.seed(1)
 df <- data.frame(
   x = sample(10, 20, replace = TRUE),
   y = sample(10, 20, replace = TRUE)
@@ -24,5 +25,12 @@ gg <- ggplot(df, aes(xmin = x, xmax = x + 1, ymin = y, ymax = y + 2)) +
   geom_rect()
 
 test_that('geom_rect becomes traces with mode "lines" with fill "tozerox"', {
-  expect_traces(gg, 1, "black")
+  info <- expect_traces(gg, 1, "black")
+  tr <- info$traces[[1]]
+  expect_identical(tr$fill, "tozerox")
+  expect_identical(tr$type, "scatter")
+  expect_identical(tr$mode, "lines")
+  for(xy in c("x", "y")){
+    expect_true(any(is.na(tr[[xy]])))
+  }
 })
