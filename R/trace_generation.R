@@ -281,6 +281,18 @@ toBasic <- list(
     })
     group2NA(g, "path")
   },
+  rect=function(g){
+    g$data$group <- 1:nrow(g$data)
+    used <- c("xmin", "ymin", "xmax", "ymax")
+    others <- g$data[!names(g$data) %in% used]
+    g$data <- with(g$data, {
+      rbind(cbind(x=xmin, y=ymin, others),
+            cbind(x=xmin, y=ymax, others),
+            cbind(x=xmax, y=ymax, others),
+            cbind(x=xmax, y=ymin, others))
+    })
+    group2NA(g, "polygon")
+  },
   polygon=function(g){
     if(is.null(g$params$fill)){
       g
