@@ -8,7 +8,8 @@ r_packages:
   - RCurl
   - RJSONIO
   - lattice
-  - xtable 
+  - xtable
+  - httr 
 
 before_script:
   - chmod 755 ./.push_test_table.sh
