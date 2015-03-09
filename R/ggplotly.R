@@ -74,6 +74,7 @@ gg2list <- function(p){
   }
   # Always use identity size scale so that plot.ly gets the real
   # units for the size variables.
+  original.p <- p
   p <- tryCatch({
     # this will be an error for discrete variables.
     suppressMessages({
@@ -122,7 +123,8 @@ gg2list <- function(p){
     ggsizemin <- min(unlist(sizerange))
     ggsizemax <- max(unlist(sizerange))
   }
-  
+
+  layer.legends <- list()
   for(i in seq_along(built$plot$layers)){
     # This is the layer from the original ggplot object.
     L <- p$layers[[i]]
@@ -139,14 +141,14 @@ gg2list <- function(p){
     # sent to plotly as characters, not as numeric data (which is
     # what ggplot_build gives us).
     misc <- list()
-    for(a in c("fill", "colour", "x", "y")){
+    for(a in c("fill", "colour", "x", "y", "size")){
       for(data.type in c("continuous", "date", "datetime", "discrete")){
         fun.name <- sprintf("scale_%s_%s", a, data.type)
         misc.name <- paste0("is.", data.type)
         misc[[misc.name]][[a]] <- tryCatch({
           fun <- get(fun.name)
           suppressMessages({
-            with.scale <- p+fun()
+            with.scale <- original.p + fun()
           })
           ggplot_build(with.scale)
           TRUE
@@ -157,13 +159,16 @@ gg2list <- function(p){
     }
     
     # scales are needed for legend ordering.
+    misc$breaks <- list()
     for(sc in p$scales$scales){
-      a <- sc$aesthetics
-      if(length(a) == 1){
+      a.vec <- sc$aesthetics
+      default.breaks <- inherits(sc$breaks, "waiver")
+      if (length(a.vec) == 1 && (!default.breaks) ) {
+        # TODO: generalize for x/y scales too.
         br <- sc$breaks
         ranks <- seq_along(br)
         names(ranks) <- br
-        misc$breaks[[sc$aesthetics]] <- ranks
+        misc$breaks[[a.vec]] <- ranks
       }
       misc$trans[sc$aesthetics] <- sc$trans$name
     }
@@ -210,6 +215,10 @@ gg2list <- function(p){
     
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
+
+    possible.legends <- markLegends[[L$geom$objname]]
+    actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
+    layer.legends[[paste(i)]] <- actual.legends
     
     # Do we really need to coord_transform?
     # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
@@ -313,12 +322,28 @@ gg2list <- function(p){
       ax.list$tickangle <- -tick.text$angle
     }
     ax.list$tickfont <- theme2font(tick.text)
+
+    ## determine axis type first, since this information is used later
+    ## (trace.order.list is only used for type=category).
+    title.text <- e(s("axis.title.%s"))
+    ax.list$titlefont <- theme2font(title.text)
+    ax.list$type <- if (misc$is.continuous[[xy]]){
+      "linear"
+    } else if (misc$is.discrete[[xy]]){
+      "category"
+    } else if (misc$is.date[[xy]] || misc$is.datetime[[xy]]){
+      "date"
+    } else {
+      stop("unrecognized data type for ", xy, " axis")
+    }
     
     # Translate axes labels.
     scale.i <- which(p$scales$find(xy))
     ax.list$title <- if(length(scale.i)){
       sc <- p$scales$scales[[scale.i]]
-      trace.order.list[[xy]] <- sc$limits
+      if(ax.list$type == "category"){
+        trace.order.list[[xy]] <- sc$limits
+      }
       trace.name.map[sc$breaks] <- sc$labels
       if (is.null(sc$breaks)) {
         ax.list$showticklabels <- FALSE
@@ -353,18 +378,7 @@ gg2list <- function(p){
     }else{
       p$labels[[xy]]
     }
-    title.text <- e(s("axis.title.%s"))
-    ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- if(misc$is.continuous[[xy]]){
-      "linear"
-    }else if(misc$is.discrete[[xy]]){
-      "category"
-    }else if(misc$is.date[[xy]] || misc$is.datetime[[xy]]){
-      "date"
-    }else{
-      stop("unrecognized data type for ", xy, " axis")
-    }
-    
+
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
     ax.list$showline <- !is.blank("panel.border", TRUE)
@@ -551,8 +565,28 @@ gg2list <- function(p){
   # [markUnique != "x"] is for boxplot's particular case.
   if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
     layout$showlegend <- FALSE
-  
-  if (layout$showlegend && length(p$data)) {
+
+  ## Legend hiding when guides(fill="none").
+  legends.present <- unique(unlist(layer.legends))
+  is.false <- function(x){
+    is.logical(x) && length(x) == 1 && x == FALSE
+  }
+  is.none <- function(x){
+    is.character(x) && length(x) == 1 && x == "none"
+  }
+  is.hidden <- function(x){
+    is.false(x) || is.none(x)
+  }
+  for(a in legends.present){
+    if(is.hidden(p$guides[[a]])){
+      layout$showlegend <- FALSE
+    }
+  }
+
+  # Only show a legend title if there is at least 1 trace with
+  # showlegend=TRUE.
+  trace.showlegend <- sapply(trace.list, "[[", "showlegend")
+  if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
     # Retrieve legend title
     legend.elements <- sapply(traces, "[[", "name")
     legend.title <- ""
@@ -680,11 +714,10 @@ gg2list <- function(p){
     for(other.i in seq_along(not.merged)){
       other <- not.merged[[other.i]]
       criteria <- c()
-      must.be.equal <- c("x", "y", "xaxis", "yaxis")
-      for(j in must.be.equal){
-        other.attr <- other[[j]]
-        tr.attr <- tr[[j]]
-        criteria[[j]] <- isTRUE(all.equal(other.attr, tr.attr))
+      for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
+        other.attr <- other[[must.be.equal]]
+        tr.attr <- tr[[must.be.equal]]
+        criteria[[must.be.equal]] <- isTRUE(all.equal(other.attr, tr.attr))
       }
       if(all(criteria)){
         can.merge[[other.i]] <- TRUE
@@ -712,7 +745,13 @@ gg2list <- function(p){
   }
   
   # Put the traces in correct order, according to any manually
-  # specified scales.
+  # specified scales. This seems to be repetitive with the trace$rank
+  # attribute in layer2traces (which is useful for sorting traces that
+  # get different legend entries but come from the same geom, as in
+  # test-ggplot-legend.R), but in fact this is better since it could
+  # be used for sorting traces that come from different geoms
+  # (currently we don't have a test for this). TODO: write such a
+  # test, delete the trace$rank code, and have it work here instead.
   trace.order <- unlist(trace.order.list)
   ordered.traces <- if(length(trace.order)){
     trace.order.score <- seq_along(trace.order)
