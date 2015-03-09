@@ -527,7 +527,7 @@ gg2list <- function(p){
                                           yanchor="top")
         nann <- nann + 1
       }
-      
+    }
       # axes titles
       annotations[[nann]] <- make.label(xaxis.title, 
                                         0.5, 
@@ -538,9 +538,7 @@ gg2list <- function(p){
                                         -outer.margin, 
                                         0.5,
                                         textangle=-90)
-      
-      layout$annotations <- annotations
-    }
+    layout$annotations <- annotations
   }
   
   # Remove legend if theme has no legend position
