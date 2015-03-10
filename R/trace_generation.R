@@ -187,8 +187,13 @@ layer2traces <- function(l, d, misc) {
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-  
-  getTrace <- geom2trace[[basic$geom]]
+  if (isTRUE(misc$smoothLine)) {
+    getTrace <- geom2trace[["smoothLine"]]
+  } else if (isTRUE(misc$smoothRibbon)) {
+    getTrace <- geom2trace[["smoothRibbon"]]
+  } else {
+    getTrace <- geom2trace[[basic$geom]]
+  }
   if(is.null(getTrace)){
     warning("Conversion not implemented for geom_",
             g$geom, " (basic geom_", basic$geom, "), ignoring. ",
@@ -637,6 +642,25 @@ geom2trace <- list(
     list(x=c(data$xintercept, data$xintercept),
          y=c(params$ystart, params$yend),
          name=params$name,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, line.defaults))
+  },
+  smoothRibbon=function(data, params) {
+    list(x=c(data$x[1], data$x, rev(data$x)),
+         y=c(data$ymin[1], data$ymax, rev(data$ymin)),
+         type="scatter",
+         line=paramORdefault(params, aes2line, ribbon.line.defaults),
+         fill="tonexty",
+         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 
+                                              0.1, params$alpha))) 
+  },
+  smoothLine=function(data, params) {
+    line.defaults$colour <- "blue"
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         text=data$text,
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))

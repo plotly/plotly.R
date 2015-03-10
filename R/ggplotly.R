@@ -206,7 +206,20 @@ gg2list <- function(p){
     }
 
     # This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc)
+    if (L$geom$objname == "smooth") {
+      # smooth is really a line + ribbon geom
+      misc$smoothRibbon <- TRUE
+      trace1 <- if (isTRUE(L$stat_params$se == FALSE)) {
+        NULL
+      } else {
+        layer2traces(L, df, misc)
+      }
+      misc$smoothRibbon <- FALSE
+      misc$smoothLine <- TRUE 
+      traces <- c(trace1, layer2traces(L, df, misc))
+    } else {
+      traces <- layer2traces(L, df, misc)
+    }
 
     possible.legends <- markLegends[[L$geom$objname]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
