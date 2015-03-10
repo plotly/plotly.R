@@ -656,7 +656,7 @@ geom2trace <- list(
                                               0.1, params$alpha))) 
   },
   smoothLine=function(data, params) {
-    line.defaults$colour <- "blue"
+    line.defaults$colour <- "#3366FF"
     list(x=data$x,
          y=data$y,
          name=params$name,
