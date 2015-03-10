@@ -165,7 +165,10 @@ gg2list <- function(p){
         names(ranks) <- br
         misc$breaks[[a.vec]] <- ranks
       }
-      misc$trans[sc$aesthetics] <- sc$trans$name
+      ## store if this is a reverse scale so we can undo that later.
+      if(is.character(sc$trans$name)){
+        misc$trans[sc$aesthetics] <- sc$trans$name
+      }
     }
     reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
     
@@ -271,6 +274,12 @@ gg2list <- function(p){
   trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
+    coord.lim <- p$coord$limits[[xy]]
+    if(is.numeric(coord.lim)){
+      ## TODO: maybe test for more exotic coord specification types
+      ## involving NA, Inf, etc?
+      ax.list$range <- coord.lim
+    }
     s <- function(tmp)sprintf(tmp, xy)
     ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
     
@@ -335,8 +344,13 @@ gg2list <- function(p){
       sc <- p$scales$scales[[scale.i]]
       if(ax.list$type == "category"){
         trace.order.list[[xy]] <- sc$limits
+        if(is.character(sc$breaks)){
+          if(is.character(sc$labels)){
+            trace.name.map[sc$breaks] <- sc$labels
+          }
+          ##TODO: if(is.function(sc$labels)){
+        }
       }
-      trace.name.map[sc$breaks] <- sc$labels
       if (is.null(sc$breaks)) {
         ax.list$showticklabels <- FALSE
         ax.list$showgrid <- FALSE
