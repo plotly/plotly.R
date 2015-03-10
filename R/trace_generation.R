@@ -613,7 +613,8 @@ geom2trace <- list(
          type="scatter",
          line=paramORdefault(params, aes2line, ribbon.line.defaults),
          fill="tonexty",
-         fillcolor=toFill(params$fill))
+         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
+                                              params$alpha)))
   },
   abline=function(data, params) {
     list(x=c(params$xstart, params$xend),
