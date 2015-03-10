@@ -38,6 +38,7 @@ git checkout gh-pages
 
 mv ../code_commits.csv .
 cat code_commits.csv
+touch table.R
 make
 
 # add, commit, push to gh-pages branch of plotly-test-table
