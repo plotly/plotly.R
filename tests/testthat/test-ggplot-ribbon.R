@@ -20,7 +20,7 @@ rb2 <- ggplot(huron, aes(x=year)) +
 L2 <- gg2list(rb2)
 
 test_that("geom_ribbon respects alpha transparency", {
-  expect_true(grepl("0.1\\)$", L2[[1]]$fillcolor))
+  expect_match(L2[[1]]$fillcolor, "0.1)", fixed=TRUE)
 })
 
 save_outputs(rb2, "ribbon-alpha")

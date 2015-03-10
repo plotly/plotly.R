@@ -1,3 +1,7 @@
+0.5.23 -- 10 March 2015.
+
+geom_ribbon now respects alpha transparency
+
 0.5.22 -- 2 March 2015.
 
 Fixes for ylim() #171.
