@@ -1,7 +1,7 @@
 Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online.
-Version: 0.5.22
+Version: 0.5.24
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
@@ -13,7 +13,9 @@ Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     person("Marianne", "Corvellec", role="aut",
     email="marianne@plot.ly"),
     person("Pedro", "Despouy", role="aut",
-    email="pedro@plot.ly"))
+    email="pedro@plot.ly"),
+    person("Carson", "Sievert", role="aut",
+    email="cpsievert1@gmail.com"))
 Author: Chris Parmer
 Maintainer: Marianne Corvellec <marianne@plot.ly>
 License: MIT + file LICENSE
