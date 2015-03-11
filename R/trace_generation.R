@@ -13,6 +13,10 @@ layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=not.na(d),
             prestats.data=not.na(misc$prestats.data))
+  if (g$geom == "smooth") {
+    if (isTRUE(misc$smoothRibbon)) g$geom <- "smoothRibbon"
+    if (isTRUE(misc$smoothLine)) g$geom <- "smoothLine"
+  }
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -187,13 +191,7 @@ layer2traces <- function(l, d, misc) {
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-  if (isTRUE(misc$smoothLine)) {
-    getTrace <- geom2trace[["smoothLine"]]
-  } else if (isTRUE(misc$smoothRibbon)) {
-    getTrace <- geom2trace[["smoothRibbon"]]
-  } else {
-    getTrace <- geom2trace[[basic$geom]]
-  }
+  getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     warning("Conversion not implemented for geom_",
             g$geom, " (basic geom_", basic$geom, "), ignoring. ",
@@ -383,6 +381,14 @@ toBasic <- list(
       g$params$sizemax <- max(g$prestats.data$globsizemax)
     }
     g
+  },
+  smoothLine=function(g) {
+    if (length(unique(g$data$group)) == 1) g$params$colour <- "#3366FF"
+    group2NA(g, "path")
+  },
+  smoothRibbon=function(g) {
+    if (is.null(g$params$alpha)) g$params$alpha <- 0.1
+    group2NA(g, "ribbon")
   }
 )
 
@@ -642,25 +648,6 @@ geom2trace <- list(
     list(x=c(data$xintercept, data$xintercept),
          y=c(params$ystart, params$yend),
          name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
-  },
-  smoothRibbon=function(data, params) {
-    list(x=c(data$x[1], data$x, rev(data$x)),
-         y=c(data$ymin[1], data$ymax, rev(data$ymin)),
-         type="scatter",
-         line=paramORdefault(params, aes2line, ribbon.line.defaults),
-         fill="tonexty",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 
-                                              0.1, params$alpha))) 
-  },
-  smoothLine=function(data, params) {
-    line.defaults$colour <- "#3366FF"
-    list(x=data$x,
-         y=data$y,
-         name=params$name,
-         text=data$text,
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
