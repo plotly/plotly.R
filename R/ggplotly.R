@@ -219,18 +219,18 @@ gg2list <- function(p){
     # This extracts essential info for this geom/layer.
     if (L$geom$objname == "smooth") {
       # smooth is really a line + ribbon geom
-      # always draw the line
-      misc$smoothLine <- TRUE
-      trace1 <- layer2traces(L, df, misc)
-      trace1 <- lapply(trace1, function(x) { x$showlegend <- FALSE; x })
-      misc$smoothLine <- FALSE
-      # draw ribbon unless se = FALSE
-      trace2 <- if (isTRUE(L$stat_params$se == FALSE)) {
+      # draw ribbon (unless se = FALSE)
+      misc$smoothRibbon <- TRUE
+      trace1 <- if (isTRUE(L$stat_params$se == FALSE)) {
         NULL
       } else {
-        misc$smoothRibbon <- TRUE
         layer2traces(L, df, misc)
       }
+      misc$smoothRibbon <- FALSE
+      # always draw the line
+      misc$smoothLine <- TRUE
+      trace2 <- layer2traces(L, df, misc)
+      trace2 <- lapply(trace2, function(x) { x$showlegend <- FALSE; x })
       traces <- c(trace1, trace2)
     } else {
       traces <- layer2traces(L, df, misc)
