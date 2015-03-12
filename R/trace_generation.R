@@ -29,7 +29,7 @@ layer2traces <- function(l, d, misc) {
     # If smoothLine has been compiled already, consider smoothRibbon.
     if (isTRUE(misc$smoothLine)) {
       misc$smoothLine <- FALSE
-      if (isTRUE(L$stat_param$se == FALSE)) {
+      if (isTRUE(l$stat_params$se == FALSE)) {
         return(NULL) 
       } else {
         g$geom <- "smoothRibbon"
@@ -671,26 +671,4 @@ geom2trace <- list(
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
   }
-#   smooth=function(data, params) {
-#     if (isTRUE(params$se == FALSE)) {
-#       L1 <- NULL
-#     } else {
-#       L1 <- list(x=c(data$x[1], data$x, rev(data$x)),
-#          y=c(data$ymin[1], data$ymax, rev(data$ymin)),
-#          type="scatter",
-#          line=paramORdefault(params, aes2line, ribbon.line.defaults),
-#          fill="tonexty",
-#          fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-#                                               params$alpha)))
-#     }
-#     # $showlegend <- FALSE
-#     c(L1,
-#       list(x=data$x,
-#            y=data$y,
-#            name=params$name,
-#            text=data$text,
-#            type="scatter",
-#            mode="lines",
-#            line=paramORdefault(params, aes2line, line.defaults)))
-#   }
 )
