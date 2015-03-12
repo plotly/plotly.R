@@ -13,6 +13,7 @@ layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=not.na(d),
             prestats.data=not.na(misc$prestats.data))
+
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -22,6 +23,22 @@ layer2traces <- function(l, d, misc) {
             probability density estimation is not supported in Plotly yet.")
   }
   
+  # geom_smooth() means geom_line() + geom_ribbon()
+  # Note the line is always drawn, but ribbon is not if se = FALSE.
+  if (g$geom == "smooth") {
+    # If smoothLine has been compiled already, consider smoothRibbon.
+    if (isTRUE(misc$smoothLine)) {
+      misc$smoothLine <- FALSE
+      if (isTRUE(l$stat_params$se == FALSE)) {
+        return(NULL) 
+      } else {
+        g$geom <- "smoothRibbon"
+      }
+    } else {
+      misc$smoothLine <- TRUE
+      g$geom <- "smoothLine"
+    }
+  }
   # Barmode and bargap
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
@@ -187,7 +204,6 @@ layer2traces <- function(l, d, misc) {
     data.list <- structure(list(list(data=basic$data, params=basic$params)),
                            names=basic$params$name)
   }
-  
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
     warning("Conversion not implemented for geom_",
@@ -282,7 +298,13 @@ layer2traces <- function(l, d, misc) {
       }
     no.sort[[tr.i]]$sort <- NULL
   }
-  no.sort
+  # if line portion of geom_smooth was compiled, call layer2traces()
+  # again for ribbon portion
+  if (isTRUE(misc$smoothLine)) {
+    c(layer2traces(l, d, misc), no.sort)
+  } else {
+    no.sort
+  }
 }#layer2traces
 
 
@@ -378,6 +400,14 @@ toBasic <- list(
       g$params$sizemax <- max(g$prestats.data$globsizemax)
     }
     g
+  },
+  smoothLine=function(g) {
+    if (length(unique(g$data$group)) == 1) g$params$colour <- "#3366FF"
+    group2NA(g, "path")
+  },
+  smoothRibbon=function(g) {
+    if (is.null(g$params$alpha)) g$params$alpha <- 0.1
+    group2NA(g, "ribbon")
   }
 )
 

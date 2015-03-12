@@ -218,7 +218,7 @@ gg2list <- function(p){
     
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
-
+    
     possible.legends <- markLegends[[L$geom$objname]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
