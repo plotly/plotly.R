@@ -13,10 +13,7 @@ layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=not.na(d),
             prestats.data=not.na(misc$prestats.data))
-  if (g$geom == "smooth") {
-    if (isTRUE(misc$smoothRibbon)) g$geom <- "smoothRibbon"
-    if (isTRUE(misc$smoothLine)) g$geom <- "smoothLine"
-  }
+
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -26,6 +23,22 @@ layer2traces <- function(l, d, misc) {
             probability density estimation is not supported in Plotly yet.")
   }
   
+  # geom_smooth() means geom_line() + geom_ribbon()
+  # Note the line is always drawn, but ribbon is not if se = FALSE.
+  if (g$geom == "smooth") {
+    # If smoothLine has been compiled already, consider smoothRibbon.
+    if (isTRUE(misc$smoothLine)) {
+      misc$smoothLine <- FALSE
+      if (isTRUE(L$stat_param$se == FALSE)) {
+        return(NULL) 
+      } else {
+        g$geom <- "smoothRibbon"
+      }
+    } else {
+      misc$smoothLine <- TRUE
+      g$geom <- "smoothLine"
+    }
+  }
   # Barmode and bargap
   barmode <- "group"
   if (g$geom == "bar" || g$geom == "histogram") {
@@ -285,7 +298,13 @@ layer2traces <- function(l, d, misc) {
       }
     no.sort[[tr.i]]$sort <- NULL
   }
-  no.sort
+  # if line portion of geom_smooth was compiled, call layer2traces()
+  # again for ribbon portion
+  if (isTRUE(misc$smoothLine)) {
+    c(layer2traces(l, d, misc), no.sort)
+  } else {
+    no.sort
+  }
 }#layer2traces
 
 
@@ -652,4 +671,26 @@ geom2trace <- list(
          mode="lines",
          line=paramORdefault(params, aes2line, line.defaults))
   }
+#   smooth=function(data, params) {
+#     if (isTRUE(params$se == FALSE)) {
+#       L1 <- NULL
+#     } else {
+#       L1 <- list(x=c(data$x[1], data$x, rev(data$x)),
+#          y=c(data$ymin[1], data$ymax, rev(data$ymin)),
+#          type="scatter",
+#          line=paramORdefault(params, aes2line, ribbon.line.defaults),
+#          fill="tonexty",
+#          fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
+#                                               params$alpha)))
+#     }
+#     # $showlegend <- FALSE
+#     c(L1,
+#       list(x=data$x,
+#            y=data$y,
+#            name=params$name,
+#            text=data$text,
+#            type="scatter",
+#            mode="lines",
+#            line=paramORdefault(params, aes2line, line.defaults)))
+#   }
 )
