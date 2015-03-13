@@ -54,23 +54,14 @@ test_that('trace contains NA back to 1st rect', {
                   2, NA,
                   1, 1)
   expect_equal(tr$x, expected.x)
-  expected.y <- c(0, 1, 1, 0, NA,
-                  0, 1, 1, 0, NA,
-                  0, 1, 1, 0, NA,
-                  0, 1, 1, 0, NA,
+  expected.y <- c(0, 1, 1, 0, 0, NA,
+                  0, 1, 1, 0, 0, NA,
+                  0, 1, 1, 0, 0, NA,
+                  0, 1, 1, 0, 0, NA,
                   0, NA,
                   0, NA,
                   0, 0)
   expect_equal(tr$y, expected.y)
-
-  ## This is how it may be implemented, but we do not include it in
-  ## the test:
-  forward.x <- as.numeric(with(df, rbind(x, x, x+0.5, x+0.5, x, NA)))
-  backward.x <- as.numeric(rbind(rev(df$x)[-1], NA))
-  nb <- length(backward.x) - 1
-  backward.x[c(1:nb, nb)]
-  backward.x <- c(3, NA, 2, NA, 1, 1)
-  full.x <- c(forward.x, backward.x)
 })
 
 rect.color <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
