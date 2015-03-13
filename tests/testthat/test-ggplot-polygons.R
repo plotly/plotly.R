@@ -62,7 +62,7 @@ test_that("polygons with different color become separate traces", {
 test_that("geom_polygon(aes(fill)) -> fillcolor + line$color transparent", {
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, fill=lab))+
-    scale_fill_manual(values=c(left=first.color, right="springgreen3"))
+    scale_fill_manual(values=c(left=blue.color, right="springgreen3"))
   info <- expect_traces(gg, 2, "aes-fill")
   traces.by.name <- list()
   for(tr in info$traces){
@@ -80,7 +80,7 @@ test_that("geom_polygon(aes(fill)) -> fillcolor + line$color transparent", {
 test_that("geom_polygon(aes(fill), color) -> line$color", {
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, fill=lab), color="black")+
-    scale_fill_manual(values=c(left=first.color, right="springgreen3"))
+    scale_fill_manual(values=c(left=blue.color, right="springgreen3"))
   info <- expect_traces(gg, 2, "color-aes-fill")
   traces.by.name <- list()
   for(tr in info$traces){
