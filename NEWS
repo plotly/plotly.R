@@ -1,3 +1,15 @@
+0.5.25 -- 10 March 2015
+
+Implemented geom_smooth() #183
+
+0.5.24 -- 10 March 2015
+
+Implemented facet_wrap(scales="free") #167
+
+0.5.23 -- 10 March 2015.
+
+geom_ribbon() now respects alpha transparency
+
 0.5.22 -- 2 March 2015.
 
 Fixes for ylim() #171.

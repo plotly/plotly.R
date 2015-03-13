@@ -19,6 +19,8 @@ test_that("size is a vector if it is specified", {
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
 
+  expect_identical(L[[1]]$showlegend, FALSE)
+
   save_outputs(iplot, "size-is-a-vector")
 })
 
