@@ -371,7 +371,6 @@ toBasic <- list(
   }
 )
 
-
 #' Drawing ggplot2 geoms with a group aesthetic is most efficient in
 #' plotly when we convert groups of things that look the same to
 #' vectors with NA.
@@ -383,14 +382,30 @@ toBasic <- list(
 group2NA <- function(g, geom) {
   poly.list <- split(g$data, g$data$group)
   is.group <- names(g$data) == "group"
-  poly.na.df <- data.frame()
-  for (i in seq_along(poly.list)) {
+  poly.na.list <- list()
+  forward.i <- seq_along(poly.list)
+  for (i in forward.i) {
     no.group <- poly.list[[i]][, !is.group, drop=FALSE]
     na.row <- no.group[1, ]
     na.row[, c("x", "y")] <- NA
-    poly.na.df <- rbind(poly.na.df, no.group, na.row)
+    retrace.first <- if(g$geom %in% c("polygon", "rect")){
+      no.group[1,]
+    }
+    poly.na.list[[paste(i, "forward")]] <-
+      rbind(no.group, retrace.first, na.row)
   }
-  g$data <- poly.na.df
+  if(g$geom %in% c("polygon", "rect")){
+    backward.i <- rev(forward.i[-1])[-1]
+    for(i in backward.i){
+      no.group <- poly.list[[i]][1, !is.group, drop=FALSE]
+      na.row <- no.group[1, ]
+      na.row[, c("x", "y")] <- NA
+      poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
+    }
+    first.group <- poly.list[[1]][1, !is.group, drop=FALSE]
+    poly.na.list[["last"]] <- rbind(first.group, first.group)
+  }
+  g$data <- do.call(rbind, poly.na.list)
   g$geom <- geom
   g
 }
@@ -437,8 +452,8 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   polygon=function(data, params){
-    list(x=c(data$x, data$x[1]),
-         y=c(data$y, data$y[1]),
+    list(x=data$x,
+         y=data$y,
          name=params$name,
          text=data$text,
          type="scatter",
