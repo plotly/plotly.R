@@ -291,16 +291,8 @@ toBasic <- list(
             cbind(x=xmax, y=ymax, others),
             cbind(x=xmax, y=ymin, others))
     })
-    group2NA(g, "polygon")
-  },
-  polygon=function(g){
-    if(is.null(g$params$fill)){
-      g
-    }else if(is.na(g$params$fill)){
-      group2NA(g, "path")
-    }else{
-      g
-    }
+    g$geom <- "polygon"
+    g
   },
   path=function(g) {
     group2NA(g, "path")
@@ -380,7 +372,7 @@ toBasic <- list(
 #' @return list of geom info.
 #' @author Toby Dylan Hocking
 group2NA <- function(g, geom) {
-  poly.list <- split(g$data, g$data$group)
+  poly.list <- split(g$data, g$data$group, drop=TRUE)
   is.group <- names(g$data) == "group"
   poly.na.list <- list()
   forward.i <- seq_along(poly.list)
@@ -402,10 +394,15 @@ group2NA <- function(g, geom) {
       na.row[, c("x", "y")] <- NA
       poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
     }
-    first.group <- poly.list[[1]][1, !is.group, drop=FALSE]
-    poly.na.list[["last"]] <- rbind(first.group, first.group)
+    if(length(poly.list) > 1){
+      first.group <- poly.list[[1]][1, !is.group, drop=FALSE]
+      poly.na.list[["last"]] <- rbind(first.group, first.group)
+    }
   }
   g$data <- do.call(rbind, poly.na.list)
+  if(is.na(g$data$x[nrow(g$data)])){
+    g$data <- g$data[-nrow(g$data), ]
+  }
   g$geom <- geom
   g
 }
@@ -452,10 +449,12 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   polygon=function(data, params){
-    list(x=data$x,
-         y=data$y,
+    g <- list(data=data, geom="polygon")
+    g <- group2NA(g, "polygon")
+    list(x=g$data$x,
+         y=g$data$y,
          name=params$name,
-         text=data$text,
+         text=g$data$text,
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, polygon.line.defaults),
