@@ -442,7 +442,7 @@ group2NA <- function(g, geom) {
     poly.na.list[[paste(i, "forward")]] <-
       rbind(no.group, retrace.first, na.row)
   }
-  if(retrace.first.points)){
+  if(retrace.first.points){
     backward.i <- rev(forward.i[-1])[-1]
     for(i in backward.i){
       no.group <- poly.list[[i]][1, !is.group, drop=FALSE]
