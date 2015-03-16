@@ -72,6 +72,7 @@ test_that('rect color', {
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$fillcolor, toRGB("grey"))
+    expect_equal(tr$fill, "tozerox")
     expect_equal(tr$y,
                  c(0, 1, 1, 0, 0, NA,
                    0, 1, 1, 0, 0, NA,
@@ -98,6 +99,7 @@ test_that('rect color', {
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$line$color, "transparent")
+    expect_equal(tr$fill, "tozerox")
     expect_equal(tr$y,
                  c(0, 1, 1, 0, 0, NA,
                    0, 1, 1, 0, 0, NA,
@@ -125,6 +127,7 @@ test_that('rect aes(fill) with constant color', {
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$line$color, toRGB("black"))
+    expect_equal(tr$fill, "tozerox")
     expect_equal(tr$y,
                  c(0, 1, 1, 0, 0, NA,
                    0, 1, 1, 0, 0, NA,
