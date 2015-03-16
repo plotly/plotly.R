@@ -428,17 +428,21 @@ group2NA <- function(g, geom) {
   is.group <- names(g$data) == "group"
   poly.na.list <- list()
   forward.i <- seq_along(poly.list)
+  ## When group2NA is called on geom_polygon (or geom_rect, which is
+  ## treated as a basic polygon), we need to retrace the first points
+  ## of each group, see https://github.com/ropensci/plotly/pull/178
+  retrace.first.points <- g$geom == "polygon"
   for (i in forward.i) {
     no.group <- poly.list[[i]][, !is.group, drop=FALSE]
     na.row <- no.group[1, ]
     na.row[, c("x", "y")] <- NA
-    retrace.first <- if(g$geom %in% c("polygon", "rect")){
+    retrace.first <- if(retrace.first.points){
       no.group[1,]
     }
     poly.na.list[[paste(i, "forward")]] <-
       rbind(no.group, retrace.first, na.row)
   }
-  if(g$geom %in% c("polygon", "rect")){
+  if(retrace.first.points)){
     backward.i <- rev(forward.i[-1])[-1]
     for(i in backward.i){
       no.group <- poly.list[[i]][1, !is.group, drop=FALSE]
