@@ -65,11 +65,29 @@ test_that('trace contains NA back to 1st rect', {
 })
 
 rect.color <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
-  geom_rect(aes(color=status))
+  geom_rect(aes(color=status), fill="grey")
 
 test_that('rect color', {
   info <- expect_traces(rect.color, 2, "rect-color")
-  ## TODO: test for weird forward/backward NA pattern with 2 rects.
+  traces.by.name <- list()
+  for(tr in info$traces){
+    expect_equal(tr$fillcolor, toRGB("grey"))
+    expect_equal(tr$y,
+                 c(0, 1, 1, 0, 0, NA,
+                   0, 1, 1, 0, 0, NA,
+                   0, 0))
+    traces.by.name[[tr$name]] <- tr
+  }
+  expect_equal(traces.by.name$cool$x,
+               c(1, 1, 1.5, 1.5, 1, NA,
+                 4, 4, 4.5, 4.5, 4, NA,
+                 1, 1))
+  expect_equal(traces.by.name$not$x,
+               c(2, 2, 2.5, 2.5, 2, NA,
+                 3, 3, 3.5, 3.5, 3, NA,
+                 2, 2))
+  expect_false(traces.by.name$not$line$color ==
+               traces.by.name$cool$line$color)
 })
 
 rect.fill <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
@@ -77,6 +95,25 @@ rect.fill <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
 
 test_that('rect color', {
   info <- expect_traces(rect.fill, 2, "rect-fill")
+  traces.by.name <- list()
+  for(tr in info$traces){
+    expect_equal(tr$line$color, "transparent")
+    expect_equal(tr$y,
+                 c(0, 1, 1, 0, 0, NA,
+                   0, 1, 1, 0, 0, NA,
+                   0, 0))
+    traces.by.name[[tr$name]] <- tr
+  }
+  expect_equal(traces.by.name$cool$x,
+               c(1, 1, 1.5, 1.5, 1, NA,
+                 4, 4, 4.5, 4.5, 4, NA,
+                 1, 1))
+  expect_equal(traces.by.name$not$x,
+               c(2, 2, 2.5, 2.5, 2, NA,
+                 3, 3, 3.5, 3.5, 3, NA,
+                 2, 2))
+  expect_false(traces.by.name$not$fillcolor ==
+               traces.by.name$cool$fillcolor)
 })
 
 rect.fill.color <-
@@ -85,4 +122,23 @@ rect.fill.color <-
 
 test_that('rect aes(fill) with constant color', {
   info <- expect_traces(rect.fill.color, 2, "rect-fill-color")
+  traces.by.name <- list()
+  for(tr in info$traces){
+    expect_equal(tr$line$color, toRGB("black"))
+    expect_equal(tr$y,
+                 c(0, 1, 1, 0, 0, NA,
+                   0, 1, 1, 0, 0, NA,
+                   0, 0))
+    traces.by.name[[tr$name]] <- tr
+  }
+  expect_equal(traces.by.name$cool$x,
+               c(1, 1, 1.5, 1.5, 1, NA,
+                 4, 4, 4.5, 4.5, 4, NA,
+                 1, 1))
+  expect_equal(traces.by.name$not$x,
+               c(2, 2, 2.5, 2.5, 2, NA,
+                 3, 3, 3.5, 3.5, 3, NA,
+                 2, 2))
+  expect_false(traces.by.name$not$fillcolor ==
+               traces.by.name$cool$fillcolor)
 })
