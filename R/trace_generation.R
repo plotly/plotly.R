@@ -412,7 +412,8 @@ toBasic <- list(
     g
   },
   smoothLine=function(g) {
-    if (length(unique(g$data$group)) == 1) g$params$colour <- "#3366FF"
+    if (length(grep("^colour$", names(g$data))) == 0) 
+      g$params$colour <- "#3366FF"
     group2NA(g, "path")
   },
   smoothRibbon=function(g) {
