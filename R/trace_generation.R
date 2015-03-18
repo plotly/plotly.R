@@ -322,14 +322,18 @@ toBasic <- list(
     })
     group2NA(g, "path")
   },
-  polygon=function(g){
-    if(is.null(g$params$fill)){
-      g
-    }else if(is.na(g$params$fill)){
-      group2NA(g, "path")
-    }else{
-      g
-    }
+  rect=function(g){
+    g$data$group <- 1:nrow(g$data)
+    used <- c("xmin", "ymin", "xmax", "ymax")
+    others <- g$data[!names(g$data) %in% used]
+    g$data <- with(g$data, {
+      rbind(cbind(x=xmin, y=ymin, others),
+            cbind(x=xmin, y=ymax, others),
+            cbind(x=xmax, y=ymax, others),
+            cbind(x=xmax, y=ymin, others))
+    })
+    g$geom <- "polygon"
+    g
   },
   path=function(g) {
     group2NA(g, "path")
@@ -411,7 +415,6 @@ toBasic <- list(
   }
 )
 
-
 #' Drawing ggplot2 geoms with a group aesthetic is most efficient in
 #' plotly when we convert groups of things that look the same to
 #' vectors with NA.
@@ -421,16 +424,41 @@ toBasic <- list(
 #' @return list of geom info.
 #' @author Toby Dylan Hocking
 group2NA <- function(g, geom) {
-  poly.list <- split(g$data, g$data$group)
+  poly.list <- split(g$data, g$data$group, drop=TRUE)
   is.group <- names(g$data) == "group"
-  poly.na.df <- data.frame()
-  for (i in seq_along(poly.list)) {
+  poly.na.list <- list()
+  forward.i <- seq_along(poly.list)
+  ## When group2NA is called on geom_polygon (or geom_rect, which is
+  ## treated as a basic polygon), we need to retrace the first points
+  ## of each group, see https://github.com/ropensci/plotly/pull/178
+  retrace.first.points <- g$geom == "polygon"
+  for (i in forward.i) {
     no.group <- poly.list[[i]][, !is.group, drop=FALSE]
     na.row <- no.group[1, ]
     na.row[, c("x", "y")] <- NA
-    poly.na.df <- rbind(poly.na.df, no.group, na.row)
+    retrace.first <- if(retrace.first.points){
+      no.group[1,]
+    }
+    poly.na.list[[paste(i, "forward")]] <-
+      rbind(no.group, retrace.first, na.row)
   }
-  g$data <- poly.na.df
+  if(retrace.first.points){
+    backward.i <- rev(forward.i[-1])[-1]
+    for(i in backward.i){
+      no.group <- poly.list[[i]][1, !is.group, drop=FALSE]
+      na.row <- no.group[1, ]
+      na.row[, c("x", "y")] <- NA
+      poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
+    }
+    if(length(poly.list) > 1){
+      first.group <- poly.list[[1]][1, !is.group, drop=FALSE]
+      poly.na.list[["last"]] <- rbind(first.group, first.group)
+    }
+  }
+  g$data <- do.call(rbind, poly.na.list)
+  if(is.na(g$data$x[nrow(g$data)])){
+    g$data <- g$data[-nrow(g$data), ]
+  }
   g$geom <- geom
   g
 }
@@ -477,10 +505,12 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   polygon=function(data, params){
-    list(x=c(data$x, data$x[1]),
-         y=c(data$y, data$y[1]),
+    g <- list(data=data, geom="polygon")
+    g <- group2NA(g, "polygon")
+    list(x=g$data$x,
+         y=g$data$y,
          name=params$name,
-         text=data$text,
+         text=g$data$text,
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, polygon.line.defaults),

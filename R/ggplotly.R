@@ -52,7 +52,11 @@ markLegends <-
   #  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
        path=c("linetype", "size", "colour", "shape"),
-       polygon=c("colour", "fill", "linetype", "size", "group"),
+       ## NOTE: typically "group" should not be present here, since
+       ## that would mean creating a separate plotly legend for each
+       ## group, even when they have the exact same visual
+       ## characteristics and could be drawn using just 1 trace!
+       polygon=c("colour", "fill", "linetype", "size"),
        bar=c("colour", "fill"),
        errorbar=c("colour", "linetype"),
        errorbarh=c("colour", "linetype"),
