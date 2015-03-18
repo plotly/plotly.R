@@ -28,7 +28,7 @@ test_that("geom_point() + geom_smooth(se = FALSE) produces 2 traces", {
   expect_traces(p2, 2, "se-false")
 })
 
-d <- diamonds[sample(nrows(diamonds, 1000)), ]
+d <- diamonds[sample(nrow(diamonds), 1000), ]
 p3 <- qplot(carat, price, group = cut, data = d) + geom_smooth()
 
 test_that("geom_smooth() respects group aesthetic", {
