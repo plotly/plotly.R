@@ -26,7 +26,7 @@ p1 <- ggplot(data = huron) +
 test_that("geom_ribbon() creates 1 trace & respects alpha transparency", {
   info <- expect_traces(p1, 1, "alpha")
   tr <- info$traces[[1]]
-  expect_match(L2[[1]]$fillcolor, "0.1)", fixed=TRUE)
+  expect_match(tr$fillcolor, "0.1)", fixed=TRUE)
 })
 
 p2 <- ggplot(data = huron, aes(group = factor(decade))) + 
