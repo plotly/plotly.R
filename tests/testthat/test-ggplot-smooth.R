@@ -32,10 +32,7 @@ d <- diamonds[sample(nrow(diamonds), 1000), ]
 p3 <- qplot(carat, price, group = cut, data = d) + geom_smooth()
 
 test_that("geom_smooth() respects group aesthetic", {
-  # 1 trace for points
-  # 5 traces for lines (1 for each group)
-  # 5 traces for ribbons (1 for each group)
-  info <- expect_traces(p3, 11, "group")
+  info <- expect_traces(p3, 3, "group")
 })
 
 p4 <- qplot(carat, price, colour = cut, data = d) + geom_smooth()
