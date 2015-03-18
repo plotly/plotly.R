@@ -26,13 +26,15 @@ layer2traces <- function(l, d, misc) {
   # geom_smooth() means geom_line() + geom_ribbon()
   # Note the line is always drawn, but ribbon is not if se = FALSE.
   if (g$geom == "smooth") {
-    # If smoothLine has been compiled already, consider smoothRibbon.
+    # If smoothLine has been compiled already, consider drawing the ribbon
     if (isTRUE(misc$smoothLine)) {
       misc$smoothLine <- FALSE
       if (isTRUE(l$stat_params$se == FALSE)) {
         return(NULL) 
       } else {
         g$geom <- "smoothRibbon"
+        # disregard colour
+        g$data <- g$data[!grepl("^colour[.name]?", names(g$data))]
       }
     } else {
       misc$smoothLine <- TRUE
@@ -248,7 +250,6 @@ layer2traces <- function(l, d, misc) {
       if (length(unique(name.list)) < 2)
         tr$name <- as.character(name.list[[1]])
     }
-    
     dpd <- data.params$data
     if ("PANEL" %in% names(dpd) && nrow(dpd) > 0)
     {
@@ -335,6 +336,11 @@ toBasic <- list(
     g$geom <- "polygon"
     g
   },
+  ribbon=function(g) {
+    g$data <- ribbon_dat(g$data)
+    g$geom <- "polygon"
+    g
+  },
   path=function(g) {
     group2NA(g, "path")
   },
@@ -410,8 +416,10 @@ toBasic <- list(
     group2NA(g, "path")
   },
   smoothRibbon=function(g) {
-    if (is.null(g$params$alpha)) g$params$alpha <- 0.1
-    group2NA(g, "ribbon")
+    if (is.null(g$params$alpha)) g$params$alpha <- 0.2
+    g$data <- ribbon_dat(g$data)
+    g$geom <- "polygon"
+    g
   }
 )
 
@@ -493,6 +501,26 @@ make.errorbar <- function(data, params, xy){
   tr
 }
 
+# function to transform geom_ribbon data into format plotly likes
+# (note this function is also used for geom_smooth)
+ribbon_dat <- function(dat) {
+  n <- nrow(dat)
+  o <- order(dat$x)
+  o2 <- order(dat$x, decreasing = TRUE)
+  used <- c("x", "ymin", "ymax")
+  not_used <- setdiff(names(dat), used)
+  # top-half of ribbon
+  tmp <- dat[o, ]
+  others <- tmp[not_used]
+  dat1 <- cbind(x = tmp$x, y = tmp$ymax, others)
+  dat1[n+1, ] <- cbind(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
+  # bottom-half of ribbon
+  tmp2 <- dat[o2, ]
+  others2 <- tmp2[not_used]
+  dat2 <- cbind(x = tmp2$x, y = tmp2$ymin, others2)
+  rbind(dat1, dat2)
+}
+
 # Convert basic geoms to traces.
 geom2trace <- list(
   path=function(data, params) {
@@ -515,7 +543,8 @@ geom2trace <- list(
          mode="lines",
          line=paramORdefault(params, aes2line, polygon.line.defaults),
          fill="tozerox",
-         fillcolor=toFill(params$fill))
+         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
+                                              params$alpha)))
   },
   point=function(data, params){
     L <- list(x=data$x,
@@ -664,15 +693,6 @@ geom2trace <- list(
          type="scatter",
          line=paramORdefault(params, aes2line, ribbon.line.defaults),
          fill="tozeroy",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-                                              params$alpha)))
-  },
-  ribbon=function(data, params) {
-    list(x=c(data$x[1], data$x, rev(data$x)),
-         y=c(data$ymin[1], data$ymax, rev(data$ymin)),
-         type="scatter",
-         line=paramORdefault(params, aes2line, ribbon.line.defaults),
-         fill="tonexty",
          fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
                                               params$alpha)))
   },
