@@ -35,17 +35,17 @@ test_that("geom_smooth() respects group aesthetic", {
   # 1 trace for points
   # 5 traces for lines (1 for each group)
   # 5 traces for ribbons (1 for each group)
-  expect_traces(p3, 11, "group")
+  info <- expect_traces(p3, 11, "group")
 })
 
 p4 <- qplot(carat, price, colour = cut, data = d) + geom_smooth()
 
 test_that("geom_smooth() respects colour aesthetic", {
-  expect_traces(p4, 11, "colour")
+  info <- expect_traces(p4, 11, "colour")
 })
 
 p5 <- qplot(carat, price, fill = cut, data = d) + geom_smooth()
 
 test_that("geom_smooth() respects fill aesthetic", {
-  expect_traces(p5, 11, "fill")
+  info <- expect_traces(p5, 11, "fill")
 })

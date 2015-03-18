@@ -32,20 +32,22 @@ test_that("geom_ribbon() creates 1 trace & respects alpha transparency", {
 p2 <- ggplot(data = huron, aes(group = factor(decade))) + 
   geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
 
-test_that("geom_ribbon() group aesthetic", {
+test_that("geom_ribbon() with group aesthetic produces 1 trace", {
   info <- expect_traces(p2, 1, "group")
 })
 
 p3 <- ggplot(data = huron, aes(colour = factor(decade))) + 
   geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
 
-test_that("geom_ribbon() colour aesthetic", {
-  info <- expect_traces(p3, 1, "colour")
+test_that("geom_ribbon() with colour aesthetic produces multiple traces", {
+  # 10 traces -- one for each decade
+  info <- expect_traces(p3, 10, "colour")
 })
 
 p4 <- ggplot(data = huron, aes(fill = factor(decade))) + 
   geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
 
-test_that("geom_ribbon() fill aesthetic", {
-  info <- expect_traces(p4, 1, "fill")
+test_that("geom_ribbon() with fill aesthetic produces multiple traces", {
+  # 10 traces -- one for each decade
+  info <- expect_traces(p4, 10, "fill")
 })
