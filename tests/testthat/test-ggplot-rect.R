@@ -31,7 +31,7 @@ test_that('geom_rect becomes 1 trace with mode="lines" fill="tozerox"', {
   expect_identical(tr$type, "scatter")
   expect_identical(tr$mode, "lines")
   for(xy in c("x", "y")){
-    expect_true(any(is.na(tr[[xy]])))
+    expect_true(anyNA(tr[[xy]]))
   }
 })
 
