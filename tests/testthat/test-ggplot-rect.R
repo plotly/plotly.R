@@ -3,7 +3,7 @@ context("geom_rect")
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("rects-", name))
+  save_outputs(gg, paste0("rect-", name))
   L <- gg2list(gg)
   is.trace <- names(L) == ""
   all.traces <- L[is.trace]
@@ -68,7 +68,7 @@ rect.color <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
   geom_rect(aes(color=status), fill="grey")
 
 test_that('rect color', {
-  info <- expect_traces(rect.color, 2, "rect-color")
+  info <- expect_traces(rect.color, 2, "color")
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$fillcolor, toRGB("grey"))
@@ -95,7 +95,7 @@ rect.fill <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
   geom_rect(aes(fill=status))
 
 test_that('rect color', {
-  info <- expect_traces(rect.fill, 2, "rect-fill")
+  info <- expect_traces(rect.fill, 2, "fill")
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$line$color, "transparent")
@@ -123,7 +123,7 @@ rect.fill.color <-
   geom_rect(aes(fill=status), color="black")
 
 test_that('rect aes(fill) with constant color', {
-  info <- expect_traces(rect.fill.color, 2, "rect-fill-color")
+  info <- expect_traces(rect.fill.color, 2, "fill-color")
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$line$color, toRGB("black"))
