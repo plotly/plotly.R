@@ -1,3 +1,7 @@
+0.5.26 -- 18 Mar 2015
+
+Implemented geom_rect #178
+
 0.5.25 -- 10 March 2015
 
 Implemented geom_smooth() #183
