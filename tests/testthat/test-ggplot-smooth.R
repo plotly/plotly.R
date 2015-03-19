@@ -43,20 +43,15 @@ test_that("geom_smooth() respects colour aesthetic", {
   # number of showlegends should equal the number of factor levels 
   n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
   expect_equal(n, nlevels(d$cut))
-  info <- expect_traces(p5, 11, "colour2")
+  info <- expect_traces(p5, 7, "colour2")
   n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
   expect_equal(n, nlevels(d$cut))
 })
 
-# why are 5 traces for point being created here??
-#p6 <- qplot(carat, price, fill = cut, data = d) + geom_smooth()
 p7 <- qplot(carat, price, data = d) + geom_smooth(aes(fill = cut))
 
 test_that("geom_smooth() respects fill aesthetic", {
-#   info <- expect_traces(p6, 11, "fill")
-#   n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
-#   expect_equal(n, nlevels(d$cut))
-  info <- expect_traces(p7, 11, "fill2")
+  info <- expect_traces(p7, 7, "fill2")
   n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
   expect_equal(n, nlevels(d$cut))
 })
