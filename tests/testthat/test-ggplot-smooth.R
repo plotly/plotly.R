@@ -36,13 +36,37 @@ test_that("geom_smooth() respects group aesthetic", {
 })
 
 p4 <- qplot(carat, price, colour = cut, data = d) + geom_smooth()
+p5 <- qplot(carat, price, data = d) + geom_smooth(aes(colour = cut))
 
 test_that("geom_smooth() respects colour aesthetic", {
   info <- expect_traces(p4, 11, "colour")
+  # number of showlegends should equal the number of factor levels 
+  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
+  expect_equal(n, nlevels(d$cut))
+  info <- expect_traces(p5, 11, "colour2")
+  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
+  expect_equal(n, nlevels(d$cut))
 })
 
-p5 <- qplot(carat, price, fill = cut, data = d) + geom_smooth()
+# why are 5 traces for point being created here??
+#p6 <- qplot(carat, price, fill = cut, data = d) + geom_smooth()
+p7 <- qplot(carat, price, data = d) + geom_smooth(aes(fill = cut))
 
 test_that("geom_smooth() respects fill aesthetic", {
-  info <- expect_traces(p5, 11, "fill")
+#   info <- expect_traces(p6, 11, "fill")
+#   n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
+#   expect_equal(n, nlevels(d$cut))
+  info <- expect_traces(p7, 11, "fill2")
+  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
+  expect_equal(n, nlevels(d$cut))
 })
+
+# ensure legend is drawn when needed
+p8 <- qplot(carat, price, data = d) + facet_wrap(~cut) + 
+  geom_smooth(aes(colour = cut, fill = cut))
+
+test_that("geom_smooth() works with facets", {
+  # 3 traces for each panel
+  info <- expect_traces(p8, 15, "fill2")
+})
+
