@@ -63,5 +63,7 @@ p8 <- qplot(carat, price, data = d) + facet_wrap(~cut) +
 test_that("geom_smooth() works with facets", {
   # 3 traces for each panel
   info <- expect_traces(p8, 15, "facet")
+  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
+  expect_equal(n, nlevels(d$cut))
 })
 
