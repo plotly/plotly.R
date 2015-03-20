@@ -760,13 +760,28 @@ gg2list <- function(p){
     merged.traces[[length(merged.traces)+1]] <- tr
   }
   
+  # -------------------------------
   # avoid redundant legends entries
-  fills <- lapply(merged.traces, function(x) paste0(x$name, "-", x$fillcolor))
-  linez <- lapply(merged.traces, function(x) paste0(x$name, "-", x$line$color))
-  marks <- lapply(merged.traces, function(x) paste0(x$name, "-",x$marker$color))
-  fill_set <- unlist(fills)
-  line_set <- unlist(linez)
-  mark_set <- unlist(marks)
+  # -------------------------------
+  # remove alpha from a color entry
+  rm_alpha <- function(x) {
+    if (length(x) == 0) return(x)
+    pat <- "^rgba\\("
+    if (!grepl(pat, x)) return(x)
+    sub(",\\s*[0]?[.]?[0-9]+\\)$", ")", sub(pat, "rgb(", x))
+  }
+  # convenient for extracting name/value of legend entries (ignoring alpha)
+  entries <- function(x, y) {
+    z <- try(x[[y]], silent = TRUE)
+    if (inherits(e, "try-error")) {
+      paste0(x$name, "-")
+    } else {
+      paste0(x$name, "-", rm_alpha(z))
+    }
+  }
+  fill_set <- unlist(lapply(merged.traces, entries, "fillcolor"))
+  line_set <- unlist(lapply(merged.traces, entries, c("line", "color")))
+  mark_set <- unlist(lapply(merged.traces, entries, c("marker", "color")))
   legend_intersect <- function(x, y) {
     i <- intersect(x, y)
     # restrict intersection to valid legend entries
