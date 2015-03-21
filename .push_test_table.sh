@@ -42,7 +42,7 @@ touch table.R
 make
 
 # add, commit, push to gh-pages branch of plotly-test-table
-git add tables/*/*.html data/*/*.png
+./git-add.sh
 git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SLUG}"
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 GH_REPO="@github.com/ropensci/plotly-test-table.git"
