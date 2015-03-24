@@ -1,26 +1,53 @@
 context("ribbon")
 
-huron <- data.frame(year=1875:1972, level=as.vector(LakeHuron))
+expect_traces <- function(gg, n.traces, name){
+  stopifnot(is.ggplot(gg))
+  stopifnot(is.numeric(n.traces))
+  save_outputs(gg, paste0("ribbon-", name))
+  L <- gg2list(gg)
+  is.trace <- names(L) == ""
+  all.traces <- L[is.trace]
+  no.data <- sapply(all.traces, function(tr) {
+    is.null(tr[["x"]]) && is.null(tr[["y"]])
+  })
+  has.data <- all.traces[!no.data]
+  expect_equal(length(has.data), n.traces)
+  list(traces=has.data, kwargs=L$kwargs)
+}
 
-rb <- ggplot(huron, aes(x=year)) + geom_ribbon(aes(ymin=level-1, ymax=level+1))
-L <- gg2list(rb)
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
+huron$decade <- with(huron, round(year/10) * 10)
+huron$diff <- huron$year - huron$decade
 
-test_that("sanity check for geom_ribbon", {
-  expect_equal(length(L), 2)
-  expect_identical(L[[1]]$type, "scatter")
-  expect_equal(L[[1]]$x, c(huron$year[1], huron$year, rev(huron$year)))
-  expect_equal(L[[1]]$y, c(huron$level[1]-1, huron$level+1, rev(huron$level-1)))
-  expect_identical(L[[1]]$line$color, "transparent")
+p1 <- ggplot(data = huron) + 
+  geom_ribbon(aes(x = year, ymin = level-1, ymax = level+1), 
+              alpha = 0.1)
+
+test_that("geom_ribbon() creates 1 trace & respects alpha transparency", {
+  info <- expect_traces(p1, 1, "alpha")
+  tr <- info$traces[[1]]
+  expect_match(tr$fillcolor, "0.1)", fixed=TRUE)
 })
 
-save_outputs(rb, "ribbon")
+p2 <- ggplot(data = huron, aes(group = factor(decade))) + 
+  geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
 
-rb2 <- ggplot(huron, aes(x=year)) + 
-  geom_ribbon(aes(ymin=level-1, ymax=level+1), alpha = 0.1)
-L2 <- gg2list(rb2)
-
-test_that("geom_ribbon respects alpha transparency", {
-  expect_match(L2[[1]]$fillcolor, "0.1)", fixed=TRUE)
+test_that("geom_ribbon() with group aesthetic produces 1 trace", {
+  info <- expect_traces(p2, 1, "group")
 })
 
-save_outputs(rb2, "ribbon-alpha")
+p3 <- ggplot(data = huron, aes(colour = factor(decade))) + 
+  geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
+
+test_that("geom_ribbon() with colour aesthetic produces multiple traces", {
+  # 10 traces -- one for each decade
+  info <- expect_traces(p3, 10, "colour")
+})
+
+p4 <- ggplot(data = huron, aes(fill = factor(decade))) + 
+  geom_ribbon(aes(x = diff, ymin = level-0.1, ymax = level+0.1))
+
+test_that("geom_ribbon() with fill aesthetic produces multiple traces", {
+  # 10 traces -- one for each decade
+  info <- expect_traces(p4, 10, "fill")
+})
