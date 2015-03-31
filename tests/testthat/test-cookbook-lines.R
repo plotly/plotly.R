@@ -55,18 +55,20 @@ test_that("geom_bar -> 1 trace", {
 
 # Add a horizontal line
 temp <- bp + geom_hline(aes(yintercept=12))
-test_that("bar + hline = 1 trace, 1 shape", {
-  info <- expect_traces_shapes(temp, 1, 1, "basic-horizontal-line")
-  expect_shape(info$shapes[[1]],
-               xref="paper", x0=0, x1=1,
-               yref="y1", y0=12, y1=12)
+test_that("bar + hline = 2 traces", {
+  info <- expect_traces_shapes(temp, 2, 0, "basic-horizontal-line")
+  ## expect_shape(info$shapes[[1]],
+  ##              xref="paper", x0=0, x1=1,
+  ##              yref="y1", y0=12, y1=12)
 })
 
 # Make the line red and dashed
 temp <- bp + geom_hline(aes(yintercept=12), colour="#990000", linetype="dashed")
 test_that("bar + red dashed hline", {
-  info <- expect_traces(temp, 2, "dashed-red-line")
-  info$traces[[2]]
+  info <- expect_traces_shapes(temp, 2, 0, "dashed-red-line")
+  hline.info <- info$traces[[2]]
+  expect_identical(hline.info$line$color, toRGB("#990000"))
+  expect_identical(hline.info$line$dash, "dash")
 })
 
 # Draw separate hlines for each bar. First add another column to df
@@ -76,13 +78,21 @@ df$hline <- c(9,12)
 # treatment   11.5    12
 
 # Need to re-specify bp, because the data has changed
-bp <- ggplot(df, aes(x=cond, y=result)) + geom_bar(position=position_dodge())
+bp <- ggplot(df, aes(x=cond, y=result)) +
+  geom_bar(position=position_dodge(), stat="identity")
 
-# Draw with separate lines for each bar
-bp + geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), colour="#AA0000")
+bp.err <- bp +
+  geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), colour="#AA0000")
+test_that("Draw with separate lines for each bar", {
+  expect_traces_shapes(bp.err, 2, 0, "bar-error-wide")
+})
 
-# Make the lines narrower
-bp + geom_errorbar(width=0.5, aes(y=hline, ymax=hline, ymin=hline), colour="#AA0000")
+bp.err.narrow <- bp +
+  geom_errorbar(width=0.5, aes(y=hline, ymax=hline, ymin=hline),
+                colour="#AA0000")
+test_that("Make the lines narrower", {
+  info <- expect_traces_shapes(bp.err.narrow, 2, 0, "bar-error-narrow")
+})
 
 
 # Can get the same result, even if we get the hline values from a second data frame
@@ -92,8 +102,12 @@ df.hlines <- data.frame(cond=c("control","treatment"), hline=c(9,12))
 #   control     9
 # treatment    12
 
-# The bar graph are from df, but the lines are from df.hlines
-bp + geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline), colour="#AA0000")
+bp.err.diff <- bp +
+  geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline),
+                colour="#AA0000")
+test_that("The bar graph are from df, but the lines are from df.hlines", {
+  info <- expect_traces_shapes(bp.err.diff, 2, 0, "bar-error-diff")
+})
 
 df <- read.table(header=T, text="
      cond group result hline
@@ -102,13 +116,20 @@ treatment     A   11.5    12
   control     B     12     9
 treatment     B     14    12
 ")
-
-# Define basic bar plot
-bp <- ggplot(df, aes(x=cond, y=result, fill=group)) + geom_bar(position=position_dodge())
-bp
-
-# The error bars get plotted over one another -- there are four but it looks like two
-bp + geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), linetype="dashed")
+bp <- ggplot(df, aes(x=cond, y=result, fill=group)) +
+  geom_bar(position=position_dodge(), stat="identity")
+test_that("bar dodged colored -> 1 trace", {
+  info <- expect_traces_shapes(bp, 2, 0, "bar-dodge-color")
+})
+bp.err <- 
+  bp + geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), linetype="dashed")
+test_that("The error bars get plotted over one another", {
+  # there are four but it looks like two.
+  info <- expect_traces_shapes(bp.err, 3, 0, "bar-dodge-color-error")
+  err.y <- info$traces[[3]]$y
+  expect_equal(length(err.y), 4)
+  expect_equal(length(unique(err.y)), 2)
+})
 
 df <- read.table(header=T, text="
      cond group result hline
@@ -117,12 +138,17 @@ treatment     A   11.5    12
   control     B     12  12.5
 treatment     B     14    15
 ")
-
-# Define basic bar plot
-bp <- ggplot(df, aes(x=cond, y=result, fill=group)) + geom_bar(position=position_dodge())
-bp
-
-bp + geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), linetype="dashed", position=position_dodge())
+bp <- ggplot(df, aes(x=cond, y=result, fill=group)) +
+  geom_bar(position=position_dodge(), stat="identity")
+bp.err4 <- bp +
+  geom_errorbar(aes(y=hline, ymax=hline, ymin=hline),
+                linetype="dashed", position=position_dodge())
+test_that("4 error bars", {
+  info <- expect_traces_shapes(bp.err4, 3, 0, "bar-dodge-color-err4")
+  err.y <- info$traces[[3]]$y
+  expect_equal(length(err.y), 4)
+  expect_equal(length(unique(err.y)), 4)
+})
 
 df <- read.table(header=T, text="
       cond xval yval
@@ -147,42 +173,89 @@ df <- read.table(header=T, text="
  treatment 11.5  9.8
  treatment 12.0 10.6
 ")
-
-library(ggplot2)
-
-# The basic scatterplot
 sp <- ggplot(df, aes(x=xval, y=yval, colour=cond)) + geom_point()
+test_that("basic scatterplot", {
+  info <- expect_traces_shapes(sp, 2, 0, "scatter-basic")
+})
 
-
-# Add a horizontal line
 temp <- sp + geom_hline(aes(yintercept=10))
-save_outputs(temp, "lines/hline on scatter", file_prefix="")
+test_that("Add a horizontal line", {
+  info <- expect_traces_shapes(temp, 3, 0, "scatter-hline")
+})
 
-# Add a red dashed vertical line
-temp <- sp + geom_hline(aes(yintercept=10)) + geom_vline(aes(xintercept=11.5), colour="#BB0000", linetype="dashed")
-save_outputs(temp, "lines/hline n vline on scatter", file_prefix="")
+temp <- sp +
+  geom_hline(aes(yintercept=10)) +
+  geom_vline(aes(xintercept=11.5),
+             colour="#BB0000", linetype="dashed")
+test_that("Add a red dashed vertical line", {
+  info <- expect_traces_shapes(temp, 4, 0, "scatter-hline-vline")
+  mode <- sapply(info$traces, "[[", "mode")
+  line.traces <- info$traces[mode == "lines"]
+  expect_equal(length(line.traces), 2)
+  dash <- sapply(line.traces, function(tr)tr$line$dash)
+  dash.traces <- line.traces[dash == "dash"]
+  expect_equal(length(dash.traces), 1)
+  dash.trace <- dash.traces[[1]]
+  expect_identical(dash.trace$line$color, toRGB("#BB0000"))
+})
 
-# Add colored lines for the mean xval of each group
 temp <- sp + geom_hline(aes(yintercept=10)) +
-     geom_line(stat="vline", xintercept="mean")
-save_outputs(temp, "lines/colored lines on scatter", file_prefix="")
+  geom_line(stat="vline", xintercept="mean")
+test_that("Add colored lines for the mean xval of each group", {
+  info <- expect_traces_shapes(temp, 5, 0, "scatter-hline-vline-stat")
+  mode <- sapply(info$traces, "[[", "mode")
+  line.traces <- info$traces[mode == "lines"]
+  expect_equal(length(line.traces), 3)
+  lines.by.name <- list()
+  for(tr in line.traces){
+    if(is.character(tr$name)){
+      lines.by.name[[tr$name]] <- tr
+    }
+  }
+  marker.traces <- info$traces[mode == "markers"]
+  for(tr in marker.traces){
+    line.trace <- lines.by.name[[tr$name]]
+    expect_equal(range(line.trace$y), range(tr$y))
+  }
+})
 
 # Facet, based on cond
 spf <- sp + facet_grid(. ~ cond)
-spf
+test_that("scatter facet -> 2 traces", {
+  info <- expect_traces_shapes(spf, 2, 0, "scatter-facet")
+  expect_true(info$traces[[1]]$xaxis != info$traces[[2]]$xaxis)
+  expect_true(info$traces[[1]]$yaxis == info$traces[[2]]$yaxis)
+})
 
-# Draw a horizontal line in all of the facets at the same value
 temp <- spf + geom_hline(aes(yintercept=10))
-save_outputs(temp, "lines/hline on facets", file_prefix="")
+test_that("geom_hline -> 2 more traces", {
+  info <- expect_traces_shapes(temp, 4, 0, "scatter-facet-hline")
+  has.name <- sapply(info$traces, function(tr)is.character(tr$name))
+  named.traces <- info$traces[has.name]
+  expect_equal(length(named.traces), 2)
+})
 
 df.vlines <- data.frame(cond=levels(df$cond), xval=c(10,11.5))
 #      cond xval
 #   control 10.0
 # treatment 11.5
 
-spf + geom_hline(aes(yintercept=10)) +
-      geom_vline(aes(xintercept=xval), data=df.vlines,
-                    colour="#990000", linetype="dashed")
+spf.vline <- 
+  spf +
+    geom_hline(aes(yintercept=10)) +
+    geom_vline(aes(xintercept=xval),
+               data=df.vlines,
+               colour="#990000", linetype="dashed")
+test_that("geom_vline -> 2 more traces", {
+  info <- expect_traces_shapes(spf.vline, 6, 0, "scatter-facet-hline-vline")
+})
 
-spf + geom_hline(aes(yintercept=10)) +
-      geom_line(stat="vline", xintercept="mean")
+spf.line.stat <- 
+  spf +
+    geom_hline(aes(yintercept=10)) +
+    geom_line(stat="vline", xintercept="mean")
+test_that("geom_line -> 2 more traces", {
+  info <-
+    expect_traces_shapes(spf.line.stat, 6, 0,
+                         "scatter-facet-hline-line-stat")
+})
