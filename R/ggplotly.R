@@ -97,8 +97,10 @@ gg2list <- function(p){
   # worry about combining global and layer-specific aes/data later.
   for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
-    to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
-    layer.aes[to.copy] <- p$mapping[to.copy]
+    if(p$layers[[layer.i]]$inherit.aes){
+      to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
+      layer.aes[to.copy] <- p$mapping[to.copy]
+    }
     mark.names <- markUnique[markUnique %in% names(layer.aes)]
     name.names <- sprintf("%s.name", mark.names)
     layer.aes[name.names] <- layer.aes[mark.names]
