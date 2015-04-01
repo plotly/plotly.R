@@ -145,9 +145,11 @@ bp.err4 <- bp +
                 linetype="dashed", position=position_dodge())
 test_that("4 error bars", {
   info <- expect_traces_shapes(bp.err4, 3, 0, "bar-dodge-color-err4")
-  err.y <- info$traces[[3]]$y
-  expect_equal(length(err.y), 4)
-  expect_equal(length(unique(err.y)), 4)
+  tr <- info$traces[[3]]
+  expect_equal(length(tr$y), 4)
+  expect_equal(length(unique(tr$y)), 4)
+  expect_equal(length(tr$x), 4)
+  expect_equal(length(unique(tr$x)), 2)
 })
 
 df <- read.table(header=T, text="
@@ -189,6 +191,7 @@ temp <- sp +
              colour="#BB0000", linetype="dashed")
 test_that("Add a red dashed vertical line", {
   info <- expect_traces_shapes(temp, 4, 0, "scatter-hline-vline")
+  expect_true(info$kwargs$layout$showlegend)
   mode <- sapply(info$traces, "[[", "mode")
   line.traces <- info$traces[mode == "lines"]
   expect_equal(length(line.traces), 2)
@@ -203,17 +206,20 @@ temp <- sp + geom_hline(aes(yintercept=10)) +
   geom_line(stat="vline", xintercept="mean")
 test_that("Add colored lines for the mean xval of each group", {
   info <- expect_traces_shapes(temp, 5, 0, "scatter-hline-vline-stat")
+  expect_true(info$kwargs$layout$showlegend)
   mode <- sapply(info$traces, "[[", "mode")
   line.traces <- info$traces[mode == "lines"]
   expect_equal(length(line.traces), 3)
   lines.by.name <- list()
   for(tr in line.traces){
+    expect_false(tr$showlegend)
     if(is.character(tr$name)){
       lines.by.name[[tr$name]] <- tr
     }
   }
   marker.traces <- info$traces[mode == "markers"]
   for(tr in marker.traces){
+    expect_true(tr$showlegend)
     line.trace <- lines.by.name[[tr$name]]
     expect_equal(range(line.trace$y), range(tr$y))
   }
@@ -230,6 +236,7 @@ test_that("scatter facet -> 2 traces", {
 temp <- spf + geom_hline(aes(yintercept=10))
 test_that("geom_hline -> 2 more traces", {
   info <- expect_traces_shapes(temp, 4, 0, "scatter-facet-hline")
+  expect_true(info$kwargs$layout$showlegend)
   has.name <- sapply(info$traces, function(tr)is.character(tr$name))
   named.traces <- info$traces[has.name]
   expect_equal(length(named.traces), 2)
@@ -258,4 +265,8 @@ test_that("geom_line -> 2 more traces", {
   info <-
     expect_traces_shapes(spf.line.stat, 6, 0,
                          "scatter-facet-hline-line-stat")
+  for(tr in info$traces){
+    expected <- ifelse(tr$mode == "markers", TRUE, FALSE)
+    expect_identical(tr$showlegend, expected)
+  }
 })
