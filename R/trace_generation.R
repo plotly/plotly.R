@@ -98,7 +98,18 @@ layer2traces <- function(l, d, misc) {
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
-          pdata.vec <- data.vec <- g$prestats.data[[paste0(a, ".name")]]
+          # Re-order data so that Plotly gets it right from ggplot2.
+          a.name <- paste0(a, ".name")
+          g$data <- g$data[order(g$data[[a]]), ]
+          vec.i <- match(g$data[[a.name]], data.vec)
+          data.vec <- data.vec[vec.i]
+          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
+          pvec.i <- match(g$prestats.data[[a]], as.numeric(pdata.vec))
+          pdata.vec <- pdata.vec[pvec.i]
+          if (length(pdata.vec) == length(data.vec))
+            pdata.vec <- data.vec
+          if (!is.factor(pdata.vec))
+            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
