@@ -60,7 +60,7 @@ layer2traces <- function(l, d, misc) {
   if (g$geom == "density") {
     bargap <- 0
   }
-  
+
   # For non-numeric data on the axes, we should take the values from
   # the original data.
   for (axis.name in c("x", "y")) {    
@@ -98,16 +98,7 @@ layer2traces <- function(l, d, misc) {
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
-          # Re-order data so that Plotly gets it right from ggplot2.
-          g$data <- g$data[order(g$data[[a]]), ]
-          data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
-          g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
-          pdata.vec <- pdata.vec[match(g$prestats.data[[a]],
-                                       as.numeric(pdata.vec))]
-          if (length(pdata.vec) == length(data.vec))
-            pdata.vec <- data.vec
-          if (!is.factor(pdata.vec))
-            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
+          pdata.vec <- data.vec <- g$prestats.data[[paste0(a, ".name")]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
@@ -145,7 +136,7 @@ layer2traces <- function(l, d, misc) {
   
   # symbol=circle,square,diamond,cross,x,
   # triangle-up,triangle-down,triangle-left,triangle-right
-  
+
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
@@ -185,7 +176,7 @@ layer2traces <- function(l, d, misc) {
       })
     }
   }
-  
+
   # Split hline and vline when multiple panels or intercepts:
   # Need multiple traces accordingly.
   if (g$geom == "hline" || g$geom == "vline") {
@@ -352,8 +343,7 @@ toBasic <- list(
     g
   },
   bar=function(g) {
-    if (any(is.na(g$prestats.data$x)))
-      g$prestats.data$x <- g$prestats.data$x.name
+    ## TODO: why is this here? bar is a basic geom.
     for(a in c("fill", "colour")){
       g$prestats.data[[a]] <-
         g$data[[a]][match(g$prestats.data$group, g$data$group)]
