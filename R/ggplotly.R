@@ -159,7 +159,11 @@ gg2list <- function(p){
   # Get global ranges now because we need some of its info in layer2traces
   ranges.list <- list()
   for(xy in c("x", "y")){
-    range.values <- if(misc$is.continuous[[xy]]){
+    use.ranges <-
+      misc$is.continuous[[xy]] |
+      misc$is.date[[xy]] |
+      misc$is.datetime[[xy]] 
+    range.values <- if(use.ranges){
       range.name <- paste0(xy, ".range")
       sapply(built$panel$ranges, "[[", range.name)
     }else{
