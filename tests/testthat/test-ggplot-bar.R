@@ -91,9 +91,9 @@ test_that("Very basic bar graph", {
     expect_null(tr$marker$color)
     expect_null(tr$marker$line$color)
     expect_null(tr$marker$line$width)
+    expect_false(tr$showlegend)
   }
   expect_null(info$kwargs$layout$annotations)
-  expect_false(info$kwargs$layout$showlegend)
 })
 
 test_that("Map the time of day to different fill colors", {
