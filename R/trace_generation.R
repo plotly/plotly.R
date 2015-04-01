@@ -1,7 +1,7 @@
 #' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
-#' @param misc named list.
+#' @param misc named list of plot info, independent of layer.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
@@ -12,7 +12,7 @@ layer2traces <- function(l, d, misc) {
   }
   g <- list(geom=l$geom$objname,
             data=not.na(d),
-            prestats.data=not.na(misc$prestats.data))
+            prestats.data=not.na(l$prestats.data))
 
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
@@ -379,11 +379,13 @@ toBasic <- list(
     g
   },
   abline=function(g) {
+    ## TODO: why not treat abline as a basic path?
     g$params$xstart <- min(g$prestats.data$globxmin)
     g$params$xend <- max(g$prestats.data$globxmax)
     g
   },
   hline=function(g) {
+    ## TODO: why not treat hline as a basic path?
     if (is.factor(g$data$x)) {
       g$params$xstart <- as.character(sort(g$data$x)[1])
       g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
@@ -394,11 +396,13 @@ toBasic <- list(
     g
   },
   vline=function(g) {
+    ## TODO: why not treat vline as a basic path?
     g$params$ystart <- min(g$prestats.data$globymin)
     g$params$yend <- max(g$prestats.data$globymax)
     g
   },
   point=function(g) {
+    ## TODO: why is this code here? point is a basic geom.
     if ("size" %in% names(g$data)) {
       g$params$sizemin <- min(g$prestats.data$globsizemin)
       g$params$sizemax <- max(g$prestats.data$globsizemax)

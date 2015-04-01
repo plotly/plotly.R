@@ -109,19 +109,69 @@ gg2list <- function(p){
       p$layers[[layer.i]]$data <- p$data
     }
   }
+
+  ## Test fill and color to see if they encode a quantitative
+  ## variable. This may be useful for several reasons: (1) it is
+  ## sometimes possible to plot several different colors in the same
+  ## trace (e.g. points), and that is faster for large numbers of
+  ## data points and colors; (2) factors on x or y axes should be
+  ## sent to plotly as characters, not as numeric data (which is
+  ## what ggplot_build gives us).
+  misc <- list()
+  for(a in c("fill", "colour", "x", "y", "size")){
+    for(data.type in c("continuous", "date", "datetime", "discrete")){
+      fun.name <- sprintf("scale_%s_%s", a, data.type)
+      misc.name <- paste0("is.", data.type)
+      misc[[misc.name]][[a]] <- tryCatch({
+        fun <- get(fun.name)
+        suppressMessages({
+          with.scale <- original.p + fun()
+        })
+        ggplot_build(with.scale)
+        TRUE
+      }, error=function(e){
+        FALSE
+      })
+    }
+  }
+  
+  ## scales are needed for legend ordering.
+  misc$breaks <- list()
+  for(sc in p$scales$scales){
+    a.vec <- sc$aesthetics
+    default.breaks <- inherits(sc$breaks, "waiver")
+    if (length(a.vec) == 1 && (!default.breaks) ) {
+      ## TODO: generalize for x/y scales too.
+      br <- sc$breaks
+      ranks <- seq_along(br)
+      names(ranks) <- br
+      misc$breaks[[a.vec]] <- ranks
+    }
+    ## store if this is a reverse scale so we can undo that later.
+    if(is.character(sc$trans$name)){
+      misc$trans[sc$aesthetics] <- sc$trans$name
+    }
+  }
+  reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
   
   # Extract data from built ggplots
   built <- ggplot_build2(p)
-  # Get global x-range now because we need some of its info in layer2traces
-  ggranges <- built$panel$ranges
-  # Extract x.range
-  xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
-  ggxmin <- min(sapply(xrange, min))
-  ggxmax <- max(sapply(xrange, max))
-  # Extract y.range
-  yrange <- sapply(ggranges, `[[`, "y.range", simplify=FALSE, USE.NAMES=FALSE)
-  ggymin <- min(sapply(yrange, min))
-  ggymax <- max(sapply(yrange, max))
+  # Get global ranges now because we need some of its info in layer2traces
+  ranges.list <- list()
+  for(xy in c("x", "y")){
+    range.values <- if(misc$is.continuous[[xy]]){
+      range.name <- paste0(xy, ".range")
+      sapply(built$panel$ranges, "[[", range.name)
+    }else{
+      ## for categorical variables on the axes, panel$ranges info is
+      ## meaningless.
+      name.name <- paste0(xy, ".name")
+      sapply(built$data, function(df){
+        paste(df[[name.name]])
+      })
+    }
+    ranges.list[[xy]] <- range(range.values)
+  }
   
   # Get global size range because we need some of its info in layer2traces
   if ("size.name" %in% name.names) {
@@ -137,51 +187,7 @@ gg2list <- function(p){
     
     # for each layer, there is a correpsonding data.frame which
     # evaluates the aesthetic mapping.
-    df <- built$data[[i]]
-    
-    # Test fill and color to see if they encode a quantitative
-    # variable. This may be useful for several reasons: (1) it is
-    # sometimes possible to plot several different colors in the same
-    # trace (e.g. points), and that is faster for large numbers of
-    # data points and colors; (2) factors on x or y axes should be
-    # sent to plotly as characters, not as numeric data (which is
-    # what ggplot_build gives us).
-    misc <- list()
-    for(a in c("fill", "colour", "x", "y", "size")){
-      for(data.type in c("continuous", "date", "datetime", "discrete")){
-        fun.name <- sprintf("scale_%s_%s", a, data.type)
-        misc.name <- paste0("is.", data.type)
-        misc[[misc.name]][[a]] <- tryCatch({
-          fun <- get(fun.name)
-          suppressMessages({
-            with.scale <- original.p + fun()
-          })
-          ggplot_build(with.scale)
-          TRUE
-        }, error=function(e){
-          FALSE
-        })
-      }
-    }
-    
-    # scales are needed for legend ordering.
-    misc$breaks <- list()
-    for(sc in p$scales$scales){
-      a.vec <- sc$aesthetics
-      default.breaks <- inherits(sc$breaks, "waiver")
-      if (length(a.vec) == 1 && (!default.breaks) ) {
-        # TODO: generalize for x/y scales too.
-        br <- sc$breaks
-        ranks <- seq_along(br)
-        names(ranks) <- br
-        misc$breaks[[a.vec]] <- ranks
-      }
-      ## store if this is a reverse scale so we can undo that later.
-      if(is.character(sc$trans$name)){
-        misc$trans[sc$aesthetics] <- sc$trans$name
-      }
-    }
-    reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
+    df <- built$data[[i]]    
     
     # get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
@@ -205,21 +211,24 @@ gg2list <- function(p){
     for (a in replace.aes) {
       prestats[[a]] <- -1 * prestats[[a]]
     }
-    misc$prestats.data <-
+    L$prestats.data <-
       merge(prestats,
             gglayout[, c("PANEL", "plotly.row", "COL")])
-    
-    # Add global x-range info
-    misc$prestats.data$globxmin <- ggxmin
-    misc$prestats.data$globxmax <- ggxmax
-    # Add global y-range info
-    misc$prestats.data$globymin <- ggymin
-    misc$prestats.data$globymax <- ggymax
+
+    # Add global range info.
+    for(xy in names(ranges.list)){
+      range.vec <- ranges.list[[xy]]
+      names(range.vec) <- c("min", "max")
+      for(range.name in names(range.vec)){
+        glob.name <- paste0("glob", xy, range.name)
+        L$prestats.data[[glob.name]] <- range.vec[[range.name]]
+      }
+    }
     
     # Add global size info if relevant
     if ("size.name" %in% name.names) {
-      misc$prestats.data$globsizemin <- ggsizemin
-      misc$prestats.data$globsizemax <- ggsizemax
+      L$prestats.data$globsizemin <- ggsizemin
+      L$prestats.data$globsizemax <- ggsizemax
     }
     
     # This extracts essential info for this geom/layer.
@@ -382,7 +391,7 @@ gg2list <- function(p){
         sc$limits
       }else{
         if(misc$is.continuous[[xy]]){
-          ggranges[[1]][[s("%s.range")]] #TODO: facets!
+          built$panel$ranges[[1]][[s("%s.range")]] #TODO: facets!
         }else{ # for a discrete scale, range should be NULL.
           NULL
         }
