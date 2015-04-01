@@ -599,11 +599,6 @@ gg2list <- function(p){
   layout$legend <- list(bordercolor="transparent", 
                         x=1.05, y=1/2,
                         xanchor="center", yanchor="top")
-  # Workaround for removing unnecessary legends.
-  # [markUnique != "x"] is for boxplot's particular case.
-  ##obrowser()
-  if (!any(names(layer.aes) %in% markUnique))
-    layout$showlegend <- FALSE
 
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
