@@ -101,7 +101,10 @@ layer2traces <- function(l, d, misc) {
           # Re-order data so that Plotly gets it right from ggplot2.
           a.name <- paste0(a, ".name")
           g$data <- g$data[order(g$data[[a]]), ]
-          vec.i <- match(g$data[[a.name]], data.vec)
+          vec.i <- match(g$data[[a]], as.numeric(data.vec))
+          if(anyNA(vec.i)){
+            vec.i <- match(g$data[[a.name]], data.vec)
+          }
           data.vec <- data.vec[vec.i]
           g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
           pvec.i <- match(g$prestats.data[[a]], as.numeric(pdata.vec))

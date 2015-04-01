@@ -171,7 +171,13 @@ gg2list <- function(p){
       ## meaningless.
       name.name <- paste0(xy, ".name")
       sapply(built$data, function(df){
-        paste(df[[name.name]])
+        if(name.name %in% names(df)){
+          ## usually for discrete data there is a .name column.
+          paste(df[[name.name]])
+        }else{
+          ## for heatmaps there may not be.
+          df[[xy]]
+        }
       })
     }
     ranges.list[[xy]] <- range(range.values)
