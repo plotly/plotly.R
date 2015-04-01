@@ -68,13 +68,14 @@ layer2traces <- function(l, d, misc) {
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {
+        a.name <- paste0(a, ".name")
         col.name <- g$aes[aes.used]
         dtemp <- l$data[[col.name]]
         if (is.null(dtemp)) {
-          if (!inherits(g$data[[paste0(a, ".name")]], "NULL")) {
+          if (!is.null(g$data[[a.name]])) {
             # Handle the case where as.Date() is passed in aes argument.
-            if (class(g$data[[a]]) != class(g$data[[paste0(a, ".name")]])) {
-              g$data[[a]] <- g$data[[paste0(a, ".name")]]
+            if (class(g$data[[a]]) != class(g$data[[a.name]])) {
+              g$data[[a]] <- g$data[[a.name]]
               data.vec <- g$data[[a]]
             }
           }
@@ -99,7 +100,6 @@ layer2traces <- function(l, d, misc) {
                                 "%Y-%m-%d %H:%M:%S")
         } else if (inherits(data.vec, "factor")) {
           # Re-order data so that Plotly gets it right from ggplot2.
-          a.name <- paste0(a, ".name")
           g$data <- g$data[order(g$data[[a]]), ]
           vec.i <- match(g$data[[a]], as.numeric(data.vec))
           if(anyNA(vec.i)){
@@ -112,7 +112,7 @@ layer2traces <- function(l, d, misc) {
           if (length(pdata.vec) == length(data.vec))
             pdata.vec <- data.vec
           if (!is.factor(pdata.vec))
-            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
+            pdata.vec <- g$prestats.data[[a.name]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
@@ -160,8 +160,8 @@ layer2traces <- function(l, d, misc) {
   }
   # Then split on visual characteristics that will get different
   # legend entries.
-  data.list <- if (basic$geom %in% names(markLegends)) {
-    mark.names <- markLegends[[basic$geom]]
+  data.list <- if (basic$geom %in% names(markSplit)) {
+    mark.names <- markSplit[[basic$geom]]
     # However, continuously colored points are an exception: they do
     # not need a legend entry, and they can be efficiently rendered
     # using just 1 trace.

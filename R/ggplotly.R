@@ -62,10 +62,11 @@ markLegends <-
        errorbarh=c("colour", "linetype"),
        area=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       boxplot=c("x"),
        text=c("colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
+
+markSplit <- c(markLegends,list(boxplot=c("x")))
 
 #' Convert a ggplot to a list.
 #' @import ggplot2
@@ -101,7 +102,7 @@ gg2list <- function(p){
       to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
       layer.aes[to.copy] <- p$mapping[to.copy]
     }
-    mark.names <- markUnique[markUnique %in% names(layer.aes)]
+    mark.names <- names(layer.aes) # make aes.name for all aes.
     name.names <- sprintf("%s.name", mark.names)
     layer.aes[name.names] <- layer.aes[mark.names]
     p$layers[[layer.i]]$mapping <- layer.aes
@@ -600,7 +601,8 @@ gg2list <- function(p){
                         xanchor="center", yanchor="top")
   # Workaround for removing unnecessary legends.
   # [markUnique != "x"] is for boxplot's particular case.
-  if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
+  ##obrowser()
+  if (!any(names(layer.aes) %in% markUnique))
     layout$showlegend <- FALSE
 
   ## Legend hiding when guides(fill="none").
