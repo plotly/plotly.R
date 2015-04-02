@@ -617,22 +617,6 @@ gg2list <- function(p){
     }
   }
 
-  ## If there are several traces with the same name and
-  ## showlegend=TRUE, then turn off the legend for all but the first.
-  indices.by.name <- list()
-  for(trace.i in seq_along(trace.list)){
-    tr <- trace.list[[trace.i]]
-    if(isTRUE(tr$showlegend)){
-      indices.by.name[[tr$name]][[paste(trace.i)]] <- trace.i
-    }
-  }
-  for(trace.name in names(indices.by.name)){
-    trace.indices <- indices.by.name[[trace.name]]
-    for(trace.i in trace.indices[-1]){
-      trace.list[[trace.i]]$showlegend <- FALSE
-    }
-  }
-
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
