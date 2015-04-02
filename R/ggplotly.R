@@ -632,12 +632,13 @@ gg2list <- function(p){
       trace.list[[trace.i]]$showlegend <- FALSE
     }
   }
+
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
     # Retrieve legend title
-    legend.elements <- sapply(traces, "[[", "name")
+    legend.elements <- unlist(sapply(traces, "[[", "name"))
     legend.title <- ""
     for (i in 1:ncol(p$data)) {
       if (all(legend.elements %in% unique(p$data[, i])))
@@ -792,6 +793,46 @@ gg2list <- function(p){
     }
     merged.traces[[length(merged.traces)+1]] <- tr
   }
+  
+  # -------------------------------
+  # avoid redundant legends entries
+  # -------------------------------
+  # remove alpha from a color entry
+  rm_alpha <- function(x) {
+    if (length(x) == 0) return(x)
+    pat <- "^rgba\\("
+    if (!grepl(pat, x)) return(x)
+    sub(",\\s*[0]?[.]?[0-9]+\\)$", ")", sub(pat, "rgb(", x))
+  }
+  # convenient for extracting name/value of legend entries (ignoring alpha)
+  entries <- function(x, y) {
+    z <- try(x[[y]], silent = TRUE)
+    if (inherits(e, "try-error")) {
+      paste0(x$name, "-")
+    } else {
+      paste0(x$name, "-", rm_alpha(z))
+    }
+  }
+  fill_set <- unlist(lapply(merged.traces, entries, "fillcolor"))
+  line_set <- unlist(lapply(merged.traces, entries, c("line", "color")))
+  mark_set <- unlist(lapply(merged.traces, entries, c("marker", "color")))
+  legend_intersect <- function(x, y) {
+    i <- intersect(x, y)
+    # restrict intersection to valid legend entries
+    i[grepl("-rgb[a]?\\(", i)]
+  }
+  # if there is a mark & line legend, get rid of line
+  t1 <- line_set %in% legend_intersect(mark_set, line_set)
+  # that is, unless the mode is 'lines+markers'...
+  t1 <- t1 & !(unlist(lapply(merged.traces, "[[", "mode")) %in% "lines+markers")
+  # if there is a mark & fill legend, get rid of fill
+  t2 <- fill_set %in% legend_intersect(mark_set, fill_set)
+  # if there is a line & fill legend, get rid of fill
+  t3 <- fill_set %in% legend_intersect(line_set, fill_set)
+  t <- t1 | t2 | t3
+  for (m in seq_along(merged.traces)) 
+    if (isTRUE(merged.traces[[m]]$showlegend && t[m]))
+      merged.traces[[m]]$showlegend <- FALSE
   
   # Put the traces in correct order, according to any manually
   # specified scales. This seems to be repetitive with the trace$rank

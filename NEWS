@@ -1,3 +1,7 @@
+0.5.27 -- 19 Mar 2015
+
+Reimplement geom_ribbon as a basic polygon. Fix #191. Fix #192.
+
 0.5.26 -- 18 Mar 2015
 
 Implemented geom_rect #178
