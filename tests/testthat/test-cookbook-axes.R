@@ -18,6 +18,30 @@ expect_traces <- function(gg, n.traces, name){
   list(traces=has.data, kwargs=L$kwargs)
 }
 
+get_legend <- function(L){
+  legend.on <- L$kwargs$layout$showlegend
+  legend.list <- list()
+  for(tr in L$traces){
+    if(is.character(tr$name)){
+      legend.list[[tr$name]] <-
+        data.frame(name=tr$name, showlegend=tr$showlegend)
+    }
+  }
+  legend.df <- do.call(rbind, legend.list)
+  subset(legend.df, showlegend)
+}
+
+leg <- function(...){
+  name <- c(...)
+  data.frame(name)
+}
+
+expect_legend <- function(L, expected){
+  stopifnot(is.data.frame(expected))
+  shown <- get_legend(L)
+  expect_identical(shown$name, expected$name)
+}
+
 # Reverse the order of a discrete-valued axis
 # Get the levels of the factor
 flevels <- levels(PlantGrowth$group)
@@ -32,6 +56,7 @@ test_that("factor levels determine tick order", {
   trace.names <- sapply(info$traces, "[[", "name")
   expect_identical(as.character(trace.names),
                    c("trt2", "trt1", "ctrl"))
+  expect_legend(info, leg())
 })
   
 ## These two do the same thing; all data points outside the graphing
@@ -39,17 +64,20 @@ test_that("factor levels determine tick order", {
 bp.ylim.hide <- bp + ylim(5, 7.5)
 test_that("ylim hides points", {
   info <- expect_traces(bp.ylim.hide, 3, "ylim.hide")
+  expect_legend(info, leg())
 })
 
 bp.scale.hide <- bp + scale_y_continuous(limits=c(5, 7.5))
 test_that("scale_y(limits) hides points", {
   info <- expect_traces(bp.scale.hide, 3, "scale.hide")
+  expect_legend(info, leg())
   expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
 })
   
 bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
   info <- expect_traces(bp.coord, 3, "coord-ylim")
+  expect_legend(info, leg())
   expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
 })
 
@@ -64,6 +92,8 @@ sp <- ggplot(dat, aes(xval, yval)) + geom_point()
 
 test_that("A scatterplot with regular (linear) axis scaling", {
   info <- expect_traces(sp, 1, "linear-axes")
+  ## TODO: why does this test take so long?
+  expect_legend(info, leg())
 })
 
 library(scales)     # Need the scales package
@@ -71,12 +101,14 @@ sp.log2.scale <- sp + scale_y_continuous(trans=log2_trans())
 
 test_that("log2 scaling of the y axis (with visually-equal spacing)", {
   info <- expect_traces(sp.log2.scale, 1, "log2-scale")
+  expect_legend(info, leg())
 })
 
 sp.log2.coord <- sp + coord_trans(ytrans="log2")
 
 test_that("log2 coordinate transformation with visually-diminishing spacing", {
   info <- expect_traces(sp.log2.coord, 1, "log2-coord")
+  expect_legend(info, leg())
 })
 
 sp.labels <- sp +
@@ -86,12 +118,14 @@ sp.labels <- sp +
 
 test_that("log2 transform with labels", {
   info <- expect_traces(sp.labels, 1, "log2-labels")
+  expect_legend(info, leg())
 })
 
 sp.log10 <- sp + scale_y_log10()
 
 test_that("scale_y_log10", {
   info <- expect_traces(sp.log10, 1, "scale_y_log10")
+  expect_legend(info, leg())
 })
 
 sp.log10.labels <- sp +
@@ -100,6 +134,7 @@ sp.log10.labels <- sp +
 
 test_that("log10 with exponents on tick labels", {
   info <- expect_traces(sp.log10.labels, 1, "scale_y_log10-labels")
+  expect_legend(info, leg())
 })
 
 # Data where x ranges from 0-10, y ranges from 0-30
@@ -111,12 +146,14 @@ sp.fixed <- sp + coord_fixed()
 
 test_that("Force equal scaling", {
   info <- expect_traces(sp.fixed, 1, "coord-fixed")
+  expect_legend(info, leg())
 })
 
 sp.ratio <- sp + coord_fixed(ratio=1/3)
 
 test_that("coord_fixed(ratio)", {
   info <- expect_traces(sp.ratio, 1, "coord-fixed-ratio")
+  expect_legend(info, leg())
 })
 
 no.x.title <- bp +
@@ -125,6 +162,7 @@ no.x.title <- bp +
 
 test_that("coord_fixed(ratio)", {
   info <- expect_traces(no.x.title, 3, "no-x-title")
+  expect_legend(info, leg())
 })
 
 # Also possible to set the axis label with the scale
@@ -135,6 +173,7 @@ bp.scale.name <- bp + scale_x_discrete(name="") +
 
 test_that("scale(name)", {
   info <- expect_traces(bp.scale.name, 3, "scale-name")
+  expect_legend(info, leg())
 })
 
 # Change font options:
@@ -148,6 +187,7 @@ bp.fonts <- bp +
 
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 3, "fonts")
+  expect_legend(info, leg())
   x <- info$kwargs$layout$xaxis
   xtitle <- x[["titlefont"]]
   xtick <- x[["tickfont"]]
@@ -168,6 +208,7 @@ label.funs <- bp +
 
 test_that("In this particular case, x scale has no effect", {
   info <- expect_traces(label.funs, 3, "label-funs")
+  expect_legend(info, leg())
 })
 
 # Self-defined formatting function for times.
@@ -184,6 +225,7 @@ custom.formatter <- bp + scale_y_continuous(label=timeHMS_formatter)
 
 test_that("custom HMS formatter function", {
   info <- expect_traces(custom.formatter, 3, "custom-formatter")
+  expect_legend(info, leg())
 })
 
 blank.minor.major <- bp +
@@ -192,6 +234,7 @@ blank.minor.major <- bp +
 
 test_that("Hide all the gridlines", {
   info <- expect_traces(blank.minor.major, 3, "blank-minor-major")
+  expect_legend(info, leg())
 })
 
 blank.minor <- bp +
@@ -199,6 +242,7 @@ blank.minor <- bp +
 
 test_that("Hide just the minor gridlines", {
   info <- expect_traces(blank.minor, 3, "blank-minor")
+  expect_legend(info, leg())
 })
 
 blank.x <- bp +
@@ -207,6 +251,7 @@ blank.x <- bp +
 
 test_that("Hide all the horizontal gridlines", {
   info <- expect_traces(blank.x, 3, "blank-x")
+  expect_legend(info, leg())
 })
 
 blank.y <- bp +
@@ -215,5 +260,6 @@ blank.y <- bp +
 
 test_that("Hide all the vertical gridlines", {
   info <- expect_traces(blank.y, 3, "blank-y")
+  expect_legend(info, leg())
 })
 
