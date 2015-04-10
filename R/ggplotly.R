@@ -242,7 +242,52 @@ gg2list <- function(p){
     if (!all(barmodes == barmodes[1]))
       warning(paste0("You have multiple barcharts or histograms with different positions; ",
                      "Plotly's layout barmode will be '", layout$barmode, "'."))
+    # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
+    if (layout$barmode == "stack") {
+      # could speed up this function with environments or C/C++
+      unStack <- function(vec) {
+        n <- length(vec)
+        if (n == 1) return(vec)
+        seq.n <- seq_len(n)
+        names(vec) <- seq.n
+        vec <- sort(vec)
+        for (k in seq(2, n)) {
+          vec[k] <- vec[k] - sum(vec[seq(1, k-1)])
+        }
+        as.numeric(vec[as.character(seq.n)])
+      }
+      ys <- lapply(trace.list, "[[", "y")
+      xs <- lapply(trace.list, "[[", "x")
+      x.vals <- unique(unlist(xs))
+      # if there is more than one y-value (for a particular x value)
+      # then 
+      # 
+      for (val in x.vals) {
+        zs <- lapply(xs, function(x) which(x == val))
+        ys.given.x <- Map(function(x, y) y[x], zs, ys)
+        if (length(unlist(ys.given.x)) < 2) next
+        st <- unStack(unlist(ys.given.x))
+        lens <- sapply(ys.given.x, length)
+        trace.seq <- seq_along(zs)
+        ws <- split(st, rep(trace.seq, lens))
+        for (tr in trace.seq) {
+          idx <- zs[[tr]]
+          if (length(idx)) trace.list[[tr]]$y[idx] <- ws[[tr]][idx]
+        }
+      }
+    }
   }
+    
+#     lens <- sapply(ys, length)
+#      && length(trace.list) > 1 && any(lens > 1)) {
+#       xs <- unlist(xs)
+#       trace.seq <- seq_along(trace.list)
+#       idx <- rep(trace.seq, lens)
+#       
+#       
+#       browser()
+#       diffs <- tapply(unlist(ys), INDEX = xs, unStack)
+#       for (k in trace.seq) trace.list[[k]]$y <- as.numeric(sapply(diffs, "[", k))
   
   # Bar Gap for histograms should be 0
   bargaps <- do.call(c, lapply(trace.list, function (x) x$bargap))

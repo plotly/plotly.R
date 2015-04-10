@@ -1,69 +1,5 @@
 context("bar")
 
-researchers <-
-  data.frame(country=c("Canada", "Canada", "Germany", "USA"),
-             name=c("Warren", "Andreanne", "Stefan", "Toby"),
-             papers=c(23, 14, 37, 20),
-             field=c("Math", "Bio", "Bio", "Math"))
-
-gg <- ggplot(researchers, aes(country, papers, fill=field))
-
-test_that("position_dodge is translated to barmode=group", {
-  gg.dodge <- gg + geom_bar(stat="identity", position="dodge")
-  L <- gg2list(gg.dodge)
-  expect_equal(length(L), 3)
-  trace.names <- sapply(L[1:2], "[[", "name")
-  expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(L$kwargs$layout$barmode, "group")
-  # Check x values
-  expect_identical(as.character(L[[1]]$x[1]), "Canada")
-  expect_identical(as.character(L[[1]]$x[2]), "Germany")
-  expect_identical(as.character(L[[2]]$x[1]), "Canada")
-  expect_identical(as.character(L[[2]]$x[2]), "USA")
-  
-  save_outputs(gg.dodge, "bar-dodge")
-})
-
-test_that("position_stack is translated to barmode=stack", {
-  gg.stack <- gg + geom_bar(stat="identity", position="stack")
-  L <- gg2list(gg.stack)
-  expect_equal(length(L), 3)
-  trace.names <- sapply(L[1:2], "[[", "name")
-  expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(L$kwargs$layout$barmode, "stack")
-  
-  save_outputs(gg.stack, "bar-stack")
-})
-
-test_that("position_identity is translated to barmode=overlay", {
-  gg.identity <- gg + geom_bar(stat="identity", position="identity")
-  L <- gg2list(gg.identity)
-  expect_equal(length(L), 3)
-  trace.names <- sapply(L[1:2], "[[", "name")
-  expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(L$kwargs$layout$barmode, "overlay")
-  
-  save_outputs(gg.identity, "bar-identity")
-})
-
-test_that("dates work well with bar charts", {
-  
-  researchers$month <- c("2012-01-01", "2012-01-01", "2012-02-01", "2012-02-01")
-  researchers$month <- as.Date(researchers$month)
-  
-  gd <- ggplot(researchers, aes(month, papers, fill=field)) +
-    geom_bar(stat="identity")
-  
-  L <- gg2list(gd)
-  
-  expect_equal(length(L), 3)  # 2 traces + layout
-  expect_identical(L$kwargs$layout$xaxis$type, "date")
-  expect_identical(L[[1]]$x[1], "2012-01-01 00:00:00")
-  expect_identical(L[[1]]$x[2], "2012-02-01 00:00:00")
-  
-  save_outputs(gd, "bar-dates")
-})
-
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
@@ -78,6 +14,56 @@ expect_traces <- function(gg, n.traces, name){
   expect_equal(length(has.data), n.traces)
   list(traces=has.data, kwargs=L$kwargs)
 }
+
+researchers <-
+  data.frame(country=c("Canada", "Canada", "Germany", "USA"),
+             name=c("Warren", "Andreanne", "Stefan", "Toby"),
+             papers=c(23, 14, 37, 20),
+             field=c("Math", "Bio", "Bio", "Math"))
+
+gg <- ggplot(researchers, aes(country, papers, fill=field))
+
+test_that("position_dodge is translated to barmode=group", {
+  gg.dodge <- gg + geom_bar(stat="identity", position="dodge")
+  info <- expect_traces(gg.dodge, 3, "dodge")
+  trs <- info$traces
+  trace.names <- sapply(trs[1:2], "[[", "name")
+  expect_true(all(c("Math", "Bio") %in% trace.names))
+  expect_identical(info$kwargs$layout$barmode, "group")
+  # Check x values
+  expect_identical(as.character(trs[[1]]$x), c("Canada", "Germany"))
+  expect_identical(as.character(trs[[2]]$x), c("Canada", "USA"))
+})
+
+test_that("position_stack is translated to barmode=stack", {
+  gg.stack <- gg + geom_bar(stat="identity", position="stack")
+  info <- expect_traces(gg.stack, 3, "stack")
+  trs <- info$traces
+  trace.names <- sapply(trs[1:2], "[[", "name")
+  expect_true(all(c("Math", "Bio") %in% trace.names))
+  expect_identical(info$kwargs$layout$barmode, "stack")
+})
+
+test_that("position_identity is translated to barmode=overlay", {
+  gg.identity <- gg + geom_bar(stat="identity", position="identity")
+  info <- expect_traces(gg.identity, 3, "identity")
+  trs <- info$traces
+  trace.names <- sapply(trs[1:2], "[[", "name")
+  expect_true(all(c("Math", "Bio") %in% trace.names))
+  expect_identical(info$kwargs$layout$barmode, "overlay")
+})
+
+test_that("dates work well with bar charts", {
+  researchers$month <- c("2012-01-01", "2012-01-01", "2012-02-01", "2012-02-01")
+  researchers$month <- as.Date(researchers$month)
+  gd <- ggplot(researchers, aes(month, papers, fill=field)) +
+    geom_bar(stat="identity")
+  info <- expect_traces(gd, 3, "dates")
+  trs <- info$traces
+  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(trs[[1]]$x[1], "2012-01-01 00:00:00")
+  expect_identical(trs[[1]]$x[2], "2012-02-01 00:00:00")
+})
 
 ## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
 df <- data.frame(time = factor(c("Lunch","Dinner"), levels=c("Lunch","Dinner")),
@@ -180,5 +166,25 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
   }
   expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
   expect_true(info$kwargs$layout$showlegend)
+})
+
+
+base <- ggplot(mtcars, aes(factor(vs), fill=factor(cyl))) 
+
+test_that("geom_bar() stacks counts", { 
+  info <- expect_traces(base + geom_bar(), 3, "position-stack")
+  expect_identical(info$kwargs$layout$barmode, "stack")
+  trs <- info$traces
+  test <- colSums(t(sapply(trs, "[[", "y")), na.rm = TRUE)
+  true <- as.numeric(colSums(with(mtcars, table(cyl, vs))))
+  expect_identical(test, true)
+})
+
+test_that("geom_bar(position = 'fill') stacks proportions", {
+  info <- expect_traces(base + geom_bar(position = "fill"), 3, "position-fill")
+  expect_identical(info$kwargs$layout$barmode, "stack")
+  trs <- info$traces
+  props <- colSums(t(sapply(trs, "[[", "y")), na.rm = TRUE)
+  expect_identical(props, c(1, 1))
 })
 
