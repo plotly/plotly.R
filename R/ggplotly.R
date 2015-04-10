@@ -259,9 +259,8 @@ gg2list <- function(p){
       ys <- lapply(trace.list, "[[", "y")
       xs <- lapply(trace.list, "[[", "x")
       x.vals <- unique(unlist(xs))
-      # if there is more than one y-value (for a particular x value)
-      # then 
-      # 
+      # if there is more than one y-value (for a particular x value),
+      # then modify those y-values so they *add up* to the correct value(s)
       for (val in x.vals) {
         zs <- lapply(xs, function(x) which(x == val))
         ys.given.x <- Map(function(x, y) y[x], zs, ys)
@@ -277,17 +276,6 @@ gg2list <- function(p){
       }
     }
   }
-    
-#     lens <- sapply(ys, length)
-#      && length(trace.list) > 1 && any(lens > 1)) {
-#       xs <- unlist(xs)
-#       trace.seq <- seq_along(trace.list)
-#       idx <- rep(trace.seq, lens)
-#       
-#       
-#       browser()
-#       diffs <- tapply(unlist(ys), INDEX = xs, unStack)
-#       for (k in trace.seq) trace.list[[k]]$y <- as.numeric(sapply(diffs, "[", k))
   
   # Bar Gap for histograms should be 0
   bargaps <- do.call(c, lapply(trace.list, function (x) x$bargap))

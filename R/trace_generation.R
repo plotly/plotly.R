@@ -577,7 +577,6 @@ geom2trace <- list(
     L
   },
   bar=function(data, params) {
-    #data <- data[order(data$y), ]
     x <- if ("x.name" %in% names(data)) data$x.name else data$x
     L <- list(x=x,
               y=data$y,
