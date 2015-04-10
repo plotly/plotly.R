@@ -259,7 +259,7 @@ gg2list <- function(p){
       ys <- lapply(trace.list, "[[", "y")
       xs <- lapply(trace.list, "[[", "x")
       x.vals <- unique(unlist(xs))
-      # if there is more than one y-value (for a particular x value),
+      # if there are two or more y-values (for a particular x value),
       # then modify those y-values so they *add up* to the correct value(s)
       for (val in x.vals) {
         zs <- lapply(xs, function(x) which(x == val))
@@ -267,11 +267,13 @@ gg2list <- function(p){
         if (length(unlist(ys.given.x)) < 2) next
         st <- unStack(unlist(ys.given.x))
         lens <- sapply(ys.given.x, length)
-        trace.seq <- seq_along(zs)
+        trace.seq <- seq_along(trace.list)
         ws <- split(st, rep(trace.seq, lens))
-        for (tr in trace.seq) {
+        for (tr in seq_along(ws)) {
           idx <- zs[[tr]]
-          if (length(idx)) trace.list[[tr]]$y[idx] <- ws[[tr]][idx]
+          replacement <- ws[[tr]]
+          if (length(idx) > 0  && length(replacement) > 0) 
+            trace.list[[tr]]$y[idx] <- replacement
         }
       }
     }

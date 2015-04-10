@@ -25,7 +25,7 @@ gg <- ggplot(researchers, aes(country, papers, fill=field))
 
 test_that("position_dodge is translated to barmode=group", {
   gg.dodge <- gg + geom_bar(stat="identity", position="dodge")
-  info <- expect_traces(gg.dodge, 3, "dodge")
+  info <- expect_traces(gg.dodge, 2, "dodge")
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
@@ -37,7 +37,7 @@ test_that("position_dodge is translated to barmode=group", {
 
 test_that("position_stack is translated to barmode=stack", {
   gg.stack <- gg + geom_bar(stat="identity", position="stack")
-  info <- expect_traces(gg.stack, 3, "stack")
+  info <- expect_traces(gg.stack, 2, "stack")
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
@@ -46,7 +46,7 @@ test_that("position_stack is translated to barmode=stack", {
 
 test_that("position_identity is translated to barmode=overlay", {
   gg.identity <- gg + geom_bar(stat="identity", position="identity")
-  info <- expect_traces(gg.identity, 3, "identity")
+  info <- expect_traces(gg.identity, 2, "identity")
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
@@ -58,11 +58,10 @@ test_that("dates work well with bar charts", {
   researchers$month <- as.Date(researchers$month)
   gd <- ggplot(researchers, aes(month, papers, fill=field)) +
     geom_bar(stat="identity")
-  info <- expect_traces(gd, 3, "dates")
+  info <- expect_traces(gd, 2, "dates")
   trs <- info$traces
   expect_identical(info$kwargs$layout$xaxis$type, "date")
-  expect_identical(trs[[1]]$x[1], "2012-01-01 00:00:00")
-  expect_identical(trs[[1]]$x[2], "2012-02-01 00:00:00")
+  expect_identical(trs[[1]]$x, unique(researchers$month))
 })
 
 ## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
@@ -175,8 +174,9 @@ test_that("geom_bar() stacks counts", {
   info <- expect_traces(base + geom_bar(), 3, "position-stack")
   expect_identical(info$kwargs$layout$barmode, "stack")
   trs <- info$traces
-  test <- colSums(t(sapply(trs, "[[", "y")), na.rm = TRUE)
-  true <- as.numeric(colSums(with(mtcars, table(cyl, vs))))
+  # sum of y values for each trace 
+  test <- as.numeric(sort(sapply(trs, function(x) sum(x$y))))
+  true <- as.numeric(sort(table(mtcars$cyl)))
   expect_identical(test, true)
 })
 
@@ -184,7 +184,8 @@ test_that("geom_bar(position = 'fill') stacks proportions", {
   info <- expect_traces(base + geom_bar(position = "fill"), 3, "position-fill")
   expect_identical(info$kwargs$layout$barmode, "stack")
   trs <- info$traces
-  props <- colSums(t(sapply(trs, "[[", "y")), na.rm = TRUE)
-  expect_identical(props, c(1, 1))
+  # sum of y-values *conditioned* on a x-value
+  prop <- sum(sapply(sapply(trs, "[[", "y"), "[", 1))
+  expect_identical(prop, 1)
 })
 

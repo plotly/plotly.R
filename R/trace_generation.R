@@ -47,11 +47,6 @@ layer2traces <- function(l, d, misc) {
     bargap <- 0
     misc$hist <- TRUE
   }
-
-  # TODO: remove this once we reimplement density as area
-  if (g$geom == "density") {
-    bargap <- 0
-  }
   
   # For non-numeric data on the axes, we should take the values from
   # the original data.
@@ -260,6 +255,10 @@ layer2traces <- function(l, d, misc) {
       } else if (pos %in% c("stack", "fill")) {
         "stack"
       } else "group"
+    }
+    # TODO: remove this once we reimplement density as area
+    if (g$geom == "density") {
+      tr$bargap <- 0
     }
     
     traces <- c(traces, list(tr))
