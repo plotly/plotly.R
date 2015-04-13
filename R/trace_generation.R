@@ -251,10 +251,6 @@ layer2traces <- function(l, d, misc) {
         "stack"
       } else "group"
     }
-    # TODO: remove this once we reimplement density as area
-    if (g$geom == "density") {
-      tr$bargap <- 0
-    }
     
     traces <- c(traces, list(tr))
   }
@@ -354,10 +350,9 @@ toBasic <- list(
     g
   },
   density=function(g) {
-    g$params$xstart <- min(g$data$x)
-    g$params$xend <- max(g$data$x)
-    g$params$binwidth <- (max(g$data$x) - min(g$data$x))/30
-    g$data <- g$prestats.data
+    g <- group2NA(g, "area")
+    if (is.null(g$data$fill) && is.null(g$params$alpha)) g$params$alpha <- 0
+    if (is.null(g$data$colour)) g$params$colour <- "black"
     g
   },
   density2d=function(g) {
@@ -627,15 +622,6 @@ geom2trace <- list(
               line=paramORdefault(params, aes2line, line.defaults))
     L$contours=list(coloring="lines")
     L
-  },
-  density=function(data, params) {
-    L <- list(x=data$x,
-              name=params$name,
-              text=data$text,
-              marker=list(color=toRGB(params$fill)),
-              type="histogram",
-              autobinx=TRUE,
-              histnorm="probability density")
   },
   density2d=function(data, params) {
     L <- list(x=data$x,
