@@ -21,16 +21,16 @@ base <- ggplot(mtcars, aes(wt))
 test_that("geom_density() is translated to area chart", {
   info <- expect_traces(base + geom_density(), 1, "simple")
   tr <- info$traces[[1]]
-  expect_identical(tr[[1]]$type, "scatter")
-  expect_identical(tr[[1]]$fill, "tozeroy")
-  expect_identical(tr[[1]]$fillcolor, "rgba(51,51,51,0)")
+  expect_identical(tr$type, "scatter")
+  expect_identical(tr$fill, "tozeroy")
+  expect_identical(tr$fillcolor, "rgba(51,51,51,0)")
 })
 
 test_that("geom_density() respects fill aesthetic", {
   info <- expect_traces(base + geom_density(aes(fill=factor(vs))), 2, "fill")
   trs <- info$traces
   type <- unique(sapply(trs, "[[", "type"))
-  type <- unique(sapply(trs, "[[", "fill"))
+  fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
   expect_identical(fill, "tozeroy")
 })
@@ -39,7 +39,7 @@ test_that("geom_density() respects colour aesthetic", {
   info <- expect_traces(base + geom_density(aes(colour=factor(vs))), 2, "color")
   trs <- info$traces
   type <- unique(sapply(trs, "[[", "type"))
-  type <- unique(sapply(trs, "[[", "fill"))
+  fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
   expect_identical(fill, "tozeroy")
 })
