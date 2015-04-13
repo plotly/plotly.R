@@ -44,13 +44,13 @@ test_that("position_stack is translated to barmode=stack", {
   expect_identical(info$kwargs$layout$barmode, "stack")
 })
 
-test_that("position_identity is translated to barmode=overlay", {
+test_that("position_identity is translated to barmode=stack", {
   gg.identity <- gg + geom_bar(stat="identity", position="identity")
   info <- expect_traces(gg.identity, 2, "identity")
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(info$kwargs$layout$barmode, "overlay")
+  expect_identical(info$kwargs$layout$barmode, "stack")
 })
 
 test_that("dates work well with bar charts", {

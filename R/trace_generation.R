@@ -250,9 +250,8 @@ layer2traces <- function(l, d, misc) {
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
       pos <- l$position$.super$objname
-      tr$barmode <- if (pos == "identity") {
-         "overlay"
-      } else if (pos %in% c("stack", "fill")) {
+      #browser()
+      tr$barmode <- if (pos %in% c("identity", "stack", "fill")) {
         "stack"
       } else "group"
     }
@@ -577,6 +576,13 @@ geom2trace <- list(
   },
   bar=function(data, params) {
     x <- if ("x.name" %in% names(data)) data$x.name else data$x
+    if (inherits(x, "POSIXt")) {
+      # Convert seconds into milliseconds
+      x <- as.numeric(x) * 1000
+    } else if (inherits(x, "Date")) {
+      # Convert days into milliseconds
+      x <- as.numeric(x) * 24 * 60 * 60 * 1000
+    }
     L <- list(x=x,
               y=data$y,
               type="bar",
