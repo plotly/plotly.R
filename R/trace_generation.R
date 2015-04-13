@@ -45,7 +45,6 @@ layer2traces <- function(l, d, misc) {
   if (g$geom == "histogram") {
     g$geom <- "bar"
     bargap <- 0
-    misc$hist <- TRUE
   }
   
   # For non-numeric data on the axes, we should take the values from
@@ -161,16 +160,14 @@ layer2traces <- function(l, d, misc) {
       matched.names <- names(basic$data)[data.i]
       name.i <- name.names %in% matched.names
       invariable.names <- cbind(name.names, mark.names)[name.i,]
-      # fill can be variable for histograms
-      #if (misc$hist) 
-      #  invariable.names <- invariable.names[!grepl("fill", invariable.names)]
       other.names <- !names(basic$data) %in% invariable.names
       vec.list <- basic$data[is.split]
       df.list <- split(basic$data, vec.list, drop=TRUE)
       lapply(df.list, function(df){
         params <- basic$params
         params[invariable.names] <- if (ncol(x <- df[1, invariable.names]) > 0) x else NULL
-        list(data=df[other.names], params=params)
+        list(data=df[other.names], 
+             params=params)
       })
     }
   }
@@ -250,7 +247,6 @@ layer2traces <- function(l, d, misc) {
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
       pos <- l$position$.super$objname
-      #browser()
       tr$barmode <- if (pos %in% c("identity", "stack", "fill")) {
         "stack"
       } else "group"

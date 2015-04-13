@@ -38,14 +38,15 @@ test_that("geom_histogram(aes(y = ..density..)) displays a density", {
   expect_equal(area, 1, 0.1)
 })
 
-# would be nice to have...
-# test_that("geom_histogram(aes(fill = ..count..)) works", {
-#   info <- expect_traces(base + geom_histogram(aes(fill = ..count..)), 1, "fill")
-#   tr <- info$traces[[1]]
-#   ncolors <- length(tr$marker$color)
-#   nbars <- sum(tr$y > 0)
-#   expect_identical(ncolor, nbars)
-# })
+test_that("geom_histogram(aes(fill = ..count..)) works", {
+  info <- expect_traces(base + geom_histogram(aes(fill = ..count..)), 6, "fill")
+  tr <- info$traces
+  # each traces should have the same value of y
+  for (i in seq_along(traces)) {
+    ys <- tr[[i]]$y
+    expect_equal(length(unique(ys)), 1)
+  }
+})
 
 test_that("Fixed colour/fill works", {
   gg <- base + geom_histogram(colour = "darkgreen", fill = "white")
