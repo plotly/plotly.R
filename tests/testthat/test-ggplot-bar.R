@@ -61,7 +61,9 @@ test_that("dates work well with bar charts", {
   info <- expect_traces(gd, 2, "dates")
   trs <- info$traces
   expect_identical(info$kwargs$layout$xaxis$type, "date")
-  expect_identical(trs[[1]]$x, unique(researchers$month))
+  # plotly likes time in milliseconds
+  t <- as.numeric(unique(researchers$month)) * 24 * 60 * 60 * 1000
+  expect_identical(trs[[1]]$x, t)
 })
 
 ## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/

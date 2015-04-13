@@ -42,7 +42,7 @@ test_that("geom_histogram(aes(fill = ..count..)) works", {
   info <- expect_traces(base + geom_histogram(aes(fill = ..count..)), 6, "fill")
   tr <- info$traces
   # each traces should have the same value of y
-  for (i in seq_along(traces)) {
+  for (i in seq_along(tr)) {
     ys <- tr[[i]]$y
     expect_equal(length(unique(ys)), 1)
   }
