@@ -581,9 +581,6 @@ gg2list <- function(p){
     layout$annotations <- annotations
   }
   
-  # Remove legend if theme has no legend position
-  layout$showlegend <- !(theme.pars$legend.position=="none")
-  
   # Main plot title.
   layout$title <- built$plot$labels$title
   
@@ -611,10 +608,15 @@ gg2list <- function(p){
   is.hidden <- function(x){
     is.false(x) || is.none(x)
   }
+  layout$showlegend <- if(length(legends.present) == 0) FALSE else TRUE
   for(a in legends.present){
     if(is.hidden(p$guides[[a]])){
       layout$showlegend <- FALSE
     }
+  }
+  # Legend hiding from theme.
+  if(theme.pars$legend.position=="none"){
+    layout$showlegend <- FALSE
   }
 
   # Only show a legend title if there is at least 1 trace with

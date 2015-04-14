@@ -19,7 +19,9 @@ expect_traces <- function(gg, n.traces, name){
 }
 
 get_legend <- function(L){
-  legend.on <- L$kwargs$layout$showlegend
+  if(!isTRUE(L$kwargs$layout$showlegend)){
+    return(data.frame())
+  }
   legend.list <- list()
   for(tr in L$traces){
     if(is.character(tr$name)){
