@@ -111,13 +111,13 @@ gg2list <- function(p){
     }
   }
 
-  ## Test fill and color to see if they encode a quantitative
-  ## variable. This may be useful for several reasons: (1) it is
-  ## sometimes possible to plot several different colors in the same
-  ## trace (e.g. points), and that is faster for large numbers of
-  ## data points and colors; (2) factors on x or y axes should be
-  ## sent to plotly as characters, not as numeric data (which is
-  ## what ggplot_build gives us).
+  # Test fill and color to see if they encode a quantitative
+  # variable. This may be useful for several reasons: (1) it is
+  # sometimes possible to plot several different colors in the same
+  # trace (e.g. points), and that is faster for large numbers of
+  # data points and colors; (2) factors on x or y axes should be
+  # sent to plotly as characters, not as numeric data (which is
+  # what ggplot_build gives us).
   misc <- list()
   for(a in c("fill", "colour", "x", "y", "size")){
     for(data.type in c("continuous", "date", "datetime", "discrete")){
