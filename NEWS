@@ -1,3 +1,7 @@
+0.5.28 -- 15 Apr 2015
+
+Add test-cookbook-lines.R and fix bugs that showed up in those tests.
+
 0.5.27 -- 19 Mar 2015
 
 Reimplement geom_ribbon as a basic polygon. Fix #191. Fix #192.
