@@ -41,25 +41,9 @@ layer2traces <- function(l, d, misc) {
       g$geom <- "smoothLine"
     }
   }
-  # Barmode and bargap
-  barmode <- "group"
-  if (g$geom == "bar" || g$geom == "histogram") {
-    if (l$stat$objname == "bin") {
-      if (g$geom != "histogram") {
-        warning("You may want to use geom_histogram.")
-      }
-    } else {
-      bargap <- "default"
-    }
-    g$geom <- "bar"  # histogram is just an alias for geom_bar + stat_bin
-    pos <- l$position$.super$objname
-    if (pos == "identity") {
-      barmode <- "overlay"
-    } else if (pos == "stack") {
-      barmode <- "stack"
-    }
-  }
-  if (g$geom == "density") {
+  # histogram is essentially a bar chart with no gaps (after stats are computed)
+  if (g$geom == "histogram") {
+    g$geom <- "bar"
     bargap <- 0
   }
   
@@ -182,12 +166,11 @@ layer2traces <- function(l, d, misc) {
       lapply(df.list, function(df){
         params <- basic$params
         params[invariable.names] <- if (ncol(x <- df[1, invariable.names]) > 0) x else NULL
-        list(data=df[other.names],
+        list(data=df[other.names], 
              params=params)
       })
     }
   }
-  
   # Split hline and vline when multiple panels or intercepts:
   # Need multiple traces accordingly.
   if (g$geom == "hline" || g$geom == "vline") {
@@ -216,7 +199,6 @@ layer2traces <- function(l, d, misc) {
   }
   traces <- NULL
   names.in.legend <- NULL
-  
   for (data.i in seq_along(data.list)) {
     data.params <- data.list[[data.i]]
     data.params$params$stat.type <- l$stat$objname
@@ -260,17 +242,22 @@ layer2traces <- function(l, d, misc) {
     if (is.null(tr$name) || tr$name %in% names.in.legend)
       tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
-    
-    if (g$geom == "bar")
-      tr$barmode <- barmode
-    
-    # Bar Gap
-    if (exists("bargap")) {
-      tr$bargap <- bargap
+
+    # special handling for bars
+    if (g$geom == "bar") {
+      tr$bargap <- if (exists("bargap")) bargap else "default"
+      pos <- l$position$.super$objname
+      tr$barmode <- if (pos %in% c("identity", "stack", "fill")) {
+        "stack"
+      } else "group"
     }
+    # TODO: remove this once we reimplement density as area
+    if (g$geom == "density") {
+      tr$bargap <- 0
+    }
+    
     traces <- c(traces, list(tr))
   }
-  
   
   sort.val <- sapply(traces, function(tr){
     rank.val <- unlist(tr$sort)
@@ -357,16 +344,9 @@ toBasic <- list(
     g$data <- g$prestats.data
     g
   },
-  bar=function(g) {
-    if (any(is.na(g$prestats.data$x)))
-      g$prestats.data$x <- g$prestats.data$x.name
-    for(a in c("fill", "colour")){
-      g$prestats.data[[a]] <-
-        g$data[[a]][match(g$prestats.data$group, g$data$group)]
-    }
-    g$params$xstart <- min(g$data$xmin)
-    g$params$xend <- max(g$data$xmax)
-    g$data <- g$prestats.data
+  bar=function(g){
+    g <- group2NA(g, "bar")
+    g$data <- g$data[!is.na(g$data$y), ]
     g
   },
   contour=function(g) {
@@ -591,40 +571,25 @@ geom2trace <- list(
     L
   },
   bar=function(data, params) {
-    L <- list(x=data$x,
+    x <- if ("x.name" %in% names(data)) data$x.name else data$x
+    if (inherits(x, "POSIXt")) {
+      # Convert seconds into milliseconds
+      x <- as.numeric(x) * 1000
+    } else if (inherits(x, "Date")) {
+      # Convert days into milliseconds
+      x <- as.numeric(x) * 24 * 60 * 60 * 1000
+    }
+    L <- list(x=x,
+              y=data$y,
+              type="bar",
               name=params$name,
               text=data$text,
               marker=list(color=toRGB(params$fill)))
-    
     if (!is.null(params$colour)) {
       L$marker$line <- list(color=toRGB(params$colour))
       L$marker$line$width <- if (is.null(params$size)) 1 else params$size
     }
-    
-    if (!is.null(params$alpha))
-      L$opacity <- params$alpha
-    
-    if (params$stat.type == "bin") {
-      L$type <- "histogram"
-      if (is.null(params$binwidth)) {
-        L$autobinx <- TRUE
-      } else {
-        L$autobinx <- FALSE
-        L$xbins=list(start=params$xstart,
-                     end=params$xend,
-                     size=params$binwidth)
-        if (inherits(data$x.name, "POSIXt")) {
-          # Convert seconds into milliseconds
-          L$xbins <- lapply(L$xbins, function(x) x * 1000)
-        } else if (inherits(data$x.name, "Date")) {
-          # Convert days into milliseconds
-          L$xbins <- lapply(L$xbins, function(x) x * 24 * 60 * 60 * 1000)
-        }
-      }
-    } else {
-      L$y <- data$y
-      L$type <- "bar"
-    }
+    if (!is.null(params$alpha)) L$opacity <- params$alpha
     L
   },
   step=function(data, params) {

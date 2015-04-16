@@ -242,6 +242,41 @@ gg2list <- function(p){
     if (!all(barmodes == barmodes[1]))
       warning(paste0("You have multiple barcharts or histograms with different positions; ",
                      "Plotly's layout barmode will be '", layout$barmode, "'."))
+    # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
+    if (layout$barmode == "stack") {
+      # could speed up this function with environments or C/C++
+      unStack <- function(vec) {
+        n <- length(vec)
+        if (n == 1) return(vec)
+        seq.n <- seq_len(n)
+        names(vec) <- seq.n
+        vec <- sort(vec)
+        for (k in seq(2, n)) {
+          vec[k] <- vec[k] - sum(vec[seq(1, k-1)])
+        }
+        as.numeric(vec[as.character(seq.n)])
+      }
+      ys <- lapply(trace.list, "[[", "y")
+      xs <- lapply(trace.list, "[[", "x")
+      x.vals <- unique(unlist(xs))
+      # if there are two or more y-values (for a particular x value),
+      # then modify those y-values so they *add up* to the correct value(s)
+      for (val in x.vals) {
+        zs <- lapply(xs, function(x) which(x == val))
+        ys.given.x <- Map(function(x, y) y[x], zs, ys)
+        if (length(unlist(ys.given.x)) < 2) next
+        st <- unStack(unlist(ys.given.x))
+        lens <- sapply(ys.given.x, length)
+        trace.seq <- seq_along(trace.list)
+        ws <- split(st, rep(trace.seq, lens))
+        for (tr in seq_along(ws)) {
+          idx <- zs[[tr]]
+          replacement <- ws[[tr]]
+          if (length(idx) > 0  && length(replacement) > 0) 
+            trace.list[[tr]]$y[idx] <- replacement
+        }
+      }
+    }
   }
   
   # Bar Gap for histograms should be 0
