@@ -350,7 +350,7 @@ toBasic <- list(
     g
   },
   density=function(g) {
-    g <- group2NA(g, "area")
+    g$geom <- "area"
     if (is.null(g$data$fill) && is.null(g$params$alpha)) g$params$alpha <- 0
     if (is.null(g$data$colour)) g$params$colour <- "black"
     g
