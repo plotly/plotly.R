@@ -1,6 +1,6 @@
 context("Probability density")
 
-expect_traces <- function(gg, n.traces, name){
+expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("density-", name))
