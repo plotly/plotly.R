@@ -1,4 +1,8 @@
-0.5.27 -- 15 April 2015
+0.5.29 -- 16 April 2015
+
+geom_density() as filled area chart #202 
+
+0.5.28 -- 15 April 2015
 
 Let ggplot handle histogram binning. Fix #198
 
