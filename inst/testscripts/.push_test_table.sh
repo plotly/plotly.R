@@ -15,7 +15,11 @@ set -e
 # -----------------------------------------------------------------------
 
 # Only build test table if $TRAVIS_PULL_REQUEST is false
-[ "${TRAVIS_PULL_REQUEST}" != "false" ] && exit 0
+if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
+  # post some comments on the pull request
+  Rscript ../plotly/inst/testscripts/comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
+  exit 0
+fi
 
 git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
@@ -52,7 +56,3 @@ GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
 git pull $FULL_REPO gh-pages
 git push $FULL_REPO gh-pages
-
-
-# post some comments on the pull request
-Rscript ../plotly/inst/testscripts/comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
