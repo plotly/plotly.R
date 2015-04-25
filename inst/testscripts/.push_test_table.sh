@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit on error
+set -e
+
 # -----------------------------------------------------------------------
 # When pushing to a pull request on GitHub, Travis does two builds:
 # (1) One for the pull request itself. In this case, $TRAVIS_PULL_REQUEST 
@@ -49,3 +52,6 @@ GH_REPO="@github.com/ropensci/plotly-test-table.git"
 FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
 git pull $FULL_REPO gh-pages
 git push $FULL_REPO gh-pages
+
+# post some comments on the pull request
+Rscript comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
