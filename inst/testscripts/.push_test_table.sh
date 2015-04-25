@@ -53,5 +53,6 @@ FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
 git pull $FULL_REPO gh-pages
 git push $FULL_REPO gh-pages
 
+
 # post some comments on the pull request
-Rscript comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
+Rscript ../plotly/inst/testscripts/comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
