@@ -12,10 +12,10 @@ r_packages:
   - httr 
 
 before_script:
-  - chmod 755 ./.push_test_table.sh
+  - chmod 755 inst/testscripts/.push_test_table.sh
 
 after_success:
-  - ./.push_test_table.sh
+  - inst/testscripts/.push_test_table.sh
 
 notifications:
   slack:
