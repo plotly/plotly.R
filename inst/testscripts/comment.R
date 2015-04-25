@@ -6,7 +6,7 @@ a <- commandArgs(TRUE)
 # note that gistr is a good reference for talking to the github API via httr
 # https://github.com/ropensci/gistr/blob/master/R/zzz.R
 url <- sprintf('https://api.github.com/repos/ropensci/plotly/pulls/%s/comments', a[1])
-home <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", a[2])
-header <- add_headers(`User-Agent` = "plotly", `Accept` = 'application/vnd.github.v3+json')
-msg <- sprintf("New test table created at \n '%s'", new_test)
+tables <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", a[2])
+header <- httr::add_headers(`User-Agent` = "plotly", `Accept` = 'application/vnd.github.v3+json')
+msg <- sprintf("New test table created at \n '%s'", tables)
 httr::POST(url = url, header, body = list(body = msg), encode = "json")
