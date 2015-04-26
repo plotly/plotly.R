@@ -17,7 +17,7 @@ set -e
 # Only build test table if $TRAVIS_PULL_REQUEST is false
 if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
   # post some comments on the pull request
-  Rscript ../plotly/inst/testscripts/comment.R ${TRAVIS_PULL_REQUEST} ${TRAVIS_COMMIT}
+  Rscript ../plotly/inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $TRAVIS_COMMIT $GH_TOKEN
   exit 0
 fi
 
