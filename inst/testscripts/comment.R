@@ -11,5 +11,6 @@ tables <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.h
 header <- httr::add_headers(`User-Agent` = "plotly", 
                             `Accept` = 'application/vnd.github.v3+json',
                             `Authorization` = paste0("token ", a[3]))
-msg <- sprintf("New test table created at \n '%s'", tables)
-httr::POST(url = url, header, body = msg, encode = "json")
+msg <- sprintf("New test table created at %s", tables)
+json <- jsonlite::toJSON(list(body = msg), auto_unbox = TRUE)
+httr::POST(url = url, header, body = json, encode = "json")
