@@ -12,4 +12,4 @@ header <- httr::add_headers(`User-Agent` = "plotly",
                             `Accept` = 'application/vnd.github.v3+json',
                             `Authorization` = paste0("token ", a[3]))
 msg <- sprintf("New test table created at \n '%s'", tables)
-httr::POST(url = url, header, body = list(body = msg), encode = "json")
+httr::POST(url = url, header, body = msg, encode = "json")
