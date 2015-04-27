@@ -20,10 +20,15 @@ info <- content(res)
 # http://stackoverflow.com/questions/15096331/github-api-how-to-find-the-branches-of-a-pull-request
 branch <- strsplit(info$head$label, ":")[[1]][2]
 
-# plotly-test-table build script assumes we've checkout the dev branch
+# plotly-test-table build script assumes we've checkout the dev branch.
+# Note that travis does something like this for "pr" build:
+#$ git fetch origin +refs/pull/number/merge:
+#$ git checkout -qf FETCH_HEAD
+# this leaves HEAD in a detached state, but we should be able to do:
+# git checkout -b new_branch_name
 setwd("../plotly")
-if (system(paste("git checkout", branch)) != 0L)
-  stop(paste("Failed to 'git checkout'", branch, "branch"))
+if (system(paste("git checkout -b", branch)) != 0L)
+  stop(paste("Failed to 'git checkout -b'", branch, "branch"))
 setwd("../plotly-test-table")
 cat("user,SHA1,label", file = "code_commits.csv")
 row1 <- paste0("\nropensci,", info$base$sha, ",master")
@@ -36,7 +41,6 @@ cat(row2, file = "code_commits.csv", append = TRUE)
 system("touch table.R")
 if (system("make") != 0L)
   stop("Failed to 'make' test table")
-
 
 # add, commit, push to gh-pages branch of plotly-test-table
 system("./git-add.sh")
