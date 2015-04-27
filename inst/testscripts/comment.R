@@ -1,5 +1,6 @@
-# first argument should be the pull request number
-# third should be the authentication token
+# first argument should be the pull request number (TRAVIS_PULL_REQUEST)
+# second should be the travis build ID (TRAVIS_BUILD_ID)
+# third should be the github authentication token 
 a <- commandArgs(TRUE)
 # gistr is a good reference for talking to the github API via httr
 # https://github.com/ropensci/gistr/blob/master/R/zzz.R
@@ -35,6 +36,16 @@ cat(row2, file = "code_commits.csv", append = TRUE)
 system("touch table.R")
 if (system("make") != 0L)
   stop("Failed to 'make' test table")
+
+
+# add, commit, push to gh-pages branch of plotly-test-table
+system("./git-add.sh")
+commit_msg <- paste0("Pushed from https://travis-ci.org/ropensci/plotly/builds/", a[2])
+system(paste('git commit -a -m', commit_msg))
+# This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
+repo <- paste0("https://", a[3], "@github.com/ropensci/plotly-test-table.git")
+system(paste("git pull", repo, "gh-pages"))
+system(paste("git push", repo, "gh-pages"))
 
 # post comment if a link to this SHA doesn't exist 
 # (needed since Travis randomly re-builds stuff)

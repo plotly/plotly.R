@@ -31,13 +31,4 @@ git clone https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
 git checkout gh-pages
 
-Rscript inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $GH_TOKEN
-
-# add, commit, push to gh-pages branch of plotly-test-table
-./git-add.sh
-git commit -a -m "Travis build number ${TRAVIS_BUILD_NUMBER} of ${TRAVIS_REPO_SLUG}"
-# This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
-GH_REPO="@github.com/ropensci/plotly-test-table.git"
-FULL_REPO="https://${GH_TOKEN}${GH_REPO}"
-git pull $FULL_REPO gh-pages
-git push $FULL_REPO gh-pages
+Rscript ../plotly/inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $TRAVIS_BUILD_ID $GH_TOKEN
