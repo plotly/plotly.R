@@ -12,6 +12,7 @@ r_packages:
   - httr 
 
 before_script:
+  - git log
   - chmod 755 inst/testscripts/.push_test_table.sh
 
 after_success:
