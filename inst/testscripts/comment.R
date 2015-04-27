@@ -13,6 +13,7 @@ header <- add_headers(`User-Agent` = "plotly",
                       `Authorization` = paste0("token ", a[3]))
 # Must be successful since we grab the branch name for this pull request
 # and SHA1 info from the request content
+message(pr)
 res <- GET(url = pr, header)
 stop_for_status(res)
 info <- content(res)
@@ -39,8 +40,7 @@ cat(row2, file = "code_commits.csv", append = TRUE)
 # copy over file (created during Rscript) 
 # with sha/branch info for building test table
 system("touch table.R")
-if (system("make") != 0L)
-  stop("Failed to 'make' test table")
+if (system("make") != 0L) stop("Failed to 'make' test table")
 
 # add, commit, push to gh-pages branch of plotly-test-table
 system("./git-add.sh")
