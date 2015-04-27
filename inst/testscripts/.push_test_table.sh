@@ -14,12 +14,8 @@ set -e
 # http://docs.travis-ci.com/user/ci-environment/
 # -----------------------------------------------------------------------
 
-# Only build test table if $TRAVIS_PULL_REQUEST is false
-if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
-  # post some comments on the pull request
-  Rscript ../plotly/inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $TRAVIS_COMMIT $GH_TOKEN
-  exit 0
-fi
+# We need the pull request number to talk to the GitHub API, make comments, etc.
+[ "${TRAVIS_PULL_REQUEST}" = "false" ] && exit 0
 
 git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
@@ -31,22 +27,11 @@ git config --global user.email "cpsievert1@gmail.com"
 cd ..
 rm -rf plotly/
 git clone https://github.com/ropensci/plotly.git
-cd plotly
-echo "user,SHA1,label" >> ../code_commits.csv
-echo "ropensci,`git rev-parse HEAD`,master" >> ../code_commits.csv
-git checkout $TRAVIS_BRANCH
-echo "ropensci,`git rev-parse HEAD`,${TRAVIS_BRANCH}" >> ../code_commits.csv
-Rscript -e "devtools::install()"
-
-cd ..
 git clone https://github.com/ropensci/plotly-test-table.git
 cd plotly-test-table
 git checkout gh-pages
 
-mv ../code_commits.csv .
-cat code_commits.csv
-touch table.R
-make
+Rscript inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $GH_TOKEN
 
 # add, commit, push to gh-pages branch of plotly-test-table
 ./git-add.sh
