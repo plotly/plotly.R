@@ -43,9 +43,9 @@ system("touch table.R")
 if (system("make") != 0L) stop("Failed to 'make' test table")
 
 # add, commit, push to gh-pages branch of plotly-test-table
-system("./git-add.sh")
-commit_msg <- paste0("Pushed from https://travis-ci.org/ropensci/plotly/builds/", a[2])
-system(paste('git commit -a -m', commit_msg))
+system("git add tables/*/*.html data/*/*.png data/*/*.log")
+commit_msg <- paste0('"Pushed from https://travis-ci.org/ropensci/plotly/builds/"', a[2])
+system(paste('git commit -m', commit_msg))
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 repo <- paste0("https://", a[3], "@github.com/ropensci/plotly-test-table.git")
 system(paste("git pull", repo, "gh-pages"))
