@@ -6,8 +6,8 @@ a <- commandArgs(TRUE)
 # https://github.com/ropensci/gistr/blob/master/R/zzz.R
 library("httr")
 base <- 'https://api.github.com/repos/ropensci/plotly/'
-pr <- sprintf(file.path(base, 'pulls/%s/'), a[1])
-comments <- sprintf(file.path(base, 'issues/%s/comments'), a[1])
+pr <- sprintf(paste0(base, 'pulls/%s'), a[1])
+comments <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 header <- add_headers(`User-Agent` = "plotly", 
                       `Accept` = 'application/vnd.github.v3+json',
                       `Authorization` = paste0("token ", a[3]))
