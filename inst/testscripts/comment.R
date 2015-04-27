@@ -13,7 +13,6 @@ header <- add_headers(`User-Agent` = "plotly",
                       `Authorization` = paste0("token ", a[3]))
 # Must be successful since we grab the branch name for this pull request
 # and SHA1 info from the request content
-message(pr)
 res <- GET(url = pr, header)
 stop_for_status(res)
 info <- content(res)
@@ -30,6 +29,7 @@ branch <- strsplit(info$head$label, ":")[[1]][2]
 setwd("../plotly")
 if (system(paste("git checkout -b", branch)) != 0L)
   stop(paste("Failed to 'git checkout -b'", branch, "branch"))
+devtools::install()
 setwd("../plotly-test-table")
 cat("user,SHA1,label", file = "code_commits.csv")
 row1 <- paste0("\nropensci,", info$base$sha, ",master")
