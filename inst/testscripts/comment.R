@@ -1,6 +1,7 @@
-# first argument should be the pull request number (TRAVIS_PULL_REQUEST)
-# second should be the travis build ID (TRAVIS_BUILD_ID)
-# third should be the github authentication token 
+# first argument is the pull request number (TRAVIS_PULL_REQUEST)
+# second is travis build ID (TRAVIS_BUILD_ID)
+# third is the commit SHA1 currently being tested (TRAVIS_COMMIT)
+# fourth is the github authentication token 
 a <- commandArgs(TRUE)
 # gistr is a good reference for talking to the github API via httr
 # https://github.com/ropensci/gistr/blob/master/R/zzz.R
@@ -42,6 +43,7 @@ system("touch table.R")
 if (system("make") != 0L) stop("Failed to 'make' test table")
 
 # add, commit, push to gh-pages branch of plotly-test-table
+system("git add index.html")
 system("git add tables/*/*.html")
 system("git add data/*/*.png")
 system("git add data/*/*.log")
@@ -55,13 +57,14 @@ system(paste("git push -q", repo, "gh-pages"))
 # post comment if a link to this SHA doesn't exist 
 # (needed since Travis randomly re-builds stuff)
 tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", a[3])
+msg <- sprintf("Commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s \n %s", 
+               info$head$sha, info$base$sha, a[3], info$base$sha, a[3], tbl_link)
 commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 res <- GET(commentz, header)
 warn_for_status(res)
 info <- content(res)
 old_body <- unlist(lapply(info, "[", "body"))
 if (!any(grepl(tbl_link, old_body))) {
-  msg <- sprintf("New test table created at %s", tbl_link)
   json <- jsonlite::toJSON(list(body = msg), auto_unbox = TRUE)
   httr::POST(url = commentz, header, body = json, encode = "json")
 } else {
