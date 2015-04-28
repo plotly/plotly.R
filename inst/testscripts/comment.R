@@ -60,7 +60,7 @@ tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index
 msg <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s", 
                info$head$sha, info$base$sha, a[3], info$base$sha, a[3], tbl_link)
 msg <- paste("```---Automatically generated message---```", msg, 
-             "```---Automatically generated message---```", collapse = "\n")
+             "```---Automatically generated message---```", sep = "\n")
 commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 res <- GET(commentz, header)
 warn_for_status(res)
