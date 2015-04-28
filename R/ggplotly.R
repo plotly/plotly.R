@@ -886,7 +886,8 @@ gg2list <- function(p){
     flipped.layout[["yaxis"]] <- x
   }
   
-  flipped.traces$kwargs <- list(layout=flipped.layout)
+  fig <- list(data=flipped.traces, layout=flipped.layout)
+
+  fig
   
-  flipped.traces
 }
