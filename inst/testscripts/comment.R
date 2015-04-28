@@ -7,7 +7,6 @@ a <- commandArgs(TRUE)
 library("httr")
 base <- 'https://api.github.com/repos/ropensci/plotly/'
 pr <- sprintf(paste0(base, 'pulls/%s'), a[1])
-comments <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 header <- add_headers(`User-Agent` = "plotly", 
                       `Accept` = 'application/vnd.github.v3+json',
                       `Authorization` = paste0("token ", a[3]))
@@ -50,14 +49,16 @@ commit_msg <- paste0('"Pushed from https://travis-ci.org/ropensci/plotly/builds/
 system(paste('git commit -m', commit_msg))
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
 repo <- paste0("https://", a[3], "@github.com/ropensci/plotly-test-table.git")
-system(paste("git pull", repo, "gh-pages"))
-system(paste("git push", repo, "gh-pages"))
+system(paste("git pull -q", repo, "gh-pages"))
+system(paste("git push -q", repo, "gh-pages"))
 
 # post comment if a link to this SHA doesn't exist 
 # (needed since Travis randomly re-builds stuff)
 tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", 
                     info$head$sha)
-res <- GET(comments, header)
+commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
+message(commentz)
+res <- GET(commentz, header)
 warn_for_status(res)
 info <- content(res)
 old_body <- unlist(lapply(info, "[", "body"))
