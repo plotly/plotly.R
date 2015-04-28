@@ -57,7 +57,6 @@ system(paste("git push -q", repo, "gh-pages"))
 tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", 
                     info$head$sha)
 commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
-message(commentz)
 res <- GET(commentz, header)
 warn_for_status(res)
 info <- content(res)
@@ -65,7 +64,7 @@ old_body <- unlist(lapply(info, "[", "body"))
 if (!any(grepl(tbl_link, old_body))) {
   msg <- sprintf("New test table created at %s", tbl_link)
   json <- jsonlite::toJSON(list(body = msg), auto_unbox = TRUE)
-  httr::POST(url = url, header, body = json, encode = "json")
+  httr::POST(url = commentz, header, body = json, encode = "json")
 } else {
   message("Link already posted")
 }
