@@ -139,11 +139,15 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
-    pargs <- gg2list(gg)
+    fig <- gg2list(gg)
     if (!"auto_open" %in% names(kwargs)) {
       kwargs <- c(kwargs, auto_open=TRUE)
     }
-    pargs$kwargs <- c(pargs$kwargs, kwargs)
+    
+    pargs <- fig$data
+    pargs$kwargs <- kwargs
+    pargs$kwargs$layout <- fig$layout
+    
     if (session == "interactive") {  # we are on the command line
       resp <- do.call(pub$plotly, pargs)
       if (pargs$kwargs$auto_open) {
