@@ -43,7 +43,9 @@ system("touch table.R")
 if (system("make") != 0L) stop("Failed to 'make' test table")
 
 # add, commit, push to gh-pages branch of plotly-test-table
-system("git add tables/*/*.html data/*/*.png data/*/*.log")
+system("git add tables/*/*.html")
+system("git add data/*/*.png")
+system("git add data/*/*.log")
 commit_msg <- paste0('"Pushed from https://travis-ci.org/ropensci/plotly/builds/"', a[2])
 system(paste('git commit -m', commit_msg))
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
@@ -55,7 +57,7 @@ system(paste("git push", repo, "gh-pages"))
 # (needed since Travis randomly re-builds stuff)
 tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", 
                     info$head$sha)
-res <- GET(url = comments, header)
+res <- GET(comments, header)
 warn_for_status(res)
 info <- content(res)
 old_body <- unlist(lapply(info, "[", "body"))
