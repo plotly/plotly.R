@@ -59,8 +59,7 @@ system(paste("git push -q", repo, "gh-pages"))
 tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", a[3])
 msg <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s", 
                info$head$sha, info$base$sha, a[3], info$base$sha, a[3], tbl_link)
-msg <- paste("```---Automatically generated message---```", msg, 
-             "```---Automatically generated message---```", sep = "\n")
+msg <- paste("> The message below was automatically generated \n", msg)
 commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 res <- GET(commentz, header)
 warn_for_status(res)
