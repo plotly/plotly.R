@@ -5,10 +5,10 @@ test_that("segments become one path", {
                        y=c(0, 1),
                        xend=c(1, 1),
                        yend=c(0, 1))
-  gg <- ggplot()+
+  gg <- ggplot() +
     geom_segment(aes(x, y, xend=xend, yend=yend), data=seg.df)
   info <- gg2list(gg)
-  tr <- info[[1]]
+  tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
   expect_true(any(is.na(tr$y)))
 
