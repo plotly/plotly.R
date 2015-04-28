@@ -89,7 +89,7 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if (is.null(kwargs$filename))
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
-      kwargs$fileopt <- NULL
+      kwargs$fileopt <- pub$fileopt
     url <- paste(base_url, "/clientresp", sep="")
     
     respst <- postForm(url, platform="R", version=pub$version, 
