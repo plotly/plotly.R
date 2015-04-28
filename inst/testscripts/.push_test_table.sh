@@ -26,4 +26,4 @@ git checkout gh-pages
 
 # Read more about Travis environment variables --
 # http://docs.travis-ci.com/user/ci-environment/
-Rscript ../plotly/inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $TRAVIS_BUILD_ID $GH_TOKEN
+Rscript ../plotly/inst/testscripts/comment.R $TRAVIS_PULL_REQUEST $TRAVIS_BUILD_ID $TRAVIS_COMMIT $GH_TOKEN

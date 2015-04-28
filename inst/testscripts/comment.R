@@ -9,7 +9,7 @@ base <- 'https://api.github.com/repos/ropensci/plotly/'
 pr <- sprintf(paste0(base, 'pulls/%s'), a[1])
 header <- add_headers(`User-Agent` = "plotly", 
                       `Accept` = 'application/vnd.github.v3+json',
-                      `Authorization` = paste0("token ", a[3]))
+                      `Authorization` = paste0("token ", a[4]))
 # Must be successful since we grab the branch name for this pull request
 # and SHA1 info from the request content
 res <- GET(url = pr, header)
@@ -33,7 +33,7 @@ setwd("../plotly-test-table")
 cat("user,SHA1,label", file = "code_commits.csv")
 row1 <- paste0("\nropensci,", info$base$sha, ",master")
 cat(row1, file = "code_commits.csv", append = TRUE)
-row2 <- paste0("\nropensci,", info$head$sha, ",", branch)
+row2 <- paste0("\nropensci,", a[3], ",", branch)
 cat(row2, file = "code_commits.csv", append = TRUE)
 
 # copy over file (created during Rscript) 
@@ -48,14 +48,13 @@ system("git add data/*/*.log")
 commit_msg <- paste0('"Pushed from https://travis-ci.org/ropensci/plotly/builds/"', a[2])
 system(paste('git commit -m', commit_msg))
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
-repo <- paste0("https://", a[3], "@github.com/ropensci/plotly-test-table.git")
+repo <- sprintf("https://%s@github.com/ropensci/plotly-test-table.git", a[4])
 system(paste("git pull -q", repo, "gh-pages"))
 system(paste("git push -q", repo, "gh-pages"))
 
 # post comment if a link to this SHA doesn't exist 
 # (needed since Travis randomly re-builds stuff)
-tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", 
-                    info$head$sha)
+tbl_link <- sprintf("http://ropensci.github.io/plotly-test-table/tables/%s/index.html", a[3])
 commentz <- sprintf(paste0(base, 'issues/%s/comments'), a[1])
 res <- GET(commentz, header)
 warn_for_status(res)
