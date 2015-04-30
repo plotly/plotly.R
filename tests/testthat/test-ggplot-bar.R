@@ -191,3 +191,16 @@ test_that("geom_bar(position = 'fill') stacks proportions", {
   expect_identical(prop, 1)
 })
 
+d <- head(diamonds, 50)
+gbar <- ggplot(d, aes(cut, price)) + geom_bar(stat = "identity")
+
+test_that("For a given x value, if multiple y exist, sum them. ", {
+  info <- expect_traces(gbar, 1, "category-names")
+  expect_identical(info$traces[[1]]$type, "bar")
+  y <- with(d, tapply(price, cut, sum))
+  # make sure order of counts match
+  y <- y[info$traces[[1]]$x]
+  expect_equal(info$traces[[1]]$y, as.numeric(y))
+})
+
+
