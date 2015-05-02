@@ -1,6 +1,14 @@
-0.5.28 -- 15 Apr 2015
+0.5.30 -- 5 May 2015
 
 Add test-cookbook-lines.R and fix bugs that showed up in those tests.
+
+0.5.29 -- 16 April 2015
+
+geom_density() as filled area chart #202 
+
+0.5.28 -- 15 April 2015
+
+Let ggplot handle histogram binning. Fix #198
 
 0.5.27 -- 19 Mar 2015
 
