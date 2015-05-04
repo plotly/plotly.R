@@ -70,9 +70,9 @@ markUnique <- as.character(unique(unlist(markLegends)))
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
-#' @return list representing a ggplot.
+#' @return figure object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p){
+gg2list <- function(p) {
   if(length(p$layers) == 0) {
     stop("No layers in plot")
   }
@@ -886,7 +886,8 @@ gg2list <- function(p){
     flipped.layout[["yaxis"]] <- x
   }
   
-  flipped.traces$kwargs <- list(layout=flipped.layout)
+  fig <- list(data=flipped.traces, layout=flipped.layout)
+
+  fig
   
-  flipped.traces
 }

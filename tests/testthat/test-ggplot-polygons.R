@@ -5,14 +5,13 @@ expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("polygon-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 poly.df <- data.frame(x=c(0, 1, 1, 0, 2, 3, 3, 2)+10,
@@ -144,8 +143,8 @@ test_that("borders become one trace with NA", {
   gg <- ggplot(canada.cities, aes(long, lat))+
     borders(regions="canada", name="borders")
   info <- gg2list(gg)
-  expect_identical(length(info), 2L)
-  tr <- info[[1]]
+  expect_equal(length(info$data), 1)
+  tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
 
   save_outputs(gg, "polygons-canada-borders")
