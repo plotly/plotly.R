@@ -9,9 +9,9 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
               data.frame(who="you", time.obj, dollars=c(10.2, 0)))
   gg <- qplot(time.obj, dollars, data=df, color=who, geom="line")
   info <- gg2list(gg)
-  expect_equal(length(info), 3)
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
-  for(trace in info[1:2]){
+  expect_equal(length(info$data), 2)
+  expect_identical(info$layout$xaxis$type, "date")
+  for(trace in info$data[1:2]){
     expect_identical(trace$x, out.str)
   }
 
@@ -24,9 +24,9 @@ test_that("class Date is supported", {
   df$x <- as.Date(df$x)
   gg <- ggplot(df) + geom_line(aes(x=x, y=y))
   info <- gg2list(gg)
-  expect_equal(length(info), 2)
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
-  expect_identical(info[[1]]$x[1], "2013-01-01 00:00:00")
+  expect_equal(length(info$data), 1)
+  expect_identical(info$layout$xaxis$type, "date")
+  expect_identical(info$data[[1]]$x[1], "2013-01-01 00:00:00")
 
   save_outputs(gg, "date-class-Date")
 })
@@ -46,13 +46,13 @@ test_that("scale_x_date and irregular time series work", {
   info <- gg2list(dt)
   info_w_scale <- gg2list(g)
 
-  expect_equal(length(info), 2)  # one trace + layout
-  expect_identical(info[[1]]$x[31], "2122-02-09 00:00:00")
-  expect_equal(length(info_w_scale), 2)  # one trace + layout
-  expect_identical(info_w_scale[[1]]$x[31], "2122-02-09 00:00:00")
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
-  expect_identical(info_w_scale$kwargs$layout$xaxis$type, "date")
-  expect_equal(length(info_w_scale[[2]]), length(info[[2]]))  # similar layout
+  expect_equal(length(info$data), 1)  # one trace
+  expect_identical(info$data[[1]]$x[31], "2122-02-09 00:00:00")
+  expect_equal(length(info_w_scale$data), 1)  # one trace
+  expect_identical(info_w_scale$data[[1]]$x[31], "2122-02-09 00:00:00")
+  expect_identical(info$layout$xaxis$type, "date")
+  expect_identical(info_w_scale$layout$xaxis$type, "date")
+  expect_equal(length(info_w_scale$layout), length(info$layout))  # similar layout
 
   save_outputs(dt, "date-irregular-time-series")
 })

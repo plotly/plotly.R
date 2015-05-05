@@ -5,14 +5,13 @@ expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("ribbon-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))

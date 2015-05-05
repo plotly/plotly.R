@@ -25,7 +25,7 @@ https://plot.ly/API
 usr <- 'anna.lyst'
 Sys.setenv(`plotly-username` = usr)
 resp <- signup(usr, 'anna.lyst@plot.ly')
-Sys.setenv(`plotly-apikey` = resp$apikey)
+Sys.setenv(`plotly-apikey` = resp[["apikey"]])
 # Note that you can set environment variables in your .Rprofile if you
 # don't want to set them everytime you start R.
 

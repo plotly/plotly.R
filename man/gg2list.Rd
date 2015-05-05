@@ -10,7 +10,7 @@ gg2list(p)
 \item{p}{ggplot2 plot.}
 }
 \value{
-list representing a ggplot.
+figure object (list with names "data" and "layout").
 }
 \description{
 Convert a ggplot to a list.
