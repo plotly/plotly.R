@@ -31,8 +31,8 @@ Depends:
     ggplot2
 Imports:
     httr,
-    RJSONIO,
-    knitr
+    RJSONIO
 Suggests:
     maps,
-    testthat
+    testthat,
+    knitr

@@ -16,6 +16,10 @@ plotly_POST(args, kwargs = list(filename = "plot from api", fileopt = "new"),
 
 \item{...}{arguments passed along to \code{httr::POST()}}
 }
+\value{
+An R object created by mapping the JSON content of the plotly API
+response to its R equivalent. This object has a class of "plotly_response"
+}
 \description{
 POST messages to plotly's REST API
 }

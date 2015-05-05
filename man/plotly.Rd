@@ -11,6 +11,8 @@ plotly(p = last_plot(), browse = interactive(), ...)
 plotly api.}
 
 \item{browse}{should the default web browser be prompted to open the Plotly result?}
+
+\item{...}{additional arguments passed onto \code{plotly_POST}.}
 }
 \description{
 Plotly interface object. See up-to-date documentation and examples at
