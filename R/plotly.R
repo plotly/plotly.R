@@ -82,14 +82,14 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
   
   # public attributes/methods that the user has access to
   pub <- list(username=username, key=key, filename="from api", fileopt=NULL,
-              version="0.5.20")
+              version="0.5.30")
   priv <- list()
   
   pub$makecall <- function(args, kwargs, origin) {
     if (is.null(kwargs$filename))
       kwargs$filename <- pub$filename
     if (is.null(kwargs$fileopt))
-      kwargs$fileopt <- NULL
+      kwargs$fileopt <- pub$fileopt
     url <- paste(base_url, "/clientresp", sep="")
     
     respst <- postForm(url, platform="R", version=pub$version, 
@@ -139,11 +139,15 @@ For more help, see https://plot.ly/R or contact <chris@plot.ly>.")
     if(!is.ggplot(gg)){
       stop("gg must be a ggplot")
     }
-    pargs <- gg2list(gg)
+    fig <- gg2list(gg)
     if (!"auto_open" %in% names(kwargs)) {
       kwargs <- c(kwargs, auto_open=TRUE)
     }
-    pargs$kwargs <- c(pargs$kwargs, kwargs)
+    
+    pargs <- fig$data
+    pargs$kwargs <- kwargs
+    pargs$kwargs$layout <- fig$layout
+    
     if (session == "interactive") {  # we are on the command line
       resp <- do.call(pub$plotly, pargs)
       if (pargs$kwargs$auto_open) {

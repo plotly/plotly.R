@@ -8,14 +8,13 @@ expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("cookbook-axes-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 get_legend <- function(L){
@@ -73,14 +72,14 @@ bp.scale.hide <- bp + scale_y_continuous(limits=c(5, 7.5))
 test_that("scale_y(limits) hides points", {
   info <- expect_traces(bp.scale.hide, 3, "scale.hide")
   expect_legend(info, leg())
-  expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
+  expect_equal(info$layout$yaxis$range, c(5, 7.5))
 })
   
 bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
   info <- expect_traces(bp.coord, 3, "coord-ylim")
   expect_legend(info, leg())
-  expect_equal(info$kwargs$layout$yaxis$range, c(5, 7.5))
+  expect_equal(info$layout$yaxis$range, c(5, 7.5))
 })
 
 # Create some noisy exponentially-distributed data
@@ -190,7 +189,7 @@ bp.fonts <- bp +
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 3, "fonts")
   expect_legend(info, leg())
-  x <- info$kwargs$layout$xaxis
+  x <- info$layout$xaxis
   xtitle <- x[["titlefont"]]
   xtick <- x[["tickfont"]]
   expect_identical(xtitle$color, toRGB("#990000"))

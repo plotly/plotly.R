@@ -1,18 +1,17 @@
 context("bar")
 
-expect_traces <- function(gg, n.traces, name){
+expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("bar-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 researchers <-
@@ -29,7 +28,7 @@ test_that("position_dodge is translated to barmode=group", {
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(info$kwargs$layout$barmode, "group")
+  expect_identical(info$layout$barmode, "group")
   # Check x values
   expect_identical(as.character(trs[[1]]$x), c("Canada", "Germany"))
   expect_identical(as.character(trs[[2]]$x), c("Canada", "USA"))
@@ -41,7 +40,7 @@ test_that("position_stack is translated to barmode=stack", {
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(info$kwargs$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "stack")
 })
 
 test_that("position_identity is translated to barmode=stack", {
@@ -50,7 +49,7 @@ test_that("position_identity is translated to barmode=stack", {
   trs <- info$traces
   trace.names <- sapply(trs[1:2], "[[", "name")
   expect_true(all(c("Math", "Bio") %in% trace.names))
-  expect_identical(info$kwargs$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "stack")
 })
 
 test_that("dates work well with bar charts", {
@@ -60,7 +59,7 @@ test_that("dates work well with bar charts", {
     geom_bar(stat="identity")
   info <- expect_traces(gd, 2, "dates")
   trs <- info$traces
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(info$layout$xaxis$type, "date")
   # plotly likes time in milliseconds
   t <- as.numeric(unique(researchers$month)) * 24 * 60 * 60 * 1000
   expect_identical(trs[[1]]$x, t)
@@ -80,7 +79,8 @@ test_that("Very basic bar graph", {
     expect_null(tr$marker$line$width)
     expect_false(tr$showlegend)
   }
-  expect_null(info$kwargs$layout$annotations)
+  expect_null(info$layout$annotations)
+  expect_false(info$layout$showlegend)
 })
 
 test_that("Map the time of day to different fill colors", {
@@ -93,8 +93,8 @@ test_that("Map the time of day to different fill colors", {
     expect_null(tr$marker$line$width)
     expect_true(tr$showlegend)
   }
-  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_match(info$layout$annotations[[1]]$text, "time")
+  expect_true(info$layout$showlegend)
 })
 
 test_that("Add a black outline", {
@@ -107,8 +107,8 @@ test_that("Add a black outline", {
     expect_equal(tr$marker$line$width, 1)
     expect_true(tr$showlegend)
   }
-  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_match(info$layout$annotations[[1]]$text, "time")
+  expect_true(info$layout$showlegend)
 })
 
 test_that("guides(fill=FALSE) hides fill legend", {
@@ -121,8 +121,8 @@ test_that("guides(fill=FALSE) hides fill legend", {
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
   }
-  expect_null(info$kwargs$layout$annotations)
-  expect_false(info$kwargs$layout$showlegend)
+  expect_null(info$layout$annotations)
+  expect_false(info$layout$showlegend)
 })
 
 test_that('guides(fill="none") hides fill legend', {
@@ -135,8 +135,8 @@ test_that('guides(fill="none") hides fill legend', {
     expect_identical(tr$marker$line$color, toRGB("black"))
     expect_equal(tr$marker$line$width, 1)
   }
-  expect_null(info$kwargs$layout$annotations)
-  expect_false(info$kwargs$layout$showlegend)
+  expect_null(info$layout$annotations)
+  expect_false(info$layout$showlegend)
 })
 
 test_that('guides(colour="none") does not affect fill legend', {
@@ -150,8 +150,8 @@ test_that('guides(colour="none") does not affect fill legend', {
     expect_equal(tr$marker$line$width, 1)
     expect_true(tr$showlegend)
   }
-  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_match(info$layout$annotations[[1]]$text, "time")
+  expect_true(info$layout$showlegend)
 })
 
 test_that("guides(fill=FALSE) does not affect colour legend", {
@@ -165,8 +165,8 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
     expect_equal(tr$marker$line$width, 1)
     expect_true(tr$showlegend)
   }
-  expect_match(info$kwargs$layout$annotations[[1]]$text, "time")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_match(info$layout$annotations[[1]]$text, "time")
+  expect_true(info$layout$showlegend)
 })
 
 
@@ -174,7 +174,7 @@ base <- ggplot(mtcars, aes(factor(vs), fill=factor(cyl)))
 
 test_that("geom_bar() stacks counts", { 
   info <- expect_traces(base + geom_bar(), 3, "position-stack")
-  expect_identical(info$kwargs$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "stack")
   trs <- info$traces
   # sum of y values for each trace 
   test <- as.numeric(sort(sapply(trs, function(x) sum(x$y))))
@@ -184,7 +184,7 @@ test_that("geom_bar() stacks counts", {
 
 test_that("geom_bar(position = 'fill') stacks proportions", {
   info <- expect_traces(base + geom_bar(position = "fill"), 3, "position-fill")
-  expect_identical(info$kwargs$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "stack")
   trs <- info$traces
   # sum of y-values *conditioned* on a x-value
   prop <- sum(sapply(sapply(trs, "[[", "y"), "[", 1))

@@ -26,18 +26,18 @@ context("Facets")
 
 test_that("3 facets becomes 3 panels", {
   df <- data.frame(x=runif(99), y=runif(99), z=rep(c('a','b','c'), 33))
-  gg <- qplot(x, y, data=df, facets=z~., pch=I(1))+
-    theme_bw()+
+  gg <- qplot(x, y, data=df, facets=z~., pch=I(1)) +
+    theme_bw() +
     theme(panel.margin=grid::unit(0, "cm"))
   info <- gg2list(gg)
-  traces <- info[names(info)==""]
+  traces <- info$data
   trace.axes <- list()
   for(N in c("xaxis", "yaxis")){
     trace.axes[[N]] <- axes.vec <- 
-      sapply(traces, function(t){
-        if(N %in% names(t)){
+      sapply(traces, function(t) {
+        if(N %in% names(t)) {
           t[[N]]
-        }else{
+        } else {
           NA
         }
       })
@@ -51,7 +51,7 @@ test_that("3 facets becomes 3 panels", {
 # expect a certain number of _unique_ [x/y] axes
 expect_axes <- function(info, n, axis = "x") {
   pattern <- paste0("^", axis, "axis([0-9]+)?$")
-  axes <- with(info$kwargs, layout[grepl(pattern, names(layout))])
+  axes <- with(info, layout[grepl(pattern, names(layout))])
   n.axes <- length(axes)
   ranges <- do.call("rbind", lapply(axes, function(x) x$range))
   expect_identical(nrow(unique(ranges)), as.integer(n))

@@ -1,6 +1,10 @@
-0.5.30 -- 5 May 2015
+0.5.31 -- 5 May 2015
 
 Add test-cookbook-lines.R and fix bugs that showed up in those tests.
+
+0.5.30 -- 4 May 2015
+
+Let gg2list() return a figure object.
 
 0.5.29 -- 16 April 2015
 

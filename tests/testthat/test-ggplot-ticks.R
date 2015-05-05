@@ -1,7 +1,7 @@
 context("ggplot ticks")
 
 PlantGrowth$type <-
-  ifelse(PlantGrowth$group=="ctrl", "control", "treatment")
+  ifelse(PlantGrowth$group == "ctrl", "control", "treatment")
 boxes <- ggplot(PlantGrowth, aes(x=group, y=weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces, name){
@@ -9,14 +9,13 @@ expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("ticks-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 plant.list <- split(PlantGrowth, PlantGrowth$group)
@@ -216,7 +215,7 @@ no.breaks <- boxes + scale_x_discrete(breaks=NULL)
 
 test_that("hide x ticks, lines, and labels", {
   info <- expect_traces(no.breaks, 3, "hide-ticks-lines-labels")
-  x <- info$kwargs$layout$xaxis
+  x <- info$layout$xaxis
   expect_identical(x[["showticklabels"]], FALSE)
   ##expect_identical(x[["showline"]], FALSE) #irrelevant.
   expect_identical(x[["showgrid"]], FALSE)
@@ -241,7 +240,7 @@ test_that("Hide X ticks and labels, but keep the gridlines", {
   boxes.grid <- boxes +
     theme(axis.ticks = element_blank(), axis.text.x = element_blank())
   info <- expect_traces(boxes.grid, 3, "hide-ticks-labels")
-  x <- info$kwargs$layout$xaxis
+  x <- info$layout$xaxis
   expect_identical(x[["showticklabels"]], FALSE)
   expect_identical(x[["showgrid"]], TRUE)
   expect_identical(x[["ticks"]], "")
@@ -250,14 +249,14 @@ test_that("Hide X ticks and labels, but keep the gridlines", {
 test_that("scale_y_continuous(limits) means yaxis$ranges", {
   boxes.range <- boxes + scale_y_continuous(limits=c(0,8))
   info <- expect_traces(boxes.range, 3, "ycontinuous-ranges")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, c(0, 8))
 })
 
 test_that("ylim() means yaxis$ranges", {
   boxes.range <- boxes + ylim(0,8)
   info <- expect_traces(boxes.range, 3, "ylim-ranges")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, c(0, 8))
   ## ensure correct positive values without reverse scale.
   for(tr in info$traces){
@@ -271,7 +270,7 @@ test_that("ylim() means yaxis$ranges", {
 test_that("scale_y_reverse() -> yaxis$ranges reversed", {
   boxes.reverse <- boxes + scale_y_reverse()
   info <- expect_traces(boxes.reverse, 3, "yreverse-ranges")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_that(y.axis$range[2], is_less_than(y.axis$range[1]))
   ## ensure correct positive values, despite the reverse scale.
   for(tr in info$traces){
@@ -286,7 +285,7 @@ test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
   y.lim <- c(10, -2)
   boxes.reverse <- boxes + scale_y_reverse(limits=y.lim)
   info <- expect_traces(boxes.reverse, 3, "yreverse-limits-ranges")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, y.lim)
   ## ensure correct positive values, despite the reverse scale.
   for(tr in info$traces){
@@ -300,7 +299,7 @@ test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
 test_that("ylim(reversed) -> yaxis$ranges reversed", {
   boxes.reverse <- boxes + ylim(7.5, -1)
   info <- expect_traces(boxes.reverse, 3, "ylim-reversed-ranges")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, c(7.5, -1))
   ## ensure correct positive values, despite the reverse scale.
   for(tr in info$traces){
@@ -316,7 +315,7 @@ test_that("Set the X tick mark locations", {
   ## show only the ones that are within range (3.50-6.25 in this case)
   boxes.ticks <- boxes + scale_y_continuous(breaks=seq(1,10,1/4))
   info <- expect_traces(boxes.ticks, 3, "evenly-spaced-ticks")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_equal(y.axis$dtick, 0.25)
   expect_identical(y.axis$autotick, FALSE)
 })
@@ -331,7 +330,7 @@ test_that("The breaks can be spaced unevenly", {
 test_that("hide y ticks, lines, and labels", {
   no.breaks <- boxes + scale_y_continuous(breaks=NULL)
   info <- expect_traces(no.breaks, 3, "hide-y")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_identical(y.axis[["showgrid"]], FALSE)
   expect_identical(y.axis[["ticks"]], "")
   expect_identical(y.axis[["showticklabels"]], FALSE)
@@ -341,7 +340,7 @@ test_that("hide y ticks and labels, but keep the gridlines", {
   boxes.ygrid <- boxes +
     theme(axis.ticks = element_blank(), axis.text.y = element_blank())
   info <- expect_traces(boxes.ygrid, 3, "hide-y-keep-grid")
-  y.axis <- info$kwargs$layout$yaxis
+  y.axis <- info$layout$yaxis
   expect_identical(y.axis[["showgrid"]], TRUE)
   expect_identical(y.axis[["ticks"]], "")
   expect_identical(y.axis[["showticklabels"]], FALSE)

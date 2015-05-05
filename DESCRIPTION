@@ -1,7 +1,7 @@
 Package: plotly
 Type: Package
 Title: Interactive, publication-quality graphs online.
-Version: 0.5.30
+Version: 0.5.31
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cre"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",

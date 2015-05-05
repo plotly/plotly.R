@@ -10,12 +10,11 @@ test_that("geom_errorbar gives errorbars", {
   L <- gg2list(g)
 
   # right nb. traces (1)
-  expect_equal(length(L), 2)
+  expect_equal(length(L$data), 1)
   # trace #1 should be errorbar
-  expect_more_than(length(L[[1]]$error_y), 1)
+  expect_more_than(length(L$data[[1]]$error_y), 1)
   # right data for errorbar ymax
-  expect_equal(L[[1]]$error_y$array, c(3.74, 1.26, 1.15))
+  expect_equal(L$data[[1]]$error_y$array, c(3.74, 1.26, 1.15))
 
   save_outputs(g, "errorbar")
 })
-
