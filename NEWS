@@ -6,10 +6,6 @@ Add test-cookbook-lines.R and fix bugs that showed up in those tests.
 
 Let gg2list() return a figure object (backwards incompatible change).
 
-0.5.30 -- 4 May 2015
-
-Let gg2list() return a figure object.
-
 0.5.29 -- 16 April 2015
 
 geom_density() as filled area chart #202 
