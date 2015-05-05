@@ -150,10 +150,14 @@ get_figure <- function(username, id) {
 #' @export
 #' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
 knit_print.plotly_response <- function(x, options, ...) {
-  if (!requireNamespace("knitr")) warning("Please install.packages('knitr')")
+  if (!requireNamespace("knitr")) {
+    warning("Please install.packages('knitr')")
+    return(x)
+  }
   w <- if (is.null(options[["width"]])) "600" else options[["width"]]
   h <- if (is.null(options[["height"]])) "600" else options[["height"]]
-  plotly_iframe(x[["url"]], h, w)
+  iframe <- plotly_iframe(x[["url"]], h, w)
+  knitr::asis_output(iframe)
 }
 
 #' Embed a plotly iframe into a IPython Notebook
@@ -167,7 +171,7 @@ embed_notebook <- function(url, width = "100%", height = "525") {
     url <- p[["url"]]
   }
   if (!requireNamespace("IRdisplay")) {
-    message("You need the IRdisplay package to use this function: \n",
+    warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
     return(p)
   }
