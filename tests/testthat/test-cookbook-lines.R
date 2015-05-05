@@ -235,18 +235,18 @@ df.vlines <- data.frame(cond = levels(df$cond), xval = c(10,11.5))
 
 spf.vline <- 
   spf +
-    geom_hline(aes(yintercept = 10)) +
-    geom_vline(aes(xintercept = xval),
-               data = df.vlines,
-               colour = "#990000", linetype = "dashed")
+  geom_hline(aes(yintercept = 10)) +
+  geom_vline(aes(xintercept = xval),
+             data = df.vlines,
+             colour = "#990000", linetype = "dashed")
 test_that("geom_vline -> 2 more traces", {
   info <- expect_traces_shapes(spf.vline, 6, 0, "scatter-facet-hline-vline")
 })
 
 spf.line.stat <- 
   spf +
-    geom_hline(aes(yintercept=10)) +
-    geom_line(stat="vline", xintercept="mean")
+  geom_hline(aes(yintercept=10)) +
+  geom_line(stat="vline", xintercept="mean")
 test_that("geom_line -> 2 more traces", {
   info <-
     expect_traces_shapes(spf.line.stat, 6, 0,

@@ -3,7 +3,7 @@ context("cookbook axes")
 bp <- ggplot(PlantGrowth, aes(x=group, y=weight)) +
   geom_boxplot()
 
-expect_traces <- function(gg, n.traces, name){
+expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("cookbook-axes-", name))
@@ -17,13 +17,13 @@ expect_traces <- function(gg, n.traces, name){
   list(traces=has.data, layout=L$layout)
 }
 
-get_legend <- function(L){
-  if(!isTRUE(L$kwargs$layout$showlegend)){
+get_legend <- function(L) {
+  if (!isTRUE(L$kwargs$layout$showlegend)) {
     return(data.frame())
   }
   legend.list <- list()
-  for(tr in L$traces){
-    if(is.character(tr$name)){
+  for (tr in L$traces) {
+    if (is.character(tr$name)) {
       legend.list[[tr$name]] <-
         data.frame(name=tr$name, showlegend=tr$showlegend)
     }
@@ -32,12 +32,12 @@ get_legend <- function(L){
   subset(legend.df, showlegend)
 }
 
-leg <- function(...){
+leg <- function(...) {
   name <- c(...)
   data.frame(name)
 }
 
-expect_legend <- function(L, expected){
+expect_legend <- function(L, expected) {
   stopifnot(is.data.frame(expected))
   shown <- get_legend(L)
   expect_identical(shown$name, expected$name)
@@ -59,7 +59,7 @@ test_that("factor levels determine tick order", {
                    c("trt2", "trt1", "ctrl"))
   expect_legend(info, leg())
 })
-  
+
 ## These two do the same thing; all data points outside the graphing
 ## range are dropped, resulting in a misleading box plot.
 bp.ylim.hide <- bp + ylim(5, 7.5)
@@ -74,7 +74,7 @@ test_that("scale_y(limits) hides points", {
   expect_legend(info, leg())
   expect_equal(info$layout$yaxis$range, c(5, 7.5))
 })
-  
+
 bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
   info <- expect_traces(bp.coord, 3, "coord-ylim")
@@ -93,11 +93,12 @@ sp <- ggplot(dat, aes(xval, yval)) + geom_point()
 
 test_that("A scatterplot with regular (linear) axis scaling", {
   info <- expect_traces(sp, 1, "linear-axes")
-  ## TODO: why does this test take so long?
+  # TODO: why does this test take so long?
   expect_legend(info, leg())
 })
 
-library(scales)     # Need the scales package
+library(scales)
+# TODO: Add package "scales" to the list of dependencies?
 sp.log2.scale <- sp + scale_y_continuous(trans=log2_trans())
 
 test_that("log2 scaling of the y axis (with visually-equal spacing)", {
@@ -214,12 +215,12 @@ test_that("In this particular case, x scale has no effect", {
 
 # Self-defined formatting function for times.
 timeHMS_formatter <- function(x) {
-    h <- floor(x/60)
-    m <- floor(x %% 60)
-    s <- round(60*(x %% 1))                   # Round to nearest second
-    lab <- sprintf("%02d:%02d:%02d", h, m, s) # Format the strings as HH:MM:SS
-    lab <- gsub("^00:", "", lab)              # Remove leading 00: if present
-    lab <- gsub("^0", "", lab)                # Remove leading 0 if present
+  h <- floor(x/60)
+  m <- floor(x %% 60)
+  s <- round(60*(x %% 1))                   # Round to nearest second
+  lab <- sprintf("%02d:%02d:%02d", h, m, s) # Format the strings as HH:MM:SS
+  lab <- gsub("^00:", "", lab)              # Remove leading 00: if present
+  lab <- gsub("^0", "", lab)                # Remove leading 0 if present
 }
 
 custom.formatter <- bp + scale_y_continuous(label=timeHMS_formatter)
@@ -263,4 +264,3 @@ test_that("Hide all the vertical gridlines", {
   info <- expect_traces(blank.y, 3, "blank-y")
   expect_legend(info, leg())
 })
-

@@ -13,7 +13,7 @@ layer2traces <- function(l, d, misc) {
   g <- list(geom=l$geom$objname,
             data=not.na(d),
             prestats.data=not.na(l$prestats.data))
-
+  
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -46,7 +46,7 @@ layer2traces <- function(l, d, misc) {
     g$geom <- "bar"
     bargap <- 0
   }
-
+  
   # For non-numeric data on the axes, we should take the values from
   # the original data.
   for (axis.name in c("x", "y")) {    
@@ -136,7 +136,7 @@ layer2traces <- function(l, d, misc) {
   
   # symbol=circle,square,diamond,cross,x,
   # triangle-up,triangle-down,triangle-left,triangle-right
-
+  
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
   basic <- if(is.null(convert)){
@@ -247,7 +247,7 @@ layer2traces <- function(l, d, misc) {
     if (is.null(tr$name) || tr$name %in% names.in.legend)
       tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
-
+    
     # special handling for bars
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
@@ -270,7 +270,7 @@ layer2traces <- function(l, d, misc) {
       0
     }
   })
-
+  
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){

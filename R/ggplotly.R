@@ -110,7 +110,7 @@ gg2list <- function(p) {
       p$layers[[layer.i]]$data <- p$data
     }
   }
-
+  
   # Test fill and color to see if they encode a quantitative
   # variable. This may be useful for several reasons: (1) it is
   # sometimes possible to plot several different colors in the same
@@ -190,7 +190,7 @@ gg2list <- function(p) {
     ggsizemin <- min(unlist(sizerange))
     ggsizemax <- max(unlist(sizerange))
   }
-
+  
   layer.legends <- list()
   for(i in seq_along(built$plot$layers)){
     # This is the layer from the original ggplot object.
@@ -225,7 +225,7 @@ gg2list <- function(p) {
     L$prestats.data <-
       merge(prestats,
             gglayout[, c("PANEL", "plotly.row", "COL")])
-
+    
     # Add global range info.
     for(xy in names(ranges.list)){
       range.vec <- ranges.list[[xy]]
@@ -356,7 +356,7 @@ gg2list <- function(p) {
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
     if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
-        c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
       ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                   toRGB(grid$colour, 0.1),
                                   toRGB(grid.major$colour, 0.1))
@@ -392,7 +392,7 @@ gg2list <- function(p) {
       ax.list$tickangle <- -tick.text$angle
     }
     ax.list$tickfont <- theme2font(tick.text)
-
+    
     ## determine axis type first, since this information is used later
     ## (trace.order.list is only used for type=category).
     title.text <- e(s("axis.title.%s"))
@@ -453,7 +453,7 @@ gg2list <- function(p) {
     }else{
       p$labels[[xy]]
     }
-
+    
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
     ax.list$showline <- !is.blank("panel.border", TRUE)
@@ -603,16 +603,16 @@ gg2list <- function(p) {
         nann <- nann + 1
       }
     }
-      # axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 
-                                        0.5, 
-                                        -outer.margin,
-                                        yanchor="top")
-      nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, 
-                                        -outer.margin, 
-                                        0.5,
-                                        textangle=-90)
+    # axes titles
+    annotations[[nann]] <- make.label(xaxis.title,
+                                      0.5,
+                                      -outer.margin,
+                                      yanchor="top")
+    nann <- nann + 1
+    annotations[[nann]] <- make.label(yaxis.title,
+                                      -outer.margin,
+                                      0.5,
+                                      textangle=-90)
     layout$annotations <- annotations
   }
   
@@ -631,7 +631,7 @@ gg2list <- function(p) {
   layout$legend <- list(bordercolor="transparent", 
                         x=1.05, y=1/2,
                         xanchor="center", yanchor="top")
-
+  
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
   is.false <- function(x){
@@ -653,7 +653,7 @@ gg2list <- function(p) {
   if(theme.pars$legend.position=="none"){
     layout$showlegend <- FALSE
   }
-
+  
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
@@ -908,7 +908,7 @@ gg2list <- function(p) {
   }
   
   fig <- list(data=flipped.traces, layout=flipped.layout)
-
+  
   fig
   
 }
