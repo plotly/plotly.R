@@ -1,7 +1,7 @@
 #' Convert a layer to a list of traces. Called from gg2list()
 #' @param l one layer of the ggplot object
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
-#' @param misc named list.
+#' @param misc named list of plot info, independent of layer.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
@@ -12,8 +12,8 @@ layer2traces <- function(l, d, misc) {
   }
   g <- list(geom=l$geom$objname,
             data=not.na(d),
-            prestats.data=not.na(misc$prestats.data))
-
+            prestats.data=not.na(l$prestats.data))
+  
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -54,13 +54,14 @@ layer2traces <- function(l, d, misc) {
       aes.names <- paste0(axis.name, c("", "end", "min", "max"))
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {
+        a.name <- paste0(a, ".name")
         col.name <- g$aes[aes.used]
         dtemp <- l$data[[col.name]]
         if (is.null(dtemp)) {
-          if (!inherits(g$data[[paste0(a, ".name")]], "NULL")) {
+          if (!is.null(g$data[[a.name]])) {
             # Handle the case where as.Date() is passed in aes argument.
-            if (class(g$data[[a]]) != class(g$data[[paste0(a, ".name")]])) {
-              g$data[[a]] <- g$data[[paste0(a, ".name")]]
+            if (class(g$data[[a]]) != class(g$data[[a.name]])) {
+              g$data[[a]] <- g$data[[a.name]]
               data.vec <- g$data[[a]]
             }
           }
@@ -86,14 +87,18 @@ layer2traces <- function(l, d, misc) {
         } else if (inherits(data.vec, "factor")) {
           # Re-order data so that Plotly gets it right from ggplot2.
           g$data <- g$data[order(g$data[[a]]), ]
-          data.vec <- data.vec[match(g$data[[a]], as.numeric(data.vec))]
+          vec.i <- match(g$data[[a]], as.numeric(data.vec))
+          if(anyNA(vec.i)){
+            vec.i <- match(g$data[[a.name]], data.vec)
+          }
+          data.vec <- data.vec[vec.i]
           g$prestats.data <- g$prestats.data[order(g$prestats.data[[a]]), ]
-          pdata.vec <- pdata.vec[match(g$prestats.data[[a]],
-                                       as.numeric(pdata.vec))]
+          pvec.i <- match(g$prestats.data[[a]], as.numeric(pdata.vec))
+          pdata.vec <- pdata.vec[pvec.i]
           if (length(pdata.vec) == length(data.vec))
             pdata.vec <- data.vec
           if (!is.factor(pdata.vec))
-            pdata.vec <- g$prestats.data[[paste0(a, ".name")]]
+            pdata.vec <- g$prestats.data[[a.name]]
         }
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
@@ -141,8 +146,8 @@ layer2traces <- function(l, d, misc) {
   }
   # Then split on visual characteristics that will get different
   # legend entries.
-  data.list <- if (basic$geom %in% names(markLegends)) {
-    mark.names <- markLegends[[basic$geom]]
+  data.list <- if (basic$geom %in% names(markSplit)) {
+    mark.names <- markSplit[[basic$geom]]
     # However, continuously colored points are an exception: they do
     # not need a legend entry, and they can be efficiently rendered
     # using just 1 trace.
@@ -173,7 +178,7 @@ layer2traces <- function(l, d, misc) {
   }
   # Split hline and vline when multiple panels or intercepts:
   # Need multiple traces accordingly.
-  if (g$geom == "hline" || g$geom == "vline") {
+  if (g$geom %in% c("hline", "vline")) {
     intercept <- paste0(ifelse(g$geom == "hline", "y", "x"), "intercept")
     vec.list <- basic$data[c("PANEL", intercept)]
     df.list <- split(basic$data, vec.list, drop=TRUE)
@@ -242,7 +247,7 @@ layer2traces <- function(l, d, misc) {
     if (is.null(tr$name) || tr$name %in% names.in.legend)
       tr$showlegend <- FALSE
     names.in.legend <- c(names.in.legend, tr$name)
-
+    
     # special handling for bars
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
@@ -265,7 +270,7 @@ layer2traces <- function(l, d, misc) {
       0
     }
   })
-
+  
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){

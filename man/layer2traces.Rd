@@ -11,7 +11,7 @@ layer2traces(l, d, misc)
 
 \item{d}{one layer of calculated data from ggplot2::ggplot_build(p)}
 
-\item{misc}{named list.}
+\item{misc}{named list of plot info, independent of layer.}
 }
 \value{
 list representing a layer, with corresponding aesthetics, ranges, and groups.
