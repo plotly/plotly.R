@@ -1,6 +1,6 @@
-0.5.30 -- 4 May 2015
+0.6 -- 4 May 2015
 
-Let gg2list() return a figure object.
+Let gg2list() return a figure object (backwards incompatible change).
 
 0.5.29 -- 16 April 2015
 

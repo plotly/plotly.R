@@ -48,7 +48,6 @@ plotly <- function(p = last_plot(), browse = interactive(), ...) {
   } else if (!is.list(p)) {
     stop("p must be either a ggplot object or a list")
   }
-  
   # how to best map list to a post message?
   resp <- plotly_POST(p, ...)
   if (browse) browse_url(resp[["url"]])
