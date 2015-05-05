@@ -1,65 +1,49 @@
 context("cookbook lines")
 
-expect_traces_shapes <- function(gg, n.traces, n.shapes, name){
+expect_traces_shapes <- function(gg, n.traces, n.shapes, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   stopifnot(is.numeric(n.shapes))
   save_outputs(gg, paste0("cookbook-lines-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  shapes <- L$kwargs$layout$shapes
+  shapes <- L$layout$shapes
   expect_equal(length(shapes), n.shapes)
-  list(traces=has.data,
-       shapes=shapes,
-       kwargs=L$kwargs)
+  list(traces = has.data, shapes = shapes, layout = L$layout)
 }
 
-expect_shape <- function(s, ...){
+expect_shape <- function(s, ...) {
   expected.list <- list(...)
-  for(key in names(expected.list)){
+  for(key in names(expected.list)) {
     value <- expected.list[[key]]
     expect_identical(s[[key]], value)
   }
 }
 
 # Some sample data
-df <- read.table(header=T, text="
+df <- read.table(header = T, text = "
      cond result
   control     10
 treatment   11.5
 ")
 
 # Basic bar plot
-bp <- ggplot(df, aes(x=cond, y=result)) +
-  geom_bar(position="dodge", stat="identity")
-
-## info <- gg2list(bp)
-## info$kwargs$layout$shapes <-
-##   list(list(xref="paper",
-##        x0=0,
-##        x1=1,
-##        yref="y1",
-##        y0=10,
-##        y1=10))
-## sendJSON(info)
+bp <- ggplot(df, aes(x = cond, y = result)) +
+  geom_bar(position = "dodge", stat = "identity")
 
 test_that("geom_bar -> 1 trace", {
   info <- expect_traces_shapes(bp, 1, 0, "basic-bar")
 })
 
 # Add a horizontal line
-temp <- bp + geom_hline(aes(yintercept=12))
+temp <- bp + geom_hline(aes(yintercept = 12))
 test_that("bar + hline = 2 traces", {
   info <- expect_traces_shapes(temp, 2, 0, "basic-horizontal-line")
-  ## expect_shape(info$shapes[[1]],
-  ##              xref="paper", x0=0, x1=1,
-  ##              yref="y1", y0=12, y1=12)
 })
 
 # Make the line red and dashed
@@ -82,14 +66,15 @@ bp <- ggplot(df, aes(x=cond, y=result)) +
   geom_bar(position=position_dodge(), stat="identity")
 
 bp.err <- bp +
-  geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), colour="#AA0000")
+  geom_errorbar(aes(y = hline, ymax = hline, ymin = hline), 
+                colour = "#AA0000")
 test_that("Draw with separate lines for each bar", {
   expect_traces_shapes(bp.err, 2, 0, "bar-error-wide")
 })
 
 bp.err.narrow <- bp +
-  geom_errorbar(width=0.5, aes(y=hline, ymax=hline, ymin=hline),
-                colour="#AA0000")
+  geom_errorbar(width = 0.5, aes(y = hline, ymax = hline, ymin = hline),
+                colour = "#AA0000")
 test_that("Make the lines narrower", {
   info <- expect_traces_shapes(bp.err.narrow, 2, 0, "bar-error-narrow")
 })
@@ -103,8 +88,8 @@ df.hlines <- data.frame(cond=c("control","treatment"), hline=c(9,12))
 # treatment    12
 
 bp.err.diff <- bp +
-  geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline),
-                colour="#AA0000")
+  geom_errorbar(data = df.hlines, aes(y = hline, ymax = hline, ymin = hline),
+                colour = "#AA0000")
 test_that("The bar graph are from df, but the lines are from df.hlines", {
   info <- expect_traces_shapes(bp.err.diff, 2, 0, "bar-error-diff")
 })
@@ -116,13 +101,14 @@ treatment     A   11.5    12
   control     B     12     9
 treatment     B     14    12
 ")
-bp <- ggplot(df, aes(x=cond, y=result, fill=group)) +
-  geom_bar(position=position_dodge(), stat="identity")
+bp <- ggplot(df, aes(x = cond, y = result, fill = group)) +
+  geom_bar(position = position_dodge(), stat = "identity")
 test_that("bar dodged colored -> 1 trace", {
   info <- expect_traces_shapes(bp, 2, 0, "bar-dodge-color")
 })
 bp.err <- 
-  bp + geom_errorbar(aes(y=hline, ymax=hline, ymin=hline), linetype="dashed")
+  bp + geom_errorbar(aes(y = hline, ymax = hline, ymin = hline), 
+                     linetype = "dashed")
 test_that("The error bars get plotted over one another", {
   # there are four but it looks like two.
   info <- expect_traces_shapes(bp.err, 3, 0, "bar-dodge-color-error")
@@ -131,18 +117,18 @@ test_that("The error bars get plotted over one another", {
   expect_equal(length(unique(err.y)), 2)
 })
 
-df <- read.table(header=T, text="
+df <- read.table(header = TRUE, text = "
      cond group result hline
   control     A     10    11
 treatment     A   11.5    12
   control     B     12  12.5
 treatment     B     14    15
 ")
-bp <- ggplot(df, aes(x=cond, y=result, fill=group)) +
-  geom_bar(position=position_dodge(), stat="identity")
+bp <- ggplot(df, aes(x = cond, y = result, fill = group)) +
+  geom_bar(position = position_dodge(), stat = "identity")
 bp.err4 <- bp +
-  geom_errorbar(aes(y=hline, ymax=hline, ymin=hline),
-                linetype="dashed", position=position_dodge())
+  geom_errorbar(aes(y = hline, ymax = hline, ymin = hline),
+                linetype = "dashed", position = position_dodge())
 test_that("4 error bars", {
   info <- expect_traces_shapes(bp.err4, 3, 0, "bar-dodge-color-err4")
   tr <- info$traces[[3]]
@@ -152,7 +138,7 @@ test_that("4 error bars", {
   expect_equal(length(unique(tr$x)), 2)
 })
 
-df <- read.table(header=T, text="
+df <- read.table(header = T, text = "
       cond xval yval
    control 11.5 10.8
    control  9.3 12.9
@@ -175,7 +161,7 @@ df <- read.table(header=T, text="
  treatment 11.5  9.8
  treatment 12.0 10.6
 ")
-sp <- ggplot(df, aes(x=xval, y=yval, colour=cond)) + geom_point()
+sp <- ggplot(df, aes(x = xval, y = yval, colour = cond)) + geom_point()
 test_that("basic scatterplot", {
   info <- expect_traces_shapes(sp, 2, 0, "scatter-basic")
 })
@@ -186,12 +172,12 @@ test_that("Add a horizontal line", {
 })
 
 temp <- sp +
-  geom_hline(aes(yintercept=10)) +
-  geom_vline(aes(xintercept=11.5),
-             colour="#BB0000", linetype="dashed")
+  geom_hline(aes(yintercept = 10)) +
+  geom_vline(aes(xintercept = 11.5),
+             colour = "#BB0000", linetype = "dashed")
 test_that("Add a red dashed vertical line", {
   info <- expect_traces_shapes(temp, 4, 0, "scatter-hline-vline")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_true(info$layout$showlegend)
   mode <- sapply(info$traces, "[[", "mode")
   line.traces <- info$traces[mode == "lines"]
   expect_equal(length(line.traces), 2)
@@ -206,7 +192,7 @@ temp <- sp + geom_hline(aes(yintercept=10)) +
   geom_line(stat="vline", xintercept="mean")
 test_that("Add colored lines for the mean xval of each group", {
   info <- expect_traces_shapes(temp, 5, 0, "scatter-hline-vline-stat")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_true(info$layout$showlegend)
   mode <- sapply(info$traces, "[[", "mode")
   line.traces <- info$traces[mode == "lines"]
   expect_equal(length(line.traces), 3)
@@ -236,23 +222,23 @@ test_that("scatter facet -> 2 traces", {
 temp <- spf + geom_hline(aes(yintercept=10))
 test_that("geom_hline -> 2 more traces", {
   info <- expect_traces_shapes(temp, 4, 0, "scatter-facet-hline")
-  expect_true(info$kwargs$layout$showlegend)
+  expect_true(info$layout$showlegend)
   has.name <- sapply(info$traces, function(tr)is.character(tr$name))
   named.traces <- info$traces[has.name]
   expect_equal(length(named.traces), 2)
 })
 
-df.vlines <- data.frame(cond=levels(df$cond), xval=c(10,11.5))
+df.vlines <- data.frame(cond = levels(df$cond), xval = c(10,11.5))
 #      cond xval
 #   control 10.0
 # treatment 11.5
 
 spf.vline <- 
   spf +
-    geom_hline(aes(yintercept=10)) +
-    geom_vline(aes(xintercept=xval),
-               data=df.vlines,
-               colour="#990000", linetype="dashed")
+    geom_hline(aes(yintercept = 10)) +
+    geom_vline(aes(xintercept = xval),
+               data = df.vlines,
+               colour = "#990000", linetype = "dashed")
 test_that("geom_vline -> 2 more traces", {
   info <- expect_traces_shapes(spf.vline, 6, 0, "scatter-facet-hline-vline")
 })

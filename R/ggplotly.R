@@ -837,6 +837,7 @@ gg2list <- function(p) {
   fill_set <- unlist(lapply(merged.traces, entries, "fillcolor"))
   line_set <- unlist(lapply(merged.traces, entries, c("line", "color")))
   mark_set <- unlist(lapply(merged.traces, entries, c("marker", "color")))
+  mode_set <- lapply(merged.traces, "[[", "mode")
   legend_intersect <- function(x, y) {
     i <- intersect(x, y)
     # restrict intersection to valid legend entries
@@ -845,7 +846,7 @@ gg2list <- function(p) {
   # if there is a mark & line legend, get rid of line
   t1 <- line_set %in% legend_intersect(mark_set, line_set)
   # that is, unless the mode is 'lines+markers'...
-  t1 <- t1 & !(unlist(lapply(merged.traces, "[[", "mode")) %in% "lines+markers")
+  t1 <- t1 & !(mode_set %in% "lines+markers")
   # if there is a mark & fill legend, get rid of fill
   t2 <- fill_set %in% legend_intersect(mark_set, fill_set)
   # if there is a line & fill legend, get rid of fill
