@@ -28,10 +28,10 @@ Description: An interface to plotly's online graphing tools with desktop R
 URL: https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
-    RCurl,
-    RJSONIO,
     ggplot2
 Imports:
+    httr,
+    RJSONIO,
     knitr
 Suggests:
     maps,
