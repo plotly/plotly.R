@@ -2,34 +2,39 @@
 % Please edit documentation in R/plotly.R
 \name{plotly}
 \alias{plotly}
-\title{Main interface to plotly}
+\title{Create, modify and style plotly graphs from R}
 \usage{
 plotly(p = last_plot(), browse = interactive(), ...)
 }
 \arguments{
 \item{p}{Either a ggplot object or a list of data/arguments to post to the
-plotly api.}
+plotly API.}
 
 \item{browse}{should the default web browser be prompted to open the Plotly result?}
 
-\item{...}{additional arguments passed onto \code{plotly_POST}.}
+\item{...}{additional arguments passed onto \link{plotly_POST}.}
 }
 \description{
-Plotly interface object. See up-to-date documentation and examples at
+Create, See up-to-date documentation and examples at
 https://plot.ly/API
 }
 \examples{
 \dontrun{
-# You need a plotly username and API key to communicate with
-# the plotly API. These are accessed via environment variables.
+# You need a plotly username and API key to communicate with the plotly API.
+
 # If you don't already have an API key, you can obtain one with a valid
-# username and email via the signup() function.
-usr <- 'anna.lyst'
-Sys.setenv(`plotly-username` = usr)
-resp <- signup(usr, 'anna.lyst@plot.ly')
-Sys.setenv(`plotly-apikey` = resp[["apikey"]])
-# Note that you can set environment variables in your .Rprofile if you
-# don't want to set them everytime you start R.
+# username and email via signup().
+s <- signup('anna.lyst', 'anna.lyst@plot.ly')
+
+# If you already have a username and API key, please create the following
+# environment variables:
+Sys.setenv(`plotly-username` = "me")
+Sys.setenv(`plotly-apikey` = "mykey")
+# You can also change the default domain if you have a plotly server.
+Sys.setenv(`plotly-domain` = "http://mydomain.com")
+
+# If you don't want to specify these environment variables everytime you
+# start R, you can put that code in a .Rprofile (see help(.Rprofile))
 
 # Send data directly to Plotly's Javascript Graphing Library
 # https://plot.ly/javascript-graphing-library/
@@ -51,7 +56,7 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
  plotly(viz)
 }
 }
-\references{
-https://plot.ly/API
+\seealso{
+\link{signup}, \link{plotly_POST}
 }
 

@@ -2,14 +2,17 @@
 % Please edit documentation in R/plotly.R
 \name{signup}
 \alias{signup}
-\title{Create a new Plotly account.}
+\title{Create a new plotly account.}
 \usage{
-signup(username, email)
+signup(username, email, save = TRUE)
 }
 \arguments{
-\item{username}{Desired username}
+\item{username}{Desired username.}
 
-\item{email}{Desired email}
+\item{email}{Desired email.}
+
+\item{save}{If request is successful, should the username & API key be
+automatically stored as an environment variable in a .Rprofile?}
 }
 \value{
 \itemize{
@@ -18,7 +21,7 @@ signup(username, email)
 }
 }
 \description{
-A sign up interface to Plotly through the R Console.
+A sign up interface to plotly through the R Console.
 }
 \references{
 https://plot.ly/rest/

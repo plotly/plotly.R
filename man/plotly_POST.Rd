@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotly.R
 \name{plotly_POST}
 \alias{plotly_POST}
-\title{POST messages to plotly's REST API}
+\title{Create, modify and style plotly graphs from R}
 \usage{
 plotly_POST(args, kwargs = list(filename = "plot from api", fileopt = "new"),
   origin = "plot", ...)
@@ -18,16 +18,24 @@ plotly_POST(args, kwargs = list(filename = "plot from api", fileopt = "new"),
 }
 \value{
 An R object created by mapping the JSON content of the plotly API
-response to its R equivalent. This object has a class of "plotly_response"
+response to its R equivalent. This object has a class of "clientresp"
 }
 \description{
-POST messages to plotly's REST API
+POST messages to the clientresp resource of plotly's REST API. Unlike \link{plotly},
+this function does not support ggplot objects.
 }
 \examples{
 args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
 resp <- plotly_POST(args)
+
+# translate a ggplot object with gg2list(), then upload to plotly
+p <- gg2list(qplot(1:10))
+resp <- plotly_POST(p$data, list(layout = p$layout), ...)
 }
 \references{
 https://plot.ly/rest/
+}
+\seealso{
+\link{signup}, \link{plotly}
 }
 

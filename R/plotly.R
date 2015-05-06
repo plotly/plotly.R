@@ -1,9 +1,11 @@
-#' Create a new Plotly account.
+#' Create a new plotly account.
 #'
-#' A sign up interface to Plotly through the R Console.
+#' A sign up interface to plotly through the R Console.
 #'
-#' @param username Desired username
-#' @param email Desired email
+#' @param username Desired username.
+#' @param email Desired email.
+#' @param save If request is successful, should the username & API key be
+#' automatically stored as an environment variable in a .Rprofile?
 #'
 #' @return
 #' \itemize{
@@ -12,44 +14,59 @@
 #' }
 #' @references https://plot.ly/rest/
 #' @export
-signup <- function(username, email) {
+signup <- function(username, email, save = TRUE) {
   if (missing(username)) username <- verify("username")
   if (missing(email)) stop("Must specify a valid email")
-  base_url <- "https://plot.ly/apimkacct"
+  # construct body of message to plotly server
   bod <- list(
     un = username,
     email = email,
     platform = "R",
     version = as.character(packageVersion("plotly"))
   )
+  base_url <- file.path(get_domain(), "apimkacct")
   resp <- httr::POST(base_url, body = bod)
   stop_for_status(resp)
-  RJSONIO::fromJSON(content(resp, as = "text"))
+  con <- RJSONIO::fromJSON(content(resp, as = "text"))
+  # TODO: alter the API response messages to reflect the changes in 1.0.0
+  if (nchar(con[["error"]]) > 0) stop(con[["error"]], call. = FALSE)
+  if (nchar(con[["message"]]) > 0) message(con[["message"]], call. = FALSE)
+  # store API key as an environment variable in .Rprofile
+  if (save) {
+    cat_profile("username", con[["un"]])
+    cat_profile("apikey", con[["api_key"]])
+  }
+  structure(con, class = "apimkacct")
 }
 
-#' Main interface to plotly
+#' Create, modify and style plotly graphs from R
 #'
-#' Plotly interface object. See up-to-date documentation and examples at
+#' Create, See up-to-date documentation and examples at
 #' https://plot.ly/API
 #'
 #' @param p Either a ggplot object or a list of data/arguments to post to the
-#' plotly api.
+#' plotly API.
 #' @param browse should the default web browser be prompted to open the Plotly result?
-#' @param ... additional arguments passed onto \code{plotly_POST}.
-#' @references https://plot.ly/API
+#' @param ... additional arguments passed onto \link{plotly_POST}.
+#' @seealso \link{signup}, \link{plotly_POST}
 #' @import httr RJSONIO
 #' @export
 #' @examples \dontrun{
-#' # You need a plotly username and API key to communicate with
-#' # the plotly API. These are accessed via environment variables.
+#' # You need a plotly username and API key to communicate with the plotly API.
+#'
 #' # If you don't already have an API key, you can obtain one with a valid
-#' # username and email via the signup() function.
-#' usr <- 'anna.lyst'
-#' Sys.setenv(`plotly-username` = usr)
-#' resp <- signup(usr, 'anna.lyst@@plot.ly')
-#' Sys.setenv(`plotly-apikey` = resp[["apikey"]])
-#' # Note that you can set environment variables in your .Rprofile if you
-#' # don't want to set them everytime you start R.
+#' # username and email via signup().
+#' s <- signup('anna.lyst', 'anna.lyst@@plot.ly')
+#'
+#' # If you already have a username and API key, please create the following
+#' # environment variables:
+#' Sys.setenv(`plotly-username` = "me")
+#' Sys.setenv(`plotly-apikey` = "mykey")
+#' # You can also change the default domain if you have a plotly server.
+#' Sys.setenv(`plotly-domain` = "http://mydomain.com")
+#'
+#' # If you don't want to specify these environment variables everytime you
+#' # start R, you can put that code in a .Rprofile (see help(.Rprofile))
 #'
 #' # Send data directly to Plotly's Javascript Graphing Library
 #' # https://plot.ly/javascript-graphing-library/
@@ -76,25 +93,43 @@ plotly <- function(p = last_plot(), browse = interactive(), ...) {
   } else if (!is.list(p)) {
     stop("p must be either a ggplot object or a list")
   }
-  # how to best map list to a post message?
+  # In an effort to save some legacy users headache...
+  # specifying username and key should still work
+  .args <- as.list(match.call())
+  if ("username" %in% names(.args))
+    Sys.setenv(`plotly-username` = args[["username"]])
+  if ("key" %in% names(.args))
+    Sys.setenv(`plotly-apikey` = args[["key"]])
+  if (!"data" %in% names(p))
+    stop("p should have at least one element named 'data'",
+         "(which is mapped to the args parameter in the plotly REST API).")
   resp <- plotly_POST(p$data, list(layout = p$layout), ...)
   if (browse) browseURL(resp[["url"]])
   resp
 }
 
-#' POST messages to plotly's REST API
+#' Create, modify and style plotly graphs from R
+#'
+#' POST messages to the clientresp resource of plotly's REST API. Unlike \link{plotly},
+#' this function does not support ggplot objects.
+#'
 #' @param args a list. For details see the rest API docs.
 #' @param kwargs a list. For details see the rest API docs.
 #' @param origin a character vector of length one. For details see the rest API docs.
 #' @param ... arguments passed along to \code{httr::POST()}
 #' @export
 #' @references https://plot.ly/rest/
+#' @seealso \link{signup}, \link{plotly}
 #' @return An R object created by mapping the JSON content of the plotly API
-#' response to its R equivalent. This object has a class of "plotly_response"
+#' response to its R equivalent. This object has a class of "clientresp"
 #' @examples
 #'
 #' args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
 #' resp <- plotly_POST(args)
+#'
+#' # translate a ggplot object with gg2list(), then upload to plotly
+#' p <- gg2list(qplot(1:10))
+#' resp <- plotly_POST(p$data, list(layout = p$layout), ...)
 #'
 plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt = "new"),
                         origin = "plot", ...) {
@@ -111,18 +146,18 @@ plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt 
     key = verify("apikey"),
     origin = origin,
     platform = "R",
-    version = "0.5.20",
+    version = as.character(packageVersion("plotly")),
     args = RJSONIO::toJSON(args, digits = 50, collapse = ""),
     kwargs = RJSONIO::toJSON(kwargs, digits = 50, collapse = "")
   )
-  # TODO: support different plotly domains?
-  resp <- httr::POST("https://plot.ly/clientresp", body = bod, ...)
+  base_url <- file.path(get_domain(), "clientresp")
+  resp <- httr::POST(base_url, body = bod, ...)
   stop_for_status(resp)
-  cont <- RJSONIO::fromJSON(content(resp, as = "text"))
-  if (nchar(cont[["error"]]) > 0) stop(cont[["error"]], call. = FALSE)
-  if (nchar(cont[["warning"]]) > 0) warning(cont[["warning"]], call. = FALSE)
-  if (nchar(cont[["message"]]) > 0) message(cont[["message"]], call. = FALSE)
-  structure(cont, class = "plotly_response")
+  con <- RJSONIO::fromJSON(content(resp, as = "text"))
+  if (nchar(con[["error"]]) > 0) stop(con[["error"]], call. = FALSE)
+  if (nchar(con[["warning"]]) > 0) warning(con[["warning"]], call. = FALSE)
+  if (nchar(con[["message"]]) > 0) message(con[["message"]], call. = FALSE)
+  structure(con, class = "clientresp")
 }
 
 #' Request data/layout for a particular Plotly figure
@@ -149,7 +184,7 @@ get_figure <- function(username, id) {
 #' @param ... placeholder.
 #' @export
 #' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
-knit_print.plotly_response <- function(x, options, ...) {
+knit_print.clientresp <- function(x, options, ...) {
   if (!requireNamespace("knitr")) {
     warning("Please install.packages('knitr')")
     return(x)
@@ -166,7 +201,7 @@ knit_print.plotly_response <- function(x, options, ...) {
 #' @param height attribute of the iframe
 #' @export
 embed_notebook <- function(url, width = "100%", height = "525") {
-  if (!inherits(p, "plotly_response")) {
+  if (!inherits(p, "clientresp")) {
     p <- plotly(p)
     url <- p[["url"]]
   }
@@ -181,6 +216,10 @@ embed_notebook <- function(url, width = "100%", height = "525") {
 # ----------------------------------------
 # Non-exported helper functions
 # ----------------------------------------
+
+get_domain <- function() {
+  Sys.getenv("plotly-domain", "https://plot.ly")
+}
 
 plotly_headers <- function() {
   httr::add_headers(.headers = c(
@@ -201,6 +240,23 @@ verify <- function(what = "username") {
 plotly_iframe <- function(url, width, height) {
   paste("<iframe height=\"", height, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\"\n\t\t\t\tsrc=\"",
         url, "\" width=\"", width, "\" frameBorder=\"0\"></iframe>", sep="")
+}
+
+# try to write environment variables to an .Rprofile
+cat_profile <- function(key, value, path = "~") {
+  r_profile <- file.path(normalizePath(path, mustWork = TRUE),
+                         ".Rprofile")
+  snippet <- sprintf('\nSys.setenv(`plotly-%s` = "%s")', key, value)
+  if (!file.exists(r_profile)) {
+    message("Creating", r_profile)
+    r_profile_con <- file(r_profile)
+  }
+  if (file.access(r_profile, 2) != 0)
+    stop("R doesn't have permission to write to this file: ", path)
+  if (file.access(r_profile, 4) != 0)
+    stop("R doesn't have permission to read this file: ", path)
+  message("Adding plotly-", key, " environment variable to ", r_profile)
+  cat(snippet, file = r_profile, append = TRUE)
 }
 
 # bummer, looks like we can't use RStudio's viewer (yet) --
