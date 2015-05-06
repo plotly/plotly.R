@@ -30,7 +30,7 @@ resp <- plotly_POST(args)
 
 # translate a ggplot object with gg2list(), then upload to plotly
 p <- gg2list(qplot(1:10))
-resp <- plotly_POST(p$data, list(layout = p$layout), ...)
+resp <- plotly_POST(p$data, list(layout = p$layout))
 }
 \references{
 https://plot.ly/rest/

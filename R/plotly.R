@@ -129,7 +129,7 @@ plotly <- function(p = last_plot(), browse = interactive(), ...) {
 #'
 #' # translate a ggplot object with gg2list(), then upload to plotly
 #' p <- gg2list(qplot(1:10))
-#' resp <- plotly_POST(p$data, list(layout = p$layout), ...)
+#' resp <- plotly_POST(p$data, list(layout = p$layout))
 #'
 plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt = "new"),
                         origin = "plot", ...) {
