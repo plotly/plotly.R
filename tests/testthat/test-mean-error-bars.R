@@ -23,11 +23,10 @@ none.json <- list(
 )
 
 test_that("only asymmetric error bars", {
-  error.gg <- ggplot(one.line.df, aes(x, y))+
+  error.gg <- ggplot(one.line.df, aes(x, y)) +
     geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
   generated.json <- gg2list(error.gg)
-  is.trace <- names(generated.json) == ""
-  traces <- generated.json[is.trace]
+  traces <- generated.json$data
   expect_identical(length(traces), 1L)
   tr <- traces[[1]]
   expect_identical(tr$mode, "none")
@@ -54,16 +53,15 @@ one.line.json <- list(
 )
 
 test_that("asymmetric error bars, geom_errorbar last", {
-  one.line.gg <- ggplot(one.line.df, aes(x, y))+
-    geom_line()+
-    geom_point()+
+  one.line.gg <- ggplot(one.line.df, aes(x, y)) +
+    geom_line() +
+    geom_point() +
     geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
   generated.json <- gg2list(one.line.gg)
   ## when there is 1 trace with error bars, lines, and markers, plotly
   ## shows error bars in the background, lines in the middle and
   ## markers in front.
-  is.trace <- names(generated.json) == ""
-  traces <- generated.json[is.trace]
+  traces <- generated.json$data
   expect_identical(length(traces), 1L)
   tr <- traces[[1]]
   expect_identical(tr$mode, "lines+markers")
@@ -76,13 +74,12 @@ test_that("asymmetric error bars, geom_errorbar last", {
 })
 
 test_that("asymmetric error bars, geom_errorbar first", {
-  one.line.gg <- ggplot(one.line.df, aes(x, y))+
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))+
-    geom_line()+
+  one.line.gg <- ggplot(one.line.df, aes(x, y)) +
+    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array)) +
+    geom_line() +
     geom_point()
   generated.json <- gg2list(one.line.gg)
-  is.trace <- names(generated.json) == ""
-  traces <- generated.json[is.trace]
+  traces <- generated.json$data
   expect_identical(length(traces), 1L)
   tr <- traces[[1]]
   expect_identical(tr$mode, "lines+markers")
@@ -112,13 +109,12 @@ colors.json <- list(
 )
 
 test_that("different colors for error bars, points, and lines", {
-  one.line.gg <- ggplot(one.line.df, aes(x, y))+
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array), color="red")+
-    geom_line(color="violet")+
+  one.line.gg <- ggplot(one.line.df, aes(x, y)) +
+    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array), color="red") +
+    geom_line(color="violet") +
     geom_point(color="blue", size=14)
   generated.json <- gg2list(one.line.gg)
-  is.trace <- names(generated.json) == ""
-  traces <- generated.json[is.trace]
+  traces <- generated.json$data
   expect_identical(length(traces), 1L)
   tr <- traces[[1]]
   expect_identical(tr$mode, "lines+markers")
@@ -179,11 +175,10 @@ test_that("errorbar(aes(color)) + other geoms", {
       geom_point()
 
   before.json <- gg2list(before)
-  is.trace <- names(before.json) == ""
-  traces <- before.json[is.trace]
+  traces <- before.json$data
 
   expect_identical(length(traces), 2L)
-  for(tr in traces){
+  for(tr in traces) {
     expected.color <- toRGB(color.code[[tr$name]])
     expected.data <- supp.list[[tr$name]]
     expect_identical(tr$mode, "lines+markers")
@@ -204,12 +199,11 @@ test_that("other geoms + errorbar(aes(color))", {
     ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
       geom_line() +
       geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
-      geom_point()+
+      geom_point() +
       scale_color_manual(values=color.code)
 
   after.json <- gg2list(after)
-  is.trace <- names(after.json) == ""
-  traces <- after.json[is.trace]
+  traces <- after.json$data
   
   expect_identical(length(traces), 2L)
   for(tr in traces){
@@ -227,5 +221,3 @@ test_that("other geoms + errorbar(aes(color))", {
     expect_equal(ey$array, expected.data$se)
   }
 })
-
-

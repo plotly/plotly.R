@@ -62,17 +62,18 @@ markLegends <-
        errorbarh=c("colour", "linetype"),
        area=c("colour", "fill"),
        step=c("linetype", "size", "colour"),
-       boxplot=c("x"),
        text=c("colour"))
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
+markSplit <- c(markLegends,list(boxplot=c("x")))
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
-#' @return list representing a ggplot.
+#' @return figure object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p){
+gg2list <- function(p) {
   if(length(p$layers) == 0) {
     stop("No layers in plot")
   }
@@ -97,9 +98,11 @@ gg2list <- function(p){
   # worry about combining global and layer-specific aes/data later.
   for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
-    to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
-    layer.aes[to.copy] <- p$mapping[to.copy]
-    mark.names <- markUnique[markUnique %in% names(layer.aes)]
+    if(p$layers[[layer.i]]$inherit.aes){
+      to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
+      layer.aes[to.copy] <- p$mapping[to.copy]
+    }
+    mark.names <- names(layer.aes) # make aes.name for all aes.
     name.names <- sprintf("%s.name", mark.names)
     layer.aes[name.names] <- layer.aes[mark.names]
     p$layers[[layer.i]]$mapping <- layer.aes
@@ -108,18 +111,78 @@ gg2list <- function(p){
     }
   }
   
+  # Test fill and color to see if they encode a quantitative
+  # variable. This may be useful for several reasons: (1) it is
+  # sometimes possible to plot several different colors in the same
+  # trace (e.g. points), and that is faster for large numbers of
+  # data points and colors; (2) factors on x or y axes should be
+  # sent to plotly as characters, not as numeric data (which is
+  # what ggplot_build gives us).
+  misc <- list()
+  for(a in c("fill", "colour", "x", "y", "size")){
+    for(data.type in c("continuous", "date", "datetime", "discrete")){
+      fun.name <- sprintf("scale_%s_%s", a, data.type)
+      misc.name <- paste0("is.", data.type)
+      misc[[misc.name]][[a]] <- tryCatch({
+        fun <- get(fun.name)
+        suppressMessages({
+          with.scale <- original.p + fun()
+        })
+        ggplot_build(with.scale)
+        TRUE
+      }, error=function(e){
+        FALSE
+      })
+    }
+  }
+  
+  ## scales are needed for legend ordering.
+  misc$breaks <- list()
+  for(sc in p$scales$scales){
+    a.vec <- sc$aesthetics
+    default.breaks <- inherits(sc$breaks, "waiver")
+    if (length(a.vec) == 1 && (!default.breaks) ) {
+      ## TODO: generalize for x/y scales too.
+      br <- sc$breaks
+      ranks <- seq_along(br)
+      names(ranks) <- br
+      misc$breaks[[a.vec]] <- ranks
+    }
+    ## store if this is a reverse scale so we can undo that later.
+    if(is.character(sc$trans$name)){
+      misc$trans[sc$aesthetics] <- sc$trans$name
+    }
+  }
+  reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
+  
   # Extract data from built ggplots
   built <- ggplot_build2(p)
-  # Get global x-range now because we need some of its info in layer2traces
-  ggranges <- built$panel$ranges
-  # Extract x.range
-  xrange <- sapply(ggranges, `[[`, "x.range", simplify=FALSE, USE.NAMES=FALSE)
-  ggxmin <- min(sapply(xrange, min))
-  ggxmax <- max(sapply(xrange, max))
-  # Extract y.range
-  yrange <- sapply(ggranges, `[[`, "y.range", simplify=FALSE, USE.NAMES=FALSE)
-  ggymin <- min(sapply(yrange, min))
-  ggymax <- max(sapply(yrange, max))
+  # Get global ranges now because we need some of its info in layer2traces
+  ranges.list <- list()
+  for(xy in c("x", "y")){
+    use.ranges <-
+      misc$is.continuous[[xy]] ||
+      misc$is.date[[xy]] ||
+      misc$is.datetime[[xy]] 
+    range.values <- if(use.ranges){
+      range.name <- paste0(xy, ".range")
+      sapply(built$panel$ranges, "[[", range.name)
+    }else{
+      ## for categorical variables on the axes, panel$ranges info is
+      ## meaningless.
+      name.name <- paste0(xy, ".name")
+      sapply(built$data, function(df){
+        if(name.name %in% names(df)){
+          ## usually for discrete data there is a .name column.
+          paste(df[[name.name]])
+        }else{
+          ## for heatmaps there may not be.
+          df[[xy]]
+        }
+      })
+    }
+    ranges.list[[xy]] <- range(range.values)
+  }
   
   # Get global size range because we need some of its info in layer2traces
   if ("size.name" %in% name.names) {
@@ -127,7 +190,7 @@ gg2list <- function(p){
     ggsizemin <- min(unlist(sizerange))
     ggsizemax <- max(unlist(sizerange))
   }
-
+  
   layer.legends <- list()
   for(i in seq_along(built$plot$layers)){
     # This is the layer from the original ggplot object.
@@ -135,51 +198,7 @@ gg2list <- function(p){
     
     # for each layer, there is a correpsonding data.frame which
     # evaluates the aesthetic mapping.
-    df <- built$data[[i]]
-    
-    # Test fill and color to see if they encode a quantitative
-    # variable. This may be useful for several reasons: (1) it is
-    # sometimes possible to plot several different colors in the same
-    # trace (e.g. points), and that is faster for large numbers of
-    # data points and colors; (2) factors on x or y axes should be
-    # sent to plotly as characters, not as numeric data (which is
-    # what ggplot_build gives us).
-    misc <- list()
-    for(a in c("fill", "colour", "x", "y", "size")){
-      for(data.type in c("continuous", "date", "datetime", "discrete")){
-        fun.name <- sprintf("scale_%s_%s", a, data.type)
-        misc.name <- paste0("is.", data.type)
-        misc[[misc.name]][[a]] <- tryCatch({
-          fun <- get(fun.name)
-          suppressMessages({
-            with.scale <- original.p + fun()
-          })
-          ggplot_build(with.scale)
-          TRUE
-        }, error=function(e){
-          FALSE
-        })
-      }
-    }
-    
-    # scales are needed for legend ordering.
-    misc$breaks <- list()
-    for(sc in p$scales$scales){
-      a.vec <- sc$aesthetics
-      default.breaks <- inherits(sc$breaks, "waiver")
-      if (length(a.vec) == 1 && (!default.breaks) ) {
-        # TODO: generalize for x/y scales too.
-        br <- sc$breaks
-        ranks <- seq_along(br)
-        names(ranks) <- br
-        misc$breaks[[a.vec]] <- ranks
-      }
-      ## store if this is a reverse scale so we can undo that later.
-      if(is.character(sc$trans$name)){
-        misc$trans[sc$aesthetics] <- sc$trans$name
-      }
-    }
-    reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
+    df <- built$data[[i]]    
     
     # get gglayout now because we need some of its info in layer2traces
     gglayout <- built$panel$layout
@@ -203,21 +222,24 @@ gg2list <- function(p){
     for (a in replace.aes) {
       prestats[[a]] <- -1 * prestats[[a]]
     }
-    misc$prestats.data <-
+    L$prestats.data <-
       merge(prestats,
             gglayout[, c("PANEL", "plotly.row", "COL")])
     
-    # Add global x-range info
-    misc$prestats.data$globxmin <- ggxmin
-    misc$prestats.data$globxmax <- ggxmax
-    # Add global y-range info
-    misc$prestats.data$globymin <- ggymin
-    misc$prestats.data$globymax <- ggymax
+    # Add global range info.
+    for(xy in names(ranges.list)){
+      range.vec <- ranges.list[[xy]]
+      names(range.vec) <- c("min", "max")
+      for(range.name in names(range.vec)){
+        glob.name <- paste0("glob", xy, range.name)
+        L$prestats.data[[glob.name]] <- range.vec[[range.name]]
+      }
+    }
     
     # Add global size info if relevant
     if ("size.name" %in% name.names) {
-      misc$prestats.data$globsizemin <- ggsizemin
-      misc$prestats.data$globsizemax <- ggsizemax
+      L$prestats.data$globsizemin <- ggsizemin
+      L$prestats.data$globsizemax <- ggsizemax
     }
     
     # This extracts essential info for this geom/layer.
@@ -334,7 +356,7 @@ gg2list <- function(p){
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
     if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
-        c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
       ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                   toRGB(grid$colour, 0.1),
                                   toRGB(grid.major$colour, 0.1))
@@ -370,7 +392,7 @@ gg2list <- function(p){
       ax.list$tickangle <- -tick.text$angle
     }
     ax.list$tickfont <- theme2font(tick.text)
-
+    
     ## determine axis type first, since this information is used later
     ## (trace.order.list is only used for type=category).
     title.text <- e(s("axis.title.%s"))
@@ -415,7 +437,7 @@ gg2list <- function(p){
         sc$limits
       }else{
         if(misc$is.continuous[[xy]]){
-          ggranges[[1]][[s("%s.range")]] #TODO: facets!
+          built$panel$ranges[[1]][[s("%s.range")]] #TODO: facets!
         }else{ # for a discrete scale, range should be NULL.
           NULL
         }
@@ -431,7 +453,7 @@ gg2list <- function(p){
     }else{
       p$labels[[xy]]
     }
-
+    
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
     ax.list$showline <- !is.blank("panel.border", TRUE)
@@ -581,21 +603,18 @@ gg2list <- function(p){
         nann <- nann + 1
       }
     }
-      # axes titles
-      annotations[[nann]] <- make.label(xaxis.title, 
-                                        0.5, 
-                                        -outer.margin,
-                                        yanchor="top")
-      nann <- nann + 1
-      annotations[[nann]] <- make.label(yaxis.title, 
-                                        -outer.margin, 
-                                        0.5,
-                                        textangle=-90)
+    # axes titles
+    annotations[[nann]] <- make.label(xaxis.title,
+                                      0.5,
+                                      -outer.margin,
+                                      yanchor="top")
+    nann <- nann + 1
+    annotations[[nann]] <- make.label(yaxis.title,
+                                      -outer.margin,
+                                      0.5,
+                                      textangle=-90)
     layout$annotations <- annotations
   }
-  
-  # Remove legend if theme has no legend position
-  layout$showlegend <- !(theme.pars$legend.position=="none")
   
   # Main plot title.
   layout$title <- built$plot$labels$title
@@ -612,11 +631,7 @@ gg2list <- function(p){
   layout$legend <- list(bordercolor="transparent", 
                         x=1.05, y=1/2,
                         xanchor="center", yanchor="top")
-  # Workaround for removing unnecessary legends.
-  # [markUnique != "x"] is for boxplot's particular case.
-  if (any(names(layer.aes) %in% markUnique[markUnique != "x"]) == FALSE)
-    layout$showlegend <- FALSE
-
+  
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
   is.false <- function(x){
@@ -628,10 +643,15 @@ gg2list <- function(p){
   is.hidden <- function(x){
     is.false(x) || is.none(x)
   }
+  layout$showlegend <- if(length(legends.present) == 0) FALSE else TRUE
   for(a in legends.present){
     if(is.hidden(p$guides[[a]])){
       layout$showlegend <- FALSE
     }
+  }
+  # Legend hiding from theme.
+  if(theme.pars$legend.position=="none"){
+    layout$showlegend <- FALSE
   }
   
   # Only show a legend title if there is at least 1 trace with
@@ -817,6 +837,7 @@ gg2list <- function(p){
   fill_set <- unlist(lapply(merged.traces, entries, "fillcolor"))
   line_set <- unlist(lapply(merged.traces, entries, c("line", "color")))
   mark_set <- unlist(lapply(merged.traces, entries, c("marker", "color")))
+  mode_set <- lapply(merged.traces, "[[", "mode")
   legend_intersect <- function(x, y) {
     i <- intersect(x, y)
     # restrict intersection to valid legend entries
@@ -825,7 +846,7 @@ gg2list <- function(p){
   # if there is a mark & line legend, get rid of line
   t1 <- line_set %in% legend_intersect(mark_set, line_set)
   # that is, unless the mode is 'lines+markers'...
-  t1 <- t1 & !(unlist(lapply(merged.traces, "[[", "mode")) %in% "lines+markers")
+  t1 <- t1 & !(mode_set %in% "lines+markers")
   # if there is a mark & fill legend, get rid of fill
   t2 <- fill_set %in% legend_intersect(mark_set, fill_set)
   # if there is a line & fill legend, get rid of fill
@@ -886,7 +907,8 @@ gg2list <- function(p){
     flipped.layout[["yaxis"]] <- x
   }
   
-  flipped.traces$kwargs <- list(layout=flipped.layout)
+  fig <- list(data=flipped.traces, layout=flipped.layout)
   
-  flipped.traces
+  fig
+  
 }

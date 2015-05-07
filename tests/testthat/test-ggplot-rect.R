@@ -1,18 +1,17 @@
 context("geom_rect")
 
-expect_traces <- function(gg, n.traces, name){
+expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("rect-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 set.seed(1)
@@ -30,7 +29,7 @@ test_that('geom_rect becomes 1 trace with mode="lines" fill="tozerox"', {
   expect_identical(tr$fill, "tozerox")
   expect_identical(tr$type, "scatter")
   expect_identical(tr$mode, "lines")
-  for(xy in c("x", "y")){
+  for(xy in c("x", "y")) {
     expect_true(anyNA(tr[[xy]]))
   }
 })
