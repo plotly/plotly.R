@@ -77,6 +77,7 @@ test_that("Very basic bar graph", {
     expect_null(tr$marker$color)
     expect_null(tr$marker$line$color)
     expect_null(tr$marker$line$width)
+    expect_false(tr$showlegend)
   }
   expect_null(info$layout$annotations)
   expect_false(info$layout$showlegend)
