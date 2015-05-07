@@ -1,25 +1,24 @@
 context("Histogram")
 
-expect_traces <- function(gg, n.traces, name){
+expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("histogram-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
-base <- ggplot(mtcars, aes(wt)) 
+base <- ggplot(mtcars, aes(wt))
 
 test_that("geom_histogram() is a bar chart of counts with no bargap", { 
   info <- expect_traces(base + geom_histogram(), 1, "counts")
-  expect_identical(info$kwargs$layout$bargap, 0)
+  expect_identical(info$layout$bargap, 0)
   tr <- info$traces[[1]]
   expect_identical(tr$type, "bar")
   expect_equal(sum(tr$y), nrow(mtcars))
@@ -27,7 +26,7 @@ test_that("geom_histogram() is a bar chart of counts with no bargap", {
 
 test_that("geom_histogram(aes(y = ..density..)) displays a density", { 
   info <- expect_traces(base + geom_histogram(aes(y=..density..)), 1, "density")
-  expect_identical(info$kwargs$layout$bargap, 0)
+  expect_identical(info$layout$bargap, 0)
   tr <- info$traces[[1]]
   expect_identical(tr$type, "bar")
   #default binwidth
@@ -72,7 +71,7 @@ noram$month <- as.Date(noram$month)
 test_that("dates work well with histograms", {
   hist <- ggplot(noram, aes(month)) + geom_histogram()
   info <- expect_traces(hist, 1, "dates")
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(info$layout$xaxis$type, "date")
   #test <- with(info[[1]], setNames(y, x))
   #true <- table(noram$month)
   # these are off by 1 day, not sure why, but I don't think it's worth
@@ -186,7 +185,7 @@ test_that("datetime binning for class POSIXt works in histograms", {
   kP$date <- as.POSIXlt(kP$date)
   histP <- ggplot(kP, aes(x=date)) + geom_histogram(binwidth=2592000)
   info <- expect_traces(histP, 1, "POSIXt-bins")
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(info$layout$xaxis$type, "date")
 })
 
 test_that("datetime binning for class Date works in histograms", {
@@ -194,5 +193,5 @@ test_that("datetime binning for class Date works in histograms", {
   kD$date <- as.Date(kD$date)
   histD <- ggplot(kD, aes(x=date)) + geom_histogram(binwidth=30)
   info <- expect_traces(histD, 1, "Date-bins")
-  expect_identical(info$kwargs$layout$xaxis$type, "date")
+  expect_identical(info$layout$xaxis$type, "date")
 })

@@ -1,10 +1,10 @@
 context("size")
 
 test_that("size is not a vector if it is not specified", {
-  iplot <- ggplot(iris)+
+  iplot <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width))
   L <- gg2list(iplot)
-  m <- L[[1]]$marker
+  m <- L$data[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) <= 1)
 
@@ -12,14 +12,14 @@ test_that("size is not a vector if it is not specified", {
 })
 
 test_that("size is a vector if it is specified", {
-  iplot <- ggplot(iris)+
+  iplot <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width, size=Petal.Length))
   L <- gg2list(iplot)
-  m <- L[[1]]$marker
+  m <- L$data[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
 
-  expect_identical(L[[1]]$showlegend, FALSE)
+  expect_identical(L$data[[1]]$showlegend, FALSE)
 
   save_outputs(iplot, "size-is-a-vector")
 })
@@ -34,9 +34,11 @@ gg <- ggplot(countrypop, aes(edu, illn, colour=country, size=population)) +
 
 test_that("global scaling works for sizes over different traces", {
   L <- gg2list(gg)
-  expect_equal(length(L), 4)  # 1 trace per country (3) + layout
-  expect_true(as.numeric(L[[1]]$marker$size) < as.numeric(L[[2]]$marker$size))
-  expect_true(as.numeric(L[[2]]$marker$size) < as.numeric(L[[3]]$marker$size))
+  expect_equal(length(L$data), 3)  # 1 trace per country (3)
+  expect_true(as.numeric(L$data[[1]]$marker$size) <
+                as.numeric(L$data[[2]]$marker$size))
+  expect_true(as.numeric(L$data[[2]]$marker$size) <
+                as.numeric(L$data[[3]]$marker$size))
 })
 
 save_outputs(gg, "size-global-scaling")

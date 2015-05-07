@@ -1,6 +1,6 @@
 context("ggplot ylim")
 
-## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
+# http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
 
 df <- data.frame(time = factor(c("Lunch","Dinner"), levels=c("Lunch","Dinner")),
                  total_bill = c(14.89, 17.23))
@@ -18,20 +18,19 @@ expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   save_outputs(gg, paste0("ylim-", name))
   L <- gg2list(gg)
-  is.trace <- names(L) == ""
-  all.traces <- L[is.trace]
+  all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, kwargs=L$kwargs)
+  list(traces=has.data, layout=L$layout)
 }
 
 test_that("ylim is respected for 1 trace", {
   info <- expect_traces(gg.ylim, 1, "one-trace")
   expected.ylim <- c(0, max(df$total_bill))
-  expect_equal(info$kwargs$layout$yaxis$range, expected.ylim)
+  expect_equal(info$layout$yaxis$range, expected.ylim)
 
   expect_identical(info$traces[[1]]$showlegend, FALSE)
 })
