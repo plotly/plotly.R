@@ -51,7 +51,7 @@ build_link <- paste0('https://travis-ci.org/ropensci/plotly/builds/', a[2])
 commit_msg <- paste0('"Pushed from ', build_link, '"')
 system(paste('git commit -m', commit_msg))
 # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
-repo <- sprintf("https://%s@github.com/ropensci/plotly-test-table.git", a[4])
+repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", a[4])
 system(paste("git pull -q", repo, "gh-pages"))
 system(paste("git push -q", repo, "gh-pages"))
 

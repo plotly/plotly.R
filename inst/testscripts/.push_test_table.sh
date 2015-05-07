@@ -20,7 +20,7 @@ git config --global user.name "cpsievert"
 git config --global user.email "cpsievert1@gmail.com"
 
 cd ..
-git clone https://github.com/ropensci/plotly-test-table.git
+git clone https://github.com/cpsievert/plotly-test-table.git
 cd plotly-test-table
 git checkout gh-pages
 
