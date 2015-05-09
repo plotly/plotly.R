@@ -15,7 +15,7 @@ save_outputs <- function(gg, name, ignore = FALSE) {
     hash <- sub("\\)", "", strsplit(src, "@")[[1]][2])
     hash_dir <- file.path(table_dir, "R", hash)
     # create a directory for this hash if necessary
-    if (!dir.exists(hash_dir)) dir.create(hash_dur, recursive = TRUE)
+    if (!dir.exists(hash_dir)) dir.create(hash_dir, recursive = TRUE)
 
     # TODO: could speed things up by avoiding two calls to gg2list()
     # (this will require tweaking expect_traces())
