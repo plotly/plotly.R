@@ -23,7 +23,10 @@ save_outputs <- function(gg, name) {
       dest <- file.path(gg_dir, ggversion, paste0(name, ".png"))
       e <- try(gg, silent = TRUE)
       png(filename = dest)
-      if (inherits(e, "try-error")) plot(1, type="n"); text(1, "ggplot2 error") else gg
+      if (inherits(e, "try-error")) {
+        plot(1, type="n")
+        text(1, "ggplot2 error")
+      } else gg
       dev.off()
     } else  {
       # TODO: could speed things up by avoiding two calls to gg2list()
