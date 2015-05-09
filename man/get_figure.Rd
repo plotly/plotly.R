@@ -15,10 +15,12 @@ get_figure(username, id)
 Request data/layout for a particular Plotly figure
 }
 \examples{
-# https://plot.ly/~TestBot/100
-resp <- get_figure("TestBot", "100")
-names(resp[["layout"]])
-names(resp[["data"]])
+\dontrun{
+ # https://plot.ly/~TestBot/100
+ resp <- get_figure("TestBot", "100")
+ names(resp[["layout"]])
+ names(resp[["data"]])
+}
 }
 \references{
 https://plot.ly/rest/

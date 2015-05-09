@@ -35,4 +35,5 @@ Imports:
 Suggests:
     maps,
     testthat,
-    knitr
+    knitr,
+    devtools

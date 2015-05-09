@@ -25,12 +25,14 @@ POST messages to the clientresp resource of plotly's REST API. Unlike \link{plot
 this function does not support ggplot objects.
 }
 \examples{
-args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
-resp <- plotly_POST(args)
+\dontrun{
+ args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
+ resp <- plotly_POST(args)
 
-# translate a ggplot object with gg2list(), then upload to plotly
-p <- gg2list(qplot(1:10))
-resp <- plotly_POST(p$data, list(layout = p$layout))
+ # translate a ggplot object with gg2list(), then upload to plotly
+ p <- gg2list(qplot(1:10))
+ resp <- plotly_POST(p$data, list(layout = p$layout))
+}
 }
 \references{
 https://plot.ly/rest/

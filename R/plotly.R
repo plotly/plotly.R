@@ -28,15 +28,16 @@ signup <- function(username, email, save = TRUE) {
   resp <- httr::POST(base_url, body = bod)
   stop_for_status(resp)
   con <- RJSONIO::fromJSON(content(resp, as = "text"))
-  # TODO: alter the API response messages to reflect the changes in 1.0.0
   if (nchar(con[["error"]]) > 0) stop(con[["error"]], call. = FALSE)
-  if (nchar(con[["message"]]) > 0) message(con[["message"]], call. = FALSE)
-  # store API key as an environment variable in .Rprofile
+  # Relaying a message with a private key probably isn't a great idea --
+  # https://github.com/ropensci/plotly/pull/217#issuecomment-100381166
+  # if (nchar(con[["message"]]) > 0) message(con[["message"]], call. = FALSE)
   if (save) {
+    # store API key as an environment variable in .Rprofile
     cat_profile("username", con[["un"]])
     cat_profile("apikey", con[["api_key"]])
   }
-  structure(con, class = "apimkacct")
+  invisible(structure(con, class = "apimkacct"))
 }
 
 #' Create, modify and style plotly graphs from R
@@ -123,13 +124,14 @@ plotly <- function(p = last_plot(), browse = interactive(), ...) {
 #' @return An R object created by mapping the JSON content of the plotly API
 #' response to its R equivalent. This object has a class of "clientresp"
 #' @examples
+#' \dontrun{
+#'  args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
+#'  resp <- plotly_POST(args)
 #'
-#' args <- list(c(0, 1, 2), c(3, 4, 5), c(1, 2, 3), c(6, 6, 5))
-#' resp <- plotly_POST(args)
-#'
-#' # translate a ggplot object with gg2list(), then upload to plotly
-#' p <- gg2list(qplot(1:10))
-#' resp <- plotly_POST(p$data, list(layout = p$layout))
+#'  # translate a ggplot object with gg2list(), then upload to plotly
+#'  p <- gg2list(qplot(1:10))
+#'  resp <- plotly_POST(p$data, list(layout = p$layout))
+#' }
 #'
 plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt = "new"),
                         origin = "plot", ...) {
@@ -157,7 +159,12 @@ plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt 
   if (nchar(con[["error"]]) > 0) stop(con[["error"]], call. = FALSE)
   if (nchar(con[["warning"]]) > 0) warning(con[["warning"]], call. = FALSE)
   if (nchar(con[["message"]]) > 0) message(con[["message"]], call. = FALSE)
-  structure(con, class = "clientresp")
+  invisible(structure(con, class = "clientresp"))
+}
+
+# Print method for a client response
+print.clientresp <- function(p) {
+  cat(" Filename: ", p[["filename"]], "\n", "URL:", p[["url"]])
 }
 
 #' Request data/layout for a particular Plotly figure
@@ -166,16 +173,25 @@ plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt 
 #' @export
 #' @references https://plot.ly/rest/
 #' @examples
-#'
-#' # https://plot.ly/~TestBot/100
-#' resp <- get_figure("TestBot", "100")
-#' names(resp[["layout"]])
-#' names(resp[["data"]])
+#' \dontrun{
+#'  # https://plot.ly/~TestBot/100
+#'  resp <- get_figure("TestBot", "100")
+#'  names(resp[["layout"]])
+#'  names(resp[["data"]])
+#' }
 get_figure <- function(username, id) {
-  base_url <- file.path("https://plot.ly/apigetfile", username, id)
+  if (missing(username)) username <- verify("username")
+  if (missing(id)) stop("Must provide a figure id.")
+  base_url <- file.path(get_domain(), "apigetfile", username, id)
   resp <- httr::GET(base_url, plotly_headers())
   stop_for_status(resp)
-  RJSONIO::fromJSON(content(resp, as = "text"))[["payload"]][["figure"]]
+  fig <- RJSONIO::fromJSON(content(resp, as = "text"))[["payload"]][["figure"]]
+  invisible(structure(fig, class = "apigetfile"))
+}
+
+# TODO: smarter print method! (we don't want to print ugly lists)
+print.apigetfile <- function(p) {
+  NextMethod("print")
 }
 
 #' Embed a plotly iframe into an R markdown document via \code{knit_print}
