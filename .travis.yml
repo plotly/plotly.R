@@ -13,8 +13,7 @@ r_packages:
 before_script:
   - git config --global user.name "cpsievert"
   - git config --global user.email "cpsievert1@gmail.com"
-  - cd ..
-  - git clone https://github.com/cpsievert/plotly-test-table.git
+  - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
 
 after_success:
   - cd ..
