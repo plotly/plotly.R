@@ -5,17 +5,20 @@ env:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
 
 r_packages:
-  - RCurl
   - RJSONIO
   - lattice
   - xtable
-  - httr 
+  - httr
 
 before_script:
-  - chmod 755 inst/testscripts/.push_test_table.sh
+  - git config --global user.name "cpsievert"
+  - git config --global user.email "cpsievert1@gmail.com"
+  - cd ..
+  - git clone https://github.com/cpsievert/plotly-test-table.git
 
 after_success:
-  - inst/testscripts/.push_test_table.sh
+  - cd ..
+  - Rscript plotly/inst/testscripts/build-push-comment.R
 
 notifications:
   slack:
