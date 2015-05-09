@@ -16,6 +16,7 @@
 tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
 if (tpr != "false" && tpr != "") {
   library("httr")
+  library("testthat")
   # gistr is a good reference for talking to the github API via httr
   # https://github.com/ropensci/gistr/blob/master/R/zzz.R
   base <- 'https://api.github.com/repos/ropensci/plotly/'
@@ -33,7 +34,7 @@ if (tpr != "false" && tpr != "") {
   # Return an abbreviated version of a hash
   abbrev_hash <- function(hash = "") substr(hash, 1, 7)
 
-  # Grab HEAD info for each branch (might not be necessary)
+  # Grab HEAD info for each branch (this might not be necessary)
 #   br <- paste0(base, 'branches')
 #   res <- GET(br)
 #   stop_for_status(res)
@@ -47,21 +48,32 @@ if (tpr != "false" && tpr != "") {
   # Remember that we're *simulating* a merge with master, but the hash for the
   # *actual* merge will be different. Instead of installing master each time
   # we call save_outputs(), we install once here, if necessary, and re-run tests
-  if (!info$base$sha %in% dir("plotly-test-table/R")) {
-    devtools::install_github("ropensci/plotly", ref = info$base$sha)
-    testthat::test_package("plotly")
+  this_hash <- abbrev_hash(Sys.getenv("TRAVIS_COMMIT"))
+  base_hash <- abbrev_hash(info$base$sha)
+  head_hash <- abbrev_hash(info$head$sha)
+  test_rerun <- function(hash) {
+    if (!hash %in% dir("plotly-test-table/R")) {
+      devtools::install_github("ropensci/plotly", ref = hash)
+      testthat::test_package("plotly")
+    }
   }
+  test_rerun(this_hash)
+  test_rerun(base_hash)
+
   # TODO: Remove plotly-test-table folders that are no longer needed
   # by comparing the directories to branch HEADs for plotly. This could
   # be hard to do the git rm properly. We could also run tests for missing
   # HEAD shas, but that's probably overkill
 
+  # list png files in a particular directory
+  pngs <- function(...) {
+    dir(file.path("plotly-test-table", "R", ...),
+        pattern = "\\.png$", full.names = T)
+  }
   # Build the main HTML page for this build
-  get_png <- function(...)
-    dir(file.path("plotly-test-table",...), pattern = "\\.png$", full.names = T)
-  ggpngs <- get_png("ggplot2", packageVersion("ggplot2"))
-  df <- data.frame(sub("\\.png$", "", basename(ggpngs)), ggpngs,
-                   get_png(commit_hash), get_png(master_hash))
+  ggpngs <- pngs("ggplot2", packageVersion("ggplot2"))
+  df <- data.frame(sub("\\.png$", "", basename(ggpngs)),
+                   ggpngs, pngs(this_hash), pngs(base_hash))
   names(df) <- c("test", "ggplot2", branch, "master")
   # TODO: create an HTML page for each test
   df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test)
@@ -69,11 +81,12 @@ if (tpr != "false" && tpr != "") {
     df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i])
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
-  this_hash <- abbrev_hash(Sys.getenv("TRAVIS_COMMIT"))
   dest <- file.path("plotly-test-table", "R", this_hash, "index.html")
   writeLines(test_table, file = dest)
 
-  # TODO: convert for thumbnails!! (see wch/vtest's convert_png() for alternative)
+  # TODO:
+  # * convert for thumbnails!! (see wch/vtest's convert_png() for alternative)
+  # * create home page for R with commmit info -- https://developer.github.com/v3/git/commits/
 
   # add, commit, push to gh-pages branch of plotly-test-table
   system("git add *")
@@ -90,7 +103,7 @@ if (tpr != "false" && tpr != "") {
   # (needed since Travis randomly re-builds stuff)
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/index.html", this_hash)
   msg <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s",
-                 info$head$sha, info$base$sha, this_hash, info$base$sha, this_hash, tbl_link)
+                 head_hash, base_hash, this_hash, base_hash, this_hash, tbl_link)
   msg <- paste("> The message below was automatically generated after build", build_link, "\n\n", msg)
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
