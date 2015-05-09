@@ -3,12 +3,11 @@
 #' @param ignore ignore ggplot2 errors?
 
 save_outputs <- function(gg, name, ignore = FALSE) {
-  # message(paste("running", name))
-  # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
-  build_dir <- Sys.getenv("TRAVIS_BUILD_DIR")
-  # only create plotlys if we're on travis
-  if (build_dir != "") {
-    table_dir <- file.path(build_dir, "plotly-test-table")
+  # only render/save plotly pngs if this is a Travis pull request
+  # (see build-comment-push.R for better explanation of why)
+  tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
+  if (tpr != "false" && tpr != "") {
+    table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "plotly-test-table")
     # find the hash of the currently installed plotly package
     pkg_info <- devtools::session_info()$packages
     src <- subset(pkg_info, package == "plotly")$source
