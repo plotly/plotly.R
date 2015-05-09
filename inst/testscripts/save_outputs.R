@@ -1,8 +1,7 @@
 #' @param gg a ggplot object
 #' @param name name of the test
-#' @param ignore ignore ggplot2 errors?
 
-save_outputs <- function(gg, name, ignore = FALSE) {
+save_outputs <- function(gg, name) {
   # only render/save pngs if this is a Travis pull request
   # (see build-comment-push.R for better explanation of this logic)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
@@ -11,6 +10,8 @@ save_outputs <- function(gg, name, ignore = FALSE) {
     # this environment variable should be set by testthat.R
     plotly_dir <- file.path(table_dir, "R", Sys.getenv("plotly-hash"))
     gg_dir <- file.path(table_dir, "R", "ggplot2")
+    if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
+    if (!dir.exists(gg_dir)) dir.create(gg_dir, recursive = TRUE)
 
     # If we don't have pngs for this version (of ggplot2), generate them;
     # otherwise, generate plotly pngs
@@ -18,10 +19,11 @@ save_outputs <- function(gg, name, ignore = FALSE) {
     # suppresses output and travis has 10 minute time limit
     # https://github.com/travis-ci/travis-ci/issues/3849
     ggversion <- as.character(packageVersion("ggplot2"))
-    if (!ggversion %in% dir(gg_dir) && !ignore) {
+    if (!ggversion %in% dir(gg_dir)) {
       dest <- file.path(gg_dir, ggversion, paste0(name, ".png"))
+      e <- try(gg, silent = TRUE)
       png(filename = dest)
-      gg
+      if (inherits(e, "try-error")) plot(1, type="n"); text(1, "ggplot2 error") else gg
       dev.off()
     } else  {
       # TODO: could speed things up by avoiding two calls to gg2list()

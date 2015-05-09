@@ -49,7 +49,7 @@ test_that("direction hvh is translated to shape=hvh", {
   expect_equal(length(L$data), 2)
   expect_identical(L$data[[1]]$line$shape, "hvh")
 
-  save_outputs(gg.hvh, "step-gg.hvh", TRUE)
+  save_outputs(gg.hvh, "step-gg.hvh")
 })
 
 test_that("direction vhv is translated to shape=vhv", {
@@ -58,5 +58,5 @@ test_that("direction vhv is translated to shape=vhv", {
   expect_equal(length(L$data), 2)
   expect_identical(L$data[[1]]$line$shape, "vhv")
 
-  save_outputs(gg.vhv, "step-gg.vhv", TRUE)
+  save_outputs(gg.vhv, "step-gg.vhv")
 })
