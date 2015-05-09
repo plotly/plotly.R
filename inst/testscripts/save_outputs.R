@@ -32,8 +32,10 @@ save_outputs <- function(gg, name, ignore = FALSE) {
     ggversion <- packageVersion("ggplot2")
     gg_dir <- file.path(table_dir, "ggplot2")
     if (!ggversion %in% dir(gg_dir) && !ignore) {
-      dest <- file.path(table_dir, "ggplot2", ggversion)
-      ggsave(filename = paste0(name, ".png"), plot = gg, path = dest)
+      dest <- file.path(table_dir, "ggplot2", ggversion, paste0(name, ".png"))
+      png(filename = dest)
+      gg
+      dev.off()
     }
   }
   invisible(NULL)
