@@ -23,7 +23,7 @@ save_outputs <- function(gg, name, ignore = FALSE) {
     if (httr::warn_for_status(resp)) resp
     # write png version of plotly figure to disk
     dest <- file.path(table_dir, hash, paste0(name, ".png"))
-    writeBin(content(resp, as = "raw"), dest)
+    writeBin(httr::content(resp, as = "raw"), dest)
 
     # if we don't have the results for this version (of ggplot2), save them
     ggversion <- packageVersion("ggplot2")
