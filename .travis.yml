@@ -9,7 +9,6 @@ r_packages:
   - lattice
   - xtable
   - httr
-  - devtools
 
 before_script:
   - git config --global user.name "cpsievert"
