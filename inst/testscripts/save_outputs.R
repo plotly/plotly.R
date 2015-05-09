@@ -1,8 +1,9 @@
 #' @param gg a ggplot object
 #' @param name name of the test
+#' @param ignore ignore ggplot2 errors?
 
-save_outputs <- function(gg, name) {
-  message(paste("running", name))
+save_outputs <- function(gg, name, ignore = FALSE) {
+  # message(paste("running", name))
   # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
   build_dir <- Sys.getenv("TRAVIS_BUILD_DIR")
   # only create plotlys if we're on travis
@@ -27,7 +28,7 @@ save_outputs <- function(gg, name) {
     # if we don't have the results for this version (of ggplot2), save them
     ggversion <- packageVersion("ggplot2")
     gg_dir <- file.path(table_dir, "ggplot2")
-    if (!ggversion %in% dir(gg_dir)) {
+    if (!ggversion %in% dir(gg_dir) && !ignore) {
       dest <- file.path(table_dir, "ggplot2", ggversion)
       ggsave(filename = paste0(name, ".png"), plot = gg, path = dest)
     }
