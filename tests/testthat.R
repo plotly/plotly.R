@@ -14,7 +14,6 @@ save_outputs <- function(gg, name) {
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
     table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "plotly-test-table")
-    # this environment variable should be set by testthat.R
     plotly_dir <- file.path(table_dir, "R", hash)
     gg_dir <- file.path(table_dir, "R", "ggplot2")
     if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
