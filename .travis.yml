@@ -14,7 +14,7 @@ before_script:
 
 after_success:
   - cd ..
-  - Rscript plotly/tests/build-push-comment.R
+  - Rscript plotly/inst/build-push-comment.R
 
 env:
   global:
