@@ -55,7 +55,7 @@ if (tpr != "false" && tpr != "") {
     if (!hash %in% dir("plotly-test-table/R")) {
       devtools::install_github("ropensci/plotly", ref = hash, local = FALSE)
       message("Rerunning tests")
-      source("plotly/tests/testthat.R", chdir = TRUE)
+      try(source("plotly/tests/testthat.R", chdir = TRUE))
     }
   }
   test_rerun(this_hash)
