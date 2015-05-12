@@ -55,7 +55,7 @@ if (tpr != "false" && tpr != "") {
     if (!hash %in% dir("plotly-test-table/R")) {
       devtools::install_github("ropensci/plotly", ref = hash, local = FALSE)
       message("Rerunning tests")
-      testthat::test_dir("plotly")
+      testthat::test_dir("plotly/tests")
     }
   }
   test_rerun(this_hash)
@@ -83,7 +83,7 @@ if (tpr != "false" && tpr != "") {
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
   dest <- file.path("plotly-test-table", "R", this_hash, "index.html")
-  writeLines(test_table, file = dest)
+  writeLines(test_table, dest)
 
   # TODO:
   # * convert for thumbnails!! (see wch/vtest's convert_png() for alternative)
