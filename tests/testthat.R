@@ -19,7 +19,7 @@ save_outputs <- function(gg, name) {
   # (see build-comment-push.R for better explanation of this logic)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
-    table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "plotly-test-table")
+    table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
     plotly_dir <- file.path(table_dir, "R", hash)
     gg_dir <- file.path(table_dir, "R", "ggplot2")
     if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
