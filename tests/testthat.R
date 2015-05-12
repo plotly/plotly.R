@@ -6,7 +6,13 @@ Sys.setenv(`plotly-apikey` = "r1neazxo9w")
 # find the hash of the currently installed plotly package
 pkg_info <- devtools::session_info()$packages
 src <- subset(pkg_info, package == "plotly")$source
-hash <- sub("\\)", "", strsplit(src, "@")[[1]][2])
+hash <- if (src == "local") {
+  # you could also do `git rev-parse HEAD`, but this is cleaner for Travis
+  substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
+} else {
+  # thankfully devtools includes hash for installs from GitHub
+  sub("\\)", "", strsplit(src, "@")[[1]][2])
+}
 
 save_outputs <- function(gg, name) {
   # only render/save pngs if this is a Travis pull request
