@@ -117,6 +117,8 @@ if (tpr != "false" && tpr != "") {
   } else {
     message("Link already posted")
   }
+} else {
+  message('The test table is only built during the "pull request" build.')
 }
 
 

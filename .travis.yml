@@ -1,18 +1,16 @@
-language: c
+language: r
+sudo: required
 
-before_install:
-  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-  - chmod 755 ./travis-tool.sh
-  - ./travis-tool.sh bootstrap
+r_packages:
+  - RJSONIO
+  - lattice
+  - xtable
+  - httr
+
+before_script:
   - git config --global user.name "cpsievert"
   - git config --global user.email "cpsievert1@gmail.com"
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
-
-install:
-   - ./travis-tool.sh install_deps
-
-script:
-  - ./travis-tool.sh run_tests
 
 after_success:
   - cd ..
