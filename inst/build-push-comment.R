@@ -83,8 +83,6 @@ if (tpr != "false" && tpr != "") {
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
   dest <- file.path("plotly-test-table", "R", this_hash, "index.html")
-  list.files("plotly-test-table")
-  list.files("plotly-test-table/R")
   writeLines(test_table, dest)
 
   # TODO:
@@ -92,6 +90,7 @@ if (tpr != "false" && tpr != "") {
   # * create home page for R with commmit info -- https://developer.github.com/v3/git/commits/
 
   # add, commit, push to gh-pages branch of plotly-test-table
+  setwd("plotly-test-table")
   system("git add *")
   build_link <- paste0('https://travis-ci.org/ropensci/plotly/builds/',
                        Sys.getenv("TRAVIS_BUILD_ID"))
