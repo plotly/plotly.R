@@ -16,7 +16,7 @@ before_script:
 after_success:
   - pwd
   - cd ..
-  - ls
+  - ls -R
   - Rscript plotly/inst/build-push-comment.R
 
 env:
