@@ -53,7 +53,7 @@ if (tpr != "false" && tpr != "") {
   head_hash <- abbrev_hash(info$head$sha)
   test_rerun <- function(hash) {
     if (!hash %in% dir("plotly-test-table/R")) {
-      devtools::install_github("ropensci/plotly", ref = hash)
+      devtools::install_github("ropensci/plotly", ref = hash, local = FALSE)
       message("Rerunning tests")
       testthat::test_dir("plotly")
     }
