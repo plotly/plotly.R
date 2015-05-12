@@ -1,23 +1,26 @@
-language: r
-
-env:
-  global:
-    - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
-
-r_packages:
-  - RJSONIO
-  - lattice
-  - xtable
-  - httr
+language: c
 
 before_script:
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
   - git config --global user.name "cpsievert"
   - git config --global user.email "cpsievert1@gmail.com"
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
 
+install:
+   - ./travis-tool.sh install_deps
+
+script:
+  - ./travis-tool.sh run_tests
+
 after_success:
   - cd ..
   - Rscript plotly/tests/build-push-comment.R
+
+env:
+  global:
+    - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
 
 notifications:
   slack:
