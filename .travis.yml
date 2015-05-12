@@ -11,9 +11,12 @@ before_script:
   - git config --global user.name "cpsievert"
   - git config --global user.email "cpsievert1@gmail.com"
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
+  - pwd
 
 after_success:
+  - pwd
   - cd ..
+  - ls
   - Rscript plotly/inst/build-push-comment.R
 
 env:
