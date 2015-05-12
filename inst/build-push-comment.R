@@ -83,6 +83,8 @@ if (tpr != "false" && tpr != "") {
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
   dest <- file.path("plotly-test-table", "R", this_hash, "index.html")
+  list.files("plotly-test-table")
+  list.files("plotly-test-table/R")
   writeLines(test_table, dest)
 
   # TODO:
