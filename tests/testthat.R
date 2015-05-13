@@ -33,9 +33,10 @@ save_outputs <- function(gg, name) {
     # https://github.com/travis-ci/travis-ci/issues/3849
     ggversion <- as.character(packageVersion("ggplot2"))
     if (!ggversion %in% dir(gg_dir)) {
-      dest <- file.path(gg_dir, ggversion, paste0(name, ".png"))
+      gglife <- file.path(gg_dir, ggversion)
+      dir.create(gglife, recursive = TRUE)
       e <- try(gg, silent = TRUE)
-      png(filename = dest)
+      png(filename = file.path(gglife, paste0(name, ".png")))
       if (inherits(e, "try-error")) {
         plot(1, type="n")
         text(1, "ggplot2 error")
