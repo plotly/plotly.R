@@ -10,7 +10,7 @@ hash <- if (src == "local") {
   # you could also do `git rev-parse HEAD`, but this is cleaner for Travis
   substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
 } else {
-  # thankfully devtools includes hash for installs from GitHub
+  # thankfully devtools includes hash for packages installed off GitHub
   sub("\\)", "", strsplit(src, "@")[[1]][2])
 }
 
@@ -19,7 +19,8 @@ save_outputs <- function(gg, name) {
   # (see build-comment-push.R for better explanation of this logic)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
-    table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
+    table_dir <-
+      file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
     plotly_dir <- file.path(table_dir, "R", hash)
     gg_dir <- file.path(table_dir, "R", "ggplot2")
     if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
@@ -57,7 +58,6 @@ save_outputs <- function(gg, name) {
 }
 
 test_check("plotly")
-
 
 # NOTE: I'm assumming Travis is installing most recent ggplot2 off CRAN
 # Here is one way to get current ggplot2 version off of CRAN if need be

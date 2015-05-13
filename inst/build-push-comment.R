@@ -80,6 +80,7 @@ if (tpr != "false" && tpr != "") {
   df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test)
   for (i in setdiff(names(df), "test"))
     df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i])
+  print(df)
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
   dest <- file.path("plotly-test-table", "R", this_hash, "index.html")
@@ -91,6 +92,7 @@ if (tpr != "false" && tpr != "") {
 
   # add, commit, push to gh-pages branch of plotly-test-table
   setwd("plotly-test-table")
+  system("git status")
   system("git add *")
   build_link <- paste0('https://travis-ci.org/ropensci/plotly/builds/',
                        Sys.getenv("TRAVIS_BUILD_ID"))
