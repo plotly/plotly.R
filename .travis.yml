@@ -14,7 +14,7 @@ before_script:
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
 
 script:
-  - Rscript -e "source('tests/testthat.R', chdir = TRUE)"
+  - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE)"
 
 after_success:
   - cd ..
