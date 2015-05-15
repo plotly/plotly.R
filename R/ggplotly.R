@@ -768,6 +768,22 @@ gg2list <- function(p) {
     stop("No exportable traces")
   }
   
+  # fixed coordinates: if the coordinates ratio is not NULL, then
+  # we make the size of the plot according to the specified ratio
+  # note: we set the biggest dimension to 600
+  if (!is.null(p$coordinates$ratio)) {
+    x_range <- range(built[[2]]$ranges[[1]]$x.major_source, na.rm = TRUE)
+    y_range <- range(built[[2]]$ranges[[1]]$y.major_source, na.rm = TRUE)
+    yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
+    if (yx_ratio > 1) {
+      layout$height <- 600
+      layout$width <- layout$height * (1 / p$coordinates$ratio) * (1 / yx_ratio) 
+    } else {
+      layout$width <- 600
+      layout$height <- layout$height * (1 / p$coordinates$ratio) * yx_ratio 
+    }
+  }
+  
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
   mode.mat["markers", "lines"] <-
