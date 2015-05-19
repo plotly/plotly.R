@@ -35,7 +35,7 @@ signup <- function(username, email, save = TRUE) {
   if (save) {
     # store API key as an environment variable in .Rprofile
     cat_profile("username", con[["un"]])
-    cat_profile("apikey", con[["api_key"]])
+    cat_profile("api_key", con[["api_key"]])
   }
   invisible(structure(con, class = "apimkacct"))
 }
@@ -61,10 +61,10 @@ signup <- function(username, email, save = TRUE) {
 #'
 #' # If you already have a username and API key, please create the following
 #' # environment variables:
-#' Sys.setenv(`plotly-username` = "me")
-#' Sys.setenv(`plotly-apikey` = "mykey")
+#' Sys.setenv("plotly_username" = "me")
+#' Sys.setenv("plotly_api_key" = "mykey")
 #' # You can also change the default domain if you have a plotly server.
-#' Sys.setenv(`plotly-domain` = "http://mydomain.com")
+#' Sys.setenv("plotly_domain" = "http://mydomain.com")
 #'
 #' # If you don't want to specify these environment variables everytime you
 #' # start R, you can put that code in a .Rprofile (see help(.Rprofile))
@@ -98,9 +98,9 @@ plotly <- function(p = last_plot(), browse = interactive(), ...) {
   # specifying username and key should still work
   .args <- as.list(match.call())
   if ("username" %in% names(.args))
-    Sys.setenv(`plotly-username` = args[["username"]])
+    Sys.setenv("plotly_username" = args[["username"]])
   if ("key" %in% names(.args))
-    Sys.setenv(`plotly-apikey` = args[["key"]])
+    Sys.setenv("plotly_api_key" = args[["key"]])
   if (!"data" %in% names(p))
     stop("p should have at least one element named 'data'",
          "(which is mapped to the args parameter in the plotly REST API).")
@@ -145,7 +145,7 @@ plotly_POST <- function(args, kwargs = list(filename = "plot from api", fileopt 
   # construct body of message to plotly server
   bod <- list(
     un = verify("username"),
-    key = verify("apikey"),
+    key = verify("api_key"),
     origin = origin,
     platform = "R",
     version = as.character(packageVersion("plotly")),
@@ -234,22 +234,30 @@ embed_notebook <- function(url, width = "100%", height = "525") {
 # ----------------------------------------
 
 get_domain <- function() {
-  Sys.getenv("plotly-domain", "https://plot.ly")
+  Sys.getenv("plotly_domain", "https://plot.ly")
 }
 
 plotly_headers <- function() {
   httr::add_headers(.headers = c(
                     "plotly-username" = verify("username"),
-                    "plotly-apikey" = verify("apikey"),
+                    "plotly-apikey" = verify("api_key"),
                     "plotly-version" = as.character(packageVersion("plotly")),
                     "plotly-platform" = "R"))
 }
 
 # verify that a certain environment variable exists
 verify <- function(what = "username") {
-  who <- paste0("plotly-", what)
+  who <- paste0("plotly_", what)
   val <- Sys.getenv(who, "")
-  if (val == "") stop("Must specify ", what, call. = FALSE)
+  # If the environment variable doesn't exist, fall back on hidden files
+  if (val == "") {
+    PLOTLY_DIR <- file.path(normalizePath("~", mustWork = TRUE), ".plotly")
+    CREDENTIALS_FILE <- file.path(PLOTLY_DIR, ".credentials")
+    CONFIG_FILE <- file.path(PLOTLY_DIR, ".config")
+
+    stop("Must specify ", what, call. = FALSE)
+  }
+
   val
 }
 
@@ -262,7 +270,7 @@ plotly_iframe <- function(url, width, height) {
 cat_profile <- function(key, value, path = "~") {
   r_profile <- file.path(normalizePath(path, mustWork = TRUE),
                          ".Rprofile")
-  snippet <- sprintf('\nSys.setenv(`plotly-%s` = "%s")', key, value)
+  snippet <- sprintf('\nSys.setenv("plotly_%s" = "%s")', key, value)
   if (!file.exists(r_profile)) {
     message("Creating", r_profile)
     r_profile_con <- file(r_profile)
@@ -271,7 +279,7 @@ cat_profile <- function(key, value, path = "~") {
     stop("R doesn't have permission to write to this file: ", path)
   if (file.access(r_profile, 4) != 0)
     stop("R doesn't have permission to read this file: ", path)
-  message("Adding plotly-", key, " environment variable to ", r_profile)
+  message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
 }
 
