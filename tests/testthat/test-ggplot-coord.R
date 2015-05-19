@@ -3,7 +3,7 @@ context("Fixed coordinates")
 # Expect trace function
 expect_traces <- function(gg, n_traces, name) {
   stopifnot(is.ggplot(gg))
-  stopifnot(is.numeric(n.traces))
+  stopifnot(is.numeric(n_traces))
   save_outputs(gg, paste0("coord_fixed-", name))
   L <- gg2list(gg)
   all_traces <- L$data
