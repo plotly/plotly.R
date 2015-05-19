@@ -590,7 +590,7 @@ geom2trace <- list(
               # text only makes sense if no dimension reduction occurred
               text = if (nrow(dat) == nrow(data)) data$text else NULL,
               name = params$name,
-              marker = list(color=toRGB(params$fill)))
+              marker = list(color = toRGB(params$fill)))
     if (!is.null(params$colour)) {
       L$marker$line <- list(color = toRGB(params$colour))
       L$marker$line$width <- if (is.null(params$size)) 1 else params$size
