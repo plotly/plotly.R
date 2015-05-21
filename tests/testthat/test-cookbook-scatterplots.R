@@ -72,3 +72,11 @@ g <- ggplot(dat, aes(x=xrnd, y=yrnd)) +
   geom_point(shape=1,      # Use hollow circles
              position=position_jitter(width=1,height=.5))
 save_outputs(g, "scatterplots-jitter")
+
+# Jitter the points using geom_jitter
+# Jitter range is 1 on the x-axis, .5 on the y-axis
+g <- ggplot(dat, aes(x = xrnd, y = yrnd)) +
+  geom_jitter(shape = 1,      # Use hollow circles
+             width = 1, height = 0.5)
+save_outputs(g, "scatterplots-geom_jitter")
+
