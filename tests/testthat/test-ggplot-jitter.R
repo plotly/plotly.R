@@ -23,5 +23,6 @@ test_that("geom_jitter is working", {
   tr <- info$traces[[1]]
   expect_identical(tr$type, "scatter")
   # default jitter is 40% of the resolution of the data.
-  expect_true(all(0 < abs(mpg$cyl - tr$x) < 0.4))
+  diffs <- abs(mpg$cyl - tr$x)
+  expect_true(all(0 < diffs & diffs < 0.4))
 })
