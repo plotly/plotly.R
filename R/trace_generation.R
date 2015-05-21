@@ -384,6 +384,14 @@ toBasic <- list(
     g$params$yend <- max(g$prestats.data$globymax)
     g
   },
+  jitter=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g$geom <- "point"
+    g
+  },
   point=function(g) {
     if ("size" %in% names(g$data)) {
       g$params$sizemin <- min(g$prestats.data$globsizemin)
@@ -555,38 +563,6 @@ geom2trace <- list(
       L$visible <- FALSE
     }
     L
-  },
-  jitter=function(data, params){
-    L <- list(x = data$x,
-              y = data$y,
-              name = params$name,
-              text = data$text,
-              type = "scatter",
-              mode = "markers",
-              marker = paramORdefault(params, aes2marker, marker.defaults))
-    if ("size" %in% names(data)) {
-      L$text <- paste("size:", data$size)
-      L$marker$sizeref <- default.marker.sizeref
-      # Make sure sizes are passed as a list even when there is only one element.
-      s <- data$size
-      marker.size <- 5 * (s - params$sizemin) / 
-        (params$sizemax - params$sizemin) + 0.25
-      marker.size <- marker.size * marker.size.mult
-      L$marker$size <- ifelse(length(s) > 1, marker.size, list(marker.size))
-      L$marker$line$width <- 0
-    }
-    if (!is.null(params$shape) && params$shape %in% c(21:25)) {
-      L$marker$color <- ifelse(!is.null(params$fill), 
-                               toRGB(params$fill), "rgba(0,0,0,0)")
-      if (!is.null(params$colour)) {
-        L$marker$line$color <- toRGB(params$colour) 
-      }
-      L$marker$line$width <- 1
-    }
-    if (!is.null(params$shape) && params$shape %in% c(32)) {
-      L$visible <- FALSE
-    }
-    return(L)
   },
   text=function(data, params){
     L <- list(x=data$x,
