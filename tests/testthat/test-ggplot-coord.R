@@ -43,7 +43,6 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   la <- info$layout
   expect_identical(tr$type, "scatter")
   # height-width ratio check
-  built <- ggplot_build2(p)
   x_range <- range(p$data$xval, na.rm = TRUE)
   y_range <- range(p$data$yval, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
