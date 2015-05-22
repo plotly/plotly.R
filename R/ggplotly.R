@@ -167,7 +167,7 @@ gg2list <- function(p) {
     range.values <- if(use.ranges){
       range.name <- paste0(xy, ".range")
       sapply(built$panel$ranges, "[[", range.name)
-    }else{
+    } else{
       ## for categorical variables on the axes, panel$ranges info is
       ## meaningless.
       name.name <- paste0(xy, ".name")
@@ -772,8 +772,8 @@ gg2list <- function(p) {
   # we make the size of the plot according to the specified ratio
   # note: we set the biggest dimension to 600
   if (!is.null(p$coordinates$ratio)) {
-    x_range <- range(built[[2]]$ranges[[1]]$x.major_source, na.rm = TRUE)
-    y_range <- range(built[[2]]$ranges[[1]]$y.major_source, na.rm = TRUE)
+    x_range <- range(p$data[[as.character(layer.aes$x.name)]], na.rm = TRUE)
+    y_range <- range(p$data[[as.character(layer.aes$y.name)]], na.rm = TRUE)
     yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
     if (yx_ratio > 1) {
       layout$height <- 600

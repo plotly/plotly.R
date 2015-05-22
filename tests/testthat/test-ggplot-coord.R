@@ -28,9 +28,8 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   la <- info$layout
   expect_identical(tr$type, "scatter")
   # height-width ratio check
-  built <- ggplot_build2(p)
-  x_range <- range(built[[2]]$ranges[[1]]$x.major_source, na.rm = TRUE)
-  y_range <- range(built[[2]]$ranges[[1]]$y.major_source, na.rm = TRUE)
+  x_range <- range(p$data$xval, na.rm = TRUE)
+  y_range <- range(p$data$yval, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
   expect_identical(la$height/la$width, yx_ratio * p$coordinates$ratio)
 })
@@ -45,8 +44,8 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   expect_identical(tr$type, "scatter")
   # height-width ratio check
   built <- ggplot_build2(p)
-  x_range <- range(built[[2]]$ranges[[1]]$x.major_source, na.rm = TRUE)
-  y_range <- range(built[[2]]$ranges[[1]]$y.major_source, na.rm = TRUE)
+  x_range <- range(p$data$xval, na.rm = TRUE)
+  y_range <- range(p$data$yval, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
   expect_identical(la$height/la$width, yx_ratio * p$coordinates$ratio)
 })
