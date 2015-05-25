@@ -202,5 +202,3 @@ test_that("For a given x value, if multiple y exist, sum them. ", {
   y <- y[info$traces[[1]]$x]
   expect_equal(info$traces[[1]]$y, as.numeric(y))
 })
-
-
