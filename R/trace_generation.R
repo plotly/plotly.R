@@ -579,14 +579,20 @@ geom2trace <- list(
       # Convert days into milliseconds
       x <- as.numeric(x) * 24 * 60 * 60 * 1000
     }
-    L <- list(x=x,
-              y=data$y,
-              type="bar",
-              name=params$name,
-              text=data$text,
-              marker=list(color=toRGB(params$fill)))
+    # if there is more than one y-value for a particular combination of
+    # x, PANEL, and group; then take the _max_ y.
+    data$x <- x
+    dat <- plyr::ddply(data, c("x", "PANEL", if ("group" %in% names(data)) "group"),
+                       plyr::summarise, count = max(y))
+    L <- list(x = dat$x,
+              y = dat$count,
+              type = "bar",
+              # text only makes sense if no dimension reduction occurred
+              text = if (nrow(dat) == nrow(data)) data$text else NULL,
+              name = params$name,
+              marker = list(color = toRGB(params$fill)))
     if (!is.null(params$colour)) {
-      L$marker$line <- list(color=toRGB(params$colour))
+      L$marker$line <- list(color = toRGB(params$colour))
       L$marker$line$width <- if (is.null(params$size)) 1 else params$size
     }
     if (!is.null(params$alpha)) L$opacity <- params$alpha
