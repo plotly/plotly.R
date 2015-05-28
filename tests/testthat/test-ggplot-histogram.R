@@ -34,7 +34,7 @@ test_that("geom_histogram(aes(y = ..density..)) displays a density", {
   area <- sum(tr$y) * bw
   # the "area" of the plot (should be 1).
   # note this also serves as a check for the default binwidth
-  expect_equal(area, 1, 0.1)
+  expect_equal(area, 1, tolerance = 0.1)
 })
 
 test_that("geom_histogram(aes(fill = ..count..)) works", {
