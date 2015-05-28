@@ -1,8 +1,8 @@
 library("testthat")
 library("plotly")
 # crendentials for the test bot
-Sys.setenv(`plotly-username` = "TestBot")
-Sys.setenv(`plotly-apikey` = "r1neazxo9w")
+Sys.setenv("plotly_username" = "TestBot")
+Sys.setenv("plotly_apikey" = "r1neazxo9w")
 # find the hash of the currently installed plotly package
 pkg_info <- devtools::session_info()$packages
 src <- subset(pkg_info, package == "plotly")$source
