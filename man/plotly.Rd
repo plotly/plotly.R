@@ -2,73 +2,61 @@
 % Please edit documentation in R/plotly.R
 \name{plotly}
 \alias{plotly}
-\title{Main interface to plotly}
+\title{Create, modify and style plotly graphs from R}
 \usage{
-plotly(username = NULL, key = NULL, base_url = NULL)
+plotly(p = last_plot(), browse = interactive(), ...)
 }
 \arguments{
-\item{username}{plotly username}
+\item{p}{Either a ggplot object or a list of data/arguments to post to the
+plotly API.}
 
-\item{key}{plotly API key}
+\item{browse}{should the default web browser be prompted to open the Plotly result?}
 
-\item{base_url}{plotly server}
-}
-\value{
-An object of class PlotlyClass, except for the final object after
-adding layers becomes a list class.
+\item{...}{additional arguments passed onto \link{plotly_POST}.}
 }
 \description{
-A call to \code{plotly(username, key)} creates an object of class
-'PlotlyClass', which has methods:
-\itemize{
- \item Plotting: py$plotly(x1, y1[, x2, y2, ...], kwargs=kwargs) or
-   py$plotly({data1[, data2, ...]}, kwargs=kwargs), py$ggplotly()
- \item Styling Data: py$style(data1,data2,..., kwargs=kwargs)
- \item Styling Layout: py$layout(layout, kwargs=kwargs)
- \item Utilities: py$get_figure(file_owner, file_id)
-}
-}
-\details{
-Plotly interface object. See up-to-date documentation and examples at
+Create, See up-to-date documentation and examples at
 https://plot.ly/API
-
-See documentation and examples at https://plot.ly/API
 }
 \examples{
 \dontrun{
-## View https://plot.ly/API for more examples
-## Generate a simple plot
-username <- 'anna.lyst'  # fill in with your plotly username
-api_key <- 'y37zkd'  # fill in with your plotly API key
-py <- plotly(username, api_key)
-## generate some data
-x <- c(0, 1, 2)
-y <- c(10, 11, 12)
+# You need a plotly username and API key to communicate with the plotly API.
 
-## Send data to Plotly. Plotly will render an interactive graph and will
-## return a URL where you can view your plot
-## This call sends data to Plotly, Plotly renders an interactive
-## graph, and returns a URL where you can view your plot
-response <- py$plot(x, y)
-response$url  # view your plot at this URL
-browseURL(response$url)  # use browseURL to go to the URL in your browser
+# If you don't already have an API key, you can obtain one with a valid
+# username and email via signup().
+s <- signup('anna.lyst', 'anna.lyst@plot.ly')
 
-## Export ggplots directly to plot.ly
-ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
-py$ggplotly(ggiris)
+# If you already have a username and API key, please create the following
+# environment variables:
+Sys.setenv(`plotly-username` = "me")
+Sys.setenv(`plotly-apikey` = "mykey")
+# You can also change the default domain if you have a plotly server.
+Sys.setenv(`plotly-domain` = "http://mydomain.com")
+
+# If you don't want to specify these environment variables everytime you
+# start R, you can put that code in a .Rprofile (see help(.Rprofile))
+
+# Send data directly to Plotly's Javascript Graphing Library
+# https://plot.ly/javascript-graphing-library/
+p <- list(
+ x = c(0, 1, 2),
+ y = c(10, 11, 12)
+)
+resp <- plotly(p)
+
+# plotly() also understands how to map (some) ggplot objects to Plotly graphs
+ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
+plotly(ggiris)
 data(canada.cities, package="maps")
 viz <- ggplot(canada.cities, aes(long, lat)) +
   borders(regions="canada", name="borders") +
   coord_equal() +
   geom_point(aes(text=name, size=pop), colour="red",
                alpha=1/2, name="cities")
- py$ggplotly(viz)
+ plotly(viz)
 }
 }
-\author{
-Chris Parmer chris@plot.ly
-}
-\references{
-https://plot.ly/API
+\seealso{
+\link{signup}, \link{plotly_POST}
 }
 
