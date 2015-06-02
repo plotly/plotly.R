@@ -19,7 +19,7 @@ set.seed(1001)
 p <- ggplot(mpg, aes(cyl, hwy)) + geom_jitter()
 
 test_that("geom_jitter is working", {
-  info <- expect_traces(p1, 1, "basic")
+  info <- expect_traces(p, 1, "basic")
   tr <- info$traces[[1]]
   expect_identical(tr$type, "scatter")
   # default jitter is 40% of the resolution of the data.
