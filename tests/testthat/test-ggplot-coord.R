@@ -31,7 +31,7 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   x_range <- range(p$data$xval, na.rm = TRUE)
   y_range <- range(p$data$yval, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
-  expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, 0.25)
+  expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, tolerance = 0.10)
 })
 
 # Equal scaling, with each 1 on the x axis the same length as y on x axis
@@ -46,5 +46,5 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   x_range <- range(p$data$xval, na.rm = TRUE)
   y_range <- range(p$data$yval, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
-  expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, 0.25)
+  expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, tolerance = 0.10)
 })
