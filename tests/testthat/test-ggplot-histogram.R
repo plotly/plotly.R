@@ -47,7 +47,7 @@ test_that("geom_histogram(aes(fill = ..count..)) works", {
   }
 })
 
-test_that("Fixed colour/fill works", {
+test_that("Histogram with fixed colour/fill works", {
   gg <- base + geom_histogram(colour = "darkgreen", fill = "white")
   info <- expect_traces(gg, 1, "fixed-fill-color")
   tr <- info$traces[[1]]
@@ -62,6 +62,69 @@ test_that("Specify histogram binwidth", {
   area <- sum(tr$y) * 0.3
   expect_equal(area, 1, 0.1)
 })
+
+test_that("geom_histogram(aes(fill = factor(...))) is a stacked by default", {
+  gg <- base + geom_histogram(aes(fill = factor(vs)))
+  info <- expect_traces(gg, 2, "fill-factor")
+  trs <- info$traces
+  type <- unique(sapply(trs, "[[", "type"))
+  gap <- unique(sapply(trs, "[[", "bargap"))
+  barmode <- unique(sapply(trs, "[[", "barmode"))
+  expect_identical(type, "bar")
+  expect_equal(gap, 0)
+  expect_equal(barmode, "stack")
+})
+
+test_that("geom_histogram(aes(fill = factor(...))) respects position_identity()", {
+  gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3,
+                              position = "identity")
+  info <- expect_traces(gg, 2, "fill-factor-identity")
+  trs <- info$traces
+  type <- unique(sapply(trs, "[[", "type"))
+  gap <- unique(sapply(trs, "[[", "bargap"))
+  barmode <- unique(sapply(trs, "[[", "barmode"))
+  expect_identical(type, "bar")
+  expect_equal(gap, 0)
+  expect_equal(barmode, "overlay")
+})
+
+test_that("geom_histogram(aes(fill = factor(...))) respects position_dodge()", {
+  gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3,
+                              position = "dodge")
+  info <- expect_traces(gg, 2, "fill-factor-dodge")
+  trs <- info$traces
+  type <- unique(sapply(trs, "[[", "type"))
+  gap <- unique(sapply(trs, "[[", "bargap"))
+  barmode <- unique(sapply(trs, "[[", "barmode"))
+  expect_identical(type, "bar")
+  expect_equal(gap, 0)
+  expect_equal(barmode, "group")
+})
+
+test_that("geom_histogram() with facets", {
+  gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3) + 
+    facet_wrap(~am)
+  info <- expect_traces(gg, 4, "fill-factor-facets")
+  trs <- info$traces
+  type <- unique(sapply(trs, "[[", "type"))
+  gap <- unique(sapply(trs, "[[", "bargap"))
+  barmode <- unique(sapply(trs, "[[", "barmode"))
+  expect_identical(type, "bar")
+  expect_equal(gap, 0)
+  expect_equal(barmode, "stack")
+})
+
+test_that("vline overlaid histogram", {
+  gg <- base + geom_histogram() +
+    geom_vline(aes(xintercept=mean(wt)), color="red", linetype="dashed", size=1)
+  info <- expect_traces(gg, 2, "vline")
+  trs <- info$traces
+  type <- unique(sapply(trs, "[[", "type"))
+  expect_identical(sort(type), c("bar", "scatter"))
+})
+
+
+
 
 # Non-numeric (date) data
 noram <- data.frame(month=c("2012-01-01", "2012-02-01", "2012-01-01",

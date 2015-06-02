@@ -252,9 +252,14 @@ layer2traces <- function(l, d, misc) {
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
       pos <- l$position$.super$objname
-      tr$barmode <- if (pos %in% c("identity", "stack", "fill")) {
-        "stack"
-      } else "group"
+      tr$barmode <-
+        if (pos %in% "identity" && tr$bargap == 0) {
+          "overlay" 
+        } else if (pos %in% c("identity", "stack", "fill")) {
+          "stack"
+        } else {
+        "group"
+      }
     }
     
     traces <- c(traces, list(tr))
