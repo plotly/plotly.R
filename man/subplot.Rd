@@ -2,26 +2,23 @@
 % Please edit documentation in R/subplots.R
 \name{subplot}
 \alias{subplot}
-\title{plotly subplots}
+\title{View multiple plots in a single view}
 \usage{
-subplot(x)
+subplot(..., nrows = 1, which_layout = 1)
 }
 \arguments{
-\item{x}{a list of plotly (and optionally layout) objects}
+\item{...}{any number of plotly objects}
+
+\item{nrows}{number of rows for laying out plots in a grid-like structure.
+Only used if no domain is specified in either \link{xaxis} or \link{yaxis}}
+
+\item{which_layout}{adopt the layout of which plot?}
+}
+\value{
+A plotly object
 }
 \description{
-plotly subplots
-}
-\examples{
-\dontrun{
-p1 <- ggplotly(qplot(rnorm(100)))
-p2 <- histogram(rnorm(100), xaxis(domain = c(0, 0.5)))
-ps <- list(
-  plot1 = p1,
-  plot2 = p2,
-  layout(plot1 = domain(0, ))
-)
-}
+View multiple plots in a single view
 }
 \author{
 Carson Sievert

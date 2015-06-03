@@ -5,6 +5,7 @@ is.style <- function(x) inherits(x, "style")
 #' @param traces numeric vector. Which traces should be modified?
 #' @param ... arguments coerced to a list and used to modify trace(s)
 #' @author Carson Sievert
+#' @export
 #'
 
 style <- function(traces = 1, ...) {
