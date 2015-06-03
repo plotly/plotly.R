@@ -1,3 +1,40 @@
+#' Create plotly graphs using ggplot2 syntax
+#'
+#' See up-to-date documentation and examples at
+#' \url{https://plot.ly/ggplot2}
+#'
+#' @param p a ggplot object.
+#' @param ... Additional arguments passed onto \link{plotly}. 
+#' You can also pass additional ggplot objects to create subplots.
+#' @seealso \link{signup}, \link{plotly}
+#' @import httr jsonlite
+#' @export
+#' @author Carson Sievert
+#' @examples \dontrun{
+#' # simple example
+#' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
+#' ggplotly(ggiris)
+#' 
+#' # maps!!
+#' data(canada.cities, package = "maps")
+#' viz <- ggplot(canada.cities, aes(long, lat)) +
+#'   borders(regions = "canada", name = "borders") +
+#'   coord_equal() +
+#'   geom_point(aes(text = name, size = pop), colour = "red",
+#'                alpha = 1/2, name = "cities")
+#'  ggplotly(viz)
+#' }
+#' 
+ggplotly <- function(p = last_plot()) {
+  l <- gg2list(p)
+  class(l$layout) <- "layout"
+  structure(l, class = "plotly")
+}
+
+# ----------------------------------------------------------------------------
+# Objects accessed inside gg2list()
+# ----------------------------------------------------------------------------
+
 # calc. the epoch
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
@@ -907,8 +944,5 @@ gg2list <- function(p) {
     flipped.layout[["yaxis"]] <- x
   }
   
-  fig <- list(data=flipped.traces, layout=flipped.layout)
-  
-  fig
-  
+  list(data = flipped.traces, layout = flipped.layout)
 }

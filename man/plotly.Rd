@@ -2,61 +2,19 @@
 % Please edit documentation in R/plotly.R
 \name{plotly}
 \alias{plotly}
-\title{Create, modify and style plotly graphs from R}
+\title{Main interface to plotly}
 \usage{
-plotly(p = last_plot(), browse = interactive(), ...)
+plotly(username = NULL, key = NULL, base_url = NULL)
 }
 \arguments{
-\item{p}{Either a ggplot object or a list of data/arguments to post to the
-plotly API.}
+\item{username}{plotly username}
 
-\item{browse}{should the default web browser be prompted to open the Plotly result?}
+\item{key}{plotly API key}
 
-\item{...}{additional arguments passed onto \link{plotly_POST}.}
+\item{base_url}{plotly server}
 }
 \description{
-Create, See up-to-date documentation and examples at
-https://plot.ly/API
-}
-\examples{
-\dontrun{
-# You need a plotly username and API key to communicate with the plotly API.
-
-# If you don't already have an API key, you can obtain one with a valid
-# username and email via signup().
-s <- signup('anna.lyst', 'anna.lyst@plot.ly')
-
-# If you already have a username and API key, please create the following
-# environment variables:
-Sys.setenv(`plotly-username` = "me")
-Sys.setenv(`plotly-apikey` = "mykey")
-# You can also change the default domain if you have a plotly server.
-Sys.setenv(`plotly-domain` = "http://mydomain.com")
-
-# If you don't want to specify these environment variables everytime you
-# start R, you can put that code in a .Rprofile (see help(.Rprofile))
-
-# Send data directly to Plotly's Javascript Graphing Library
-# https://plot.ly/javascript-graphing-library/
-p <- list(
- x = c(0, 1, 2),
- y = c(10, 11, 12)
-)
-resp <- plotly(p)
-
-# plotly() also understands how to map (some) ggplot objects to Plotly graphs
-ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
-plotly(ggiris)
-data(canada.cities, package="maps")
-viz <- ggplot(canada.cities, aes(long, lat)) +
-  borders(regions="canada", name="borders") +
-  coord_equal() +
-  geom_point(aes(text=name, size=pop), colour="red",
-               alpha=1/2, name="cities")
- plotly(viz)
-}
-}
-\seealso{
-\link{signup}, \link{plotly_POST}
+Deprecated: see \link{signup} for credentials/configuration storage details.
+See \link{ggplotly} for the new ggplot2 interface.
 }
 
