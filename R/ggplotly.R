@@ -872,7 +872,7 @@ gg2list <- function(p) {
     trace.score <- trace.order.score[trace.name]
     merged.traces[order(trace.score)]
   }else{
-    merged.traces
+    rev(merged.traces)
   }
   
   # Translate scale(labels) to trace name.
