@@ -5,3 +5,4 @@ man-roxygen
 man-roxygen/^.*\.Rproj$
 ^\.Rproj\.user$
 vignettes/margins.sty
+appveyor.yml

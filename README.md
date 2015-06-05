@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
+[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)  [![Build status](https://ci.appveyor.com/api/projects/status/4m5gq5hbjqcgkpep)](https://ci.appveyor.com/project/karthik/plotly)
 
 
 ![](http://i.imgur.com/gp0muqe.gif)
