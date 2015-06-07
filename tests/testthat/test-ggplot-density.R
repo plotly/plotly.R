@@ -54,3 +54,23 @@ test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
   type <- unique(sapply(trs, "[[", "type"))
   expect_identical(sort(type), c("bar", "scatter"))
 })
+
+# Check if the traces are in the correct order when position = stack
+# Generate ggplot object
+p <- ggplot(data = movies, aes(x = rating, fill = mpaa,)) + 
+  geom_density(position = "stack")
+# Test 
+test_that("traces are ordered correctly in geom_density", {
+  info <- expect_traces(p, 5, "geom_density_traces_order")
+  tr <- info$traces[[1]]
+  la <- info$layout
+  expect_identical(tr$type, "scatter")
+  # check trace order
+  trace.names <- rev(levels(movies$mpaa))
+  for (i in 1:5){
+    expect_identical(info$traces[[i]]$name, trace.names[i])
+  }
+})
+# Save output
+save_outputs(p, "density_traces_order")
+
