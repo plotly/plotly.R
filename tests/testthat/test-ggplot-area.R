@@ -42,11 +42,14 @@ expect_traces <- function(gg, n_traces, name) {
   expect_equal(length(has_data), n_traces)
   list(traces = has_data, layout = L$layout)
 }
+# Generate data
+df <- aggregate(price ~ cut + carat, data = diamonds, FUN = length)
+names(df)[3] <- "n"
+temp <- aggregate(n ~ carat, data = df, FUN = sum)
+names(temp)[2] <- "sum.n"
+df <- merge(x = df, y = temp, all.x = TRUE)
+df$freq <- df$n / df$sum.n
 # Generate ggplot object
-library(dplyr)
-df <- diamonds %>% group_by(carat, cut) %>% 
-  summarise(n = n()) %>% mutate(freq = n/sum(n))
-df$r.cut <- factor(df$cut, levels = rev(levels(df$cut)))
 p <- ggplot(data = df, aes(x = carat, y = freq, fill = cut)) + 
   geom_area() 
 # Test 
