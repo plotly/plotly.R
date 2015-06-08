@@ -1,9 +1,99 @@
+#' Pipe operator
+#'
+#' See \code{\link[magrittr]{\%>\%}} for more details.
+#'
+#' @name %>%
+#' @rdname pipe
+#' @keywords internal
+#' @export
+#' @importFrom magrittr %>%
+#' @usage lhs \%>\% rhs
+NULL
+
+is.plotly <- function(x) inherits(x, "plotly")
+
 # this function is called after the package is loaded
 .onLoad <- function(...) {
   usr <- verify("username")
   message("Howdy ", usr, "!")
   key <- verify("api_key")
   invisible(NULL)
+}
+
+# special enviroment that tracks trace/layout information
+plotlyEnv <- new.env(parent = emptyenv())
+
+# hash plot info, assign it to the special plotly environment, & attach it to data
+hash_plot <- function(df, p) {
+  hash <- digest::digest(p)
+  assign(hash, p, envir = plotlyEnv)
+  attr(df, "plotly_hash") <- hash
+  # add plotly class mainly for printing method
+  class(df) <- unique(c("plotly", class(df)))
+  # return a data frame to be compatible with things like dplyr
+  df
+}
+
+# get plot info given a 
+get_plot <- function(data, strict = TRUE) {
+  hash <- attr(data, "plotly_hash")
+  if (!is.null(hash)) {
+    p <- get(hash, envir = plotlyEnv)
+  } else {
+    # safe to just grab the most recent environment?
+    hash <- rev(ls(plotlyEnv))[1]
+    p <- plotlyEnv[[hash]]
+    if (strict) 
+      warning("Output may not be correct since data isn't a plotly object")
+  }
+  p
+}
+
+# evaluate unevaluated expressions before POSTing to plotly
+eval_list <- function(l) {
+  # create list skeleton
+  x <- list()
+  ntraces <- length(l$data)
+  x$data <- vector("list", ntraces)
+  # when appropriate, evaluate trace arguments in a suitable environment
+  for (i in seq_len(ntraces)) {
+    dat <- l$data[[i]]
+    idx <- names(dat) %in% c("args", "env")
+    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, dat$env)) else dat
+  }
+  # carry over data from first trace (if appropriate)
+  if (ntraces > 1 && isTRUE(l$data[[1]]$inherit)) {
+    for (i in seq.int(2, ntraces)) {
+      x$data[[i]] <- modifyList(x$data[[1]], x$data[[i]])
+    }
+  }
+  # plot_ly()/layout() will produce a unnamed list of layouts
+  # in that case, we may want to evaluate layout arguments
+  idx <- names(l$layout) == ""
+  if (all(idx)) {
+    nlayouts <- length(l$layout)
+    layouts <- setNames(vector("list", nlayouts), names(l$layout))
+    for (i in seq_len(nlayouts)) {
+      layout <- l$layout[[i]]
+      idx <- names(layout) %in% c("args", "env")
+      layouts[[i]] <- if (sum(idx) == 2) {
+        c(layout[!idx], eval(layout$args, layout$env)) 
+      } else {
+        layout
+      }
+    }
+    idx <- names(layouts) == ""
+    x$layout <- if (any(idx)) {
+      c(Reduce(c, layouts[idx]), layouts[!idx])
+    } else {
+      Reduce(c, layouts)
+    }
+  } else {
+    x$layout <- l$layout
+  }
+  # create a new plotly if no url is attached to this environment
+  x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
+  x
 }
 
 # Check for credentials/configuration and throw warnings where appropriate
@@ -50,8 +140,11 @@ from_JSON <- function(x, ...) {
   jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
-# added a class to existing class(es) of an object and return the object
-struct <- function(x, y) structure(x, class = c(class(x), y))
+# add a class to an object only if it is new, and keep any existing classes of 
+# that object
+struct <- function(x, y, ...) {
+  structure(x, class = unique(c(class(x), y)), ...)
+} 
 
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function() {
@@ -73,11 +166,6 @@ plotly_headers <- function() {
     "plotly-platform" = "R"))
 }
 
-# Given a vector or list, drop all the NULL items in it
-dropNulls <- function(x) {
-  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
-}
-
 # try to write environment variables to an .Rprofile
 cat_profile <- function(key, value, path = "~") {
   r_profile <- file.path(normalizePath(path, mustWork = TRUE),
@@ -87,10 +175,14 @@ cat_profile <- function(key, value, path = "~") {
     message("Creating", r_profile)
     r_profile_con <- file(r_profile)
   }
-  if (file.access(r_profile, 2) != 0)
-    stop("R doesn't have permission to write to this file: ", path)
-  if (file.access(r_profile, 4) != 0)
+  if (file.access(r_profile, 2) != 0) {
+    stop("R doesn't have permission to write to this file: ", path, "\n",
+         "You should consider putting this in an .Rprofile ", "\n",
+         "(or sourcing it when you use plotly): ", snippet)
+  }
+  if (file.access(r_profile, 4) != 0) {
     stop("R doesn't have permission to read this file: ", path)
+  }
   message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
 }

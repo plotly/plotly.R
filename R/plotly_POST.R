@@ -3,7 +3,7 @@
 #' POST messages to the clientresp resource of plotly's REST API. Unlike \link{ggplotly},
 #' this function does not translate ggplot objects.
 #'
-#' @param x a list.
+#' @param x a list or an environment.
 #' @export
 #' @references https://plot.ly/rest/
 #' @seealso \link{signup}
@@ -25,11 +25,9 @@
 #' )
 #' plotly_POST(list(trace1, trace2))
 #' }
-#'
-#'
 
 plotly_POST <- function(x) {
-  if (!is.list(x)) stop("x must be a list")
+  x <- eval_list(x)
   nms <- names(x)
   # initialize positional and keyword 'arguments' as empty lists
   args <- kwargs <- list()
@@ -45,9 +43,7 @@ plotly_POST <- function(x) {
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
   if (is.null(kwargs$filename)) kwargs$filename <- "plot from api"
-  if (is.null(kwargs$fileopt)) 
-    # figure objects should be overwritten when POSTED
-    kwargs$fileopt <- if (is.figure(x)) "overwrite" else "new"
+  if (is.null(kwargs$fileopt)) kwargs$fileopt <- "new"
   
   # layout can be an empty list
   kwargs <- kwargs[sapply(kwargs, length) > 0]
@@ -65,7 +61,9 @@ plotly_POST <- function(x) {
   base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
   con <- process(struct(resp, "clientresp"))
-  attr(x, "url") <- con$url
-  attr(x, "filename") <- con$filename
-  x
+  msg <- switch(kwargs$fileopt,
+                new = "Success! Created a new plotly here -> ",
+                overwrite = "Success! Modified your plotly here -> ")
+  message(msg, con$url)
+  con
 }

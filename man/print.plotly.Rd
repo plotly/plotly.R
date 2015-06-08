@@ -7,7 +7,7 @@
 \method{print}{plotly}(p)
 }
 \arguments{
-\item{p}{a list of class 'plotly'}
+\item{p}{an object with class 'plotly'}
 }
 \description{
 Print a plotly object

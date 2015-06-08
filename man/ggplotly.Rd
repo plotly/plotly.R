@@ -8,9 +8,6 @@ ggplotly(p = last_plot())
 }
 \arguments{
 \item{p}{a ggplot object.}
-
-\item{...}{Additional arguments passed onto \link{plotly}.
-You can also pass additional ggplot objects to create subplots.}
 }
 \description{
 See up-to-date documentation and examples at
@@ -36,6 +33,6 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
 Carson Sievert
 }
 \seealso{
-\link{signup}, \link{plotly}
+\link{signup}, \link{plot_ly}
 }
 

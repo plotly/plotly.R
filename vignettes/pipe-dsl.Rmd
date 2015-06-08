@@ -1,0 +1,135 @@
+---
+title: "A declarative DSL for the plotly graphing library in R"
+author: "Carson Sievert"
+output: html_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Plotly DSL}
+---
+
+```{r setup, echo = FALSE, message = FALSE}
+# plotly's testbot
+Sys.setenv("plotly_username" = "TestBot")
+Sys.setenv("plotly_api_key" = "r1neazxo9w")
+# eventually set cache = T!
+knitr::opts_chunk$set(width = 800, height = 400, cache = FALSE)
+```
+
+Version 1.0.0 of the [plotly R package](https://github.com/ropensci/plotly) introduces a new interface for creating plotly graphs in a [pure, predictable, and pipeable](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) manner. Most importantly, this implies a couple things:
+
+1. Functions take a central object (I'll call this a 'plotly object') as their first argument, modify it in some way, and return that modified object.
+2. Output is defined entirely based on input.
+
+## Creating and modifying plotlys
+
+To initiate a plotly object with a single trace, use `plot_ly()`. Here we use it to create a scatter trace (but there are many [other trace types](https://plot.ly/javascript-graphing-library/reference/)).
+
+```{r, message = FALSE}
+library(plotly)
+data(economics, package = "ggplot2")
+p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", showlegend = F)
+```
+
+If you have a plotly account, printing plotly objects in the R console will create a new plotly figure (via plotly's REST API). If you're using knitr/R Markdown with HTML output (like [this vignette]()), printing not only creates the plot, but also embeds it as an iframe. If you're using an IPython Notebook, you'll can embed with `embed_notebook(p)`.
+
+```{r}
+p
+```
+
+To add more traces to your plotly, use `add_trace()`. By default, trace information created in `plot_ly()` will carry over to future traces, unless we explictly override it (this helps [avoid repeating yourself](http://en.wikipedia.org/wiki/Don%27t_repeat_yourself)).
+
+```{r}
+# since economics was provided to plot_ly(), we can still reference it's column names
+p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
+p2
+```
+
+To modify the styling of the plot, use `layout()`.
+
+```{r}
+(p3 <- layout(p2, title = "Median duration of unemployment (in weeks)"))
+```
+
+If you study [plotly's graphing reference](https://plot.ly/javascript-graphing-library/reference), you'll see that many arguments take (JSON) objects. Under the hood, __plotly__ uses [__jsonlite__](http://cran.r-project.org/web/packages/jsonlite/index.html) to convert R objects to JSON, so knowing a bit about [it's mapping rules](http://arxiv.org/abs/1403.2805) can be helpful. Here, we modify the global font using a named list (a named list in R is equivalent to a JSON object).
+
+```{r}
+layout(p3, font = list(family = "Courier New, monospace"))
+```
+
+If you look at the structure of plotly objects, they are data frames with a class of plotly and a special environment attached. 
+
+```{r}
+str(p3)
+```
+
+This might seem strange, but it yields desirable results since it integrates nicely nicely with other pipeable interfaces that use a data frame their central object (such as [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html)). This means that we can incorporate data manipulation verbs into a sequence of steps leading to a visualization. Here, we take advantage of `dplyr::filter()` to label the highest peak in the time series:
+
+```{r, message = FALSE, warning = FALSE}
+economics %>%
+  plot_ly(x = date, y = uempmed, type = "scatter", showlegend = F) %>%
+  add_trace(y = fitted(loess(uempmed ~ as.numeric(date)))) %>%
+  layout(title = "Median duration of unemployment (in weeks)") %>%
+  dplyr::filter(uempmed == max(uempmed)) %>%
+  # annotations is an array of objects (in R, that's a list of named list(s))
+  layout(annotations = list(list(x = date, y = uempmed, text = "Peak", showarrow = T)))
+```
+
+For some visualizations, using a data frame can be awkward. This is especially true of any trace type that requires `z`. Again, according the JSON reference, [`z` needs to be an array of arrays](https://plot.ly/javascript-graphing-library/reference/#surface-z). In this case, a numeric matrix works well.
+
+```{r}
+str(volcano)
+plot_ly(z = volcano, type = "surface")
+```
+
+### Figure objects
+
+Figure objects are plotly objects, but with a fixed location. That is, when you print a figure object, it modifies the already existing plotly (instead of creating a new one). The proper way to initiate a figure object is with `get_figure()`:
+
+```{r}
+fig <- get_figure("TestBot", "17555")
+layout(fig, title = paste("Last modified ", Sys.time()))
+```
+
+If you want to modify the styling of trace(s), use `style()`.
+
+### `ggplot2` objects
+
+The `ggplotly()` function converts a ggplot object to a plotly object. 
+
+```{r}
+library(ggplot2)
+(gg <- ggplotly(qplot(mpg, wt, data = mtcars)))
+```
+
+This means we can alter (converted) ggplot(s) as if they were plotly object(s).
+
+```{r}
+layout(gg, font = list(family = "Courier New, monospace"))
+```
+
+### Multiple plots
+
+ggplot2's `facet_wrap()` and `facet_grid()` are a nice way to produce [small multiples](http://en.wikipedia.org/wiki/Small_multiple), but sometimes you want more flexibility in laying out multiple plots in a single view. Advanced ggplot2 users might be familiar with using grid or [gridExtra package](http://lightonphiri.org/blog/ggplot2-multiple-plots-in-one-graph-using-gridextra) for this sort of thing, but these approaches communicate directly with R's graphics devices, so that approach won't work for plotly.
+
+Thankfully, plotly provides a `subplots()` function:
+
+```{r}
+a1 <- layout(p2, title = "Median duration of unemployment (in weeks)")
+a2 <- plot_ly(economics, x = date, y = unemploy, showlegend = F)
+subplot(a1, a2)
+```
+
+By default, `subplot()` will assume you want all your plots in a single row. Use the `nrows` argument to change that default:
+
+```{r}
+subplot(a1, a2, nrows = 2)
+```
+
+You can also manually add xaxis/yaxis domain information. In fact, this approach makes it fairly easy to create [inset plots](https://plot.ly/javascript-graphing-library/insets/). 
+
+```{r}
+a2_small <- layout(a2, 
+                   xaxis = list(domain = c(0.05, 0.35)), 
+                   yaxis = list(domain = c(0.7, 1)))
+subplot(a1, a2_small)
+```

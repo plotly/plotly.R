@@ -51,5 +51,7 @@ signup <- function(username, email, save = TRUE) {
     cat_profile("username", con$un)
     cat_profile("api_key", con$api_key)
   }
+  Sys.setenv("plotly_username" = con$un)
+  Sys.setenv("plotly_api_key" = con$api_key)
   invisible(con)
 }

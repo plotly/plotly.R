@@ -4,9 +4,7 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
-#' @param ... Additional arguments passed onto \link{plotly}. 
-#' You can also pass additional ggplot objects to create subplots.
-#' @seealso \link{signup}, \link{plotly}
+#' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
 #' @export
 #' @author Carson Sievert
@@ -27,8 +25,7 @@
 #' 
 ggplotly <- function(p = last_plot()) {
   l <- gg2list(p)
-  class(l$layout) <- "layout"
-  structure(l, class = "plotly")
+  hash_plot(p$data, l)
 }
 
 # ----------------------------------------------------------------------------

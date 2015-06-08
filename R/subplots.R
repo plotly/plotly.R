@@ -10,10 +10,8 @@
 #' 
 
 # TODO: throw warning if more than one _unique_ axis is predefined in any plot?
-
 subplot <- function(..., nrows = 1, which_layout = 1) {
   dots <- list(...)
-  if (length(dots) == 1) return(dots)
   is_plotly <- vapply(dots, is.plotly, logical(1), USE.NAMES = FALSE)
   if (!all(is_plotly)) {
     warning("Every argument to this function should be plotly object.",
@@ -22,6 +20,8 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
             "These arguments will be ignored")
     dots <- dots[is_plotly]
   }
+  if (length(dots) == 1) return(dots)
+  dots <- lapply(dots, function(x) eval_list(get_plot(x)))
   # make sure each 'subplot' has each unique set of axes
   dat <- lapply(dots, "[[", "data")
   # for a particular plot, get axis identifiers
@@ -44,7 +44,6 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
     }
   }
   for (i in seq_along(dat)) dat[[i]] <- dat[[i]][[1]]
-  
   # now, figure out the domain spacing
   ls <- lapply(dots, "[[", "layout")
   nplots <- sum(is_plotly)
@@ -58,20 +57,17 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
     xdom <- get_domains(nplots, ncols)
     ydom <- get_domains(nplots, nrows)
   }
-  xaxes <- mapply(function(x, y) xaxis(domain = x, anchor = y),
+  xaxes <- mapply(function(x, y) list(domain = x, anchor = y),
                   xdom, paste0("y", seq_len(nplots)), SIMPLIFY = FALSE)
   xaxes <- setNames(xaxes, sub("1", "", paste0("xaxis", seq_len(nplots))))
-  yaxes <- mapply(function(x, y) yaxis(domain = x, anchor = y),
+  yaxes <- mapply(function(x, y) list(domain = x, anchor = y),
                   ydom, paste0("x", seq_len(nplots)), SIMPLIFY = FALSE)
   yaxes <- setNames(yaxes, sub("1", "", paste0("yaxis", seq_len(nplots))))
   layout <- dots[[which_layout]]$layout
   if (is.null(layout)) layout <- list()
   layout <- modifyList(layout, xaxes)
   layout <- modifyList(layout, yaxes)
-  structure(
-    list(data = dat, layout = layout),
-    class = "plotly"
-  )
+  hash_plot(data.frame(), list(data = dat, layout = layout))
 }
 
 

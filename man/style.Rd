@@ -4,9 +4,11 @@
 \alias{style}
 \title{Modify trace styling}
 \usage{
-style(traces = 1, ...)
+style(data = NULL, traces = 1, ...)
 }
 \arguments{
+\item{data}{A data frame with a class of plotly.}
+
 \item{traces}{numeric vector. Which traces should be modified?}
 
 \item{...}{arguments coerced to a list and used to modify trace(s)}

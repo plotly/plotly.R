@@ -4,10 +4,10 @@
 \alias{embed_notebook}
 \title{Embed a plotly iframe into a IPython Notebook}
 \usage{
-embed_notebook(url, width = "100\%", height = "525")
+embed_notebook(p, width = "100\%", height = "525")
 }
 \arguments{
-\item{url}{A url pointing to a plotly graph}
+\item{p}{a plotly object}
 
 \item{width}{attribute of the iframe}
 

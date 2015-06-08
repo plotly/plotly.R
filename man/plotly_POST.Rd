@@ -7,7 +7,7 @@
 plotly_POST(x)
 }
 \arguments{
-\item{x}{a list.}
+\item{x}{a list or an environment.}
 }
 \value{
 An R object created by mapping the JSON content of the plotly API

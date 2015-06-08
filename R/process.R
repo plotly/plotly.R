@@ -18,11 +18,10 @@ process.clientresp <- function(resp) {
 process.figure <- function(resp) {
   stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
-  structure(
-    con$payload$figure, 
-    class = "figure", 
-    url = sub("apigetfile/", "~", resp$url)
-  )
+  fig <- con$payload$figure
+  fig$url <- sub("apigetfile/", "~", resp$url)
+  # any reasonable way to return a data frame?
+  hash_plot(data.frame(), fig)
 }
 
 process.signup <- function(resp) {

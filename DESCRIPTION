@@ -1,6 +1,5 @@
 Package: plotly
-Type: Package
-Title: Interactive, publication-quality graphs online.
+Title: Create interactive web-based graphs via plotly's API. 
 Version: 1.0.0
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     email = "chris@plot.ly"),
@@ -17,22 +16,23 @@ Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"))
 License: MIT + file LICENSE
-Description: An interface to plotly's online graphing tools with desktop R
-    environments. Send data to a plotly account and view the graphs in a web
-    browser. Style the graphs with code or with plotly's online interface;
-    share data and graphs publicly with a url or privately among other plotly
-    members; access your graphs from anywhere. Example graph:
-    https://plot.ly/~chris/1638/
+Description: Create interactive web-based graphs via plotly's API. 
+    Easily translate ggplot2 plots to plotly and/or create custom plotly graphs. 
+    Once uploaded to a plotly account, plotly graphs (and the data behind them) 
+    can be viewed and modified in a web browser.
 URL: https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
-Depends:
-    ggplot2
 Imports:
+    ggplot2,
     httr,
-    jsonlite
+    jsonlite,
+    magrittr,
+    digest
 Suggests:
+    dplyr,
     maps,
     testthat,
     knitr,
     devtools,
     simsalapar
+LazyData: true
