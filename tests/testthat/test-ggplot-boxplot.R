@@ -90,3 +90,5 @@ test_that("legends for boxplot", {
                  tolerance = 1)
   }
 })
+
+
