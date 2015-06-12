@@ -29,10 +29,28 @@ test_that("geom_density() respects fill aesthetic", {
   gg <- base + geom_density(aes(fill=factor(vs)), alpha = 0.3)
   info <- expect_traces(gg, 2, "fill")
   trs <- info$traces
+  la <- info$layout
   type <- unique(sapply(trs, "[[", "type"))
   fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
   expect_identical(fill, "tozeroy")
+  # check legend exists
+  expect_identical(la$showlegend, TRUE)
+  # check legend for each fill exists
+  for (i in 1:2) {
+    expect_identical(trs[[i]]$showlegend, TRUE)
+  }
+  # check the fill colors are correct
+  g <- ggplot_build(gg)
+  fill.colors <- unique(g$data[[1]]["fill"])[,1]
+  for (i in 1:2) {
+    plotly.color <- as.integer(
+      strsplit(gsub("[\\(\\)]|rgba", "", 
+                    trs[[i]]$fillcolor), split = ",")[[1]])[1:3]
+    names(plotly.color) <- c("red", "green", "blue")
+    expect_equal(plotly.color, col2rgb(fill.colors[i])[,1], 
+                 tolerance = 1)
+  }
 })
 
 test_that("geom_density() respects colour aesthetic", {
