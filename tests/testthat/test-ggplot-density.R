@@ -61,7 +61,7 @@ p <- ggplot(data = movies, aes(x = rating, fill = mpaa,)) +
   geom_density(position = "stack")
 # Test 
 test_that("traces are ordered correctly in geom_density", {
-  info <- expect_traces(p, 5, "geom_density_traces_order")
+  info <- expect_traces(p, 5, "traces_order")
   tr <- info$traces[[1]]
   la <- info$layout
   expect_identical(tr$type, "scatter")
@@ -71,6 +71,4 @@ test_that("traces are ordered correctly in geom_density", {
     expect_identical(info$traces[[i]]$name, trace.names[i])
   }
 })
-# Save output
-save_outputs(p, "density_traces_order")
 

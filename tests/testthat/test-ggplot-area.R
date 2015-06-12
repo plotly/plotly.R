@@ -32,7 +32,7 @@ save_outputs(gg, "area-fillcolor")
 expect_traces <- function(gg, n_traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n_traces))
-  save_outputs(gg, paste0("coord_fixed-", name))
+  save_outputs(gg, paste0("area-", name))
   L <- gg2list(gg)
   all_traces <- L$data
   no_data <- sapply(all_traces, function(tr) {
@@ -54,7 +54,7 @@ p <- ggplot(data = df, aes(x = carat, y = freq, fill = cut)) +
   geom_area() 
 # Test 
 test_that("traces are ordered correctly in geom_area", {
-  info <- expect_traces(p, 5, "geom_area_traces_order")
+  info <- expect_traces(p, 5, "traces_order")
   tr <- info$traces[[1]]
   la <- info$layout
   expect_identical(tr$type, "scatter")
@@ -64,6 +64,4 @@ test_that("traces are ordered correctly in geom_area", {
     expect_identical(info$traces[[i]]$name, trace.names[i])
   }
 })
-# Save output
-save_outputs(p, "area_traces_order")
 
