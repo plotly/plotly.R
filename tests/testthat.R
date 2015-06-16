@@ -13,6 +13,9 @@ hash <- if (src == "local") {
   # thankfully devtools includes hash for packages installed off GitHub
   sub("\\)", "", strsplit(src, "@")[[1]][2])
 }
+table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
+plotly_dir <- file.path(table_dir, "R", hash)
+if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
 save_outputs <- function(gg, name) {
   # only render/save pngs if this is a Travis pull request
@@ -20,11 +23,7 @@ save_outputs <- function(gg, name) {
   message("Running test: ", name)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
-    table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), 
-                           "..", "plotly-test-table")
-    plotly_dir <- file.path(table_dir, "R", hash)
-    if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
-    p <- print(ggplotly(gg))
+    (p <- ggplotly(gg))
     png_url <- paste0(p[["url"]], ".png")
     resp <- httr::GET(png_url)
     # print the response if it wasn't successful
