@@ -7,7 +7,7 @@ process <- function(resp) {
 }
 
 process.clientresp <- function(resp) {
-  stop_for_status(resp)
+  httr::stop_for_status(resp)
   con <- from_JSON(httr::content(resp, as = "text"))
   if (nchar(con$error) > 0) stop(con$error, call. = FALSE)
   if (nchar(con$warning) > 0) warning(con$warning, call. = FALSE)
@@ -16,7 +16,7 @@ process.clientresp <- function(resp) {
 }
 
 process.figure <- function(resp) {
-  stop_for_status(resp)
+  httr::stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
   fig <- con$payload$figure
   fig$url <- sub("apigetfile/", "~", resp$url)
@@ -25,7 +25,7 @@ process.figure <- function(resp) {
 }
 
 process.signup <- function(resp) {
-  stop_for_status(resp)
+  httr::stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
   if (nchar(con[["error"]]) > 0) stop(con$error, call. = FALSE)
   # Relaying a message with a private key probably isn't a great idea --

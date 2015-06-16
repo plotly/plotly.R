@@ -3,22 +3,24 @@ context("get_figure")
 test_that("requests made by a user who doesn't exist error a 404", {
   expect_error({
     get_figure("klmadslfjdfljdsf", 0)
-  }, "404")
+  }, ".*404.*")
 })
 
 test_that("requests made to retrieve a figure that doesn't exist returns a 404", {
   expect_error({
     get_figure("get_test_user", 18324823)
-  }, "404")
+  }, ".*404.*")
 })
 
 test_that("requests made to retrieve some elses private file errors a 403", {
   expect_error({
     get_figure("get_test_user", 1)
-  }, "403")
+  }, ".*403.*")
 })
 
 test_that("retrieving a public figure ... works.", {
-  figure <- get_figure("get_test_user", 0)
-  expect_equivalent(figure$data[[1]]$x, list("1", "2", "3"))
+  fig <- get_figure("get_test_user", 0)
+  # get the data behind the hash
+  p <- plotly:::get_plot(fig)
+  expect_equivalent(p$data[[1]]$x, list("1", "2", "3"))
 })
