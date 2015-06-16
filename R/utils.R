@@ -56,8 +56,16 @@ get_plot <- function(data, strict = TRUE) {
 
 # evaluate unevaluated expressions before POSTing to plotly
 eval_list <- function(l) {
-  x <- list()
+  # assume unnamed list elements are data/traces
+  nms <- names(l)
+  idx <- nms %in% ""
+  l <- if (is.null(nms)) {
+    list(data = l) 
+  } else if (any(idx)) {
+    c(data = c(l$data, l[idx]), l[!idx])
+  } else l
   ntraces <- length(l$data)
+  x <- list()
   x$data <- vector("list", ntraces)
   # when appropriate, evaluate trace arguments in a suitable environment
   for (i in seq_len(ntraces)) {

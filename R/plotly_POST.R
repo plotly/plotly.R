@@ -28,18 +28,13 @@
 
 plotly_POST <- function(x) {
   x <- eval_list(x)
-  nms <- names(x)
-  # initialize positional and keyword 'arguments' as empty lists
-  args <- kwargs <- list()
-  if (is.null(nms)) {
-    args <- x
-  } else {
-    args <- x$data
-    args <- c(args, x[nms %in% ""])
-    idx <- nms %in% get_kwargs()
-    # TODO: throw warning/error if we detect names that aren't recognized?
-    kwargs <- x[idx]
-  }
+  args <- x$data
+  kwargs <- x[get_kwargs()]
+  
+  # search for keyword args in traces and take the first valid one
+  kwargs2 <- lapply(x$data, function(x) x[get_kwargs()])
+  kwargs <- modifyList(kwargs, Reduce(c, kwargs2))
+  
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
   if (is.null(kwargs$filename)) kwargs$filename <- "plot from api"
