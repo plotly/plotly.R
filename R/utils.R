@@ -71,7 +71,7 @@ eval_list <- function(l) {
   for (i in seq_len(ntraces)) {
     dat <- l$data[[i]]
     idx <- names(dat) %in% c("args", "env")
-    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, dat$env)) else dat
+    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, dat$env, dat$enclos)) else dat
   }
   # translate colors and shapes
   title <- as.character(as.list(l$data[[1]]$args)[["color"]])
@@ -93,7 +93,7 @@ eval_list <- function(l) {
       layout <- l$layout[[i]]
       idx <- names(layout) %in% c("args", "env")
       layouts[[i]] <- if (sum(idx) == 2) {
-        c(layout[!idx], eval(layout$args, layout$env)) 
+        c(layout[!idx], eval(layout$args, layout$env, layout$enclos)) 
       } else {
         layout
       }

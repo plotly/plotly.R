@@ -71,7 +71,8 @@ plot_ly <- function(data = NULL, type = "scatter", ...,
 add_trace <- function(data = NULL, ..., env = parent.frame()) {
   tr <- list(
     args = substitute(list(...)),
-    env = if (is.null(data)) env else list2env(data)
+    env = if (is.null(data)) env else list2env(data),
+    enclos = env
   )
   df <- if (is.null(data)) data.frame() else data
   p <- get_plot(df)
@@ -93,7 +94,8 @@ add_trace <- function(data = NULL, ..., env = parent.frame()) {
 layout <- function(data = NULL, ..., env = parent.frame()) {
   layout <- list(
     args = substitute(list(...)),
-    env = if (is.null(data)) env else list2env(data)
+    env = if (is.null(data)) env else list2env(data),
+    enclos = env
   )
   df <- if (is.null(data)) data.frame() else data
   p <- get_plot(df)
