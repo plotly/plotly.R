@@ -32,7 +32,7 @@ save_outputs <- function(gg, name) {
     # write png version of plotly figure to disk
     writeBin(httr::content(resp, as = "raw"),
              file.path(plotly_dir, paste0(name, ".png")))
-  } 
+  }
   invisible(NULL)
   
   #gg_dir <- file.path(table_dir, "R", "ggplot2")

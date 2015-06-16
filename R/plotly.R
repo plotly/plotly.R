@@ -39,6 +39,7 @@ plot_ly <- function(data = NULL, type = "scatter", ...,
     # TODO: verify/filter arguments based on trace type.
     args = substitute(list(...)),
     env = if (is.null(data)) env else list2env(data),
+    enclos = env,
     inherit = inherit
   )
   # this info is sufficient for recreating the plot
