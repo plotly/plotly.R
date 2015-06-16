@@ -3,7 +3,7 @@
 #' POST messages to the clientresp resource of plotly's REST API. Unlike \link{ggplotly},
 #' this function does not translate ggplot objects.
 #'
-#' @param x a list or an environment.
+#' @param x either a plotly object or a list.
 #' @export
 #' @references https://plot.ly/rest/
 #' @seealso \link{signup}
@@ -27,13 +27,14 @@
 #' }
 
 plotly_POST <- function(x) {
+  if (is.plotly(x)) x <- get_plot(x)
   x <- eval_list(x)
   args <- x$data
   kwargs <- x[get_kwargs()]
   
   # search for keyword args in traces and take the first valid one
-  kwargs2 <- lapply(x$data, function(x) x[get_kwargs()])
-  kwargs <- modifyList(kwargs, Reduce(c, kwargs2))
+  kwargs2 <- Reduce(c, lapply(x$data, function(x) x[get_kwargs()]))
+  kwargs <- modifyList(kwargs, if (is.null(kwargs2)) list() else kwargs2)
   
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)

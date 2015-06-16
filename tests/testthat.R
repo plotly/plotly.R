@@ -18,19 +18,19 @@ save_outputs <- function(gg, name) {
   # only render/save pngs if this is a Travis pull request
   # (see build-comment-push.R for better explanation of this logic)
   message("Running test: ", name)
+  p <- gg2list(gg)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
-    p <- print(ggplotly(gg))
-    png_url <- paste0(p[["url"]], ".png")
-    resp <- httr::GET(png_url)
+    resp <- plotly_POST(p)
+    resp <- httr::GET(paste0(resp[["url"]], ".png"))
     # print the response if it wasn't successful
     if (httr::warn_for_status(resp)) resp
     # write png version of plotly figure to disk
-    writeBin(httr::content(resp, as = "raw"),
-             file.path(plotly_dir, paste0(name, ".png")))
+    filename <- file.path(plotly_dir, paste0(name, ".png"))
+    writeBin(httr::content(resp, as = "raw"), filename)
   }
-  invisible(NULL)
-  
+  # eventually change tests so that they use output from this function
+  invisible(p)
   #gg_dir <- file.path(table_dir, "R", "ggplot2")
   #if (!dir.exists(gg_dir)) dir.create(gg_dir, recursive = TRUE)
   
@@ -52,7 +52,6 @@ save_outputs <- function(gg, name) {
   #       dev.off()
   #     } else  {
   #     }
-  
 }
 
 test_check("plotly")
