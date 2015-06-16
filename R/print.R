@@ -40,11 +40,11 @@ knit_print.plotly <- function(x, options, ...) {
 }
 
 #' Embed a plotly iframe into a IPython Notebook
-#' @param p a plotly object
+#' @param x a plotly object
 #' @param width attribute of the iframe
 #' @param height attribute of the iframe
 #' @export
-embed_notebook <- function(p, width = "100%", height = "525") {
+embed_notebook <- function(x, width = "100%", height = "525") {
   if (!requireNamespace("IRdisplay")) {
     warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
