@@ -4,10 +4,11 @@
 
 #' Print a plotly object
 #' 
-#' @param p an object with class 'plotly'
+#' @param x an object with class 'plotly'
+#' @param ... other arguments
 #' @export
-print.plotly <- function(p) {
-  hash <- attr(p, "plotly_hash")
+print.plotly <- function(x, ...) {
+  hash <- attr(x, "plotly_hash")
   if (is.null(hash)) 
     stop("A plotly object should always have a plotly_hash attribute.",
          call. = FALSE)
@@ -58,4 +59,3 @@ plotly_iframe <- function(url, width, height) {
   paste("<iframe height=\"", height, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\" src=\"",
         url, "\" width=\"", width, "\" frameBorder=\"0\"></iframe>", sep="")
 }
-

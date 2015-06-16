@@ -2,7 +2,7 @@
 #' 
 #' @param ... any number of plotly objects
 #' @param nrows number of rows for laying out plots in a grid-like structure.
-#' Only used if no domain is specified in either \link{xaxis} or \link{yaxis}
+#' Only used if no domain is already specified.
 #' @param which_layout adopt the layout of which plot?
 #' @return A plotly object
 #' @export

@@ -4,7 +4,7 @@ txt <- "
 Simple knitr demo
 ```{r}
 p <- qplot(rnorm(50))
-plotly::plotly(p, browse = FALSE)
+ggplotly(p)
 ```
 "
 test_that("plotly embeds inside knitr", {
