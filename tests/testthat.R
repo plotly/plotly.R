@@ -20,7 +20,7 @@ save_outputs <- function(gg, name) {
   message("Running test: ", name)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
-    (p <- ggplotly(gg))
+    p <- print(ggplotly(gg))
     png_url <- paste0(p[["url"]], ".png")
     resp <- httr::GET(png_url)
     # print the response if it wasn't successful
