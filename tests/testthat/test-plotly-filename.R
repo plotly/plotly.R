@@ -1,11 +1,10 @@
 context("Filename")
 
 test_that("filepath with directories is returned as passed", {
-  dat <- list(x = rnorm(30), type = "histogramx")
-  nm <- "directory/coolest-plot"
-  l <- list(autosize = FALSE, width = 600, height = 400, showlegend = FALSE,
-            filename = nm, fileopt = "overwrite")
-  resp <- plotly_POST(dat, l)
-  # why does directory get prepended?
-  expect_identical(resp[["filename"]], "directorydirectory/coolest-plot")
+  nm <- "directory/awesome"
+  p <- print(plot_ly(mtcars, x = wt, y = vs, filename = nm))
+  usr <- sub("https://plot.ly/~(.*)/[0-9]+", "\\1", p$url)
+  id <- sub("https://plot.ly/~.*/([0-9]+)", "\\1", p$url)
+  fig <- get_plot(get_figure(usr, id))
+  expect_identical(fig$data[[1]]$filename, nm)
 })
