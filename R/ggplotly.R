@@ -25,7 +25,6 @@
 #' 
 ggplotly <- function(p = last_plot()) {
   l <- gg2list(p)
-  browser()
   hash_plot(p$data, l)
 }
 

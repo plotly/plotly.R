@@ -13,10 +13,15 @@ NULL
 is.plotly <- function(x) inherits(x, "plotly")
 
 # this function is called after the package is loaded
-.onLoad <- function(...) {
+.onAttach <- function(...) {
   usr <- verify("username")
-  message("Howdy ", usr, "!")
+  if (nchar(usr) > 0) 
+    packageStartupMessage("\n", "Howdy, ", usr, "!")
   key <- verify("api_key")
+  if (nchar(key) > 0) {
+    packageStartupMessage("Sweet, you have an API key already! \n",
+                          "Start making plots with ggplotly() or plot_ly().")
+  }
   invisible(NULL)
 }
 
@@ -165,8 +170,10 @@ grab <- function(what = "username") {
     PLOTLY_DIR <- file.path(normalizePath("~", mustWork = TRUE), ".plotly")
     CREDENTIALS_FILE <- file.path(PLOTLY_DIR, ".credentials")
     CONFIG_FILE <- file.path(PLOTLY_DIR, ".config")
+    # note: try_file can be 'succesful', yet return NULL
     val2 <- try_file(CREDENTIALS_FILE, what)
-    val <- if (val2 == "") try_file(CONFIG_FILE, what) else val2
+    val <- if (length(nchar(val2)) == 0) try_file(CONFIG_FILE, what) else val2
+    if (is.null(val)) val <- ""
   }
   # return true if value is non-trivial
   setNames(val, who)
@@ -174,7 +181,7 @@ grab <- function(what = "username") {
 
 # try to grab an object key from a JSON file (returns empty string on error)
 try_file <- function(f, what) {
-  tryCatch(jsonlite::fromJSON(f)[[what]], error = function(e) "")
+  tryCatch(jsonlite::fromJSON(f)[[what]], error = function(e) NULL)
 }
 
 # preferred defaults for toJSON mapping

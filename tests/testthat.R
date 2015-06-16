@@ -45,7 +45,7 @@ save_outputs <- function(gg, name) {
     } else  {
       # TODO: could speed things up by avoiding two calls to gg2list()
       # (this will require tweaking expect_traces())
-      p <- plotly(gg, browse = FALSE)
+      p <- print(ggplotly(gg))
       png_url <- paste0(p[["url"]], ".png")
       resp <- httr::GET(png_url)
       # print the response if it wasn't successful
