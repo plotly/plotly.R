@@ -55,7 +55,7 @@ plotly_POST <- function(x) {
     origin = if (is.null(x$origin)) "plot" else x$origin,
     platform = "R",
     version = as.character(packageVersion("plotly")),
-    args = to_JSON(args),
+    args = to_JSON(setNames(args, NULL)),
     kwargs = to_JSON(kwargs)
   )
   base_url <- file.path(get_domain(), "clientresp")

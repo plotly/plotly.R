@@ -51,7 +51,6 @@ get_plot <- function(data, strict = TRUE) {
 
 # evaluate unevaluated expressions before POSTing to plotly
 eval_list <- function(l) {
-  # create list skeleton
   x <- list()
   ntraces <- length(l$data)
   x$data <- vector("list", ntraces)
@@ -61,6 +60,10 @@ eval_list <- function(l) {
     idx <- names(dat) %in% c("args", "env")
     x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, dat$env)) else dat
   }
+  # translate colors and shapes
+  title <- as.character(as.list(l$data[[1]]$args)[["color"]])
+  x$data <- colorize(x$data, title)
+
   # carry over data from first trace (if appropriate)
   if (ntraces > 1 && isTRUE(l$data[[1]]$inherit)) {
     for (i in seq.int(2, ntraces)) {
@@ -94,6 +97,50 @@ eval_list <- function(l) {
   # create a new plotly if no url is attached to this environment
   x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
   x
+}
+
+
+colorize <- function(data, title = "") {
+  # TODO: how to provide a way to change default color scale?
+  # IDEA: provide some scale_*() functions?
+  seq_dat <- seq_along(data)
+  for (i in seq_dat) {
+    cols <- data[[i]]$color
+    if (!is.null(cols)) {
+      if (is.numeric(cols)) {
+        cols <- unique(scales::rescale(cols))
+        o <- order(cols, decreasing = FALSE)
+        # match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
+        colz <- scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(cols)
+        df <- setNames(data.frame(cols[o], colz[o]), NULL)
+        data[[i]][["marker"]] <- list(
+          colorbar = list(title = title),
+          colorscale = df,
+          color = data[[i]]$color,
+          cmin = min(data[[i]]$color), 
+          cmax = max(data[[i]]$color)
+        )
+      } else { # discrete color scale
+        lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
+        colz <- scales::col_factor("Set2", domain = lvls)(cols)
+        # break up data into multiple traces (so legend appears). We assume
+        # any column with same length as color vector should be split
+        lens <- lapply(data[[i]], length)
+        idx <- lens == length(cols)
+        new_dat <- list()
+        # TODO
+        for (j in seq_along(lvls)) {
+          idx2 <- which(cols == lvls[j])
+          sub_dat <- as.data.frame(data[[i]][idx])[idx2, ]
+          new_dat[[j]] <- c(as.list(sub_dat), data[[i]][!idx])
+          new_dat[[j]]$name <- lvls[j]
+        }
+        # TODO: construct appropriate aux object? get type from trace?
+        data <- c(new_dat, data[setdiff(seq_dat, i)])
+      }
+    }
+  }
+  data
 }
 
 # Check for credentials/configuration and throw warnings where appropriate
