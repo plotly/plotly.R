@@ -14,7 +14,7 @@ table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table"
 r_dir <- file.path(table_dir, "R")
 plotly_dir <- file.path(r_dir, hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
-httr::set_config(config(ssl.verifypeer=FALSE))
+httr::set_config(httr::config(ssl.verifypeer=FALSE))
 
 # database which tracks 
 db <- if ("db.rds" %in% dir(r_dir)) {
