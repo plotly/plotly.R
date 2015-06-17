@@ -3,8 +3,7 @@ context("polygon")
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("polygon-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("polygon-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -142,12 +141,10 @@ test_that("borders become one trace with NA", {
   data(canada.cities)
   gg <- ggplot(canada.cities, aes(long, lat))+
     borders(regions="canada", name="borders")
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "polygons-canada-borders")
   expect_equal(length(info$data), 1)
   tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
-
-  save_outputs(gg, "polygons-canada-borders")
 })
 
 x <- c(0, -1, 2, -2, 1)

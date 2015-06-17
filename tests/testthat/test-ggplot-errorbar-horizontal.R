@@ -12,7 +12,7 @@ test_that("geom_errorbarh gives horizontal errorbars", {
   # Define the limits of the horizontal errorbars
   g <- g + geom_errorbarh(aes(xmax = resp + se, xmin = resp - se))
 
-  L <- gg2list(g)
+  L <- save_outputs(g, "errorbar-horizontal")
 
   # Expect 2 traces
   expect_equal(length(L$data), 2)
@@ -22,6 +22,4 @@ test_that("geom_errorbarh gives horizontal errorbars", {
   # Expect given errorbar values
   expect_equal(L$data[[1]]$error_x$array, c(0.1, 0.3))
   expect_true(L$data[[1]]$error_x$symmetric)
-
-  save_outputs(g, "errorbar-horizontal")
 })

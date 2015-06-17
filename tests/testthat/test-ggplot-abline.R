@@ -10,7 +10,7 @@ test_that("Second trace be the a-b line", {
   gg <- ggplot(df) + geom_point(aes(x=x1, y=x2)) +
     geom_abline(intercept=1.1, slope=0.9, colour="red", size=4)
   
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "abline")
 
   expect_equal(length(L$data), 2)
   expect_true(L$data[[2]]$x[1] <= 0)
@@ -21,6 +21,4 @@ test_that("Second trace be the a-b line", {
   
   expect_identical(L$data[[1]]$showlegend, FALSE)
   expect_identical(L$data[[2]]$showlegend, FALSE)
-
-  save_outputs(gg, "abline")
 })

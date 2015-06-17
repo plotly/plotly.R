@@ -67,6 +67,3 @@ test_that('axis.text.x=element_text(angle=70) means transform="rotate(-70)"', {
 ##     info <- renderHTML(problem)
 ##   }, "ggplotly only supports hjust values 0, 0.5, 1")
 ## })
-
-
-

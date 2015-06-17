@@ -15,12 +15,14 @@ plotly_dir <- file.path(table_dir, "R", hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
 save_outputs <- function(gg, name) {
+  print(paste("Running test:", name))
+  # might want to pass plotly objects to this eventually
+  p <- if (is.ggplot(gg)) gg2list(gg) else get_plot(gg)
+  tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
   # (see build-comment-push.R for better explanation of this logic)
-  print(paste("Running test:", name))
-  p <- gg2list(gg)
-  tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   if (tpr != "false" && tpr != "") {
+    #d <- digest::digest(p)
     resp <- plotly_POST(p)
     resp <- httr::GET(paste0(resp[["url"]], ".png"))
     # print the response if it wasn't successful

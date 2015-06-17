@@ -4,8 +4,7 @@ expect_traces_shapes <- function(gg, n.traces, n.shapes, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   stopifnot(is.numeric(n.shapes))
-  save_outputs(gg, paste0("cookbook-lines-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("cookbook-lines-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])

@@ -8,14 +8,12 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
   df <- rbind(data.frame(who="me", time.obj, dollars=c(1.1, 5.6)),
               data.frame(who="you", time.obj, dollars=c(10.2, 0)))
   gg <- qplot(time.obj, dollars, data=df, color=who, geom="line")
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "date-strings")
   expect_equal(length(info$data), 2)
   expect_identical(info$layout$xaxis$type, "date")
   for(trace in info$data[1:2]){
     expect_identical(trace$x, out.str)
   }
-
-  save_outputs(gg, "date-strings")
 })
 
 test_that("class Date is supported", {
@@ -23,12 +21,10 @@ test_that("class Date is supported", {
                    y=c(2, 3, 2.5))
   df$x <- as.Date(df$x)
   gg <- ggplot(df) + geom_line(aes(x=x, y=y))
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "date-class-Date")
   expect_equal(length(info$data), 1)
   expect_identical(info$layout$xaxis$type, "date")
   expect_identical(info$data[[1]]$x[1], "2013-01-01 00:00:00")
-
-  save_outputs(gg, "date-class-Date")
 })
 
 test_that("scale_x_date and irregular time series work", {
@@ -43,9 +39,9 @@ test_that("scale_x_date and irregular time series work", {
   #                        minor_breaks=date_breaks("1 day"),
   #                        labels = date_format("%b/%W"))
 
-  info <- gg2list(dt)
+  info <- save_outputs(dt, "date-irregular-time-series")
   info_w_scale <- gg2list(g)
-
+  
   expect_equal(length(info$data), 1)  # one trace
   expect_identical(info$data[[1]]$x[31], "2122-02-09 00:00:00")
   expect_equal(length(info_w_scale$data), 1)  # one trace
@@ -53,6 +49,4 @@ test_that("scale_x_date and irregular time series work", {
   expect_identical(info$layout$xaxis$type, "date")
   expect_identical(info_w_scale$layout$xaxis$type, "date")
   expect_equal(length(info_w_scale$layout), length(info$layout))  # similar layout
-
-  save_outputs(dt, "date-irregular-time-series")
 })

@@ -12,11 +12,9 @@ ww$time <- factor(ww$time, dtimes)
 hm <- ggplot(ww) + geom_tile(aes(x=day, y=time, fill=value))
 
 test_that("geom_tile is translated to type=heatmap", {
-    L <- gg2list(hm)
+    L <- save_outputs(hm, "heatmap")
     expect_equal(length(L$data), 1)
     expect_identical(L$data[[1]]$type, "heatmap")
     expect_identical(as.character(L$data[[1]]$x), wdays)
     expect_identical(as.character(L$data[[1]]$y), dtimes)
 })
-
-save_outputs(hm, "heatmap")

@@ -6,8 +6,7 @@ bp <- ggplot(PlantGrowth, aes(x=group, y=weight)) +
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("cookbook-axes-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("cookbook-axes-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])

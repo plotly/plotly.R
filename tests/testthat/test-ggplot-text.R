@@ -2,7 +2,7 @@ context("Text")
 
 gg <- ggplot(mtcars, aes(x=wt, y=mpg, label=rownames(mtcars))) +
   geom_text(size=18)
-info <- gg2list(gg)
+info <- save_outputs(gg, "text")
 
 test_that("label is translated correctly", {
   expect_identical(as.character(info$data[[1]]$text), rownames(mtcars))
@@ -16,8 +16,6 @@ test_that("position is translated correctly", {
 test_that("textsize is translated correctly", {
   expect_identical(info$data[[1]]$textfont$size, 18)
 })
-
-save_outputs(gg, "text")
 
 test_that("geom_text splits along colour", {
   mds <- data.frame(State=c("Alabama", "Alabama", "Alabama", "Alabama",
@@ -34,7 +32,7 @@ test_that("geom_text splits along colour", {
   gg <- ggplot(mds) +
     geom_text(aes(x=coord.1, y=coord.2, label=City, colour=Division))
   
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "text-colour")
   
   expect_equal(length(L$data), 2)  # 2 traces
   # Proper type and mode conversion
@@ -45,6 +43,4 @@ test_that("geom_text splits along colour", {
   # Right colour for each trace
   expect_identical(L$data[[1]]$textfont$color, "#F8766D")
   expect_identical(L$data[[2]]$textfont$color, "#00BFC4")
-  
-  save_outputs(gg, "text-colour")
 })

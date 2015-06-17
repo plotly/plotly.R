@@ -11,12 +11,10 @@ test_that("6 different automatic lty converted to plotly's 6 types", {
       "dashdot",
       "longdash",
       "longdashdot")
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "linetype-types")
   generated <- sapply(info$data[1:6], function(L) L$line$dash)
   expect_true(all(generated %in% expected))
   expect_true(all(expected %in% generated))
-
-  save_outputs(gg, "linetype-types")
 })
 
 test_that("different colored lines become different colored traces", {
@@ -32,7 +30,7 @@ test_that("different colored lines become different colored traces", {
   gg <- ggplot(data = df, aes(x = x, y = value, colour = variable))+
     geom_line()+
     scale_color_manual(values=c(y1="blue", y2="red"))
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "linetype-colors")
   expect_equal(length(info$data), 2)
   expect_identical(info$data[[1]]$line$color, toRGB("blue"))
   n <- length(x)
@@ -41,6 +39,4 @@ test_that("different colored lines become different colored traces", {
   expect_identical(info$data[[2]]$line$color, toRGB("red"))
   expect_identical(info$data[[2]]$y[1:n], y2)
   expect_identical(info$data[[2]]$x[1:n], x)
-
-  save_outputs(gg, "linetype-colors")
 })
