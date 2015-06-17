@@ -11,8 +11,22 @@ hash <- if (src == "local") {
   sub("\\)", "", strsplit(src, "@")[[1]][2])
 }
 table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
-plotly_dir <- file.path(table_dir, "R", hash)
+r_dir <- file.path(table_dir, "R")
+plotly_dir <- file.path(r_dir, hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
+httr::set_config(config(ssl.verifypeer=FALSE))
+
+# database which tracks 
+db <- if ("db.rds" %in% dir(r_dir)) {
+  readRDS("db.rds")
+} else {
+  data.frame(
+    commit = character(),
+    name = character(),
+    plot = character(),
+    stringsAsFactors = FALSE
+  )
+}
 
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
@@ -22,14 +36,16 @@ save_outputs <- function(gg, name) {
   # only render/save pngs if this is a Travis pull request
   # (see build-comment-push.R for better explanation of this logic)
   if (tpr != "false" && tpr != "") {
-    #d <- digest::digest(p)
-    resp <- plotly_POST(p)
-    resp <- httr::GET(paste0(resp[["url"]], ".png"))
-    # print the response if it wasn't successful
-    if (httr::warn_for_status(resp)) resp
+    #df[nrow(df) + 1, ] <- c(hash, name, digest::digest(p))
+    print("Post Time: \n")
+    system.time(resp <- plotly_POST(p))
+    print("Download Time: \n")
+    system.time(resp <- httr::GET(paste0(resp[["url"]], ".png")))
+    httr::warn_for_status(resp)
     # write png version of plotly figure to disk
     filename <- file.path(plotly_dir, paste0(name, ".png"))
-    writeBin(httr::content(resp, as = "raw"), filename)
+    print("Write Time: \n")
+    system.time(writeBin(httr::content(resp, as = "raw"), filename))
   }
   # eventually change tests so that they use output from this function
   invisible(p)
