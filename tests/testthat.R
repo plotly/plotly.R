@@ -37,15 +37,18 @@ save_outputs <- function(gg, name) {
   # (see build-comment-push.R for better explanation of this logic)
   if (tpr != "false" && tpr != "") {
     #df[nrow(df) + 1, ] <- c(hash, name, digest::digest(p))
-    print("Post Time: \n")
-    system.time(resp <- plotly_POST(p))
+    cat("Post Time:")
+    a1 <- system.time(resp <- plotly_POST(p))
+    print(a1)
     print("Download Time: \n")
-    system.time(resp <- httr::GET(paste0(resp[["url"]], ".png")))
+    a2 <- system.time(resp <- httr::GET(paste0(resp[["url"]], ".png")))
+    print(a2)
     httr::warn_for_status(resp)
     # write png version of plotly figure to disk
     filename <- file.path(plotly_dir, paste0(name, ".png"))
     print("Write Time: \n")
-    system.time(writeBin(httr::content(resp, as = "raw"), filename))
+    a3 <- system.time(writeBin(httr::content(resp, as = "raw"), filename))
+    print(a3)
   }
   # eventually change tests so that they use output from this function
   invisible(p)
