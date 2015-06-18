@@ -14,7 +14,9 @@
 # Read more about Travis environment variables --
 # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
 tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
-if (tpr != "false" && tpr != "") {
+# is this build a pull request
+pr <- tpr != "false" && tpr != ""
+if (pr) {
   library("httr")
   library("testthat")
   # gistr is a good reference for talking to the github API via httr
@@ -34,27 +36,16 @@ if (tpr != "false" && tpr != "") {
   # Return an abbreviated version of a hash
   abbrev_hash <- function(hash = "") substr(hash, 1, 7)
 
-  # Grab HEAD info for each branch (this might not be necessary)
-#   br <- paste0(base, 'branches')
-#   res <- GET(br)
-#   stop_for_status(res)
-#   info <- content(res)
-#   commits <- sapply(info, "[[", "commit")
-#   shas <- unlist(commits["sha",])
-#   shas <- sapply(shas, abbrev_hash, USE.NAMES = FALSE)
-#   shas <- setNames(shas, sapply(info, "[[", "name"))
-
   # NOTE: $TRAVIS_COMMIT doesn't match the HEAD of this (or master) branch!!!
   # Remember that we're *simulating* a merge with master, but the hash for the
   # *actual* merge will be different. Instead of installing master each time
   # we call save_outputs(), we install once here, if necessary, and re-run tests
   this_hash <- abbrev_hash(Sys.getenv("TRAVIS_COMMIT"))
   base_hash <- abbrev_hash(info$base$sha)
-  head_hash <- abbrev_hash(info$head$sha)
   test_rerun <- function(hash) {
     if (!hash %in% dir("plotly-test-table/R")) {
       devtools::install_github("ropensci/plotly", ref = hash, local = FALSE)
-      message("Rerunning tests")
+      print("Rerunning tests")
       try(source("plotly/tests/testthat.R", chdir = TRUE))
     }
   }
@@ -107,7 +98,7 @@ if (tpr != "false" && tpr != "") {
   # (needed since Travis randomly re-builds stuff)
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/index.html", this_hash)
   msg <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s",
-                 head_hash, base_hash, this_hash, base_hash, this_hash, tbl_link)
+                 abbrev_hash(info$head$sha), base_hash, this_hash, base_hash, this_hash, tbl_link)
   msg <- paste("> The message below was automatically generated after build", build_link, "\n\n", msg)
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
@@ -123,8 +114,3 @@ if (tpr != "false" && tpr != "") {
 } else {
   message('The test table is only built during the "pull request" build.')
 }
-
-
-# IDEAS:
-# * iframe into json diffs on github???
-# * Github now renders IPython!!!

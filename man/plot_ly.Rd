@@ -4,8 +4,7 @@
 \alias{plot_ly}
 \title{Initiate a plotly object}
 \usage{
-plot_ly(data = NULL, type = "scatter", ..., env = parent.frame(),
-  inherit = TRUE)
+plot_ly(data = data.frame(), type = "scatter", ..., inherit = TRUE)
 }
 \arguments{
 \item{data}{A data frame to visualize (optional).}
@@ -14,9 +13,6 @@ plot_ly(data = NULL, type = "scatter", ..., env = parent.frame(),
 
 \item{...}{Trace properties. See the references section below for documentation
 of these properties.}
-
-\item{env}{An evaluation environment for arguments in \code{...}.
-Only used if \code{data} is \code{NULL}.}
 
 \item{inherit}{should future traces inherit properties from this initial trace?}
 }

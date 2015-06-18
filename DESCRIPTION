@@ -36,5 +36,6 @@ Suggests:
     testthat,
     knitr,
     devtools,
+    shiny,
     simsalapar
 LazyData: true

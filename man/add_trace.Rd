@@ -4,16 +4,13 @@
 \alias{add_trace}
 \title{Add a trace to a plotly object}
 \usage{
-add_trace(data = NULL, ..., env = parent.frame())
+add_trace(data = data.frame, ...)
 }
 \arguments{
 \item{data}{A data frame with a class of plotly.}
 
 \item{...}{Trace arguments. Arguments are evaluated in the environment attached to
 the most recent trace. See the reference below for documentation.}
-
-\item{env}{An evaluation environment for arguments in \code{...}.
-Only used if \code{data} is \code{NULL}.}
 }
 \description{
 Turns a dataset into a plotly object. A plotly object can be conceptualized as

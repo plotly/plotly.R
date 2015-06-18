@@ -39,7 +39,7 @@ hash_plot <- function(df, p) {
   df
 }
 
-# get plot info given a 
+# get plot info from a dataset (maybe expose to users?)
 get_plot <- function(data, strict = TRUE) {
   hash <- attr(data, "plotly_hash")
   if (!is.null(hash)) {
@@ -54,7 +54,7 @@ get_plot <- function(data, strict = TRUE) {
   p
 }
 
-# evaluate unevaluated expressions before POSTing to plotly
+# evaluate unevaluated expressions before POSTing to plotly (expose to users?)
 eval_list <- function(l) {
   # assume unnamed list elements are data/traces
   nms <- names(l)
@@ -71,7 +71,7 @@ eval_list <- function(l) {
   for (i in seq_len(ntraces)) {
     dat <- l$data[[i]]
     idx <- names(dat) %in% c("args", "env")
-    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, dat$env, dat$enclos)) else dat
+    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, as.list(dat$env), dat$enclos)) else dat
   }
   # translate colors and shapes
   title <- as.character(as.list(l$data[[1]]$args)[["color"]])
@@ -93,7 +93,7 @@ eval_list <- function(l) {
       layout <- l$layout[[i]]
       idx <- names(layout) %in% c("args", "env")
       layouts[[i]] <- if (sum(idx) == 2) {
-        c(layout[!idx], eval(layout$args, layout$env, layout$enclos)) 
+        c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
       } else {
         layout
       }
@@ -106,6 +106,16 @@ eval_list <- function(l) {
     }
   } else {
     x$layout <- l$layout
+  }
+  # if style is not null, use it to modify existing traces
+  if (!is.null(l$style)) {
+    for (i in seq_along(l$style)) {
+      sty <- l$style[[i]]
+      idx <- names(sty) %in% c("args", "env")
+      new_sty <- if (sum(idx) == 2) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
+      # TODO: add a warning of non-existing traces are referrenced
+      for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
+    }
   }
   # create a new plotly if no url is attached to this environment
   x$fileopt <- if (is.null(l$url)) "new" else "overwrite"

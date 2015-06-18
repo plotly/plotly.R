@@ -4,16 +4,13 @@
 \alias{layout}
 \title{Add and/or modify layout of a plotly}
 \usage{
-layout(data = NULL, ..., env = parent.frame())
+layout(data = data.frame(), ...)
 }
 \arguments{
 \item{data}{A data frame with a class of plotly.}
 
 \item{...}{Trace arguments. Arguments are evaluated in the environment attached to
 the most recent trace. See the reference below for documentation.}
-
-\item{env}{An evaluation environment for arguments in \code{...}.
-Only used if \code{data} is \code{NULL}.}
 }
 \description{
 Add and/or modify layout of a plotly

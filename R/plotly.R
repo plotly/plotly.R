@@ -8,8 +8,6 @@
 #' @param ... Trace properties. See the references section below for documentation
 #' of these properties.
 #' @param inherit should future traces inherit properties from this initial trace?
-#' @param env An evaluation environment for arguments in \code{...}. 
-#' Only used if \code{data} is \code{NULL}.
 #' @author Carson Sievert
 #' @references 
 #'   \url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
@@ -30,16 +28,14 @@
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
 #' 
-
-plot_ly <- function(data = NULL, type = "scatter", ..., 
-                    env = parent.frame(), inherit = TRUE) {
+plot_ly <- function(data = data.frame(), type = "scatter", ..., inherit = TRUE) {
   # record trace information
   tr <- list(
     type = type,
     # TODO: verify/filter arguments based on trace type.
     args = substitute(list(...)),
-    env = if (is.null(data)) env else list2env(data),
-    enclos = env,
+    env = list2env(data),
+    enclos = parent.frame(),
     inherit = inherit
   )
   # this info is sufficient for recreating the plot
@@ -49,8 +45,7 @@ plot_ly <- function(data = NULL, type = "scatter", ...,
     layout = NULL,
     url = NULL
   )
-  df <- if (is.null(data)) data.frame() else data
-  hash_plot(df, p)
+  hash_plot(data, p)
 }
 
 #' Add a trace to a plotly object
@@ -61,24 +56,20 @@ plot_ly <- function(data = NULL, type = "scatter", ...,
 #' @param data A data frame with a class of plotly.
 #' @param ... Trace arguments. Arguments are evaluated in the environment attached to 
 #' the most recent trace. See the reference below for documentation.
-#' @param env An evaluation environment for arguments in \code{...}. 
-#' Only used if \code{data} is \code{NULL}.
 #' @author Carson Sievert
 #' @export
 #' @references 
 #'   \url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
 #' 
-
-add_trace <- function(data = NULL, ..., env = parent.frame()) {
+add_trace <- function(data = data.frame, ...) {
   tr <- list(
     args = substitute(list(...)),
-    env = if (is.null(data)) env else list2env(data),
-    enclos = env
+    env = list2env(data),
+    enclos = parent.frame()
   )
-  df <- if (is.null(data)) data.frame() else data
-  p <- get_plot(df)
+  p <- get_plot(data)
   p$data <- c(p$data, list(tr))
-  hash_plot(df, p)
+  hash_plot(data, p)
 }
 
 # Layout and layout style objects
@@ -91,17 +82,35 @@ add_trace <- function(data = NULL, ..., env = parent.frame()) {
 #' @author Carson Sievert
 #' @references \url{https://plot.ly/javascript-graphing-library/reference/#layout}
 #' 
-
-layout <- function(data = NULL, ..., env = parent.frame()) {
+layout <- function(data = data.frame(), ...) {
   layout <- list(
     args = substitute(list(...)),
-    env = if (is.null(data)) env else list2env(data),
-    enclos = env
+    env = list2env(data),
+    enclos = parent.frame()
   )
-  df <- if (is.null(data)) data.frame() else data
-  p <- get_plot(df)
+  p <- get_plot(data)
   p$layout <- c(p$layout, list(layout))
-  hash_plot(df, p)
+  hash_plot(data, p)
+}
+
+#' Modify trace styling
+#'
+#' @param data A data frame with a class of plotly.
+#' @param traces numeric vector. Which traces should be modified?
+#' @param ... arguments coerced to a list and used to modify trace(s)
+#' @author Carson Sievert
+#' @export
+#'
+style <- function(data = data.frame(), traces = 1, ...) {
+  style <- list(
+    args = substitute(list(...)),
+    env = list2env(data),
+    enclos = parent.frame(),
+    traces = traces
+  )
+  p <- get_plot(data)
+  p$style <- c(p$style, list(style))
+  hash_plot(data, p)
 }
 
 #' Main interface to plotly 
