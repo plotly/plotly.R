@@ -20,7 +20,7 @@ if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 # text file that tracks figure hashes
 hash_file <- paste0(table_dir, "R/hashes.csv")
 if (!file.exists(hash_file)) {
-  file.create(hash_file, )
+  file.create(hash_file)
   cat("commit,test,hash,url\n", file = hash_file, append = TRUE)
 }
 
