@@ -4,14 +4,12 @@
 \alias{plotly}
 \title{Main interface to plotly}
 \usage{
-plotly(username = NULL, key = NULL, base_url = NULL)
+plotly(username, key)
 }
 \arguments{
 \item{username}{plotly username}
 
 \item{key}{plotly API key}
-
-\item{base_url}{plotly server}
 }
 \description{
 Deprecated: see \link{signup} for credentials/configuration storage details.

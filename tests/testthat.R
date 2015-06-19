@@ -1,5 +1,6 @@
 library("testthat")
 library("plotly")
+
 # find the hash of the currently installed plotly package
 pkg_info <- devtools::session_info()$packages
 src <- subset(pkg_info, package == "plotly")$source
@@ -10,75 +11,80 @@ hash <- if (src == "local") {
   # thankfully devtools includes hash for packages installed off GitHub
   sub("\\)", "", strsplit(src, "@")[[1]][2])
 }
-table_dir <- file.path(Sys.getenv("TRAVIS_BUILD_DIR"), "..", "plotly-test-table")
-r_dir <- file.path(table_dir, "R")
-plotly_dir <- file.path(r_dir, hash)
+# setup directory for placing files during tests
+# (note the working directory should be /path/to/plotly/tests)
+table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
+plotly_dir <- paste0(table_dir, "/R/", hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
-httr::set_config(httr::config(ssl.verifypeer=FALSE))
 
-# database which tracks 
-db <- if ("db.rds" %in% dir(r_dir)) {
-  readRDS("db.rds")
-} else {
-  data.frame(
-    commit = character(),
-    name = character(),
-    plot = character(),
-    stringsAsFactors = FALSE
-  )
+# text file that tracks figure hashes
+hash_file <- paste0(table_dir, "R/hashes.csv")
+if (!file.exists(hash_file)) {
+  file.create(hash_file)
+  cat("commit,test,hash,url\n", file = hash_file, append = TRUE)
 }
 
+# This function is called within testthat/test-*.R files.
+# It takes a ggplot or plotly object as input, and it returns a figure
+# object (aka the data behind the plot).
+# Along the way, if this is a pull request build on Travis,
+# it will POST figures to plotly and save pngs 
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  # might want to pass plotly objects to this eventually
   p <- if (is.ggplot(gg)) gg2list(gg) else get_plot(gg)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
-  # (see build-comment-push.R for better explanation of this logic)
   if (tpr != "false" && tpr != "") {
-    #df[nrow(df) + 1, ] <- c(hash, name, digest::digest(p))
-    cat("Post Time:")
-    a1 <- system.time(resp <- plotly_POST(p))
-    print(a1)
-    print("Download Time: \n")
-    a2 <- system.time(resp <- httr::GET(paste0(resp[["url"]], ".png")))
-    print(a2)
+    # If we don't have pngs for this version of ggplot2, generate them!
+    # (env var is set in build-push-comment.R if we are supposed save them)
+    if (Sys.getenv("GGPLOT2_FOLDER") != "") {
+      gg_dir <- paste0(table_dir, "/R/", Sys.getenv("GGPLOT2_FOLDER"))
+      e <- try(gg, silent = TRUE)
+      png(filename = paste0(gg_dir, "/", name, ".png"))
+      if (inherits(e, "try-error")) {
+        plot(1, type="n")
+        text(1, "ggplot2 error")
+      } else gg
+      dev.off()
+    }
+    # POST data to plotly and return the url
+    u <- if (packageVersion("plotly") < 1) {
+      py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
+      resp <- py$ggplotly(gg)
+      resp$response$url
+    } else {
+      resp <- plotly_POST(p)
+      resp$url
+    }
+    # save png under a directory specific to this installed version of plotly
+    resp <- httr::GET(paste0(u, ".png"))
     httr::warn_for_status(resp)
-    # write png version of plotly figure to disk
     filename <- file.path(plotly_dir, paste0(name, ".png"))
-    print("Write Time: \n")
-    a3 <- system.time(writeBin(httr::content(resp, as = "raw"), filename))
-    print(a3)
+    writeBin(httr::content(resp, as = "raw"), filename)
+    # save a hash of the R object sent to the plotly server
+    info <- paste(hash, name, digest::digest(p), u, sep = ",")
+    cat(paste(info, "\n"), file = hash_file, append = TRUE)
   }
-  # eventually change tests so that they use output from this function
-  invisible(p)
-  #gg_dir <- file.path(table_dir, "R", "ggplot2")
-  #if (!dir.exists(gg_dir)) dir.create(gg_dir, recursive = TRUE)
-  
-  # If we don't have pngs for this version (of ggplot2), generate them;
-  # otherwise, generate plotly pngs
-  # NOTE: we can't save both plotly & ggplot2 at once since R CMD check
-  # suppresses output and travis has 10 minute time limit
-  # https://github.com/travis-ci/travis-ci/issues/3849
-  #     ggversion <- as.character(packageVersion("ggplot2"))
-  #     if (!ggversion %in% dir(gg_dir)) {
-  #       gglife <- file.path(gg_dir, ggversion)
-  #       dir.create(gglife, recursive = TRUE)
-  #       e <- try(gg, silent = TRUE)
-  #       png(filename = file.path(gglife, paste0(name, ".png")))
-  #       if (inherits(e, "try-error")) {
-  #         plot(1, type="n")
-  #         text(1, "ggplot2 error")
-  #       } else gg
-  #       dev.off()
-  #     } else  {
-  #     }
+  p
 }
 
 test_check("plotly")
 
-# NOTE: I'm assumming Travis is installing most recent ggplot2 off CRAN
-# Here is one way to get current ggplot2 version off of CRAN if need be
-# gg <- rvest::html("http://cran.r-project.org/web/packages/ggplot2/")
-# tab <- rvest::html_table(gg, header = FALSE)[[1]]
-# ggversion <- tab[grepl("Version:", tab[, 1]), 2]
+
+
+
+
+# Database for tracking plot hashes? 
+# Pros: (1) Don't have to upload a plot if underlying data hasn't changed
+# Cons: (1) Significantly more complicated and leaves us prone to mistakes
+# db <- if ("db.rds" %in% dir(r_dir)) {
+#   readRDS("db.rds")
+# } else {
+#   data.frame(
+#     commit = character(),
+#     name = character(),
+#     plot = character(),
+#     stringsAsFactors = FALSE
+#   )
+# }
+#df[nrow(df) + 1, ] <- c(hash, name, digest::digest(p))

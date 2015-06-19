@@ -120,21 +120,23 @@ style <- function(data = data.frame(), traces = 1, ...) {
 #' 
 #' @param username plotly username
 #' @param key plotly API key
-#' @param base_url plotly server
 #' @export
-plotly <- function(username = NULL, key = NULL, base_url = NULL) {
-  .Deprecated("signup")
+plotly <- function(username, key) {
+  
   if (!missing(username)) {
-    message("Storing API key as the environment variable 'plotly_username'")
+    message("Storing 'username' as the environment variable 'plotly_username'")
     Sys.setenv("plotly_username" = username)
   } else {
-    Sys.setenv("plotly_username" = verify("username"))
+    usr <- verify("username")
   }
   if (!missing(key)) {
-    message("Storing API key as the environment variable 'plotly_api_key'")
+    message("Storing 'key' as the environment variable 'plotly_api_key'")
     Sys.setenv("plotly_api_key" = key)
   } else {
-    Sys.setenv("plotly_api_key" = verify("api_key"))
+    key <- verify("api_key")
   }
+  
+  .Deprecated("ggplotly")
+  .Deprecated("plot_ly")
   invisible(NULL)
 }
