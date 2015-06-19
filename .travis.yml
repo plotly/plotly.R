@@ -7,6 +7,7 @@ before_install:
 
 install:
   - ./travis-tool.sh install_deps
+  - ./travis-tool.sh install_github saurfang/jsdiff
 
 before_script:
   - git config --global user.name "cpsievert"
@@ -25,5 +26,3 @@ env:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
     - secure: "HP5+UE9TfosA5aZxXTifawbhHVWR+XvutzgGKGKtls3ip43Hq98FNDVL+WBRtRWEgwUuhB8ss3cGaY3r3Y+9vwZUA74bZyZ+go7+cyMGvMMWt/zijKddRfs1qRQlLzHsebjJKOvNjofQYjIhkyz/UG9qr9w5EOSKmkFY2DZPnWE="
     - secure: "M2zuKpl+CbLpNhXYB5UrcN3vdn6p74dD3LGG9yyEAFpvoB1kzJF6KSJDXwfrr+bdtIBSzoWQuq9KnmxqUuTVdmzP6IVLuVB8A66ytJriGhxIlSrmSCsR2Ad+ehxP8wloGjOLrHOTIIqF/mrq51wnTBdvvlV5l/JTWHq+vscwBCM="
-
-
