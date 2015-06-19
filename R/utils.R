@@ -39,7 +39,11 @@ hash_plot <- function(df, p) {
   df
 }
 
-# get plot info from a dataset (maybe expose to users?)
+#' Obtain underlying data of plotly object
+#' 
+#' @param data a data frame with a class of plotly (and a plotly_hash attribute).
+#' @param srict throw a warning if the plotly_hash attribute is missing.
+#' @export
 get_plot <- function(data, strict = TRUE) {
   hash <- attr(data, "plotly_hash")
   if (!is.null(hash)) {
