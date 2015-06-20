@@ -41,6 +41,7 @@ if (pr) {
   # (since this is a pull requst, we're *simulating* a merge with master)
   this_hash <- abbrev_hash(Sys.getenv("TRAVIS_COMMIT"))
   this_dir <- paste0("plotly-test-table/R/", this_hash)
+  dir.create(this_dir, recursive = TRUE)
   this_pngs <- dir(this_dir, pattern = "\\.png$")
   
   # do we have ggplot2 pngs for this test suite?
@@ -60,6 +61,7 @@ if (pr) {
   base_pngs <- dir(this_dir, pattern = "\\.png$")
   # Re-run (current) test suite with master branch if it's missing any tests 
   if (!all(this_pngs %in% base_pngs)) {
+    dir.create(base_dir, showWarnings = FALSE)
     devtools::install_github("ropensci/plotly", ref = base_hash)
     print("Rerunning tests with master")
     try(source("plotly/tests/testthat.R", chdir = TRUE))
