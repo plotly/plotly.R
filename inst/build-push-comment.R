@@ -40,31 +40,31 @@ if (pr) {
   # NOTE: $TRAVIS_COMMIT won't match the HEAD of this (or the master) branch!!!
   # (since this is a pull requst, we're *simulating* a merge with master)
   this_hash <- abbrev_hash(Sys.getenv("TRAVIS_COMMIT"))
-  this_dir <- paste0("plotly-test-table/R/", this_hash)
+  this_dir <- paste0("R/", this_hash)
   dir.create(this_dir, recursive = TRUE)
   this_pngs <- dir(this_dir, pattern = "\\.png$")
   
   # do we have ggplot2 pngs for this test suite?
   ggversion <- as.character(packageVersion("ggplot2"))
-  gg_dir <- paste0("plotly-test-table/R/ggplot2-", ggversion)
+  gg_dir <- paste0("R/ggplot2-", ggversion)
   gg_pngs <- dir(gg_dir, pattern = "\\.png$")
   if (!all(this_pngs %in% gg_pngs)) {
     dir.create(gg_dir, showWarnings = FALSE)
     Sys.setenv("GGPLOT2_FOLDER" = basename(gg_dir))
     print("Rerunning tests to obtain ggplot2 pngs")
-    try(source("plotly/tests/testthat.R", chdir = TRUE))
+    try(source("../plotly/tests/testthat.R", chdir = TRUE))
   }
 
   # HEAD of the master branch. 
   base_hash <- abbrev_hash(info$base$sha)
-  base_dir <- paste0("plotly-test-table/R/", base_hash)
-  base_pngs <- dir(this_dir, pattern = "\\.png$")
+  base_dir <- paste0("R/", base_hash)
+  base_pngs <- dir(base_dir, pattern = "\\.png$")
   # Re-run (current) test suite with master branch if it's missing any tests 
   if (!all(this_pngs %in% base_pngs)) {
     dir.create(base_dir, showWarnings = FALSE)
     devtools::install_github("ropensci/plotly", ref = base_hash)
     print("Rerunning tests with master")
-    try(source("plotly/tests/testthat.R", chdir = TRUE))
+    try(source("../plotly/tests/testthat.R", chdir = TRUE))
   }
 
   # ---------------------------------------------------------------------------
@@ -85,7 +85,7 @@ if (pr) {
   print(df)
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
-  dest <- sprintf("plotly-test-table/R/%s/index.html", this_hash)
+  dest <- file.path(this_hash, "index.html")
   writeLines(test_table, dest)
   
   # start constructing automated GitHub message 
@@ -142,7 +142,6 @@ if (pr) {
   }
   
   # add, commit, push to gh-pages branch of plotly-test-table
-  setwd("plotly-test-table")
   system("git status")
   system("git add *")
   commit_msg <- paste0('"Pushed from ', build_link, '"')

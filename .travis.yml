@@ -18,8 +18,9 @@ script:
   - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE)"
 
 after_success:
-  - cd ..
-  - Rscript plotly/inst/build-push-comment.R
+  - cd ../plotly-test-table
+  - ls -R
+  - Rscript ../plotly/inst/build-push-comment.R
 
 env:
   global:
