@@ -13,12 +13,13 @@ hash <- if (src == "local") {
 }
 # setup directory for placing files during tests
 # (note the working directory should be /path/to/plotly/tests)
-table_dir <- normalizePath("../../plotly-test-table/", mustWork = TRUE)
-plotly_dir <- paste0(table_dir, "R/", hash)
+table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
+plotly_dir <- file.path(table_dir, "R", hash)
+print(plotly_dir)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
 # text file that tracks figure hashes
-hash_file <- paste0(table_dir, "R/hashes.csv")
+hash_file <- file.path(table_dir, "R", "hashes.csv")
 if (!file.exists(hash_file)) {
   file.create(hash_file)
   cat("commit,test,hash,url\n", file = hash_file, append = TRUE)
@@ -38,9 +39,9 @@ save_outputs <- function(gg, name) {
     # If we don't have pngs for this version of ggplot2, generate them!
     # (env var is set in build-push-comment.R if we are supposed save them)
     if (Sys.getenv("GGPLOT2_FOLDER") != "") {
-      gg_dir <- paste0(table_dir, "R/", Sys.getenv("GGPLOT2_FOLDER"))
+      gg_dir <- file.path(table_dir, "R", Sys.getenv("GGPLOT2_FOLDER"))
       e <- try(gg, silent = TRUE)
-      png(filename = paste0(gg_dir, "/", name, ".png"))
+      png(filename = file.path(gg_dir, paste0(name, ".png")))
       if (inherits(e, "try-error")) {
         plot(1, type="n")
         text(1, "ggplot2 error")
