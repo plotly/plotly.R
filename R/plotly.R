@@ -1,16 +1,17 @@
-#' Initiate a plotly object
+#' Initiate a plotly visualization
 #'
-#' Creates a plotly object with a single trace and an empty layout. To add traces, 
-#' see \code{\link{add_trace}()} and to customize the layout see \code{\link{layout}()}.
+#' Transform data into a plotly visualization.
 #' 
-#' @param data A data frame to visualize (optional).
+#' @param data A data frame (optional).
+#' @param ... Visual properties. 
+#' All arguments documented in the references section below are supported.
+#' In addition, there are special arguments which map variables to visual
+#' aethestics in a similar style to ggplot2 (such as \code{color}).
 #' @param type A charater string describing the type of trace.
-#' @param ... Trace properties. See the references section below for documentation
-#' of these properties.
 #' @param inherit should future traces inherit properties from this initial trace?
+#' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+#' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
-#' @references 
-#'   \url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
 #' @export
 #' @examples
 #' 
@@ -28,7 +29,7 @@
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
 #' 
-plot_ly <- function(data = data.frame(), type = "scatter", ..., inherit = TRUE) {
+plot_ly <- function(data = data.frame(), ..., type = "scatter", inherit = TRUE) {
   # record trace information
   tr <- list(
     type = type,
@@ -48,69 +49,97 @@ plot_ly <- function(data = data.frame(), type = "scatter", ..., inherit = TRUE) 
   hash_plot(data, p)
 }
 
-#' Add a trace to a plotly object
-#'
-#' Turns a dataset into a plotly object. A plotly object can be conceptualized as
-#' a set of traces, a layout. This function will initiate 
+#' Add a trace to a plotly visualization
 #' 
-#' @param data A data frame with a class of plotly.
-#' @param ... Trace arguments. Arguments are evaluated in the environment attached to 
-#' the most recent trace. See the reference below for documentation.
+#' @param p A plotly visualization.
+#' @param ... Visual properties. 
+#' All arguments documented in the references section below are supported.
+#' In addition, there are special arguments which map variables to visual
+#' aethestics in a similar style to ggplot2 (such as \code{color}).
+#' @param data A data frame (optional).
+#' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
-#' @references 
-#'   \url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
 #' 
-add_trace <- function(data = data.frame, ...) {
+add_trace <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
+  if (is.plotly(p)) p <- get_plot(p)
   tr <- list(
     args = substitute(list(...)),
-    env = list2env(data),
+    # if data is missing, adopt the most recent data environment
+    env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
     enclos = parent.frame()
   )
-  p <- get_plot(data)
   p$data <- c(p$data, list(tr))
   hash_plot(data, p)
 }
 
-# Layout and layout style objects
-# https://plot.ly/javascript-graphing-library/reference/#Layout_and_layout_style_objects
-
 #' Add and/or modify layout of a plotly
 #' 
 #' @inheritParams add_trace
-#' @export
 #' @author Carson Sievert
-#' @references \url{https://plot.ly/javascript-graphing-library/reference/#layout}
+#' @references \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
+#' @export
 #' 
-layout <- function(data = data.frame(), ...) {
+layout <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
+  if (is.plotly(p)) p <- get_plot(p)
   layout <- list(
     args = substitute(list(...)),
-    env = list2env(data),
+    # if data is missing, adopt the most recent data environment
+    env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
     enclos = parent.frame()
   )
-  p <- get_plot(data)
   p$layout <- c(p$layout, list(layout))
   hash_plot(data, p)
 }
 
-#' Modify trace styling
+#' Modify trace(s)
 #'
-#' @param data A data frame with a class of plotly.
+#' Modify trace(s) of an existing plotly visualization. Useful when used in
+#' conjunction with \code{\link{get_figure}()}.
+#'
+#' @param p A plotly visualization.
+#' @param ... Visual properties.
 #' @param traces numeric vector. Which traces should be modified?
-#' @param ... arguments coerced to a list and used to modify trace(s)
+#' @seealso \code{\link{get_figure}()}
 #' @author Carson Sievert
 #' @export
 #'
-style <- function(data = data.frame(), traces = 1, ...) {
+style <- function(p = get_plot(strict = FALSE), ..., traces = 1) {
+  if (is.plotly(p)) p <- get_plot(p)
+  idx <- traces >= length(p$data)
+  if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
   style <- list(
     args = substitute(list(...)),
-    env = list2env(data),
+    # not optimal....
+    env = p$data[[max(traces)]]$env,
     enclos = parent.frame(),
     traces = traces
   )
-  p <- get_plot(data)
   p$style <- c(p$style, list(style))
   hash_plot(data, p)
+}
+
+#' Obtain underlying data of plotly object
+#' 
+#' Given a data frame with a class of plotly, this function returns the arguments
+#' and/or data used to create the plotly. If no data frame is provided, 
+#' the last plotly object created in this R session is returned (if it exists).
+#' 
+#' @param data a data frame with a class of plotly (and a plotly_hash attribute).
+#' @param srict throw a warning if the plotly_hash attribute is missing.
+#' @export
+get_plot <- function(data = NULL, strict = TRUE) {
+  hash <- attr(data, "plotly_hash")
+  if (!is.null(hash)) {
+    p <- get(hash, envir = plotlyEnv)
+  } else {
+    # safe to just grab the most recent environment?
+    hash <- rev(ls(plotlyEnv))[1]
+    p <- plotlyEnv[[hash]]
+    if (strict) 
+      warning("Output may not be correct since data isn't a plotly object")
+  }
+  p
 }
 
 #' Main interface to plotly 

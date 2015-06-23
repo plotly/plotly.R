@@ -2,24 +2,27 @@
 % Please edit documentation in R/plotly.R
 \name{add_trace}
 \alias{add_trace}
-\title{Add a trace to a plotly object}
+\title{Add a trace to a plotly visualization}
 \usage{
-add_trace(data = data.frame, ...)
+add_trace(p = get_plot(strict = FALSE), ..., data = NULL)
 }
 \arguments{
-\item{data}{A data frame with a class of plotly.}
+\item{p}{A plotly visualization.}
 
-\item{...}{Trace arguments. Arguments are evaluated in the environment attached to
-the most recent trace. See the reference below for documentation.}
+\item{...}{Visual properties.
+All arguments documented in the references section below are supported.
+In addition, there are special arguments which map variables to visual
+aethestics in a similar style to ggplot2 (such as \code{color}).}
+
+\item{data}{A data frame (optional).}
 }
 \description{
-Turns a dataset into a plotly object. A plotly object can be conceptualized as
-a set of traces, a layout. This function will initiate
+Add a trace to a plotly visualization
 }
 \author{
 Carson Sievert
 }
 \references{
-\url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
+\url{https://plot.ly/r/reference/}
 }
 

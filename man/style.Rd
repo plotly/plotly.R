@@ -2,21 +2,25 @@
 % Please edit documentation in R/plotly.R
 \name{style}
 \alias{style}
-\title{Modify trace styling}
+\title{Modify trace(s)}
 \usage{
-style(data = data.frame(), traces = 1, ...)
+style(p = get_plot(strict = FALSE), ..., traces = 1)
 }
 \arguments{
-\item{data}{A data frame with a class of plotly.}
+\item{p}{A plotly visualization.}
+
+\item{...}{Visual properties.}
 
 \item{traces}{numeric vector. Which traces should be modified?}
-
-\item{...}{arguments coerced to a list and used to modify trace(s)}
 }
 \description{
-Modify trace styling
+Modify trace(s) of an existing plotly visualization. Useful when used in
+conjunction with \code{\link{get_figure}()}.
 }
 \author{
 Carson Sievert
+}
+\seealso{
+\code{\link{get_figure}()}
 }
 

@@ -4,13 +4,17 @@
 \alias{layout}
 \title{Add and/or modify layout of a plotly}
 \usage{
-layout(data = data.frame(), ...)
+layout(p = get_plot(strict = FALSE), ..., data = NULL)
 }
 \arguments{
-\item{data}{A data frame with a class of plotly.}
+\item{p}{A plotly visualization.}
 
-\item{...}{Trace arguments. Arguments are evaluated in the environment attached to
-the most recent trace. See the reference below for documentation.}
+\item{...}{Visual properties.
+All arguments documented in the references section below are supported.
+In addition, there are special arguments which map variables to visual
+aethestics in a similar style to ggplot2 (such as \code{color}).}
+
+\item{data}{A data frame (optional).}
 }
 \description{
 Add and/or modify layout of a plotly
@@ -19,6 +23,6 @@ Add and/or modify layout of a plotly
 Carson Sievert
 }
 \references{
-\url{https://plot.ly/javascript-graphing-library/reference/#layout}
+\url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
 }
 

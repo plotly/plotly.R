@@ -30,6 +30,7 @@ plotlyEnv <- new.env(parent = emptyenv())
 
 # hash plot info, assign it to the special plotly environment, & attach it to data
 hash_plot <- function(df, p) {
+  if (missing(df) || is.null(df)) df <- data.frame()
   hash <- digest::digest(p)
   assign(hash, p, envir = plotlyEnv)
   attr(df, "plotly_hash") <- hash
@@ -37,25 +38,6 @@ hash_plot <- function(df, p) {
   class(df) <- unique(c("plotly", class(df)))
   # return a data frame to be compatible with things like dplyr
   df
-}
-
-#' Obtain underlying data of plotly object
-#' 
-#' @param data a data frame with a class of plotly (and a plotly_hash attribute).
-#' @param srict throw a warning if the plotly_hash attribute is missing.
-#' @export
-get_plot <- function(data, strict = TRUE) {
-  hash <- attr(data, "plotly_hash")
-  if (!is.null(hash)) {
-    p <- get(hash, envir = plotlyEnv)
-  } else {
-    # safe to just grab the most recent environment?
-    hash <- rev(ls(plotlyEnv))[1]
-    p <- plotlyEnv[[hash]]
-    if (strict) 
-      warning("Output may not be correct since data isn't a plotly object")
-  }
-  p
 }
 
 # evaluate unevaluated expressions before POSTing to plotly (expose to users?)
@@ -117,7 +99,6 @@ eval_list <- function(l) {
       sty <- l$style[[i]]
       idx <- names(sty) %in% c("args", "env")
       new_sty <- if (sum(idx) == 2) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
-      # TODO: add a warning of non-existing traces are referrenced
       for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
     }
   }
@@ -132,8 +113,15 @@ colorize <- function(data, title = "") {
   # IDEA: provide some scale_*() functions?
   seq_dat <- seq_along(data)
   for (i in seq_dat) {
-    cols <- data[[i]]$color
+    cols <- data[[i]][["color"]]
     if (!is.null(cols)) {
+#       mode <- data[[i]][["mode"]]
+#       # at least for the scatter trace, "lines" is the default mode
+#       if (is.null(mode)) mode <- "lines"
+#       # of course, aux object names are singular...
+#       mode <- sub("s$", "", strsplit(mode, "\\+")[[1]])
+#       # we don't want to colorize text...
+#       mode <- setdiff(mode, "text")
       if (is.numeric(cols)) {
         cols <- unique(scales::rescale(cols))
         o <- order(cols, decreasing = FALSE)
@@ -148,22 +136,28 @@ colorize <- function(data, title = "") {
           cmax = max(data[[i]]$color)
         )
       } else { # discrete color scale
+        pal <- if (is.ordered(cols)) "Purples" else "Set2"
         lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
-        colz <- scales::col_factor("Set2", domain = lvls)(cols)
+        colz <- if (is.factor(cols)) {
+          scales::col_factor(pal, levels = lvls)(lvls)
+        } else {
+          scales::col_factor(pal, domain = lvls)(lvls)
+        }
         # break up data into multiple traces (so legend appears). We assume
         # any column with same length as color vector should be split
         lens <- lapply(data[[i]], length)
         idx <- lens == length(cols)
         new_dat <- list()
-        # TODO
+        # TODO: add a legend title (is this only possible via annotations?!?)
         for (j in seq_along(lvls)) {
           idx2 <- which(cols == lvls[j])
           sub_dat <- as.data.frame(data[[i]][idx])[idx2, ]
           new_dat[[j]] <- c(as.list(sub_dat), data[[i]][!idx])
           new_dat[[j]]$name <- lvls[j]
+          new_dat[[j]][["marker"]] <- list(color = colz[j])
         }
-        # TODO: construct appropriate aux object? get type from trace?
-        data <- c(new_dat, data[setdiff(seq_dat, i)])
+        # TODO: how to order the traces properly?
+        data <- rev(c(new_dat, data[setdiff(seq_dat, i)]))
       }
     }
   }

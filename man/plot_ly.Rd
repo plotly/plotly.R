@@ -2,23 +2,24 @@
 % Please edit documentation in R/plotly.R
 \name{plot_ly}
 \alias{plot_ly}
-\title{Initiate a plotly object}
+\title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), type = "scatter", ..., inherit = TRUE)
 }
 \arguments{
-\item{data}{A data frame to visualize (optional).}
+\item{data}{A data frame (optional).}
 
 \item{type}{A charater string describing the type of trace.}
 
-\item{...}{Trace properties. See the references section below for documentation
-of these properties.}
+\item{...}{Visual properties.
+All arguments documented in the references section below are supported.
+In addition, there are special arguments which map variables to visual
+aethestics in a similar style to ggplot2 (such as \code{color}).}
 
 \item{inherit}{should future traces inherit properties from this initial trace?}
 }
 \description{
-Creates a plotly object with a single trace and an empty layout. To add traces,
-see \code{\link{add_trace}()} and to customize the layout see \code{\link{layout}()}.
+Transform data into a plotly visualization.
 }
 \examples{
 data(economics, package = "ggplot2")
@@ -39,6 +40,9 @@ plot_ly(z = volcano, type = "surface")
 Carson Sievert
 }
 \references{
-\url{https://plot.ly/javascript-graphing-library/reference/#Trace_objects}
+\url{https://plot.ly/r/reference/}
+}
+\seealso{
+\code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 }
 
