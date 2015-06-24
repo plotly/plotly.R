@@ -66,8 +66,7 @@ if (tpr != "false" && tpr != "") {
     stringsAsFactors = FALSE
   )
   names(df) <- c("test", "ggplot2", branch, "master")
-  # TODO: create an HTML page for each test
-  df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test)
+  df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test"))
     df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i])
   print(df)
