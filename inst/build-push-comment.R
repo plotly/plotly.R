@@ -77,7 +77,7 @@ if (tpr != "false" && tpr != "") {
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
   msg1 <- paste("> The message below was automatically generated after build", build_link, "\n\n")
-  msg2 <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s",
+  msg2 <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here -> %s",
                   abbrev_hash(info$head$sha), base_hash, this_hash, base_hash, this_hash, tbl_link)
   # ---------------------------------------------------------------------------
   # For each test, build a webpage (under this commit hash directory)
@@ -109,9 +109,12 @@ if (tpr != "false" && tpr != "") {
     dir.create(name_dir, recursive = TRUE)
     writeLines(diff_table, paste0(name_dir, "/index.html"))
   }
-  msg3 <- sprintf("Detected a total of %s differences: \n", length(diffs))
-  msg4 <- paste(tbl_link, names(diffs), collapse = " \n ")
-  msg <- paste(msg1, msg2, msg3, msg4)
+  msg3 <- sprintf("Detected a total of %s differences in figure objects: \n", length(diffs))
+  msg <- paste(msg1, msg2, msg3)
+  if (length(diffs)) {
+    msg <- paste(msg, "Links to the differences: \n", 
+                 paste(tbl_link, names(diffs), collapse = " \n "))
+  }
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
   warn_for_status(res)
@@ -126,6 +129,7 @@ if (tpr != "false" && tpr != "") {
   }
 }
 
+system("git status")
 st <- system("git status", intern = TRUE)
 # if the working state is dirty, clean it, and push!
 # (if tests are added, or if ggplot2 updates, the push travis build will add ggplot2 pngs)
