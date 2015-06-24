@@ -93,7 +93,7 @@ if (tpr != "false" && tpr != "") {
     # TODO: add the ggplot result to this page?
     top <- sprintf(
       '<a src="%s"> <img src="%s.png"> </a> <a src="%s"> <img src="%s.png"> </a>',
-      test_info$url[1], urls[1], test_info$url[2], urls[2]
+      test_info$url[1], test_info$url[1], test_info$url[2], test_info$url[2]
     )
     bottom <- if (has_diff) {
       diffs[[i]] <- 1
