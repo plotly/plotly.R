@@ -17,6 +17,11 @@ table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
 plotly_dir <- file.path(table_dir, "R", hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
+# in case we need save ggplot2 output
+ggversion <- as.character(packageVersion("ggplot2"))
+gg_dir <- file.path(table_dir, "R", paste0("ggplot2-", ggversion))
+gg_names <- sub("\\.png$", "", dir(gg_dir, pattern = "\\.png$"))
+
 # text file that tracks figure hashes
 hash_file <- file.path(table_dir, "R", "hashes.csv")
 if (!file.exists(hash_file)) {
@@ -52,6 +57,14 @@ save_outputs <- function(gg, name) {
     # save a hash of the R object sent to the plotly server
     info <- paste(hash, name, digest::digest(p), u, sep = ",")
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
+  } else if (!name %in% gg_names) { # do we need to save a ggplot2 result?
+    e <- try(gg, silent = TRUE)
+    png(filename = file.path(gg_dir, paste0(name, ".png")))
+    if (inherits(e, "try-error")) {
+      plot(1, type = "n")
+      text(1, "ggplot2 error")
+    } else gg
+    dev.off()
   }
   p
 }
