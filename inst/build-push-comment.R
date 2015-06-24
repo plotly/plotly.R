@@ -109,11 +109,11 @@ if (tpr != "false" && tpr != "") {
     dir.create(name_dir, recursive = TRUE)
     writeLines(diff_table, paste0(name_dir, "/index.html"))
   }
-  msg3 <- sprintf("Detected a total of %s differences in figure objects: \n", length(diffs))
-  msg <- paste(msg1, msg2, msg3)
+  msg3 <- sprintf("Detected a total of %s differences in figure objects:", length(diffs))
+  msg <- paste(msg1, msg2, msg3, sep = "\n\n")
   if (length(diffs)) {
-    msg <- paste(msg, "Links to the differences: \n", 
-                 paste(tbl_link, names(diffs), collapse = " \n "))
+    msg <- paste(msg, "Links to the differences:", 
+                 paste(tbl_link, names(diffs), collapse = "\n\n"), sep = "\n\n")
   }
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
@@ -133,7 +133,7 @@ system("git status")
 st <- system("git status", intern = TRUE)
 # if the working state is dirty, clean it, and push!
 # (if tests are added, or if ggplot2 updates, the push travis build will add ggplot2 pngs)
-if (any(grepl("modified:", st))) {
+if (any(grepl("Changes not staged for commit:|Untracked files:", st))) {
   system("git add *")
   commit_msg <- paste0('"Pushed from ', build_link, '"')
   system(paste('git commit -m', commit_msg))

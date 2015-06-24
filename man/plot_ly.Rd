@@ -4,17 +4,17 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), type = "scatter", ..., inherit = TRUE)
+plot_ly(data = data.frame(), ..., type = "scatter", inherit = TRUE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
-
-\item{type}{A charater string describing the type of trace.}
 
 \item{...}{Visual properties.
 All arguments documented in the references section below are supported.
 In addition, there are special arguments which map variables to visual
 aethestics in a similar style to ggplot2 (such as \code{color}).}
+
+\item{type}{A charater string describing the type of trace.}
 
 \item{inherit}{should future traces inherit properties from this initial trace?}
 }
