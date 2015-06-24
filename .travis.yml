@@ -4,6 +4,8 @@ before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
+  # password is encrypted below
+  - echo "Sys.setenv('plotly_username' = 'asdfff')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
@@ -25,5 +27,4 @@ after_success:
 env:
   global:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
-    - secure: "C1QHrZIyZqur3yR/RqNEV/oUeWygdUOIQSiDzu+RRrxRJ9yRKtcTtqrvBuFR22VBsXY3/s5dtZinrbETtXzXC8gw3Q5kbCil9IDw4lqoy48tgxrggg8EDefz6bbCfJ2zvNPM38rCZGRFwB45fnBIINgiUWq5VF6WHhV3fNO/GWg="
-    - secure: "Ot/cGWmKq3d/JqDJ5g3iRPjqIvPz9Vu3ccBWtmStIk5b3XZLvYtTU/1Qb6DtvT5szFs9bf1WsaCt1lv2VnuQVSc7m7PZnpRPi8czyMiKErn0AkalmnPhXJ5cJIWDJQRuKYdrVfSlRRACm1SxhKKlEqMyeL/kmUIbtMfgQIdAnhA="
+    - secure: "lXmTkDxEhchb9AdINwwMnRHMyQtBFi/+5wgjUlhFeadjo0SoeEitZVOmj4Aw990NYkOFX5Owbp9WSIc3c4U/sdegDD8C9FjX4obuvxhWFhDUNeMvlZn5eiZ+SRQRdUvnQu5XNCpBKJ1XaAwlzPBKZB1TLQu+DslEMU0W77O7JWI="
