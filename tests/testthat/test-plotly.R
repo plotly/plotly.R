@@ -2,7 +2,7 @@ context("plot_ly")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(gg, paste0("plotly-", name))
+  L <- save_outputs(p, paste0("plotly-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
