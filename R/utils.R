@@ -102,6 +102,8 @@ eval_list <- function(l) {
       for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
     }
   }
+  # add appropriate axis title (if they don't already exist)
+  x <- add_titles(x, l)
   # create a new plotly if no url is attached to this environment
   x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
   x
@@ -115,13 +117,6 @@ colorize <- function(data, title = "") {
   for (i in seq_dat) {
     cols <- data[[i]][["color"]]
     if (!is.null(cols)) {
-#       mode <- data[[i]][["mode"]]
-#       # at least for the scatter trace, "lines" is the default mode
-#       if (is.null(mode)) mode <- "lines"
-#       # of course, aux object names are singular...
-#       mode <- sub("s$", "", strsplit(mode, "\\+")[[1]])
-#       # we don't want to colorize text...
-#       mode <- setdiff(mode, "text")
       if (is.numeric(cols)) {
         cols <- unique(scales::rescale(cols))
         o <- order(cols, decreasing = FALSE)
@@ -163,6 +158,24 @@ colorize <- function(data, title = "") {
   }
   data
 }
+
+add_titles <- function(x, l) {
+  for (i in c("x", "y", "z")) {
+    s <- lapply(x$data, "[[", i)
+    ax <- paste0(i, "axis")
+    t <- x$layout[[ax]]$title
+    if (is.null(t)) { # deparse the unevaluated expression from 1st trace
+      argz <- as.list(l$data[[1]]$args)
+      idx <- names(argz) %in% i
+      x$layout[[ax]]$title <- if (any(idx)) deparse(argz[idx][[1]]) else ""
+    }
+  }
+  x
+}
+
+
+
+
 
 # Check for credentials/configuration and throw warnings where appropriate
 verify <- function(what = "username") {
