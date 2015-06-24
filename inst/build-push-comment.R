@@ -68,7 +68,7 @@ if (tpr != "false" && tpr != "") {
   names(df) <- c("test", "ggplot2", branch, "master")
   df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test"))
-    df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i])
+    df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i], df[, i])
   print(df)
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
