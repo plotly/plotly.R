@@ -11,15 +11,15 @@
 # Since it makes more sense to visually compared what we'd see *after* we
 # merge with master, we don't do anything here if it's a push build.
 # -----------------------------------------------------------------------
-
 library("httr")
 library("testthat")
-# Read more about Travis environment variables --
+
 # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
+build_link <- file.path('https://travis-ci.org/ropensci/plotly/builds',
+                        Sys.getenv("TRAVIS_BUILD_ID"))
 tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
-# is this build a pull request
-pr <- tpr != "false" && tpr != ""
-if (pr) {
+# is this build a pull request, build the test table
+if (tpr != "false" && tpr != "") {
   # gistr is a good reference for talking to the github API via httr
   # https://github.com/ropensci/gistr/blob/master/R/zzz.R
   base <- 'https://api.github.com/repos/ropensci/plotly/'
@@ -77,8 +77,6 @@ if (pr) {
   writeLines(test_table, dest)
   
   # start constructing automated GitHub message 
-  build_link <- paste0('https://travis-ci.org/ropensci/plotly/builds/',
-                       Sys.getenv("TRAVIS_BUILD_ID"))
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
   msg1 <- paste("> The message below was automatically generated after build", build_link, "\n\n")
   msg2 <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here:\n %s",
@@ -128,9 +126,12 @@ if (pr) {
   } else {
     message("Link already posted")
   }
-  
-  # add, commit, push to gh-pages branch of plotly-test-table
-  system("git status")
+}
+
+st <- system("git status", intern = TRUE)
+# if the working state is dirty, clean it, and push!
+# (if tests are added, or if ggplot2 updates, the push travis build will add ggplot2 pngs)
+if (any(grepl("modified:", st))) {
   system("git add *")
   commit_msg <- paste0('"Pushed from ', build_link, '"')
   system(paste('git commit -m', commit_msg))
@@ -138,7 +139,4 @@ if (pr) {
   repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", Sys.getenv("GH_TOKEN"))
   system(paste("git pull", repo, "gh-pages"))
   system(paste("git push", repo, "gh-pages"))
-  
-} else {
-  message('The test table is only built during the "pull request" build.')
 }

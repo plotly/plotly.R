@@ -15,7 +15,6 @@ hash <- if (src == "local") {
 # (note the working directory should be /path/to/plotly/tests)
 table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
 plotly_dir <- file.path(table_dir, "R", hash)
-print(plotly_dir)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
 # text file that tracks figure hashes
@@ -36,22 +35,10 @@ save_outputs <- function(gg, name) {
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
   if (tpr != "false" && tpr != "") {
-    # If we don't have pngs for this version of ggplot2, generate them!
-    # (env var is set in build-push-comment.R if we are supposed save them)
-    if (Sys.getenv("GGPLOT2_FOLDER") != "") {
-      gg_dir <- file.path(table_dir, "R", Sys.getenv("GGPLOT2_FOLDER"))
-      e <- try(gg, silent = TRUE)
-      png(filename = file.path(gg_dir, paste0(name, ".png")))
-      if (inherits(e, "try-error")) {
-        plot(1, type="n")
-        text(1, "ggplot2 error")
-      } else gg
-      dev.off()
-    }
     # POST data to plotly and return the url
     u <- if (packageVersion("plotly") < 1) {
       py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
-      resp <- py$ggplotly(gg)
+      resp <- py$ggplotly(gg, kwargs = list(auto_open = FALSE))
       resp$response$url
     } else {
       resp <- plotly_POST(p)
@@ -73,9 +60,7 @@ test_check("plotly")
 
 
 
-
-
-# Database for tracking plot hashes? 
+# Keep database for tracking plot hashes? 
 # Pros: (1) Don't have to upload a plot if underlying data hasn't changed
 # Cons: (1) Significantly more complicated and leaves us prone to mistakes
 # db <- if ("db.rds" %in% dir(r_dir)) {
