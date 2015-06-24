@@ -45,7 +45,7 @@ if (tpr != "false" && tpr != "") {
   
   # HEAD of the master branch. 
   base_hash <- abbrev_hash(info$base$sha)
-  base_dir <- file.path("R/", base_hash)
+  base_dir <- file.path("R", base_hash)
   base_pngs <- dir(base_dir, pattern = "\\.png$")
   # Re-run (current) test suite with master branch if it's missing any tests 
   if (!all(this_pngs %in% base_pngs)) {
@@ -69,10 +69,9 @@ if (tpr != "false" && tpr != "") {
   df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test"))
     df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i], df[, i])
-  print(df)
   test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
                                  quiet = TRUE)
-  dest <- file.path(this_hash, "index.html")
+  dest <- file.path("R", this_hash, "index.html")
   writeLines(test_table, dest)
   
   # start constructing automated GitHub message 
