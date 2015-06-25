@@ -3,13 +3,8 @@ context("plot_ly")
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-", name))
-  all.traces <- L$data
-  no.data <- sapply(all.traces, function(tr) {
-    is.null(tr[["x"]]) && is.null(tr[["y"]])
-  })
-  has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  expect_equal(length(L$data), n.traces)
+  L
 }
 
 test_that("plot_ly() handles a simple scatterplot", {
