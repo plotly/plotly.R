@@ -99,7 +99,7 @@ if (tpr != "false" && tpr != "") {
     bottom <- if (has_diff) {
       diffs[[i]] <- 1
       sprintf(
-        ' \n `r jsdiff::jsdiff(get_plot(get_figure(url=%s)), get_plot(get_figure(url=%s)))`',
+        ' \n `r jsdiff::jsdiff(get_plot(get_figure(url="%s")), get_plot(get_figure(url="%s")))`',
         test_info$url[1], test_info$url[2]
       )
     } else {

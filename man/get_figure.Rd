@@ -4,12 +4,14 @@
 \alias{get_figure}
 \title{Request a figure object}
 \usage{
-get_figure(username, id)
+get_figure(username, id, url)
 }
 \arguments{
 \item{username}{corresponding username for the figure.}
 
 \item{id}{of the Plotly figure.}
+
+\item{url}{a Plotly figure url.}
 }
 \description{
 Figure objects work in the same way as plotly objects, but when printed,
