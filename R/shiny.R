@@ -1,7 +1,7 @@
 #' Shiny ui output function
 #' @param outputId output variable to read the plot from
-#' @param width
-#' @param height
+#' @param width width of the output.
+#' @param height height of the output.
 #' @seealso http://shiny.rstudio.com/articles/building-outputs.html
 #' @export
 #' 
@@ -10,9 +10,9 @@ plotlyOutput <- function(outputId, width = "100%", height = "550px") {
   deps <- lapply(plotly_dependencies(), shiny::createWebDependency)
   htmltools::attachDependencies(
     # TODO: allow users to specify their own src location?
-    tags$iframe(id = outputId, src = "https://plot.ly/~playground/7.embed",
-                class = "graphs", style = "border:none;", seamless = TRUE, 
-                width = width, height = height),
+    htmltools::tags$iframe(id = outputId, src = "https://plot.ly/~playground/7.embed",
+                           class = "graphs", style = "border:none;", seamless = TRUE, 
+                           width = width, height = height),
     deps
   )
 }

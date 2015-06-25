@@ -22,9 +22,11 @@ aethestics in a similar style to ggplot2 (such as \code{color}).}
 Transform data into a plotly visualization.
 }
 \examples{
+\dontrun{
 data(economics, package = "ggplot2")
 # basic time-series plot
-p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", showlegend = F)
+p <- plot_ly(economics, x = date, y = uempmed, type = "scatter",
+  showlegend = FALSE)
 # add a loess smoother
 p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
 # add a title
@@ -35,6 +37,7 @@ layout(p3, font = list(family = "Courier New, monospace"))
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
+}
 }
 \author{
 Carson Sievert

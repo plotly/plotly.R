@@ -14,10 +14,11 @@
 #' @author Carson Sievert
 #' @export
 #' @examples
-#' 
+#' \dontrun{
 #' data(economics, package = "ggplot2")
 #' # basic time-series plot
-#' p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", showlegend = F)
+#' p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", 
+#'   showlegend = FALSE)
 #' # add a loess smoother
 #' p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
 #' # add a title
@@ -28,6 +29,7 @@
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
+#' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter", inherit = TRUE) {
   # record trace information
@@ -126,7 +128,7 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1) {
 #' the last plotly object created in this R session is returned (if it exists).
 #' 
 #' @param data a data frame with a class of plotly (and a plotly_hash attribute).
-#' @param srict throw a warning if the plotly_hash attribute is missing.
+#' @param strict throw a warning if the plotly_hash attribute is missing.
 #' @export
 get_plot <- function(data = NULL, strict = TRUE) {
   hash <- attr(data, "plotly_hash")

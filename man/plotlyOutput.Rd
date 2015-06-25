@@ -9,9 +9,9 @@ plotlyOutput(outputId, width = "100\%", height = "550px")
 \arguments{
 \item{outputId}{output variable to read the plot from}
 
-\item{width}{}
+\item{width}{width of the output.}
 
-\item{height}{}
+\item{height}{height of the output.}
 }
 \description{
 Shiny ui output function

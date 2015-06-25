@@ -9,7 +9,7 @@ get_plot(data = NULL, strict = TRUE)
 \arguments{
 \item{data}{a data frame with a class of plotly (and a plotly_hash attribute).}
 
-\item{srict}{throw a warning if the plotly_hash attribute is missing.}
+\item{strict}{throw a warning if the plotly_hash attribute is missing.}
 }
 \description{
 Given a data frame with a class of plotly, this function returns the arguments
