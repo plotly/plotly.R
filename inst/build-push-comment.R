@@ -86,6 +86,7 @@ if (tpr != "false" && tpr != "") {
   # ---------------------------------------------------------------------------
   hashes <- read.csv("R/hashes.csv")
   hashes <- hashes[hashes$commit %in% c(this_hash, base_hash), ]
+  devtools::install("../plotly")
   diffs <- character()
   for (i in tests) {
     test_info <- hashes[hashes$test %in% i, ]
