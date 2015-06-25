@@ -21,6 +21,6 @@ get_figure <- function(username, id) {
   if (missing(username)) username <- verify("username")
   if (missing(id)) stop("Please provide a figure id number")
   base_url <- file.path(get_domain(), "apigetfile", username, id)
-  resp <- httr::GET(base_url, plotly_headers())
+  resp <- httr::GET(base_url, plotly_headers(), config(ssl.verifypeer=FALSE))
   process(struct(resp, "figure"))
 }
