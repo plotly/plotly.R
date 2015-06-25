@@ -13,7 +13,7 @@ hash <- if (src == "local") {
 }
 # setup directory for placing files during tests
 # (note the working directory should be /path/to/plotly/tests)
-table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
+table_dir <- normalizePath("../../plotly-test-table")
 plotly_dir <- file.path(table_dir, "R", hash)
 if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 
