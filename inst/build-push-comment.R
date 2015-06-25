@@ -58,8 +58,9 @@ if (tpr != "false" && tpr != "") {
   # ---------------------------------------------------------------------------
   # Build the main HTML page for this build
   # ---------------------------------------------------------------------------
+  tests <- sub("\\.png$", "", this_pngs)
   df <- data.frame(
-    sub("\\.png$", "", this_pngs),
+    tests,
     file.path(gg_dir, this_pngs),
     file.path(this_dir, this_pngs),
     file.path(base_dir, this_pngs),
@@ -86,7 +87,7 @@ if (tpr != "false" && tpr != "") {
   hashes <- read.csv("R/hashes.csv")
   hashes <- hashes[hashes$commit %in% c(this_hash, base_hash), ]
   diffs <- character()
-  for (i in df$test) {
+  for (i in tests) {
     test_info <- hashes[hashes$test %in% i, ]
     # are the plot hashes different for this test?
     has_diff <- length(unique(test_info$hash)) > 1
@@ -140,5 +141,5 @@ if (any(grepl("Changes not staged for commit:|Untracked files:", st))) {
   # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
   repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", Sys.getenv("GH_TOKEN"))
   system(paste("git pull", repo, "gh-pages"))
-  system(paste("git push", repo, "gh-pages"))
+  system(paste("git push -q", repo, "gh-pages"))
 }
