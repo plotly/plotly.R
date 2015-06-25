@@ -6,21 +6,21 @@
 #' 
 #' @param username corresponding username for the figure.
 #' @param id of the Plotly figure.
-#' @param url a Plotly figure url.
 #' @export
 #' @references https://plot.ly/rest/
 #' @examples
 #' \dontrun{
 #'  # Anyone can obtain the information for a particular plot
 #'  fig <- get_figure("cpsievert", "559")
-#'  # If you have proper credentials, you can modify it
+#'  # If you have proper credentials, you can easily modify
 #'  layout(fig, title = paste("Modified on ", Sys.time()))
+#'  
+#'  
 #' }
-get_figure <- function(username, id, url) {
+get_figure <- function(username, id) {
   if (missing(username)) username <- verify("username")
-  base_url <- if (!missing(id)) {
-    file.path(get_domain(), "apigetfile", username, id)
-  } else url 
+  if (missing(id)) stop("Please provide a figure id number")
+  base_url <- file.path(get_domain(), "apigetfile", username, id)
   resp <- httr::GET(base_url, plotly_headers())
   process(struct(resp, "figure"))
 }

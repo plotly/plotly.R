@@ -4,14 +4,12 @@
 \alias{get_figure}
 \title{Request a figure object}
 \usage{
-get_figure(username, id, url)
+get_figure(username, id)
 }
 \arguments{
 \item{username}{corresponding username for the figure.}
 
 \item{id}{of the Plotly figure.}
-
-\item{url}{a Plotly figure url.}
 }
 \description{
 Figure objects work in the same way as plotly objects, but when printed,
@@ -22,8 +20,10 @@ they overwrite the already existing plotly object
 \dontrun{
  # Anyone can obtain the information for a particular plot
  fig <- get_figure("cpsievert", "559")
- # If you have proper credentials, you can modify it
+ # If you have proper credentials, you can easily modify
  layout(fig, title = paste("Modified on ", Sys.time()))
+
+
 }
 }
 \references{
