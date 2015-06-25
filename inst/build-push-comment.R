@@ -99,9 +99,11 @@ if (tpr != "false" && tpr != "") {
     )
     bottom <- if (has_diff) {
       diffs[[i]] <- 1
+      id1 <- sub(".*/([0-9]+$)", "\\1", test_info$url[1])
+      id2 <- sub(".*/([0-9]+$)", "\\1", test_info$url[2])
       sprintf(
-        ' \n `r jsdiff::jsdiff(get_plot(get_figure(url="%s")), get_plot(get_figure(url="%s")))`',
-        test_info$url[1], test_info$url[2]
+        ' \n `r jsdiff::jsdiff(get_plot(get_figure("%s", "%s")), get_plot(get_figure("%s", "%s")))`',
+        plotly:::verify("username"), id1, plotly:::verify("username"), id2
       )
     } else {
       sprintf('\n No difference in this test between %s and %s', this_hash, base_hash)
