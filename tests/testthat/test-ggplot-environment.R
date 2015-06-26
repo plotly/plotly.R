@@ -48,3 +48,5 @@ test_that("object increase_margin_r in environment outside plotly", {
   expect_identical(tr$type, "scatter")
   expect_true(grepl("cond", la$annotations[[1]]$text))
 })
+
+
