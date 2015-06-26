@@ -656,15 +656,23 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
+  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
     # Retrieve legend title
     legend.elements <- unlist(sapply(traces, "[[", "name"))
-    legend.title <- ""
-    for (i in 1:ncol(p$data)) {
-      if (all(legend.elements %in% unique(p$data[, i])))
-        legend.title <- colnames(p$data)[i]
+    legend.title <- if (!is.null(ggplot_labels$colour)) {
+      ggplot_labels$colour 
+    } else if (!is.null(ggplot_labels$fill)) {
+      ggplot_labels$fill 
+    } else if (!is.null(ggplot_labels$shape)) {
+      ggplot_labels$shape
     }
+#     for (i in 1:ncol(p$data)) {
+#       if (all(legend.elements %in% unique(p$data[, i]))) {
+#         legend.title <- colnames(p$data)[i] 
+#       }
+#     }
     legend.title <- paste0("<b>", legend.title, "</b>")
     # Create legend title element as an annotation
     if (exists("annotations", where = as.environment("package:plotly"))) {
