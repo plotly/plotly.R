@@ -49,4 +49,15 @@ test_that("object increase_margin_r in environment outside plotly", {
   expect_true(grepl("cond", la$annotations[[1]]$text))
 })
 
+# Test 3: bargap
+test_that("object bargap in environment outside plotly", {
+  increase_margin_r <- "outside of the plotly environment"
+  info <- expect_traces(p, 2, "bargap")
+  tr <- info$traces[[1]]
+  la <- info$layout
+  expect_identical(la$xaxis$title, "X")
+  expect_identical(la$yaxis$title, "Y")
+  expect_identical(tr$type, "scatter")
+  expect_true(grepl("cond", la$annotations[[1]]$text))
+})
 
