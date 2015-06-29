@@ -14,13 +14,11 @@
 #'  fig <- get_figure("cpsievert", "559")
 #'  # If you have proper credentials, you can easily modify
 #'  layout(fig, title = paste("Modified on ", Sys.time()))
-#'  
-#'  
 #' }
 get_figure <- function(username, id) {
   if (missing(username)) username <- verify("username")
   if (missing(id)) stop("Please provide a figure id number")
   base_url <- file.path(get_domain(), "apigetfile", username, id)
-  resp <- httr::GET(base_url, plotly_headers(), config(ssl.verifypeer=FALSE))
+  resp <- httr::GET(base_url, plotly_headers(), httr::config(ssl_verifypeer=FALSE))
   process(struct(resp, "figure"))
 }

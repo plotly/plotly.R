@@ -22,8 +22,6 @@ they overwrite the already existing plotly object
  fig <- get_figure("cpsievert", "559")
  # If you have proper credentials, you can easily modify
  layout(fig, title = paste("Modified on ", Sys.time()))
-
-
 }
 }
 \references{
