@@ -108,6 +108,7 @@ if (tpr != "false" && tpr != "") {
     } else {
       sprintf('\n No difference in this test between %s and %s', this_hash, base_hash)
     }
+    print(paste(top, bottom))
     diff_table <- knitr::knit2html(text = paste(top, bottom))
     name_dir <- sprintf("R/%s/%s", this_hash, i)
     dir.create(name_dir, recursive = TRUE)
