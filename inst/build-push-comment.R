@@ -78,7 +78,7 @@ if (tpr != "false" && tpr != "") {
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
   msg1 <- paste("> The message below was automatically generated after build", build_link, "\n\n")
-  msg2 <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here -> %s",
+  msg2 <- sprintf("On TravisCI, commit %s was successfully merged with %s (master) to create %s. A visual testing table comparing %s with %s can be found here -> \n\n %s",
                   abbrev_hash(info$head$sha), base_hash, this_hash, base_hash, this_hash, tbl_link)
   # ---------------------------------------------------------------------------
   # For each test, build a webpage (under this commit hash directory)
@@ -114,17 +114,17 @@ if (tpr != "false" && tpr != "") {
     } else {
       sprintf('\n No difference in this test between %s and %s', this_hash, base_hash)
     }
-    print(paste(top, bottom))
     diff_table <- knitr::knit2html(text = paste(top, bottom))
     name_dir <- sprintf("R/%s/%s", this_hash, i)
     dir.create(name_dir, recursive = TRUE)
     writeLines(diff_table, paste0(name_dir, "/index.html"))
   }
-  msg3 <- sprintf("Detected a total of %s differences in figure objects:", length(diffs))
+  msg3 <- sprintf("Detected %s differences ->", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
   if (length(diffs)) {
     msg <- paste(msg, "Links to the differences:", 
-                 paste(tbl_link, names(diffs), collapse = "\n\n"), sep = "\n\n")
+                 paste(file.path(tbl_link, names(diffs)), collapse = "\n"), 
+                 sep = "\n\n")
   }
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
