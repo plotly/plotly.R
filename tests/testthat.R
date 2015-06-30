@@ -40,10 +40,6 @@ save_outputs <- function(gg, name) {
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
   if (tpr != "false" && tpr != "") {
-    # save a hash of the R object sent to the plotly server
-    # (eventually use this to prevent redundant POSTs?!)
-    info <- paste(hash, name, digest::digest(p), u, sep = ",")
-    cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # POST data to plotly and return the url
     u <- if (packageVersion("plotly") < 1) {
       py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
@@ -53,6 +49,10 @@ save_outputs <- function(gg, name) {
       resp <- plotly_POST(p)
       resp$url
     }
+    # save a hash of the R object sent to the plotly server
+    # (eventually use this to prevent redundant POSTs?!)
+    info <- paste(hash, name, digest::digest(p), u, sep = ",")
+    cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # download png under a directory specific to this installed version of plotly
     filename <- file.path(plotly_dir, paste0(name, ".png"))
     if (!file.exists(filename)) {
