@@ -5,7 +5,7 @@ before_install:
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
   # password is encrypted below
-  - echo "Sys.setenv('plotly_username' = 'sadasd')" > ~/.Rprofile
+  - echo "Sys.setenv('plotly_username' = 'sfg')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
@@ -27,4 +27,4 @@ after_success:
 env:
   global:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
-    - secure: "UQhr1j3N5UeqyS8Kt1ePJKO3rgqLG4mI59pmJyRGQH+9f3HBsiPI8ENIl1yhHBga2DacsjF8yrBmlc4fuRM7uXe7O2/aFIuuunya9zyNfG9r1Gn2QHzoZpFWo1QjRG+1ir+gGCRxoPzwgFjuqqb6tbWPmgea8CpX2bWoEOisa6g="
+    - secure: "PWii6+la9Z90Cdu+3geXwcgwQz8OWwotrVxQ7tVA0nOwrWsS7VEzR74Z6xkJs5bBjb+fKRCqpd6TGfC6Y2vTSJ8rITigR/q12qdxCel/jER+zT8sm3nw8/U+Z3o/SxdRalhJ5bVUXPEI+9tTYwDJ8fqfE5Cnx/XGdydvKE3pXLM="
