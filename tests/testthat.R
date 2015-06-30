@@ -40,6 +40,10 @@ save_outputs <- function(gg, name) {
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
   if (tpr != "false" && tpr != "") {
+    # save a hash of the R object sent to the plotly server
+    # (eventually use this to prevent redundant POSTs?!)
+    info <- paste(hash, name, digest::digest(p), u, sep = ",")
+    cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # POST data to plotly and return the url
     u <- if (packageVersion("plotly") < 1) {
       py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
@@ -49,41 +53,26 @@ save_outputs <- function(gg, name) {
       resp <- plotly_POST(p)
       resp$url
     }
-    # save png under a directory specific to this installed version of plotly
-    resp <- httr::GET(paste0(u, ".png"))
-    httr::warn_for_status(resp)
+    # download png under a directory specific to this installed version of plotly
     filename <- file.path(plotly_dir, paste0(name, ".png"))
-    writeBin(httr::content(resp, as = "raw"), filename)
-    # save a hash of the R object sent to the plotly server
-    info <- paste(hash, name, digest::digest(p), u, sep = ",")
-    cat(paste(info, "\n"), file = hash_file, append = TRUE)
-  } else if (!name %in% gg_names) { # do we need to save a ggplot2 result?
-    e <- try(gg, silent = TRUE)
-    png(filename = file.path(gg_dir, paste0(name, ".png")))
-    if (inherits(e, "try-error")) {
-      plot(1, type = "n")
-      text(1, "ggplot2 error")
-    } else gg
-    dev.off()
-  }
+    if (!file.exists(filename)) {
+      e <- try(curl::curl_download(paste0(u, ".png"), filename))
+      while (inherits(e, "try-error")) {
+        e <- try(curl::curl_download(paste0(u, ".png"), filename))
+      }
+    }
+  } 
+#   else if (!name %in% gg_names) { 
+#     # save the ggplot2 result
+#     e <- try(gg, silent = TRUE)
+#     png(filename = file.path(gg_dir, paste0(name, ".png")))
+#     if (inherits(e, "try-error")) {
+#       plot(1, type = "n")
+#       text(1, "ggplot2 error")
+#     } else gg
+#     dev.off()
+#   }
   p
 }
 
 test_check("plotly")
-
-
-
-# Keep database for tracking plot hashes? 
-# Pros: (1) Don't have to upload a plot if underlying data hasn't changed
-# Cons: (1) Significantly more complicated and leaves us prone to mistakes
-# db <- if ("db.rds" %in% dir(r_dir)) {
-#   readRDS("db.rds")
-# } else {
-#   data.frame(
-#     commit = character(),
-#     name = character(),
-#     plot = character(),
-#     stringsAsFactors = FALSE
-#   )
-# }
-#df[nrow(df) + 1, ] <- c(hash, name, digest::digest(p))
