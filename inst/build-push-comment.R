@@ -85,6 +85,8 @@ if (tpr != "false" && tpr != "") {
   # If plot hashed were different, include a JSON diff and links in the github comment
   # ---------------------------------------------------------------------------
   hashes <- read.csv("R/hashes.csv")
+  # strip any leading/trailing whitespace in urls
+  hashes$url <- sub("\\s$", "", sub("^\\s", "", hashes$url))
   hashes <- hashes[hashes$commit %in% c(this_hash, base_hash), ]
   devtools::install("../plotly")
   diffs <- character()
@@ -99,11 +101,15 @@ if (tpr != "false" && tpr != "") {
     )
     bottom <- if (has_diff) {
       diffs[[i]] <- 1
-      id1 <- sub(".*/([0-9]+$)", "\\1", test_info$url[1])
-      id2 <- sub(".*/([0-9]+$)", "\\1", test_info$url[2])
+      id_pat <- ".*/([0-9]+$)"
+      id1 <- sub(id_pat, "\\1", test_info$url[1])
+      id2 <- sub(id_pat, "\\1", test_info$url[2])
+      usr_pat <- ".*/~(.*)/.*"
+      usr1 <- sub(usr_pat, "\\1", test_info$url[1])
+      usr2 <- sub(usr_pat, "\\1", test_info$url[2])
       sprintf(
         ' \n `r jsdiff::jsdiff(get_plot(get_figure("%s", "%s")), get_plot(get_figure("%s", "%s")))`',
-        plotly:::verify("username"), id1, plotly:::verify("username"), id2
+        usr1, id1, usr2, id2
       )
     } else {
       sprintf('\n No difference in this test between %s and %s', this_hash, base_hash)
