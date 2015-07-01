@@ -67,13 +67,13 @@ if (tpr != "false" && tpr != "") {
     stringsAsFactors = FALSE
   )
   names(df) <- c("test", "ggplot2", branch, "master")
-  df$test <- sprintf('<a href = "%s.html"> %s </a>', df$test, df$test)
+  df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test"))
     df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i], df[, i])
-  test_table <- knitr::knit2html(text = '`r knitr::kable(df, type = "html")`',
-                                 quiet = TRUE)
-  dest <- file.path("R", this_hash, "index.html")
-  writeLines(test_table, dest)
+  # render the table
+  rmd <- file.path("R", this_hash, "index.Rmd")
+  writeLines('`r knitr::kable(df, type = "markdown")`', rmd)
+  rmarkdown::render(rmd)
   
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
@@ -96,7 +96,7 @@ if (tpr != "false" && tpr != "") {
     has_diff <- length(unique(test_info$hash)) > 1
     # TODO: add the ggplot result to this page?
     top <- sprintf(
-      '<a src="%s"> <img src="%s.png"> </a> <a src="%s"> <img src="%s.png"> </a>',
+      '<div align="center"> <a src="%s"><img src="%s.png"></a> <a src="%s"><img src="%s.png"></a> </div>',
       test_info$url[1], test_info$url[1], test_info$url[2], test_info$url[2]
     )
     bottom <- if (has_diff) {
@@ -112,19 +112,20 @@ if (tpr != "false" && tpr != "") {
         usr1, id1, usr2, id2
       )
     } else {
-      sprintf('\n No difference in this test between %s and %s', this_hash, base_hash)
+      sprintf('\n No difference in this test between %s (%s) and master (%s)', 
+              branch, this_hash, base_hash)
     }
-    diff_table <- knitr::knit2html(text = paste(top, bottom))
     name_dir <- sprintf("R/%s/%s", this_hash, i)
     dir.create(name_dir, recursive = TRUE)
-    writeLines(diff_table, paste0(name_dir, "/index.html"))
+    idx <- file.path(name_dir, "index.Rmd")
+    writeLines(paste(top, bottom), idx)
+    rmarkdown::render(idx)
   }
-  msg3 <- sprintf("Detected %s differences ->", length(diffs))
+  msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
   if (length(diffs)) {
-    msg <- paste(msg, "Links to the differences:", 
-                 paste(file.path(tbl_link, names(diffs)), collapse = "\n"), 
-                 sep = "\n\n")
+    links <- file.path(tbl_link, names(diffs))
+    msg <- paste(msg, " -> \n\n", paste(links, collapse = "\n"))
   }
   commentz <- sprintf(paste0(base, 'issues/%s/comments'), tpr)
   res <- GET(commentz, header)
@@ -147,7 +148,7 @@ st <- system("git status", intern = TRUE)
 if (any(grepl("Changes not staged for commit:|Untracked files:", st))) {
   system("git add *")
   commit_msg <- paste0('"Pushed from ', build_link, '"')
-  system(paste('git commit -m', commit_msg))
+  system(paste('git commit -q -m', commit_msg))
   # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
   repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", Sys.getenv("GH_TOKEN"))
   system(paste("git pull", repo, "gh-pages"))
