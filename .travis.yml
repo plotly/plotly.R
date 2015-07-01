@@ -13,7 +13,7 @@ before_install:
   - rm pandoc-1.12.3.zip
   - $HOME/opt/pandoc/pandoc --version
   # password is encrypted below
-  - echo "Sys.setenv('plotly_username' = 'sfg')" > ~/.Rprofile
+  - echo "Sys.setenv('plotly_username' = 'jsj')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
@@ -35,4 +35,4 @@ after_success:
 env:
   global:
     - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
-    - secure: "PWii6+la9Z90Cdu+3geXwcgwQz8OWwotrVxQ7tVA0nOwrWsS7VEzR74Z6xkJs5bBjb+fKRCqpd6TGfC6Y2vTSJ8rITigR/q12qdxCel/jER+zT8sm3nw8/U+Z3o/SxdRalhJ5bVUXPEI+9tTYwDJ8fqfE5Cnx/XGdydvKE3pXLM="
+    - secure: "JePatMPnLXeYSxMs87AB3cF85QQXweLVheH4hhLNbop9Eg7DSjSMRz0PGgiaJOpsVIB+KJXH1S27hDVxXQ784jwiyqQWq/mXUP3ohFRGTTYVGKD7lnTNHzvo4jaQIE+AssYPbddQI0sVVPnfFAYyUtBdK9oEGM8tculI2Ymv7Nw="
