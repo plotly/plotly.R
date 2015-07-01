@@ -66,13 +66,8 @@ save_outputs <- function(gg, name) {
     # if missing, save the ggplot2
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
-      print("Saving ggplot2 result")
-      e <- try(gg, silent = TRUE)
       png(filename = file.path(gg_dir, paste0(name, ".png")))
-      if (inherits(e, "try-error")) {
-        plot(1, type = "n")
-        text(1, "ggplot2 error")
-      } else gg
+      try(gg)
       dev.off()
     }
     
