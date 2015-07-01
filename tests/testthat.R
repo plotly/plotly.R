@@ -67,7 +67,7 @@ save_outputs <- function(gg, name) {
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
       png(filename = file.path(gg_dir, paste0(name, ".png")))
-      try(gg)
+      print(gg)
       dev.off()
     }
     
