@@ -58,6 +58,8 @@ if (tpr != "false" && tpr != "") {
   # ---------------------------------------------------------------------------
   # Build the main HTML page for this build
   # ---------------------------------------------------------------------------
+  ggversion <- as.character(packageVersion("ggplot2"))
+  gg_dir <- file.path("R", paste0("ggplot2-", ggversion))
   tests <- sub("\\.png$", "", this_pngs)
   df <- data.frame(
     tests,
@@ -68,8 +70,7 @@ if (tpr != "false" && tpr != "") {
   )
   names(df) <- c("test", "ggplot2", branch, "master")
   df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
-  for (i in setdiff(names(df), "test"))
-    df[, i] <- sprintf('<a href = "%s"> <img src = "%s"> </a>', df[, i], df[, i])
+  for (i in setdiff(names(df), "test")) df[, i] <- sprintf('<img src="%s">', df[, i])
   # render the table
   rmd <- file.path("R", this_hash, "index.Rmd")
   writeLines('`r knitr::kable(df, type = "markdown")`', rmd)
