@@ -20,6 +20,7 @@ if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
 # in case we need save ggplot2 output
 ggversion <- as.character(packageVersion("ggplot2"))
 gg_dir <- file.path(table_dir, "R", paste0("ggplot2-", ggversion))
+if (!dir.exists(gg_dir)) dir.create(gg_dir, recursive = TRUE)
 gg_names <- sub("\\.png$", "", dir(gg_dir, pattern = "\\.png$"))
 
 # text file that tracks figure hashes
@@ -61,18 +62,22 @@ save_outputs <- function(gg, name) {
         e <- try(curl::curl_download(paste0(u, ".png"), filename))
       }
     }
-  } 
-  # if missing, save the ggplot2
-  # do an else if to take advantage of both builds?
-  if (!name %in% gg_names) {
-    e <- try(gg, silent = TRUE)
-    png(filename = file.path(gg_dir, paste0(name, ".png")))
-    if (inherits(e, "try-error")) {
-      plot(1, type = "n")
-      text(1, "ggplot2 error")
-    } else gg
-    dev.off()
+    
+    # if missing, save the ggplot2
+    # do an else if to take advantage of both builds?
+    if (!name %in% gg_names) {
+      print("Saving ggplot2 result")
+      e <- try(gg, silent = TRUE)
+      png(filename = file.path(gg_dir, paste0(name, ".png")))
+      if (inherits(e, "try-error")) {
+        plot(1, type = "n")
+        text(1, "ggplot2 error")
+      } else gg
+      dev.off()
+    }
+    
   }
+  
   p
 }
 
