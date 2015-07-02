@@ -73,7 +73,7 @@ if (tpr != "false" && tpr != "") {
   # render the table (note: R markdown will set working directory to R/this_hash)
   rmd <- file.path("R", this_hash, "index.Rmd")
   writeLines('`r knitr::kable(df, type = "markdown")`', rmd)
-  rmarkdown::render(rmd)
+  rmarkdown::render(rmd, output_options = list(self_contained = FALSE))
   
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
@@ -119,7 +119,7 @@ if (tpr != "false" && tpr != "") {
     dir.create(name_dir, recursive = TRUE)
     idx <- file.path(name_dir, "index.Rmd")
     writeLines(paste(top, bottom), idx)
-    rmarkdown::render(idx)
+    rmarkdown::render(idx, output_options = list(self_contained = FALSE))
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
