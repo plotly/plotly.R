@@ -63,15 +63,15 @@ if (tpr != "false" && tpr != "") {
   tests <- sub("\\.png$", "", this_pngs)
   df <- data.frame(
     tests,
-    file.path(gg_dir, this_pngs),
-    file.path(this_dir, this_pngs),
-    file.path(base_dir, this_pngs),
+    file.path("..", gg_dir, this_pngs),
+    this_pngs,
+    file.path("..", base_dir, this_pngs),
     stringsAsFactors = FALSE
   )
   names(df) <- c("test", "ggplot2", branch, "master")
   df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test")) df[, i] <- sprintf('<img src="%s">', df[, i])
-  # render the table
+  # render the table (note: R markdown will set working directory to R/this_hash)
   rmd <- file.path("R", this_hash, "index.Rmd")
   writeLines('`r knitr::kable(df, type = "markdown")`', rmd)
   rmarkdown::render(rmd)
