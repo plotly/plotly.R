@@ -59,13 +59,12 @@ if (tpr != "false" && tpr != "") {
   # Build the main HTML page for this build
   # ---------------------------------------------------------------------------
   ggversion <- as.character(packageVersion("ggplot2"))
-  gg_dir <- file.path("R", paste0("ggplot2-", ggversion))
   tests <- sub("\\.png$", "", this_pngs)
   df <- data.frame(
     tests,
-    file.path("..", gg_dir, this_pngs),
+    file.path("..", paste0("ggplot2-", ggversion), this_pngs),
     this_pngs,
-    file.path("..", base_dir, this_pngs),
+    file.path("..", base_hash, this_pngs),
     stringsAsFactors = FALSE
   )
   names(df) <- c("test", "ggplot2", branch, "master")
