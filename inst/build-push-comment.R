@@ -86,7 +86,7 @@ if (tpr != "false" && tpr != "") {
       %s
      </body>
     </html>', as.character(knitr::kable(df, format = "html")))
-  writeLines(html, this_dir)
+  writeLines(html, file.path(this_dir, "index.html"))
   
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
