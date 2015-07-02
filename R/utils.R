@@ -1,15 +1,3 @@
-#' Pipe operator
-#'
-#' See \code{\link[magrittr]{\%>\%}} for more details.
-#'
-#' @name %>%
-#' @rdname pipe
-#' @keywords internal
-#' @export
-#' @importFrom magrittr %>%
-#' @usage lhs \%>\% rhs
-NULL
-
 is.plotly <- function(x) inherits(x, "plotly")
 
 # this function is called after the package is loaded

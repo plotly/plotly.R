@@ -4,20 +4,11 @@ before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
-    # Install binary pandoc from Rstudio (needed for jsdiff)
-  - mkdir -p $HOME/opt/pandoc
-  - curl -O https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip
-  - unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc
-    -d $HOME/opt/pandoc
-  - chmod +x $HOME/opt/pandoc/pandoc*
-  - rm pandoc-1.12.3.zip
-  - $HOME/opt/pandoc/pandoc --version
   # password is encrypted below
   - echo "Sys.setenv('plotly_username' = 'kwq')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
-  - ./travis-tool.sh install_github saurfang/jsdiff
 
 before_script:
   - git config --global user.name "cpsievert"

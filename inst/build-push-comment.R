@@ -14,6 +14,11 @@
 library("httr")
 library("testthat")
 
+# check the working directory
+stopifnot(basename(getwd()) == "plotly-test-table")
+# this script helps build the diff pages
+source("jsondiff/create_diff.R")
+
 # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
 build_link <- file.path('https://travis-ci.org/ropensci/plotly/builds',
                         Sys.getenv("TRAVIS_BUILD_ID"))
@@ -70,10 +75,18 @@ if (tpr != "false" && tpr != "") {
   names(df) <- c("test", "ggplot2", branch, "master")
   df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
   for (i in setdiff(names(df), "test")) df[, i] <- sprintf('<img src="%s">', df[, i])
-  # render the table (note: R markdown will set working directory to R/this_hash)
-  rmd <- file.path("R", this_hash, "index.Rmd")
-  writeLines('`r knitr::kable(df, type = "markdown")`', rmd)
-  rmarkdown::render(rmd, output_options = list(self_contained = FALSE))
+  html <- sprintf(
+  '<!DOCTYPE html>
+    <html>
+     <head>
+      <meta charset=\"utf-8\"/>
+      <style type=\"text/css\" media=\"screen\"> table td tr { border:1px solid #FF0000;} </style
+     </head>
+     <body>
+      %s
+     </body>
+    </html>', as.character(knitr::kable(df, format = "html")))
+  writeLines(html, this_dir)
   
   # start constructing automated GitHub message 
   tbl_link <- sprintf("http://cpsievert.github.io/plotly-test-table/R/%s/", this_hash)
@@ -94,32 +107,11 @@ if (tpr != "false" && tpr != "") {
     test_info <- hashes[hashes$test %in% i, ]
     # are the plot hashes different for this test?
     has_diff <- length(unique(test_info$hash)) > 1
-    # TODO: add the ggplot result to this page?
-    top <- sprintf(
-      '<div align="center"> <a src="%s"><img src="%s.png"></a> <a src="%s"><img src="%s.png"></a> </div>',
-      test_info$url[1], test_info$url[1], test_info$url[2], test_info$url[2]
-    )
-    bottom <- if (has_diff) {
+    if (has_diff) {
       diffs[[i]] <- 1
-      id_pat <- ".*/([0-9]+$)"
-      id1 <- sub(id_pat, "\\1", test_info$url[1])
-      id2 <- sub(id_pat, "\\1", test_info$url[2])
-      usr_pat <- ".*/~(.*)/.*"
-      usr1 <- sub(usr_pat, "\\1", test_info$url[1])
-      usr2 <- sub(usr_pat, "\\1", test_info$url[2])
-      sprintf(
-        ' \n `r jsdiff::jsdiff(get_plot(get_figure("%s", "%s")), get_plot(get_figure("%s", "%s")))`',
-        usr1, id1, usr2, id2
-      )
-    } else {
-      sprintf('\n No difference in this test between %s (%s) and master (%s)', 
-              branch, this_hash, base_hash)
+      Dir <- file.path(this_dir, i)
+      res <- with(test_info, create_diff(url[1], url[2], Dir))
     }
-    name_dir <- sprintf("R/%s/%s", this_hash, i)
-    dir.create(name_dir, recursive = TRUE)
-    idx <- file.path(name_dir, "index.Rmd")
-    writeLines(paste(top, bottom), idx)
-    rmarkdown::render(idx, output_options = list(self_contained = FALSE))
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
