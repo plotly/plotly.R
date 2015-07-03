@@ -9,6 +9,7 @@
 #' aethestics in a similar style to ggplot2 (such as \code{color}).
 #' @param type A charater string describing the type of trace.
 #' @param inherit should future traces inherit properties from this initial trace?
+#' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
@@ -31,7 +32,8 @@
 #' plot_ly(z = volcano, type = "surface")
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = "scatter", inherit = TRUE) {
+plot_ly <- function(data = data.frame(), ..., type = "scatter", 
+                    inherit = TRUE, evaluate = FALSE) {
   # record trace information
   tr <- list(
     type = type,
@@ -48,6 +50,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter", inherit = TRUE) 
     layout = NULL,
     url = NULL
   )
+  if (evaluate) p <- eval_plot(p)
   hash_plot(data, p)
 }
 
@@ -59,11 +62,13 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter", inherit = TRUE) 
 #' In addition, there are special arguments which map variables to visual
 #' aethestics in a similar style to ggplot2 (such as \code{color}).
 #' @param data A data frame (optional).
+#' @param evaluate logical. Evaluate arguments when this function is called?
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
 #' 
-add_trace <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
+add_trace <- function(p = get_plot(strict = FALSE), ..., 
+                      data = NULL, evaluate = FALSE) {
   if (is.plotly(p)) p <- get_plot(p)
   tr <- list(
     args = substitute(list(...)),
@@ -72,6 +77,7 @@ add_trace <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
     enclos = parent.frame()
   )
   p$data <- c(p$data, list(tr))
+  if (evaluate) p <- eval_plot(p)
   hash_plot(data, p)
 }
 
@@ -82,7 +88,8 @@ add_trace <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
 #' @references \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
 #' @export
 #' 
-layout <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
+layout <- function(p = get_plot(strict = FALSE), ..., 
+                   data = NULL, evaluate = FALSE) {
   if (is.plotly(p)) p <- get_plot(p)
   layout <- list(
     args = substitute(list(...)),
@@ -91,6 +98,7 @@ layout <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
     enclos = parent.frame()
   )
   p$layout <- c(p$layout, list(layout))
+  if (evaluate) p <- eval_plot(p)
   hash_plot(data, p)
 }
 
@@ -102,11 +110,12 @@ layout <- function(p = get_plot(strict = FALSE), ..., data = NULL) {
 #' @param p A plotly visualization.
 #' @param ... Visual properties.
 #' @param traces numeric vector. Which traces should be modified?
+#' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{get_figure}()}
 #' @author Carson Sievert
 #' @export
 #'
-style <- function(p = get_plot(strict = FALSE), ..., traces = 1) {
+style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALSE) {
   if (is.plotly(p)) p <- get_plot(p)
   idx <- traces >= length(p$data)
   if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
@@ -118,6 +127,7 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1) {
     traces = traces
   )
   p$style <- c(p$style, list(style))
+  if (evaluate) p <- eval_plot(p)
   hash_plot(data, p)
 }
 

@@ -28,8 +28,8 @@ hash_plot <- function(df, p) {
   df
 }
 
-# evaluate unevaluated expressions before POSTing to plotly (expose to users?)
-eval_list <- function(l) {
+#' Evaluate unevaluated arguments for a plotly object 
+eval_plot <- function(l) {
   # assume unnamed list elements are data/traces
   nms <- names(l)
   idx <- nms %in% ""
@@ -155,7 +155,7 @@ add_titles <- function(x, l) {
     if (is.null(t)) { # deparse the unevaluated expression from 1st trace
       argz <- as.list(l$data[[1]]$args)
       idx <- names(argz) %in% i
-      x$layout[[ax]]$title <- if (any(idx)) deparse(argz[idx][[1]]) else ""
+      if (any(idx)) x$layout[[ax]]$title <- deparse(argz[idx][[1]])
     }
   }
   x

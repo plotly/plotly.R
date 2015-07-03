@@ -4,7 +4,7 @@
 \alias{layout}
 \title{Add and/or modify layout of a plotly}
 \usage{
-layout(p = get_plot(strict = FALSE), ..., data = NULL)
+layout(p = get_plot(strict = FALSE), ..., data = NULL, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly visualization.}
@@ -15,6 +15,8 @@ In addition, there are special arguments which map variables to visual
 aethestics in a similar style to ggplot2 (such as \code{color}).}
 
 \item{data}{A data frame (optional).}
+
+\item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
 \description{
 Add and/or modify layout of a plotly

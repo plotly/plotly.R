@@ -28,7 +28,7 @@
 
 plotly_POST <- function(x) {
   if (is.plotly(x)) x <- get_plot(x)
-  x <- eval_list(x)
+  x <- eval_plot(x)
   args <- x$data
   kwargs <- x[get_kwargs()]
   

@@ -4,7 +4,7 @@
 \alias{style}
 \title{Modify trace(s)}
 \usage{
-style(p = get_plot(strict = FALSE), ..., traces = 1)
+style(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly visualization.}
@@ -12,6 +12,8 @@ style(p = get_plot(strict = FALSE), ..., traces = 1)
 \item{...}{Visual properties.}
 
 \item{traces}{numeric vector. Which traces should be modified?}
+
+\item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
 \description{
 Modify trace(s) of an existing plotly visualization. Useful when used in
