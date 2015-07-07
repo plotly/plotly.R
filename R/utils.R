@@ -52,10 +52,12 @@ plotly_build <- function(l) {
     # process specially named arguments
     has_color <- !is.null(dat[["color"]])
     has_symbol <- !is.null(dat[["symbol"]])
+    has_group <- !is.null(dat[["group"]])
     if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
-    #if (has_symbol) dats <- c(dats, symbolize(dat))
-    # traceify will return dat if there is no group
-    dats <- c(dats, traceify(dat, "group"))
+    # TODO: add a legend title (is this only possible via annotations?!?)
+    if (has_symbol) dats <- c(dats, symbolize(dat))
+    if (has_group) dats <- c(dats, traceify(dat, "group"))
+    if (!has_color && !has_symbol && !has_group) dats <- c(dats, list(dat))
   }
   x <- list(data = dats)
   # carry over properties/data from first trace (if appropriate)
@@ -116,7 +118,7 @@ colorize <- function(dat, title = "") {
     df <- setNames(data.frame(cols[o], colz[o]), NULL)
     # TODO: how to accomodate other types than marker (e.g., bar/line)? 
     dat[["marker"]] <- list(
-      colorbar = list(title = title),
+      colorbar = list(title = as.character(title)),
       colorscale = df,
       color = dat$color,
       cmin = min(dat$color), 
@@ -138,11 +140,16 @@ colorize <- function(dat, title = "") {
   dat
 }
 
-symbolize <- function(dat, title = "") {
-  sym <- dat[["symbol"]]
-  if (!is.null(sym)) {
-    
-  }
+symbolize <- function(dat) {
+  # symbols really only make sense when markers are in the mode
+  if (is.null(dat$mode)) dat$mode <- "markers"
+  dat <- traceify(dat, "symbol")
+  dat <- lapply(dat, function(x) { x$symbol <- NULL; x })
+  N <- length(dat)
+  if (N > 8) warning("Plotly supports 8 different symbols, but you have ", N, " levels!")
+  symbols <- c('dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up')
+  sym <- symbols[seq_len(N)]
+  dat <- Map(function(x, y) { x$marker$symbol <- y; x }, dat, sym)
   dat
 }
 
@@ -154,7 +161,7 @@ traceify <- function(dat, nm = "group") {
     return(list(dat))
   } else {
     lvls <- if (is.factor(x)) levels(x) else unique(x)
-    n <- length(lvls)
+    n <- length(x)
     # recursively search for a non-list of appropriate length (if it is, subset it)
     recurse <- function(z, n, idx) {
       if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
@@ -164,7 +171,6 @@ traceify <- function(dat, nm = "group") {
       new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
       new_dat[[j]]$name <- lvls[j]
     }
-    # TODO: add a legend title (is this only possible via annotations?!?)
     return(new_dat)
   }
 }

@@ -4,8 +4,8 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = "scatter", color, colors, symbol,
-  symbols, inherit = TRUE, evaluate = FALSE)
+plot_ly(data = data.frame(), ..., type = "scatter", inherit = TRUE,
+  evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -17,6 +17,13 @@ aethestics in a similar style to ggplot2 (such as \code{color}).}
 
 \item{type}{A charater string describing the type of trace.}
 
+\item{inherit}{should future traces inherit properties from this initial trace?}
+
+\item{evaluate}{logical. Evaluate arguments when this function is called?}
+
+\item{group}{A variable name for mapping to group.
+If used, a different trace will be created for each unique value.}
+
 \item{color}{A variable name for mapping to color.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
@@ -27,13 +34,6 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
-
-\item{inherit}{should future traces inherit properties from this initial trace?}
-
-\item{evaluate}{logical. Evaluate arguments when this function is called?}
-
-\item{group}{A variable name for mapping to group.
-If used, a different trace will be created for each unique value.}
 }
 \description{
 Transform data into a plotly visualization.

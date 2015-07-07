@@ -9,7 +9,7 @@ expect_traces <- function(p, n.traces, name){
 
 test_that("plot_ly() handles a simple scatterplot", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
-  l <- expect_traces(p, 1, "basic-scatterplot")
+  l <- expect_traces(p, 1, "scatterplot")
   expect_identical(l$data[[1]]$mode, "markers")
   expect_identical(l$data[[1]]$x, iris$Sepal.Length)
   expect_identical(l$data[[1]]$y, iris$Petal.Length)
@@ -17,10 +17,25 @@ test_that("plot_ly() handles a simple scatterplot", {
   expect_identical(l$layout$yaxis$title, "Petal.Length")
 })
 
+test_that("Using group argument creates multiple traces", {
+  p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, group = Species)
+  l <- expect_traces(p, 3, "scatterplot-group")
+  expect_identical(l$layout$xaxis$title, "Sepal.Length")
+  expect_identical(l$layout$yaxis$title, "Petal.Length")
+})
+
+test_that("Mapping a variable to symbol works", {
+  p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, symbol = Species)
+  l <- expect_traces(p, 3, "scatterplot-symbol")
+  markers <- lapply(l$data, "[[", "marker")
+  syms <- unlist(lapply(markers, "[[", "symbol"))
+  expect_identical(syms, c("dot", "cross", "diamond"))
+})
+
 test_that("Mapping a factor variable to color works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Species, mode = "markers")
-  l <- expect_traces(p, 3, "basic-scatterplot-color-factor")
+  l <- expect_traces(p, 3, "scatterplot-color-factor")
   markers <- lapply(l$data, "[[", "marker")
   cols <- unlist(lapply(markers, "[[", "color"))
   expect_equal(length(cols), 3)
@@ -30,7 +45,7 @@ test_that("Custom color scale for factor variable works", {
   cols <- RColorBrewer::brewer.pal(nlevels(iris$Species), "Set1")
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Species, colors = cols, mode = "markers")
-  l <- expect_traces(p, 3, "basic-scatterplot-color-factor")
+  l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
   expect_identical(cols, colz)
@@ -39,7 +54,7 @@ test_that("Custom color scale for factor variable works", {
 test_that("Mapping a numeric variable to color works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Petal.Width, mode = "markers")
-  l <- expect_traces(p, 1, "basic-scatterplot-color-numeric")
+  l <- expect_traces(p, 1, "scatterplot-color-numeric")
   marker <- l$data[[1]]$marker
   expect_identical(marker$colorbar$title, "Petal.Width")
   expect_identical(marker$color, iris$Petal.Width)
@@ -52,7 +67,7 @@ test_that("Mapping a numeric variable to color works", {
 test_that("Custom color scale for numeric variable works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Petal.Width, colors = "Greens", mode = "markers")
-  l <- expect_traces(p, 1, "basic-scatterplot-color-numeric")
+  l <- expect_traces(p, 1, "scatterplot-color-numeric-custom")
   marker <- l$data[[1]]$marker
   expect_identical(marker$colorbar$title, "Petal.Width")
   expect_identical(marker$color, iris$Petal.Width)
