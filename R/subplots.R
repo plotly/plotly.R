@@ -21,7 +21,7 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
     dots <- dots[is_plotly]
   }
   if (length(dots) == 1) return(dots)
-  dots <- lapply(dots, function(x) eval_plot(get_plot(x)))
+  dots <- lapply(dots, function(x) plotly_build(get_plot(x)))
   # make sure each 'subplot' has each unique set of axes
   dat <- lapply(dots, "[[", "data")
   # for a particular plot, get axis identifiers

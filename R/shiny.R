@@ -36,7 +36,7 @@ renderPlotly <- function(expr, envir = parent.frame(), quoted = FALSE) {
     l <- if (is.ggplot(p)) {
       gg2list(p) 
     } else if (is.plotly(p)) {
-      eval_plot(get_plot(p))
+      plotly_build(get_plot(p))
     } else if (is.list(p)) {
       p
     } else stop("Input to renderPlotly() must be either a ggplot object, a plotly object, or a list.")

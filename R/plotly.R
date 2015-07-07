@@ -2,12 +2,25 @@
 #'
 #' Transform data into a plotly visualization.
 #' 
+#' There are a number of "visual properties" that aren't included in the officical 
+#' Reference section (see below). 
+#' 
 #' @param data A data frame (optional).
 #' @param ... Visual properties. 
 #' All arguments documented in the references section below are supported.
 #' In addition, there are special arguments which map variables to visual
 #' aethestics in a similar style to ggplot2 (such as \code{color}).
 #' @param type A charater string describing the type of trace.
+#' @param group A variable name for mapping to group. 
+#' If used, a different trace will be created for each unique value.
+#' @param color A variable name for mapping to color.
+#' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
+#' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
+#' or a color interpolation function like \link{grDevices::colorRamp}.
+#' @param symbol A variable name for mapping to symbols.
+#' @param symbols A character vector of symbol types. Possible values:
+#' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
+#' 
 #' @param inherit should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -32,7 +45,7 @@
 #' plot_ly(z = volcano, type = "surface")
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = "scatter", 
+plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     inherit = TRUE, evaluate = FALSE) {
   # record trace information
   tr <- list(
@@ -50,7 +63,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL
   )
-  if (evaluate) p <- eval_plot(p)
+  if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
 
@@ -77,7 +90,7 @@ add_trace <- function(p = get_plot(strict = FALSE), ...,
     enclos = parent.frame()
   )
   p$data <- c(p$data, list(tr))
-  if (evaluate) p <- eval_plot(p)
+  if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
 
@@ -98,7 +111,7 @@ layout <- function(p = get_plot(strict = FALSE), ...,
     enclos = parent.frame()
   )
   p$layout <- c(p$layout, list(layout))
-  if (evaluate) p <- eval_plot(p)
+  if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
 
@@ -127,7 +140,7 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
     traces = traces
   )
   p$style <- c(p$style, list(style))
-  if (evaluate) p <- eval_plot(p)
+  if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
 

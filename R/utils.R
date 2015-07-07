@@ -29,7 +29,7 @@ hash_plot <- function(df, p) {
 }
 
 #' Evaluate unevaluated arguments for a plotly object 
-eval_plot <- function(l) {
+plotly_build <- function(l) {
   # assume unnamed list elements are data/traces
   nms <- names(l)
   idx <- nms %in% ""
@@ -38,26 +38,33 @@ eval_plot <- function(l) {
   } else if (any(idx)) {
     c(data = c(l$data, l[idx]), l[!idx])
   } else l
-  ntraces <- length(l$data)
-  x <- list()
-  x$data <- vector("list", ntraces)
-  # when appropriate, evaluate trace arguments in a suitable environment
-  for (i in seq_len(ntraces)) {
-    dat <- l$data[[i]]
-    idx <- names(dat) %in% c("args", "env")
-    x$data[[i]] <- if (sum(idx) == 2) c(dat[!idx], eval(dat$args, as.list(dat$env), dat$enclos)) else dat
+  dats <- list()
+  for (i in seq_along(l$data)) {
+    d <- l$data[[i]]
+    # if appropriate, evaluate trace arguments in a suitable environment
+    idx <- names(d) %in% c("args", "env")
+    if (sum(idx) == 2) {
+      dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
+      dat[c("args", "env", "enclos")] <- NULL
+    } else {
+      dat <- d
+    }
+    # process specially named arguments
+    has_color <- !is.null(dat[["color"]])
+    has_symbol <- !is.null(dat[["symbol"]])
+    if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
+    #if (has_symbol) dats <- c(dats, symbolize(dat))
+    # traceify will return dat if there is no group
+    dats <- c(dats, traceify(dat, "group"))
   }
-  # translate colors and shapes
-  title <- as.character(as.list(l$data[[1]]$args)[["color"]])
-  x$data <- colorize(x$data, title)
-
-  # carry over data from first trace (if appropriate)
-  if (ntraces > 1 && isTRUE(l$data[[1]]$inherit)) {
-    for (i in seq.int(2, ntraces)) {
+  x <- list(data = dats)
+  # carry over properties/data from first trace (if appropriate)
+  if (length(x$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
+    for (i in seq.int(2, length(x$data))) {
       x$data[[i]] <- modifyList(x$data[[1]], x$data[[i]])
     }
   }
-  # plot_ly()/layout() will produce a unnamed list of layouts
+  # plot_ly()/layout() may produce a unnamed list of layouts
   # in that case, we may want to evaluate layout arguments
   idx <- names(l$layout) == ""
   if (all(idx)) {
@@ -91,63 +98,78 @@ eval_plot <- function(l) {
     }
   }
   # add appropriate axis title (if they don't already exist)
-  x <- add_titles(x, l)
+  x <- axis_titles(x, l)
   # create a new plotly if no url is attached to this environment
   x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
   x
 }
 
-
-colorize <- function(data, title = "") {
-  # TODO: how to provide a way to change default color scale?
-  # IDEA: provide some scale_*() functions?
-  seq_dat <- seq_along(data)
-  for (i in seq_dat) {
-    cols <- data[[i]][["color"]]
-    if (!is.null(cols)) {
-      if (is.numeric(cols)) {
-        cols <- unique(scales::rescale(cols))
-        o <- order(cols, decreasing = FALSE)
-        # match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
-        colz <- scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(cols)
-        df <- setNames(data.frame(cols[o], colz[o]), NULL)
-        data[[i]][["marker"]] <- list(
-          colorbar = list(title = title),
-          colorscale = df,
-          color = data[[i]]$color,
-          cmin = min(data[[i]]$color), 
-          cmax = max(data[[i]]$color)
-        )
-      } else { # discrete color scale
-        pal <- if (is.ordered(cols)) "Purples" else "Set2"
-        lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
-        colz <- if (is.factor(cols)) {
-          scales::col_factor(pal, levels = lvls)(lvls)
-        } else {
-          scales::col_factor(pal, domain = lvls)(lvls)
-        }
-        # break up data into multiple traces (so legend appears). We assume
-        # any column with same length as color vector should be split
-        lens <- lapply(data[[i]], length)
-        idx <- lens == length(cols)
-        new_dat <- list()
-        # TODO: add a legend title (is this only possible via annotations?!?)
-        for (j in seq_along(lvls)) {
-          idx2 <- which(cols == lvls[j])
-          sub_dat <- as.data.frame(data[[i]][idx])[idx2, ]
-          new_dat[[j]] <- c(as.list(sub_dat), data[[i]][!idx])
-          new_dat[[j]]$name <- lvls[j]
-          new_dat[[j]][["marker"]] <- list(color = colz[j])
-        }
-        # TODO: how to order the traces properly?
-        data <- rev(c(new_dat, data[setdiff(seq_dat, i)]))
-      }
+# returns a _list of traces_.
+colorize <- function(dat, title = "") {
+  cols <- dat[["color"]]
+  if (is.numeric(cols)) {
+    cols <- unique(scales::rescale(cols))
+    o <- order(cols, decreasing = FALSE)
+    # by default, match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
+    colors <- if (is.null(dat[["colors"]])) c("#132B43", "#56B1F7") else dat[["colors"]]
+    colz <- scales::col_numeric(colors, cols, na.color = "transparent")(cols)
+    df <- setNames(data.frame(cols[o], colz[o]), NULL)
+    # TODO: how to accomodate other types than marker (e.g., bar/line)? 
+    dat[["marker"]] <- list(
+      colorbar = list(title = title),
+      colorscale = df,
+      color = dat$color,
+      cmin = min(dat$color), 
+      cmax = max(dat$color)
+    )
+    dat <- list(dat)
+  } else { # discrete color scale
+    lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
+    colors <- if (is.null(dat[["colors"]])) {
+      RColorBrewer::brewer.pal(length(lvls), if (is.ordered(cols)) "BuPu" else "Set2")
+    } else {
+      dat[["colors"]]
     }
+    colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
+    dat <- traceify(dat, "color")
+    dat <- Map(function(x, y) { x[["marker"]] <- list(color = y); x }, dat, colz)
+    dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
   }
-  data
+  dat
 }
 
-add_titles <- function(x, l) {
+symbolize <- function(dat, title = "") {
+  sym <- dat[["symbol"]]
+  if (!is.null(sym)) {
+    
+  }
+  dat
+}
+
+# break up a single trace into multiple traces according to values stored 
+# a particular key name
+traceify <- function(dat, nm = "group") {
+  x <- dat[[nm]]
+  if (is.null(x)) {
+    return(list(dat))
+  } else {
+    lvls <- if (is.factor(x)) levels(x) else unique(x)
+    n <- length(lvls)
+    # recursively search for a non-list of appropriate length (if it is, subset it)
+    recurse <- function(z, n, idx) {
+      if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
+    }
+    new_dat <- list()
+    for (j in seq_along(lvls)) {
+      new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
+      new_dat[[j]]$name <- lvls[j]
+    }
+    # TODO: add a legend title (is this only possible via annotations?!?)
+    return(new_dat)
+  }
+}
+
+axis_titles <- function(x, l) {
   for (i in c("x", "y", "z")) {
     s <- lapply(x$data, "[[", i)
     ax <- paste0(i, "axis")
@@ -160,10 +182,6 @@ add_titles <- function(x, l) {
   }
   x
 }
-
-
-
-
 
 # Check for credentials/configuration and throw warnings where appropriate
 verify <- function(what = "username") {
