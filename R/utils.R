@@ -54,7 +54,7 @@ plotly_build <- function(l) {
       dat <- d
     }
     # process specially named arguments
-    has_color <- !is.null(dat[["color"]])
+    has_color <- !is.null(dat[["color"]]) || !is.null(dat[["z"]])
     has_symbol <- !is.null(dat[["symbol"]])
     has_group <- !is.null(dat[["group"]])
     if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
@@ -112,24 +112,23 @@ plotly_build <- function(l) {
 
 # returns a _list of traces_.
 colorize <- function(dat, title = "") {
-  cols <- dat[["color"]]
+  cols <- dat[["color"]] %||% dat[["z"]]
   if (is.numeric(cols)) {
-    cols <- unique(scales::rescale(cols))
-    o <- order(cols, decreasing = FALSE)
     # by default, match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
     colors <- dat[["colors"]] %||% c("#132B43", "#56B1F7")
     colz <- scales::col_numeric(colors, cols, na.color = "transparent")(cols)
-    df <- setNames(data.frame(cols[o], colz[o]), NULL)
+    df <- if (length(cols) > 1) data.frame(scales::rescale(cols), colz) 
+      else data.frame(c(0, 1), rep(colz, 2))
     col_list <- list(
       colorbar = list(title = as.character(title)),
-      colorscale = df,
+      colorscale = setNames(df, NULL),
       autocolorscale = FALSE,
-      color = dat$color,
-      cmin = min(dat$color), 
-      cmax = max(dat$color)
+      color = cols,
+      cmin = min(cols),
+      cmax = max(cols)
     )
     if (grepl("scatter", dat[["type"]] %||% "scatter")) {
-      dat[["marker"]] <- c(dat[["marker"]], col_list)
+      dat[["marker"]] <- modifyList(col_list, dat[["marker"]] %||% list())
     } else {
       dat <- c(dat, col_list)
     }
@@ -142,8 +141,8 @@ colorize <- function(dat, title = "") {
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
                dat, colz)
-    dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
   }
+  dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
   dat
 }
 
