@@ -85,7 +85,7 @@ if (tpr != "false" && tpr != "") {
      <body>
       %s
      </body>
-    </html>', as.character(knitr::kable(df, format = "html")))
+    </html>', as.character(knitr::kable(df, format = "html", escape = FALSE)))
   writeLines(html, file.path(this_dir, "index.html"))
   
   # start constructing automated GitHub message 
@@ -111,7 +111,7 @@ if (tpr != "false" && tpr != "") {
       diffs[[i]] <- 1
       Dir <- file.path(this_dir, i)
       dir.create(Dir)
-      file.copy("jsondiff", Dir, recursive = TRUE)
+      file.copy(dir("jsondiff", full.names = T), Dir, recursive = TRUE)
       res <- with(test_info, create_diff(url[1], url[2], Dir))
     }
   }

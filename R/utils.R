@@ -124,8 +124,8 @@ colorize <- function(dat, title = "") {
       cmin = min(dat$color), 
       cmax = max(dat$color)
     )
-    if (dat[["type"]] == "scatter") {
-      dat[["marker"]] <- col_list
+    if (grepl("scatter", dat[["type"]])) {
+      dat[["marker"]] <- c(dat[["marker"]], col_list)
     } else {
       dat <- c(dat, col_list)
     }
@@ -139,7 +139,8 @@ colorize <- function(dat, title = "") {
     }
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- traceify(dat, "color")
-    dat <- Map(function(x, y) { x[["marker"]] <- list(color = y); x }, dat, colz)
+    dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
+               dat, colz)
     dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
   }
   dat
