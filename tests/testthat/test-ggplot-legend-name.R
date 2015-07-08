@@ -1,4 +1,4 @@
-context("legend name is correct")
+context("legend names")
 
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
