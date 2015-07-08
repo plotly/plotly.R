@@ -58,8 +58,6 @@ test_that("Mapping a numeric variable to color works", {
   marker <- l$data[[1]]$marker
   expect_identical(marker$colorbar$title, "Petal.Width")
   expect_identical(marker$color, iris$Petal.Width)
-  expect_identical(marker$cmin, min(iris$Petal.Width))
-  expect_identical(marker$cmax, max(iris$Petal.Width))
   expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
 })
 
