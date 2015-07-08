@@ -80,7 +80,7 @@ if (tpr != "false" && tpr != "") {
     <html>
      <head>
       <meta charset=\"utf-8\"/>
-      <style type=\"text/css\" media=\"screen\"> table td tr { border:1px solid #FF0000;} </style
+      <style type=\"text/css\" media=\"screen\"> table td tr { border:1px solid #FF0000;} </style>
      </head>
      <body>
       %s
@@ -110,6 +110,7 @@ if (tpr != "false" && tpr != "") {
     if (has_diff) {
       diffs[[i]] <- 1
       Dir <- file.path(this_dir, i)
+      file.copy("jsondiff", Dir, recursive = TRUE)
       res <- with(test_info, create_diff(url[1], url[2], Dir))
     }
   }
