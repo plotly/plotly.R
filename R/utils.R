@@ -116,14 +116,9 @@ colorize <- function(dat, title = "") {
     colors <- if (is.null(dat[["colors"]])) c("#132B43", "#56B1F7") else dat[["colors"]]
     colz <- scales::col_numeric(colors, cols, na.color = "transparent")(cols)
     df <- setNames(data.frame(cols[o], colz[o]), NULL)
-    # TODO: how to accomodate other types than marker (e.g., bar/line)? 
-    dat[["marker"]] <- list(
-      colorbar = list(title = as.character(title)),
-      colorscale = df,
-      color = dat$color,
-      cmin = min(dat$color), 
-      cmax = max(dat$color)
-    )
+    dat[["autocolorscale"]] <- FALSE
+    dat[["colorscale"]] <- df
+    if (is.null(dat[["colorbar"]][["title"]])) dat[["colorbar"]][["title"]] <- as.character(title)
     dat <- list(dat)
   } else { # discrete color scale
     lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
