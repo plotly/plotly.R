@@ -112,7 +112,9 @@ if (tpr != "false" && tpr != "") {
       Dir <- file.path(this_dir, i)
       dir.create(Dir)
       file.copy(dir("jsondiff", full.names = T), Dir, recursive = TRUE)
-      res <- with(test_info, create_diff(url[1], url[2], Dir))
+      png1 <- paste0(test_info$url[1], ".png")
+      png2 <- paste0(test_info$url[2], ".png")
+      res <- create_diff(png1, png2, Dir)
     }
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
