@@ -635,7 +635,7 @@ gg2list <- function(p) {
   
   # Legend.
   layout$margin$r <- 10
-  if (exists("increase_margin_r")) {
+  if (exists("increase_margin_r", where = as.environment("package:plotly"))) {
     layout$margin$r <- 60
   }
   layout$legend <- list(bordercolor="transparent", 
@@ -666,6 +666,7 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
+  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
       # Retrieve legend title
@@ -676,11 +677,10 @@ gg2list <- function(p) {
         unique(temp.title)
       }
     legend.title <- paste0("<b>", legend.title, "</b>")
-    
     # Create legend title element as an annotation
-    if (exists("annotations")) {
-      nann <- nann + 1
-    } else {
+    if (exists("annotations", where = as.environment("package:plotly"))) {
+        nann <- nann + 1
+    } else{
       annotations <- list()
       nann <- 1
     }
