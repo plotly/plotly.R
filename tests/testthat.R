@@ -66,7 +66,8 @@ save_outputs <- function(gg, name) {
     # if missing, save the ggplot2
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
-      png(filename = file.path(gg_dir, paste0(name, ".png")))
+      gg_file <- file.path(gg_dir, paste0(name, ".png"))
+      png(gg_file, width = 700, height = 500)
       try(print(gg))
       dev.off()
     }
