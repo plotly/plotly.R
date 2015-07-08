@@ -68,7 +68,8 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- c(markLegends,list(boxplot=c("x")))
 
-guide_names <- function(p, aes = c("shape", "colour", "size", "linetype")) {
+guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
+                                   "color", "colour", "size", "linetype")) {
   sc <- as.list(p$scales)$scales
   nms <- lapply(sc, "[[", "name")
   if (length(nms) > 0) {
