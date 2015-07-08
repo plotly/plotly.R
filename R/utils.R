@@ -1,5 +1,9 @@
 is.plotly <- function(x) inherits(x, "plotly")
 
+"%||%" <- function(x, y) {
+  if (length(x) > 0) x else y
+}
+
 # this function is called after the package is loaded
 .onAttach <- function(...) {
   usr <- verify("username")
@@ -113,7 +117,7 @@ colorize <- function(dat, title = "") {
     cols <- unique(scales::rescale(cols))
     o <- order(cols, decreasing = FALSE)
     # by default, match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
-    colors <- if (is.null(dat[["colors"]])) c("#132B43", "#56B1F7") else dat[["colors"]]
+    colors <- dat[["colors"]] %||% c("#132B43", "#56B1F7")
     colz <- scales::col_numeric(colors, cols, na.color = "transparent")(cols)
     df <- setNames(data.frame(cols[o], colz[o]), NULL)
     col_list <- list(
@@ -124,21 +128,18 @@ colorize <- function(dat, title = "") {
       cmin = min(dat$color), 
       cmax = max(dat$color)
     )
-    if (grepl("scatter", dat[["type"]])) {
+    if (grepl("scatter", dat[["type"]] %||% "scatter")) {
       dat[["marker"]] <- c(dat[["marker"]], col_list)
     } else {
       dat <- c(dat, col_list)
     }
     dat <- list(dat)
   } else { # discrete color scale
-    lvls <- if (is.factor(cols)) levels(cols) else unique(cols)
-    colors <- if (is.null(dat[["colors"]])) {
-      RColorBrewer::brewer.pal(length(lvls), if (is.ordered(cols)) "BuPu" else "Set2")
-    } else {
-      dat[["colors"]]
-    }
-    colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- traceify(dat, "color")
+    lvls <- unlist(lapply(dat, function(x) unique(x[["color"]])))
+    colors <- dat[["colors"]] %||% 
+      RColorBrewer::brewer.pal(length(lvls), if (is.ordered(cols)) "Greens" else "Set2")
+    colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
                dat, colz)
     dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
@@ -147,8 +148,8 @@ colorize <- function(dat, title = "") {
 }
 
 symbolize <- function(dat) {
-  # symbols really only make sense when markers are in the mode
-  if (is.null(dat$mode)) dat$mode <- "markers"
+  # symbols really only make sense when markers are in the mode, right?
+  dat$mode <- dat$mode %||% "markers"
   dat <- traceify(dat, "symbol")
   dat <- lapply(dat, function(x) { x$symbol <- NULL; x })
   N <- length(dat)
@@ -166,7 +167,10 @@ traceify <- function(dat, nm = "group") {
   if (is.null(x)) {
     return(list(dat))
   } else {
-    lvls <- if (is.factor(x)) levels(x) else unique(x)
+    # the order of lvls determines the order in which traces are drawn
+    # for ordered factors at least, it makes sense to draw the highest level first
+    # since that _should_ be the darkest color in a sequential pallette
+    lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
     n <- length(x)
     # recursively search for a non-list of appropriate length (if it is, subset it)
     recurse <- function(z, n, idx) {
@@ -220,7 +224,7 @@ grab <- function(what = "username") {
     # note: try_file can be 'succesful', yet return NULL
     val2 <- try_file(CREDENTIALS_FILE, what)
     val <- if (length(nchar(val2)) == 0) try_file(CONFIG_FILE, what) else val2
-    if (is.null(val)) val <- ""
+    val <- val %||% ""
   }
   # return true if value is non-trivial
   setNames(val, who)
