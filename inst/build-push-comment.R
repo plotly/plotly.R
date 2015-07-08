@@ -110,6 +110,7 @@ if (tpr != "false" && tpr != "") {
     if (has_diff) {
       diffs[[i]] <- 1
       Dir <- file.path(this_dir, i)
+      dir.create(Dir)
       file.copy("jsondiff", Dir, recursive = TRUE)
       res <- with(test_info, create_diff(url[1], url[2], Dir))
     }
