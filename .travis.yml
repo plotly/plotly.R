@@ -25,4 +25,5 @@ after_success:
 
 env:
   global:
-    secure: "JsYD7yQbn4PsuUBEvwJHA5TeG/heCE0StTjDo0ecbmUXETCGCepsBnIZLDCl11PSgiBpxIl0kQXp14nr5eZlOvX4r71/ICwug95t2ec56fRFKW4IXeoINlvlSsEC51SVwufsRVpuM0dwIqnpFU4e55tpL/SRGD9E7f5ygLKillA="
+    - secure: "fT5AI256qBJ41/XhIGc8EPlbUVTiDPAi6/BRHoaSobGtQG9UkfJgprnPvV5jWb6jXYvg7rIldx+ieEeWRraSwYBknqUectIXkP66h+ffUf2U8VYzXrFSRIinN9czWICJj9SOPkt/S3I3/CfCsQ+DAqDLc/qP1/Q1nKNxy04J/Ok="
+    - secure: "JsYD7yQbn4PsuUBEvwJHA5TeG/heCE0StTjDo0ecbmUXETCGCepsBnIZLDCl11PSgiBpxIl0kQXp14nr5eZlOvX4r71/ICwug95t2ec56fRFKW4IXeoINlvlSsEC51SVwufsRVpuM0dwIqnpFU4e55tpL/SRGD9E7f5ygLKillA="
