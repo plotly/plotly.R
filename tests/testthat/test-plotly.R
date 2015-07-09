@@ -41,14 +41,22 @@ test_that("Mapping a factor variable to color works", {
   expect_equal(length(cols), 3)
 })
 
-test_that("Custom color scale for factor variable works", {
+test_that("Custom RColorBrewer pallette works for factor variable", {
   cols <- RColorBrewer::brewer.pal(nlevels(iris$Species), "Set1")
+  # specifying a pallette set should "span the gamut" 
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
-               color = Species, colors = cols, mode = "markers")
+               color = Species, colors = "Set1", mode = "markers")
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
-  expect_identical(cols, colz)
+  expect_identical(cols[c(3, 6, 9)], colz)
+  # providing vector of RGB codes should also work
+  p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
+               color = Species, colors = cols[1:3], mode = "markers")
+  l <- expect_traces(p, 3, "scatterplot-color-factor-custom2")
+  markers <- lapply(l$data, "[[", "marker")
+  colz <- unlist(lapply(markers, "[[", "color"))
+  expect_identical(cols[1:3], colz)
 })
 
 test_that("Mapping a numeric variable to color works", {
@@ -61,8 +69,7 @@ test_that("Mapping a numeric variable to color works", {
   expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
 })
 
-
-test_that("Custom color scale for numeric variable works", {
+test_that("Custom RColorBrewer pallette works for numeric variable", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Petal.Width, colors = "Greens", mode = "markers")
   l <- expect_traces(p, 1, "scatterplot-color-numeric-custom")
