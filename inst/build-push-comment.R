@@ -30,7 +30,7 @@ if (tpr != "false" && tpr != "") {
   base <- 'https://api.github.com/repos/ropensci/plotly/'
   header <- add_headers(`User-Agent` = "plotly",
                         `Accept` = 'application/vnd.github.v3+json',
-                        `Authorization` = paste0("token ", Sys.getenv("GH_TOKEN")))
+                        `Authorization` = paste0("token ", Sys.getenv("GITHUB_PAT")))
   # Grab the branch name for this pull request (must be successful!!)
   # http://stackoverflow.com/questions/15096331/github-api-how-to-find-the-branches-of-a-pull-request
   pr <- sprintf(paste0(base, 'pulls/%s'), tpr)
