@@ -136,7 +136,7 @@ colorize <- function(dat, title = "") {
   } else { # discrete color scale
     dat <- traceify(dat, "color")
     lvls <- unlist(lapply(dat, function(x) unique(x[["color"]])))
-    colors <- dat[["colors"]] %||% 
+    colors <- dat[[1]][["colors"]] %||% 
       RColorBrewer::brewer.pal(length(lvls), if (is.ordered(cols)) "Greens" else "Set2")
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
