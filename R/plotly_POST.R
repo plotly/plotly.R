@@ -27,7 +27,6 @@
 #' }
 
 plotly_POST <- function(x) {
-  if (is.plotly(x)) x <- get_plot(x)
   x <- plotly_build(x)
   args <- x$data
   kwargs <- x[get_kwargs()]

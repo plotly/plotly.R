@@ -80,9 +80,9 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @author Carson Sievert
 #' @export
 #' 
-add_trace <- function(p = get_plot(strict = FALSE), ..., 
+add_trace <- function(p = get_plot(), ..., 
                       data = NULL, evaluate = FALSE) {
-  if (is.plotly(p)) p <- get_plot(p)
+  p <- get_plot(p)
   tr <- list(
     args = substitute(list(...)),
     # if data is missing, adopt the most recent data environment
@@ -101,9 +101,9 @@ add_trace <- function(p = get_plot(strict = FALSE), ...,
 #' @references \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
 #' @export
 #' 
-layout <- function(p = get_plot(strict = FALSE), ..., 
+layout <- function(p = get_plot(), ..., 
                    data = NULL, evaluate = FALSE) {
-  if (is.plotly(p)) p <- get_plot(p)
+  p <- get_plot(p)
   layout <- list(
     args = substitute(list(...)),
     # if data is missing, adopt the most recent data environment
@@ -129,7 +129,7 @@ layout <- function(p = get_plot(strict = FALSE), ...,
 #' @export
 #'
 style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALSE) {
-  if (is.plotly(p)) p <- get_plot(p)
+  p <- get_plot(p)
   idx <- traces >= length(p$data)
   if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
   style <- list(
@@ -151,20 +151,18 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
 #' the last plotly object created in this R session is returned (if it exists).
 #' 
 #' @param data a data frame with a class of plotly (and a plotly_hash attribute).
-#' @param strict throw a warning if the plotly_hash attribute is missing.
 #' @export
 get_plot <- function(data = NULL, strict = TRUE) {
   hash <- attr(data, "plotly_hash")
   if (!is.null(hash)) {
-    p <- get(hash, envir = plotlyEnv)
-  } else {
+    get(hash, envir = plotlyEnv)
+  } else if (is.data.frame(data)) {
     # safe to just grab the most recent environment?
     hash <- rev(ls(plotlyEnv))[1]
-    p <- plotlyEnv[[hash]]
-    if (strict) 
-      warning("Output may not be correct since data isn't a plotly object")
+    plotlyEnv[[hash]]
+  } else {
+    data
   }
-  p
 }
 
 #' Main interface to plotly 

@@ -4,7 +4,7 @@
 \alias{plotlyOutput}
 \title{Shiny ui output function}
 \usage{
-plotlyOutput(outputId, width = "100\%", height = "550px")
+plotlyOutput(outputId, width = "100\%", height = "550px", offline = TRUE)
 }
 \arguments{
 \item{outputId}{output variable to read the plot from}
@@ -12,6 +12,8 @@ plotlyOutput(outputId, width = "100\%", height = "550px")
 \item{width}{width of the output.}
 
 \item{height}{height of the output.}
+
+\item{Use}{plotly offline, if available?}
 }
 \description{
 Shiny ui output function

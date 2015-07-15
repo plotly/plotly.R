@@ -4,14 +4,16 @@
 \alias{renderPlotly}
 \title{Render a plotly graph in shiny}
 \usage{
-renderPlotly(expr, envir = parent.frame(), quoted = FALSE)
+renderPlotly(expr, envir = parent.frame(), quoted = FALSE, offline = TRUE)
 }
 \arguments{
 \item{expr}{An expression that creates a ggplot or plotly object}
 
 \item{envir}{The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is expr a quoted expression (with \code{quote()})?
+\item{quoted}{Is expr a quoted expression (with \code{quote()})?}
+
+\item{Use}{plotly offline, if available?
 This is useful if you want to save an expression in a variable.}
 }
 \description{

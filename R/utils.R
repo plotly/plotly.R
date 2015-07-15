@@ -14,6 +14,11 @@ is.plotly <- function(x) inherits(x, "plotly")
     packageStartupMessage("Sweet, you have an API key already! \n",
                           "Start making plots with ggplotly() or plot_ly().")
   }
+  # set a default for the offline bundle directory 
+  if (Sys.getenv("plotly_offline") == "") {
+    Sys.setenv("plotly_offline" = "~/.plotly/plotlyjs")
+    # maybe rely a message if bundle is (or isn't) found?
+  }
   invisible(NULL)
 }
 
@@ -32,10 +37,22 @@ hash_plot <- function(df, p) {
   df
 }
 
-#' Evaluate unevaluated arguments for a plotly object 
+#' Build a plotly object before viewing it
+#' 
+#' For convenience and efficiency purposes, plotly objects are subject to lazy 
+#' evaluation. That is, the actual content behind a plotly object is not 
+#' created until it is absolutely necessary. In some instances, you may want 
+#' to perform this evaluation yourself, and work directly with the resulting 
+#' list.
+#' 
+#' @param l a ggplot object, or a plotly object, or a list.
+#' @export
 plotly_build <- function(l) {
-  # assume unnamed list elements are data/traces
+  # ggplot objects don't need any special type of handling
+  if (is.ggplot(l)) return(gg2list(l))
+  l <- get_plot(l)
   nms <- names(l)
+  # assume unnamed list elements are data/traces
   idx <- nms %in% ""
   l <- if (is.null(nms)) {
     list(data = l) 
@@ -107,6 +124,8 @@ plotly_build <- function(l) {
   x <- axis_titles(x, l)
   # create a new plotly if no url is attached to this environment
   x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
+  # add plotly class mainly for printing method
+  class(x) <- unique(c("plotly", class(x)))
   x
 }
 

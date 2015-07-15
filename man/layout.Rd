@@ -4,7 +4,7 @@
 \alias{layout}
 \title{Add and/or modify layout of a plotly}
 \usage{
-layout(p = get_plot(strict = FALSE), ..., data = NULL, evaluate = FALSE)
+layout(p = get_plot(), ..., data = NULL, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly visualization.}

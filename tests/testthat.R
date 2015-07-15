@@ -37,7 +37,7 @@ if (!file.exists(hash_file)) {
 # it will POST figures to plotly and save pngs 
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- if (is.ggplot(gg)) gg2list(gg) else plotly:::plotly_build(get_plot(gg))
+  p <- if (is.ggplot(gg)) gg2list(gg) else plotly_build(gg)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
   # only render/save pngs if this is a Travis pull request
   if (tpr != "false" && tpr != "") {

@@ -1,10 +1,7 @@
 var binding = new Shiny.OutputBinding();
 
 binding.find = function(scope) {
-    // not sure what this function does, or
-    // why its necessary...
-    console.log('binding.scope');
-    return $(scope).find('.graphs');
+    return $(scope).find('.plotly_embed');
 };
 
 binding.renderValue = function(el, messages) {
@@ -13,11 +10,9 @@ binding.renderValue = function(el, messages) {
     // by renderGraph. these named lists are postMessage
     // commands that get passed into the embedded graph.
     // See https://github.com/plotly/Embed-API for details
-    console.log('renderValue, messages: ', JSON.stringify(messages));
     var $el = $(el);
 
     if (!window.graphs) {
-        console.log('first time rendering');
         initGraphs(messages);
     }
     messages.forEach(function(message){
@@ -27,10 +22,10 @@ binding.renderValue = function(el, messages) {
 
 };
 
-Shiny.outputBindings.register(binding, "plotlyshiny");
+Shiny.outputBindings.register(binding, "plotlyEmbed");
 
 function initGraphs(initialMessages){
-    var $graphs = $('.graphs');
+    var $graphs = $('.plotly_embed');
     var graphs = {};
     $graphs.each(function(i){
         graphs[$graphs[i].id] = {
@@ -42,13 +37,12 @@ function initGraphs(initialMessages){
         };
     });
 
-
     // messages coming from the embedded graphs
     // either 'pong' or the 'hover', 'zoom', 'click' events
-    window.addEventListener('message', function(e){
+    window.addEventListener('message', function(e) {
         var message = e.data;
-        for(var graph_id in graphs){
-            if(graphs[graph_id].graphContentWindow === e.source) {
+        for (var graph_id in graphs) {
+            if (graphs[graph_id].graphContentWindow === e.source) {
                 var graph = graphs[graph_id];
                 break;
             }
@@ -58,8 +52,7 @@ function initGraphs(initialMessages){
         var graphContentWindow = graph.graphContentWindow;
         var id = graph.id;
 
-        if('pong' in message && message.pong) {
-            console.log('>> clearing!');
+        if ('pong' in message && message.pong) {
             clearInterval(pinger);
             graphContentWindow.postMessage({
                 'task': 'listen',
@@ -71,11 +64,10 @@ function initGraphs(initialMessages){
                 }
             });
             // TODO: send pong back to R
-        } else if (message.type==='hover' ||
-                    message.type==='zoom'  ||
-                    message.type==='click') {
-            console.log('>> ', message.type);
-            if(message.type !== 'zoom') {
+        } else if (message.type === 'hover' ||
+                    message.type === 'zoom'  ||
+                    message.type === 'click') {
+            if (message.type !== 'zoom') {
                 for(var i in message.points) {
                     delete message.points[i].data;
                 }

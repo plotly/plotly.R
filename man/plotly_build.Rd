@@ -2,11 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{plotly_build}
 \alias{plotly_build}
-\title{Evaluate unevaluated arguments for a plotly object}
+\title{Build a plotly object before viewing it}
 \usage{
 plotly_build(l)
 }
+\arguments{
+\item{l}{a ggplot object, or a plotly object, or a list.}
+}
 \description{
-Evaluate unevaluated arguments for a plotly object
+For convenience and efficiency purposes, plotly objects are subject to lazy
+evaluation. That is, the actual content behind a plotly object is not
+created until it is absolutely necessary. In some instances, you may want
+to perform this evaluation yourself, and work directly with the resulting
+list.
 }
 
