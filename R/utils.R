@@ -1,4 +1,5 @@
 is.plotly <- function(x) inherits(x, "plotly")
+is.offline <- function(x) inherits(x, "offline")
 
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y

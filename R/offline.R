@@ -44,8 +44,6 @@ offline <- function(p = get_plot(), height = 400, width = "100%",
   haz <- has_offline()
   if (!haz) offline_stop()
   p <- plotly_build(p)
-  
-  if (is.numeric(width)) width <- paste0(width, "px")
   structure(
     list(
       data = to_JSON(p$data),
@@ -53,11 +51,17 @@ offline <- function(p = get_plot(), height = 400, width = "100%",
       id = digest::digest(p),
       height = if (is.numeric(height)) paste0(height, "px") else height,
       width = if (is.numeric(width)) paste0(width, "px") else width,
-      bundle = names(haz),
       out_dir = out_dir,
       viewer = if (open_browser) get_browser()
     ),
     class = "offline"
+  )
+}
+
+new_offline <- function(data, layout, height, width, id) {
+  sprintf(
+    '<div class="%s loading" style="color: rgb(50,50,50);">Drawing...</div><div id="%s" style="height: %s; width: %s;" ></div><script type="text/javascript">Plotly.plot("%s", %s, %s).then(function() {$(".%s.loading").remove();})</script>', 
+    id, id, height, width, id, data, layout, id
   )
 }
 
@@ -76,19 +80,21 @@ has_offline <- function() {
     }
   }
   # return the path as well as T/F 
-  setNames(haz, off)
+  setNames(!haz, off)
 }
 
 offline_stop <- function() {
-  stop("Couldn't find the offline source file under ", 
+  stop("Required source files are not located under ", 
        Sys.getenv("plotly_offline"), "\n\n",
-       "If you have Plotly Offline, change the default search path: \n ",
-       " Sys.setenv('plotly_offline' = '/path/to/bundle.js') \n", 
-       "If you don't have Plotly Offline, you may purchase it here http://purchasing.plot.ly \n", 
+       "If you have Plotly Offline, and those files are located under a different \n",
+       "directory, you can change the default search path: \n ",
+       " Sys.setenv('plotly_offline' = '/path/to/plotlyjs') \n", 
+       "If you don't have Plotly Offline, you may purchase it here: \n", 
+       " http://purchasing.plot.ly \n", 
        "If you have any questions, please contact team@plot.ly", call. = FALSE)
 }
 
-get_offline <- function(jq = FALSE) {
+offline_bundle <- function(jq = FALSE) {
   haz <- has_offline()
   if (!haz) offline_stop()
   # ipython already has jQuery, and so does shiny

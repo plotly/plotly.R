@@ -8,11 +8,11 @@
 #' @param ... other arguments
 #' @export
 print.plotly <- function(x, ...) {
-  resp <- plotly_POST(x)
-  l$url <- u <- resp$url
-  if (!is.null(u)) {
-    if (httr::url_ok(u) && interactive()) browseURL(u)
+  l <- plotly_POST(x)
+  if (!is.null(l$url)) {
+    if (httr::url_ok(l$url) && interactive()) browseURL(l$url)
   }
+  # get_figure() instead?
   invisible(l)
 }
 
@@ -40,9 +40,9 @@ knit_print.plotly <- function(x, options, ...) {
 #' @param ... other arguments
 #' @export
 print.offline <- function(x, ...) {
-  off <- get_offline(jq = TRUE)
+  off <- offline_bundle(jq = TRUE)
   plotlyjs <- readChar(off, file.info(off)$size)
-  html <- with(x, sprintf(
+  html <- sprintf(
     '<!DOCTYPE html><html lang="en">
      <head>
      	<meta charset="utf-8">
@@ -51,16 +51,9 @@ print.offline <- function(x, ...) {
      </head>
      
      <body>
-       <div class="%s loading" style="color: rgb(50,50,50);">Drawing...</div>
-       <div id="%s" style="height: %s; width: %s;" ></div>
-       <script type="text/javascript">
-         Plotly.plot("%s", %s, %s).then(function() {
-           $(".%s.loading").remove();
-         })
-      </script>
-     </body>', 
-    plotlyjs, id, id, height, width, id, data, layout, id
-  ))
+       %s
+     </body>', plotlyjs, with(x, new_offline(data, layout, height, width, id))
+  )
   d <- if (is.null(x$out_dir)) {
     tempdir()
   } else {
@@ -83,16 +76,13 @@ knit_print.offline <- function(x, options, ...) {
     warning("Please install.packages('knitr')")
     return(x)
   }
-  # if this is the first plot in the document, 
-  # place dependencies just before it
-  if (length(knitr::knit_meta(class = "plotly_offline", clean = FALSE)) == 0) {
-    b <- readChar(x$bundle, file.info(x$bundle)$size)
-    x$html <- paste0(
-      sprintf('<script type="text/javascript">%s</script>', b),
-      x$html
-    )
-  }
-  knitr::asis_output(x$html, meta = structure("", class = "plotly_offline"))
+  off <- offline_bundle(jq = TRUE)
+  b <- readChar(off, file.info(off)$size)
+  p <- paste0(
+    sprintf('<script type="text/javascript">%s</script>', b),
+    with(x, new_offline(data, layout, height, width, id))
+  )
+  knitr::asis_output(p)
 }
 
 #' Embed a plotly iframe into a IPython Notebook

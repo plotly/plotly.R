@@ -8,26 +8,27 @@
 #' 
 plotlyOutput <- function(outputId, width = "100%", height = "550px", offline = TRUE) {
   if (!requireNamespace("shiny")) message("Please install.packages('shiny')")
+  dep <- shiny::createWebDependency(plotly_shiny())
   if (offline && has_offline()) {
-    deps <- lapply(plotly_offline(), shiny::createWebDependency)
+    dep <- list(dep, shiny::createWebDependency(shiny_offline()))
     el <- htmltools::tags$div(
       id = outputId,
-      class = 'plotly_offline',
+      class = 'plotly_shiny',
       style = sprintf("width: %s; height: %s;", width, height)
     )
   } else {
-    deps <- shiny::createWebDependency(plotly_embed())
+    #dep <- list(shiny::createWebDependency(shiny_online()), dep)
     el <- htmltools::tags$iframe(
       id = outputId, 
       src = "https://plot.ly/~playground/7.embed",
-      class = "plotly_embed", 
+      class = "plotly_shiny", 
       style = "border:none;", 
       seamless = TRUE, 
       width = width, 
       height = height
     )
   }
-  htmltools::attachDependencies(el, deps)
+  htmltools::attachDependencies(el, dep)
 }
 
 #' Render a plotly graph in shiny
@@ -49,8 +50,7 @@ renderPlotly <- function(expr, envir = parent.frame(), quoted = FALSE, offline =
   renderFunc <- function(shinysession, name, ...) {
     p <- func()
     l <- if (offline) offline(p) else plotly_build(p)
-    # why do I need this????????????
-    l$id <- "trendPlot"
+    l$offline <- offline
     # eventually let users alter this?
     l$task <- "newPlot"
     # return a list of named lists that describe valid postMessage 
@@ -69,25 +69,28 @@ renderPlotly <- function(expr, envir = parent.frame(), quoted = FALSE, offline =
 # these are here basically so we can take advantage of shiny::createWebDependency
 # ---------------------------------------------------------------------------
 
-plotly_embed <- function() {
-  htmltools::htmlDependency(name = "plotly_embed",
+# functionality shared between both online and offline modes
+plotly_shiny <- function() {
+  htmltools::htmlDependency(name = "plotly_shiny",
                             version = packageVersion("plotly"),
                             src = system.file("shiny", package = "plotly"),
-                            script = "plotly_embed.js")
+                            script = "plotly_shiny.js")
 }
 
-plotly_offline <- function() {
+shiny_online <- function() {
+  htmltools::htmlDependency(name = "shiny_online",
+                            # better way to track the bundle version?
+                            version = packageVersion("plotly"),
+                            src = system.file("shiny", package = "plotly"),
+                            script = "plotly_ping.js")
+}
+
+shiny_offline <- function() {
   # shiny already has jQuery (and it requires >= 1.10)
-  off <- get_offline(jq = FALSE)
-  list(
-    htmltools::htmlDependency(name = "offline_bundle",
-                              # better way to track the bundle version?
-                              version = packageVersion("plotly"),
-                              src = dirname(off),
-                              script = basename(off)),
-    htmltools::htmlDependency(name = "plotly_offline",
-                              version = packageVersion("plotly"),
-                              src = system.file("shiny", package = "plotly"),
-                              script = "plotly_offline.js")
-  )
+  off <- offline_bundle(jq = FALSE)
+  htmltools::htmlDependency(name = "shiny_offline",
+                            # better way to track the bundle version?
+                            version = packageVersion("plotly"),
+                            src = dirname(off),
+                            script = basename(off))
 }
