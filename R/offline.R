@@ -80,7 +80,7 @@ has_offline <- function() {
     }
   }
   # return the path as well as T/F 
-  setNames(!haz, off)
+  setNames(haz, off)
 }
 
 offline_stop <- function() {
