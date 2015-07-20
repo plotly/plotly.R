@@ -146,7 +146,7 @@ if (any(grepl("Changes not staged for commit:|Untracked files:", st))) {
   commit_msg <- paste0('"Pushed from ', build_link, '"')
   system(paste('git commit -q -m', commit_msg))
   # This post explains how this works -- http://rmflight.github.io/posts/2014/11/travis_ci_gh_pages.html
-  repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", Sys.getenv("GH_TOKEN"))
+  repo <- sprintf("https://%s@github.com/cpsievert/plotly-test-table.git", Sys.getenv("GITHUB_PAT"))
   system(paste("git pull", repo, "gh-pages"))
   system(paste("git push -q", repo, "gh-pages"))
 }
