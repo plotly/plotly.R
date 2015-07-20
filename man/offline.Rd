@@ -5,7 +5,7 @@
 \title{Plotly Offline}
 \usage{
 offline(p = get_plot(), height = 400, width = "100\%", out_dir = NULL,
-  open_browser = interactive(), src_dir = "~/.plotly/plotlyjs")
+  open_browser = interactive())
 }
 \arguments{
 \item{p}{a plotly object}
@@ -17,11 +17,9 @@ which will be coerced to a string and have "px" appended.}
 which will be coerced to a string and have "px" appended.}
 
 \item{out_dir}{a directory to place the visualization.
-If \code{NULL}, a temporary directory is used when the offlin object is printed.}
+If \code{NULL}, a temporary directory is used when the offline object is printed.}
 
 \item{open_browser}{open the visualization after creating it?}
-
-\item{src_dir}{a directory pointing to the plotlyjs source}
 }
 \value{
 a plotly object of class "offline"
@@ -31,13 +29,27 @@ Create a plotly visualization that doesn't require an external plotly server.
 }
 \examples{
 \dontrun{
+# If you purchased plotly offline, you should've received a private link
+# to the source files. You may use this code to install them
+link <- "private link" # put the link you received here
+tmp <- tempfile(fileext = ".zip")
+js_dir <- "~/.plotly/plotlyjs"
+download.file(link, tmp)
+if (!dir.exists(js_dir)) dir.create(js_dir, recursive = TRUE)
+unzip(tmp, exdir = js_dir)
+unlink(tmp)
+
+# now start making offline plots!
 p <- plot_ly(data = iris, x = Sepal.Width, y = Sepal.Length, color = Species,
   mode = "markers")
 offline(p)
 
-# offline ggplots
+# works with ggplot2
 gg <- qplot(data = iris, x = Sepal.Width, y = Sepal.Length, color = Species)
 offline(gg)
+
+# also works with shiny/rmarkdown
+shiny::runApp(system.file("examples/UN_Simple", package = "plotly"))
 }
 }
 \author{

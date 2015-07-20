@@ -4,17 +4,33 @@
 \alias{add_trace}
 \title{Add a trace to a plotly visualization}
 \usage{
-add_trace(p = get_plot(), ..., data = NULL, evaluate = FALSE)
+add_trace(p = get_plot(), ..., type = "scatter", group, color, colors,
+  symbol, symbols, data = NULL, evaluate = FALSE)
 }
 \arguments{
-\item{p}{A plotly visualization.}
+\item{p}{A plotly object.}
 
-\item{...}{Visual properties.
-All arguments documented in the references section below are supported.
-In addition, there are special arguments which map variables to visual
-aethestics in a similar style to ggplot2 (such as \code{color}).}
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
 
-\item{data}{A data frame (optional).}
+\item{type}{A charater string describing the type of trace.}
+
+\item{group}{Map a variable to group. If used,
+a different trace will be created for each unique value of this variable.}
+
+\item{color}{Map a variable to color.}
+
+\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
+or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
+or a color interpolation function like \link{grDevices::colorRamp}.}
+
+\item{symbol}{A variable name for mapping to symbols.}
+
+\item{symbols}{A character vector of symbol types. Possible values:
+'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
+
+\item{data}{A data frame to associate with this trace (optional). If not
+provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
@@ -26,5 +42,8 @@ Carson Sievert
 }
 \references{
 \url{https://plot.ly/r/reference/}
+}
+\seealso{
+\code{\link{plot_ly}()}
 }
 

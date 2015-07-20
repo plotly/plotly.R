@@ -13,7 +13,7 @@ renderPlotly(expr, envir = parent.frame(), quoted = FALSE, offline = TRUE)
 
 \item{quoted}{Is expr a quoted expression (with \code{quote()})?}
 
-\item{Use}{plotly offline, if available?
+\item{offline}{Use plotly offline, if available?
 This is useful if you want to save an expression in a variable.}
 }
 \description{

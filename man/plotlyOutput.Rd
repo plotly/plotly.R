@@ -13,7 +13,7 @@ plotlyOutput(outputId, width = "100\%", height = "550px", offline = TRUE)
 
 \item{height}{height of the output.}
 
-\item{Use}{plotly offline, if available?}
+\item{offline}{Use plotly offline, if available?}
 }
 \description{
 Shiny ui output function

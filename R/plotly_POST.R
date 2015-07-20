@@ -33,7 +33,7 @@ plotly_POST <- function(x) {
   
   # search for keyword args in traces and take the first valid one
   kwargs2 <- Reduce(c, lapply(x$data, function(x) x[get_kwargs()]))
-  kwargs <- modifyList(kwargs, if (is.null(kwargs2)) list() else kwargs2)
+  kwargs <- modifyList(kwargs, kwargs %||% list())
   
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)

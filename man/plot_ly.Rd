@@ -4,27 +4,21 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = "scatter", inherit = TRUE,
-  evaluate = FALSE)
+plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
+  symbol, symbols, inherit = TRUE, evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
 
-\item{...}{Visual properties.
-All arguments documented in the references section below are supported.
-In addition, there are special arguments which map variables to visual
-aethestics in a similar style to ggplot2 (such as \code{color}).}
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
 
 \item{type}{A charater string describing the type of trace.}
 
-\item{inherit}{should future traces inherit properties from this initial trace?}
+\item{group}{Map a variable to group. If used,
+a different trace will be created for each unique value of this variable.}
 
-\item{evaluate}{logical. Evaluate arguments when this function is called?}
-
-\item{group}{A variable name for mapping to group.
-If used, a different trace will be created for each unique value.}
-
-\item{color}{A variable name for mapping to color.}
+\item{color}{Map a variable to color.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
 or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
@@ -34,6 +28,10 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
+
+\item{inherit}{should future traces inherit properties from this initial trace?}
+
+\item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
 \description{
 Transform data into a plotly visualization.

@@ -7,14 +7,13 @@
 layout(p = get_plot(), ..., data = NULL, evaluate = FALSE)
 }
 \arguments{
-\item{p}{A plotly visualization.}
+\item{p}{A plotly object.}
 
-\item{...}{Visual properties.
-All arguments documented in the references section below are supported.
-In addition, there are special arguments which map variables to visual
-aethestics in a similar style to ggplot2 (such as \code{color}).}
+\item{...}{Arguments to the layout object. For documentation,
+see \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}}
 
-\item{data}{A data frame (optional).}
+\item{data}{A data frame to associate with this layout (optional). If not
+provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
@@ -23,8 +22,5 @@ Add and/or modify layout of a plotly
 }
 \author{
 Carson Sievert
-}
-\references{
-\url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
 }
 

@@ -6,21 +6,18 @@
 #' Reference section (see below). 
 #' 
 #' @param data A data frame (optional).
-#' @param ... Visual properties. 
-#' All arguments documented in the references section below are supported.
-#' In addition, there are special arguments which map variables to visual
-#' aethestics in a similar style to ggplot2 (such as \code{color}).
+#' @param ... These arguments are documented in the references section below.
+#' Note that acceptable arguments depend on the trace type.
 #' @param type A charater string describing the type of trace.
-#' @param group A variable name for mapping to group. 
-#' If used, a different trace will be created for each unique value.
-#' @param color A variable name for mapping to color.
+#' @param group Map a variable to group. If used, 
+#' a different trace will be created for each unique value of this variable.
+#' @param color Map a variable to color.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 #' or a color interpolation function like \link{grDevices::colorRamp}.
 #' @param symbol A variable name for mapping to symbols.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
-#' 
 #' @param inherit should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -46,20 +43,27 @@
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
+                    group, color, colors, symbol, symbols,
                     inherit = TRUE, evaluate = FALSE) {
-  # record trace information
+  # "native" plotly arguments
+  argz <- substitute(list(...))
+  # tack on "special" arguments
+  if (!missing(group)) argz$group <- substitute(group)
+  if (!missing(color)) argz$color <- substitute(color)
+  if (!missing(colors)) argz$colors <- substitute(colors)
+  if (!missing(symbol)) argz$symbol <- substitute(symbol)
+  if (!missing(symbols)) argz$symbols <- substitute(symbols)
+  # trace information
   tr <- list(
     type = type,
-    # TODO: verify/filter arguments based on trace type.
-    args = substitute(list(...)),
-    env = list2env(data),
-    enclos = parent.frame(),
+    args = argz,
+    env = list2env(data),    # environment in which to evaluate arguments
+    enclos = parent.frame(), # if objects aren't found in env, look here
     inherit = inherit
   )
-  # this info is sufficient for recreating the plot
+  # plotly objects should always have a _list_ of trace(s)
   p <- list(
     data = list(tr),
-    # Maybe provide an argument to keep layout?
     layout = NULL,
     url = NULL
   )
@@ -69,26 +73,45 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 
 #' Add a trace to a plotly visualization
 #' 
-#' @param p A plotly visualization.
-#' @param ... Visual properties. 
-#' All arguments documented in the references section below are supported.
-#' In addition, there are special arguments which map variables to visual
-#' aethestics in a similar style to ggplot2 (such as \code{color}).
-#' @param data A data frame (optional).
+#' @param p A plotly object.
+#' @param ... These arguments are documented in the references section below.
+#' Note that acceptable arguments depend on the trace type.
+#' @param type A charater string describing the type of trace.
+#' @param group Map a variable to group. If used, 
+#' a different trace will be created for each unique value of this variable.
+#' @param color Map a variable to color.
+#' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
+#' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
+#' or a color interpolation function like \link{grDevices::colorRamp}.
+#' @param symbol A variable name for mapping to symbols.
+#' @param symbols A character vector of symbol types. Possible values:
+#' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
+#' @param data A data frame to associate with this trace (optional). If not 
+#' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
 #' @param evaluate logical. Evaluate arguments when this function is called?
+#' @seealso \code{\link{plot_ly}()}
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
 #' 
-add_trace <- function(p = get_plot(), ..., 
+add_trace <- function(p = get_plot(), ..., type = "scatter",
+                      group, color, colors, symbol, symbols,
                       data = NULL, evaluate = FALSE) {
-  p <- get_plot(p)
+  # "native" plotly arguments
+  argz <- substitute(list(...))
+  # tack on "special" arguments
+  if (!missing(group)) argz$group <- substitute(group)
+  if (!missing(color)) argz$color <- substitute(color)
+  if (!missing(colors)) argz$colors <- substitute(colors)
+  if (!missing(symbol)) argz$symbol <- substitute(symbol)
+  if (!missing(symbols)) argz$symbols <- substitute(symbols)
   tr <- list(
-    args = substitute(list(...)),
+    args = argz,
     # if data is missing, adopt the most recent data environment
     env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
     enclos = parent.frame()
   )
+  p <- get_plot(p)
   p$data <- c(p$data, list(tr))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
@@ -96,9 +119,13 @@ add_trace <- function(p = get_plot(), ...,
 
 #' Add and/or modify layout of a plotly
 #' 
-#' @inheritParams add_trace
+#' @param p A plotly object.
+#' @param ... Arguments to the layout object. For documentation,
+#' see \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
+#' @param data A data frame to associate with this layout (optional). If not 
+#' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
+#' @param evaluate logical. Evaluate arguments when this function is called?
 #' @author Carson Sievert
-#' @references \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
 #' @export
 #' 
 layout <- function(p = get_plot(), ..., 
@@ -144,25 +171,191 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
   hash_plot(data, p)
 }
 
-#' Obtain underlying data of plotly object
+
+#' Build a plotly object before viewing it
 #' 
-#' Given a data frame with a class of plotly, this function returns the arguments
-#' and/or data used to create the plotly. If no data frame is provided, 
-#' the last plotly object created in this R session is returned (if it exists).
+#' For convenience and efficiency purposes, plotly objects are subject to lazy 
+#' evaluation. That is, the actual content behind a plotly object is not 
+#' created until it is absolutely necessary. In some instances, you may want 
+#' to perform this evaluation yourself, and work directly with the resulting 
+#' list.
 #' 
-#' @param data a data frame with a class of plotly (and a plotly_hash attribute).
+#' @param l a ggplot object, or a plotly object, or a list.
 #' @export
-get_plot <- function(data = NULL, strict = TRUE) {
-  hash <- attr(data, "plotly_hash")
-  if (!is.null(hash)) {
-    get(hash, envir = plotlyEnv)
-  } else if (is.data.frame(data)) {
-    # safe to just grab the most recent environment?
-    hash <- rev(ls(plotlyEnv))[1]
-    plotlyEnv[[hash]]
-  } else {
-    data
+plotly_build <- function(l) {
+  # ggplot objects don't need any special type of handling
+  if (is.ggplot(l)) return(gg2list(l))
+  l <- get_plot(l)
+  nms <- names(l)
+  # assume unnamed list elements are data/traces
+  idx <- nms %in% ""
+  l <- if (is.null(nms)) {
+    list(data = l) 
+  } else if (any(idx)) {
+    c(data = c(l$data, l[idx]), l[!idx])
+  } else l
+  dats <- list()
+  for (i in seq_along(l$data)) {
+    d <- l$data[[i]]
+    # if appropriate, evaluate trace arguments in a suitable environment
+    idx <- names(d) %in% c("args", "env")
+    if (sum(idx) == 2) {
+      dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
+      dat[c("args", "env", "enclos")] <- NULL
+    } else {
+      dat <- d
+    }
+    # process specially named arguments
+    has_color <- !is.null(dat[["color"]]) || !is.null(dat[["z"]])
+    has_symbol <- !is.null(dat[["symbol"]])
+    has_group <- !is.null(dat[["group"]])
+    if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
+    # TODO: add a legend title (is this only possible via annotations?!?)
+    if (has_symbol) dats <- c(dats, symbolize(dat))
+    if (has_group) dats <- c(dats, traceify(dat, "group"))
+    if (!has_color && !has_symbol && !has_group) dats <- c(dats, list(dat))
   }
+  x <- list(data = dats)
+  # carry over properties/data from first trace (if appropriate)
+  if (length(x$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
+    for (i in seq.int(2, length(x$data))) {
+      x$data[[i]] <- modifyList(x$data[[1]], x$data[[i]])
+    }
+  }
+  # plot_ly()/layout() may produce a unnamed list of layouts
+  # in that case, we may want to evaluate layout arguments
+  idx <- names(l$layout) == ""
+  if (all(idx)) {
+    nlayouts <- length(l$layout)
+    layouts <- setNames(vector("list", nlayouts), names(l$layout))
+    for (i in seq_len(nlayouts)) {
+      layout <- l$layout[[i]]
+      idx <- names(layout) %in% c("args", "env")
+      layouts[[i]] <- if (sum(idx) == 2) {
+        c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
+      } else {
+        layout
+      }
+    }
+    idx <- names(layouts) == ""
+    x$layout <- if (any(idx)) {
+      c(Reduce(c, layouts[idx]), layouts[!idx])
+    } else {
+      Reduce(c, layouts)
+    }
+  } else {
+    x$layout <- l$layout
+  }
+  # if style is not null, use it to modify existing traces
+  if (!is.null(l$style)) {
+    for (i in seq_along(l$style)) {
+      sty <- l$style[[i]]
+      idx <- names(sty) %in% c("args", "env")
+      new_sty <- if (sum(idx) == 2) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
+      for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
+    }
+  }
+  # add appropriate axis title (if they don't already exist)
+  x <- axis_titles(x, l)
+  # create a new plotly if no url is attached to this environment
+  x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
+  # add plotly class mainly for printing method
+  class(x) <- unique(c("plotly", class(x)))
+  x
+}
+
+# returns a _list of traces_.
+colorize <- function(dat, title = "") {
+  cols <- dat[["color"]] %||% dat[["z"]]
+  if (is.numeric(cols)) {
+    # by default, use viridis::viridis(10) -> http://rud.is/b/2015/07/20/using-the-new-viridis-colormap-in-r-thanks-to-simon-garnier/
+    colors <- dat[["colors"]] %||% viridis::viridis(10)
+    cols <- as.vector(cols)
+    rng <- range(cols, na.rm = TRUE)
+    x <- seq(min(rng), max(rng), length.out = 10)
+    colz <- scales::col_numeric(colors, rng, na.color = "transparent")(x)
+    df <- if (length(cols) > 1) data.frame(scales::rescale(x), colz) 
+    else data.frame(c(0, 1), rep(colz, 2))
+    col_list <- list(
+      colorbar = list(title = as.character(title)),
+      colorscale = setNames(df, NULL)
+    )
+    # scatter-like traces can have both line and marker objects
+    if (grepl("scatter", dat[["type"]] %||% "scatter")) {
+      col_list$color <- cols
+      #mode <- dat[["mode"]] %||% "markers+lines"
+      dat[["marker"]] <- modifyList(col_list, dat[["marker"]] %||% list())
+      # doing this breaks 
+      #dat[["line"]] <- modifyList(col_list, dat[["line"]] %||% list())
+    } else {
+      dat <- c(dat, col_list)
+    }
+    dat <- list(dat)
+  } else { # discrete color scale
+    dat <- traceify(dat, "color")
+    lvls <- unlist(lapply(dat, function(x) unique(x[["color"]])))
+    N <- length(lvls)
+    default <- if (is.ordered(cols)) viridis::viridis(N) 
+    else RColorBrewer::brewer.pal(N, "Set2")
+    colors <- dat[[1]][["colors"]] %||% default
+    colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
+    dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
+               dat, colz)
+  }
+  dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
+  dat
+}
+
+symbolize <- function(dat) {
+  # symbols really only make sense when markers are in the mode, right?
+  dat$mode <- dat$mode %||% "markers"
+  dat <- traceify(dat, "symbol")
+  dat <- lapply(dat, function(x) { x$symbol <- NULL; x })
+  N <- length(dat)
+  if (N > 8) warning("Plotly supports 8 different symbols, but you have ", N, " levels!")
+  symbols <- c('dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up')
+  sym <- symbols[seq_len(N)]
+  dat <- Map(function(x, y) { x$marker$symbol <- y; x }, dat, sym)
+  dat
+}
+
+# break up a single trace into multiple traces according to values stored 
+# a particular key name
+traceify <- function(dat, nm = "group") {
+  x <- dat[[nm]]
+  if (is.null(x)) {
+    return(list(dat))
+  } else {
+    # the order of lvls determines the order in which traces are drawn
+    # for ordered factors at least, it makes sense to draw the highest level first
+    # since that _should_ be the darkest color in a sequential pallette
+    lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
+    n <- length(x)
+    # recursively search for a non-list of appropriate length (if it is, subset it)
+    recurse <- function(z, n, idx) {
+      if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
+    }
+    new_dat <- list()
+    for (j in seq_along(lvls)) {
+      new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
+      new_dat[[j]]$name <- lvls[j]
+    }
+    return(new_dat)
+  }
+}
+
+axis_titles <- function(x, l) {
+  for (i in c("x", "y", "z")) {
+    s <- lapply(x$data, "[[", i)
+    ax <- paste0(i, "axis")
+    t <- x$layout[[ax]]$title
+    if (is.null(t)) { # deparse the unevaluated expression from 1st trace
+      argz <- as.list(l$data[[1]]$args)
+      idx <- names(argz) %in% i
+      if (any(idx)) x$layout[[ax]]$title <- deparse(argz[idx][[1]])
+    }
+  }
+  x
 }
 
 #' Main interface to plotly 
