@@ -17,7 +17,6 @@ plotlyOutput <- function(outputId, width = "100%", height = "550px", offline = T
       style = sprintf("width: %s; height: %s;", width, height)
     )
   } else {
-    #dep <- list(shiny::createWebDependency(shiny_online()), dep)
     el <- htmltools::tags$iframe(
       id = outputId, 
       src = "https://plot.ly/~playground/7.embed",
@@ -69,7 +68,7 @@ renderPlotly <- function(expr, envir = parent.frame(), quoted = FALSE, offline =
 # these are here basically so we can take advantage of shiny::createWebDependency
 # ---------------------------------------------------------------------------
 
-# functionality shared between both online and offline modes
+# the shiny binding
 plotly_shiny <- function() {
   htmltools::htmlDependency(name = "plotly_shiny",
                             version = packageVersion("plotly"),
@@ -77,14 +76,7 @@ plotly_shiny <- function() {
                             script = "plotly_shiny.js")
 }
 
-shiny_online <- function() {
-  htmltools::htmlDependency(name = "shiny_online",
-                            # better way to track the bundle version?
-                            version = packageVersion("plotly"),
-                            src = system.file("shiny", package = "plotly"),
-                            script = "plotly_ping.js")
-}
-
+# the plotly offline bundle
 shiny_offline <- function() {
   # shiny already has jQuery (and it requires >= 1.10)
   off <- offline_bundle(jq = FALSE)
