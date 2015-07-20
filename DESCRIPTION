@@ -29,7 +29,8 @@ Imports:
     httr,
     jsonlite,
     magrittr,
-    digest
+    digest,
+    viridis
 Suggests:
     dplyr,
     maps,
@@ -37,5 +38,6 @@ Suggests:
     knitr,
     devtools,
     shiny,
-    rmarkdown
+    rmarkdown,
+    RColorBrewer
 LazyData: true

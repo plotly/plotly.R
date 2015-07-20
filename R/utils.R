@@ -134,18 +134,17 @@ plotly_build <- function(l) {
 colorize <- function(dat, title = "") {
   cols <- dat[["color"]] %||% dat[["z"]]
   if (is.numeric(cols)) {
-    # by default, match ggplot2 color gradient -- http://docs.ggplot2.org/current/scale_gradient.html
-    colors <- dat[["colors"]] %||% c("#132B43", "#56B1F7")
-    colz <- scales::col_numeric(colors, cols, na.color = "transparent")(cols)
-    df <- if (length(cols) > 1) data.frame(scales::rescale(cols), colz) 
+    # by default, use viridis::viridis(10) -> http://rud.is/b/2015/07/20/using-the-new-viridis-colormap-in-r-thanks-to-simon-garnier/
+    colors <- dat[["colors"]] %||% viridis::viridis(10)
+    cols <- as.vector(cols)
+    rng <- range(cols, na.rm = TRUE)
+    x <- seq(min(rng), max(rng), length.out = 10)
+    colz <- scales::col_numeric(colors, rng, na.color = "transparent")(x)
+    df <- if (length(cols) > 1) data.frame(scales::rescale(x), colz) 
       else data.frame(c(0, 1), rep(colz, 2))
     col_list <- list(
       colorbar = list(title = as.character(title)),
-      colorscale = setNames(df, NULL),
-      autocolorscale = FALSE,
-      color = cols,
-      cmin = min(cols),
-      cmax = max(cols)
+      colorscale = setNames(df, NULL)
     )
     if (grepl("scatter", dat[["type"]] %||% "scatter")) {
       dat[["marker"]] <- modifyList(col_list, dat[["marker"]] %||% list())
@@ -156,8 +155,10 @@ colorize <- function(dat, title = "") {
   } else { # discrete color scale
     dat <- traceify(dat, "color")
     lvls <- unlist(lapply(dat, function(x) unique(x[["color"]])))
-    colors <- dat[[1]][["colors"]] %||% 
-      RColorBrewer::brewer.pal(length(lvls), if (is.ordered(cols)) "Greens" else "Set2")
+    N <- length(lvls)
+    default <- if (is.ordered(cols)) viridis::viridis(N) 
+    else RColorBrewer::brewer.pal(N, "Set2")
+    colors <- dat[[1]][["colors"]] %||% default
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
     dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
                dat, colz)
@@ -271,8 +272,13 @@ struct <- function(x, y, ...) {
 } 
 
 # TODO: what are some other common configuration options we want to support??
-get_domain <- function() {
-  Sys.getenv("plotly_domain", "https://plot.ly")
+get_domain <- function(type = "main") {
+  if (type == "stream") {
+    Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
+  } else {
+    Sys.getenv("plotly_domain", "https://plot.ly")
+  }
+  
 }
 
 # plotly's special keyword arguments in POST body
