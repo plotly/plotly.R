@@ -15,16 +15,16 @@ Note that acceptable arguments depend on the trace type.}
 
 \item{type}{A charater string describing the type of trace.}
 
-\item{group}{Map a variable to group. If used,
-a different trace will be created for each unique value of this variable.}
+\item{group}{Either a variable name or a vector to use for grouping. If used,
+a different trace will be created for each unique value.}
 
-\item{color}{Map a variable to color.}
+\item{color}{Either a variable name or a vector to use for color mapping.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
 or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
 or a color interpolation function like \link{grDevices::colorRamp}.}
 
-\item{symbol}{A variable name for mapping to symbols.}
+\item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
 
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
@@ -32,6 +32,8 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 \item{inherit}{should future traces inherit properties from this initial trace?}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
+
+\item{size}{A variable name or numeric vector to encode the area of markers.}
 }
 \description{
 Transform data into a plotly visualization.

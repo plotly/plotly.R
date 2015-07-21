@@ -9,15 +9,16 @@
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
 #' @param type A charater string describing the type of trace.
-#' @param group Map a variable to group. If used, 
-#' a different trace will be created for each unique value of this variable.
-#' @param color Map a variable to color.
+#' @param group Either a variable name or a vector to use for grouping. If used, 
+#' a different trace will be created for each unique value.
+#' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 #' or a color interpolation function like \link{grDevices::colorRamp}.
-#' @param symbol A variable name for mapping to symbols.
+#' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
+#' @param size A variable name or numeric vector to encode the area of markers.
 #' @param inherit should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -77,15 +78,16 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
 #' @param type A charater string describing the type of trace.
-#' @param group Map a variable to group. If used, 
-#' a different trace will be created for each unique value of this variable.
-#' @param color Map a variable to color.
+#' @param group Either a variable name or a vector to use for grouping. If used, 
+#' a different trace will be created for each unique value.
+#' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 #' or a color interpolation function like \link{grDevices::colorRamp}.
-#' @param symbol A variable name for mapping to symbols.
+#' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
+#' @param size A variable name or numeric vector to encode the area of markers.
 #' @param data A data frame to associate with this trace (optional). If not 
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
 #' @param evaluate logical. Evaluate arguments when this function is called?
@@ -205,7 +207,25 @@ plotly_build <- function(l) {
     } else {
       dat <- d
     }
-    # process specially named arguments
+    # start processing specially named arguments
+    s <- dat[["size"]]
+    if (!is.null(s)) {
+      if (!is.numeric(s)) warning("size should be numeric", call. = FALSE)
+      # if autosizing is used, guess that the plot is 300 by 600
+      auto <- dat[["layout"]][["autosize"]] %||% TRUE
+      hw <- if (auto) c(300, 600)
+        else c(dat[["layout"]][["height"]], dat[["layout"]][["width"]])
+      # ensure that markers cover 30% of the plot area
+      m <- list(
+        size = 0.3 * prod(hw) * (s/sum(s)),
+        sizemode = "area"
+      )
+      # the marker object is the only type of object which respects size
+      dat[["marker"]] <- modifyList(dat[["marker"]] %||% list(), m)
+      # either add some appropriate hover text
+      txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
+      dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
+    }
     has_color <- !is.null(dat[["color"]]) || !is.null(dat[["z"]])
     has_symbol <- !is.null(dat[["symbol"]])
     has_group <- !is.null(dat[["group"]])
@@ -283,9 +303,9 @@ colorize <- function(dat, title = "") {
     # scatter-like traces can have both line and marker objects
     if (grepl("scatter", dat[["type"]] %||% "scatter")) {
       col_list$color <- cols
-      #mode <- dat[["mode"]] %||% "markers+lines"
       dat[["marker"]] <- modifyList(col_list, dat[["marker"]] %||% list())
-      # doing this breaks 
+      #mode <- dat[["mode"]] %||% "markers+lines"
+      # can't have a colorscale for both markers and lines???
       #dat[["line"]] <- modifyList(col_list, dat[["line"]] %||% list())
     } else {
       dat <- c(dat, col_list)

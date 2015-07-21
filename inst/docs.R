@@ -5,14 +5,10 @@
 # https://plot.ly/r/3d-line-plots/
 # ----------------------------------------------------------------------
 
-library(plotly)
-
 # initiate a 100 x 3 matrix filled with zeros
 m <- matrix(numeric(300), ncol = 3)
-
 # simulate a 3D random-walk
 for (i in 2:100) m[i, ] <- m[i-1, ] + rnorm(3)
-
 # collect everything in a data-frame
 df <- setNames(
   data.frame(m, seq(1, 100)), 
@@ -20,25 +16,23 @@ df <- setNames(
 )
 
 # create the plotly
+library(plotly)
 plot_ly(df, x = x, y = y, z = z, color = time, type = "scatter3d")
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/3d-scatter-plots/
 # ----------------------------------------------------------------------
 
-library(plotly)
-
 # variance-covariance matrix for a multivariate normal distribution
 s <- matrix(c(1, .5, .5, 
               .5, 1, .5, 
               .5, .5, 1), ncol = 3)
-
 # use the mvtnorm package to sample 200 observations
 obs <- mvtnorm::rmvnorm(200, sigma = s)
-
 # collect everything in a data-frame
 df <- setNames(data.frame(obs), c("x", "y", "z"))
 
+library(plotly)
 plot_ly(df, x = x, y = y, z = z, type = "scatter3d", mode = "markers")
 
 # ----------------------------------------------------------------------
@@ -46,12 +40,11 @@ plot_ly(df, x = x, y = y, z = z, type = "scatter3d", mode = "markers")
 # ----------------------------------------------------------------------
 
 library(plotly)
-# Note that volcano is a numeric matrix that ships with R
+# volcano is a numeric matrix that ships with R
 plot_ly(z = volcano, type = "surface")
 
-
 # 2D kernel density estimation
-kd <- with(geyser, MASS::kde2d(duration, waiting, n = 50))
+kd <- with(MASS::geyser, MASS::kde2d(duration, waiting, n = 50))
 with(kd, plot_ly(x = x, y = y, z = z, type = "surface"))
 
 
@@ -77,11 +70,11 @@ p <- plot_ly(
 )
 p
 
-
-p2 <- add_trace(p, 
-                x = c("giraffes", "orangutans", "monkeys"),
-                y = c(12, 18, 29),
-                name = "LA Zoo"
+p2 <- add_trace(
+  p, 
+  x = c("giraffes", "orangutans", "monkeys"),
+  y = c(12, 18, 29),
+  name = "LA Zoo"
 )
 p2
 
@@ -102,35 +95,30 @@ ggplot2::diamonds %>% count(cut, clarity) %>%
 # ----------------------------------------------------------------------
 
 library(plotly)
-
 #' basic boxplot
 plot_ly(y = rnorm(50), type = "box") %>%
   add_trace(y = rnorm(50, 1))
-
-
 #' adding jittered points
 plot_ly(y = rnorm(50), type = "box", boxpoints = "all", jitter = 0.3,
         pointpos = -1.8)
-
 #' several box plots
-data(diamonds, package = "ggplot2")
-plot_ly(diamonds, y = price, color = cut, type = "box")
-
+plot_ly(ggplot2::diamonds, y = price, color = cut, type = "box")
 
 #' grouped box plots
-plot_ly(diamonds, x = cut, y = price, color = clarity, type = "box") %>%
+plot_ly(ggplot2::diamonds, x = cut, y = price, color = clarity, type = "box") %>%
   layout(boxmode = "group")
-
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/bubble-charts/ 
 # ----------------------------------------------------------------------
 
-# why do we need a separate page from this?? -> https://plot.ly/r/line-and-scatter/
+# IMO, this page should be a part of this page -> https://plot.ly/r/line-and-scatter/
+data(diamonds, package = "ggplot2")
 d <- diamonds[sample(nrow(diamonds), 1000), ]
+library(plotly)
+# note how size is automatically scaled and added as hover text
 plot_ly(d, x = carat, y = price, text = paste("Clarity: ", clarity),
-        mode = "markers", marker = list(size = depth))
-# TODO: automatic scaling for marker size/opacity
+        mode = "markers", size = carat, opacity = 1/carat)
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/contour-plots/
@@ -204,6 +192,9 @@ cols <- scales::col_numeric("Blues", domain = NULL)(vals)
 colz <- setNames(data.frame(vals[o], cols[o]), NULL)
 plot_ly(z = volcano, colorscale = colz, type = "heatmap")
 
+library(viridis)
+plot_ly(z = volcano, colors = viridis(256), type = "heatmap")
+
 # ----------------------------------------------------------------------
 # https://plot.ly/r/2D-Histogram/
 # ----------------------------------------------------------------------
@@ -235,17 +226,23 @@ plot_ly(x = rnorm(500), opacity = 0.6, type = "histogram") %>%
 plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
 
 #' Scatterplot with qualitative colorscale
-plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, color = Species, mode = "markers")
+plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, color = Species, 
+        mode = "markers")
+
+#' colors argument accepts colorbrewer2.org palette names
+plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, color = Species,
+        colors = "Set1", mode = "markers")
+#' By default, colors will 'span the gamut'
+# scales::show_col(RColorBrewer::brewer.pal("Set1"))
+
+#' If you want finer control over the color scheme, you can pass
+#' RGB or hex color codes directly to colors
+pal <- RColorBrewer::brewer.pal(nlevels(iris$Species), "Set1")
+plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, color = Species,
+        colors = pal, mode = "markers")
 
 #' Scatterplot with sequential colorscale
 plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, color = Petal.Width, mode = "markers")
-
-#' Scatterplot with custom colorscale (TODO: how to add legend entries?)
-pal <- RColorBrewer::brewer.pal(3, "Set1")
-names(pal) <- levels(iris$Species)
-cols <- as.character(pal[iris$Species])
-plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, marker = list(color = cols),
-        mode = "markers")
 
 #' Basic time-series (line) plot with loess smooth 
 plot_ly(economics, x = date, y = uempmed, name = "unemployment")
@@ -279,13 +276,11 @@ d <- diamonds[sample(nrow(diamonds), 1000), ]
 #' Without log scales
 (p <- plot_ly(d, x = carat, y = price, mode = "markers"))
 
-
 #' With log scales
 layout(p, xaxis = list(type = "log", autorange = T),
        yaxis = list(type = "log", autorange = T))
 
-
-# ----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # https://plot.ly/r/graphing-multiple-chart-types/
 # ----------------------------------------------------------------------
 
@@ -352,7 +347,7 @@ g <- list(
 
 plot_ly(df, z = total.exports, text = hover, locations = code, type = 'choropleth', 
         locationmode = 'USA-states', color = total.exports, colors = 'Purples', 
-        marker = list(line = l)), colorbar = list(title = "Millions USD")) %>%
+        marker = list(line = l), colorbar = list(title = "Millions USD")) %>%
   layout(title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)', geo = g)
 
 
@@ -397,7 +392,6 @@ g <- list(
   landcolor = toRGB("grey90")
 )
 
-# styling for "zoomed in" map
 g1 <- c(
   g,
   resolution = 50,
@@ -700,7 +694,7 @@ p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR,
 l <- plotly_build(p)
 geos <- sub("^geo1$", "geo", paste0("geo", seq_along(unique(df$YEAR))))
 l$data <- Map(function(x, y) { x[["geo"]] <- y; x }, l$data, geos)
-subplots(l)
+subplot(l)
 
 
 # Also, something like this?
@@ -709,7 +703,7 @@ levels(df$id) <- seq_along(unique(df$YEAR))
 p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
              geo = paste0("geo", id), showlegend = F,
              marker = list(color = toRGB("blue"), opacity = 0.5))
-subplots(p)
+subplot(p)
 
 
 # # some examples are easier with ggplot2 (but this takes FOREVER)

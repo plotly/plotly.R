@@ -3,9 +3,9 @@
 #' Create a plotly visualization that doesn't require an external plotly server.
 #' 
 #' @param p a plotly object
-#' @param height A valid CSS unit (like "100%", "600px", "auto") or a number, 
+#' @param height A valid CSS unit. (like "100\%", "600px", "auto") or a number, 
 #' which will be coerced to a string and have "px" appended.
-#' @param width A valid CSS unit (like "100%", "600px", "auto") or a number, 
+#' @param width A valid CSS unit. (like "100\%", "600px", "auto") or a number, 
 #' which will be coerced to a string and have "px" appended.
 #' @param out_dir a directory to place the visualization. 
 #' If \code{NULL}, a temporary directory is used when the offline object is printed.

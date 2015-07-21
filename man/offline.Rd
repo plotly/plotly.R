@@ -10,10 +10,10 @@ offline(p = get_plot(), height = 400, width = "100\%", out_dir = NULL,
 \arguments{
 \item{p}{a plotly object}
 
-\item{height}{A valid CSS unit (like "100%", "600px", "auto") or a number,
+\item{height}{A valid CSS unit. (like "100\%", "600px", "auto") or a number,
 which will be coerced to a string and have "px" appended.}
 
-\item{width}{A valid CSS unit (like "100%", "600px", "auto") or a number,
+\item{width}{A valid CSS unit. (like "100\%", "600px", "auto") or a number,
 which will be coerced to a string and have "px" appended.}
 
 \item{out_dir}{a directory to place the visualization.
