@@ -79,4 +79,4 @@ save_outputs <- function(gg, name) {
   p
 }
 
-test_check("plotly", filter = "plotly")
+test_check("plotly")
