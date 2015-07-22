@@ -107,13 +107,13 @@ add_trace <- function(p = get_plot(), ..., type = "scatter",
   if (!missing(colors)) argz$colors <- substitute(colors)
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
+  p <- get_plot(p)
   tr <- list(
     args = argz,
     # if data is missing, adopt the most recent data environment
     env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
     enclos = parent.frame()
   )
-  p <- get_plot(p)
   p$data <- c(p$data, list(tr))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
@@ -277,8 +277,9 @@ plotly_build <- function(l) {
   }
   # add appropriate axis title (if they don't already exist)
   x <- axis_titles(x, l)
-  # create a new plotly if no url is attached to this environment
-  x$fileopt <- if (is.null(l$url)) "new" else "overwrite"
+  # tack on other keyword arguments, if necessary
+  idx <- !names(l) %in% c("data", "layout")
+  if (any(idx)) x <- c(x, l[idx])
   # add plotly class mainly for printing method
   class(x) <- unique(c("plotly", class(x)))
   x
