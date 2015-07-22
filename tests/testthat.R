@@ -61,6 +61,8 @@ save_outputs <- function(gg, name) {
       while (inherits(e, "try-error")) {
         e <- try(curl::curl_download(paste0(u, ".png"), filename))
       }
+    } else {
+      stop(shQuote(name), " has already been used to save_outputs() in another test.")
     }
     
     # if missing, save the ggplot2
@@ -77,4 +79,4 @@ save_outputs <- function(gg, name) {
   p
 }
 
-test_check("plotly")
+test_check("plotly", filter = "plotly")

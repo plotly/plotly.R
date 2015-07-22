@@ -48,7 +48,7 @@ g <- base +
   geom_density(fill = "lightblue", alpha = 0.1)
   
 test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
-  info <- expect_traces(g, 2, "color")
+  info <- expect_traces(g, 2, "histogram")
   trs <- info$traces
   type <- unique(sapply(trs, "[[", "type"))
   expect_identical(sort(type), c("bar", "scatter"))

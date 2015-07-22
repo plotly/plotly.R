@@ -120,7 +120,7 @@ test_that("geom_polygon(aes(size), fill, colour)", {
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, size=lab), fill="orange", colour="black")+
     scale_size_manual(values=c(left=2, right=3))
-  info <- expect_traces(gg, 2, "color-fill-aes-linetype")
+  info <- expect_traces(gg, 2, "color-fill-aes-size")
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$fillcolor, toRGB("orange"))
