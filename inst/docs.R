@@ -113,12 +113,13 @@ plot_ly(ggplot2::diamonds, x = cut, y = price, color = clarity, type = "box") %>
 # ----------------------------------------------------------------------
 
 # IMO, this page should be a part of this page -> https://plot.ly/r/line-and-scatter/
-data(diamonds, package = "ggplot2")
-d <- diamonds[sample(nrow(diamonds), 1000), ]
 library(plotly)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
 # note how size is automatically scaled and added as hover text
+plot_ly(d, x = carat, y = price, size = carat, mode = "markers")
+
 plot_ly(d, x = carat, y = price, text = paste("Clarity: ", clarity),
-        mode = "markers", size = carat, opacity = 1/carat)
+        mode = "markers", color = carat, size = carat, opacity = carat)
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/contour-plots/
@@ -633,6 +634,8 @@ plot_ly(df, lon = lon, lat = lat, text = hover,
 # https://plot.ly/python/map-subplots-and-small-multiples/
 # ----------------------------------------------------------------------------
 
+library(plotly)
+
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv')
 
 # common map properties
@@ -644,75 +647,50 @@ g <- list(
   subunitcolor = toRGB("white")
 )
 
-df2 <- subset(df, YEAR %in% 2000:2005)
-p <- plot_ly(df2, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
-             marker = list(color = toRGB("blue"), opacity = 0.5), showlegend = F) %>%
+
+yrs <- unique(df$YEAR)
+id <- seq_along(yrs)
+df$id <- factor(df$YEAR, levels = id)
+df2 <- data.frame(
+  YEAR = yrs,
+  id = id
+)
+
+
+p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
+             geo = paste0("geo", id), showlegend = F,
+             marker = list(color = toRGB("blue"), opacity = 0.5)) %>%
+  add_trace(lon = list(-78), lat = list(47), mode = 'text', group = YEAR,
+            geo = paste0("geo", id), text = list(YEAR), data = df2) %>%
   layout(title = 'New Walmart Stores per year 1962-2006<br> 
          Source: <a href="http://www.econ.umn.edu/~holmes/data/WalMart/index.html">
          University of Minnesota</a>',
-         # showlegend = False,
+         geo = g,
          autosize = F,
          width = 1000,
          height = 900,
          hovermode = F)
 
-# To do more complex plots, you might need to modify the _built_ plotly object
-l <- plotly_build(p)
-geos <- sub("^geo1$", "geo", paste0("geo", seq_along(unique(df2$YEAR))))
-l$data <- Map(function(x, y) { x[["geo"]] <- y; x }, l$data, geos)
-frac <- function(x) {
-  y <- abs(x - trunc(x))
-  y[y == 0 & x > 0] <- 1
-  y
-}
-
-for (i in 9:1) {
-  for (j in 1:5) {
-    # five columns
-    xs <- c((j - 1) / 5, j / 5)
-    l[["layout"]][[geos[i]]] <- c(
-      g,
-      list(domain =
-             list(
-               x = frac(xs),
-               y = c(0, 1)
-             )
-      )
-    )
-  }
-  
-}
+subplot(p, nrows = 7)
 
 
-l
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/privacy/
+# ----------------------------------------------------------------------------
 
+library(plotly)
 
-# IDEA: In subplots API, maybe we could provide smart domain defaults given that
-# the user specifies which traces are on different plots? For example:
-p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
-             marker = list(color = toRGB("blue"), opacity = 0.5), showlegend = F)
-l <- plotly_build(p)
-geos <- sub("^geo1$", "geo", paste0("geo", seq_along(unique(df$YEAR))))
-l$data <- Map(function(x, y) { x[["geo"]] <- y; x }, l$data, geos)
-subplot(l)
+#' public
+plot_ly(x = c(0, 2, 4), y = c(0, 4, 2))
 
+#' private
+plot_ly(x = c(0, 2, 4), y = c(0, 4, 2), 
+        world_readable = FALSE, filename = "privacy-true")
 
-# Also, something like this?
-df$id <- factor(df$YEAR)
-levels(df$id) <- seq_along(unique(df$YEAR))
-p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
-             geo = paste0("geo", id), showlegend = F,
-             marker = list(color = toRGB("blue"), opacity = 0.5))
-subplot(p)
+# another option is to "build" the plot, then tack on these properties
+p <- plot_ly(x = c(0, 2, 4), y = c(0, 4, 2))
+p <- plotly_build(p)
+p$world_readable <- FALSE
+p$filename <- "privacy-true"
+p
 
-
-# # some examples are easier with ggplot2 (but this takes FOREVER)
-# library(ggplot2)
-# st <- map_data("state")
-# gg <- ggplot() + geom_polygon(aes(long, lat, group = group), data = st) +
-#   geom_point(aes(LON, LAT), color = "blue", alpha = 0.5, data = df) + 
-#   facet_wrap(~YEAR, ncol = 5)
-# 
-# # convert ggplot2 to plotly
-# p <- ggplotly(gg)
-# str(p$layout)
