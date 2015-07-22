@@ -42,6 +42,7 @@ test_that("Mapping a factor variable to color works", {
 })
 
 test_that("Custom RColorBrewer pallette works for factor variable", {
+  browser()
   cols <- RColorBrewer::brewer.pal(9, "Set1")
   # specifying a pallette set should "span the gamut" 
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
@@ -76,7 +77,5 @@ test_that("Custom RColorBrewer pallette works for numeric variable", {
   marker <- l$data[[1]]$marker
   expect_identical(marker$colorbar$title, "Petal.Width")
   expect_identical(marker$color, iris$Petal.Width)
-  expect_identical(marker$cmin, min(iris$Petal.Width))
-  expect_identical(marker$cmax, max(iris$Petal.Width))
   expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
 })
