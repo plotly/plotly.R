@@ -280,6 +280,18 @@ plotly_build <- function(l) {
   # tack on other keyword arguments, if necessary
   idx <- !names(l) %in% c("data", "layout")
   if (any(idx)) x <- c(x, l[idx])
+  # some object keys require an array, even if length one
+  # one way to ensure atomic vectors of length 1 are not automatically unboxed,
+  # by to_JSON(), is to attach a class of AsIs (via I())
+  for (i in seq_along(x$data)) {
+    d <- x$data[[i]]
+    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
+    if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
+  }
+  # search for keyword args in traces and place them at the top level
+  x <- c(x, Reduce(c, lapply(x$data, function(z) z[get_kwargs()])))
+  # traces shouldn't have any names
+  x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
   class(x) <- unique(c("plotly", class(x)))
   x

@@ -28,21 +28,16 @@
 
 plotly_POST <- function(x) {
   x <- plotly_build(x)
-  args <- setNames(x$data, NULL)
-  kwargs <- x[get_kwargs()]
   
-  # search for keyword args in traces and take the first valid one
-  kwargs2 <- Reduce(c, lapply(x$data, function(x) x[get_kwargs()]))
-  kwargs <- modifyList(kwargs, kwargs2 %||% list())
+  # empty keyword arguments can cause problems
+  kwargs <- x[get_kwargs()]
+  kwargs <- kwargs[sapply(kwargs, length) > 0]
   
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
   if (is.null(kwargs$filename)) kwargs$filename <- "plot from api"
   if (!is.null(x$url)) kwargs$fileopt <- "overwrite"
   if (is.null(kwargs$fileopt)) kwargs$fileopt <- "new"
-  
-  # empty keyword arguments can cause problems
-  kwargs <- kwargs[sapply(kwargs, length) > 0]
   
   # construct body of message to plotly server
   bod <- list(
@@ -51,7 +46,7 @@ plotly_POST <- function(x) {
     origin = if (is.null(x$origin)) "plot" else x$origin,
     platform = "R",
     version = as.character(packageVersion("plotly")),
-    args = to_JSON(args),
+    args = to_JSON(x$data),
     kwargs = to_JSON(kwargs)
   )
   base_url <- file.path(get_domain(), "clientresp")

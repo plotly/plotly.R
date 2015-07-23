@@ -104,6 +104,11 @@ from_JSON <- function(x, ...) {
   jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
+# plotlyjs properties that must _always_ be an array (even if length 1)
+get_boxed <- function() {
+  c("x", "y", "lat", "lon", "text")
+}
+
 # add a class to an object only if it is new, and keep any existing classes of 
 # that object
 struct <- function(x, y, ...) {

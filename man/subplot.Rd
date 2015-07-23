@@ -20,6 +20,13 @@ A plotly object
 \description{
 View multiple plots in a single view
 }
+\examples{
+\dontrun{
+p1 <- plot_ly(economics, x = date, y = uempmed, showlegend = F)
+p2 <- plot_ly(economics, x = date, y = unemploy, showlegend = F)
+offline(subplot(p1, p2, p1, p2, nrows = 2))
+}
+}
 \author{
 Carson Sievert
 }
