@@ -19,6 +19,7 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
   # put existing plot anchors and domain information into a tidy format
   # (geo, xaxis, or yaxis can be used to anchor traces on different plots)
   p_info <- list()
+  ctr <- 1
   for (i in seq_along(dots)) {
     dat <- dots[[i]]$data
     layout <- dots[[i]]$layout
@@ -51,7 +52,8 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
           yend = dy[2]
         )
       }
-      p_info[[i * j]] <- c(info, plot = i, trace = j)
+      p_info[[ctr]] <- c(info, plot = i, trace = j)
+      ctr <- ctr + 1
     }
   }
   # put p_info into a data.frame()
@@ -69,7 +71,7 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
   # (I don't think it makes sense to support partial specification of domains)
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
     nplots <- max(p_info$key)
-    ncols <- floor(nplots / nrows)
+    ncols <- ceiling(nplots / nrows)
     xdom <- get_domains(nplots, ncols)
     ydom <- get_domains(nplots, nrows)
     xdf <- cbind(
@@ -77,7 +79,10 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
       key = seq_len(nplots)
     )
     ydf <- list2df(ydom, c("ystart", "yend"))
-    # make sure the first plot appears in the top row
+    # get_domains() currently assumes plots are drawn from _lower_ left
+    # corner to _upper_ right, but we need them going from _upper_ left
+    # to _lower-right_
+    ydf <- with(ydf, data.frame(ystart = 1 - yend, yend = 1 - ystart))
     ydf <- ydf[order(ydf$ystart, decreasing = TRUE), ]
     ydf$key <- seq_len(nplots)
     # overwrite relevant info 
@@ -123,6 +128,7 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
       p$data[[i]]$yaxis <- info$yaxis
     }
   }
+  browser()
   hash_plot(data.frame(), p)
 }
 
