@@ -15,12 +15,14 @@ hash <- if (src == "local") {
 # (note the working directory should be /path/to/plotly/tests)
 table_dir <- normalizePath("../../plotly-test-table")
 plotly_dir <- file.path(table_dir, "R", hash)
-if (!dir.exists(plotly_dir)) dir.create(plotly_dir, recursive = TRUE)
+plotly_thumb_dir <- file.path(plotly_dir, "thumbs")
+dir.create(plotly_thumb_dir, showWarnings = FALSE, recursive = TRUE)
 
 # in case we need save ggplot2 output
 ggversion <- as.character(packageVersion("ggplot2"))
 gg_dir <- file.path(table_dir, "R", paste0("ggplot2-", ggversion))
-if (!dir.exists(gg_dir)) dir.create(gg_dir, recursive = TRUE)
+gg_thumb_dir <- file.path(gg_dir, "thumbs")
+dir.create(gg_thumb_dir, showWarnings = FALSE, recursive = TRUE)
 gg_names <- sub("\\.png$", "", dir(gg_dir, pattern = "\\.png$"))
 
 # text file that tracks figure hashes
@@ -66,7 +68,7 @@ save_outputs <- function(gg, name) {
       })
       # now convert png to a smaller size
       cmd <- paste("convert", filename, "-resize 230", 
-                   sub("\\.png", "thumb.png", filename))
+                   file.path(plotly_thumb_dir, paste0(name, ".png")))
       st <- system(cmd)
     } else {
       stop(shQuote(name), " has already been used to save_outputs() in another test.")
@@ -81,13 +83,10 @@ save_outputs <- function(gg, name) {
       dev.off()
       # now convert png to a smaller size
       cmd <- paste("convert", gg_file, "-resize 230", 
-                   sub("\\.png", "thumb.png", gg_file))
+                   file.path(gg_thumb_dir, paste0(name, ".png")))
       st <- system(cmd)
     }
-    
-    
   }
-  
   p
 }
 

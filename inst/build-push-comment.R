@@ -16,7 +16,7 @@ library("testthat")
 
 # check the working directory
 stopifnot(basename(getwd()) == "plotly-test-table")
-# this script helps build the diff pages
+# define create_diff() which helps build the diff pages
 source("jsondiff/create_diff.R")
 
 # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
@@ -73,9 +73,11 @@ if (tpr != "false" && tpr != "") {
     stringsAsFactors = FALSE
   )
   names(df) <- c("test", "ggplot2", branch, "master")
-  df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
+  # eventually link to page for each test?
+  #df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
+  # show just the thumbnail, but link to the bigger image
   for (i in setdiff(names(df), "test")) 
-    df[, i] <- sprintf('<img src="%s">', sub("\\.png", "thumb.png", df[, i]))
+    df[, i] <- sprintf('<a href = "%s"> <img src="thumbs/%s"> </a>', df[, i])
   html <- sprintf(
   '<!DOCTYPE html>
     <html>
