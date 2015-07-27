@@ -18,7 +18,7 @@
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
-#' @param size A variable name or numeric vector to encode the area of markers.
+#' @param size A variable name or numeric vector to encode the size of markers.
 #' @param inherit should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -44,7 +44,7 @@
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
-                    group, color, colors, symbol, symbols,
+                    group, color, colors, symbol, symbols, size,
                     inherit = TRUE, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
@@ -54,6 +54,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   if (!missing(colors)) argz$colors <- substitute(colors)
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
+  if (!missing(size)) argz$size <- substitute(size)
   # trace information
   tr <- list(
     type = type,
@@ -87,7 +88,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
-#' @param size A variable name or numeric vector to encode the area of markers.
+#' @param size A variable name or numeric vector to encode the size of markers.
 #' @param data A data frame to associate with this trace (optional). If not 
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
 #' @param evaluate logical. Evaluate arguments when this function is called?
@@ -107,6 +108,7 @@ add_trace <- function(p = get_plot(), ..., type = "scatter",
   if (!missing(colors)) argz$colors <- substitute(colors)
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
+  if (!missing(size)) argz$size <- substitute(size)
   p <- get_plot(p)
   tr <- list(
     args = argz,
@@ -184,7 +186,7 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
 #' 
 #' @param l a ggplot object, or a plotly object, or a list.
 #' @export
-plotly_build <- function(l) {
+plotly_build <- function(l = get_plot()) {
   # ggplot objects don't need any special type of handling
   if (is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
@@ -226,7 +228,8 @@ plotly_build <- function(l) {
       txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
       dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
     }
-    has_color <- !is.null(dat[["color"]]) || !is.null(dat[["z"]])
+    has_color <- !is.null(dat[["color"]]) || 
+      (!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
     has_symbol <- !is.null(dat[["symbol"]])
     has_group <- !is.null(dat[["group"]])
     if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
@@ -288,8 +291,11 @@ plotly_build <- function(l) {
     idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
     if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
   }
+  
   # search for keyword args in traces and place them at the top level
-  x <- c(x, Reduce(c, lapply(x$data, function(z) z[get_kwargs()])))
+  kwargs <- lapply(x$data, function(z) z[get_kwargs()])
+  if (length(kwargs) == 1) kwargs <- c(kwargs, kwargs)
+  x <- c(x, Reduce(modifyList, kwargs))
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
@@ -378,14 +384,21 @@ traceify <- function(dat, nm = "group") {
 }
 
 axis_titles <- function(x, l) {
+  d <- l$data[[1]]
+  argz <- as.list(d$args)
+  scene <- if (d$type %in% c("scatter3d", "surface")) TRUE else FALSE
+  # TODO: how to attach title to scene object in layout???
   for (i in c("x", "y", "z")) {
     s <- lapply(x$data, "[[", i)
     ax <- paste0(i, "axis")
     t <- x$layout[[ax]]$title
     if (is.null(t)) { # deparse the unevaluated expression from 1st trace
-      argz <- as.list(l$data[[1]]$args)
       idx <- names(argz) %in% i
-      if (any(idx)) x$layout[[ax]]$title <- deparse(argz[idx][[1]])
+      if (any(idx)) {
+        title <- deparse(argz[idx][[1]])
+        if (scene) x$layout[["scene"]][[ax]]$title <- title 
+        else x$layout[[ax]]$title <- title
+      }
     }
   }
   x
