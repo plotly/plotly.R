@@ -76,8 +76,11 @@ if (tpr != "false" && tpr != "") {
   # eventually link to page for each test?
   #df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
   # show just the thumbnail, but link to the bigger image
-  for (i in setdiff(names(df), "test")) 
-    df[, i] <- sprintf('<a href="%s"><img src="thumbs/%s"></a>', df[, i], df[, i])
+  for (i in setdiff(names(df), "test")) {
+    thumb <- file.path(dirname(df[, i]), "thumbs", basename(df[, i]))
+    df[, i] <- sprintf('<a href="%s"><img src="%s"></a>', df[, i], thumb)
+  }
+    
   html <- sprintf(
   '<!DOCTYPE html>
     <html>
