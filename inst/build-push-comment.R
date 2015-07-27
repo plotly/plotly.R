@@ -74,7 +74,8 @@ if (tpr != "false" && tpr != "") {
   )
   names(df) <- c("test", "ggplot2", branch, "master")
   df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
-  for (i in setdiff(names(df), "test")) df[, i] <- sprintf('<img src="%s">', df[, i])
+  for (i in setdiff(names(df), "test")) 
+    df[, i] <- sprintf('<img src="%s">', sub("\\.png", "thumb.png", df[, i]))
   html <- sprintf(
   '<!DOCTYPE html>
     <html>

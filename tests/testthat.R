@@ -44,11 +44,15 @@ save_outputs <- function(gg, name) {
     # POST data to plotly and return the url
     u <- if (packageVersion("plotly") < 1) {
       py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
-      resp <- py$ggplotly(gg, kwargs = list(auto_open = FALSE))
-      resp$response$url
+      tryWhile({
+        resp <- py$ggplotly(gg, kwargs = list(auto_open = FALSE))
+        resp$response$url
+      })
     } else {
-      resp <- plotly_POST(p)
-      resp$url
+      tryWhile({
+        resp <- plotly_POST(p)
+        resp$url
+      })
     }
     # save a hash of the R object sent to the plotly server
     # (eventually use this to prevent redundant POSTs?!)
@@ -57,10 +61,13 @@ save_outputs <- function(gg, name) {
     # download png under a directory specific to this installed version of plotly
     filename <- file.path(plotly_dir, paste0(name, ".png"))
     if (!file.exists(filename)) {
-      e <- try(curl::curl_download(paste0(u, ".png"), filename))
-      while (inherits(e, "try-error")) {
-        e <- try(curl::curl_download(paste0(u, ".png"), filename))
-      }
+      tryWhile({
+        curl::curl_download(paste0(u, ".png"), filename)
+      })
+      # now convert png to a smaller size
+      cmd <- paste("convert", filename, "-resize 230", 
+                   sub("\\.png", "thumb.png", filename))
+      st <- system(cmd)
     } else {
       stop(shQuote(name), " has already been used to save_outputs() in another test.")
     }
@@ -72,11 +79,26 @@ save_outputs <- function(gg, name) {
       png(gg_file, width = 700, height = 500)
       try(print(gg))
       dev.off()
+      # now convert png to a smaller size
+      cmd <- paste("convert", gg_file, "-resize 230", 
+                   sub("\\.png", "thumb.png", gg_file))
+      st <- system(cmd)
     }
+    
     
   }
   
   p
+}
+
+tryWhile <- function(expr, times = 20) {
+  e <- try(expr)
+  while (inherits(e, "try-error") && times > 0) {
+    Sys.sleep(0.5)
+    times <- times - 1
+    e <- try(expr)
+  }
+  e
 }
 
 test_check("plotly")
