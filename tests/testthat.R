@@ -67,9 +67,10 @@ save_outputs <- function(gg, name) {
         curl::curl_download(paste0(u, ".png"), filename)
       })
       # now convert png to a smaller size
-      cmd <- paste("convert", filename, "-resize 230", 
-                   file.path(plotly_thumb_dir, paste0(name, ".png")))
-      st <- system(cmd)
+      args <- c(args, "\\(", filename, "-density", "72x72", "-write", 
+                file.path(plotly_thumb_dir, paste0(name, ".png")),
+                "+delete", "\\)")
+      system2("convert", args)
     } else {
       stop(shQuote(name), " has already been used to save_outputs() in another test.")
     }
@@ -82,9 +83,10 @@ save_outputs <- function(gg, name) {
       try(print(gg))
       dev.off()
       # now convert png to a smaller size
-      cmd <- paste("convert", gg_file, "-resize 230", 
-                   file.path(gg_thumb_dir, paste0(name, ".png")))
-      st <- system(cmd)
+      args <- c(args, "\\(", filename, "-density", "72x72", "-write", 
+                file.path(gg_thumb_dir, paste0(name, ".png")),
+                "+delete", "\\)")
+      system2("convert", args)
     }
   }
   p

@@ -1,5 +1,5 @@
 ---
-title: "A declarative DSL for the plotly graphing library in R"
+title: "An introduction to plotly's R API"
 author: "Carson Sievert"
 output: html_document
 vignette: >
@@ -8,38 +8,75 @@ vignette: >
 ---
 
 ```{r setup, echo = FALSE, message = FALSE}
-# plotly's testbot
-Sys.setenv("plotly_username" = "TestBot")
-Sys.setenv("plotly_api_key" = "r1neazxo9w")
-# eventually set cache = T!
-knitr::opts_chunk$set(width = 800, height = 400, cache = FALSE)
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
-Version 1.0.0 of the [plotly R package](https://github.com/ropensci/plotly) introduces a new interface for creating plotly graphs in a [pure, predictable, and pipeable](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) manner. Most importantly, this implies a couple things:
-
-1. Functions take a central object (I'll call this a 'plotly object') as their first argument, modify it in some way, and return that modified object.
-2. Output is defined entirely based on input.
+Version 1.0.0 of the [plotly R package](https://github.com/ropensci/plotly) introduces a new interface for creating plotly graphs in a [pure, predictable, and pipeable](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) manner. This interface makes it a bit easier to work directly with the JavaScript graphing library by providing some high-level semantics and sensible defaults.
 
 ## Creating and modifying plotlys
 
-To initiate a plotly object with a single trace, use `plot_ly()`. Here we use it to create a scatter trace (but there are many [other trace types](https://plot.ly/javascript-graphing-library/reference/)).
+To initiate a plotly object, use `plot_ly()`. Here we use it to create a scatter trace (but there are many [other trace types](https://plot.ly/r/)).
 
-```{r, message = FALSE}
+```{r}
 library(plotly)
-data(economics, package = "ggplot2")
 p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", showlegend = F)
 ```
 
-If you have a plotly account, printing plotly objects in the R console will create a new plotly figure (via plotly's REST API). If you're using knitr/R Markdown with HTML output (like [this vignette]()), printing not only creates the plot, but also embeds it as an iframe. If you're using an IPython Notebook, you'll can embed with `embed_notebook(p)`.
+If you have a plotly account, printing plotly objects in the R console will create a new plotly figure (via plotly's REST API). If you're using knitr/R Markdown with HTML output (like [this vignette]()), printing not only creates the plot, but also embeds it as an HTML iframe. If you want to create standalone HTML pages, check out [plotly offline](http://purchasing.plot.ly/) and the accompanying [vignette for R]().
 
 ```{r}
 p
 ```
 
+## Using special arguments
+
+`plot_ly()` has a number of arguments which are unique to the R package that make common visualization tasks a bit easier. These arguments are very much inspired by the semantics of ggplot2's `qplot()` in the sense that a scaling function is automatically applied these variables.
+
+### The color argument
+
+If a ordinal variable (aka a non-ordered factor variable) is mapped to color, then a qualitative color pallete is used by default.
+
+```{r}
+plot_ly(iris, x = Petal.Length, y = Petal.Width, 
+        color = Species, mode = "markers")
+```
+
+<a href="https://plot.ly/~agvd/414"> 
+  <img src="https://plot.ly/~agvd/414.png">
+</a>
+
+If you want to change the default pallette, you can give the colors argument either a <http://colorbrewer2.org> pallette name (e.g., "Set1" or "Blues"), or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, or a color interpolation function like `grDevices::colorRamp()`.
+
+```{r}
+plot_ly(iris, x = Petal.Length, y = Petal.Width, 
+        color = Species, colors = "Set1", mode = "markers")
+```
+
+<a href="https://plot.ly/~agvd/428"> 
+  <img src="https://plot.ly/~agvd/428.png">
+</a>
+
+```{r}
+plot_ly(iris, x = Petal.Length, y = Petal.Width, z = Sepal.Width,
+        color = Sepal.Length, type = "scatter3d", mode = "markers")
+```
+
+
+### The symbol argument
+
+
+
+### The group argument
+
+This can be useful when used in conjunction with `subplot()` (link to a separate vignette?)
+
+## Manually adding traces
+
+Sometimes you want to add trace(s) to a plot that derive from a different data frame. 
+
 To add more traces to your plotly, use `add_trace()`. By default, trace information created in `plot_ly()` will carry over to future traces, unless we explictly override it (this helps [avoid repeating yourself](http://en.wikipedia.org/wiki/Don%27t_repeat_yourself)).
 
 ```{r}
-# since economics was provided to plot_ly(), we can still reference it's column names
 p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
 p2
 ```
@@ -50,10 +87,10 @@ To modify the styling of the plot, use `layout()`.
 (p3 <- layout(p2, title = "Median duration of unemployment (in weeks)"))
 ```
 
-If you study [plotly's graphing reference](https://plot.ly/javascript-graphing-library/reference), you'll see that many arguments take (JSON) objects. Under the hood, __plotly__ uses [__jsonlite__](http://cran.r-project.org/web/packages/jsonlite/index.html) to convert R objects to JSON, so knowing a bit about [it's mapping rules](http://arxiv.org/abs/1403.2805) can be helpful. Here, we modify the global font using a named list (a named list in R is equivalent to a JSON object).
+The documentation for valid arguments to `layout()` are under [plotly's R reference](https://plot.ly/r/reference/#layout). In addition to title (a string) , `layout()` also accepts [font](https://plot.ly/r/reference/#font) (a named list). Lets use this argument to change the default font family and size:
 
 ```{r}
-layout(p3, font = list(family = "Courier New, monospace"))
+layout(p3, font = list(family = "Courier New, monospace", size = 10))
 ```
 
 If you look at the structure of plotly objects, they are data frames with a class of plotly and a special environment attached. 
@@ -62,7 +99,7 @@ If you look at the structure of plotly objects, they are data frames with a clas
 str(p3)
 ```
 
-This might seem strange, but it yields desirable results since it integrates nicely nicely with other pipeable interfaces that use a data frame their central object (such as [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html)). This means that we can incorporate data manipulation verbs into a sequence of steps leading to a visualization. Here, we take advantage of `dplyr::filter()` to label the highest peak in the time series:
+This might seem strange, but it yields desirable results since it integrates nicely with other pipeable interfaces that use a data frame their central object (such as [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html)). This means that we can incorporate data manipulation verbs into a sequence of steps leading to a visualization. Here, we take advantage of `dplyr::filter()` to label the highest peak in the time series:
 
 ```{r, message = FALSE, warning = FALSE}
 economics %>%
@@ -74,7 +111,7 @@ economics %>%
   layout(annotations = list(list(x = date, y = uempmed, text = "Peak", showarrow = T)))
 ```
 
-For some visualizations, using a data frame can be awkward. This is especially true of any trace type that requires `z`. Again, according the JSON reference, [`z` needs to be an array of arrays](https://plot.ly/javascript-graphing-library/reference/#surface-z). In this case, a numeric matrix works well.
+It's also important to note that plotly visualization don't _require_ a data frame. Chart types that accept a `z` argument 
 
 ```{r}
 str(volcano)
