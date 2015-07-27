@@ -5,7 +5,7 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, inherit = TRUE, evaluate = FALSE)
+  symbol, symbols, size, inherit = TRUE, evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -29,11 +29,11 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
 
+\item{size}{A variable name or numeric vector to encode the area of markers.}
+
 \item{inherit}{should future traces inherit properties from this initial trace?}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
-
-\item{size}{A variable name or numeric vector to encode the area of markers.}
 }
 \description{
 Transform data into a plotly visualization.
