@@ -77,7 +77,7 @@ if (tpr != "false" && tpr != "") {
   #df$test <- sprintf('<a href = "%s"> %s </a>', df$test, df$test)
   # show just the thumbnail, but link to the bigger image
   for (i in setdiff(names(df), "test")) 
-    df[, i] <- sprintf('<a href = "%s"> <img src="thumbs/%s"> </a>', df[, i])
+    df[, i] <- sprintf('<a href="%s"><img src="thumbs/%s"></a>', df[, i], df[, i])
   html <- sprintf(
   '<!DOCTYPE html>
     <html>
