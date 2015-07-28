@@ -78,3 +78,20 @@ test_that("Custom RColorBrewer pallette works for numeric variable", {
   expect_identical(marker$color, iris$Petal.Width)
   expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
 })
+
+test_that("axis titles get attached to scene object for 3D plots", {
+  p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, z = Sepal.Width,
+               type = "scatter3d", mode = "markers")
+  l <- expect_traces(p, 1, "scatterplot-scatter3d-axes")
+  scene <- l$layout$scene
+  expect_identical(scene$xaxis$title, "Petal.Length")
+  expect_identical(scene$yaxis$title, "Petal.Width")
+  expect_identical(scene$zaxis$title, "Sepal.Width")
+})
+
+test_that("Only use symbols as names for axis titles.", {
+  p <- plot_ly(x = c(1, 2), y = c(1, 2))
+  l <- expect_traces(p, 1, "scatterplot-axis-titles")
+  expect_identical(l$layout$xaxis$title, "x")
+  expect_identical(l$layout$yaxis$title, "y")
+})
