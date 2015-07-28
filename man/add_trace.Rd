@@ -5,7 +5,7 @@
 \title{Add a trace to a plotly visualization}
 \usage{
 add_trace(p = get_plot(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, data = NULL, evaluate = FALSE)
+  symbol, symbols, size, data = NULL, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly object.}
@@ -29,12 +29,12 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
 
+\item{size}{A variable name or numeric vector to encode the size of markers.}
+
 \item{data}{A data frame to associate with this trace (optional). If not
 provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
-
-\item{size}{A variable name or numeric vector to encode the area of markers.}
 }
 \description{
 Add a trace to a plotly visualization

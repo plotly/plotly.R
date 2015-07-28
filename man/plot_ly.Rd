@@ -29,7 +29,7 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 \item{symbols}{A character vector of symbol types. Possible values:
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
 
-\item{size}{A variable name or numeric vector to encode the area of markers.}
+\item{size}{A variable name or numeric vector to encode the size of markers.}
 
 \item{inherit}{should future traces inherit properties from this initial trace?}
 

@@ -4,7 +4,7 @@
 \alias{subplot}
 \title{View multiple plots in a single view}
 \usage{
-subplot(..., nrows = 1, which_layout = 1)
+subplot(..., nrows = 1, which_layout = "merge", margin = 0.1/nrows)
 }
 \arguments{
 \item{...}{any number of plotly objects}
@@ -12,7 +12,12 @@ subplot(..., nrows = 1, which_layout = 1)
 \item{nrows}{number of rows for laying out plots in a grid-like structure.
 Only used if no domain is already specified.}
 
-\item{which_layout}{adopt the layout of which plot?}
+\item{which_layout}{adopt the layout of which plot? If the default value of
+"merge" is used, all plot level layout options will be included in the final
+layout. This argument also accepts a numeric vector which will restric}
+
+\item{margin}{a numeric value between 0 and 1. Corrsepnds to the proportion
+of plot width/height to attribute to margins between subplots.}
 }
 \value{
 A plotly object

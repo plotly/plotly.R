@@ -3,7 +3,11 @@
 #' @param ... any number of plotly objects
 #' @param nrows number of rows for laying out plots in a grid-like structure.
 #' Only used if no domain is already specified.
-#' @param which_layout adopt the layout of which plot?
+#' @param which_layout adopt the layout of which plot? If the default value of 
+#' "merge" is used, all plot level layout options will be included in the final 
+#' layout. This argument also accepts a numeric vector which will restric
+#' @param margin a numeric value between 0 and 1. Corrsepnds to the proportion 
+#' of plot width/height to attribute to margins between subplots.
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
@@ -15,7 +19,7 @@
 
 
 ## TODO: add warning if geo and non-geo coordinates are used!!!
-subplot <- function(..., nrows = 1, which_layout = 1) {
+subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows) {
   # note that dots is a _list of plotlys_
   dots <- lapply(list(...), plotly_build)
   # put existing plot anchors and domain information into a tidy format
@@ -75,8 +79,8 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
     nplots <- max(p_info$key)
     ncols <- ceiling(nplots / nrows)
-    xdom <- get_domains(nplots, ncols)
-    ydom <- get_domains(nplots, nrows)
+    xdom <- get_domains(nplots, ncols, margin)
+    ydom <- get_domains(nplots, nrows, margin)
     xdf <- cbind(
       list2df(xdom, c("xstart", "xend")),
       key = seq_len(nplots)
@@ -95,11 +99,19 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
   }
   # empty plot container that we'll fill up with new info
   p <- list(
-    data = vector("list", nrow(p_info)),
-    # add warning if referencing non-exitant layouts?
-    layout = dots[[which_layout]]$layout
+    data = vector("list", nrow(p_info))
   )
-    
+  # merge layouts of the subplots
+  ls <- if (which_layout == "merge") {
+    lapply(dots, "[[", "layout")
+  } else {
+    # TODO: warning if referencing non-exitant layouts?
+    lapply(dots[which_layout], "[[", "layout")
+  }
+  ls <- ls[!vapply(ls, is.null, logical(1))]
+  p[["layout"]] <- Reduce(modifyList, ls)
+  
+  
   p_info$plot <- as.numeric(p_info$plot)
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
