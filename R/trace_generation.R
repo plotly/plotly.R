@@ -545,7 +545,7 @@ geom2trace <- list(
       L$marker$sizeref <- default.marker.sizeref
       # Make sure sizes are passed as a list even when there is only one element.
       s <- data$size
-      marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
+      marker.size <- 10 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
       marker.size <- marker.size * marker.size.mult
       L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
       L$marker$line$width <- 0
