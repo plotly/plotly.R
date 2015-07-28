@@ -35,8 +35,11 @@ plotly_POST <- function(x) {
   
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
-  if (is.null(kwargs$filename)) kwargs$filename <- "plot from api"
-  if (!is.null(x$url)) kwargs$fileopt <- "overwrite"
+  if (!is.null(x$url) || !is.null(kwargs$filename)) kwargs$fileopt <- "overwrite"
+  if (is.null(kwargs$filename)) 
+    kwargs$filename <- kwargs$layout$title %||% 
+    with(kwargs$layout, paste(c(xaxis, yaxis, zaxis), collapse = "vs.")) %||%
+    "plot from api" 
   if (is.null(kwargs$fileopt)) kwargs$fileopt <- "new"
   
   # construct body of message to plotly server
