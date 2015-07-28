@@ -41,8 +41,10 @@ plotly_POST <- function(x) {
     kwargs$filename <- 
       as.character(kwargs$layout$title) %||% 
       paste(
-        c(kwargs$layout$xaxis, kwargs$layout$yaxis, kwargs$layout$zaxis), 
-        collapse = "vs."
+        c(kwargs$layout$xaxis$title, 
+          kwargs$layout$yaxis$title, 
+          kwargs$layout$zaxis$title), 
+        collapse = " vs. "
       ) %||%
       "plot from api" 
   }
