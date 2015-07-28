@@ -13,6 +13,8 @@
 #' offline(subplot(p1, p2, p1, p2, nrows = 2))
 #' }
 
+
+## TODO: add warning if geo and non-geo coordinates are used!!!
 subplot <- function(..., nrows = 1, which_layout = 1) {
   # note that dots is a _list of plotlys_
   dots <- lapply(list(...), plotly_build)
@@ -56,6 +58,7 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
       ctr <- ctr + 1
     }
   }
+  #browser()
   # put p_info into a data.frame()
   p_info <- Reduce(rbind, p_info)
   row.names(p_info) <- NULL
@@ -90,12 +93,13 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
     p_info <- plyr::join(p_info, xdf, by = "key")
     p_info <- plyr::join(p_info, ydf, by = "key")
   }
-  
   # empty plot container that we'll fill up with new info
   p <- list(
     data = vector("list", nrow(p_info)),
+    # add warning if referencing non-exitant layouts?
     layout = dots[[which_layout]]$layout
   )
+    
   p_info$plot <- as.numeric(p_info$plot)
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
@@ -116,12 +120,15 @@ subplot <- function(..., nrows = 1, which_layout = 1) {
     } else {
       xaxis <- sub("x", "xaxis", info$xaxis)
       yaxis <- sub("y", "yaxis", info$yaxis)
+      # does this plot contain x/y axis styling? If so, use it 
+      # (but overwrite domain/anchor info)
+      l <- dots[[info$plot]]$layout
       p$layout[[xaxis]] <- modifyList(
-        p$layout[[xaxis]] %||% list(),
+        l[names(l) %in% "xaxis"][[1]] %||% list(),
         list(domain = xdom, anchor = info$yaxis)
       )
       p$layout[[yaxis]] <- modifyList(
-        p$layout[[yaxis]] %||% list(),
+        l[names(l) %in% "yaxis"][[1]] %||% list(),
         list(domain = ydom, anchor = info$xaxis)
       )
       p$data[[i]]$xaxis <- info$xaxis
