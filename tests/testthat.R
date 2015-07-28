@@ -67,7 +67,7 @@ save_outputs <- function(gg, name) {
         curl::curl_download(paste0(u, ".png"), filename)
       })
       # now convert png to a smaller size
-      args <- c(filename, "-density", "72x72", "-write", 
+      args <- c(filename, "-density", "36x36", "-write", 
                 file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
       system2("convert", args)
     } else {
