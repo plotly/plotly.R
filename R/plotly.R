@@ -190,6 +190,10 @@ plotly_build <- function(l = get_plot()) {
   # ggplot objects don't need any special type of handling
   if (is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
+  # plots without NSE don't need it either
+  nms <- lapply(l$data, names)
+  idx <- unique(unlist(lapply(l$data, names))) %in% c("args", "env")
+  if (sum(idx) != 2) return(l)
   nms <- names(l)
   # assume unnamed list elements are data/traces
   idx <- nms %in% ""
@@ -388,7 +392,6 @@ axis_titles <- function(x, l) {
   argz <- as.list(d$args)
   scene <- if (isTRUE(d$type %in% c("scatter3d", "surface"))) TRUE else FALSE
   for (i in c("x", "y", "z")) {
-    s <- lapply(x$data, "[[", i)
     ax <- paste0(i, "axis")
     t <- x$layout[[ax]]$title
     if (is.null(t)) {
@@ -402,6 +405,21 @@ axis_titles <- function(x, l) {
   }
   x
 }
+
+#' Create a complete empty plotly graph.
+#' 
+#' Useful when used with \link{subplot}
+#' 
+#' @export
+plotly_empty <- function() {
+  eaxis <- list(
+    showticklabels = FALSE,
+    showgrid = FALSE,
+    zeroline = FALSE
+  )
+  layout(plot_ly(), xaxis = eaxis, yaxis = eaxis)
+}
+
 
 #' Main interface to plotly 
 #' 
