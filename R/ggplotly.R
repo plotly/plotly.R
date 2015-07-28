@@ -25,6 +25,12 @@
 #' 
 ggplotly <- function(p = last_plot()) {
   l <- gg2list(p)
+  # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
+  # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
+  # x/y/etc so that they don't get unboxed when they are of length 1.
+  # unfortunately, this conflicts when using I() in qplot. For example,
+  # qplot(1:10, 1:10, size = I(10))
+  l <- rapply(l, unclass, how = "list")
   hash_plot(p$data, l)
 }
 
