@@ -98,7 +98,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @export
 #' 
 add_trace <- function(p = get_plot(), ..., type = "scatter",
-                      group, color, colors, symbol, symbols,
+                      group, color, colors, symbol, symbols, size,
                       data = NULL, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
@@ -386,16 +386,15 @@ traceify <- function(dat, nm = "group") {
 axis_titles <- function(x, l) {
   d <- l$data[[1]]
   argz <- as.list(d$args)
-  scene <- if (d$type %in% c("scatter3d", "surface")) TRUE else FALSE
-  # TODO: how to attach title to scene object in layout???
+  scene <- if (isTRUE(d$type %in% c("scatter3d", "surface"))) TRUE else FALSE
   for (i in c("x", "y", "z")) {
     s <- lapply(x$data, "[[", i)
     ax <- paste0(i, "axis")
     t <- x$layout[[ax]]$title
-    if (is.null(t)) { # deparse the unevaluated expression from 1st trace
-      idx <- names(argz) %in% i
-      if (any(idx)) {
-        title <- deparse(argz[idx][[1]])
+    if (is.null(t)) {
+      idx <- which(names(argz) %in% i)
+      if (length(idx)) {
+        title <- if (is.symbol(argz[[idx]])) deparse(argz[[idx]]) else i
         if (scene) x$layout[["scene"]][[ax]]$title <- title 
         else x$layout[[ax]]$title <- title
       }
