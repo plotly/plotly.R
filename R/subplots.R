@@ -22,7 +22,7 @@
 
 
 ## TODO: throw warning if geo and non-geo coordinates are used!!!
-subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0) {
+subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 /nrows) {
   # note that dots is a _list of plotlys_
   dots <- lapply(list(...), plotly_build)
   # put existing plot anchors and domain information into a tidy format
