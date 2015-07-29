@@ -296,7 +296,7 @@ mtcars <- mtcars[order(mtcars$disp), ]
 p <- plot_ly(mtcars, x = disp, y = mpg, mode = "markers", 
              text = rownames(mtcars), showlegend = FALSE) 
 add_trace(p, y = fitted(loess(mpg ~ disp)), mode = "lines", 
-          name = "loess smoother", showlegend = TRUE) %>% offline
+          name = "loess smoother", showlegend = TRUE) 
 
 #' Scatterplot with loess smoother and it's uncertaincy estimates
 m <- loess(mpg ~ disp, data = mtcars)
@@ -479,6 +479,8 @@ plot_ly(air, lon = long, lat = lat, text = airport, type = 'scattergeo',
   layout(title = 'Feb. 2011 American Airline flight paths<br>(Hover for airport names)',
          geo = geo, showlegend = FALSE)
 
+#' London to NYC Great Circle
+library(plotly)
 plot_ly(lat = c(40.7127, 51.5072), lon = c(-74.0059, 0.1275), type = 'scattergeo',
         mode = 'lines', line = list(width = 2, color = 'blue')) %>%
   layout(
@@ -508,6 +510,8 @@ plot_ly(lat = c(40.7127, 51.5072), lon = c(-74.0059, 0.1275), type = 'scattergeo
     )
   )
 
+#' Contour lines on globe
+library(plotly)
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/globe_contours.csv')
 df$id <- seq_len(nrow(df))
 
@@ -556,77 +560,87 @@ layout(p, showlegend = FALSE, geo = geo,
        title = 'Contour lines over globe<br>(Click and drag to rotate)')
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/python/scatter-plots-on-maps/
+#  https://plot.ly/r/scatter-plots-on-maps/ (new)
 # ----------------------------------------------------------------------------
 
+#' US Airports Map
+library(plotly)
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2011_february_us_airport_traffic.csv')
 df$hover <- with(df, paste(airport, city, state, "Arrivals: ", cnt))
 
-# TODO: rework utils so that marker specs aren't written over
+# marker styling
+m <- list(
+  colorbar = list(title = "Incoming flights February 2011"),
+  size = 8, opacity = 0.8, symbol = 'square'
+)
+
+# geo styling
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showland = TRUE,
+  landcolor = toRGB("gray95"),
+  subunitcolor = toRGB("gray85"),
+  countrycolor = toRGB("gray85"),
+  countrywidth = 0.5,
+  subunitwidth = 0.5        
+)
+
 plot_ly(df, lat = lat, lon = long, text = hover, color = cnt, 
         type = 'scattergeo', locationmode = 'USA-states', mode = 'markers',
-        marker = list(size = 8, opacity = 0.8, symbol = 'square')) %>%
-  layout(
-    title = 'Most trafficked US airports<br>(Hover for airport names)',
-    geo = list(
-      scope = 'usa',
-      projection = list(type = 'albers usa'),
-      showland = TRUE,
-      landcolor = toRGB("gray95"),
-      subunitcolor = toRGB("gray85"),
-      countrycolor = toRGB("gray85"),
-      countrywidth = 0.5,
-      subunitwidth = 0.5        
-    )
-  )
+        marker = m) %>%
+  layout(title = 'Most trafficked US airports<br>(Hover for airport)', geo = g)
 
-##########################################################################
-
+#' North American Precipitation Map
+library(plotly)
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2015_06_30_precipitation.csv')
 df$hover <- paste(df$Globvalue, "inches")
 
 # change default color scale title
 m <- list(colorbar = list(title = "Total Inches"))
 
+# geo styling
+g <- list(
+  scope = 'north america',
+  showland = TRUE,
+  landcolor = toRGB("grey83"),
+  subunitcolor = toRGB("white"),
+  countrycolor = toRGB("white"),
+  showlakes = TRUE,
+  lakecolor = toRGB("white"),
+  showsubunits = TRUE,
+  showcountries = TRUE,
+  resolution = 50,
+  projection = list(
+    type = 'conic conformal',
+    rotation = list(
+      lon = -100
+    )
+  ),
+  lonaxis = list(
+    showgrid = TRUE,
+    gridwidth = 0.5,
+    range = c(-140, -55),
+    dtick = 5
+  ),
+  lataxis = list(
+    showgrid = TRUE,
+    gridwidth = 0.5,
+    range = c(20, 60),
+    dtick = 5
+  )
+)
+
 plot_ly(df, lat = Lat, lon = Lon, text = hover, color = Globvalue,
         type = 'scattergeo', marker = m) %>%
-  layout(title = 'US Precipitation 06-30-2015<br>Source: NOAA',
-         geo = list(
-           scope = 'north america',
-           showland = TRUE,
-           landcolor = toRGB("grey83"),
-           subunitcolor = toRGB("white"),
-           countrycolor = toRGB("white"),
-           showlakes = TRUE,
-           lakecolor = toRGB("white"),
-           showsubunits = TRUE,
-           showcountries = TRUE,
-           resolution = 50,
-           projection = list(
-             type = 'conic conformal',
-             rotation = list(
-               lon = -100
-             )
-           ),
-           lonaxis = list(
-             showgrid = TRUE,
-             gridwidth = 0.5,
-             range= c(-140, -55),
-             dtick = 5
-           ),
-           lataxis = list(
-             showgrid = TRUE,
-             gridwidth = 0.5,
-             range= c(20, 60),
-             dtick = 5
-           )
-         )
-  )
+  layout(title = 'US Precipitation 06-30-2015<br>Source: NOAA', geo = g)
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/python/bubble-maps/
+#  https://plot.ly/r/bubble-maps/ (new)
 # ----------------------------------------------------------------------------
 
+#' United States Bubble Map
+library(plotly)
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_us_cities.csv')
 df$hover <- paste(df$name, "Population", df$pop/1e6, " million")
 
@@ -634,29 +648,32 @@ df$q <- with(df, cut(pop, quantile(pop)))
 levels(df$q) <- paste(c("1st", "2nd", "3rd", "4th", "5th"), "Quantile")
 df$q <- as.ordered(df$q)
 
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showland = TRUE,
+  landcolor = toRGB("gray85"),       
+  subunitwidth = 1,
+  countrywidth = 1,
+  subunitcolor = toRGB("white"),
+  countrycolor = toRGB("white") 
+)
+
 plot_ly(df, lon = lon, lat = lat, text = hover,
         marker = list(size = sqrt(pop/10000) + 1),
         color = q, type = 'scattergeo', locationmode = 'USA-states') %>%
-  layout(
-    title = '2014 US city populations<br>(Click legend to toggle traces)',
-    geo = list(
-      scope = 'usa',
-      projection = list(type = 'albers usa'),
-      showland = TRUE,
-      landcolor = toRGB("gray85"),       
-      subunitwidth = 1,
-      countrywidth = 1,
-      subunitcolor = toRGB("white"),
-      countrycolor = toRGB("white") 
-    )
-  )
+  layout(title = '2014 US city populations<br>(Click legend to toggle)', geo = g)
+
+#' Ebola Cases in West Africa
+
+# see 'Choropleth Inset Map' example
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/python/map-subplots-and-small-multiples/
+# https://plot.ly/r/map-subplots-and-small-multiples/ (new)
 # ----------------------------------------------------------------------------
 
+#' US map small multiples
 library(plotly)
-
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv')
 
 # common map properties
@@ -695,13 +712,6 @@ p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR,
          hovermode = F)
 
 subplot(p, nrows = 9)
-
-
-yr_count <- table(df$YEAR)
-plot_ly(x = names(yr_count), y = as.numeric(yr_count)) %>%
-  layout(xaxis = list(title = ""), yaxis = list(title = ""))
-
-subplot(p, p2, p3,  nrows = 9)
 
 ################################################################################
 # Multiple Axes, Subplots, and Insets (https://plot.ly/r/#multiple-axes-subplots-and-insets)
