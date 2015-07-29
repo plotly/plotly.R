@@ -88,10 +88,3 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$yaxis$title, "Petal.Width")
   expect_identical(scene$zaxis$title, "Sepal.Width")
 })
-
-test_that("Only use symbols as names for axis titles.", {
-  p <- plot_ly(x = c(1, 2), y = c(1, 2))
-  l <- expect_traces(p, 1, "scatterplot-axis-titles")
-  expect_identical(l$layout$xaxis$title, "x")
-  expect_identical(l$layout$yaxis$title, "y")
-})
