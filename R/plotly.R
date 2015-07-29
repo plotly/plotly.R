@@ -191,7 +191,7 @@ plotly_build <- function(l = get_plot()) {
   # plots without NSE don't need it either
   nms <- lapply(l$data, names)
   idx <- unique(unlist(lapply(l$data, names))) %in% c("args", "env")
-  if (sum(idx) != 2) return(l)
+  if (sum(idx) != 2) return(struct(l, "plotly"))
   nms <- names(l)
   # assume unnamed list elements are data/traces
   idx <- nms %in% ""
@@ -307,8 +307,7 @@ plotly_build <- function(l = get_plot()) {
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
-  class(x) <- unique(c("plotly", class(x)))
-  x
+  struct(x, "plotly")
 }
 
 # returns a _list of traces_.
