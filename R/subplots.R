@@ -6,8 +6,11 @@
 #' @param which_layout adopt the layout of which plot? If the default value of 
 #' "merge" is used, all plot level layout options will be included in the final 
 #' layout. This argument also accepts a numeric vector which will restric
-#' @param margin a numeric value between 0 and 1. Corrsepnds to the proportion 
-#' of plot width/height to attribute to margins between subplots.
+#' @param margin either a single value or four values (all between 0 and 1).
+#' If four values are provided, the first is used as the left margin, the second
+#' is used as the right margin, the third is used as the top margin, and the
+#' fourth is used as the bottom margin.
+#' If a single value is provided, it will be used as all four margins. 
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
@@ -18,8 +21,8 @@
 #' }
 
 
-## TODO: add warning if geo and non-geo coordinates are used!!!
-subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows) {
+## TODO: throw warning if geo and non-geo coordinates are used!!!
+subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0) {
   # note that dots is a _list of plotlys_
   dots <- lapply(list(...), plotly_build)
   # put existing plot anchors and domain information into a tidy format
@@ -62,7 +65,6 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows
       ctr <- ctr + 1
     }
   }
-  #browser()
   # put p_info into a data.frame()
   p_info <- Reduce(rbind, p_info)
   row.names(p_info) <- NULL
@@ -77,25 +79,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows
   # Only do domain computations if they are _completely_ missing
   # (I don't think it makes sense to support partial specification of domains)
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
-    nplots <- max(p_info$key)
-    ncols <- ceiling(nplots / nrows)
-    xdom <- get_domains(nplots, ncols, margin)
-    ydom <- get_domains(nplots, nrows, margin)
-    xdf <- cbind(
-      list2df(xdom, c("xstart", "xend")),
-      key = seq_len(nplots)
-    )
-    ydf <- list2df(ydom, c("ystart", "yend"))
-    # get_domains() currently assumes plots are drawn from _lower_ left
-    # corner to _upper_ right, but we need them going from _upper_ left
-    # to _lower-right_
-    ydf <- with(ydf, data.frame(ystart = 1 - yend, yend = 1 - ystart))
-    ydf <- ydf[order(ydf$ystart, decreasing = TRUE), ]
-    ydf$key <- seq_len(nplots)
-    # overwrite relevant info 
-    p_info <- p_info[!grepl("start$|end$", names(p_info))]
-    p_info <- plyr::join(p_info, xdf, by = "key")
-    p_info <- plyr::join(p_info, ydf, by = "key")
+    p_info[c("xstart", "xend", "yend", "ystart")] <- 
+      get_domains(max(p_info$key), nrows, margin)
   }
   # empty plot container that we'll fill up with new info
   p <- list(
@@ -105,13 +90,17 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows
   ls <- if (which_layout == "merge") {
     lapply(dots, "[[", "layout")
   } else {
-    # TODO: warning if referencing non-exitant layouts?
+    if (!is.numeric(which_layout)) warning("which_layout must be numeric")
+    if (!all(idx <- which_layout %in% seq_along(dots))) {
+      warning("which_layout is referencing non-existant layouts")
+      which_layout <- which_layout[idx]
+    }
     lapply(dots[which_layout], "[[", "layout")
   }
   ls <- ls[!vapply(ls, is.null, logical(1))]
   p[["layout"]] <- Reduce(modifyList, ls)
   
-  
+  # tack on trace, domain, and anchor information
   p_info$plot <- as.numeric(p_info$plot)
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
@@ -136,11 +125,11 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows
       # (but overwrite domain/anchor info)
       l <- dots[[info$plot]]$layout
       p$layout[[xaxis]] <- modifyList(
-        l[names(l) %in% "xaxis"][[1]] %||% list(),
+        l[names(l) %in% "xaxis"],
         list(domain = xdom, anchor = info$yaxis)
       )
       p$layout[[yaxis]] <- modifyList(
-        l[names(l) %in% "yaxis"][[1]] %||% list(),
+        l[names(l) %in% "yaxis"],
         list(domain = ydom, anchor = info$xaxis)
       )
       p$data[[i]]$xaxis <- info$xaxis
@@ -151,22 +140,30 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.1 / nrows
 }
 
 
-# margins should shrink as # of plots increase
-get_domains <- function(nplots = 1, nsplits = 1, mar = 0.1 / nsplits, 
-                        decreasing = FALSE) {
-  if (nsplits == 1) {
-    lapply(vector("list", nplots), function(x) c(0, 1))
-  } else {
-    domains <- vector("list", nsplits)
-    for (i in seq_len(nsplits)) {
-      l <-  ((i - 1) / nsplits) + ifelse(i == 1, 0, mar)
-      u <- (i / nsplits) - ifelse(i == nsplits, 0, mar)
-      domains[[i]] <- c(l, u)
-    }
-    rep_len(domains, nplots)
+get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
+  if (length(margins) == 1) margins <- rep(margins, 4)
+  if (length(margins) != 4) stop("margins must be length 1 or 4", call. = FALSE)
+  ncols <- ceiling(nplots / nrows)
+  
+  xs <- vector("list", ncols)
+  for (i in seq_len(ncols)) {
+    xs[[i]] <- c(
+      xstart = ((i - 1) / ncols) + ifelse(i == 1, 0, margins[1]),
+      xend = (i / ncols) - ifelse(i == ncols, 0, margins[2])
+    )
   }
+  xz <- rep_len(xs, nplots)
+  
+  ys <- vector("list", nrows)
+  for (i in seq_len(nplots)) {
+    j <- ceiling(i / ncols)
+    ys[[i]] <- c(
+      ystart = 1 - ((j - 1) / nrows) - ifelse(j == 1, 0, margins[3]),
+      yend = 1 - (j / nrows) + ifelse(j == nrows, 0, margins[4])
+    )
+  }
+  list2df(Map(c, xz, ys))
 }
-
 
 list2df <- function(x, nms) {
   stopifnot(length(unique(sapply(x, length))) == 1)

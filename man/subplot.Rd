@@ -4,7 +4,7 @@
 \alias{subplot}
 \title{View multiple plots in a single view}
 \usage{
-subplot(..., nrows = 1, which_layout = "merge", margin = 0.1/nrows)
+subplot(..., nrows = 1, which_layout = "merge", margin = 0)
 }
 \arguments{
 \item{...}{any number of plotly objects}
@@ -16,8 +16,11 @@ Only used if no domain is already specified.}
 "merge" is used, all plot level layout options will be included in the final
 layout. This argument also accepts a numeric vector which will restric}
 
-\item{margin}{a numeric value between 0 and 1. Corrsepnds to the proportion
-of plot width/height to attribute to margins between subplots.}
+\item{margin}{either a single value or four values (all between 0 and 1).
+If four values are provided, the first is used as the left margin, the second
+is used as the right margin, the third is used as the top margin, and the
+fourth is used as the bottom margin.
+If a single value is provided, it will be used as all four margins.}
 }
 \value{
 A plotly object
