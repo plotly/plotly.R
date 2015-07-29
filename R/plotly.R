@@ -78,7 +78,6 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @param p A plotly object.
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
-#' @param type A charater string describing the type of trace.
 #' @param group Either a variable name or a vector to use for grouping. If used, 
 #' a different trace will be created for each unique value.
 #' @param color Either a variable name or a vector to use for color mapping.
@@ -97,7 +96,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @author Carson Sievert
 #' @export
 #' 
-add_trace <- function(p = get_plot(), ..., type = "scatter",
+add_trace <- function(p = get_plot(), ...,
                       group, color, colors, symbol, symbols, size,
                       data = NULL, evaluate = FALSE) {
   # "native" plotly arguments
@@ -175,7 +174,6 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
   hash_plot(data, p)
 }
 
-
 #' Build a plotly object before viewing it
 #' 
 #' For convenience and efficiency purposes, plotly objects are subject to lazy 
@@ -233,10 +231,13 @@ plotly_build <- function(l = get_plot()) {
       dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
     }
     has_color <- !is.null(dat[["color"]]) || 
-      (!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
+      isTRUE(!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
     has_symbol <- !is.null(dat[["symbol"]])
     has_group <- !is.null(dat[["group"]])
-    if (has_color) dats <- c(dats, colorize(dat, as.list(d$args)[["color"]]))
+    if (has_color) {
+      title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
+      dats <- c(dats, colorize(dat, title))
+    }
     # TODO: add a legend title (is this only possible via annotations?!?)
     if (has_symbol) dats <- c(dats, symbolize(dat))
     if (has_group) dats <- c(dats, traceify(dat, "group"))
@@ -287,15 +288,18 @@ plotly_build <- function(l = get_plot()) {
   # tack on other keyword arguments, if necessary
   idx <- !names(l) %in% c("data", "layout")
   if (any(idx)) x <- c(x, l[idx])
-  # some object keys require an array, even if length one
-  # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-  # by to_JSON(), is to attach a class of AsIs (via I())
   for (i in seq_along(x$data)) {
+    # if any traces don't have a type, fall back on scatter
+    # (this could happen if inherit = FALSE in plot_ly() and add_trace()
+    # doesn't have a type argument)
     d <- x$data[[i]]
+    x$data[[i]][["type"]] <- d[["type"]] %||% "scatter"
+    # some object keys require an array, even if length one
+    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
+    # by to_JSON(), is to attach a class of AsIs (via I())
     idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
     if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
   }
-  
   # search for keyword args in traces and place them at the top level
   kwargs <- lapply(x$data, function(z) z[get_kwargs()])
   if (length(kwargs) == 1) kwargs <- c(kwargs, kwargs)
@@ -397,7 +401,7 @@ axis_titles <- function(x, l) {
     if (is.null(t)) {
       idx <- which(names(argz) %in% i)
       if (length(idx)) {
-        title <- if (is.symbol(argz[[idx]])) deparse(argz[[idx]]) else i
+        title <- if (is.language(argz[[idx]])) deparse(argz[[idx]]) else i
         if (scene) x$layout[["scene"]][[ax]]$title <- title 
         else x$layout[[ax]]$title <- title
       }
