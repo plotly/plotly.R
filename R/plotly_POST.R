@@ -49,6 +49,11 @@ plotly_POST <- function(x) {
       "plot from api" 
   }
   if (is.null(kwargs$fileopt)) kwargs$fileopt <- "new"
+  # ugh, annotations _must_ be an _array_ of object(s)...
+  a <- kwargs$layout$annotations
+  if (!is.null(a) && !is.null(names(a))) {
+    kwargs$layout$annotations <- list(kwargs$layout$annotations)
+  }
   # construct body of message to plotly server
   bod <- list(
     un = verify("username"),
