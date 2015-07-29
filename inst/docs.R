@@ -1,6 +1,10 @@
 # install the new/experimental plotly R package
 # devtools::install_github("ropensci/plotly@carson-dsl")
 
+################################################################################
+# Basic Charts (https://plot.ly/r/#basic-charts)
+################################################################################
+
 # ----------------------------------------------------------------------
 # https://plot.ly/r/3d-line-plots/
 # ----------------------------------------------------------------------
@@ -285,7 +289,30 @@ layout(p, xaxis = list(type = "log", autorange = T),
 # https://plot.ly/r/graphing-multiple-chart-types/
 # ----------------------------------------------------------------------
 
-# necessary?
+#' Scatterplot with loess smoother
+
+library(plotly)
+mtcars <- mtcars[order(mtcars$disp), ]
+p <- plot_ly(mtcars, x = disp, y = mpg, mode = "markers", 
+             text = rownames(mtcars), showlegend = FALSE) 
+add_trace(p, y = fitted(loess(mpg ~ disp)), mode = "lines", 
+          name = "loess smoother", showlegend = TRUE) %>% offline
+
+#' Scatterplot with loess smoother and it's uncertaincy estimates
+m <- loess(mpg ~ disp, data = mtcars)
+f <- with(predict(m, se = TRUE), data.frame(fit, se.fit))
+
+l <- list(
+  color = toRGB("gray90", alpha = 0.3),
+  fillcolor = toRGB("gray90", alpha = 0.3)
+)
+
+p %>%
+  add_trace(p, data = f, y = fit, mode = "lines") %>%
+  add_trace(p, data = f, y = fit + 1.96 * se.fit, mode = "lines", 
+            fill = "tonexty", line = l) %>%
+  add_trace(p, data = f, y = fit - 1.96 * se.fit, mode = "lines", 
+            fill = "tonexty", line = l)
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/polar-chart/
@@ -326,9 +353,10 @@ y <- rnorm(length(x))
 plot_ly(x = x, y = y, text = paste(tm, "days from today"))
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/python/choropleth-maps/
+#  https://plot.ly/r/choropleth-maps/  (new)
 # ----------------------------------------------------------------------------
 
+#' World Choropleth Map
 df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv")
 df$hover <- with(df, paste(state, '<br>', "Beef", beef, "Dairy", dairy, "<br>",
                            "Fruits", total.fruits, "Veggies", total.veggies,
@@ -351,9 +379,7 @@ plot_ly(df, z = total.exports, text = hover, locations = code, type = 'choroplet
         marker = list(line = l), colorbar = list(title = "Millions USD")) %>%
   layout(title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)', geo = g)
 
-
-##########################################################################
-
+#' World Choropleth Map
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv')
 
 # light grey boundaries
@@ -372,11 +398,10 @@ g <- list(
 plot_ly(df, z = GDP..BILLIONS., text = COUNTRY, locations = CODE, type = 'choropleth', 
         color = GDP..BILLIONS., colors = 'Blues', marker = list(line = l),
         colorbar = list(tickprefix = '$', title = 'GDP Billions US$')) %>%
-  # TODO: how to add the hyperlink? (<a href=""> doesn't seem to work)
-  layout(title = '2014 Global GDP<br>Source: CIA World Factbook', geo = g)
+  layout(title = '2014 Global GDP<br>Source:<a href="https://www.cia.gov/library/publications/the-world-factbook/fields/2195.html">CIA World Factbook</a>', 
+         geo = g)
 
-##########################################################################
-
+#' Choropleth Inset Map
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_ebola.csv')
 # restrict from June to September
 df <- subset(df, Month %in% 6:9)
@@ -417,16 +442,17 @@ plot_ly(df, type = 'scattergeo', mode = 'markers', locations = Country,
         locationmode = 'country names', text = paste(Value, "cases"), 
         color = as.ordered(abbrev), marker = list(size = Value/50), inherit = F) %>%
   add_trace(type = 'scattergeo', mode = 'text', geo = 'geo2', showlegend = F,
-            # plotly should support "unboxed" constants
-            lon = list(21.0936), lat = list(7.1881), text = list('Africa')) %>%
+            lon = 21.0936, lat = 7.1881, text = 'Africa') %>%
   add_trace(type = 'choropleth', locations = Country, locationmode = 'country names',
             z = Month, colors = "black", showscale = F, geo = 'geo2', data = df9) %>%
   layout(title = 'Ebola cases reported by month in West Africa 2014<br> Source: <a href="https://data.hdx.rwlabs.org/dataset/rowca-ebola-cases">HDX</a>',
          geo = g1, geo2 = g2)
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/python/lines-on-maps/
+#  https://plot.ly/r/lines-on-maps/ (new)
 # ----------------------------------------------------------------------------
+
+#' US Flight Paths Map
 
 # airport locations
 air <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2011_february_us_airport_traffic.csv')
@@ -452,9 +478,6 @@ plot_ly(air, lon = long, lat = lat, text = airport, type = 'scattergeo',
             type = 'scattergeo', locationmode = 'USA-states') %>%
   layout(title = 'Feb. 2011 American Airline flight paths<br>(Hover for airport names)',
          geo = geo, showlegend = FALSE)
-
-##########################################################################
-
 
 plot_ly(lat = c(40.7127, 51.5072), lon = c(-74.0059, 0.1275), type = 'scattergeo',
         mode = 'lines', line = list(width = 2, color = 'blue')) %>%
@@ -484,8 +507,6 @@ plot_ly(lat = c(40.7127, 51.5072), lon = c(-74.0059, 0.1275), type = 'scattergeo
       )
     )
   )
-
-##########################################################################
 
 df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/globe_contours.csv')
 df$id <- seq_len(nrow(df))
@@ -647,21 +668,23 @@ g <- list(
   subunitcolor = toRGB("white")
 )
 
-
+# year text labels
 yrs <- unique(df$YEAR)
 id <- seq_along(yrs)
-df$id <- factor(df$YEAR, levels = id)
 df2 <- data.frame(
   YEAR = yrs,
   id = id
 )
 
+# id for anchoring traces on different plots
+df$id <- factor(df$YEAR)
+levels(df$id) <- id
 
 p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
              geo = paste0("geo", id), showlegend = F,
              marker = list(color = toRGB("blue"), opacity = 0.5)) %>%
-  add_trace(lon = list(-78), lat = list(47), mode = 'text', group = YEAR,
-            geo = paste0("geo", id), text = list(YEAR), data = df2) %>%
+  add_trace(lon = -78, lat = 47, mode = 'text', group = YEAR,
+            geo = paste0("geo", id), text = YEAR, data = df2) %>%
   layout(title = 'New Walmart Stores per year 1962-2006<br> 
          Source: <a href="http://www.econ.umn.edu/~holmes/data/WalMart/index.html">
          University of Minnesota</a>',
@@ -671,8 +694,351 @@ p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR,
          height = 900,
          hovermode = F)
 
-subplot(p, nrows = 7)
+subplot(p, nrows = 9)
 
+
+yr_count <- table(df$YEAR)
+plot_ly(x = names(yr_count), y = as.numeric(yr_count)) %>%
+  layout(xaxis = list(title = ""), yaxis = list(title = ""))
+
+subplot(p, p2, p3,  nrows = 9)
+
+################################################################################
+# Multiple Axes, Subplots, and Insets (https://plot.ly/r/#multiple-axes-subplots-and-insets)
+################################################################################
+
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/subplots/
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/multiple-axes/
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/insets/
+# ----------------------------------------------------------------------------
+
+p1 <- plot_ly(x = c(1, 2, 3), y = c(4, 3, 2))
+p2 <- plot_ly(x = c(20, 30, 40), y = c(30, 40, 50)) %>%
+  layout(xaxis = list(domain = c(0.6, 0.95)), 
+         yaxis = list(domain = c(0.6, 0.95)))
+subplot(p1, p2)
+
+
+################################################################################
+# Layout Options
+################################################################################
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/setting-graph-size/
+# ----------------------------------------------------------------------------
+
+library(plotly)
+m = list(
+  l = 50,
+  r = 50,
+  b = 100,
+  t = 100,
+  pad = 4
+)
+plot_ly(x = seq(0, 8), y = seq(0, 8)) %>%
+  layout(autosize = F, width = 500, height = 500, margin = m)
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/legend/
+# ----------------------------------------------------------------------------
+
+#' Legend Names
+library(plotly)
+p <- plot_ly(x = seq(0, 8), y = rnorm(8), name = "Blue Trace") %>%
+  add_trace(y = rnorm(8), name = "Orange Trace")
+p
+
+#' Hiding the Legend
+p %>% layout(showlegend = FALSE)
+
+#' Positioning the Legend
+p %>% layout(legend = list(x = 0.5, y = 0))
+
+#' Styling the Legend
+f <- list(
+  family = "sans-serif",
+  size = 12,
+  color = "#000"
+)
+l <- list(
+  font = f,
+  bgcolor = "#E2E2E2",
+  bordercolor = "#FFFFFF",
+  borderwidth = 2
+) 
+p %>% layout(legend = l)
+
+#' Hiding Legend Entries
+plot_ly(x = seq(0, 8), y = rnorm(8), showlegend = FALSE) %>%
+  add_trace(y = rnorm(8), name = "Orange Trace", showlegend = TRUE)
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/LaTeX/
+# ----------------------------------------------------------------------------
+
+library(plotly)
+plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16),
+        name = "$\\alpha_{1c} = 352 \\pm 11 \\text{ km s}^{-1}$") %>%
+  add_trace(x = c(1, 2, 3, 4), y = c(0.5, 2, 4.5, 8),
+            name = "$\\beta_{1c} = 25 \\pm 11 \\text{ km s}^{-1}$") %>%
+  layout(xaxis = list(title = "$\\sqrt{(n_\\text{c}(t|{T_\\text{early}}))}$"),
+         yaxis = list(title = "$d, r \\text{ (solar radius)}$"))
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/figure-labels/
+# ----------------------------------------------------------------------------
+
+# NOTE: title and link of this page could be improvded
+
+library(plotly)
+f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+)
+x <- list(
+  title = "x Axis",
+  titlefont = f
+)
+y <- list(
+  title = "y Axis",
+  titlefont = f
+)
+plot_ly(x = rnorm(10), y = rnorm(10), mode = "markers") %>%
+  layout(xaxis = x, yaxis = y)
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/font/
+# ----------------------------------------------------------------------------
+
+library(plotly)
+f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+)
+plot_ly(x = 0:8, y = 0:8) %>%
+  layout(title = "Global Font", font = f)
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/axes/
+# ----------------------------------------------------------------------------
+
+#' Style Axes Ticks and Placement
+
+library(plotly)
+a <- list(
+  autotick = FALSE,
+  ticks = "outside",
+  tick0 = 0,
+  dtick = 0.25,
+  ticklen = 5,
+  tickwidth = 2,
+  tickcolor = toRGB("blue")
+)
+s <- seq(1, 4, by = 0.25)
+plot_ly(x = s, y = s) %>%
+  layout(xaxis = a, yaxis = a)
+
+#' Style Axes Title and Ticks Labels
+
+library(plotly)
+f1 <- list(
+  family = "Arial, sans-serif",
+  size = 18,
+  color = "lightgrey"
+)
+f2 <- list(
+  family = "Old Standard TT, serif",
+  size = 14,
+  color = "black"
+)
+a <- list(
+  title = "AXIS TITLE",
+  titlefont = f1,
+  showticklabels = TRUE,
+  tickangle = 45,
+  tickfont = f2,
+  exponentformat = "e",
+  showexponent = "All"
+)
+
+s <- seq(0, 8)
+plot_ly(x = s, y = s) %>%
+  add_trace(y = rev(s)) %>%
+  layout(xaxis = a, yaxis = a, showlegend = FALSE)
+
+#' Style Axes and the Zero-Line
+
+library(plotly)
+ax <- list(
+  zeroline = TRUE,
+  showline = TRUE,
+  mirror = "ticks",
+  gridcolor = toRGB("gray50"),
+  gridwidth = 2,
+  zerolinecolor = toRGB("red"),
+  zerolinewidth = 4,
+  linecolor = toRGB("black"),
+  linewidth = 6
+)
+s <- seq(-1, 4)
+plot_ly(x = s, y = s) %>%
+  layout(xaxis = ax, yaxis = ax) %>% offline
+
+#' Hide Axes Title, Lines, Ticks, and Labels
+
+library(plotly)
+ax <- list(
+  title = "",
+  zeroline = FALSE,
+  showline = FALSE,
+  showticklabels = FALSE,
+  showgrid = FALSE
+)
+
+plot_ly(x = c(1, 2), y = c(1, 2)) %>%
+  layout(xaxis = ax, yaxis = ax) %>% offline
+
+#' Reversed Axes
+
+library(plotly)
+plot_ly(x = c(1, 2), y = c(1, 2)) %>%
+  layout(xaxis = list(autorange = "reversed"))
+
+#' Logarithmic Axes
+
+library(plotly)
+s <- seq(1, 8)
+plot_ly(x = s, y = exp(s), name = "exponential") %>%
+  add_trace(y =  s, name = "linear") %>%
+  layout(yaxis = list(type = "log"))
+
+#' Rangemode
+
+library(plotly)
+plot_ly(x = seq(2, 6, by = 2), y = seq(-3, 3, by = 3)) %>%
+  layout(
+    xaxis = list(rangemode = "tozero"),
+    yaxis = list(rangemode = "nonnegative")
+  )
+
+#' Manual ranges
+
+library(plotly)
+s <- seq(1, 8)
+plot_ly(x = s, y = s) %>%
+  add_trace(y = rev(s)) %>%
+  layout(
+    xaxis = list(range = c(2, 5)),
+    yaxis = list(range = c(2, 5))
+  )
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/text-and-annotations/
+# ----------------------------------------------------------------------------
+
+#' Text mode
+plot_ly(mtcars, x = wt, y = mpg, text = rownames(mtcars), mode = "text")
+
+#' Styling text
+t <- list(
+    family = "sans serif",
+    size = 18,
+    color = toRGB("grey50")
+)
+plot_ly(mtcars, x = wt, y = mpg, text = rownames(mtcars), mode = "markers+text",
+        textfont = t, textposition = "top middle")
+
+#' Show custom text on hover
+plot_ly(mtcars, x = wt, y = mpg, text = rownames(mtcars), mode = "markers")
+
+#' Single Annotation
+
+m <- mtcars[which.max(mtcars$mpg), ]
+
+a <- list(
+  x = m$wt,
+  y = m$mpg,
+  text = rownames(m),
+  xref = "x",
+  yref = "y",
+  showarrow = TRUE,
+  arrowhead = 7,
+  ax = 20,
+  ay = -40
+)
+
+plot_ly(mtcars, x = wt, y = mpg, mode = "markers") %>%
+  layout(annotations = a)
+
+#' Styling and Coloring Annotations
+
+m <- mtcars[which.max(mtcars$mpg), ]
+
+f <- list(
+  family = "sans serif",
+  size = 18,
+  color = toRGB("white")
+)
+
+a <- list(
+  textposition = "top right",
+  font = f,
+  x = m$wt,
+  y = m$mpg,
+  text = rownames(m),
+  xref = "x",
+  yref = "y",
+  ax = 20,
+  ay = -40,
+  align = "center",
+  arrowhead = 2,
+  arrowsize = 1,
+  arrowwidth = 2,
+  arrowcolor = toRGB("lightblue"),
+  bordercolor = toRGB("gray50"),
+  borderwidth = 2,
+  borderpad = 4,
+  bgcolor = toRGB("blue"),
+  opacity = 0.8
+)
+
+plot_ly(mtcars, x = wt, y = mpg, mode = "markers") %>%
+  layout(annotations = a)
+
+#' Many Annotations
+
+a <- list()
+for (i in seq_len(nrow(mtcars))) {
+  m <- mtcars[i, ]
+  a[[i]] <- list(
+    x = m$wt,
+    y = m$mpg,
+    text = rownames(m),
+    xref = "x",
+    yref = "y",
+    showarrow = TRUE,
+    arrowhead = 7,
+    ax = 20,
+    ay = -40
+  )
+}
+# could be improved with label dodging, but how to measure text height/width?
+plot_ly() %>% layout(annotations = a)
+
+
+################################################################################
+# File Settings
+################################################################################
 
 # ----------------------------------------------------------------------------
 # https://plot.ly/r/privacy/
@@ -684,13 +1050,76 @@ library(plotly)
 plot_ly(x = c(0, 2, 4), y = c(0, 4, 2))
 
 #' private
-plot_ly(x = c(0, 2, 4), y = c(0, 4, 2), 
-        world_readable = FALSE, filename = "privacy-true")
+plot_ly(x = c(0, 2, 4), y = c(0, 4, 2), world_readable = FALSE)
 
 # another option is to "build" the plot, then tack on these properties
 p <- plot_ly(x = c(0, 2, 4), y = c(0, 4, 2))
 p <- plotly_build(p)
 p$world_readable <- FALSE
-p$filename <- "privacy-true"
 p
 
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/file-options/
+# ----------------------------------------------------------------------------
+
+library(plotly)
+
+# By default, everytime you print a plotly object, it will create a new file
+plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot")
+
+# There are a couple ways to prevent a new file from being created
+# (1) Use get_figure() to obtain a figure object. 
+fig <- get_figure("cpsievert", "559")
+# Then modify and print that object (this will only work if you have proper credentials)
+layout(fig, title = paste("Modified on ", Sys.time()))
+
+# (2) If you know the filename attached to the plot you want to modify,
+# place that name in filename and specify fileopt to overwrite that file
+plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot", fileopt = "overwrite")
+
+# NOTE: filenames that contain "/" be treated as a Plotly directory and will be saved to your Plotly account in a folder tree. For example, to save your graphs to the folder my-graphs: 
+
+################################################################################
+# Get Requests, Static Image Export, and Interactive Embedding  (https://plot.ly/r/#get-requests-static-image-export)
+################################################################################
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/embedding-plotly-graphs-in-HTML/
+# ----------------------------------------------------------------------------
+
+# Maybe copy/paste relevant bits from this vignette? ->
+# https://github.com/ropensci/plotly/blob/carson-dsl/vignettes/intro.Rmd
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/shiny-tutorial/
+# ----------------------------------------------------------------------------
+
+# Maybe link to an updated version of this blog post?
+# http://moderndata.plot.ly/dashboards-in-r-with-shiny-plotly/
+
+# If we want, we could copy/paste source from this folder ->
+# https://github.com/ropensci/plotly/tree/carson-dsl/inst/examples
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/get-requests/
+# ----------------------------------------------------------------------------
+
+fig <- get_figure("cpsievert", "559")
+layout(fig, title = paste("Modified on ", Sys.time()))
+
+################################################################################
+# Miscellaneous
+################################################################################
+
+# ----------------------------------------------------------------------------
+# https://plot.ly/r/static-image-export/ (currently no R page)
+# ----------------------------------------------------------------------------
+
+# Use the curl package to download a static image of any publicly viewable figure
+library(curl)
+curl_download("https://plot.ly/~cpsievert/1000.png", "image.png")
+curl_download("https://plot.ly/~cpsievert/1000.pdf", "image.pdf")
+
+# you can also download the underlying SVG
+
+curl_download("https://plot.ly/~cpsievert/1000.svg", "image.svg")

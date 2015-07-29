@@ -4,16 +4,14 @@
 \alias{add_trace}
 \title{Add a trace to a plotly visualization}
 \usage{
-add_trace(p = get_plot(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, data = NULL, evaluate = FALSE)
+add_trace(p = get_plot(), ..., group, color, colors, symbol, symbols, size,
+  data = NULL, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly object.}
 
 \item{...}{These arguments are documented in the references section below.
 Note that acceptable arguments depend on the trace type.}
-
-\item{type}{A charater string describing the type of trace.}
 
 \item{group}{Either a variable name or a vector to use for grouping. If used,
 a different trace will be created for each unique value.}
