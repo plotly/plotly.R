@@ -96,7 +96,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @author Carson Sievert
 #' @export
 #' 
-add_trace <- function(p = get_plot(), ...,
+add_trace <- function(p = last_plot(), ...,
                       group, color, colors, symbol, symbols, size,
                       data = NULL, evaluate = FALSE) {
   # "native" plotly arguments
@@ -108,13 +108,13 @@ add_trace <- function(p = get_plot(), ...,
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
-  p <- get_plot(p)
+  data <- data %||% if (is.data.frame(p)) p else list()
   tr <- list(
     args = argz,
-    # if data is missing, adopt the most recent data environment
-    env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
+    env = list2env(data),
     enclos = parent.frame()
   )
+  p <- last_plot(p)
   p$data <- c(p$data, list(tr))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
@@ -131,15 +131,15 @@ add_trace <- function(p = get_plot(), ...,
 #' @author Carson Sievert
 #' @export
 #' 
-layout <- function(p = get_plot(), ..., 
+layout <- function(p = last_plot(), ..., 
                    data = NULL, evaluate = FALSE) {
-  p <- get_plot(p)
+  data <- data %||% if (is.data.frame(p)) p else list()
   layout <- list(
     args = substitute(list(...)),
-    # if data is missing, adopt the most recent data environment
-    env = if (is.null(data)) p$data[[length(p$data)]]$env else list2env(data),
+    env = list2env(data),
     enclos = parent.frame()
   )
+  p <- last_plot(p)
   p$layout <- c(p$layout, list(layout))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
@@ -158,8 +158,7 @@ layout <- function(p = get_plot(), ...,
 #' @author Carson Sievert
 #' @export
 #'
-style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALSE) {
-  p <- get_plot(p)
+style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
   idx <- traces >= length(p$data)
   if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
   style <- list(
@@ -184,14 +183,14 @@ style <- function(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALS
 #' 
 #' @param l a ggplot object, or a plotly object, or a list.
 #' @export
-plotly_build <- function(l = get_plot()) {
+plotly_build <- function(l = last_plot()) {
   # ggplot objects don't need any special type of handling
-  if (is.ggplot(l)) return(gg2list(l))
+  if (is.ggplot(l)) return(ggplotly(l))
   l <- get_plot(l)
   # plots without NSE don't need it either
   nms <- lapply(l$data, names)
   idx <- unique(unlist(lapply(l$data, names))) %in% c("args", "env")
-  if (sum(idx) != 2) return(struct(l, "plotly"))
+  if (sum(idx) != 2) return(structure(l, class = unique("plotly", class(l))))
   nms <- names(l)
   # assume unnamed list elements are data/traces
   idx <- nms %in% ""
@@ -307,7 +306,7 @@ plotly_build <- function(l = get_plot()) {
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
-  struct(x, "plotly")
+  structure(x, class = unique("plotly", class(x)))
 }
 
 # returns a _list of traces_.

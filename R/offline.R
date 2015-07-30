@@ -39,7 +39,7 @@
 #' }
 #' 
 
-offline <- function(p = get_plot(), height = 400, width = "100%", 
+offline <- function(p = last_plot(), height = 400, width = "100%", 
                     out_dir = NULL, open_browser = interactive()) {
   haz <- has_offline()
   if (!haz) offline_stop()

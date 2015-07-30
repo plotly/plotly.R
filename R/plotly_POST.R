@@ -28,7 +28,6 @@
 
 plotly_POST <- function(x) {
   x <- plotly_build(x)
-  
   # empty keyword arguments can cause problems
   kwargs <- x[get_kwargs()]
   kwargs <- kwargs[sapply(kwargs, length) > 0]

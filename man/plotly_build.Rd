@@ -4,7 +4,7 @@
 \alias{plotly_build}
 \title{Build a plotly object before viewing it}
 \usage{
-plotly_build(l = get_plot())
+plotly_build(l = last_plot())
 }
 \arguments{
 \item{l}{a ggplot object, or a plotly object, or a list.}

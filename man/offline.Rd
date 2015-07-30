@@ -4,7 +4,7 @@
 \alias{offline}
 \title{Plotly Offline}
 \usage{
-offline(p = get_plot(), height = 400, width = "100\%", out_dir = NULL,
+offline(p = last_plot(), height = 400, width = "100\%", out_dir = NULL,
   open_browser = interactive())
 }
 \arguments{

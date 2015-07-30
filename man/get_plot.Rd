@@ -4,10 +4,12 @@
 \alias{get_plot}
 \title{Obtain underlying data of plotly object}
 \usage{
-get_plot(data = NULL, strict = TRUE)
+get_plot(data = NULL, last = FALSE)
 }
 \arguments{
 \item{data}{a data frame with a class of plotly (and a plotly_hash attribute).}
+
+\item{last}{if no plotly attribute is found, return the last plot or NULL?}
 }
 \description{
 Given a data frame with a class of plotly, this function returns the arguments

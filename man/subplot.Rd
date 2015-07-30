@@ -4,7 +4,7 @@
 \alias{subplot}
 \title{View multiple plots in a single view}
 \usage{
-subplot(..., nrows = 1, which_layout = "merge", margin = 0)
+subplot(..., nrows = 1, which_layout = "merge", margin = 0.02)
 }
 \arguments{
 \item{...}{any number of plotly objects}

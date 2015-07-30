@@ -4,7 +4,7 @@
 \alias{add_trace}
 \title{Add a trace to a plotly visualization}
 \usage{
-add_trace(p = get_plot(), ..., group, color, colors, symbol, symbols, size,
+add_trace(p = last_plot(), ..., group, color, colors, symbol, symbols, size,
   data = NULL, evaluate = FALSE)
 }
 \arguments{

@@ -4,7 +4,7 @@
 \alias{style}
 \title{Modify trace(s)}
 \usage{
-style(p = get_plot(strict = FALSE), ..., traces = 1, evaluate = FALSE)
+style(p = last_plot(), ..., traces = 1, evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly visualization.}

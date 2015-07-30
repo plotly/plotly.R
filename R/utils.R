@@ -30,6 +30,8 @@ plotlyEnv <- new.env(parent = emptyenv())
 hash_plot <- function(df, p) {
   if (missing(df) || is.null(df)) df <- data.frame()
   hash <- digest::digest(p)
+  # terrible hack to ensure we can always find the most recent hash
+  hash <- paste(hash, length(ls(plotlyEnv)), sep = "#")
   assign(hash, p, envir = plotlyEnv)
   attr(df, "plotly_hash") <- hash
   # add plotly class mainly for printing method
@@ -45,17 +47,31 @@ hash_plot <- function(df, p) {
 #' the last plotly object created in this R session is returned (if it exists).
 #' 
 #' @param data a data frame with a class of plotly (and a plotly_hash attribute).
-get_plot <- function(data = NULL, strict = TRUE) {
+#' @param last if no plotly attribute is found, return the last plot or NULL?
+get_plot <- function(data = NULL, last = FALSE) {
   hash <- attr(data, "plotly_hash")
   if (!is.null(hash)) {
     get(hash, envir = plotlyEnv)
-  } else if (is.data.frame(data)) {
-    # safe to just grab the most recent environment?
-    hash <- rev(ls(plotlyEnv))[1]
-    plotlyEnv[[hash]]
+  } else if (last) {
+    envs <- strsplit(ls(plotlyEnv), "#")
+    last_env <- ls(plotlyEnv)[which.max(sapply(envs, "[[", 2))]
+    get(last_env, envir = plotlyEnv)
   } else {
-    data
+    data %||% list()
   }
+}
+
+#' Retrive last plotly to be modified or created
+#' 
+#' @seealso \link{plotly_build}
+#' @export
+#' 
+last_plot <- function(...) {
+  p <- get_plot(..., last = TRUE)
+  structure(
+    p, 
+    class = unique(c("plotly", class(p)))
+  )
 }
 
 # Check for credentials/configuration and throw warnings where appropriate
