@@ -21,6 +21,6 @@ test_that("requests made to retrieve some elses private file errors a 403", {
 test_that("retrieving a public figure ... works.", {
   fig <- get_figure("get_test_user", 0)
   # get the data behind the hash
-  p <- plotly:::get_plot(fig)
+  p <- plotly_build(fig)
   expect_equivalent(p$data[[1]]$x, list("1", "2", "3"))
 })
