@@ -360,7 +360,7 @@ symbolize <- function(dat) {
   N <- length(dat)
   if (N > 8) warning("Plotly supports 8 different symbols, but you have ", N, " levels!")
   symbols <- c('dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up')
-  sym <- symbols[seq_len(N)]
+  sym <- dat[[1]][["symbols"]][seq_len(N)] %||% symbols[seq_len(N)]
   dat <- Map(function(x, y) { x$marker$symbol <- y; x }, dat, sym)
   dat
 }
