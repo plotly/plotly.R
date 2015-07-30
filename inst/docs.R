@@ -694,17 +694,14 @@ df2 <- data.frame(
 )
 
 # id for anchoring traces on different plots
-df$id <- factor(df$YEAR)
-levels(df$id) <- id
+df$id <- as.integer(factor(df$YEAR))
 
 p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR, 
              geo = paste0("geo", id), showlegend = F,
              marker = list(color = toRGB("blue"), opacity = 0.5)) %>%
   add_trace(lon = -78, lat = 47, mode = 'text', group = YEAR,
             geo = paste0("geo", id), text = YEAR, data = df2) %>%
-  layout(title = 'New Walmart Stores per year 1962-2006<br> 
-         Source: <a href="http://www.econ.umn.edu/~holmes/data/WalMart/index.html">
-         University of Minnesota</a>',
+  layout(title = 'New Walmart Stores per year 1962-2006<br> Source: <a href="http://www.econ.umn.edu/~holmes/data/WalMart/index.html">University of Minnesota</a>',
          geo = g,
          autosize = F,
          width = 1000,
