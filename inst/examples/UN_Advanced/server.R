@@ -28,7 +28,7 @@ shinyServer(function(input, output, session) {
         theme(legend.direction = "horizontal", legend.position = "bottom")
 
       # Convert ggplot object to plotly
-      gg <- get_plot(ggplotly(ggideal_point))
+      gg <- plotly_build(ggideal_point)
 
       # Use Plotly syntax to further edit the plot:
       gg$layout$annotations <- NULL # Remove the existing annotations (the legend label)
@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
       # Add colored text annotations next to the end of each line
       # More about plotly annotations: https://plot.ly/r/reference/#annotation
       # Each key that we update is documented in that link above.
-      for(i in 1:(length(gg$data))){ # data is a list of the lines in the graph
+      for (i in 1:length(gg$data)) { # data is a list of the lines in the graph
         gg$layout$annotations[[i]] <- list(
           text = gg$data[[i]]$name,  # The text label of the annotation, e.g. "Canada"
           font = list(color = gg$data[[i]]$line$color), # Match the font color to the line color
