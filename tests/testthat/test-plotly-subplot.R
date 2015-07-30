@@ -20,7 +20,7 @@ test_that("simple subplot works", {
 test_that("nrows argument works", {
   p1 <- plot_ly(x = c(1, 2))
   p2 <- plot_ly(x = c(1, 2))
-  s <- expect_traces(subplot(p1, p2, nrows = 2), 2, "simple")
+  s <- expect_traces(subplot(p1, p2, nrows = 2), 2, "simple2")
   expect_identical(s$data[[2]]$xaxis, s$layout[["yaxis2"]][["anchor"]])
   expect_identical(s$data[[2]]$yaxis, s$layout[["xaxis2"]][["anchor"]])
   doms <- lapply(s$layout, "[[", "domain")
