@@ -2,11 +2,11 @@
 
 # plotly
 
-An R package for creating (and modifying) interactive web-based graphs via [plotly](https://plot.ly/)'s API. 
+An R package for creating (and modifying) interactive web-based graphs via [plotly](https://plot.ly/)'s JavaScript graphing library. 
 
 ## Installation
 
-__plotly__ is not (yet) available on CRAN, but you can easily install it via [devtools](http://cran.r-project.org/web/packages/devtools/):
+__plotly__ is not (yet) available on CRAN, but you can install it via [devtools](http://cran.r-project.org/web/packages/devtools/):
 
 ```r
 devtools::install_github("ropensci/plotly")
@@ -25,42 +25,52 @@ plotly:::verify("username")
 plotly:::verify("api_key")
 ```
 
-### ggplot2 converter
+### Introduction
 
-If you use [ggplot2](http://cran.r-project.org/web/packages/ggplot2/index.html), you can easily convert them to plotly!
+If you use [ggplot2](http://cran.r-project.org/web/packages/ggplot2/index.html), simply call `ggplotly()` to make your ggplots online and interactive!
 
 ```r
 library(plotly)
 d <- diamonds[sample(nrow(diamonds), 1000), ]
-p <- qplot(carat, price, size = I(4), data = d) + facet_wrap(~cut) + 
-  geom_smooth(aes(colour = cut, fill = cut))
-ggplotly(p)
+p <- ggplot(data = d, aes(x = carat, y = price)) + 
+  geom_point(aes(text = paste("Clarity:", clarity)), size = 4) +
+  geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
+(gg <- ggplotly(p))
 ```
 
-[![](https://plot.ly/~cpsievert/949.png)](https://plot.ly/~cpsievert/949)
-Interact with the Plotly graph: [https://plot.ly/~cpsievert/949](https://plot.ly/~cpsievert/949)
+![https://plot.ly/~brnvg/1132](http://imgur.com/tbKybEb)
+
+[Click here](https://plot.ly/~brnvg/1132) to interact with the resulting graph (notice the custom hover text!)
 
 
-### Custom plotlys
+The `ggplotly()` function converts a ggplot object to a plotly object, so if you like, you may 'post-process' your ggplot graphs to add custom plotly features, for example:
 
-See the vignette entry for an overview of the 
+```r
+layout(gg, hovermode = "closest")
+```
 
+plotly also supports certain chart types that ggplot2 doesn't support (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can easily create these (or any other plotly) charts using the high-level interface. 
 
-## Learn More
+```r
+plot_ly(z = volcano, type = "surface")
+```
 
-- [A declarative DSL for the plotly graphing library in R](http://cpsievert.github.io/plotly/dsl/)
-- [Plot with ggplot2, interact, collaborate, and share online « Bayesian Biologist](http://bayesianbiologist.com/2014/07/31/plot-with-ggplot2-interact-collaborate-and-share-online/)
-- [A Rosetta Stone for R, ggplot2, Python, MATLAB, and Excel Plotting](http://nbviewer.ipython.org/gist/msund/61cdbd5b22c103fffb84)
+![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
 
+## Learn more
+
+* [An introduction to plotly's R API](http://ropensci.github.io/plotly/intro)
+* [Plotly Offline Mode](http://ropensci.github.io/plotly/offline)
+* Plotly's [R homepage](https://plot.ly/r) and [ggplot2 homepage](https://plot.ly/ggplot2)
+
+## Contributing
+
+- We love collaboration! See the [wiki](https://github.com/ropensci/plotly/wiki/Development-guidelines) and the [code of conduct](https://github.com/ropensci/plotly/blob/master/CONDUCT.md) for more information.
 
 ## Stay in touch
 
 - <feedback@plot.ly>
 - [@plotlygraphs](https://twitter.com/plotlygraphs)
-
-## Contributing
-
-- We love collaboration! See the [code of conduct]() and the [wiki](https://github.com/ropensci/plotly/wiki/Development-guidelines) for more information. 
 
 ---
 

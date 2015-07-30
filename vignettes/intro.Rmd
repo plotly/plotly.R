@@ -2,8 +2,6 @@
 title: "An introduction to plotly's R API"
 author: "Carson Sievert"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     toc: yes
 vignette: |
