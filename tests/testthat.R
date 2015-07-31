@@ -82,7 +82,7 @@ save_outputs <- function(gg, name) {
       try(print(gg))
       dev.off()
       # now convert png to a smaller size
-      args <- c(filename, "-density", "72x72", "-write", 
+      args <- c(gg_file, "-density", "72x72", "-write", 
                 file.path(gg_thumb_dir, paste0(name, ".png")), "+delete")
       system2("convert", args)
     }
