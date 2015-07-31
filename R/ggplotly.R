@@ -947,6 +947,6 @@ gg2list <- function(p) {
   # x/y/etc so that they don't get unboxed when they are of length 1.
   # unfortunately, this conflicts when using I() in qplot. For example,
   # qplot(1:10, 1:10, size = I(10))
-  un <- function(x) if (is.list(x)) lapply(x, f) else if (inherits(x, "AsIs")) unclass(x) else x
+  un <- function(x) if (is.list(x)) lapply(x, un) else if (inherits(x, "AsIs")) unclass(x) else x
   lapply(l, un)
 }
