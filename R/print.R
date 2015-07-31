@@ -103,5 +103,5 @@ embed_notebook <- function(x, width = "100%", height = "525") {
 
 plotly_iframe <- function(url, width, height) {
   paste("<iframe height=\"", height, "\" id=\"igraph\" scrolling=\"no\" seamless=\"seamless\" src=\"",
-        url, "\" width=\"", width, "\" frameBorder=\"0\"></iframe>", sep="")
+        url, ".embed\" width=\"", width, "\" frameBorder=\"0\"></iframe>", sep="")
 }
