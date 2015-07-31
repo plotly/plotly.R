@@ -136,17 +136,19 @@ plot_ly(z = volcano, type = "contour")
 #' Advanced
 x <- rnorm(200) 
 y <- rnorm(200)
-p1 <- plot_ly(x = x, type = "histogram")
-p2 <- plot_ly(x = x, y = y, type = "histogram2dcontour")
-p3 <- plot_ly(y = y, type = "histogram")
-a1 <- list(domain = c(0, .85))
-a2 <- list(domain = c(.85, 1))
+eaxis <- list(title = "", showticklabels = FALSE)
+p1 <- plot_ly(x = x, type = "histogram", showlegend = FALSE) %>%
+  layout(xaxis = eaxis)
+p4 <- plot_ly(y = y, type = "histogram", showlegend = FALSE) %>%
+  layout(yaxis = eaxis)
 subplot(
-  layout(p1, xaxis = a1, yaxis = a2),
-  layout(p2, xaxis = a1, yaxis = a1),
-  layout(p3, xaxis = a2, yaxis = a1)
-)
-#TODO: fix this -> https://plot.ly/~botty/2038
+  p1,
+  plotly_empty(),
+  plot_ly(x = x, y = y, type = "histogram2dcontour"),
+  p4,
+  nrows = 2,
+  margin = 0
+) 
 
 # ----------------------------------------------------------------------
 # https://plot.ly/r/error-bars/

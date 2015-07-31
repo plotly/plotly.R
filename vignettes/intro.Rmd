@@ -5,10 +5,12 @@ output:
   html_document:
     toc: yes
 vignette: |
-  %\VignetteEngine{knitr::rmarkdown} %\VignetteIndexEntry{Plotly DSL}
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{Plotly DSL}
 ---
 
 ```{r setup, echo = FALSE, message = FALSE}
+library(plotly)
 knitr::opts_chunk$set(eval = FALSE)
 ```
 
@@ -37,13 +39,13 @@ p
 
 ## Using special arguments
 
-`plot_ly()` has a number of arguments which are unique to the R package that make common visualization tasks a bit easier. These arguments are very much inspired by the semantics of ggplot2's `qplot()` in the sense that a scales are automatically applied these variables (scales map data to visual properties).
+`plot_ly()` has a number of arguments which are unique to the R package and make common visualizations a bit easier. These arguments are very much inspired by the semantics of ggplot2's `qplot()` in the sense that a scales are automatically applied these variables (i.e., they map data to visual properties).
 
 ### The color argument
 
 #### Qualitative color mappings
 
-If a ordinal variable (aka a non-ordered factor variable) is mapped to color, then a qualitative color palette is used by default.
+If a ordinal variable (aka a non-ordered factor variable) is assigned to color, then a qualitative color palette is used by default.
 
 ```{r}
 plot_ly(iris, x = Petal.Length, y = Petal.Width, 
@@ -216,9 +218,10 @@ subplot(p)
 Since `subplot()` does not assume x/y axes are on a common scale, it does not impose any restrictions on the range by default. However, you can change this by pre-specifying the range of the [axis objects](https://plot.ly/r/reference/#xaxis) via the `layout()` function.
 
 ```{r}
-p2 <- layout(p,
-             xaxis = list(range = range(Petal.Length) + c(-0.1, 0.1)),
-             yaxis = list(range = range(Petal.Width) + c(-0.1, 0.1))
+p2 <- layout(
+  p, 
+  xaxis = list(range = range(Petal.Length) + c(-0.1, 0.1)),
+  yaxis = list(range = range(Petal.Width) + c(-0.1, 0.1))
 )
 subplot(p2)
 ```
@@ -228,6 +231,23 @@ subplot(p2)
     <img src="https://plot.ly/~brnvg/545.png" height="300" width="600" />
   </a>
 </div>
+
+The `subplot()` function creates "xaxis[0-9]" objects which inherit pre-specified properties, but you can also customize each subplot by referencing these objects in the layout
+
+```{r}
+layout(
+    subplot(p2),
+    yaxis2 = list(title = ""), 
+    yaxis3 = list(title = "")
+)
+```
+
+<div align="center">
+  <a href="https://plot.ly/~agvd/839"> 
+    <img src="https://plot.ly/~agvd/839.png" height="300" width="600" />
+  </a>
+</div>
+
 
 [See here](https://plot.ly/r/map-subplots-and-small-multiples/) for another example of using the group argument to make small multiples (with maps!).
 
@@ -255,7 +275,7 @@ Note that the date information carries over from the first trace to the second. 
 
 If you look at the structure of plotly objects, they are actually data frames with a class of plotly and a special environment attached (this environment tracks the mapping from data to visual properties). 
 
-```{r}
+```{r, eval = TRUE}
 str(p <- plot_ly(economics, x = date, y = uempmed))
 ```
 
@@ -275,7 +295,6 @@ p %>%
     <img src="https://plot.ly/~brnvg/592.png" height="300" width="600" />
   </a>
 </div>
-
 
 Although data frames can be thought of as the central object in this package, plotly visualizations don't actually _require_ a data frame. This makes chart types that accept a `z` argument especially easy to use if you have a numeric matrix:
 

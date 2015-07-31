@@ -51,7 +51,7 @@ offline(gg)
 Since plotly offline allows us to make standalone web pages, when using RStudio, your offline plots will appear directly in the viewer:
 
 <div align = "center">
-  <img src = "offline.gif" height = "300" width = "600"></img>
+  <img src = "offline.gif" height = "300" width = "600" />
 </div>
 
 If you use plotly inside of shiny apps or reactive rmarkdown documents (and have plotly offline), your plotly graphs will be offline by default!
