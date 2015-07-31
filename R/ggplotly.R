@@ -625,7 +625,7 @@ gg2list <- function(p) {
   
   # Legend.
   layout$margin$r <- 10
-  if (exists("increase_margin_r", where = as.environment("package:plotly"))) {
+  if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
   layout$legend <- list(bordercolor = "transparent", 
@@ -666,10 +666,11 @@ gg2list <- function(p) {
         legend.title <- colnames(p$data)[i]
     }
     legend.title <- paste0("<b>", legend.title, "</b>")
+    
     # Create legend title element as an annotation
-    if (exists("annotations", where = as.environment("package:plotly"))) {
-        nann <- nann + 1
-    } else{
+    if (exists("annotations")) {
+      nann <- nann + 1
+    } else {
       annotations <- list()
       nann <- 1
     }
