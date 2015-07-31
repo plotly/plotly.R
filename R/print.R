@@ -76,13 +76,17 @@ knit_print.offline <- function(x, options, ...) {
     warning("Please install.packages('knitr')")
     return(x)
   }
-  off <- offline_bundle(jq = TRUE)
-  b <- readChar(off, file.info(off)$size)
-  p <- paste0(
-    sprintf('<script type="text/javascript">%s</script>', b),
-    with(x, new_offline(data, layout, height, width, id))
-  )
-  knitr::asis_output(p)
+  p <- with(x, new_offline(data, layout, height, width, id))
+  # if this is the first plot, place bundle just before the plot
+  if (length(knitr::knit_meta(class = "plotly", clean = FALSE)) == 0) {
+    off <- offline_bundle(jq = TRUE)
+    b <- readChar(off, file.info(off)$size)
+    p <- paste0(
+      sprintf('<script type="text/javascript">%s</script>', b),
+      p
+    )
+  }
+  knitr::asis_output(p, meta = list(plotly = structure("", class = "plotly")))
 }
 
 #' Embed a plotly iframe into a IPython Notebook
