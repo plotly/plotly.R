@@ -628,9 +628,9 @@ gg2list <- function(p) {
   if (exists("increase_margin_r", where = as.environment("package:plotly"))) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", 
-                        x=1.05, y=1/2,
-                        xanchor="center", yanchor="top")
+  layout$legend <- list(bordercolor = "transparent", 
+                        x = 1.01, y = 0.5,
+                        xanchor = "left", yanchor = "center")
   
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
@@ -674,11 +674,12 @@ gg2list <- function(p) {
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x=layout$legend$x,
-                                y=layout$legend$y * 1.04,
+                                x= layout$legend$x * 1.0154,
+                                y= layout$legend$y + 
+                                  0.5 * length(trace.list) * 0.10,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
-                                xanchor="center",
+                                xanchor="left", yanchor = "center",
                                 textangle=0)
     layout$annotations <- annotations
   }
