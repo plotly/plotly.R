@@ -185,14 +185,13 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' @export
 plotly_build <- function(l = last_plot()) {
   # ggplot objects don't need any special type of handling
-  if (is.ggplot(l)) return(ggplotly(l))
+  if (is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
   # plots without NSE don't need it either
-  nms <- lapply(l$data, names)
-  idx <- unique(unlist(lapply(l$data, names))) %in% c("args", "env")
-  if (sum(idx) != 2) return(structure(l, class = unique("plotly", class(l))))
-  nms <- names(l)
+  nmz <- c(lapply(l$data, names), lapply(l$layout, names), lapply(l$style, names))
+  if (!all(c("args", "env") %in% unlist(nmz))) return(structure(l, class = unique("plotly", class(l))))
   # assume unnamed list elements are data/traces
+  nms <- names(l)
   idx <- nms %in% ""
   l <- if (is.null(nms)) {
     list(data = l) 
@@ -207,40 +206,40 @@ plotly_build <- function(l = last_plot()) {
     if (sum(idx) == 2) {
       dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
       dat[c("args", "env", "enclos")] <- NULL
-    } else {
-      dat <- d
-    }
-    # start processing specially named arguments
-    s <- dat[["size"]]
-    if (!is.null(s)) {
-      if (!is.numeric(s)) warning("size should be numeric", call. = FALSE)
-      # if autosizing is used, guess that the plot is 300 by 600
-      auto <- dat[["layout"]][["autosize"]] %||% TRUE
-      hw <- if (auto) c(300, 600)
+      # start processing specially named arguments
+      s <- dat[["size"]]
+      if (!is.null(s)) {
+        if (!is.numeric(s)) warning("size should be numeric", call. = FALSE)
+        # if autosizing is used, guess that the plot is 300 by 600
+        auto <- dat[["layout"]][["autosize"]] %||% TRUE
+        hw <- if (auto) c(300, 600)
         else c(dat[["layout"]][["height"]], dat[["layout"]][["width"]])
-      # ensure that markers cover 30% of the plot area
-      m <- list(
-        size = 0.3 * prod(hw) * (s/sum(s)),
-        sizemode = "area"
-      )
-      # the marker object is the only type of object which respects size
-      dat[["marker"]] <- modifyList(dat[["marker"]] %||% list(), m)
-      # either add some appropriate hover text
-      txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
-      dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
+        # ensure that markers cover 30% of the plot area
+        m <- list(
+          size = 0.3 * prod(hw) * (s/sum(s)),
+          sizemode = "area"
+        )
+        # the marker object is the only type of object which respects size
+        dat[["marker"]] <- modifyList(dat[["marker"]] %||% list(), m)
+        # either add some appropriate hover text
+        txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
+        dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
+      }
+      has_color <- !is.null(dat[["color"]]) || 
+        isTRUE(!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
+      has_symbol <- !is.null(dat[["symbol"]])
+      has_group <- !is.null(dat[["group"]])
+      if (has_color) {
+        title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
+        dats <- c(dats, colorize(dat, title))
+      }
+      # TODO: add a legend title (is this only possible via annotations?!?)
+      if (has_symbol) dats <- c(dats, symbolize(dat))
+      if (has_group) dats <- c(dats, traceify(dat, "group"))
+      if (!has_color && !has_symbol && !has_group) dats <- c(dats, list(dat))
+    } else {
+      dats <- c(dats, list(d))
     }
-    has_color <- !is.null(dat[["color"]]) || 
-      isTRUE(!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
-    has_symbol <- !is.null(dat[["symbol"]])
-    has_group <- !is.null(dat[["group"]])
-    if (has_color) {
-      title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
-      dats <- c(dats, colorize(dat, title))
-    }
-    # TODO: add a legend title (is this only possible via annotations?!?)
-    if (has_symbol) dats <- c(dats, symbolize(dat))
-    if (has_group) dats <- c(dats, traceify(dat, "group"))
-    if (!has_color && !has_symbol && !has_group) dats <- c(dats, list(dat))
   }
   x <- list(data = dats)
   # carry over properties/data from first trace (if appropriate)
@@ -249,30 +248,25 @@ plotly_build <- function(l = last_plot()) {
       x$data[[i]] <- modifyList(x$data[[1]], x$data[[i]])
     }
   }
-  # plot_ly()/layout() may produce a unnamed list of layouts
-  # in that case, we may want to evaluate layout arguments
-  idx <- names(l$layout) == ""
-  if (all(idx)) {
-    nlayouts <- length(l$layout)
-    layouts <- setNames(vector("list", nlayouts), names(l$layout))
-    for (i in seq_len(nlayouts)) {
-      layout <- l$layout[[i]]
-      idx <- names(layout) %in% c("args", "env")
-      layouts[[i]] <- if (sum(idx) == 2) {
-        c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
-      } else {
-        layout
-      }
-    }
-    idx <- names(layouts) == ""
-    x$layout <- if (any(idx)) {
-      c(Reduce(c, layouts[idx]), layouts[!idx])
-    } else {
-      Reduce(c, layouts)
-    }
-  } else {
-    x$layout <- l$layout
+  # layout() tacks on an unnamed list element to potentially pre-existing
+  # layout(s). Note that ggplotly() will return a named list 
+  # of length n >= 1 (so we need to carefully merge them ).
+  nms <- names(l$layout)
+  if (!is.null(nms) && any(idx <- nms %in% "")) {
+    # TODO: does this always preserve the correct order to layouts?
+    # (important since we use modifyList at a later point)
+    l$layout <- c(list(l$layout[!idx]), l$layout[idx])
   }
+  for (i in seq_along(l$layout)) {
+    layout <- l$layout[[i]]
+    idx <- names(layout) %in% c("args", "env")
+    x$layout[[i]] <- if (sum(idx) == 2) {
+      c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
+    } else {
+      layout
+    }
+  }
+  x$layout <- Reduce(modifyList, x$layout)
   # if style is not null, use it to modify existing traces
   if (!is.null(l$style)) {
     for (i in seq_along(l$style)) {
