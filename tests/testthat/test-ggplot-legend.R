@@ -110,9 +110,9 @@ test_that("many legend items", {
                                          size = 100, replace = TRUE))
   p_many_items <- ggplot(many_items, aes(cat2, fill=cat1)) + 
     geom_bar(position="dodge")
-  info <- expect_traces(p_long_items, 3, "many legend items")
+  info <- expect_traces(p_many_items, 12, "many legend items")
   expect_equal(length(info$layout$annotations), 1)
-  expected.names <- levels(long_items$cat2)
+  expected.names <- levels(many_items$cat2)
   expect_identical(info$layout$annotations[[1]]$y > 0.5, TRUE)
   expect_identical(info$layout$annotations[[1]]$y - 
                      info$layout$legend$y > 0, TRUE)
