@@ -250,7 +250,7 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap")) bargap else "default"
+      tr$bargap <- if (exists("bargap", where = environment())) bargap else "default"
       pos <- l$position$.super$objname
       tr$barmode <-
         if (pos %in% "identity" && tr$bargap == 0) {
