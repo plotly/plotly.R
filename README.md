@@ -60,8 +60,8 @@ plot_ly(z = volcano, type = "surface")
 
 ## Learn more
 
-* [An introduction to plotly's R API](http://ropensci.github.io/plotly/intro)
-* [Plotly Offline Mode](http://ropensci.github.io/plotly/offline)
+* [An introduction to plotly's R API](https://cdn.rawgit.com/ropensci/plotly/master/vignettes/intro.html)
+* [Plotly Offline Mode](https://cdn.rawgit.com/ropensci/plotly/master/vignettes/offline.html)
 * Plotly's [R homepage](https://plot.ly/r) and [ggplot2 homepage](https://plot.ly/ggplot2)
 
 ## Contributing
