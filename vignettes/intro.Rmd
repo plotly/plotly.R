@@ -16,9 +16,9 @@ knitr::opts_chunk$set(eval = FALSE)
 
 Version 1.0.0 of the [plotly R package](https://github.com/ropensci/plotly) introduces a new high-level interface for working with plotly's JavaScript graphing library from R. The aim of this vignette is to explain the semantics of this interface, but I also recommend perusing [plotly's R homepage](https://plot.ly/r/) for more examples.
 
-## Creating and modifying plotlys
+## Creating plotlys
 
-To initiate a plotly object, use `plot_ly()`. Here we turn the `economics` data frame (from the ggplot2 package) into a plotly visualization and store it as the object `p`.
+To create a plotly object, start with `plot_ly()`. Here we turn the `economics` data frame (from the ggplot2 package) into a plotly visualization and store it as the object `p`.
 
 ```{r}
 library(plotly)
@@ -232,7 +232,7 @@ subplot(p2)
   </a>
 </div>
 
-The `subplot()` function creates "xaxis[0-9]" objects which inherit pre-specified properties, but you can also customize each subplot by referencing these objects in the layout
+Part of the magic of `subplot()` is that it generates axis objects with appropriate anchor and domain properties. After generating a subplot, you can always reference these axis objects to customize each plot.
 
 ```{r}
 layout(

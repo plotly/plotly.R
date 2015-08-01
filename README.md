@@ -31,6 +31,7 @@ If you use [ggplot2](http://cran.r-project.org/web/packages/ggplot2/index.html),
 
 ```r
 library(plotly)
+set.seed(100)
 d <- diamonds[sample(nrow(diamonds), 1000), ]
 p <- ggplot(data = d, aes(x = carat, y = price)) + 
   geom_point(aes(text = paste("Clarity:", clarity)), size = 4) +
@@ -38,9 +39,9 @@ p <- ggplot(data = d, aes(x = carat, y = price)) +
 (gg <- ggplotly(p))
 ```
 
-![https://plot.ly/~brnvg/1132](http://imgur.com/tbKybEb)
+![https://plot.ly/~agvd/1153](http://imgur.com/tbKybEb)
 
-[Click here](https://plot.ly/~brnvg/1132) to interact with the resulting graph (notice the custom hover text!)
+[Click here](https://plot.ly/~agvd/1153) to interact with the resulting graph (notice the custom hover text!)
 
 
 The `ggplotly()` function converts a ggplot object to a plotly object, so if you like, you may 'post-process' your ggplot graphs to add custom plotly features, for example:
