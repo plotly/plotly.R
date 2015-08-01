@@ -73,9 +73,8 @@ test_that("Very basic bar graph", {
     geom_bar(stat="identity")
   info <- expect_traces(gg, 1, "nocolor")
   for(tr in info$traces){
-    expect_null(tr$marker$color)
-    expect_null(tr$marker$line$color)
-    expect_null(tr$marker$line$width)
+    expect_true(is.na(l$data[[1]]$marker$color))
+    expect_null(tr$marker$line)
     expect_false(tr$showlegend)
   }
   expect_null(info$layout$annotations)
