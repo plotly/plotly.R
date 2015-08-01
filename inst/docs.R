@@ -719,9 +719,38 @@ subplot(p, nrows = 9)
 # https://plot.ly/r/subplots/
 # ----------------------------------------------------------------------------
 
+#' Basic subplot
+library(plotly)
+subplot(
+  plot_ly(economics, x = date, y = uempmed),
+  plot_ly(economics, x = date, y = unemploy),
+  margin = 0.05
+) %>% layout(showlegend = FALSE)
+
+#' Sharing an axis
+subplot(
+  plot_ly(economics, x = date, y = uempmed),
+  plot_ly(economics, x = date, y = unemploy),
+  margin = 0.03,
+  nrows = 2,
+  # fyi, share doesn't work (yet)
+  share = "x"
+) %>% layout(showlegend = FALSE)
+
 # ----------------------------------------------------------------------------
 # https://plot.ly/r/multiple-axes/
 # ----------------------------------------------------------------------------
+
+library(plotly)
+ay <- list(
+  tickfont = list(color = "red"),
+  overlaying = "y",
+  side = "right"
+)
+plot_ly(x = 1:3, y = 10*(1:3), name = "slope of 10") %>%
+  add_trace(x = 2:4, y = 1:3, name = "slope of 1", yaxis = "y2") %>%
+  layout(title = "Double Y Axis", yaxis2 = ay)
+
 
 # ----------------------------------------------------------------------------
 # https://plot.ly/r/insets/
