@@ -9,8 +9,8 @@ gg <- ggplot(df) + geom_point(aes(x=x1, y=x2))
 test_that("second trace be the hline", {
   gg <- gg + geom_hline(yintercept=1.1, colour="green", size=3)
   
-  L <- gg2list(gg)
-  
+  L <- save_outputs(gg, "hline")
+
   expect_equal(length(L$data), 2)
   expect_equal(L$data[[2]]$y[1], 1.1)
   expect_true(L$data[[2]]$x[1] <= 0)
@@ -19,14 +19,12 @@ test_that("second trace be the hline", {
   expect_identical(L$data[[2]]$line$shape, "linear")
   expect_equal(L$data[[2]]$line$width, 6)
   expect_identical(L$data[[2]]$line$color, "rgb(0,255,0)")
-  
-  save_outputs(gg, "hline")
 })
 
 test_that("vector yintercept results in multiple horizontal lines", {
   gg <- gg + geom_hline(yintercept=1:3, colour="red", size=3)
   
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "hline-multiple")
   
   expect_equal(length(L$data), 4)
   expect_equal(L$data[[2]]$y[1], 1)
@@ -39,7 +37,6 @@ test_that("vector yintercept results in multiple horizontal lines", {
   expect_equal(L$data[[3]]$line$width, 6)
   expect_identical(L$data[[3]]$line$color, "rgb(255,0,0)")
   
-  save_outputs(gg, "hline-multiple")
 })
 
 test_that("hline can be drawn over range of factors", {
@@ -47,9 +44,7 @@ test_that("hline can be drawn over range of factors", {
   gg <- ggplot(df, aes(x=cond, y=result)) +
     geom_bar(position="dodge", stat="identity") +
     geom_hline(aes(yintercept=12))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "hline-factor")
   expect_equal(length(L$data), 2)  # 1 trace for bar chart, 1 trace for hline
   expect_true(all(c("control", "treatment") %in% L$data[[2]]$x))
-  
-  save_outputs(gg, "hline-factor")
 })

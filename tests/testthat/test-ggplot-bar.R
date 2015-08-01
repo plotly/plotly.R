@@ -3,8 +3,7 @@ context("bar")
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("bar-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("bar-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -74,9 +73,8 @@ test_that("Very basic bar graph", {
     geom_bar(stat="identity")
   info <- expect_traces(gg, 1, "nocolor")
   for(tr in info$traces){
-    expect_null(tr$marker$color)
-    expect_null(tr$marker$line$color)
-    expect_null(tr$marker$line$width)
+    expect_true(is.na(tr$marker$color))
+    expect_null(tr$marker$line)
     expect_false(tr$showlegend)
   }
   expect_null(info$layout$annotations)

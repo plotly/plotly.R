@@ -3,7 +3,7 @@ context("Boxplot")
 test_that("geom_boxplot gives a boxplot", {
   gg <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_boxplot()
   
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "boxplot")
 
   # right nb. traces
   expect_equal(length(L$data), 3)
@@ -12,14 +12,12 @@ test_that("geom_boxplot gives a boxplot", {
   # right data for 1st trace
   expect_identical(sort(L$data[[1]]$y),
                    sort(mtcars$mpg[mtcars$cyl == 4]))
-  
-  save_outputs(gg, "boxplot")
 })
 
 test_that("geom_violin is equated to geom_boxplot for now", {
   gg <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_violin()
   
-  L <- gg2list(gg)
+  L <- save_outputs(gg, "violin")
   
   # right nb. traces
   expect_equal(length(L$data), 3)
@@ -28,8 +26,6 @@ test_that("geom_violin is equated to geom_boxplot for now", {
   # right data for 1st trace
   expect_identical(sort(L$data[[1]]$y),
                    sort(mtcars$mpg[mtcars$cyl == 4]))
-  
-  save_outputs(gg, "violin")
 })
 
 test_that("you can make a boxplot for a distribution of datetimes", {
@@ -40,11 +36,9 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   
   bp <- ggplot(df) + geom_boxplot(aes(x, y))
   
-  L <- gg2list(bp)
+  L <- save_outputs(bp, "boxplot-datetime")
   
   expect_equal(length(L$data), 1)  # 1 trace
   expect_identical(L$data[[1]]$type, "box")
   expect_identical(L$data[[1]]$y, as.character(df$y))
-  
-  save_outputs(bp, "boxplot-datetime")
 })
