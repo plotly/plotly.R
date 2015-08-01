@@ -39,7 +39,7 @@ p <- ggplot(data = d, aes(x = carat, y = price)) +
 (gg <- ggplotly(p))
 ```
 
-![https://plot.ly/~agvd/1153](http://imgur.com/tbKybEb)
+![https://plot.ly/~agvd/1153](http://i.imgur.com/tbKybEb.png)
 
 [Click here](https://plot.ly/~agvd/1153) to interact with the resulting graph (notice the custom hover text!)
 
