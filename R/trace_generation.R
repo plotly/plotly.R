@@ -536,7 +536,7 @@ geom2trace <- list(
     L <- list(x=data$x,
               y=data$y,
               name=params$name,
-              text=data$text,
+              text=as.character(data$text),
               type="scatter",
               mode="markers",
               marker=paramORdefault(params, aes2marker, marker.defaults))

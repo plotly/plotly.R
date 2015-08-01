@@ -3,8 +3,7 @@ context("polygon")
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("polygon-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("polygon-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -121,7 +120,7 @@ test_that("geom_polygon(aes(size), fill, colour)", {
   gg <- ggplot(poly.df)+
     geom_polygon(aes(x, y, size=lab), fill="orange", colour="black")+
     scale_size_manual(values=c(left=2, right=3))
-  info <- expect_traces(gg, 2, "color-fill-aes-linetype")
+  info <- expect_traces(gg, 2, "color-fill-aes-size")
   traces.by.name <- list()
   for(tr in info$traces){
     expect_equal(tr$fillcolor, toRGB("orange"))
@@ -142,12 +141,10 @@ test_that("borders become one trace with NA", {
   data(canada.cities)
   gg <- ggplot(canada.cities, aes(long, lat))+
     borders(regions="canada", name="borders")
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "polygons-canada-borders")
   expect_equal(length(info$data), 1)
   tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
-
-  save_outputs(gg, "polygons-canada-borders")
 })
 
 x <- c(0, -1, 2, -2, 1)

@@ -3,8 +3,7 @@ context("Probability density")
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
-  save_outputs(gg, paste0("density-", name))
-  L <- gg2list(gg)
+  L <- save_outputs(gg, paste0("density-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -49,7 +48,7 @@ g <- base +
   geom_density(fill = "lightblue", alpha = 0.1)
   
 test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
-  info <- expect_traces(g, 2, "color")
+  info <- expect_traces(g, 2, "histogram")
   trs <- info$traces
   type <- unique(sapply(trs, "[[", "type"))
   expect_identical(sort(type), c("bar", "scatter"))

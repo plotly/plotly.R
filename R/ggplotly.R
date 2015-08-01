@@ -1,3 +1,37 @@
+#' Create plotly graphs using ggplot2 syntax
+#'
+#' See up-to-date documentation and examples at
+#' \url{https://plot.ly/ggplot2}
+#'
+#' @param p a ggplot object.
+#' @seealso \link{signup}, \link{plot_ly}
+#' @import httr jsonlite
+#' @export
+#' @author Carson Sievert
+#' @examples \dontrun{
+#' # simple example
+#' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
+#' ggplotly(ggiris)
+#' 
+#' # maps!!
+#' data(canada.cities, package = "maps")
+#' viz <- ggplot(canada.cities, aes(long, lat)) +
+#'   borders(regions = "canada", name = "borders") +
+#'   coord_equal() +
+#'   geom_point(aes(text = name, size = pop), colour = "red",
+#'                alpha = 1/2, name = "cities")
+#'  ggplotly(viz)
+#' }
+#' 
+ggplotly <- function(p = last_plot()) {
+  l <- gg2list(p)
+  hash_plot(p$data, l)
+}
+
+# ----------------------------------------------------------------------------
+# Objects accessed inside gg2list()
+# ----------------------------------------------------------------------------
+
 # calc. the epoch
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
@@ -907,8 +941,17 @@ gg2list <- function(p) {
     flipped.layout[["yaxis"]] <- x
   }
   
-  fig <- list(data=flipped.traces, layout=flipped.layout)
-  
-  fig
-  
+  l <- list(data = flipped.traces, layout = flipped.layout)
+  # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
+  # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
+  # x/y/etc so that they don't get unboxed when they are of length 1.
+  # unfortunately, this conflicts when using I() in qplot. For example,
+  # qplot(1:10, 1:10, size = I(10))
+  un <- function(x) {
+    if (is.null(x)) return(NA)
+    if (is.list(x)) lapply(x, un) 
+    else if (inherits(x, "AsIs")) unclass(x) 
+    else x
+  }
+  lapply(l, un)
 }

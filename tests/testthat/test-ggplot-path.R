@@ -4,15 +4,13 @@ test_that("lines are different from paths", {
   df <- data.frame(x=c(1, 3, 2),
                    y=c(0, 0, 1))
   p <- qplot(x, y, data=df, geom="path")
-  info <- gg2list(p)
+  info <- save_outputs(p, "path-lines-diff-from-paths")
   expect_identical(info$data[[1]]$x[1:3], c(1, 3, 2))
   expect_identical(info$data[[1]]$y[1:3], c(0, 0, 1))
-  l <- qplot(x, y, data=df, geom="line")
-  l.tr <- gg2list(l)$data
+  p2 <- qplot(x, y, data=df, geom="line")
+  l.tr <- gg2list(p2)$data
   expect_identical(l.tr[[1]]$x[1:3], c(1, 2, 3))
   expect_identical(l.tr[[1]]$y[1:3], c(0, 1, 0))
-
-  save_outputs(p, "path-lines-diff-from-paths")
 })
 
 two.paths <- data.frame(x=c(1, 2, 1, 2),
@@ -33,7 +31,7 @@ test_that("paths with different colors become different traces", {
   ## Categorical color.
   gg <- ggplot()+
     geom_path(aes(x, y, group=y, color=paste0("FOO", y)), data=two.paths)
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "path-colors")
   expect_equal(length(info$data), 2)
   trace.names <- sapply(info$data[1:2], "[[", "name")
   expect_identical(as.character(trace.names), c("FOO1", "FOO2"))
@@ -41,8 +39,6 @@ test_that("paths with different colors become different traces", {
   expect_identical(info$data[[2]]$x[1:2], c(1,2))
   expect_identical(info$data[[1]]$y[1:2], c(1,1))
   expect_identical(info$data[[2]]$y[1:2], c(2,2))
-
-  save_outputs(gg, "path-colors")
 })
 
 four.paths <- rbind(data.frame(two.paths, g="positive"),
@@ -51,7 +47,7 @@ four.paths <- rbind(data.frame(two.paths, g="positive"),
 test_that("paths with the same color but different groups stay together", {
   gg <- ggplot()+
     geom_path(aes(x, y, group=y, color=g), data=four.paths)
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "path-colored-groups-stay-together")
   expect_equal(length(info$data), 2)
   expect_identical(info$data[[1]]$name, "positive")
   expect_identical(info$data[[2]]$name, "negative")
@@ -59,8 +55,6 @@ test_that("paths with the same color but different groups stay together", {
   expect_true(any(is.na(info$data[[1]]$y)))
   expect_true(any(is.na(info$data[[2]]$x)))
   expect_true(any(is.na(info$data[[2]]$y)))
-
-  save_outputs(gg, "path-colored-groups-stay-together")
 })
 
 test_that("lines work with aesthetic shape", {
@@ -71,7 +65,7 @@ test_that("lines work with aesthetic shape", {
   gg <- ggplot(data=df1, aes(x=time, y=total_bill, group=sex, shape=sex)) +
     geom_line() +
     geom_point()
-  info <- gg2list(gg)
+  info <- save_outputs(gg, "path-line-symbols")
   expect_equal(length(info$data), 2)  # 2 traces
   expect_identical(info$data[[1]]$name, "Female")
   expect_identical(info$data[[1]]$marker$symbol, "circle")
@@ -80,6 +74,4 @@ test_that("lines work with aesthetic shape", {
   # Layout
   expect_identical(info$layout$xaxis$title, "time")
   expect_identical(info$layout$xaxis$type, "category")
-  
-  save_outputs(gg, "path-line-symbols")
 })

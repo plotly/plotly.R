@@ -1,18 +1,35 @@
-language: r
+language: c
+
+before_install:
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+  # password is encrypted below
+  - echo "Sys.setenv('plotly_username' = 'dfvd')" > ~/.Rprofile
+
+install:
+  - ./travis-tool.sh install_deps
+
+before_script:
+  - git config --global user.name "cpsievert"
+  - git config --global user.email "cpsievert1@gmail.com"
+  - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
+
+script:
+  - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE)"
+
+after_success:
+  - cd ../plotly-test-table
+  - ls -R
+  - Rscript ../plotly/inst/build-push-comment.R
 
 env:
   global:
-    - secure: "cJ1bDRrAdIRjG+JnsQI9CdA4wQJhJJ2DdCNQ3frl8dotk69z61EiGCFW1Ir1cAY5V/NbHvFHp91HDiSo28ggwqRkEPBOGE44ico5gtVaELu3M/EnkWc2ZwQoN1273Vfdm26QYidqrvWrpLZ0XkFl7Q8xgvBswx30MF7y61+0Hv4="
-
-r_packages:
-  - RCurl
-  - RJSONIO
-  - lattice
-  - xtable
-  - httr 
-
-before_script:
-  - chmod 755 inst/testscripts/.push_test_table.sh
-
-after_success:
-  - inst/testscripts/.push_test_table.sh
+    # plotly_api_key (for posting to plot.ly)
+    - secure: "eHO4OUmgLusU9i4xSvr3daZxnsMZw3x4FH8BYVEC8Ja+Ey6kkAFFSh2iAC/CqewEYJ7I/M8aIJYqlyTMGRYUgy36WU7iWHAGgaZOU8fIB5dWzMwHbIvS4Naq2sdU7lRT7sxkS+40K1+rplpWDoLF2yt8vSRWo9rjNzp+yc8PjXM="
+    # GITHUB_PAT (for pushing to plotly-test-table)
+    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
+    # plotlyjs_full (link to the full offline bundle)
+    - secure: "ivxfqGwbzpBpVJe+jVcOBktcmLrT38W/ZapAk/FNDu+yaBhag1eCYErAPPx6Snc4GzwatMt22v4SxAqXQF4SAhTRtmrWVaWnbhzuNqpTkiS6IKEd6EqaoyUZvUTgXh1ruyik00zl3ET9898O3vFfqafodljE0lCLVICHq6ANo68="
+    # plotlyjs_no_jq (link to the offline bundle w/o jQuery)
+    - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA=" 

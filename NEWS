@@ -1,3 +1,17 @@
+1.0.0 -- 31 July 2015
+
+A major reworking of package internals which includes a few backwards incompatible changes. 
+
+Major changes include:
+
+(1) New high-level grammar for expressing Plotly graphs from R (see the `plot_ly()`, `add_trace()`, `layout()`, and `style()` functions).
+(2) New print methods which make it easier to create, modify, and embed Plotly graphs.
+(3) Added a `subplot()` function for putting several graphs on a single page.
+(4) Added the `renderPlotly()` and `plotlyOutput()` functions for embedding plotly graphs in shiny applications.
+(5) Added `offline()` function for creating standalone HTML pages via Plotly Offline (see http://purchasing.plot.ly/)
+
+For more details, see the new vignettes with `browseVignettes(package = "plotly")` and/or the pull request -> https://github.com/ropensci/plotly/pull/226
+
 0.6.3 -- 2 June 2015
 
 Add new tests inspired by the R Cookbook distributions #214
