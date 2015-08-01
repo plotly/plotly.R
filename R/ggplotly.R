@@ -23,7 +23,7 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = last_plot()) {
+ggplotly <- function(p = ggplot2::last_plot()) {
   l <- gg2list(p)
   hash_plot(p$data, l)
 }
@@ -948,6 +948,8 @@ gg2list <- function(p) {
   # unfortunately, this conflicts when using I() in qplot. For example,
   # qplot(1:10, 1:10, size = I(10))
   un <- function(x) {
+    # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
+    # https://github.com/jeroenooms/jsonlite/issues/29
     if (is.null(x)) return(NA)
     if (is.list(x)) lapply(x, un) 
     else if (inherits(x, "AsIs")) unclass(x) 
