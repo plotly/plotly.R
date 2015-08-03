@@ -4,12 +4,22 @@
 \alias{ggplotly}
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
-ggplotly(p = ggplot2::last_plot(), ...)
+ggplotly(p = ggplot2::last_plot(), filename, fileopt, world_readable = TRUE)
 }
 \arguments{
 \item{p}{a ggplot object.}
 
-\item{...}{additional arguments for changing the filename of the plot, etc.}
+\item{filename}{character string describing the name of the plot in your plotly account.
+Use / to specify directories. If a directory path does not exist it will be created.
+If this argument is not specified and the title of the plot exists,
+that will be used for the filename.}
+
+\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly,
+"append" data to existing plotly, or "extend" it.}
+
+\item{world_readable}{logical. If \code{TRUE}, the graph is viewable
+by anyone who has the link and in the owner's plotly account.
+If \code{FALSE}, graph is only viewable in the owner's plotly account.}
 }
 \description{
 See up-to-date documentation and examples at
