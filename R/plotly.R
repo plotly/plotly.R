@@ -14,12 +14,21 @@
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
-#' or a color interpolation function like \link{grDevices::colorRamp}.
+#' or a color interpolation function like \code{colorRamp()}.
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
-#' @param inherit should future traces inherit properties from this initial trace?
+#' @param filename character string describing the name of the plot in your plotly account. 
+#' Use / to specify directories. If a directory path does not exist it will be created.
+#' If this argument is not specified and the title of the plot exists,
+#' that will be used for the filename.
+#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
+#' "append" data to existing plotly, or "extend" it.
+#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
+#' by anyone who has the link and in the owner's plotly account.
+#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
+#' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @references \url{https://plot.ly/r/reference/}
@@ -45,6 +54,7 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
+                    filename, fileopt, world_readable = TRUE,
                     inherit = TRUE, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
@@ -69,6 +79,11 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL
   )
+  # tack on special keyword arguments
+  if (!missing(filename)) p$filename <- filename
+  if (!missing(fileopt)) p$fileopt <- fileopt
+  p$world_readable <- world_readable
+  
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
@@ -83,7 +98,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
-#' or a color interpolation function like \link{grDevices::colorRamp}.
+#' or a color interpolation function like \code{colorRamp}.
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
