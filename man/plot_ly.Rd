@@ -22,7 +22,7 @@ a different trace will be created for each unique value.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
 or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
-or a color interpolation function like \link{grDevices::colorRamp}.}
+or a color interpolation function like \code{colorRamp()}.}
 
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
 
