@@ -9,7 +9,7 @@ ggplotly(p)
 "
 test_that("plotly embeds inside knitr", {
   html <- knitr::knit2html(text = txt)
-  expect_true(grepl("<iframe", html))
+  expect_true(grepl("iframe", html))
 })
 
 # If you want to interactively see the result

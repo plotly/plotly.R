@@ -4,7 +4,7 @@
 \alias{ggplotly}
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
-ggplotly(p = last_plot())
+ggplotly(p = ggplot2::last_plot())
 }
 \arguments{
 \item{p}{a ggplot object.}
