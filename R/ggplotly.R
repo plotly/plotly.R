@@ -4,6 +4,15 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
+#' @param filename character string describing the name of the plot in your plotly account. 
+#' Use / to specify directories. If a directory path does not exist it will be created.
+#' If this argument is not specified and the title of the plot exists,
+#' that will be used for the filename.
+#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
+#' "append" data to existing plotly, or "extend" it.
+#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
+#' by anyone who has the link and in the owner's plotly account.
+#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
 #' @export
@@ -23,8 +32,13 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = ggplot2::last_plot()) {
+ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt, 
+                     world_readable = TRUE) {
   l <- gg2list(p)
+  # tack on special keyword arguments
+  if (!missing(filename)) l$filename <- filename
+  if (!missing(fileopt)) l$fileopt <- fileopt
+  l$world_readable <- world_readable
   hash_plot(p$data, l)
 }
 
@@ -354,7 +368,7 @@ gg2list <- function(p) {
   # x axis scale instead of on the grid 0-1 scale). This allows
   # transformations to be used out of the box, with no additional d3
   # coding.
-  theme.pars <- ggplot2:::plot_theme(p)
+  theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
   
   # Flip labels if coords are flipped - transform does not take care
   # of this. Do this BEFORE checking if it is blank or not, so that
