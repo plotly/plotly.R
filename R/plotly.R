@@ -197,6 +197,7 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' list.
 #' 
 #' @param l a ggplot object, or a plotly object, or a list.
+#' @importFrom viridis viridis
 #' @export
 plotly_build <- function(l = last_plot()) {
   # ggplot objects don't need any special type of handling
