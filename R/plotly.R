@@ -309,6 +309,11 @@ plotly_build <- function(l = last_plot()) {
     idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
     if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
   }
+  # ugh, annotations _must_ be an _array_ of object(s)...
+  a <- x$layout$annotations
+  if (!is.null(a) && !is.null(names(a))) {
+    x$layout$annotations <- list(x$layout$annotations)
+  }
   # search for keyword args in traces and place them at the top level
   kwargs <- lapply(x$data, function(z) z[get_kwargs()])
   if (length(kwargs) == 1) kwargs <- c(kwargs, kwargs)
