@@ -1,3 +1,7 @@
+1.0.3 -- 7 Aug 2015
+
+Improved legend positioning. See #241
+
 1.0.2 -- 2 Aug 2015
 
 * last_plot() will now look for the last plotly object; if not found, it will try to find the last ggplot object.
