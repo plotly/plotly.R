@@ -676,9 +676,11 @@ gg2list <- function(p) {
   if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", 
-                        x=1.05, y=1/2,
-                        xanchor="center", yanchor="top")
+  layout$legend <- list(bordercolor = "transparent", 
+                        x = 1.01, 
+                        y = 0.075 * 0.5* length(trace.list) + 0.45,
+                        xref="paper", yref="paper",
+                        xanchor = "left", yanchor = "top")
   
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
@@ -723,15 +725,14 @@ gg2list <- function(p) {
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x=layout$legend$x,
-                                y=layout$legend$y * 1.04,
+                                x = layout$legend$x * 1.0154,
+                                y = 0.075 * 0.5* length(trace.list) + 0.55,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
-                                xanchor="center",
+                                xanchor="left", yanchor = "top",
                                 textangle=0)
     layout$annotations <- annotations
   }
-  
   # Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family

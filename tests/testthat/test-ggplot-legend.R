@@ -83,3 +83,37 @@ test_that("0 breaks -> 3 traces with showlegend=FALSE", {
   computed.showlegend <- sapply(info$traces, "[[", "showlegend")
   expect_identical(as.logical(computed.showlegend), expected.showlegend)
 })
+
+# test of legend position
+test_that("very long legend items", {
+  long_items <- data.frame(cat1 = sample(x = LETTERS[1:10], 
+                                         size = 100, replace = TRUE),
+                           cat2 = sample(x = c("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                                               "BBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                                               "CCCCCCCCCCCCCCCCCCCCCCCCCCCCC"),
+                                         size = 100, replace = TRUE))
+  p_long_items <- ggplot(long_items, aes(cat1, fill=cat2)) + 
+    geom_bar(position="dodge")
+  info <- expect_traces(p_long_items, 3, "very long legend items")
+  expect_equal(length(info$layout$annotations), 1)
+  expected.names <- levels(long_items$cat2)
+  expect_identical(info$layout$annotations[[1]]$y - 
+                     info$layout$legend$y > 0, TRUE)
+})
+
+# test of legend position
+test_that("many legend items", {
+  many_items <- data.frame(cat1 = sample(x = paste0("Group ", LETTERS[1:12]), 
+                                         size = 100, replace = TRUE),
+                           cat2 = sample(x = c("foo", "bar", "baz"),
+                                         size = 100, replace = TRUE))
+  p_many_items <- ggplot(many_items, aes(cat2, fill=cat1)) + 
+    geom_bar(position="dodge")
+  info <- expect_traces(p_many_items, 12, "many legend items")
+  expect_equal(length(info$layout$annotations), 1)
+  expected.names <- levels(many_items$cat2)
+  expect_identical(info$layout$annotations[[1]]$y > 0.5, TRUE)
+  expect_identical(info$layout$annotations[[1]]$y - 
+                     info$layout$legend$y > 0, TRUE)
+})
+
