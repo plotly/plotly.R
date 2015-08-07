@@ -67,8 +67,8 @@ new_offline <- function(data, layout, height, width, id) {
 
 has_offline <- function() {
   off <- Sys.getenv("plotly_offline")
-  bundles <- c("plotly-matlab-offline-bundle.js", 
-               "plotly-ipython-offline-bundle.js")
+  bundles <- c("plotly-offline.min.js",
+               "plotly-offline-nojquery.min.js")
   haz <- all(bundles %in% list.files(off))
   # if bundles don't exist and a zip does try to unzip
   if (!haz) {
@@ -98,7 +98,7 @@ offline_bundle <- function(jq = FALSE) {
   haz <- has_offline()
   if (!haz) offline_stop()
   # ipython already has jQuery, and so does shiny
-  f <- if (jq) "plotly-matlab-offline-bundle.js" else "plotly-ipython-offline-bundle.js"
+  f <- if (jq) "plotly-offline.min.js" else "plotly-offline-nojquery.min.js"
   file.path(names(haz), f)
 }
 
