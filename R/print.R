@@ -10,7 +10,7 @@
 print.plotly <- function(x, ...) {
   l <- plotly_POST(x)
   if (!is.null(l$url)) {
-    if (httr::url_ok(l$url) && interactive()) browseURL(l$url)
+    if (interactive()) browseURL(l$url)
   }
   # get_figure() instead?
   invisible(l)

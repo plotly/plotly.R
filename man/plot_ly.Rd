@@ -5,7 +5,8 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, inherit = TRUE, evaluate = FALSE)
+  symbol, symbols, size, filename, fileopt, world_readable = TRUE,
+  inherit = TRUE, evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -22,7 +23,7 @@ a different trace will be created for each unique value.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
 or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
-or a color interpolation function like \link{grDevices::colorRamp}.}
+or a color interpolation function like \code{colorRamp()}.}
 
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
 
@@ -31,7 +32,19 @@ or a color interpolation function like \link{grDevices::colorRamp}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
-\item{inherit}{should future traces inherit properties from this initial trace?}
+\item{filename}{character string describing the name of the plot in your plotly account.
+Use / to specify directories. If a directory path does not exist it will be created.
+If this argument is not specified and the title of the plot exists,
+that will be used for the filename.}
+
+\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly,
+"append" data to existing plotly, or "extend" it.}
+
+\item{world_readable}{logical. If \code{TRUE}, the graph is viewable
+by anyone who has the link and in the owner's plotly account.
+If \code{FALSE}, graph is only viewable in the owner's plotly account.}
+
+\item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
