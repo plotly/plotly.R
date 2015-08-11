@@ -18,10 +18,7 @@ is.offline <- function(x) inherits(x, "offline")
   # set a default for the offline bundle directory 
   if (Sys.getenv("plotly_offline") == "") {
     Sys.setenv("plotly_offline" = "~/.plotly/plotlyjs")
-    # iframes won't work in RStudio viewer, so we override
-    # shiny's browser launch method 
-    if (!has_offline()) 
-      options("shiny.launch.browser" = function(url) { browseURL(url) })
+    # maybe rely a message if bundle is (or isn't) found?
   }
   invisible(NULL)
 }
@@ -64,16 +61,13 @@ get_plot <- function(data = NULL, last = FALSE) {
   }
 }
 
-#' Retrive and create the last plotly (or ggplot).
+#' Retrive last plotly to be modified or created
 #' 
 #' @seealso \link{plotly_build}
-#' @param data (optional) a data frame with a class of plotly (and a plotly_hash attribute).
 #' @export
 #' 
-last_plot <- function(data = NULL) {
-  p <- try(get_plot(data, last = TRUE), silent = TRUE)
-  if (inherits(p, "try-error")) p <- try(ggplotly(), silent = TRUE)
-  if (inherits(p, "try-error")) stop("The last plot doesn't exist")
+last_plot <- function(...) {
+  p <- get_plot(..., last = TRUE)
   structure(
     p, 
     class = unique(c("plotly", class(p)))
@@ -149,7 +143,8 @@ get_domain <- function(type = "main") {
 
 # plotly's special keyword arguments in POST body
 get_kwargs <- function() {
-  c("filename", "fileopt", "style", "traces", "layout", "world_readable")
+  c("filename", "fileopt", "style", "traces", "layout", 
+    "world_readable", "kwarg_example")
 }
 
 # POST header fields

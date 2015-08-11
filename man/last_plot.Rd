@@ -2,15 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{last_plot}
 \alias{last_plot}
-\title{Retrive and create the last plotly (or ggplot).}
+\title{Retrive last plotly to be modified or created}
 \usage{
-last_plot(data = NULL)
-}
-\arguments{
-\item{data}{(optional) a data frame with a class of plotly (and a plotly_hash attribute).}
+last_plot(...)
 }
 \description{
-Retrive and create the last plotly (or ggplot).
+Retrive last plotly to be modified or created
 }
 \seealso{
 \link{plotly_build}
