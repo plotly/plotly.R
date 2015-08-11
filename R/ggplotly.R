@@ -4,15 +4,6 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
-#' @param filename character string describing the name of the plot in your plotly account. 
-#' Use / to specify directories. If a directory path does not exist it will be created.
-#' If this argument is not specified and the title of the plot exists,
-#' that will be used for the filename.
-#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-#' "append" data to existing plotly, or "extend" it.
-#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
-#' by anyone who has the link and in the owner's plotly account.
-#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
 #' @export
@@ -32,13 +23,8 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt, 
-                     world_readable = TRUE) {
+ggplotly <- function(p = last_plot()) {
   l <- gg2list(p)
-  # tack on special keyword arguments
-  if (!missing(filename)) l$filename <- filename
-  if (!missing(fileopt)) l$fileopt <- fileopt
-  l$world_readable <- world_readable
   hash_plot(p$data, l)
 }
 
@@ -368,7 +354,7 @@ gg2list <- function(p) {
   # x axis scale instead of on the grid 0-1 scale). This allows
   # transformations to be used out of the box, with no additional d3
   # coding.
-  theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
+  theme.pars <- ggplot2:::plot_theme(p)
   
   # Flip labels if coords are flipped - transform does not take care
   # of this. Do this BEFORE checking if it is blank or not, so that
@@ -673,14 +659,12 @@ gg2list <- function(p) {
   
   # Legend.
   layout$margin$r <- 10
-  if (exists("increase_margin_r")) {
+  if (exists("increase_margin_r", where = as.environment("package:plotly"))) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor = "transparent", 
-                        x = 1.01, 
-                        y = 0.075 * 0.5* length(trace.list) + 0.45,
-                        xref="paper", yref="paper",
-                        xanchor = "left", yanchor = "top")
+  layout$legend <- list(bordercolor="transparent", 
+                        x=1.05, y=1/2,
+                        xanchor="center", yanchor="top")
   
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
@@ -716,23 +700,23 @@ gg2list <- function(p) {
         legend.title <- colnames(p$data)[i]
     }
     legend.title <- paste0("<b>", legend.title, "</b>")
-    
     # Create legend title element as an annotation
-    if (exists("annotations")) {
-      nann <- nann + 1
-    } else {
+    if (exists("annotations", where = as.environment("package:plotly"))) {
+        nann <- nann + 1
+    } else{
       annotations <- list()
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x = layout$legend$x * 1.0154,
-                                y = 0.075 * 0.5* length(trace.list) + 0.55,
+                                x=layout$legend$x,
+                                y=layout$legend$y * 1.04,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
-                                xanchor="left", yanchor = "top",
+                                xanchor="center",
                                 textangle=0)
     layout$annotations <- annotations
   }
+  
   # Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
@@ -963,8 +947,6 @@ gg2list <- function(p) {
   # unfortunately, this conflicts when using I() in qplot. For example,
   # qplot(1:10, 1:10, size = I(10))
   un <- function(x) {
-    # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
-    # https://github.com/jeroenooms/jsonlite/issues/29
     if (is.null(x)) return(NA)
     if (is.list(x)) lapply(x, un) 
     else if (inherits(x, "AsIs")) unclass(x) 
