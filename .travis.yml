@@ -24,6 +24,52 @@ after_success:
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
+  - TEST_SUITE=cookbook-axes
+  - TEST_SUITE=cookbook-lines
+  - TEST_SUITE=cookbook-scatterplots
+  - TEST_SUITE=ggplot-abline
+  - TEST_SUITE=ggplot-area
+  - TEST_SUITE=ggplot-bar
+  - TEST_SUITE=ggplot-boxplot
+  - TEST_SUITE=ggplot-build2
+  - TEST_SUITE=ggplot-categorical
+  - TEST_SUITE=ggplot-contour
+  - TEST_SUITE=ggplot-date
+  - TEST_SUITE=ggplot-density
+  - TEST_SUITE=ggplot-density2d
+  - TEST_SUITE=ggplot-errorbar-horizontal
+  - TEST_SUITE=ggplot-errorbar
+  - TEST_SUITE=ggplot-facets
+  - TEST_SUITE=ggplot-heatmap
+  - TEST_SUITE=ggplot-histogram
+  - TEST_SUITE=ggplot-hline
+  - TEST_SUITE=ggplot-labels
+  - TEST_SUITE=ggplot-legend
+  - TEST_SUITE=ggplot-linetype
+  - TEST_SUITE=ggplot-names
+  - TEST_SUITE=ggplot-path
+  - TEST_SUITE=ggplot-polygons
+  - TEST_SUITE=ggplot-rect
+  - TEST_SUITE=ggplot-ribbon
+  - TEST_SUITE=ggplot-segment
+  - TEST_SUITE=ggplot-size
+  - TEST_SUITE=ggplot-smooth
+  - TEST_SUITE=ggplot-stack
+  - TEST_SUITE=ggplot-step
+  - TEST_SUITE=ggplot-text
+  - TEST_SUITE=ggplot-theme
+  - TEST_SUITE=ggplot-ticks
+  - TEST_SUITE=ggplot-vline
+  - TEST_SUITE=ggplot-ylim
+  - TEST_SUITE=mean-error-bars
+  - TEST_SUITE=plotly-filename
+  - TEST_SUITE=plotly-getfigure
+  - TEST_SUITE=plotly-knitr
+  - TEST_SUITE=plotly-subplot
+  - TEST_SUITE=plotly
+  - TEST_SUITE=rotated-ticks
+  - TEST_SUITE=unimplemented
+
   global:
     # plotly_api_key (for posting to plot.ly)
     - secure: "GTrq7AhGuufvuP6EfiI/tiFCcmCCkNDMQPV7Ux/djC6pdmhbbmmuB6AuRnYe9Z/pknPfWrjeyN3E/AFjzZtbRVQeVQSjlFILDRWPQhXdsXQ4P0XySTeRu4uRayS9NPFzNaNh1Kbrf/lq1+jkxKhlef1ZlUQqhuOch80vbXRFEyY="
