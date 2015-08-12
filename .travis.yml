@@ -5,7 +5,7 @@ before_install:
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
   # password is encrypted below
-  - echo "Sys.setenv('plotly_username' = 'dsvgb')" > ~/.Rprofile
+  - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
