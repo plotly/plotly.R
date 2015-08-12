@@ -24,7 +24,6 @@ after_success:
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
-  - TEST_VAR: "cookbook_axes"
   global:
     # plotly_api_key (for posting to plot.ly)
     - secure: "GTrq7AhGuufvuP6EfiI/tiFCcmCCkNDMQPV7Ux/djC6pdmhbbmmuB6AuRnYe9Z/pknPfWrjeyN3E/AFjzZtbRVQeVQSjlFILDRWPQhXdsXQ4P0XySTeRu4uRayS9NPFzNaNh1Kbrf/lq1+jkxKhlef1ZlUQqhuOch80vbXRFEyY="
@@ -34,3 +33,4 @@ env:
     - secure: "ivxfqGwbzpBpVJe+jVcOBktcmLrT38W/ZapAk/FNDu+yaBhag1eCYErAPPx6Snc4GzwatMt22v4SxAqXQF4SAhTRtmrWVaWnbhzuNqpTkiS6IKEd6EqaoyUZvUTgXh1ruyik00zl3ET9898O3vFfqafodljE0lCLVICHq6ANo68="
     # plotlyjs_no_jq (link to the offline bundle w/o jQuery)
     - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA="
+  - TEST_VAR: "cookbook_axes"
