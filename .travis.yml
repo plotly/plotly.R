@@ -24,7 +24,7 @@ after_success:
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
-- SUITE=cookbookaxes
+  - SUITE=cookbookaxes
   global:
     # plotly_api_key (for posting to plot.ly)
     - secure: "GTrq7AhGuufvuP6EfiI/tiFCcmCCkNDMQPV7Ux/djC6pdmhbbmmuB6AuRnYe9Z/pknPfWrjeyN3E/AFjzZtbRVQeVQSjlFILDRWPQhXdsXQ4P0XySTeRu4uRayS9NPFzNaNh1Kbrf/lq1+jkxKhlef1ZlUQqhuOch80vbXRFEyY="
