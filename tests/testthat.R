@@ -52,6 +52,7 @@ save_outputs <- function(gg, name) {
       })
     } else {
       tryWhile({
+        p$filename <- name
         resp <- plotly_POST(p)
         resp$url
       })
