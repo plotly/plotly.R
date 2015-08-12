@@ -101,4 +101,4 @@ tryWhile <- function(expr, times = 20) {
   e
 }
 
-test_check("plotly")
+test_check("plotly", filter=gsub("_", "-", Sys.getenv("TEST_SUITE")))
