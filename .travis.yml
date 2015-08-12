@@ -24,7 +24,7 @@ after_success:
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
-  - SUITE=cookbookaxes
+  - TEST_SUITE=cookbook_axes
   - global:
     - test: "this"
     # plotly_api_key (for posting to plot.ly)
