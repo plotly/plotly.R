@@ -23,6 +23,7 @@ after_success:
   - ls -R
   - Rscript ../plotly/inst/build-push-comment.R
 
+
 env:
   global:
     # plotly_api_key (for posting to plot.ly)
@@ -32,4 +33,4 @@ env:
     # plotlyjs_full (link to the full offline bundle)
     - secure: "ivxfqGwbzpBpVJe+jVcOBktcmLrT38W/ZapAk/FNDu+yaBhag1eCYErAPPx6Snc4GzwatMt22v4SxAqXQF4SAhTRtmrWVaWnbhzuNqpTkiS6IKEd6EqaoyUZvUTgXh1ruyik00zl3ET9898O3vFfqafodljE0lCLVICHq6ANo68="
     # plotlyjs_no_jq (link to the offline bundle w/o jQuery)
-    - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA=" 
+    - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA="
