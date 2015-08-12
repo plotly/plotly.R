@@ -16,7 +16,7 @@ before_script:
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
 
 script:
-  - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE); Sys.setenv('TEST_SUITE'='$TEST_SUITE')"
+  - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE);"
 
 after_success:
   - cd ../plotly-test-table
@@ -24,7 +24,7 @@ after_success:
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
-  - TEST_SUITE=cookbook_axes
+  - TEST_VAR=cookbook_axes
   global:
     # plotly_api_key (for posting to plot.ly)
     - secure: "GTrq7AhGuufvuP6EfiI/tiFCcmCCkNDMQPV7Ux/djC6pdmhbbmmuB6AuRnYe9Z/pknPfWrjeyN3E/AFjzZtbRVQeVQSjlFILDRWPQhXdsXQ4P0XySTeRu4uRayS9NPFzNaNh1Kbrf/lq1+jkxKhlef1ZlUQqhuOch80vbXRFEyY="
