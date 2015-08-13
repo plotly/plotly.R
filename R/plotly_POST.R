@@ -32,21 +32,8 @@ plotly_POST <- function(x) {
   kwargs <- x[get_kwargs()]
   kwargs <- kwargs[sapply(kwargs, length) > 0]
 
-  # class "environment" from $layout$enclos causes
-  # Error in unclass(x) : cannot unclass an environment
-  # in jsonlite::toJSON
-  # (https://github.com/ropensci/plotly/issues/254)
-  kwargs <- lapply(kwargs, function(i){
-    if(class(i)=="list") {
-       i[sapply(i, class) != "environment"]
-    } else{
-      i
-    }
-  })
-
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
-  
   if (!is.null(x$url) || !is.null(kwargs$filename)) kwargs$fileopt <- "overwrite"
   if (is.null(kwargs$filename)) {
     kwargs$filename <- 
