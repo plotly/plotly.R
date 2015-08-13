@@ -20,7 +20,6 @@ script:
 
 after_success:
   - cd ../plotly-test-table
-  - ls -R
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:

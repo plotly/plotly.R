@@ -541,7 +541,9 @@ geom2trace <- list(
               mode="markers",
               marker=paramORdefault(params, aes2marker, marker.defaults))
     if("size" %in% names(data)){
-      L$text <- paste("size:", data$size)
+      if(!("text" %in% names(data))) {
+        L$text <- paste("size:", data$size)
+      }
       L$marker$sizeref <- default.marker.sizeref
       # Make sure sizes are passed as a list even when there is only one element.
       s <- data$size
