@@ -54,8 +54,11 @@ if (tpr != "false" && tpr != "") {
   base_pngs <- dir(base_dir, pattern = "\\.png$")
   # Re-run (current) test suite with master branch if it's missing any tests 
   if (!all(this_pngs %in% base_pngs)) {
+    cat(base_hash, file = "base_hash.txt")
     dir.create(base_dir, showWarnings = FALSE)
-    devtools::install_github("ropensci/plotly", ref = base_hash)
+    system2("Rscript", 
+            c("-e", shQuote("devtools::install_github('ropensci/plotly', ref = readLines('base_hash.txt'))"))
+    )
     print("Rerunning tests with master")
     try(source("../plotly/tests/testthat.R", chdir = TRUE))
   }
@@ -107,7 +110,7 @@ if (tpr != "false" && tpr != "") {
   # strip any leading/trailing whitespace in urls
   hashes$url <- sub("\\s$", "", sub("^\\s", "", hashes$url))
   hashes <- hashes[hashes$commit %in% c(this_hash, base_hash), ]
-  devtools::install("../plotly")
+  system("R CMD INSTALL ../plotly")
   diffs <- character()
   for (i in tests) {
     test_info <- hashes[hashes$test %in% i, ]
