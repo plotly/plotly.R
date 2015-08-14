@@ -1,3 +1,7 @@
+1.0.4 -- 14 Aug 2015
+
+Bug fix for subplot. See #265
+
 1.0.3 -- 7 Aug 2015
 
 Improved legend positioning. See #241
