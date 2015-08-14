@@ -43,11 +43,6 @@ layer2traces <- function(l, d, misc) {
       g$geom <- "smoothLine"
     }
   }
-  # histogram is essentially a bar chart with no gaps (after stats are computed)
-  if (g$geom == "histogram") {
-    g$geom <- "bar"
-    bargap <- 0
-  }
   
   # For non-numeric data on the axes, we should take the values from
   # the original data.
@@ -252,7 +247,7 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap")) bargap else "default"
+      tr$bargap <- if ("binwidth" %in% names(l$stat_params)) 0 else "default"
       pos <- type(l, "position")
       tr$barmode <-
         if (pos %in% "identity" && tr$bargap == 0) {
