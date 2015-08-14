@@ -116,6 +116,12 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- c(markLegends,list(boxplot=c("x")))
 
+# obtain the "type" of geom/position/etc.
+type <- function(x, y) {
+  sub(y, "", tolower(class(x[[y]])[[1]]))
+}
+
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
@@ -293,7 +299,7 @@ gg2list <- function(p) {
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    possible.legends <- markLegends[[L$geom$objname]]
+    possible.legends <- markLegends[[type(L, "geom")]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     

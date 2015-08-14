@@ -10,9 +10,11 @@ layer2traces <- function(l, d, misc) {
     to.exclude <- apply(na.mat, 1, any)
     df[!to.exclude, ]
   }
-  g <- list(geom=l$geom$objname,
-            data=not.na(d),
-            prestats.data=not.na(l$prestats.data))
+  g <- list(
+    geom = type(l, "geom"),
+    data = not.na(d),
+    prestats.data = not.na(l$prestats.data)
+  )
   
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
@@ -251,7 +253,7 @@ layer2traces <- function(l, d, misc) {
     # special handling for bars
     if (g$geom == "bar") {
       tr$bargap <- if (exists("bargap")) bargap else "default"
-      pos <- l$position$.super$objname
+      pos <- type(l, "position")
       tr$barmode <-
         if (pos %in% "identity" && tr$bargap == 0) {
           "overlay" 
