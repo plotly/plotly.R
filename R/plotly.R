@@ -218,8 +218,8 @@ plotly_build <- function(l = last_plot()) {
   for (i in seq_along(l$data)) {
     d <- l$data[[i]]
     # if appropriate, evaluate trace arguments in a suitable environment
-    idx <- names(d) %in% c("args", "env")
-    if (sum(idx) == 2) {
+    idx <- names(d) %in% c("args", "env", "enclos")
+    if (sum(idx) == 3) {
       dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
       dat[c("args", "env", "enclos")] <- NULL
       # start processing specially named arguments
@@ -275,8 +275,8 @@ plotly_build <- function(l = last_plot()) {
   }
   for (i in seq_along(l$layout)) {
     layout <- l$layout[[i]]
-    idx <- names(layout) %in% c("args", "env")
-    x$layout[[i]] <- if (sum(idx) == 2) {
+    idx <- names(layout) %in% c("args", "env", "enclos")
+    x$layout[[i]] <- if (sum(idx) == 3) {
       c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
     } else {
       layout
@@ -287,8 +287,8 @@ plotly_build <- function(l = last_plot()) {
   if (!is.null(l$style)) {
     for (i in seq_along(l$style)) {
       sty <- l$style[[i]]
-      idx <- names(sty) %in% c("args", "env")
-      new_sty <- if (sum(idx) == 2) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
+      idx <- names(sty) %in% c("args", "env", "enclos")
+      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
       for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
     }
   }

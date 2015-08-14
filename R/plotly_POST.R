@@ -31,10 +31,9 @@ plotly_POST <- function(x) {
   # empty keyword arguments can cause problems
   kwargs <- x[get_kwargs()]
   kwargs <- kwargs[sapply(kwargs, length) > 0]
-  
+
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
-  
   if (!is.null(x$url) || !is.null(kwargs$filename)) kwargs$fileopt <- "overwrite"
   if (is.null(kwargs$filename)) {
     kwargs$filename <- 
