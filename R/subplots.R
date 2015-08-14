@@ -75,12 +75,13 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   # bump x/y axis anchors appropriately
   p_info$xaxis <- sub("x1", "x", paste0("x", p_info$key))
   p_info$yaxis <- sub("y1", "y", paste0("y", p_info$key))
-  
   # Only do domain computations if they are _completely_ missing
   # (I don't think it makes sense to support partial specification of domains)
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
-    p_info[c("xstart", "xend", "yend", "ystart")] <- 
-      get_domains(max(p_info$key), nrows, margin)
+    doms <- get_domains(max(p_info$key), nrows, margin)
+    doms$plot <- as.character(seq_len(nrow(doms)))
+    p_info <- p_info[!names(p_info) %in% c("xstart", "xend", "ystart", "yend")]
+    p_info <- plyr::join(p_info, doms, by = "plot")
   }
   # empty plot container that we'll fill up with new info
   p <- list(
