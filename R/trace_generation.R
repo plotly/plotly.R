@@ -247,10 +247,11 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if ("binwidth" %in% names(l$stat_params)) 0 else "default"
+      is_hist <- (misc$is.continuous[["x"]] || misc$is.date[["x"]])
+      tr$bargap <- if (is_hist) 0 else "default"
       pos <- type(l, "position")
       tr$barmode <-
-        if (pos %in% "identity" && tr$bargap == 0) {
+        if (pos %in% "identity" && is_hist) {
           "overlay" 
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
