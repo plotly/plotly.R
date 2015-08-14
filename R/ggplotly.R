@@ -944,7 +944,8 @@ gg2list <- function(p) {
   # each axis.
   flipped.traces <- named.traces
   flipped.layout <- layout
-  if("flip" %in% attr(built$plot$coordinates, "class")){
+  coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
+  if("flip" %in% coord_cl){
     if(!inherits(p$facet, "null")){
       stop("coord_flip + facet conversion not supported")
     }
