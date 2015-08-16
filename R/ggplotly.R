@@ -128,9 +128,6 @@ type <- function(x, y) {
 #' @return figure object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p) {
-  if(length(p$layers) == 0) {
-    stop("No layers in plot")
-  }
   # Always use identity size scale so that plot.ly gets the real
   # units for the size variables.
   original.p <- p
@@ -145,11 +142,14 @@ gg2list <- function(p) {
   })
   layout <- list()
   trace.list <- list()
+  # ggplot now applies geom_blank() (instead of erroring) when no layers exist
+  if (length(p$layers) == 0) p <- p + geom_blank()
   
   # Before building the ggplot, we would like to add aes(name) to
   # figure out what the object group is later. This also copies any
   # needed global aes/data values to each layer, so we do not have to
   # worry about combining global and layer-specific aes/data later.
+  
   for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
     if(p$layers[[layer.i]]$inherit.aes){

@@ -192,12 +192,12 @@ layer2traces <- function(l, d, misc) {
                            names=basic$params$name)
   }
   getTrace <- geom2trace[[basic$geom]]
-  if(is.null(getTrace)){
-    warning("Conversion not implemented for geom_",
-            g$geom, " (basic geom_", basic$geom, "), ignoring. ",
-            "Please open an issue with your example code at ",
-            "https://github.com/ropensci/plotly/issues")
-    return(list())
+  if (is.null(getTrace)) {
+    getTrace <- geom2trace[["blank"]]
+    warning("geom_", g$geom, " has yet to be implemented in plotly.\n",
+            "  If you'd like to see this geom implemented,\n",
+            "  Please open an issue with your example code at\n",
+            "  https://github.com/ropensci/plotly/issues")
   }
   traces <- NULL
   names.in.legend <- NULL
@@ -256,8 +256,8 @@ layer2traces <- function(l, d, misc) {
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
         } else {
-        "group"
-      }
+          "group"
+        }
     }
     
     traces <- c(traces, list(tr))
@@ -507,6 +507,17 @@ ribbon_dat <- function(dat) {
 
 # Convert basic geoms to traces.
 geom2trace <- list(
+  blank=function(data, params) {
+    list(
+      x=data$x,
+      y=data$y,
+      name=params$name,
+      text=data$text,
+      type="scatter",
+      mode="markers",
+      marker=list(opacity = 0)
+    )
+  },
   path=function(data, params) {
     list(x=data$x,
          y=data$y,
