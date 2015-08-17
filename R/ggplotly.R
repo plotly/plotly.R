@@ -410,7 +410,7 @@ gg2list <- function(p) {
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
     if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
-          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+        c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
       ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                   toRGB(grid$colour, 0.1),
                                   toRGB(grid.major$colour, 0.1))
@@ -463,50 +463,35 @@ gg2list <- function(p) {
     
     # Translate axes labels.
     scale.i <- which(p$scales$find(xy))
-    ax.list$title <- if(length(scale.i)){
-      sc <- p$scales$scales[[scale.i]]
-      if(ax.list$type == "category"){
-        trace.order.list[[xy]] <- sc$limits
-        if(is.character(sc$breaks)){
-          if(is.character(sc$labels)){
-            trace.name.map[sc$breaks] <- sc$labels
-          }
-          ##TODO: if(is.function(sc$labels)){
-        }
-      }
-      if (is.null(sc$breaks)) {
-        ax.list$showticklabels <- FALSE
-        ax.list$showgrid <- FALSE
-        ax.list$ticks <- ""
-      }
-      if (is.numeric(sc$breaks)) {
-        dticks <- diff(sc$breaks)
-        dt <- dticks[1]
-        if(all(dticks == dt)){
-          ax.list$dtick <- dt
-          ax.list$autotick <- FALSE
-        }
-      }
-      ax.list$range <- if(!is.null(sc$limits)){
-        sc$limits
-      }else{
-        if(misc$is.continuous[[xy]]){
-          built$panel$ranges[[1]][[s("%s.range")]] #TODO: facets!
-        }else{ # for a discrete scale, range should be NULL.
-          NULL
-        }
-      }
-      if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
-        ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
-      }
-      if(!is.null(sc$name)){
-        sc$name
-      }else{
-        p$labels[[xy]]
-      }
-    }else{
-      p$labels[[xy]]
+    sc <- tryCatch(p$scales$scales[[scale.i]], 
+                   error = function(e) list())
+    ax.list$title <- sc$name %||% p$labels[[xy]] %||% p$labels[[xy]]
+    
+    if (ax.list$type == "category") {
+      trace.order.list[[xy]] <- sc$limits
+      if (is.character(sc$breaks) && is.character(sc$labels))
+        trace.name.map[sc$breaks] <- sc$labels
+      ##TODO: if(is.function(sc$labels)){
     }
+    if (is.null(sc$breaks)) {
+      ax.list$showticklabels <- FALSE
+      ax.list$showgrid <- FALSE
+      ax.list$ticks <- ""
+    }
+    if (is.numeric(sc$breaks)) {
+      dticks <- diff(sc$breaks)
+      dt <- dticks[1]
+      if (all(dticks == dt)) {
+        ax.list$dtick <- dt
+        ax.list$autotick <- FALSE
+      }
+    }
+    ax.list$range <- sc$limits %||% 
+      #TODO: facets!
+      if (misc$is.continuous[[xy]]) 
+        built$panel$ranges[[1]][[s("%s.range")]] %||%
+      if (is.character(sc$trans$name) && sc$trans$name == "reverse")
+        sort(-ax.list$range, decreasing = TRUE)
     
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
