@@ -10,12 +10,13 @@ layer2traces <- function(l, d, misc) {
     to.exclude <- apply(na.mat, 1, any)
     df[!to.exclude, ]
   }
+  
   g <- list(
     geom = type(l, "geom"),
     data = not.na(d),
     prestats.data = not.na(l$prestats.data)
   )
-  
+  #if (grepl("line", g$geom)) browser()
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -677,8 +678,8 @@ geom2trace <- list(
   },
   abline=function(data, params) {
     list(x=c(params$xstart, params$xend),
-         y=c(params$intercept + params$xstart * params$slope,
-             params$intercept + params$xend * params$slope),
+         y=c(data$intercept + params$xstart * data$slope,
+             data$intercept + params$xend * data$slope),
          name=params$name,
          type="scatter",
          mode="lines",
