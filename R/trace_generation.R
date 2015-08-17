@@ -248,7 +248,7 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      is_hist <- (misc$is.continuous[["x"]] || misc$is.date[["x"]])
+      is_hist <- misc$is.continuous[["x"]]
       tr$bargap <- if (is_hist) 0 else "default"
       pos <- type(l, "position")
       tr$barmode <-
@@ -369,8 +369,19 @@ toBasic <- list(
     g
   },
   abline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
+    N <- nrow(g$data)
+    m <- g$data$slope
+    b <- g$data$intercept
+    xmin <- unique(g$prestats.data$globxmin)
+    xmax <- unique(g$prestats.data$globxmax)
+    browser()
+    l <- list()
+    for (i in seq_len(N)) {
+      # the NAs tell plotly to draw different traces for each line
+      l$x <- c(l$x, xmin, xmax, NA) 
+      l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
+    }
+    g$params$ablines <- data.frame(l)
     g
   },
   hline=function(g) {
@@ -677,13 +688,14 @@ geom2trace <- list(
                                               params$alpha)))
   },
   abline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(data$intercept + params$xstart * data$slope,
-             data$intercept + params$xend * data$slope),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    list(
+      x = params$ablines$x,
+      y = params$ablines$y,
+      name = params$name,
+      type = "scatter",
+      mode = "lines",
+      line = paramORdefault(params, aes2line, line.defaults)
+    )
   },
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),
