@@ -5,16 +5,11 @@
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
-  not.na <- function(df){
-    na.mat <- is.na(df)
-    to.exclude <- apply(na.mat, 1, any)
-    df[!to.exclude, ]
-  }
   
   g <- list(
     geom = type(l, "geom"),
-    data = not.na(d),
-    prestats.data = not.na(l$prestats.data)
+    data = na.omit(d),
+    prestats.data = na.omit(l$prestats.data)
   )
   #if (grepl("line", g$geom)) browser()
   # needed for when group, etc. is an expression.
@@ -137,11 +132,7 @@ layer2traces <- function(l, d, misc) {
   
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
-  basic <- if(is.null(convert)){
-    g
-  }else{
-    convert(g)
-  }
+  basic <- if (is.null(convert)) g else convert(g)
   # Then split on visual characteristics that will get different
   # legend entries.
   data.list <- if (basic$geom %in% names(markSplit)) {
@@ -374,7 +365,6 @@ toBasic <- list(
     b <- g$data$intercept
     xmin <- unique(g$prestats.data$globxmin)
     xmax <- unique(g$prestats.data$globxmax)
-    browser()
     l <- list()
     for (i in seq_len(N)) {
       # the NAs tell plotly to draw different traces for each line
