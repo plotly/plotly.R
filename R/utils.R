@@ -118,7 +118,8 @@ try_file <- function(f, what) {
 
 # preferred defaults for toJSON mapping
 to_JSON <- function(x, ...) {
-  jsonlite::toJSON(x, digits = 50, auto_unbox = TRUE, force = TRUE, ...)
+  jsonlite::toJSON(x, digits = 50, auto_unbox = TRUE, force = TRUE,
+                   null = "null", na = "null", ...)
 }
 
 # preferred defaults for toJSON mapping

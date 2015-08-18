@@ -116,15 +116,19 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- c(markLegends,list(boxplot=c("x")))
 
+# obtain the "type" of geom/position/etc.
+type <- function(x, y) {
+  sub(y, "", tolower(class(x[[y]])[[1]]))
+}
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
 #' @return figure object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p) {
-  if(length(p$layers) == 0) {
-    stop("No layers in plot")
-  }
+  # ggplot now applies geom_blank() (instead of erroring) when no layers exist
+  if (length(p$layers) == 0) p <- p + geom_blank()
   # Always use identity size scale so that plot.ly gets the real
   # units for the size variables.
   original.p <- p
@@ -293,7 +297,7 @@ gg2list <- function(p) {
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    possible.legends <- markLegends[[L$geom$objname]]
+    possible.legends <- markLegends[[type(L, "geom")]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
@@ -938,7 +942,8 @@ gg2list <- function(p) {
   # each axis.
   flipped.traces <- named.traces
   flipped.layout <- layout
-  if("flip" %in% attr(built$plot$coordinates, "class")){
+  coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
+  if("flip" %in% coord_cl){
     if(!inherits(p$facet, "null")){
       stop("coord_flip + facet conversion not supported")
     }

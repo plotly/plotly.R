@@ -10,7 +10,7 @@ layer2traces <- function(l, d, misc) {
     to.exclude <- apply(na.mat, 1, any)
     df[!to.exclude, ]
   }
-  g <- list(geom=l$geom$objname,
+  g <- list(geom=type(l, "geom"),
             data=not.na(d),
             prestats.data=not.na(l$prestats.data))
   
@@ -40,11 +40,6 @@ layer2traces <- function(l, d, misc) {
       misc$smoothLine <- TRUE
       g$geom <- "smoothLine"
     }
-  }
-  # histogram is essentially a bar chart with no gaps (after stats are computed)
-  if (g$geom == "histogram") {
-    g$geom <- "bar"
-    bargap <- 0
   }
   
   # For non-numeric data on the axes, we should take the values from
@@ -196,11 +191,11 @@ layer2traces <- function(l, d, misc) {
   }
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
-    warning("Conversion not implemented for geom_",
-            g$geom, " (basic geom_", basic$geom, "), ignoring. ",
-            "Please open an issue with your example code at ",
-            "https://github.com/ropensci/plotly/issues")
-    return(list())
+    getTrace <- geom2trace[["blank"]]
+    warning("geom_", g$geom, " has yet to be implemented in plotly.\n",
+            "  If you'd like to see this geom implemented,\n",
+            "  Please open an issue with your example code at\n",
+            "  https://github.com/ropensci/plotly/issues")
   }
   traces <- NULL
   names.in.legend <- NULL
@@ -250,10 +245,11 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap")) bargap else "default"
-      pos <- l$position$.super$objname
+      is_hist <- misc$is.continuous[["x"]]
+      tr$bargap <- if (is_hist) 0 else "default"
+      pos <- type(l, "position")
       tr$barmode <-
-        if (pos %in% "identity" && tr$bargap == 0) {
+        if (pos %in% "identity" && is_hist) {
           "overlay" 
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
@@ -509,6 +505,17 @@ ribbon_dat <- function(dat) {
 
 # Convert basic geoms to traces.
 geom2trace <- list(
+  blank=function(data, params) {
+    list(
+        x=data$x,
+        y=data$y,
+        name=params$name,
+        text=data$text,
+        type="scatter",
+        mode="markers",
+        marker=list(opacity = 0)
+      )
+  },
   path=function(data, params) {
     list(x=data$x,
          y=data$y,
