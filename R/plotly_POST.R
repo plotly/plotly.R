@@ -35,7 +35,7 @@ plotly_POST <- function(x) {
   # filename & fileopt are keyword arguments required by the API
   # (note they can also be specified by the user)
   if (!is.null(x$url) || !is.null(kwargs$filename)) kwargs$fileopt <- "overwrite"
-  if (is.null(kwargs$filename)) {
+  if (is.null(kwargs$filename) || kwargs$filename == "") {
     kwargs$filename <- 
       as.character(kwargs$layout$title) %||% 
       paste(

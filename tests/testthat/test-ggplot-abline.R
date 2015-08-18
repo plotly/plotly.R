@@ -36,12 +36,13 @@ test_that("Second trace be the a-b line", {
 
 test_that("abline aesthetics", {
   df <- data.frame(
-    m = c(2, -3, 0.1),
-    b = c(1, 0, -1)
+    m = c(5, 5, 5, -5, -5, -5),
+    b = c(10, 0, -10, 10, 0, -10),
+    type = factor(c(1, 2, 3, 3, 2, 1))
   )
   
   p <- ggplot(df) + xlim(c(-5, 5)) + ylim(c(-5, 5)) + 
-    geom_abline(aes(intercept = b, slope = m))
+    geom_abline(aes(intercept = b, slope = m, linetype = type))
   
   L <- expect_traces(p, 2, "multiple")
   expect_identical(L$layout$xaxis$range, c(-5, 5))
