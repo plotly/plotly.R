@@ -331,6 +331,51 @@ toBasic <- list(
     g$data <- g$data[order(g$data$x), ]
     group2NA(g, "path")
   },
+  abline=function(g) {
+    m <- g$data$slope
+    b <- g$data$intercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = with(g$prestats.data, c(globxmin, globxmax)),
+      y = with(g$prestats.data, c(globxmin * m + b, globxmax * m + b))
+    )
+    g$data <- g$data[order(g$data$x), ]
+    group2NA(g, "path")
+  },
+  hline=function(g) {
+    if (is.factor(g$data$x)) {
+      xstart <- as.character(sort(g$data$x)[1])
+      xend <- as.character(sort(g$data$x)[length(g$data$x)])
+    } else {
+      xstart <- min(g$prestats.data$globxmin)
+      xend <- max(g$prestats.data$globxmax)
+    }
+    int <- g$data$yintercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = int[idx],
+      y = c(xstart, xend)
+    )
+    group2NA(g, "path")
+  },
+  vline=function(g) {
+    int <- g$data$xintercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = int[idx],
+      y = with(g$prestats.data, c(globymin, globymax))
+    )
+    group2NA(g, "path")
+  },
   boxplot=function(g) {
     # Preserve default colour values usign fill:
     if (!is.null(g$data$fill)) {
@@ -357,36 +402,6 @@ toBasic <- list(
   },
   density2d=function(g) {
     g$data <- g$prestats.data
-    g
-  },
-  abline=function(g) {
-    N <- nrow(g$data)
-    m <- g$data$slope
-    b <- g$data$intercept
-    xmin <- unique(g$prestats.data$globxmin)
-    xmax <- unique(g$prestats.data$globxmax)
-    l <- list()
-    for (i in seq_len(N)) {
-      # the NAs tell plotly to draw different traces for each line
-      l$x <- c(l$x, xmin, xmax, NA) 
-      l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
-    }
-    g$params$ablines <- data.frame(l)
-    g
-  },
-  hline=function(g) {
-    if (is.factor(g$data$x)) {
-      g$params$xstart <- as.character(sort(g$data$x)[1])
-      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
-    } else {
-      g$params$xstart <- min(g$prestats.data$globxmin)
-      g$params$xend <- max(g$prestats.data$globxmax)
-    }
-    g
-  },
-  vline=function(g) {
-    g$params$ystart <- min(g$prestats.data$globymin)
-    g$params$yend <- max(g$prestats.data$globymax)
     g
   },
   point=function(g) {
