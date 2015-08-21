@@ -60,7 +60,7 @@ offline <- function(p = last_plot(), height = 400, width = "100%",
 
 new_offline <- function(data, layout, height, width, id) {
   sprintf(
-    '<div class="%s loading" style="color: rgb(50,50,50);">Drawing...</div><div id="%s" style="height: %s; width: %s;" ></div><script type="text/javascript">Plotly.plot("%s", %s, %s).then(function() {$(".%s.loading").remove();})</script>', 
+    '<div class="%s loading" style="color: rgb(50,50,50);">Drawing...</div><div id="%s" style="height: %s; width: %s;" ></div>\n<script type="text/javascript">Plotly.plot("%s", %s, %s).then(function() {$(".%s.loading").remove();})</script>',
     id, id, height, width, id, data, layout, id
   )
 }

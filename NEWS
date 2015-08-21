@@ -1,3 +1,7 @@
+1.0.5 -- 20 Aug 2015
+
+Fix issue converting plotly offline markdown documents to HTML when using `markdown::markdownToHTML`
+
 1.0.4 -- 14 Aug 2015
 
 Bug fix for subplot. See #265
@@ -19,7 +23,7 @@ Removed the stream() function as it wasn't ready to be included.
 
 1.0.0 -- 31 July 2015
 
-A major reworking of package internals which includes a few backwards incompatible changes. 
+A major reworking of package internals which includes a few backwards incompatible changes.
 
 Major changes include:
 
@@ -49,7 +53,7 @@ Let gg2list() return a figure object (backwards incompatible change).
 
 0.5.29 -- 16 April 2015
 
-geom_density() as filled area chart #202 
+geom_density() as filled area chart #202
 
 0.5.28 -- 15 April 2015
 
