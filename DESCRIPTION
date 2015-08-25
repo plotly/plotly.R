@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create interactive web-based graphs via plotly's API
-Version: 1.0.5
+Version: 1.0.6
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
