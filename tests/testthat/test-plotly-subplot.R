@@ -27,6 +27,20 @@ test_that("nrows argument works", {
   expect_true(doms$yaxis[1] >= doms$yaxis2[2])
 })
 
+test_that("group + [x/y]axis works", {
+  iris$id <- as.integer(iris$Species)
+  p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
+               xaxis = paste0("x", id), mode = "markers")
+  s <- expect_traces(subplot(p, margin = 0.05), 3, "group")
+  doms <- lapply(s$layout, "[[", "domain")
+  # make sure y domain is [0, 1] on every axis
+  ydom <- doms[grepl("^y", names(doms))]
+  expect_equal(sort(unique(unlist(ydom))), c(0, 1))
+  xdom <- doms[grepl("^x", names(doms))]
+  expect_true(all(1/3 > xdom[[1]] & xdom[[1]] >= 0))
+  expect_true(all(2/3 > xdom[[2]] & xdom[[2]] > 1/3))
+  expect_true(all(1 >= xdom[[3]] & xdom[[3]] > 2/3))
+})
 
 
 
