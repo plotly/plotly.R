@@ -114,6 +114,6 @@ get_browser <- function() {
   # default web browser
   if (is.null(browseR) || !is.function(browseR) ||
       inherits(try(browseR('http://www.rstudio.com'), silent = TRUE), 'try-error'))
-    browseR = getOption("browser")
+    browseR = browseURL
   browseR
 }
