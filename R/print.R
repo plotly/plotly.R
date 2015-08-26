@@ -41,7 +41,7 @@ knit_print.plotly <- function(x, options, ...) {
 #' @export
 print.offline <- function(x, ...) {
   off <- offline_bundle(jq = TRUE)
-  plotlyjs <- readChar(off, file.info(off)$size)
+  plotlyjs <- readChar(off, file.info(off)$size, useBytes=TRUE)
   html <- sprintf(
     '<!DOCTYPE html><html lang="en">
      <head>
@@ -80,7 +80,7 @@ knit_print.offline <- function(x, options, ...) {
   # if this is the first plot, place bundle just before the plot
   if (length(knitr::knit_meta(class = "plotly", clean = FALSE)) == 0) {
     off <- offline_bundle(jq = TRUE)
-    b <- readChar(off, file.info(off)$size)
+    b <- readChar(off, file.info(off)$size, useBytes=TRUE)
     p <- paste0(
       sprintf('<script type="text/javascript">%s</script>', b),
       p
