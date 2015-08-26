@@ -62,7 +62,7 @@ print.offline <- function(x, ...) {
   }
   index <- file.path(d, "index.html")
   res <- writeLines(html, index)
-  if (!is.null(x$viewer)) x$viewer(index)
+  if (is.function(x$viewer)) x$viewer(index)
 }
 
 #' Embed a plotly iframe into an R markdown document via \code{knit_print}
