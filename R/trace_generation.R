@@ -5,15 +5,13 @@
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
 #' @export
 layer2traces <- function(l, d, misc) {
-  not.na <- function(df){
-    na.mat <- is.na(df)
-    to.exclude <- apply(na.mat, 1, any)
-    df[!to.exclude, ]
-  }
-  g <- list(geom=l$geom$objname,
-            data=not.na(d),
-            prestats.data=not.na(l$prestats.data))
   
+  g <- list(
+    geom = type(l, "geom"),
+    data = na.omit(d),
+    prestats.data = na.omit(l$prestats.data)
+  )
+  #if (grepl("line", g$geom)) browser()
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -40,11 +38,6 @@ layer2traces <- function(l, d, misc) {
       misc$smoothLine <- TRUE
       g$geom <- "smoothLine"
     }
-  }
-  # histogram is essentially a bar chart with no gaps (after stats are computed)
-  if (g$geom == "histogram") {
-    g$geom <- "bar"
-    bargap <- 0
   }
   
   # For non-numeric data on the axes, we should take the values from
@@ -139,11 +132,7 @@ layer2traces <- function(l, d, misc) {
   
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
-  basic <- if(is.null(convert)){
-    g
-  }else{
-    convert(g)
-  }
+  basic <- if (is.null(convert)) g else convert(g)
   # Then split on visual characteristics that will get different
   # legend entries.
   data.list <- if (basic$geom %in% names(markSplit)) {
@@ -195,12 +184,12 @@ layer2traces <- function(l, d, misc) {
                            names=basic$params$name)
   }
   getTrace <- geom2trace[[basic$geom]]
-  if(is.null(getTrace)){
-    warning("Conversion not implemented for geom_",
-            g$geom, " (basic geom_", basic$geom, "), ignoring. ",
-            "Please open an issue with your example code at ",
-            "https://github.com/ropensci/plotly/issues")
-    return(list())
+  if (is.null(getTrace)) {
+    getTrace <- geom2trace[["blank"]]
+    warning("geom_", g$geom, " has yet to be implemented in plotly.\n",
+            "  If you'd like to see this geom implemented,\n",
+            "  Please open an issue with your example code at\n",
+            "  https://github.com/ropensci/plotly/issues")
   }
   traces <- NULL
   names.in.legend <- NULL
@@ -250,16 +239,17 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap")) bargap else "default"
-      pos <- l$position$.super$objname
+      is_hist <- misc$is.continuous[["x"]]
+      tr$bargap <- if (is_hist) 0 else "default"
+      pos <- type(l, "position")
       tr$barmode <-
-        if (pos %in% "identity" && tr$bargap == 0) {
+        if (pos %in% "identity" && is_hist) {
           "overlay" 
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
         } else {
-        "group"
-      }
+          "group"
+        }
     }
     
     traces <- c(traces, list(tr))
@@ -341,6 +331,51 @@ toBasic <- list(
     g$data <- g$data[order(g$data$x), ]
     group2NA(g, "path")
   },
+  abline=function(g) {
+    m <- g$data$slope
+    b <- g$data$intercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = with(g$prestats.data, c(globxmin, globxmax)),
+      y = with(g$prestats.data, c(globxmin * m + b, globxmax * m + b))
+    )
+    g$data <- g$data[order(g$data$x), ]
+    group2NA(g, "path")
+  },
+  hline=function(g) {
+    if (is.factor(g$data$x)) {
+      xstart <- as.character(sort(g$data$x)[1])
+      xend <- as.character(sort(g$data$x)[length(g$data$x)])
+    } else {
+      xstart <- min(g$prestats.data$globxmin)
+      xend <- max(g$prestats.data$globxmax)
+    }
+    int <- g$data$yintercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = int[idx],
+      y = c(xstart, xend)
+    )
+    group2NA(g, "path")
+  },
+  vline=function(g) {
+    int <- g$data$xintercept
+    # replicate each row twice (since each line needs 2 points)
+    idx <- rep(seq_len(nrow(g$data)), 2)
+    g$data <- g$data[idx, ]
+    g$data <- cbind(
+      g$data,
+      x = int[idx],
+      y = with(g$prestats.data, c(globymin, globymax))
+    )
+    group2NA(g, "path")
+  },
   boxplot=function(g) {
     # Preserve default colour values usign fill:
     if (!is.null(g$data$fill)) {
@@ -367,26 +402,6 @@ toBasic <- list(
   },
   density2d=function(g) {
     g$data <- g$prestats.data
-    g
-  },
-  abline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
-    g
-  },
-  hline=function(g) {
-    if (is.factor(g$data$x)) {
-      g$params$xstart <- as.character(sort(g$data$x)[1])
-      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
-    } else {
-      g$params$xstart <- min(g$prestats.data$globxmin)
-      g$params$xend <- max(g$prestats.data$globxmax)
-    }
-    g
-  },
-  vline=function(g) {
-    g$params$ystart <- min(g$prestats.data$globymin)
-    g$params$yend <- max(g$prestats.data$globymax)
     g
   },
   point=function(g) {
@@ -509,6 +524,17 @@ ribbon_dat <- function(dat) {
 
 # Convert basic geoms to traces.
 geom2trace <- list(
+  blank=function(data, params) {
+    list(
+      x=data$x,
+      y=data$y,
+      name=params$name,
+      text=data$text,
+      type="scatter",
+      mode="markers",
+      marker=list(opacity = 0)
+    )
+  },
   path=function(data, params) {
     list(x=data$x,
          y=data$y,
@@ -667,13 +693,14 @@ geom2trace <- list(
                                               params$alpha)))
   },
   abline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(params$intercept + params$xstart * params$slope,
-             params$intercept + params$xend * params$slope),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    list(
+      x = params$ablines$x,
+      y = params$ablines$y,
+      name = params$name,
+      type = "scatter",
+      mode = "lines",
+      line = paramORdefault(params, aes2line, line.defaults)
+    )
   },
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),

@@ -187,29 +187,6 @@ test_that("Add a red dashed vertical line", {
   expect_identical(dash.trace$line$color, toRGB("#BB0000"))
 })
 
-temp <- sp + geom_hline(aes(yintercept=10)) +
-  geom_line(stat="vline", xintercept="mean")
-test_that("Add colored lines for the mean xval of each group", {
-  info <- expect_traces_shapes(temp, 5, 0, "scatter-hline-vline-stat")
-  expect_true(info$layout$showlegend)
-  mode <- sapply(info$traces, "[[", "mode")
-  line.traces <- info$traces[mode == "lines"]
-  expect_equal(length(line.traces), 3)
-  lines.by.name <- list()
-  for(tr in line.traces){
-    expect_false(tr$showlegend)
-    if(is.character(tr$name)){
-      lines.by.name[[tr$name]] <- tr
-    }
-  }
-  marker.traces <- info$traces[mode == "markers"]
-  for(tr in marker.traces){
-    expect_true(tr$showlegend)
-    line.trace <- lines.by.name[[tr$name]]
-    expect_equal(range(line.trace$y), range(tr$y))
-  }
-})
-
 # Facet, based on cond
 spf <- sp + facet_grid(. ~ cond)
 test_that("scatter facet -> 2 traces", {
@@ -240,18 +217,4 @@ spf.vline <-
              colour = "#990000", linetype = "dashed")
 test_that("geom_vline -> 2 more traces", {
   info <- expect_traces_shapes(spf.vline, 6, 0, "scatter-facet-hline-vline")
-})
-
-spf.line.stat <- 
-  spf +
-  geom_hline(aes(yintercept=10)) +
-  geom_line(stat="vline", xintercept="mean")
-test_that("geom_line -> 2 more traces", {
-  info <-
-    expect_traces_shapes(spf.line.stat, 6, 0,
-                         "scatter-facet-hline-line-stat")
-  for(tr in info$traces){
-    expected <- ifelse(tr$mode == "markers", TRUE, FALSE)
-    expect_identical(tr$showlegend, expected)
-  }
 })

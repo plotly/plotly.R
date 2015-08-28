@@ -116,15 +116,18 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- c(markLegends,list(boxplot=c("x")))
 
+# obtain the "type" of geom/position/etc.
+type <- function(x, y) {
+  sub(y, "", tolower(class(x[[y]])[[1]]))
+}
+
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
 #' @return figure object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p) {
-  if(length(p$layers) == 0) {
-    stop("No layers in plot")
-  }
   # Always use identity size scale so that plot.ly gets the real
   # units for the size variables.
   original.p <- p
@@ -139,11 +142,14 @@ gg2list <- function(p) {
   })
   layout <- list()
   trace.list <- list()
+  # ggplot now applies geom_blank() (instead of erroring) when no layers exist
+  if (length(p$layers) == 0) p <- p + geom_blank()
   
   # Before building the ggplot, we would like to add aes(name) to
   # figure out what the object group is later. This also copies any
   # needed global aes/data values to each layer, so we do not have to
   # worry about combining global and layer-specific aes/data later.
+  
   for(layer.i in seq_along(p$layers)) {
     layer.aes <- p$layers[[layer.i]]$mapping
     if(p$layers[[layer.i]]$inherit.aes){
@@ -293,7 +299,7 @@ gg2list <- function(p) {
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    possible.legends <- markLegends[[L$geom$objname]]
+    possible.legends <- markLegends[[type(L, "geom")]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
@@ -404,7 +410,7 @@ gg2list <- function(p) {
     grid <- theme.pars$panel.grid
     grid.major <- theme.pars$panel.grid.major
     if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
-          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
+        c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
       ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
                                   toRGB(grid$colour, 0.1),
                                   toRGB(grid.major$colour, 0.1))
@@ -457,50 +463,35 @@ gg2list <- function(p) {
     
     # Translate axes labels.
     scale.i <- which(p$scales$find(xy))
-    ax.list$title <- if(length(scale.i)){
-      sc <- p$scales$scales[[scale.i]]
-      if(ax.list$type == "category"){
-        trace.order.list[[xy]] <- sc$limits
-        if(is.character(sc$breaks)){
-          if(is.character(sc$labels)){
-            trace.name.map[sc$breaks] <- sc$labels
-          }
-          ##TODO: if(is.function(sc$labels)){
-        }
-      }
-      if (is.null(sc$breaks)) {
-        ax.list$showticklabels <- FALSE
-        ax.list$showgrid <- FALSE
-        ax.list$ticks <- ""
-      }
-      if (is.numeric(sc$breaks)) {
-        dticks <- diff(sc$breaks)
-        dt <- dticks[1]
-        if(all(dticks == dt)){
-          ax.list$dtick <- dt
-          ax.list$autotick <- FALSE
-        }
-      }
-      ax.list$range <- if(!is.null(sc$limits)){
-        sc$limits
-      }else{
-        if(misc$is.continuous[[xy]]){
-          built$panel$ranges[[1]][[s("%s.range")]] #TODO: facets!
-        }else{ # for a discrete scale, range should be NULL.
-          NULL
-        }
-      }
-      if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
-        ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
-      }
-      if(!is.null(sc$name)){
-        sc$name
-      }else{
-        p$labels[[xy]]
-      }
-    }else{
-      p$labels[[xy]]
+    sc <- tryCatch(p$scales$scales[[scale.i]], 
+                   error = function(e) list())
+    ax.list$title <- sc$name %||% p$labels[[xy]] %||% p$labels[[xy]]
+    
+    if (ax.list$type == "category") {
+      trace.order.list[[xy]] <- sc$limits
+      if (is.character(sc$breaks) && is.character(sc$labels))
+        trace.name.map[sc$breaks] <- sc$labels
+      ##TODO: if(is.function(sc$labels)){
     }
+    if (is.null(sc$breaks)) {
+      ax.list$showticklabels <- FALSE
+      ax.list$showgrid <- FALSE
+      ax.list$ticks <- ""
+    }
+    if (is.numeric(sc$breaks)) {
+      dticks <- diff(sc$breaks)
+      dt <- dticks[1]
+      if (all(dticks == dt)) {
+        ax.list$dtick <- dt
+        ax.list$autotick <- FALSE
+      }
+    }
+    ax.list$range <- sc$limits %||% 
+      #TODO: facets!
+      if (misc$is.continuous[[xy]]) 
+        built$panel$ranges[[1]][[s("%s.range")]] %||%
+      if (is.character(sc$trans$name) && sc$trans$name == "reverse")
+        sort(-ax.list$range, decreasing = TRUE)
     
     ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
     # Lines drawn around the plot border.
@@ -938,7 +929,8 @@ gg2list <- function(p) {
   # each axis.
   flipped.traces <- named.traces
   flipped.layout <- layout
-  if("flip" %in% attr(built$plot$coordinates, "class")){
+  coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
+  if("flip" %in% coord_cl){
     if(!inherits(p$facet, "null")){
       stop("coord_flip + facet conversion not supported")
     }
