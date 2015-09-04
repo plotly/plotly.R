@@ -254,8 +254,8 @@ layer2traces <- function(l, d, misc) {
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
         } else {
-        "group"
-      }
+          "group"
+        }
     }
     
     traces <- c(traces, list(tr))
@@ -366,8 +366,18 @@ toBasic <- list(
     g
   },
   abline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
+    N <- nrow(g$data)
+    m <- g$data$slope
+    b <- g$data$intercept
+    xmin <- unique(g$prestats.data$globxmin)
+    xmax <- unique(g$prestats.data$globxmax)
+    l <- list()
+    for (i in seq_len(N)) {
+      # the NAs tell plotly to draw different traces for each line
+      l$x <- c(l$x, xmin, xmax, NA) 
+      l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
+    }
+    g$params$ablines <- data.frame(l)
     g
   },
   hline=function(g) {
@@ -507,14 +517,14 @@ ribbon_dat <- function(dat) {
 geom2trace <- list(
   blank=function(data, params) {
     list(
-        x=data$x,
-        y=data$y,
-        name=params$name,
-        text=data$text,
-        type="scatter",
-        mode="markers",
-        marker=list(opacity = 0)
-      )
+      x=data$x,
+      y=data$y,
+      name=params$name,
+      text=data$text,
+      type="scatter",
+      mode="markers",
+      marker=list(opacity = 0)
+    )
   },
   path=function(data, params) {
     list(x=data$x,
@@ -674,13 +684,14 @@ geom2trace <- list(
                                               params$alpha)))
   },
   abline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(params$intercept + params$xstart * params$slope,
-             params$intercept + params$xend * params$slope),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    list(
+      x = params$ablines$x,
+      y = params$ablines$y,
+      name = params$name,
+      type = "scatter",
+      mode = "lines",
+      line = paramORdefault(params, aes2line, line.defaults)
+    )
   },
   hline=function(data, params) {
     list(x=c(params$xstart, params$xend),
