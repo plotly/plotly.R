@@ -15,7 +15,7 @@ ggplot_build2 <- local({
   g_b <- as.list(body(ggplot_build2))
   
   # Find line where we want to insert new code
-  idx <- grep("calc_statistic", as.character(g_b))
+  idx <- grep("compute_statistic", as.character(g_b))
   if (length(idx) != 1) stop("Unexpected ggplot_build() definition")
   
   # Insert new code before that line
