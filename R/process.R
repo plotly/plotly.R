@@ -15,6 +15,12 @@ process.clientresp <- function(resp) {
   con
 }
 
+process.image <- function(resp) {
+  httr::stop_for_status(resp)
+  browser()
+  con <- from_JSON(httr::content(resp, as = "text"))
+}
+
 process.figure <- function(resp) {
   httr::stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
