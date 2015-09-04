@@ -30,7 +30,8 @@ Imports:
     jsonlite,
     magrittr,
     digest,
-    viridis
+    viridis,
+    base64enc
 Suggests:
     dplyr,
     maps,

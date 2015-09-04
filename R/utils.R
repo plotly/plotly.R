@@ -154,13 +154,14 @@ get_kwargs <- function() {
 }
 
 # POST header fields
+#' @importFrom base64enc base64encode
 plotly_headers <- function(type = "main") {
   usr <- verify("username")
   key <- verify("api_key")
   h <- if (type == "v2") {
     c(
-      "Plotly-Username" = base64enc::base64encode(charToRaw(usr)),
-      "Plotly-Apikey" = base64enc::base64encode(charToRaw(key)),
+      "plotly-username" = base64enc::base64encode(charToRaw(usr)),
+      "plotly-apikey" = base64enc::base64encode(charToRaw(key)),
       "Plotly-Client-Platform" = paste("R", as.character(packageVersion("plotly")))
     )
   } else {
