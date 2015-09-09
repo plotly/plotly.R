@@ -5,7 +5,7 @@
 \title{Create/Modify plotly images}
 \usage{
 plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 4,
-  encoded = FALSE)
+  out_file, ...)
 }
 \arguments{
 \item{x}{either a plotly object or a list.}
@@ -18,13 +18,21 @@ plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 4,
 
 \item{scale}{Both png and jpeg formats will be scaled beyond the specified width and height by this number.}
 
-\item{encoded}{A boolean flag for base64 encoding of bytes}
+\item{out_file}{A filename for writing the image to a file.}
+
+\item{...}{arguments passed onto \code{httr::POST}}
 }
 \description{
 The images endpoint turn a plot (which may be given in multiple forms)
 into an image of the desired format.
 }
 \examples{
-plotly_IMAGE(qplot(1:10))
+p <- plot_ly(x = 1:10)
+
+# returns raster array representing the image
+img <- plotly_IMAGE(p, out_file = "plotly-test-image.png", overwrite = TRUE)
+
+img <- plotly_IMAGE(p, format = "pdf",
+  out_file = "plotly-test-image.pdf")
 }
 

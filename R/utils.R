@@ -158,17 +158,20 @@ get_kwargs <- function() {
 plotly_headers <- function(type = "main") {
   usr <- verify("username")
   key <- verify("api_key")
+  v <- as.character(packageVersion("plotly"))
   h <- if (type == "v2") {
+    auth <- base64enc::base64encode(charToRaw(paste(usr, key, sep = ":")))
     c(
-      "plotly-username" = base64enc::base64encode(charToRaw(usr)),
-      "plotly-apikey" = base64enc::base64encode(charToRaw(key)),
-      "Plotly-Client-Platform" = paste("R", as.character(packageVersion("plotly")))
+      "authorization" = paste("Basic", auth),
+      "plotly-client-platform" = paste("R", v),
+      "plotly_version" = v,
+      "content-type" = "application/json"
     )
   } else {
     c(
       "plotly-username" = usr,
       "plotly-apikey" = key,
-      "plotly-version" = as.character(packageVersion("plotly")),
+      "plotly-version" = v,
       "plotly-platform" = "R"
     )
   }

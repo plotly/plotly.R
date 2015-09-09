@@ -41,7 +41,7 @@ plotly_POST <- function(x) {
   base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
   con <- process(struct(resp, "clientresp"))
-  msg <- switch(kwargs$fileopt,
+  msg <- switch(x$fileopt %||% "new",
                 new = "Success! Created a new plotly here -> ",
                 overwrite = "Success! Modified your plotly here -> ")
   message(msg, con$url)
