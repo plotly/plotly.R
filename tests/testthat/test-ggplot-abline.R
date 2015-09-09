@@ -20,8 +20,8 @@ test_that("Second trace be the a-b line", {
   y <- x * 0.95
   df <- data.frame(x, y)
   
-  gg <- ggplot(df) + geom_point(aes(x, y)) 
-  geom_abline(intercept = 1.1, slope = 0.9, colour = "red", size = 4)
+  gg <- ggplot(df) + geom_point(aes(x, y)) +
+    geom_abline(intercept = 1.1, slope = 0.9, colour = "red", size = 4)
   
   L <- expect_traces(gg, 2, "single-abline")
   
@@ -39,7 +39,7 @@ test_that("abline aesthetics", {
     m = c(2, -3, 0.1),
     b = c(1, 0, -1)
   )
-  p <- ggplot(df) + xlim(c(-5, 5))  ylim(c(-5, 5)) +
+  p <- ggplot(df) + xlim(c(-5, 5)) + ylim(c(-5, 5)) +
     geom_abline(aes(intercept = b, slope = m))
   
   L <- expect_traces(gg, 2, "multiple-abline")
