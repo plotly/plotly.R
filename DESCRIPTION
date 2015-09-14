@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create interactive web-based graphs via plotly's API
-Version: 1.0.4
+Version: 1.0.8
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
@@ -17,8 +17,8 @@ Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     email = "cpsievert1@gmail.com"))
 License: MIT + file LICENSE
 Description: Create interactive web-based graphs via plotly's API.
-    Easily translate ggplot2 plots to plotly and/or create custom plotly graphs. 
-    Once uploaded to a plotly account, plotly graphs (and the data behind them) 
+    Easily translate ggplot2 plots to plotly and/or create custom plotly graphs.
+    Once uploaded to a plotly account, plotly graphs (and the data behind them)
     can be viewed and modified in a web browser.
 URL: https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
@@ -30,7 +30,8 @@ Imports:
     jsonlite,
     magrittr,
     digest,
-    viridis
+    viridis,
+    base64enc
 Suggests:
     dplyr,
     maps,

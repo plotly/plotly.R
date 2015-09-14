@@ -15,6 +15,13 @@ process.clientresp <- function(resp) {
   con
 }
 
+process.image <- function(resp) {
+  httr::stop_for_status(resp)
+  # httr (should) know to call png::readPNG() which returns raster array
+  tryCatch(httr::content(resp, as = "parsed"), 
+           error = function(e) httr::content(resp, as = "raw"))
+}
+
 process.figure <- function(resp) {
   httr::stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
