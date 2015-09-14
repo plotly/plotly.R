@@ -141,10 +141,11 @@ struct <- function(x, y, ...) {
 get_domain <- function(type = "main") {
   if (type == "stream") {
     Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
+  } else if (type == "v2") {
+    Sys.getenv("plotly_domain", "https://api.plot.ly/v2/")
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }
-  
 }
 
 # plotly's special keyword arguments in POST body
@@ -153,12 +154,28 @@ get_kwargs <- function() {
 }
 
 # POST header fields
-plotly_headers <- function() {
-  httr::add_headers(.headers = c(
-    "plotly-username" = verify("username"),
-    "plotly-apikey" = verify("api_key"),
-    "plotly-version" = as.character(packageVersion("plotly")),
-    "plotly-platform" = "R"))
+#' @importFrom base64enc base64encode
+plotly_headers <- function(type = "main") {
+  usr <- verify("username")
+  key <- verify("api_key")
+  v <- as.character(packageVersion("plotly"))
+  h <- if (type == "v2") {
+    auth <- base64enc::base64encode(charToRaw(paste(usr, key, sep = ":")))
+    c(
+      "authorization" = paste("Basic", auth),
+      "plotly-client-platform" = paste("R", v),
+      "plotly_version" = v,
+      "content-type" = "application/json"
+    )
+  } else {
+    c(
+      "plotly-username" = usr,
+      "plotly-apikey" = key,
+      "plotly-version" = v,
+      "plotly-platform" = "R"
+    )
+  }
+  httr::add_headers(.headers = h)
 }
 
 # try to write environment variables to an .Rprofile
