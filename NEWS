@@ -1,3 +1,9 @@
+1.0.8 -- 14 Sep 2015
+
+Added the plotly_IMAGES() function which interfaces to the images endpoint https://api.plot.ly/v2/#images
+
+Details -> https://github.com/ropensci/plotly/pull/279
+
 1.0.7 -- 26 Aug 2015
 
 See https://github.com/ropensci/plotly/pull/275
