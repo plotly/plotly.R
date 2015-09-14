@@ -41,41 +41,25 @@ save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
   p <- if (is.ggplot(gg)) gg2list(gg) else plotly_build(gg)
   tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
-  # only render/save pngs if this is a Travis pull request
+  # only create images if this is a Travis pull request
   if (tpr != "false" && tpr != "") {
-    # POST data to plotly and return the url
-    u <- if (packageVersion("plotly") < 1) {
-      py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
-      tryWhile({
-        resp <- py$ggplotly(gg, kwargs = list(auto_open = FALSE))
-        resp$response$url
-      })
-    } else {
-      tryWhile({
-        p$filename <- name
-        resp <- plotly_POST(p)
-        resp$url
-      })
-    }
     # save a hash of the R object sent to the plotly server
     # (eventually use this to prevent redundant POSTs?!)
     info <- paste(hash, name, digest::digest(p), u, sep = ",")
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
-    # download png under a directory specific to this installed version of plotly
     filename <- file.path(plotly_dir, paste0(name, ".png"))
-    if (!file.exists(filename)) {
-      tryWhile({
-        curl::curl_download(paste0(u, ".png"), filename)
-      })
-      # now convert png to a smaller size
-      args <- c(filename, "-density", "36x36", "-write", 
-                file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
-      system2("convert", args)
-    } else {
+    if (file.exists(filename))
       stop(shQuote(name), " has already been used to save_outputs() in another test.")
-    }
+    # Using plotly_IMAGE() requires 1.0.8 or higher
+    if (packageVersion("plotly") < "1.0.8") 
+      stop("These tests assume you're running plotly version 1.0.8 or higher")
+    resp <- plotly_IMAGE(p, height = 500, width = 700, out_file = filename)
+    # now convert png to a smaller size
+    argz <- c(filename, "-density", "36x36", "-write", 
+              file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
+    system2("convert", argz)
     
-    # if missing, save the ggplot2
+    # if missing, save the ggplot2 version
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
       gg_file <- file.path(gg_dir, paste0(name, ".png"))
@@ -83,9 +67,9 @@ save_outputs <- function(gg, name) {
       try(print(gg))
       dev.off()
       # now convert png to a smaller size
-      args <- c(gg_file, "-density", "72x72", "-write", 
+      argz <- c(gg_file, "-density", "72x72", "-write", 
                 file.path(gg_thumb_dir, paste0(name, ".png")), "+delete")
-      system2("convert", args)
+      system2("convert", argz)
     }
   }
   p
