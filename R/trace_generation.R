@@ -371,13 +371,15 @@ toBasic <- list(
     b <- g$data$intercept
     xmin <- unique(g$prestats.data$globxmin)
     xmax <- unique(g$prestats.data$globxmax)
+    g$data$plotly_id <- seq_len(N)
     l <- list()
     for (i in seq_len(N)) {
       # the NAs tell plotly to draw different traces for each line
       l$x <- c(l$x, xmin, xmax, NA) 
       l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
     }
-    g$data <- cbind(g$data, data.frame(l))
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
     # TODO: always use data for parameter values? 
     # Or should we prefer g$params, if they exist?
     g$params <- dat2params(g$data)
@@ -571,7 +573,7 @@ geom2trace <- list(
         L$text <- paste("size:", data$size)
       }
       L$marker$sizeref <- default.marker.sizeref
-      L$marker$size <- marker.size.mult * scales::rescale(data$size) + 0.25
+      L$marker$size <- marker.size.mult * (scales::rescale(data$size) + 0.25)
       L$marker$line$width <- 0
     }
     if (!is.null(params$shape) && params$shape %in% c(21:25)) {
