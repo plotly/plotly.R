@@ -20,7 +20,7 @@ test_that("Second trace be the a-b line", {
   y <- x * 0.95
   df <- data.frame(x, y)
   
-  gg <- ggplot(df) + geom_point(aes(x, y)) +
+  gg <- ggplot(df) + geom_point(aes(x, y, size = x)) +
     geom_abline(intercept = 1.1, slope = 0.9, colour = "red", size = 4)
   
   L <- expect_traces(gg, 2, "single-abline")

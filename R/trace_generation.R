@@ -379,8 +379,7 @@ toBasic <- list(
     }
     g$data <- cbind(g$data, data.frame(l))
     # TODO: always use data for parameter values? 
-    # Or should we prefer
-    browser()
+    # Or should we prefer g$params, if they exist?
     g$params <- dat2params(g$data)
     group2NA(g, "path")
   },
@@ -402,10 +401,6 @@ toBasic <- list(
     g
   },
   point=function(g) {
-    if ("size" %in% names(g$data) && nrow(g$data) > 0) {
-      g$params$sizemin <- min(g$prestats.data$globsizemin)
-      g$params$sizemax <- max(g$prestats.data$globsizemax)
-    }
     g
   },
   smoothLine=function(g) {
@@ -562,23 +557,21 @@ geom2trace <- list(
                                               params$alpha)))
   },
   point=function(data, params){
-    L <- list(x=data$x,
-              y=data$y,
-              name=params$name,
-              text=as.character(data$text),
-              type="scatter",
-              mode="markers",
-              marker=paramORdefault(params, aes2marker, marker.defaults))
-    if("size" %in% names(data)){
-      if(!("text" %in% names(data))) {
+    L <- list(
+      x = data$x,
+      y = data$y,
+      name = params$name,
+      text = as.character(data$text),
+      type = "scatter",
+      mode = "markers",
+      marker = paramORdefault(params, aes2marker, marker.defaults)
+    )
+    if ("size" %in% names(data)) {
+      if (!("text" %in% names(data))) {
         L$text <- paste("size:", data$size)
       }
       L$marker$sizeref <- default.marker.sizeref
-      # Make sure sizes are passed as a list even when there is only one element.
-      s <- data$size
-      marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
-      marker.size <- marker.size * marker.size.mult
-      L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
+      L$marker$size <- marker.size.mult * scales::rescale(data$size) + 0.25
       L$marker$line$width <- 0
     }
     if (!is.null(params$shape) && params$shape %in% c(21:25)) {

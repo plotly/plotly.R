@@ -51,7 +51,7 @@ now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
 default.marker.sizeref <- 1
-marker.size.mult <- 10
+marker.size.mult <- 50
 
 marker.defaults <- list(alpha=1,
                         shape="16",
