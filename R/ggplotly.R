@@ -114,7 +114,7 @@ markLegends <-
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
-markSplit <- c(markLegends,list(boxplot=c("x")))
+markSplit <- c(markLegends,list(boxplot=c("x", "fill", "colour")))
 
 # obtain the "type" of geom/position/etc.
 type <- function(x, y) {

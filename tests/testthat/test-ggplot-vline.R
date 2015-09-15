@@ -1,13 +1,13 @@
 context("Vline")
 # Vertical line
 
-x1 <- seq(from=0, to=3.5, by=0.5)
-x2 <- x1 * 0.95
-df <- data.frame("x1"=x1, "x2"=x2)
-gg <- ggplot(df) + geom_point(aes(x=x1, y=x2))
+x <- seq(0, 3.5, by = 0.5)
+y <- x * 0.95
+df <- data.frame(x, y)
+gg <- ggplot(df, aes(x, y)) + geom_point()
 
 test_that("second trace be the vline", {
-  gg <- gg + geom_vline(xintercept=1.1, colour="green", size=3)
+  gg <- gg + geom_vline(xintercept = 1.1, colour = "green", size = 3)
   
   L <- save_outputs(gg, "vline")
   
@@ -22,7 +22,7 @@ test_that("second trace be the vline", {
 })
 
 test_that("vector xintercept results in multiple vertical lines", {
-  gg <- gg + geom_vline(xintercept=1:2, colour="blue", size=3)
+  gg <- gg + geom_vline(xintercept = 1:2, colour = "blue", size = 3)
   
   L <- save_outputs(gg, "vline-multiple")
   

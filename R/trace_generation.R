@@ -118,27 +118,15 @@ layer2traces <- function(l, d, misc) {
   # cases of basic geoms. In ggplot2, this processing is done in the
   # draw method of the geoms.
   
-  # Every plotly trace has one of these types
-  # type=scatter,bar,box,histogramx,histogram2d,heatmap
-  
-  # for type=scatter, you can define
+  # for type='scatter', you can define
   # mode=none,markers,lines,lines+markers where "lines" is the
   # default for 20 or more points, "lines+markers" is the default for
   # <20 points. "none" is useful mainly if fill is used to make area
   # plots with no lines.
   
-  # marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
-  
-  # symbol=circle,square,diamond,cross,x,
-  # triangle-up,triangle-down,triangle-left,triangle-right
-  
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
-  basic <- if(is.null(convert)){
-    g
-  }else{
-    convert(g)
-  }
+  basic <- if (is.function(convert)) convert(g) else g
   # Then split on visual characteristics that will get different
   # legend entries.
   data.list <- if (basic$geom %in% names(markSplit)) {
@@ -171,18 +159,6 @@ layer2traces <- function(l, d, misc) {
       })
     }
   }
-  # Split hline and vline when multiple panels or intercepts:
-  # Need multiple traces accordingly.
-  if (g$geom %in% c("hline", "vline")) {
-    intercept <- paste0(ifelse(g$geom == "hline", "y", "x"), "intercept")
-    vec.list <- basic$data[c("PANEL", intercept)]
-    df.list <- split(basic$data, vec.list, drop=TRUE)
-    data.list <- lapply(df.list, function(df) {
-      params <- basic$params
-      list(data=df,
-           params=params)
-    })
-  }
   
   # case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
@@ -201,7 +177,7 @@ layer2traces <- function(l, d, misc) {
   names.in.legend <- NULL
   for (data.i in seq_along(data.list)) {
     data.params <- data.list[[data.i]]
-    data.params$params$stat.type <- l$stat$objname
+    data.params$params$stat.type <- type(l, "stat")
     tr <- do.call(getTrace, data.params)
     for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
@@ -338,11 +314,14 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
-    # Preserve default colour values usign fill:
-    if (!is.null(g$data$fill)) {
-      levels(g$prestats.data$fill) <- g$data$fill
-      g$prestats.data$fill <- as.character(g$prestats.data$fill)
-    }
+    # boxplot needs the prestats data, but doesn't have color codes...
+    cols <- setNames(g$data$colour, g$data$colour.name)
+    g$prestats.data$colour <- 
+      cols[as.character(g$prestats.data[["colour"]])] %||% cols
+    # same with fill
+    fill <- setNames(g$data$fill, g$data$fill.name)
+    g$prestats.data$fill <- 
+      fill[as.character(g$prestats.data[["fill"]])] %||% fill
     g$data <- g$prestats.data
     g
   },
@@ -369,8 +348,8 @@ toBasic <- list(
     N <- nrow(g$data)
     m <- g$data$slope
     b <- g$data$intercept
-    xmin <- unique(g$prestats.data$globxmin)
-    xmax <- unique(g$prestats.data$globxmax)
+    xmin <- min(g$prestats.data$globxmin, na.rm = T)
+    xmax <- max(g$prestats.data$globxmax, na.rm = T)
     g$data$plotly_id <- seq_len(N)
     l <- list()
     for (i in seq_len(N)) {
@@ -386,21 +365,48 @@ toBasic <- list(
     group2NA(g, "path")
   },
   hline=function(g) {
+    N <- nrow(g$data)
+    yint <- g$data$yintercept
     if (is.factor(g$data$x)) {
-      g$params$xstart <- as.character(sort(g$data$x)[1])
-      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
+      s <- sort(g$data$x)
+      xmin <- as.character(s[1])
+      xmax <- as.character(s[length(s)])
     } else {
-      g$params$xstart <- min(g$prestats.data$globxmin)
-      g$params$xend <- max(g$prestats.data$globxmax)
+      xmin <- min(g$prestats.data$globxmin, na.rm = T)
+      xmax <- max(g$prestats.data$globxmax, na.rm = T)
     }
-    g$geom <- "path"
-    g
+    g$data$plotly_id <- seq_len(N)
+    l <- list()
+    for (i in seq_len(N)) {
+      l$x <- c(l$x, xmin, xmax, NA) 
+      l$y <- c(l$y, yint[i], yint[i], NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
+    }
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
+    g$params <- dat2params(g$data)
+    group2NA(g, "path")
   },
   vline=function(g) {
-    g$params$ystart <- min(g$prestats.data$globymin)
-    g$params$yend <- max(g$prestats.data$globymax)
-    g$geom <- "path"
-    g
+    N <- nrow(g$data)
+    xint <- g$data$xintercept
+    if (is.factor(g$data$y)) {
+      s <- sort(g$data$y)
+      ymin <- as.character(s[1])
+      ymax <- as.character(s[length(s)])
+    } else {
+      ymin <- min(g$prestats.data$globxmin, na.rm = T)
+      ymax <- max(g$prestats.data$globxmax, na.rm = T)
+    }
+    g$data$plotly_id <- seq_len(N)
+    l <- list()
+    for (i in seq_len(N)) {
+      l$x <- c(l$x, xint[i], xint[i], NA) 
+      l$y <- c(l$y, ymin, ymax, NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
+    }
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
+    g$params <- dat2params(g$data)
+    group2NA(g, "path")
   },
   point=function(g) {
     g
@@ -648,11 +654,14 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   boxplot=function(data, params) {
-    list(y=data$y,
-         name=params$name,
-         type="box",
-         line=paramORdefault(params, aes2line, boxplot.defaults),
-         fillcolor=ifelse(!is.null(data$fill), toRGB(data$fill), toRGB("white")))
+    list(
+      y = data$y,
+      name = params$name,
+      type = "box",
+      # TODO: translate marker styling for outliers!
+      line = paramORdefault(params, aes2line, boxplot.defaults),
+      fillcolor = toRGB(params$fill %||% "white")
+    )
   },
   contour=function(data, params) {
     L <- list(x=unique(data$x),
