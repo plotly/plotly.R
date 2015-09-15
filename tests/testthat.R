@@ -59,6 +59,11 @@ save_outputs <- function(gg, name) {
               file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
     system2("convert", argz)
     
+    # write the JSON used to create the image to disk for diffing purposes
+    name_dir <- file.path(plotly_dir, name)
+    dir.create(name_dir)
+    writeLines(plotly:::to_JSON(p), name_dir)
+    
     # if missing, save the ggplot2 version
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
