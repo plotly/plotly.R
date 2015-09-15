@@ -29,7 +29,7 @@ gg_names <- sub("\\.png$", "", dir(gg_dir, pattern = "\\.png$"))
 hash_file <- file.path(table_dir, "R", "hashes.csv")
 if (!file.exists(hash_file)) {
   file.create(hash_file)
-  cat("commit,test,hash,url\n", file = hash_file, append = TRUE)
+  cat("commit,test,hash\n", file = hash_file, append = TRUE)
 }
 
 # This function is called within testthat/test-*.R files.
@@ -45,7 +45,7 @@ save_outputs <- function(gg, name) {
   if (tpr != "false" && tpr != "") {
     # save a hash of the R object sent to the plotly server
     # (eventually use this to prevent redundant POSTs?!)
-    info <- paste(hash, name, digest::digest(p), u, sep = ",")
+    info <- paste(hash, name, digest::digest(p), sep = ",")
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
     filename <- file.path(plotly_dir, paste0(name, ".png"))
     if (file.exists(filename))
