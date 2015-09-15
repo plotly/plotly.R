@@ -5,6 +5,9 @@ is.offline <- function(x) inherits(x, "offline")
   if (length(x) > 0) x else y
 }
 
+#' @importFrom stats setNames
+setNames <- stats::setNames
+
 # this function is called after the package is loaded
 .onAttach <- function(...) {
   usr <- verify("username")
