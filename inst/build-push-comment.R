@@ -115,7 +115,7 @@ if (tpr != "false" && tpr != "") {
     # are the plot hashes different for this test?
     has_diff <- length(unique(test_info$hash)) > 1
     # obtain json files for this test
-    json <- paste0(name, ".json")
+    json <- paste0(i, ".json")
     Old <- file.path(base_dir, json)
     New <- file.path(this_dir, json)
     if (has_diff) {
