@@ -115,22 +115,23 @@ if (tpr != "false" && tpr != "") {
     # are the plot hashes different for this test?
     has_diff <- length(unique(test_info$hash)) > 1
     # obtain json files for this test
-    Dir <- file.path(this_dir, i)
-    json <- dir(Dir, pattern = "\\.json*", full.names = T)
-    if (length(json) != 2) stop("There should be two json files for each test")
+    json <- paste0(name, ".json")
+    Old <- file.path(base_dir, json)
+    New <- file.path(this_dir, json)
     if (has_diff) {
       # increment the total # of diffs
       diffs[[i]] <- 1
       # copy over diffing template and name things appropriately
       file.copy(dir("jsondiff", full.names = T), Dir, recursive = T)
       writeLines(
-        paste("Old =", readLines(json[1], warn = F)), "Old.json"
+        paste("Old =", readLines(Old, warn = F)), "Old.json"
       )
       writeLines(
-        paste("New =", readLines(json[2], warn = F)), "New.json"
+        paste("New =", readLines(New, warn = F)), "New.json"
       )
     }
-    unlink(json)
+    unlink(Old)
+    unlink(New)
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
