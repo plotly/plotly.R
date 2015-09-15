@@ -28,6 +28,10 @@
 
 plotly_POST <- function(x) {
   x <- plotly_build(x)
+  # need to separate out "data" form keyword args (e.g., layout, etc)
+  kwargs <- x[get_kwargs()]
+  # server can't handle empty keys
+  kwargs <- kwargs[!vapply(kwargs, is.null, logical(1))]
   # construct body of message to plotly server
   bod <- list(
     un = verify("username"),
@@ -36,7 +40,7 @@ plotly_POST <- function(x) {
     platform = "R",
     version = as.character(packageVersion("plotly")),
     args = to_JSON(x$data),
-    kwargs = to_JSON(x[get_kwargs()])
+    kwargs = to_JSON(kwargs)
   )
   base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
