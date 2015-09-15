@@ -11,14 +11,13 @@
 #' @param out_file A filename for writing the image to a file.
 #' @param ... arguments passed onto \code{httr::POST}
 #' @export
-#' @examples
-#' 
+#' @examples \dontrun{
 #' p <- plot_ly(x = 1:10)
-#' 
 #' Png <- plotly_IMAGE(p, out_file = "plotly-test-image.png")
 #' Jpeg <- plotly_IMAGE(p, format = "jpeg", out_file = "plotly-test-image.jpeg")
 #' Svg <- plotly_IMAGE(p, format = "svg",  out_file = "plotly-test-image.svg")
 #' Pdf <- plotly_IMAGE(p, format = "pdf",  out_file = "plotly-test-image.pdf")
+#' }
 #' 
 
 plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
