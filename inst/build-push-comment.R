@@ -122,12 +122,16 @@ if (tpr != "false" && tpr != "") {
       # increment the total # of diffs
       diffs[[i]] <- 1
       # copy over diffing template and name things appropriately
-      file.copy(dir("jsondiff", full.names = T), Dir, recursive = T)
-      writeLines(
-        paste("Old =", readLines(Old, warn = F)), "Old.json"
+      file.copy(
+        dir("jsondiff", full.names = TRUE), 
+        file.path(tbl_link, i), 
+        recursive = TRUE
       )
       writeLines(
-        paste("New =", readLines(New, warn = F)), "New.json"
+        paste("Old =", readLines(Old, warn = FALSE)), "Old.json"
+      )
+      writeLines(
+        paste("New =", readLines(New, warn = FALSE)), "New.json"
       )
     }
     unlink(Old)
