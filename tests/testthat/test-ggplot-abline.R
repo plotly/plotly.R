@@ -12,7 +12,7 @@ expect_traces <- function(gg, n.traces, name) {
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data=has.data, layout=L$layout)
 }
 
 test_that("Second trace be the a-b line", {
@@ -42,7 +42,7 @@ test_that("abline aesthetics", {
   p <- ggplot(df) + xlim(c(-5, 5)) + ylim(c(-5, 5)) +
     geom_abline(aes(intercept = b, slope = m))
   
-  L <- expect_traces(gg, 2, "multiple-abline")
+  L <- expect_traces(p, 1, "multiple-abline")
   expect_identical(L$layout$xaxis$range, c(-5, 5))
   expect_identical(L$layout$yaxis$range, c(-5, 5))
   expect_identical(L$data[[1]]$y[1:2], df$m[1] * L$data[[1]]$x[1:2] + df$b[1])
