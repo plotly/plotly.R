@@ -65,6 +65,10 @@ save_outputs <- function(gg, name) {
       file.path(plotly_dir, paste0(name, ".json"))
     )
     
+    # just for debugging
+    print(file.path(plotly_dir, paste0(name, ".json")))
+    print(plotly:::to_JSON(p))
+    
     # if missing, save the ggplot2 version
     # do an else if to take advantage of both builds?
     if (!name %in% gg_names) {
