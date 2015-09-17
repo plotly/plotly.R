@@ -178,6 +178,11 @@ layer2traces <- function(l, d, misc) {
   for (data.i in seq_along(data.list)) {
     data.params <- data.list[[data.i]]
     data.params$params$stat.type <- type(l, "stat")
+    # as of ggplot2 version 1.1, param defaults can be obtained from the data
+    data.params$params <- modifyList(
+      dat2params(data.params$data),
+      data.params$params
+    )
     tr <- do.call(getTrace, data.params)
     for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
@@ -475,25 +480,23 @@ group2NA <- function(g, geom) {
 # Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
 # error_x.
 make.errorbar <- function(data, params, xy){
-  tr <-
-    list(x=data$x,
-         y=data$y,
-         type="scatter",
-         mode="none")
+  tr <- list(
+    x = data$x,
+    y = data$y,
+    type = "scatter",
+    mode = "none"
+  )
   err.name <- paste0("error_", xy)
   min.name <- paste0(xy, "min")
   max.name <- paste0(xy, "max")
-  e <-
-    list(array=data[[max.name]]-data[[xy]],
-         type="data",
-         width=params$width,
-         symmetric=TRUE,
-         color=if(!is.null(params$colour)){
-           toRGB(params$colour)
-         }else{
-           toRGB(data$colour)
-         })
-  arrayminus <- data[[xy]]-data[[min.name]]
+  e <- list(
+    array = data[[max.name]] - data[[xy]],
+    type = "data",
+    width = params$width,
+    symmetric = TRUE,
+    color = toRGB(params$colour)
+  )
+  arrayminus <- data[[xy]] - data[[min.name]]
   if(!isTRUE(all.equal(e$array, arrayminus))){
     e$arrayminus <- arrayminus
     e$symmetric <- FALSE
@@ -583,9 +586,8 @@ geom2trace <- list(
       L$marker$line$width <- 0
     }
     if (!is.null(params$shape) && params$shape %in% c(21:25)) {
-      L$marker$color <- ifelse(!is.null(params$fill), toRGB(params$fill), "rgba(0,0,0,0)")
-      if (!is.null(params$colour))
-        L$marker$line$color <- toRGB(params$colour)
+      L$marker$color <- toRGB(params$fill %||% "black")
+      L$marker$line$color <- toRGB(params$colour %||% "transparent")
       L$marker$line$width <- 1
     }
     if (!is.null(params$shape) && params$shape %in% c(32)) {
@@ -621,16 +623,18 @@ geom2trace <- list(
     data$x <- x
     dat <- plyr::ddply(data, c("x", "PANEL", if ("group" %in% names(data)) "group"),
                        plyr::summarise, count = max(y))
-    L <- list(x = dat$x,
-              y = dat$count,
-              type = "bar",
-              # text only makes sense if no dimension reduction occurred
-              text = if (nrow(dat) == nrow(data)) data$text else NULL,
-              name = params$name,
-              marker = list(color = toRGB(params$fill)))
+    L <- list(
+      x = dat$x,
+      y = dat$count,
+      type = "bar",
+      # text only makes sense if no dimension reduction occurred
+      text = if (nrow(dat) == nrow(data)) data$text else NULL,
+      name = params$name,
+      marker = list(color = toRGB(params$fill))
+    )
     if (!is.null(params$colour)) {
       L$marker$line <- list(color = toRGB(params$colour))
-      L$marker$line$width <- if (is.null(params$size)) 1 else params$size
+      L$marker$line$width <- params$size %||% 1
     }
     if (!is.null(params$alpha)) L$opacity <- params$alpha
     L
@@ -660,7 +664,7 @@ geom2trace <- list(
       type = "box",
       # TODO: translate marker styling for outliers!
       line = paramORdefault(params, aes2line, boxplot.defaults),
-      fillcolor = toRGB(params$fill %||% "white")
+      fillcolor = toRGB(params$fill)
     )
   },
   contour=function(data, params) {
@@ -690,13 +694,14 @@ geom2trace <- list(
     make.errorbar(data, params, "x")
   },
   area=function(data, params) {
-    list(x=c(data$x[1], data$x, tail(data$x, n=1)),
-         y=c(0, data$y, 0),
-         name=params$name,
-         type="scatter",
-         line=paramORdefault(params, aes2line, ribbon.line.defaults),
-         fill="tozeroy",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-                                              params$alpha)))
+    list(
+      x = c(data$x[1], data$x, tail(data$x, n = 1)),
+      y = c(0, data$y, 0),
+      name = params$name,
+      type = "scatter",
+      line = paramORdefault(params, aes2line, ribbon.line.defaults),
+      fill = "tozeroy",
+      fillcolor = toRGB(params$fill %||% "grey20", params$alpha)
+    )
   }
 )

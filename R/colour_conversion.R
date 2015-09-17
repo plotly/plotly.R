@@ -3,9 +3,11 @@
 #' @param alpha transparency alpha
 #' @return hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 #' @export
-toRGB <- function(x, alpha=1) {
-  if(is.null(x))return(x)
-  if (alpha!=1) {
+toRGB <- function(x, alpha = 1) {
+  if (is.null(x)) return(x)
+  # as of ggplot2 version 1.1, an NA alpha is treated as though it's 1
+  if (is.na(alpha)) alpha <- 1
+  if (alpha != 1) {
     rgb.matrix <- col2rgb(x, TRUE)
     rgb.matrix["alpha", 1] <- alpha
     ch.vector <- "rgba(%s)"
