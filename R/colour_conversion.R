@@ -5,6 +5,7 @@
 #' @export
 toRGB <- function(x, alpha = 1) {
   if (is.null(x)) return(x)
+  if (identical(x, "NA")) x <- NA
   # as of ggplot2 version 1.1, an NA alpha is treated as though it's 1
   if (is.na(alpha)) alpha <- 1
   if (alpha != 1) {
