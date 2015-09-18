@@ -2,7 +2,7 @@ context("ggplot ticks")
 
 PlantGrowth$type <-
   ifelse(PlantGrowth$group == "ctrl", "control", "treatment")
-boxes <- ggplot(PlantGrowth, aes(x=group, y=weight)) + geom_boxplot()
+boxes <- ggplot(PlantGrowth, aes(x = group, y = weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.ggplot(gg))
@@ -14,7 +14,7 @@ expect_traces <- function(gg, n.traces, name){
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data = has.data, layout = L$layout)
 }
 
 plant.list <- split(PlantGrowth, PlantGrowth$group)
