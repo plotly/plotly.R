@@ -319,14 +319,6 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
-    # boxplot needs the prestats data, but doesn't have color codes...
-    cols <- setNames(g$data$colour, g$data$colour.name)
-    g$prestats.data$colour <- 
-      cols[as.character(g$prestats.data[["colour"]])] %||% cols
-    # same with fill
-    fill <- setNames(g$data$fill, g$data$fill.name)
-    g$prestats.data$fill <- 
-      fill[as.character(g$prestats.data[["fill"]])] %||% fill
     g$data <- g$prestats.data
     g
   },
@@ -664,7 +656,7 @@ geom2trace <- list(
       type = "box",
       # TODO: translate marker styling for outliers!
       line = paramORdefault(params, aes2line, boxplot.defaults),
-      fillcolor = toRGB(params$fill)
+      fillcolor = toRGB(params$fill %||% "white")
     )
   },
   contour=function(data, params) {
