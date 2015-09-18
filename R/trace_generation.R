@@ -356,9 +356,6 @@ toBasic <- list(
       l$plotly_id <- c(l$plotly_id, rep(i, 3))
     }
     g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
-    # TODO: always use data for parameter values? 
-    # Or should we prefer g$params, if they exist?
-    g$params <- dat2params(g$data)
     group2NA(g, "path")
   },
   hline=function(g) {
@@ -380,7 +377,6 @@ toBasic <- list(
       l$plotly_id <- c(l$plotly_id, rep(i, 3))
     }
     g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
-    g$params <- dat2params(g$data)
     group2NA(g, "path")
   },
   vline=function(g) {
@@ -402,7 +398,6 @@ toBasic <- list(
       l$plotly_id <- c(l$plotly_id, rep(i, 3))
     }
     g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
-    g$params <- dat2params(g$data)
     group2NA(g, "path")
   },
   point=function(g) {
@@ -519,7 +514,8 @@ ribbon_dat <- function(dat) {
 
 
 dat2params <- function(d) {
-  l <- as.list(d[names(d) %in% names(aesConverters)])
+  params <- c(names(aesConverters), "fill")
+  l <- as.list(d[names(d) %in% params])
   lapply(l, unique)
 }
 
@@ -546,18 +542,19 @@ geom2trace <- list(
          line=paramORdefault(params, aes2line, line.defaults))
   },
   polygon=function(data, params){
-    g <- list(data=data, geom="polygon")
+    g <- list(data = data, geom = "polygon")
     g <- group2NA(g, "polygon")
-    list(x=g$data$x,
-         y=g$data$y,
-         name=params$name,
-         text=g$data$text,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, polygon.line.defaults),
-         fill="tozerox",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-                                              params$alpha)))
+    list(
+      x = g$data$x,
+      y = g$data$y,
+      name = params$name,
+      text = g$data$text,
+      type = "scatter",
+      mode = "lines",
+      line = paramORdefault(params, aes2line, polygon.line.defaults),
+      fill = "tozerox",
+      fillcolor = toRGB(params$fill, params$alpha)
+    )
   },
   point=function(data, params){
     L <- list(
