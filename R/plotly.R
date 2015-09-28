@@ -316,10 +316,8 @@ plotly_build <- function(l = last_plot()) {
   }
   # search for keyword args in traces and place them at the top level
   kwargs <- lapply(x$data, function(z) z[get_kwargs()])
-  # later keywords args take precedence
-  kwargs <- Reduce(modifyList, kwargs)
-  # apply kwargs supplied in the call signature
-  kwargs[get_kwargs()] <- x[get_kwargs()]
+  # 'top-level' keywords args take precedence
+  kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
   # empty keyword arguments can cause problems
   kwargs <- kwargs[sapply(kwargs, length) > 0]
   # filename & fileopt are keyword arguments required by the API
@@ -338,8 +336,8 @@ plotly_build <- function(l = last_plot()) {
       ) %||%
       "plot from api" 
   }
-  # place kwargs back into x
-  x[get_kwargs()] = kwargs[get_kwargs()]
+  # tack on keyword arguments
+  x <- c(x, kwargs)
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
