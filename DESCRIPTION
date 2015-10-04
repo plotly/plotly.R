@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create interactive web-based graphs via plotly's API
-Version: 1.0.9
+Version: 1.1.0
 Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
     email = "chris@plot.ly"),
     person("Scott", "Chamberlain", role = "aut",
@@ -31,7 +31,8 @@ Imports:
     magrittr,
     digest,
     viridis,
-    base64enc
+    base64enc,
+    htmlwidgets
 Suggests:
     dplyr,
     maps,

@@ -6,8 +6,8 @@
 #' Reference section (see below). 
 #' 
 #' @param data A data frame (optional).
-#' @param ... These arguments are documented in the references section below.
-#' Note that acceptable arguments depend on the trace type.
+#' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
+#' Note that acceptable arguments depend on the value of \code{type}.
 #' @param type A charater string describing the type of trace.
 #' @param group Either a variable name or a vector to use for grouping. If used, 
 #' a different trace will be created for each unique value.
@@ -19,19 +19,11 @@
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
-#' @param filename character string describing the name of the plot in your plotly account. 
-#' Use / to specify directories. If a directory path does not exist it will be created.
-#' If this argument is not specified and the title of the plot exists,
-#' that will be used for the filename.
-#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-#' "append" data to existing plotly, or "extend" it.
-#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
-#' by anyone who has the link and in the owner's plotly account.
-#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
+#' @param width	Width in pixels (optional, defaults to automatic sizing).
+#' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
-#' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -54,8 +46,8 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
-                    filename, fileopt, world_readable = TRUE,
-                    inherit = TRUE, evaluate = FALSE) {
+                    width = NULL, height = NULL, inherit = TRUE, 
+                    evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
   # tack on "special" arguments
@@ -77,12 +69,10 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   p <- list(
     data = list(tr),
     layout = NULL,
-    url = NULL
+    url = NULL,
+    width = width,
+    height = height
   )
-  # tack on special keyword arguments
-  if (!missing(filename)) p$filename <- filename
-  if (!missing(fileopt)) p$fileopt <- fileopt
-  p$world_readable <- world_readable
   
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)

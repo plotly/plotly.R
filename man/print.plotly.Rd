@@ -4,12 +4,12 @@
 \alias{print.plotly}
 \title{Print a plotly object}
 \usage{
-\method{print}{plotly}(x, ...)
+\method{print}{plotly}(p, ...)
 }
 \arguments{
-\item{x}{an object with class 'plotly'}
+\item{p}{a plotly object}
 
-\item{...}{other arguments}
+\item{...}{additional arguments (currently ignored)}
 }
 \description{
 Print a plotly object
