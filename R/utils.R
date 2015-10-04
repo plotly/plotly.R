@@ -1,5 +1,4 @@
 is.plotly <- function(x) inherits(x, "plotly")
-is.offline <- function(x) inherits(x, "offline")
 
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
@@ -8,21 +7,7 @@ is.offline <- function(x) inherits(x, "offline")
 # this function is called after the package is loaded
 .onAttach <- function(...) {
   usr <- verify("username")
-  if (nchar(usr) > 0) 
-    packageStartupMessage("\n", "Howdy, ", usr, "!")
-  key <- verify("api_key")
-  if (nchar(key) > 0) {
-    packageStartupMessage("Sweet, you have an API key already! \n",
-                          "Start making plots with ggplotly() or plot_ly().")
-  }
-  # set a default for the offline bundle directory 
-  if (Sys.getenv("plotly_offline") == "") {
-    Sys.setenv("plotly_offline" = "~/.plotly/plotlyjs")
-    # iframes won't work in RStudio viewer, so we override
-    # shiny's browser launch method 
-    if (!has_offline()) 
-      options("shiny.launch.browser" = function(url) { browseURL(url) })
-  }
+  if (nchar(usr) > 0) packageStartupMessage("\n", "Howdy, ", usr, "!")
   invisible(NULL)
 }
 
