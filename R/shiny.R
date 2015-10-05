@@ -12,16 +12,18 @@
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This 
 #'   is useful if you want to save an expression in a variable.
 #'   
+#' @importFrom htmlwidgets shinyWidgetOutput
+#' @importFrom htmlwidgets shinyRenderWidget
 #' @name plotly-shiny
 #'
 #' @export
 plotlyOutput <- function(outputId, width = "100%", height = "400px") {
-  shinyWidgetOutput(outputId, "plotly", width, height, package = "plotly")
+  htmlwidgets::shinyWidgetOutput(outputId, "plotly", width, height, package = "plotly")
 }
 
 #' @rdname plotly-shiny
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
-  shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+  htmlwidgets::shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
 }

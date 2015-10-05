@@ -32,7 +32,8 @@ Imports:
     digest,
     viridis,
     base64enc,
-    htmlwidgets
+    htmlwidgets,
+    plyr
 Suggests:
     dplyr,
     maps,

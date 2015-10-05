@@ -3,6 +3,8 @@
 #' @param d one layer of calculated data from ggplot2::ggplot_build(p)
 #' @param misc named list of plot info, independent of layer.
 #' @return list representing a layer, with corresponding aesthetics, ranges, and groups.
+#' @importFrom plyr ddply
+#' @importFrom plyr summarise
 #' @export
 layer2traces <- function(l, d, misc) {
   not.na <- function(df){

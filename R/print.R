@@ -1,16 +1,17 @@
 #' Print a plotly object
 #' 
-#' @param p a plotly object
+#' @param x a plotly object
 #' @param ... additional arguments (currently ignored)
 #' @export
 #' @importFrom htmlwidgets createWidget
+#' @importFrom htmlwidgets sizingPolicy
 
-print.plotly <- function(p, ...) {
+print.plotly <- function(x, ...) {
   w <- htmlwidgets::createWidget(
     name = "plotly",
-    x = plotly_build(p),
-    width = p$width,
-    height = p$height,
+    x = plotly_build(x),
+    width = x$width,
+    height = x$height,
     htmlwidgets::sizingPolicy(viewer.padding = 10, browser.fill = TRUE)
   )
   get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
@@ -30,7 +31,7 @@ embed_notebook <- function(x, width = "100%", height = "525") {
   }
   resp <- plotly_POST(x)
   iframe <- plotly_iframe(attr(resp, "url"), width, height)
-  IRdisplay::display_html(iframe)
+  get("display_html", envir = asNamespace("IRdisplay"))(iframe)
 }
 
 plotly_iframe <- function(url, width, height) {
