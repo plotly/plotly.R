@@ -16,8 +16,6 @@ library("testthat")
 
 # check the working directory
 stopifnot(basename(getwd()) == "plotly-test-table")
-# define create_diff() which helps build the diff pages
-source("jsondiff/create_diff.R")
 
 # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
 build_link <- file.path('https://travis-ci.org/ropensci/plotly/builds',
@@ -57,7 +55,7 @@ if (tpr != "false" && tpr != "") {
     cat(base_hash, file = "base_hash.txt")
     dir.create(base_dir, showWarnings = FALSE)
     system2("Rscript", 
-            c("-e", shQuote("devtools::install_github('ropensci/plotly', ref = readLines('base_hash.txt'))"))
+            c("-e", shQuote("devtools::install_github('ropensci/plotly', ref = readLines('base_hash.txt', warn = F))"))
     )
     print("Rerunning tests with master")
     try(source("../plotly/tests/testthat.R", chdir = TRUE))
@@ -116,15 +114,32 @@ if (tpr != "false" && tpr != "") {
     test_info <- hashes[hashes$test %in% i, ]
     # are the plot hashes different for this test?
     has_diff <- length(unique(test_info$hash)) > 1
+    # obtain json files for this test
+    json <- paste0(i, ".json")
+    cat(list.files(base_dir), sep = "\n")
+    cat(list.files(this_dir), sep = "\n")
+    Old <- file.path(base_dir, json)
+    New <- file.path(this_dir, json)
     if (has_diff) {
+      # increment the total # of diffs
       diffs[[i]] <- 1
-      Dir <- file.path(this_dir, i)
-      dir.create(Dir)
-      file.copy(dir("jsondiff", full.names = T), Dir, recursive = TRUE)
-      png1 <- paste0(test_info$url[1], ".png")
-      png2 <- paste0(test_info$url[2], ".png")
-      res <- create_diff(png1, png2, Dir)
+      # copy over diffing template and name things appropriately
+      base_name_dir <- file.path(base_dir, i)
+      this_name_dir <- file.path(this_dir, i)
+      jsondiff <- dir("jsondiff", full.names = TRUE)
+      dir.create(base_name_dir)
+      dir.create(this_name_dir)
+      file.copy(jsondiff, base_name_dir, recursive = TRUE)
+      file.copy(jsondiff, this_name_dir, recursive = TRUE)
+      writeLines(
+        paste("Old =", readLines(Old, warn = FALSE)), "Old.json"
+      )
+      writeLines(
+        paste("New =", readLines(New, warn = FALSE)), "New.json"
+      )
     }
+    unlink(Old)
+    unlink(New)
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
