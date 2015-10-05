@@ -53,7 +53,7 @@ save_outputs <- function(gg, name) {
     # Using plotly_IMAGE() requires 1.0.8 or higher
     if (packageVersion("plotly") < "1.0.8") 
       stop("These tests assume you're running plotly version 1.0.8 or higher")
-    resp <- plotly_IMAGE(p, height = 500, width = 700, out_file = filename)
+    print(system.time(resp <- plotly_IMAGE(p, height = 500, width = 700, out_file = filename)))
     # now convert png to a smaller size
     argz <- c(filename, "-density", "36x36", "-write", 
               file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
