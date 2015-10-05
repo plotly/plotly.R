@@ -116,8 +116,8 @@ if (tpr != "false" && tpr != "") {
     has_diff <- length(unique(test_info$hash)) > 1
     # obtain json files for this test
     json <- paste0(i, ".json")
-    list.files(base_dir)
-    list.files(this_dir)
+    cat(list.files(base_dir), sep = "\n")
+    cat(list.files(this_dir), sep = "\n")
     Old <- file.path(base_dir, json)
     New <- file.path(this_dir, json)
     if (has_diff) {
