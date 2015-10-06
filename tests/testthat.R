@@ -60,7 +60,10 @@ save_outputs <- function(gg, name) {
     system2("convert", argz)
     
     # write the JSON used to create the image to disk for diffing purposes
-    print(system.time(writeLines(plotly:::to_JSON(p), filename)))
+    writeLines(
+      plotly:::to_JSON(p), 
+      file.path(plotly_dir, paste0(name, ".json"))
+    )
     
     # if missing, save the ggplot2 version
     # do an else if to take advantage of both builds?

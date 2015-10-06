@@ -116,8 +116,6 @@ if (tpr != "false" && tpr != "") {
     has_diff <- length(unique(test_info$hash)) > 1
     # obtain json files for this test
     json <- paste0(i, ".json")
-    cat(list.files(base_dir), sep = "\n")
-    cat(list.files(this_dir), sep = "\n")
     Old <- file.path(base_dir, json)
     New <- file.path(this_dir, json)
     if (has_diff) {
@@ -132,14 +130,14 @@ if (tpr != "false" && tpr != "") {
       file.copy(jsondiff, base_name_dir, recursive = TRUE)
       file.copy(jsondiff, this_name_dir, recursive = TRUE)
       writeLines(
-        paste("Old =", readLines(Old, warn = FALSE)), "Old.json"
+        paste("Old =", readLines(Old, warn = FALSE)), 
+        file.path(base_name_dir, "Old.json")
       )
       writeLines(
-        paste("New =", readLines(New, warn = FALSE)), "New.json"
+        paste("New =", readLines(New, warn = FALSE)), 
+        file.path(base_name_dir, "New.json")
       )
     }
-    unlink(Old)
-    unlink(New)
   }
   msg3 <- sprintf("Detected %s differences", length(diffs))
   msg <- paste(msg1, msg2, msg3, sep = "\n\n")
