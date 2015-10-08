@@ -24,7 +24,7 @@ print.plotly <- function(x, ...) {
 #' @param height attribute of the iframe
 #' @export
 embed_notebook <- function(x, width = "100%", height = "525") {
-  if (!requireNamespace("IRdisplay")) {
+  if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
     return(x)
