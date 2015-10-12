@@ -17,6 +17,22 @@ print.plotly <- function(x, ...) {
   get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
 
+#' Print a plotly object in a knitr doc
+#' 
+#' @param x a plotly object
+#' @param ... additional arguments (currently ignored)
+#' @export
+knit_print.plotly <- function(x, ...) {
+  w <- htmlwidgets::createWidget(
+    name = "plotly",
+    x = plotly_build(x),
+    width = x$width,
+    height = x$height,
+    htmlwidgets::sizingPolicy(viewer.padding = 10, browser.fill = TRUE)
+  )
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
+}
+
 
 #' Embed a plotly iframe into a IPython Notebook
 #' @param x a plotly object
