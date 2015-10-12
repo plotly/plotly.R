@@ -8,7 +8,7 @@ master_hash <- substr(system("git rev-parse master", intern = T), 1, 7)
 check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 
 # plotly-test-table repo hosts the diff pages & keeps track of previous versions
-table_dir <- normalizePath("../../plotly-test-table", mustWork = TRUE)
+table_dir <- normalizePath("../../plotly-test-table")
 this_dir <- file.path(table_dir, "R", this_hash)
 master_dir <- file.path(table_dir, "R", master_hash)
 
@@ -32,7 +32,7 @@ save_outputs <- function(gg, name) {
   if (check_tests) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
-    info <- paste(hash, name, plot_hash, sep = ",")
+    info <- paste(this_hash, name, plot_hash, sep = ",")
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
