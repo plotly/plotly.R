@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <script type="text/javascript" src="jsondiffpatch/jsondiffpatch.min.js"></script>
+      <script type="text/javascript" src="jsondiffpatch/jsondiffpatch-formatters.min.js"></script>
+      <script type="text/javascript" src="plotly/plotly.js"></script>
+      <link rel="stylesheet" href="jsondiffpatch/html.css" type="text/css"/>
+      <script type="text/javascript" src="renderjson/renderjson.js"></script>
+      <link rel="stylesheet" href="renderjson/renderjson.css" type="text/css"/>
+      <script type="text/javascript" src="New.json"></script>
+      <script type="text/javascript" src="Old.json"></script>
+  </head>
+  <body>
+      
+    <div align="center">
+      <table>
+        <tr>
+          <td><h3>New</h3></td>
+          <td><h3>Old</h3></td>
+        </tr>
+        <tr>
+          <td>
+            <div id="NewPlot" style="width: 600px"></div>
+              <script>
+                Plotly.newPlot("NewPlot", New.data, New.layout);
+              </script>
+          </td>
+          <td>
+            <div id="OldPlot" style="width: 600px"></div>
+              <script>
+                Plotly.newPlot("OldPlot", Old.data, Old.layout);
+              </script>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div id="New" style="width: 600px; background-color: #6D6D6D;"></div>
+          </td>
+          <td>
+            <div id="Old" style="width: 600px; background-color: #6D6D6D;"></div>
+          </td>
+        </tr>
+      </table>
+      
+      <hr/>
+      <div align="left"><h3>Difference</h3></div>
+      <div id="visual"></div>
+      
+    </div>
+    
+    <script>
+        // number of levels to show in JSON object by default
+        renderjson.set_show_to_level(2);
+        // render the json for each plot
+        document.getElementById('New').appendChild(renderjson(New));
+        document.getElementById('Old').appendChild(renderjson(Old));
+        // compute the diff & format it
+        var delta = jsondiffpatch.diff(Old, New);
+        var fdelta = jsondiffpatch.formatters.html.format(delta, Old);
+        document.getElementById('visual').innerHTML = fdelta;
+    </script>
+  </body>
+</html>
