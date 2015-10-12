@@ -10,13 +10,19 @@ check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 # plotly-test-table repo hosts the diff pages & keeps track of previous versions
 table_dir <- normalizePath("../../plotly-test-table")
 this_dir <- file.path(table_dir, "R", this_hash)
+if (dir.exists(this_dir)) {
+  message("Tests were already run on this commit. Nuking the old results...")
+  unlink(this_dir, recursive = T)
+}
 master_dir <- file.path(table_dir, "R", master_hash)
 
 # text file that tracks plot hashes
-hash_file <- file.path(table_dir, "R", "hashes.csv")
+r_dir <- file.path(table_dir, "R")
+if (!dir.exists(r_dir)) dir.create(r_dir)
+hash_file <- file.path(r_dir, "hashes.csv")
 if (!file.exists(hash_file)) {
   file.create(hash_file)
-  cat("commit,test,hash\n", file = hash_file, append = TRUE)
+  cat("commit,test,hash\n", file = hash_file, append = T)
 }
 hash_info <- utils::read.csv(hash_file)
 master_info <- hash_info[hash_info$commit %in% master_hash, ]
@@ -33,29 +39,34 @@ save_outputs <- function(gg, name) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
     info <- paste(this_hash, name, plot_hash, sep = ",")
-    cat(paste(info, "\n"), file = hash_file, append = TRUE)
+    cat(paste(info, "\n"), file = hash_file, append = T)
     # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
     if (!isTRUE(plot_hash == test_info$hash)) {
-      pm <- run_master(gg)
+      # ugly hack to run plotly_build() using code on the HEAD of master 
+      # (instead of the current version being tested)
+      assign("gg", gg, envir = .GlobalEnv)
+      assign("plotlyEnv", plotly:::plotlyEnv, envir = .GlobalEnv)
+      save.image("tmp.rda")
+      system("Rscript -e 'devtools::load_all(\"../../plotlyMaster\"); load(\"tmp.rda\"); saveRDS(plotly::plotly_build(gg), \"tmp.rds\")'")
+      pm <- readRDS("tmp.rds")
       # it could be that the hash didn't exist, so make sure they're different
-      browser()
       if (plot_hash != digest::digest(pm)) {
         if (packageVersion("plotly") < "1.0.8") stop("These tests assume you're running plotly version 1.0.8 or higher", call. = F)
         # copy over diffing template
-        jsondiff <- dir("../inst/jsondiff", full.names = TRUE)
+        jsondiff <- dir("../../inst/jsondiff", full.names = T)
         test_dir <- file.path(this_dir, name)
         if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
         print(test_dir)
-        dir.create(test_dir)
-        file.copy(jsondiff, test_dir, recursive = TRUE)
+        dir.create(test_dir, recursive = T)
+        file.copy(jsondiff, test_dir, recursive = T)
         # overwrite the default JSON
         writeLines(
-          plotly:::to_JSON(p), 
+          paste("New =", plotly:::to_JSON(p)), 
           file.path(test_dir, "New.json")
         )
         writeLines(
-          plotly:::to_JSON(pm), 
+          paste("Old =", plotly:::to_JSON(pm)), 
           file.path(test_dir, "Old.json")
         )
       }
@@ -64,13 +75,6 @@ save_outputs <- function(gg, name) {
   p
 }
 
-# a hack to run plotly_build() using code on the HEAD of master 
-# (instead of the current version being tested)
-run_master <- function(p) {
-  saveRDS(p, "tmp.rds")
-  system("git checkout master; Rscript -e 'devtools::load_all(); saveRDS(plotly::plotly_build(p <- readRDS(\"tmp.rds\")), \"tmp.rds\")'")
-  on.exit(unlink("tmp.rds"))
-  readRDS("tmp.rds")
-}
+
 
 test_check("plotly")
