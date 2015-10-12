@@ -36,7 +36,7 @@ save_outputs <- function(gg, name) {
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
-    if (plot_hash != test_info$hash) {
+    if (isTRUE(plot_hash != test_info$hash)) {
       pm <- run_master(gg)
       # it could be that the hash didn't exist, so make sure they're different
       if (plot_hash != digest::digest(pm)) {
