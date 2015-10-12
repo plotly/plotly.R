@@ -36,15 +36,17 @@ save_outputs <- function(gg, name) {
     cat(paste(info, "\n"), file = hash_file, append = TRUE)
     # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
-    if (isTRUE(plot_hash != test_info$hash)) {
+    if (!isTRUE(plot_hash == test_info$hash)) {
       pm <- run_master(gg)
       # it could be that the hash didn't exist, so make sure they're different
+      browser()
       if (plot_hash != digest::digest(pm)) {
         if (packageVersion("plotly") < "1.0.8") stop("These tests assume you're running plotly version 1.0.8 or higher", call. = F)
         # copy over diffing template
         jsondiff <- dir("../inst/jsondiff", full.names = TRUE)
         test_dir <- file.path(this_dir, name)
         if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
+        print(test_dir)
         dir.create(test_dir)
         file.copy(jsondiff, test_dir, recursive = TRUE)
         # overwrite the default JSON
