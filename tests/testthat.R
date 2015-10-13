@@ -8,7 +8,7 @@ check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 # objects that should only be created once
 if (check_tests) {
   message("Spinning up an independent R session with plotly's master branch installed")
-  system("R CMD RServe --RS-enable-remote")
+  Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   client <- RSconnect()
   RSeval(client, "devtools::install_github('ropensci/plotly')")
   # hash of the version being tested
@@ -83,3 +83,9 @@ save_outputs <- function(gg, name) {
 
 
 test_check("plotly")
+
+# shut down the other R session
+if (check_tests) {
+  RSshutdown(client)
+  RSclose(client)
+}
