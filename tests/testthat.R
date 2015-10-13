@@ -55,7 +55,8 @@ save_outputs <- function(gg, name) {
       res <- mapply(rs_assign, mget(ls()), ls())
       # also need to transfer over the plotly environment to enable NSE
       res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
-      res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, envir = asNamespace('plotly'))")
+      res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
+      res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
       pm <- RSeval(conn, "plotly::plotly_build(gg)")
       # it could be that the hash didn't exist, so make sure they're different
       if (plot_hash != digest::digest(pm)) {
