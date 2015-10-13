@@ -9,12 +9,12 @@ check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 if (check_tests) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
-  client <- RSconnect()
-  RSeval(client, "library(methods); devtools::install_github('ropensci/plotly')")
+  conn <- RSconnect()
+  RSeval(conn, "library(methods); devtools::install_github('ropensci/plotly')")
   # hash of the version being tested
   this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
   # hash of version to compare with (master)
-  master_hash <- RSeval(client, "packageDescription('plotly')$GithubSHA1")
+  master_hash <- RSeval(conn, "packageDescription('plotly')$GithubSHA1")
   master_hash <- substr(master_hash, 1, 7)
   # plotly-test-table repo hosts the diff pages & keeps track of previous versions
   table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
@@ -51,11 +51,12 @@ save_outputs <- function(gg, name) {
     test_info <- master_info[master_info$test %in% name, ]
     if (!isTRUE(plot_hash == test_info$hash)) {
       # a hacky way to transfer workspace to the other R session
-      rs_assign <- function(obj, name) RSassign(client, obj, name)
+      rs_assign <- function(obj, name) RSassign(conn, obj, name)
       res <- mapply(rs_assign, mget(ls()), ls())
-      # also need the plotly environment 
-      res <- RSassign(client, mget("plotlyEnv", envir = asNamespace("plotly")), "plotlyEnv")
-      pm <- RSeval(client, "plotly::plotly_build(gg)")
+      # also need to transfer over the plotly environment to enable NSE
+      res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
+      res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, envir = asNamespace('plotly'))")
+      pm <- RSeval(conn, "plotly::plotly_build(gg)")
       # it could be that the hash didn't exist, so make sure they're different
       if (plot_hash != digest::digest(pm)) {
         if (packageVersion("plotly") < "1.0.8") stop("These tests assume you're running plotly version 1.0.8 or higher", call. = F)
@@ -63,7 +64,6 @@ save_outputs <- function(gg, name) {
         jsondiff <- dir("../../inst/jsondiff", full.names = T)
         test_dir <- file.path(this_dir, name)
         if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
-        print(test_dir)
         dir.create(test_dir, recursive = T)
         file.copy(jsondiff, test_dir, recursive = T)
         # overwrite the default JSON
@@ -86,6 +86,6 @@ test_check("plotly")
 
 # shut down the other R session
 if (check_tests) {
-  RSshutdown(client)
-  RSclose(client)
+  RSshutdown(conn)
+  RSclose(conn)
 }
