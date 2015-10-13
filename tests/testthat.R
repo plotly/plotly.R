@@ -63,7 +63,7 @@ save_outputs <- function(gg, name) {
         dir.create(test_dir, recursive = T)
         # copy over diffing template
         file.copy(
-          file.path(table_dir, "template", "index.html"), 
+          file.path(table_dir, "template", "template", "index.html"), 
           test_dir, 
           recursive = T
         )
