@@ -18,16 +18,14 @@ if (check_tests) {
   master_hash <- substr(master_hash, 1, 7)
   # plotly-test-table repo hosts the diff pages & keeps track of previous versions
   table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
-  r_dir <- file.path(table_dir, "R")
-  if (!dir.exists(r_dir)) dir.create(r_dir)
-  this_dir <- file.path(r_dir, this_hash)
+  this_dir <- file.path(table_dir, this_hash)
   if (dir.exists(this_dir)) {
     message("Tests were already run on this commit. Nuking the old results...")
     unlink(this_dir, recursive = T)
   }
-  master_dir <- file.path(r_dir, master_hash)
+  master_dir <- file.path(table_dir, master_hash)
   # csv file that tracks plot hashes
-  hash_file <- file.path(r_dir, "hashes.csv")
+  hash_file <- file.path(table_dir, "hashes.csv")
   if (!file.exists(hash_file)) {
     file.create(hash_file)
     cat("commit,test,hash\n", file = hash_file, append = T)
@@ -50,7 +48,7 @@ save_outputs <- function(gg, name) {
     # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
     if (!isTRUE(plot_hash == test_info$hash)) {
-      # a hacky way to transfer workspace to the other R session
+      # hack to transfer workspace to the other R session
       rs_assign <- function(obj, name) RSassign(conn, obj, name)
       res <- mapply(rs_assign, mget(ls()), ls())
       # also need to transfer over the plotly environment to enable NSE
@@ -60,13 +58,15 @@ save_outputs <- function(gg, name) {
       pm <- RSeval(conn, "plotly::plotly_build(gg)")
       # it could be that the hash didn't exist, so make sure they're different
       if (plot_hash != digest::digest(pm)) {
-        if (packageVersion("plotly") < "1.0.8") stop("These tests assume you're running plotly version 1.0.8 or higher", call. = F)
-        # copy over diffing template
-        jsondiff <- dir("../../inst/jsondiff", full.names = T)
-        test_dir <- file.path(this_dir, name)
+        test_dir <- file.path(this_dir, gsub("\\s+", "-", name))
         if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
         dir.create(test_dir, recursive = T)
-        file.copy(jsondiff, test_dir, recursive = T)
+        # copy over diffing template
+        file.copy(
+          file.path(table_dir, "template", "index.html"), 
+          test_dir, 
+          recursive = T
+        )
         # overwrite the default JSON
         writeLines(
           paste("New =", plotly:::to_JSON(p)), 
