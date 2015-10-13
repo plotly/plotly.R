@@ -24,9 +24,9 @@ comment <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 if (comment) {
   # get the links to differences, if any
   this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
-  this_dir <- normalizePath(file.path("R", this_hash), mustWork = T)
+  this_dir <- normalizePath(this_hash, mustWork = T)
   links <- sprintf(
-    "http://cpsievert.github.io/plotly-test-table/R/%s/%s", 
+    "http://cpsievert.github.io/plotly-test-table/%s/%s", 
     this_hash, dir(this_dir)
   )
   # construct the message 
