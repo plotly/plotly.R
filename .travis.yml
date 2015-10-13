@@ -8,6 +8,7 @@ before_install:
   - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
 
 install:
+  - ./travis-tool.sh r_install Rserve RSclient
   - ./travis-tool.sh install_deps
 
 before_script:
@@ -19,10 +20,7 @@ script:
   - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE)"
 
 after_success:
-  - cd ..
-  # so we don't have to checkout master everytime we want to run code from it
-  - git clone https://github.com/ropensci/plotly.git plotlyMaster --depth 1
-  - cd plotly-test-table
+  - cd ../plotly-test-table
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
