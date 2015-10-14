@@ -44,5 +44,7 @@ Suggests:
     htmltools,
     curl,
     rmarkdown,
-    RColorBrewer
+    RColorBrewer,
+    Rserve,
+    RSclient
 LazyData: true
