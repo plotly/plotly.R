@@ -10,8 +10,6 @@
 #' that will be used for the filename.
 #' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
 #' "append" data to existing plotly, or "extend" it.
-#' @param origin Controls whether create a "new" plot, "overwrite" it, 
-#' "append" to it, or "extend" it.
 #' @param world_readable logical. If \code{TRUE}, the graph is viewable 
 #' by anyone who has the link and in the owner's plotly account.
 #' If \code{FALSE}, graph is only viewable in the owner's plotly account.
@@ -27,8 +25,7 @@
 #' }
 
 # TODO: support all the API arguments???
-plotly_POST <- function(x, filename, fileopt = "new", origin = "plot",
-                        world_readable = TRUE) {
+plotly_POST <- function(x, filename, fileopt = "new", world_readable = TRUE) {
   x <- plotly_build(x)
   if (!missing(filename)) x$filename <- filename
   if (!is.null(x$fileopt)) 
@@ -42,7 +39,7 @@ plotly_POST <- function(x, filename, fileopt = "new", origin = "plot",
   bod <- list(
     un = verify("username"),
     key = verify("api_key"),
-    origin = origin,
+    origin = "plot",
     platform = "R",
     version = as.character(packageVersion("plotly")),
     args = to_JSON(x$data),
