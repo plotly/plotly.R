@@ -1,3 +1,11 @@
+1.1.0
+
+Added a dependency on htmlwidgets and 'offline' plots are now the default. If you want to create a figure on a plotly server, you need to use plotly_POST().
+
+1.0.9 -- 28 Sep 2015
+
+Fixed filename, fileopt arguments in plot_ly. Specifying the same filename will now overwrite the plot if it exists.
+
 1.0.8 -- 14 Sep 2015
 
 Added the plotly_IMAGES() function which interfaces to the images endpoint https://api.plot.ly/v2/#images

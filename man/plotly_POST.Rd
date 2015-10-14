@@ -4,42 +4,41 @@
 \alias{plotly_POST}
 \title{Create/Modify plotly graphs}
 \usage{
-plotly_POST(x)
+plotly_POST(x, filename, fileopt = "new", world_readable = TRUE)
 }
 \arguments{
-\item{x}{either a plotly object or a list.}
+\item{x}{either a ggplot object, a plotly object, or a list.}
+
+\item{filename}{character string describing the name of the plot in your plotly account.
+Use / to specify directories. If a directory path does not exist it will be created.
+If this argument is not specified and the title of the plot exists,
+that will be used for the filename.}
+
+\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly,
+"append" data to existing plotly, or "extend" it.}
+
+\item{world_readable}{logical. If \code{TRUE}, the graph is viewable
+by anyone who has the link and in the owner's plotly account.
+If \code{FALSE}, graph is only viewable in the owner's plotly account.}
 }
 \value{
 An R object created by mapping the JSON content of the plotly API
 response to its R equivalent.
 }
 \description{
-POST messages to the clientresp resource of plotly's REST API. Unlike \link{ggplotly},
-this function does not translate ggplot objects.
+Create and modify graphs on your plotly account via plotly's REST API
+\url{https://plot.ly/rest/}
 }
 \examples{
 \dontrun{
-# If you want, you can still construct lists by hand...
-trace1 <- list(
-  x = c(1, 2, 3, 4),
-  y = c(10, 15, 13, 17),
-  type = "scatter"
-)
-trace2 <- list(
-  x = c(1, 2, 3, 4),
-  y = c(16, 5, 11, 9),
-  type = "scatter"
-)
-plotly_POST(list(trace1, trace2))
+p <- plot_ly(mtcars, x = vs, type = "bar")
+plotly_POST(p, filename = "mtcars-bar-plot")
 }
 }
 \author{
 Carson Sievert
 }
-\references{
-https://plot.ly/rest/
-}
 \seealso{
-\link{signup}
+\link{plot_ly}, \link{signup}
 }
 

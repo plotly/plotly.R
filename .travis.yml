@@ -8,6 +8,7 @@ before_install:
   - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
 
 install:
+  - ./travis-tool.sh r_install Rserve RSclient
   - ./travis-tool.sh install_deps
   - ./travis-tool.sh install_github hadley/ggplot2
 
@@ -29,7 +30,3 @@ env:
     - secure: "UAETDsmeXkXm9eUpZa3JTm8/cv+jyLmArXE0TQD0yQNICFNPkGeNergoQmkesRqG+ifLu6V1lPXu1XlqQPdXY60clUHThDN+AjsBmcv9F170k6RtBSV8pIKL9fsW8t0v/maEet86qOSf3cNa5+gK8GjBH1pmLrN2rF9r7RhwUdg="
     # GITHUB_PAT (for pushing to plotly-test-table)
     - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="    
-    # plotlyjs_full (link to the full offline bundle)
-    - secure: "ivxfqGwbzpBpVJe+jVcOBktcmLrT38W/ZapAk/FNDu+yaBhag1eCYErAPPx6Snc4GzwatMt22v4SxAqXQF4SAhTRtmrWVaWnbhzuNqpTkiS6IKEd6EqaoyUZvUTgXh1ruyik00zl3ET9898O3vFfqafodljE0lCLVICHq6ANo68="
-    # plotlyjs_no_jq (link to the offline bundle w/o jQuery)
-    - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA=" 
