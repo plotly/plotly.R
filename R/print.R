@@ -7,12 +7,21 @@
 #' @importFrom htmlwidgets sizingPolicy
 
 print.plotly <- function(x, ...) {
+  p <- plotly_build(x)
+  # set some better default margins
+  p$layout$margin <- modifyList(
+    list(b = 40, l = 40, t = 25, r = 10),
+    p$layout$margin %||% list()
+  )
   w <- htmlwidgets::createWidget(
     name = "plotly",
-    x = plotly_build(x),
+    x = p,
     width = x$width,
     height = x$height,
-    htmlwidgets::sizingPolicy(viewer.padding = 10, browser.fill = TRUE)
+    htmlwidgets::sizingPolicy(
+      padding = 5, 
+      browser.fill = TRUE
+    )
   )
   get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
