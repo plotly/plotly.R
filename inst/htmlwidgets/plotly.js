@@ -11,7 +11,7 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
-    Plotly.newPlot(el.id, x.data, x.layout);
+    Plotly.plot(el.id, x.data, x.layout, x.config);
   },
   
 });
