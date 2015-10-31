@@ -11,7 +11,13 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
-    Plotly.plot(el.id, x.data, x.layout, x.config);
-  },
+    // if no plot exists yet, create one with a particular configuration
+    if (!instance.plotly) {
+      Plotly.plot(el.id, x.data, x.layout, x.config);
+      instance.plotly = true;
+    } else {
+      Plotly.newPlot(el.id, x.data, x.layout);
+    }
+  }
   
 });

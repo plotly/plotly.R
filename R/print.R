@@ -5,26 +5,8 @@
 #' @export
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
-
 print.plotly <- function(x, ...) {
-  p <- plotly_build(x)
-  # set some better default margins
-  p$layout$margin <- modifyList(
-    list(b = 40, l = 40, t = 25, r = 10),
-    p$layout$margin %||% list()
-  )
-  # customize the JSON serializer
-  attr(p, 'TOJSON_FUNC') <- to_JSON
-  w <- htmlwidgets::createWidget(
-    name = "plotly",
-    x = p,
-    width = x$width,
-    height = x$height,
-    htmlwidgets::sizingPolicy(
-      padding = 5, 
-      browser.fill = TRUE
-    )
-  )
+  w <- toWidget(x)
   get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
 
@@ -34,16 +16,23 @@ print.plotly <- function(x, ...) {
 #' @param ... additional arguments (currently ignored)
 #' @export
 knit_print.plotly <- function(x, ...) {
-  w <- htmlwidgets::createWidget(
+  w <- toWidget(x)
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
+}
+
+# convert a plotly object to an htmlwidget object
+toWidget <- function(x) {
+  htmlwidgets::createWidget(
     name = "plotly",
     x = plotly_build(x),
     width = x$width,
     height = x$height,
-    htmlwidgets::sizingPolicy(viewer.padding = 10, browser.fill = TRUE)
+    htmlwidgets::sizingPolicy(
+      padding = 5, 
+      browser.fill = TRUE
+    )
   )
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
-
 
 #' Embed a plotly iframe into a IPython Notebook
 #' @param x a plotly object

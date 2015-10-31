@@ -377,6 +377,13 @@ plotly_build <- function(l = last_plot()) {
   x <- c(x, kwargs)
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
+  # set some better default margins
+  x$layout$margin <- modifyList(
+    list(b = 40, l = 40, t = 25, r = 10),
+    x$layout$margin %||% list()
+  )
+  # customize the JSON serializer (for htmlwidgets)
+  attr(x, 'TOJSON_FUNC') <- to_JSON
   # add plotly class mainly for printing method
   structure(x, class = unique("plotly", class(x)))
 }
