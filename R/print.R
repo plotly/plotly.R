@@ -13,6 +13,8 @@ print.plotly <- function(x, ...) {
     list(b = 40, l = 40, t = 25, r = 10),
     p$layout$margin %||% list()
   )
+  # customize the JSON serializer
+  attr(p, 'TOJSON_FUNC') <- to_JSON
   w <- htmlwidgets::createWidget(
     name = "plotly",
     x = p,
