@@ -16,8 +16,6 @@ test_that("second trace be the hline", {
   expect_true(min(L$data[[2]]$x) < min(x))
   expect_true(max(L$data[[2]]$x[2]) > max(x))
   expect_identical(L$data[[2]]$mode, "lines")
-  expect_identical(L$data[[2]]$line$shape, "linear")
-  expect_equal(L$data[[2]]$line$width, 6)
   expect_identical(L$data[[2]]$line$color, "rgb(0,255,0)")
 })
 
@@ -33,8 +31,6 @@ test_that("vector yintercept results in multiple horizontal lines", {
   expect_true(min(xs, na.rm = TRUE) < min(x))
   expect_true(max(xs, na.rm = TRUE) > max(x))
   expect_identical(L$data[[2]]$mode, "lines")
-  expect_identical(L$data[[2]]$line$shape, "linear")
-  expect_equal(L$data[[2]]$line$width, 6)
   expect_identical(L$data[[2]]$line$color, "rgb(255,0,0)")
   
 })

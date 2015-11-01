@@ -22,7 +22,7 @@ weight.range <- range(PlantGrowth$weight)
 
 test_that("boxes without coord_flip()", {
   info <- expect_traces(boxes, 3, "boxes")
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -36,7 +36,7 @@ test_that("boxes with facet_grid", {
   ## TODO: expect boxes of equal size.
 
   ## TODO: expect empty space.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -50,7 +50,7 @@ test_that('boxes with facet_grid(scales="free")', {
   ## TODO: expect boxes of unequal size.
 
   ## TODO: expect no empty space.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -64,7 +64,7 @@ test_that('boxes with facet_grid(scales="free", space="free")', {
   ## TODO: expect boxes of equal size.
 
   ## TODO: expect no empty space.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -76,7 +76,7 @@ flipped <- boxes + coord_flip()
 
 test_that("boxes with coord_flip()", {
   info <- expect_traces(flipped, 3, "flip")
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["y"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["x"]]
@@ -90,7 +90,7 @@ test_that("boxes with coord_flip()", {
 test_that("boxes with coord_flip()+facet_grid()", {
   flip.facet <- flipped + facet_grid(type ~ .)
   ##info <- expect_traces(flip.facet, 3)
-  ## for(tr in info$traces){
+  ## for(tr in info$data){
   ##   expect_true(is.null(tr[["y"]]))
   ##   expected <- plant.list[[tr$name]]$weight
   ##   computed <- tr[["x"]]
@@ -101,7 +101,7 @@ test_that("boxes with coord_flip()+facet_grid()", {
 test_that('boxes with coord_flip()+facet_grid(scales="free")', {
   flip.facet.scales <- flipped + facet_grid(type ~ ., scales="free")
   ##info <- expect_traces(flip.facet.scales, 3)
-  ## for(tr in info$traces){
+  ## for(tr in info$data){
   ##   expect_true(is.null(tr[["y"]]))
   ##   expected <- plant.list[[tr$name]]$weight
   ##   computed <- tr[["x"]]
@@ -126,7 +126,7 @@ test_that("Manually set the order of a discrete-valued axis", {
   expected.order <- c("trt1", "ctrl", "trt2")
   boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
   info <- expect_traces(boxes.limits, 3, "discrete-order")
-  computed.order <- sapply(info$traces, "[[", "name")
+  computed.order <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.order), expected.order)
 })
 
@@ -134,7 +134,7 @@ test_that("limits can hide data", {
   expected.order <- c("trt1", "ctrl")
   boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
   info <- expect_traces(boxes.limits, 2, "limits-hide")
-  computed.order <- sapply(info$traces, "[[", "name")
+  computed.order <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.order), expected.order)
 })
 
@@ -142,7 +142,7 @@ test_that("limits can create a gap", {
   expected.order <- c("trt1", "trt2", "GAP", "ctrl")
   boxes.limits <- boxes + scale_x_discrete(limits=expected.order)
   info <- expect_traces(boxes.limits, 3, "limits-gap")
-  computed.order <- sapply(info$traces, "[[", "name")
+  computed.order <- sapply(info$data, "[[", "name")
   ##expect_identical(as.character(computed.order), expected.order)
 
   ## TODO: can we make this in plotly?
@@ -153,7 +153,7 @@ boxes.breaks <- boxes +
 
 test_that("setting breaks does not change order", {
   info <- expect_traces(boxes.breaks, 3, "breaks-nochange")
-  computed.labels <- sapply(info$traces, "[[", "name")
+  computed.labels <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
   ## For some reason plotly does not render the third box if range is
   ## not NULL.
@@ -165,7 +165,7 @@ boxes.more <- boxes +
 
 test_that("more breaks is fine", {
   info <- expect_traces(boxes.more, 3, "breaks-more")
-  computed.labels <- sapply(info$traces, "[[", "name")
+  computed.labels <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
   ## For some reason plotly does not render the third box if range is
   ## not NULL.
@@ -186,7 +186,7 @@ test_that("less breaks is fine", {
   ## no.xrange$kwargs$layout$xaxis$range <- NULL
   ## sendJSON(no.xrange) # 3 boxes
   info <- expect_traces(boxes.less, 3, "breaks-less")
-  computed.labels <- sapply(info$traces, "[[", "name")
+  computed.labels <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.labels), c("ctrl", "trt1", "trt2"))
   ## For some reason plotly does not render the third box if range is
   ## not NULL.
@@ -202,7 +202,7 @@ boxes.labels <- boxes +
 
 test_that("scale(labels) changes trace names", {
   info <- expect_traces(boxes.labels, 3, "scale-labels")
-  computed.labels <- sapply(info$traces, "[[", "name")
+  computed.labels <- sapply(info$data, "[[", "name")
   expect_identical(as.character(computed.labels),
                    c("Control", "Treatment 1", "Treatment 2"))
   ## For some reason plotly does not render the third box if range is
@@ -258,7 +258,7 @@ test_that("ylim() means yaxis$ranges", {
   y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, c(0, 8))
   ## ensure correct positive values without reverse scale.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -272,7 +272,7 @@ test_that("scale_y_reverse() -> yaxis$ranges reversed", {
   y.axis <- info$layout$yaxis
   expect_that(y.axis$range[2], is_less_than(y.axis$range[1]))
   ## ensure correct positive values, despite the reverse scale.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -287,7 +287,7 @@ test_that("scale_y_reverse(limits) -> yaxis$ranges reversed", {
   y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, y.lim)
   ## ensure correct positive values, despite the reverse scale.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]
@@ -301,7 +301,7 @@ test_that("ylim(reversed) -> yaxis$ranges reversed", {
   y.axis <- info$layout$yaxis
   expect_equal(y.axis$range, c(7.5, -1))
   ## ensure correct positive values, despite the reverse scale.
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(is.null(tr[["x"]]))
     expected <- plant.list[[tr$name]]$weight
     computed <- tr[["y"]]

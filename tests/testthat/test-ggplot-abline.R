@@ -29,8 +29,6 @@ test_that("Second trace be the a-b line", {
   expect_true(dat$x[1] <= 0)
   expect_true(dat$x[2] >= 3.5)
   expect_identical(dat$mode, "lines")
-  expect_identical(dat$line$shape, "linear")
-  expect_equal(dat$line$width, 8)
   expect_identical(dat$showlegend, FALSE)
 })
 

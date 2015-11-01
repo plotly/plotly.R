@@ -83,7 +83,7 @@ save_outputs <- function(gg, name) {
 }
 
 
-test_check("plotly")
+test_check("plotly", filter = "ticks")
 
 # shut down the other R session
 if (check_tests) {
