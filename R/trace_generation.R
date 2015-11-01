@@ -629,7 +629,7 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          mode="lines",
-         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
+         line=paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes))
   },
   tile=function(data, params) {
     list(x=unique(data$x),

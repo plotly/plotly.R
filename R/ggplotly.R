@@ -57,9 +57,9 @@ aesConverters <- list(
   colour=function(col) {
     toRGB(col)
   },
-  # ggplot2 size is in millimeters. plotly is in pixels. Without knowing the
-  # resolution of the display, I don't think it's possible to do this conversion
-  # correctly, but this seems to work reasonably well
+  # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
+  # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
+  # from R, but it seems 96 is a reasonable assumption.
   size=function(mm) {
     (mm * 96) / 25.4
   },

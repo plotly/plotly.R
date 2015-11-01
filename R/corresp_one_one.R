@@ -43,13 +43,6 @@ pch2symbol <- c(
   "+" = "cross-thin-open"
 )
 
-# Convert ggplot2 aes to plotly "marker" codes.
-aes2marker <- c(
-  alpha = "opacity",
-  colour = "color",
-  size = "size",
-  shape = "symbol"
-)
 
 # Convert numeric line type.
 numeric.lty <- c(
@@ -96,7 +89,19 @@ lty2dash <- c(numeric.lty, named.lty, coded.lty)
 aes2line <- c(
   linetype = "dash",
   colour = "color",
-  size = "width",
+  size = "width"
+)
+
+aes2step <- c(
+  aes2line,
   direction = "shape"
+)
+
+# Convert ggplot2 aes to plotly "marker" codes.
+aes2marker <- c(
+  alpha = "opacity",
+  colour = "color",
+  size = "size",
+  shape = "symbol"
 )
 
