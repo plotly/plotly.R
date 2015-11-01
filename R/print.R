@@ -21,6 +21,7 @@ knit_print.plotly <- function(x, ...) {
 }
 
 # convert a plotly object to an htmlwidget object
+#' @export
 toWidget <- function(x) {
   htmlwidgets::createWidget(
     name = "plotly",
