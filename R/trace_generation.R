@@ -403,6 +403,9 @@ toBasic <- list(
     group2NA(g, "path")
   },
   point=function(g) {
+    if (length(unique(g$data$size)) > 1 && is.null(g$data$text)) {
+      g$data$text <- paste("size:", g$data$size)
+    }
     g
   },
   smoothLine=function(g) {
@@ -541,7 +544,7 @@ geom2trace <- list(
          text=data$text,
          type="scatter",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
   },
   polygon=function(data, params){
     g <- list(data = data, geom = "polygon")
@@ -553,7 +556,7 @@ geom2trace <- list(
       text = g$data$text,
       type = "scatter",
       mode = "lines",
-      line = paramORdefault(params, aes2line, polygon.line.defaults),
+      line = paramORdefault(params, aes2line, ggplot2::GeomPolygon$default_aes),
       fill = "tozerox",
       fillcolor = toRGB(params$fill, params$alpha)
     )
@@ -566,20 +569,10 @@ geom2trace <- list(
       text = as.character(data$text),
       type = "scatter",
       mode = "markers",
-      marker = paramORdefault(params, aes2marker, marker.defaults)
+      marker = paramORdefault(params, aes2marker, ggplot2::GeomPoint$default_aes)
     )
-    if ("size" %in% names(data)) {
-      if (!("text" %in% names(data))) {
-        L$text <- paste("size:", data$size)
-      }
-      L$marker$sizeref <- default.marker.sizeref
-      L$marker$size <- marker.size.mult * (scales::rescale(data$size) + 0.25)
-      L$marker$line$width <- 0
-    }
     if (!is.null(params$shape) && params$shape %in% c(21:25)) {
       L$marker$color <- toRGB(params$fill %||% "black")
-      L$marker$line$color <- toRGB(params$colour %||% "transparent")
-      L$marker$line$width <- 1
     }
     if (!is.null(params$shape) && params$shape %in% c(32)) {
       L$visible <- FALSE
@@ -636,7 +629,7 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
   },
   tile=function(data, params) {
     list(x=unique(data$x),
@@ -646,7 +639,7 @@ geom2trace <- list(
          name=params$name,
          type="heatmap",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
   },
   boxplot=function(data, params) {
     list(
@@ -654,7 +647,7 @@ geom2trace <- list(
       name = params$name,
       type = "box",
       # TODO: translate marker styling for outliers!
-      line = paramORdefault(params, aes2line, boxplot.defaults),
+      line = paramORdefault(params, aes2line, ggplot2::GeomBoxplot$default_aes),
       fillcolor = toRGB(params$fill %||% "white")
     )
   },
@@ -665,7 +658,7 @@ geom2trace <- list(
                          ncol=length(unique(data$y)))),
               name=params$name,
               type="contour",
-              line=paramORdefault(params, aes2line, line.defaults))
+              line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
     L$contours=list(coloring="lines")
     L
   },
@@ -674,7 +667,7 @@ geom2trace <- list(
               y=data$y,
               name=params$name,
               type="histogram2dcontour",
-              line=paramORdefault(params, aes2line, line.defaults))
+              line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
     L$contours=list(coloring="lines")
     L
   },
@@ -690,7 +683,7 @@ geom2trace <- list(
       y = c(0, data$y, 0),
       name = params$name,
       type = "scatter",
-      line = paramORdefault(params, aes2line, ribbon.line.defaults),
+      line = paramORdefault(params, aes2line, ggplot2::GeomRibbon$default_aes),
       fill = "tozeroy",
       fillcolor = toRGB(params$fill %||% "grey20", params$alpha)
     )

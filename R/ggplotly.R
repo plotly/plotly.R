@@ -50,33 +50,6 @@ ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt,
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
-default.marker.sizeref <- 1
-marker.size.mult <- 50
-
-marker.defaults <- list(alpha=1,
-                        shape="16",
-                        size=marker.size.mult,
-                        sizeref=default.marker.sizeref,
-                        sizemode="area",
-                        colour="black")
-
-line.defaults <- list(linetype="solid",
-                      colour="black",
-                      size=1,
-                      direction="linear")
-
-boxplot.defaults <- line.defaults
-boxplot.defaults$colour <- "grey20"
-
-ribbon.line.defaults <- line.defaults
-ribbon.line.defaults$colour <- NA
-
-polygon.line.defaults <- line.defaults
-polygon.line.defaults$colour <- NA
-
-# Convert R lty line type codes to plotly "dash" codes.
-lty2dash <- c(numeric.lty, named.lty, coded.lty)
-
 aesConverters <- list(
   linetype=function(lty) {
     lty2dash[as.character(lty)]
@@ -84,7 +57,12 @@ aesConverters <- list(
   colour=function(col) {
     toRGB(col)
   },
-  size=identity,
+  # ggplot2 size is in millimeters. plotly is in pixels. Without knowing the
+  # resolution of the display, I don't think it's possible to do this conversion
+  # correctly, but this seems to work reasonably well
+  size=function(mm) {
+    (mm * 96) / 25.4
+  },
   sizeref=identity,
   sizemode=identity,
   alpha=identity,
@@ -129,18 +107,6 @@ type <- function(x, y) {
 gg2list <- function(p) {
   # ggplot now applies geom_blank() (instead of erroring) when no layers exist
   if (length(p$layers) == 0) p <- p + geom_blank()
-  # Always use identity size scale so that plot.ly gets the real
-  # units for the size variables.
-  original.p <- p
-  p <- tryCatch({
-    # this will be an error for discrete variables.
-    suppressMessages({
-      ggplot_build(p+scale_size_continuous())
-      p+scale_size_identity()
-    })
-  },error=function(e){
-    p
-  })
   layout <- list()
   trace.list <- list()
   
@@ -178,7 +144,7 @@ gg2list <- function(p) {
       misc[[misc.name]][[a]] <- tryCatch({
         fun <- get(fun.name)
         suppressMessages({
-          with.scale <- original.p + fun()
+          with.scale <- p + fun()
         })
         ggplot_build(with.scale)
         TRUE
