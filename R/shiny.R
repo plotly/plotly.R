@@ -24,22 +24,7 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px") {
 #' @rdname plotly-shiny
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!requireNamespace("shiny")) message("Please install.packages('shiny')")
-  func <- shiny::exprToFunction(expr, env, quoted)
-  renderFunc <- function(shinysession, name, ...) {
-    # The line below is the reason why we can't just use htmlwidgets::shinyRenderWidget()
-    # shinyRenderWidget() assumes the expression returns an htmlwidget object.
-    # But plotly objects are not htmlwidgets objects, so we need to convert
-    instance <- toWidget(func())
-    if (!is.null(instance$elementId)) {
-      warning("Ignoring explicitly provided widget ID \"", 
-              instance$elementId, "\"; Shiny doesn't use them")
-    }
-    deps <- .subset2(instance, "dependencies")
-    deps <- lapply(htmltools::resolveDependencies(deps), 
-                   shiny::createWebDependency)
-    payload <- c(htmlwidgets:::createPayload(instance), list(deps = deps))
-    htmlwidgets:::toJSON(payload)
-  }
-  shiny::markRenderFunction(plotly::plotlyOutput, renderFunc)
+  if (!quoted) { expr <- substitute(expr) } # force quoted
+  expr <- call("toWidget", expr)
+  shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
 }
