@@ -538,6 +538,10 @@ geom2trace <- list(
     )
   },
   path=function(data, params) {
+    # when converting ggplot2 size to plotly size, we assume size is an _area_,
+    # but "size" for lines really means linewidth, so size is a _length_ in this case
+    # (see aesConverters$size)
+    params$size <- sqrt(params$size)
     list(x=data$x,
          y=data$y,
          name=params$name,

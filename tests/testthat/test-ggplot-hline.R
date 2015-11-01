@@ -10,28 +10,28 @@ test_that("second trace be the hline", {
   p <- gg + geom_hline(yintercept = 1.1, colour = "green", size = 3)
   
   L <- save_outputs(p, "hline")
-
   expect_equal(length(L$data), 2)
-  expect_equal(unique(L$data[[2]]$y), 1.1)
-  expect_true(min(L$data[[2]]$x) < min(x))
-  expect_true(max(L$data[[2]]$x[2]) > max(x))
-  expect_identical(L$data[[2]]$mode, "lines")
-  expect_identical(L$data[[2]]$line$color, "rgb(0,255,0)")
+  l <- L$data[[2]]
+  expect_equal(unique(l$y), 1.1)
+  expect_true(min(l$x) < min(x))
+  expect_true(max(l$x[2]) > max(x))
+  expect_identical(l$mode, "lines")
+  expect_identical(l$line$color, "rgb(0,255,0)")
 })
 
 test_that("vector yintercept results in multiple horizontal lines", {
   p <- gg + geom_hline(yintercept = 1:3, colour = "red", size = 3)
   
   L <- save_outputs(p, "hline-multiple")
-  
   expect_equal(length(L$data), 2)
-  ys <- L$data[[2]]$y
+  l <- L$data[[2]]
+  ys <- l$y
   expect_identical(ys, c(1, 1, NA, 2, 2, NA, 3, 3))
-  xs <- L$data[[2]]$x
+  xs <- l$x
   expect_true(min(xs, na.rm = TRUE) < min(x))
   expect_true(max(xs, na.rm = TRUE) > max(x))
-  expect_identical(L$data[[2]]$mode, "lines")
-  expect_identical(L$data[[2]]$line$color, "rgb(255,0,0)")
+  expect_identical(l$mode, "lines")
+  expect_identical(l$line$color, "rgb(255,0,0)")
   
 })
 
