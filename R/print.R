@@ -20,7 +20,11 @@ knit_print.plotly <- function(x, ...) {
   get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
 
-# convert a plotly object to an htmlwidget object
+#' Convert a plotly object to an htmlwidget object
+#' 
+#' Users shouldn't need to use this function. It's exported for internal reasons.
+#' 
+#' @param x a plotly object.
 #' @export
 toWidget <- function(x) {
   p <- plotly_build(x)
