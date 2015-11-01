@@ -3,6 +3,7 @@
 S3method(print,plotly)
 export("%>%")
 export(add_trace)
+export(config)
 export(embed_notebook)
 export(get_figure)
 export(gg2list)
