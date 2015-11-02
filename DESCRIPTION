@@ -23,7 +23,7 @@ Description: Create interactive web-based graphs via plotly's API.
 URL: https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
-    ggplot2 (> 1.0.1)
+    ggplot2
 Imports:
     scales,
     httr,
