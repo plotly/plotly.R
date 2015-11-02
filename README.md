@@ -2,7 +2,7 @@
 
 # plotly
 
-An R package for creating (and modifying) interactive web-based graphs via [plotly](https://plot.ly/)'s JavaScript graphing library. 
+An R package for creating interactive web-based graphs via [plotly](https://plot.ly/)'s JavaScript graphing library. 
 
 ## Installation
 
@@ -21,7 +21,7 @@ library(plotly)
 set.seed(100)
 d <- diamonds[sample(nrow(diamonds), 1000), ]
 p <- ggplot(data = d, aes(x = carat, y = price)) + 
-  geom_point(aes(text = paste("Clarity:", clarity)), size = 4) +
+  geom_point(aes(text = paste("Clarity:", clarity))) +
   geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
 (gg <- ggplotly(p))
 ```
@@ -46,8 +46,8 @@ layout(gg, hovermode = "closest")
 
 ## Learn more
 
-* [An introduction to plotly's R API](https://cdn.rawgit.com/ropensci/plotly/master/vignettes/intro.html)
-* Plotly's [R homepage](https://plot.ly/r) and [ggplot2 homepage](https://plot.ly/ggplot2)
+* [An overview of plotly's R API](https://cdn.rawgit.com/ropensci/plotly/master/vignettes/intro.html)
+* Peruse the examples on plotly's [R homepage](https://plot.ly/r) and [ggplot2 homepage](https://plot.ly/ggplot2)
 
 ## Contributing
 
