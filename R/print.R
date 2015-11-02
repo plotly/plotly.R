@@ -25,7 +25,7 @@ knit_print.plotly <- function(x, ...) {
 #' Users shouldn't need to use this function. It's exported for internal reasons.
 #' 
 #' @param x a plotly object.
-#' @export
+#' 
 toWidget <- function(x) {
   p <- plotly_build(x)
   # set some margin defaults if none are provided
