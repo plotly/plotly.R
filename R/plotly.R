@@ -50,6 +50,13 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
+  # old arguments to this function that are no longer supported
+  if (!is.null(argz$filename)) 
+    warning("Ignoring filename. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$fileopt)) 
+    warning("Ignoring fileopt. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$world_readable)) 
+    warning("Ignoring world_readable. Use plotly_POST() if you want to post figures to plotly.")
   # tack on "special" arguments
   if (!missing(group)) argz$group <- substitute(group)
   if (!missing(color)) argz$color <- substitute(color)
