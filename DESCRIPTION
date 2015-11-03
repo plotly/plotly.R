@@ -1,20 +1,20 @@
 Package: plotly
 Title: Create interactive web-based graphs via plotly's API
-Version: 1.1.0
-Authors@R: c(person("Chris", "Parmer", role = c("aut", "cph"),
+Version: 2.0.0
+Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
+    email = "cpsievert1@gmail.com"),
+    person("Chris", "Parmer", role = c("aut", "cph"),
     email = "chris@plot.ly"),
+    person("Toby", "Hocking", role = "aut",
+    email = "tdhock5@gmail.com"),
     person("Scott", "Chamberlain", role = "aut",
     email = "myrmecocystus@gmail.com"),
     person("Karthik", "Ram", role = "aut",
     email = "karthik.ram@gmail.com"),
-    person("Toby", "Hocking", role = "aut",
-    email = "tdhock5@gmail.com"),
     person("Marianne", "Corvellec", role = "aut",
     email = "marianne@plot.ly"),
     person("Pedro", "Despouy", role = "aut",
-    email = "pedro@plot.ly"),
-    person("Carson", "Sievert", role = c("aut", "cre"),
-    email = "cpsievert1@gmail.com"))
+    email = "pedro@plot.ly"))
 License: MIT + file LICENSE
 Description: Create interactive web-based graphs via plotly's API.
     Easily translate ggplot2 plots to plotly and/or create custom plotly graphs.
@@ -46,5 +46,6 @@ Suggests:
     rmarkdown,
     RColorBrewer,
     Rserve,
-    RSclient
+    RSclient,
+    broom
 LazyData: true

@@ -25,12 +25,12 @@ knit_print.plotly <- function(x, ...) {
 #' Users shouldn't need to use this function. It's exported for internal reasons.
 #' 
 #' @param x a plotly object.
-#' @export
+#' 
 toWidget <- function(x) {
   p <- plotly_build(x)
   # set some margin defaults if none are provided
   p$layout$margin <- modifyList(
-    list(b = 40, l = 40, t = 25, r = 10),
+    list(b = 40, l = 60, t = 25, r = 10),
     p$layout$margin %||% list()
   )
   # customize the JSON serializer (for htmlwidgets)

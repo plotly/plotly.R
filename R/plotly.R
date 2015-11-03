@@ -39,6 +39,25 @@
 #' # change the font
 #' layout(p3, font = list(family = "Courier New, monospace"))
 #' 
+#' # using the color argument
+#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
+#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, 
+#'   colors = terrain.colors(5), mode = "markers")
+#'   
+#' # function to extract the decade of a given date
+#' decade <- function(x) {
+#'   factor(floor(as.numeric(format(x, "%Y")) / 10) * 10)
+#' }
+#' plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
+#' 
+#' # plotly loves pipelines
+#' economics %>%
+#'  transform(rate = unemploy / pop) %>%
+#'  plot_ly(x = date, y = rate) %>%
+#'  loess(rate ~ as.numeric(date), data = .) %>%
+#'  broom::augment() %>%
+#'  add_trace(y = .fitted)
+#' 
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
@@ -50,6 +69,13 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
+  # old arguments to this function that are no longer supported
+  if (!is.null(argz$filename)) 
+    warning("Ignoring filename. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$fileopt)) 
+    warning("Ignoring fileopt. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$world_readable)) 
+    warning("Ignoring world_readable. Use plotly_POST() if you want to post figures to plotly.")
   # tack on "special" arguments
   if (!missing(group)) argz$group <- substitute(group)
   if (!missing(color)) argz$color <- substitute(color)
@@ -257,7 +283,7 @@ plotly_build <- function(l = last_plot()) {
     # if appropriate, evaluate trace arguments in a suitable environment
     idx <- names(d) %in% c("args", "env", "enclos")
     if (sum(idx) == 3) {
-      dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
+      dat <- c(d[!idx], eval(d$args, as.list(d$env, all.names = TRUE), d$enclos))
       dat[c("args", "env", "enclos")] <- NULL
       # start processing specially named arguments
       s <- dat[["size"]]
@@ -314,7 +340,7 @@ plotly_build <- function(l = last_plot()) {
     layout <- l$layout[[i]]
     idx <- names(layout) %in% c("args", "env", "enclos")
     x$layout[[i]] <- if (sum(idx) == 3) {
-      c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
+      c(layout[!idx], eval(layout$args, as.list(layout$env, all.names = TRUE), layout$enclos)) 
     } else {
       layout
     }
@@ -325,7 +351,7 @@ plotly_build <- function(l = last_plot()) {
     for (i in seq_along(l$style)) {
       sty <- l$style[[i]]
       idx <- names(sty) %in% c("args", "env", "enclos")
-      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
+      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env, all.names = TRUE), sty$enclos)) else sty
       for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
     }
   }
@@ -492,33 +518,4 @@ plotly_empty <- function() {
     zeroline = FALSE
   )
   layout(plot_ly(), xaxis = eaxis, yaxis = eaxis)
-}
-
-
-#' Main interface to plotly 
-#' 
-#' Deprecated: see \link{signup} for credentials/configuration storage details.
-#' See \link{ggplotly} for the new ggplot2 interface.
-#' 
-#' @param username plotly username
-#' @param key plotly API key
-#' @export
-plotly <- function(username, key) {
-  
-  if (!missing(username)) {
-    message("Storing 'username' as the environment variable 'plotly_username'")
-    Sys.setenv("plotly_username" = username)
-  } else {
-    usr <- verify("username")
-  }
-  if (!missing(key)) {
-    message("Storing 'key' as the environment variable 'plotly_api_key'")
-    Sys.setenv("plotly_api_key" = key)
-  } else {
-    key <- verify("api_key")
-  }
-  
-  .Deprecated("ggplotly")
-  .Deprecated("plot_ly")
-  invisible(NULL)
 }

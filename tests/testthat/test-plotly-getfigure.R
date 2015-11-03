@@ -26,5 +26,5 @@ test_that("retrieving a public figure ... works.", {
   fig <- get_figure("get_test_user", 0)
   # get the data behind the hash
   p <- plotly_build(fig)
-  expect_equivalent(p$data[[1]]$x, list("1", "2", "3"))
+  expect_equivalent(p$data[[1]]$x, c("1", "2", "3"))
 })
