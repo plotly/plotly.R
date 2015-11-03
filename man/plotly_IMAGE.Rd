@@ -29,10 +29,9 @@ into an image of the desired format.
 \examples{
 p <- plot_ly(x = 1:10)
 
-# returns raster array representing the image
-img <- plotly_IMAGE(p, out_file = "plotly-test-image.png", overwrite = TRUE)
-
-img <- plotly_IMAGE(p, format = "pdf",
-  out_file = "plotly-test-image.pdf")
+Png <- plotly_IMAGE(p, out_file = "plotly-test-image.png")
+Jpeg <- plotly_IMAGE(p, format = "jpeg", out_file = "plotly-test-image.jpeg")
+Svg <- plotly_IMAGE(p, format = "svg",  out_file = "plotly-test-image.svg")
+Pdf <- plotly_IMAGE(p, format = "pdf",  out_file = "plotly-test-image.pdf")
 }
 

@@ -42,5 +42,8 @@ Suggests:
     htmltools,
     curl,
     rmarkdown,
-    RColorBrewer
+    RColorBrewer,
+    Rserve,
+    RSclient,
+    broom
 LazyData: true

@@ -68,6 +68,25 @@ p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
 # change the font
 layout(p3, font = list(family = "Courier New, monospace"))
 
+# using the color argument
+plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
+plot_ly(economics, x = date, y = unemploy / pop, color = pop,
+  colors = terrain.colors(5), mode = "markers")
+
+# function to extract the decade of a given date
+decade <- function(x) {
+  factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
+}
+plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
+
+# plotly loves pipelines
+economics \%>\%
+ transform(rate = unemploy / pop) \%>\%
+ plot_ly(x = date, y = rate) \%>\%
+ loess(rate ~ as.numeric(date), data = .) \%>\%
+ broom::augment() \%>\%
+ add_trace(y = .fitted)
+
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
