@@ -519,32 +519,3 @@ plotly_empty <- function() {
   )
   layout(plot_ly(), xaxis = eaxis, yaxis = eaxis)
 }
-
-
-#' Main interface to plotly 
-#' 
-#' Deprecated: see \link{signup} for credentials/configuration storage details.
-#' See \link{ggplotly} for the new ggplot2 interface.
-#' 
-#' @param username plotly username
-#' @param key plotly API key
-#' @export
-plotly <- function(username, key) {
-  
-  if (!missing(username)) {
-    message("Storing 'username' as the environment variable 'plotly_username'")
-    Sys.setenv("plotly_username" = username)
-  } else {
-    usr <- verify("username")
-  }
-  if (!missing(key)) {
-    message("Storing 'key' as the environment variable 'plotly_api_key'")
-    Sys.setenv("plotly_api_key" = key)
-  } else {
-    key <- verify("api_key")
-  }
-  
-  .Deprecated("ggplotly")
-  .Deprecated("plot_ly")
-  invisible(NULL)
-}
