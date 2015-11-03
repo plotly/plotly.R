@@ -46,5 +46,6 @@ Suggests:
     rmarkdown,
     RColorBrewer,
     Rserve,
-    RSclient
+    RSclient,
+    broom
 LazyData: true

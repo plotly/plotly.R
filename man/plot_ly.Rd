@@ -71,6 +71,14 @@ decade <- function(x) {
 }
 plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
 
+# plotly loves pipelines
+economics \%>\%
+ transform(rate = unemploy / pop) \%>\%
+ plot_ly(x = date, y = rate) \%>\%
+ loess(rate ~ as.numeric(date), data = .) \%>\%
+ broom::augment() \%>\%
+ add_trace(y = .fitted)
+
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
