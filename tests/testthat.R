@@ -1,104 +1,92 @@
 library("testthat")
 library("plotly")
+library("RSclient")
 
-# find the hash of the currently installed plotly package
-pkg_info <- devtools::session_info()$packages
-src <- subset(pkg_info, package == "plotly")$source
-hash <- if (src == "local") {
-  # you could also do `git rev-parse HEAD`, but this is cleaner for Travis
-  substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
-} else {
-  # thankfully devtools includes hash for packages installed off GitHub
-  sub("\\)", "", strsplit(src, "@")[[1]][2])
-}
-# setup directory for placing files during tests
-# (note the working directory should be /path/to/plotly/tests)
-table_dir <- normalizePath("../../plotly-test-table")
-plotly_dir <- file.path(table_dir, "R", hash)
-plotly_thumb_dir <- file.path(plotly_dir, "thumbs")
-dir.create(plotly_thumb_dir, showWarnings = FALSE, recursive = TRUE)
+# is this a pull request? if so, we compare results from this test with master
+check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
 
-# in case we need save ggplot2 output
-ggversion <- as.character(packageVersion("ggplot2"))
-gg_dir <- file.path(table_dir, "R", paste0("ggplot2-", ggversion))
-gg_thumb_dir <- file.path(gg_dir, "thumbs")
-dir.create(gg_thumb_dir, showWarnings = FALSE, recursive = TRUE)
-gg_names <- sub("\\.png$", "", dir(gg_dir, pattern = "\\.png$"))
-
-# text file that tracks figure hashes
-hash_file <- file.path(table_dir, "R", "hashes.csv")
-if (!file.exists(hash_file)) {
-  file.create(hash_file)
-  cat("commit,test,hash,url\n", file = hash_file, append = TRUE)
+# objects that should only be created once
+if (check_tests) {
+  message("Spinning up an independent R session with plotly's master branch installed")
+  Rserve::Rserve(args = "--vanilla --RS-enable-remote")
+  conn <- RSconnect()
+  RSeval(conn, "library(methods); devtools::install_github('ropensci/plotly')")
+  # hash of the version being tested
+  this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
+  # hash of version to compare with (master)
+  master_hash <- RSeval(conn, "packageDescription('plotly')$GithubSHA1")
+  master_hash <- substr(master_hash, 1, 7)
+  # plotly-test-table repo hosts the diff pages & keeps track of previous versions
+  table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
+  this_dir <- file.path(table_dir, this_hash)
+  if (dir.exists(this_dir)) {
+    message("Tests were already run on this commit. Nuking the old results...")
+    unlink(this_dir, recursive = T)
+  }
+  master_dir <- file.path(table_dir, master_hash)
+  # csv file that tracks plot hashes
+  hash_file <- file.path(table_dir, "hashes.csv")
+  if (!file.exists(hash_file)) {
+    file.create(hash_file)
+    cat("commit,test,hash\n", file = hash_file, append = T)
+  }
+  hash_info <- utils::read.csv(hash_file)
+  master_info <- hash_info[hash_info$commit %in% master_hash, ]
 }
 
 # This function is called within testthat/test-*.R files.
 # It takes a ggplot or plotly object as input, and it returns a figure
 # object (aka the data behind the plot).
-# Along the way, if this is a pull request build on Travis,
-# it will POST figures to plotly and save pngs 
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- if (is.ggplot(gg)) gg2list(gg) else plotly_build(gg)
-  tpr <- Sys.getenv("TRAVIS_PULL_REQUEST")
-  # only render/save pngs if this is a Travis pull request
-  if (tpr != "false" && tpr != "") {
-    # POST data to plotly and return the url
-    u <- if (packageVersion("plotly") < 1) {
-      py <- plotly(Sys.getenv("plotly_username"), Sys.getenv("plotly_api_key"))
-      tryWhile({
-        resp <- py$ggplotly(gg, kwargs = list(auto_open = FALSE))
-        resp$response$url
-      })
-    } else {
-      tryWhile({
-        p$filename <- name
-        resp <- plotly_POST(p)
-        resp$url
-      })
-    }
-    # save a hash of the R object sent to the plotly server
-    # (eventually use this to prevent redundant POSTs?!)
-    info <- paste(hash, name, digest::digest(p), u, sep = ",")
-    cat(paste(info, "\n"), file = hash_file, append = TRUE)
-    # download png under a directory specific to this installed version of plotly
-    filename <- file.path(plotly_dir, paste0(name, ".png"))
-    if (!file.exists(filename)) {
-      tryWhile({
-        curl::curl_download(paste0(u, ".png"), filename)
-      })
-      # now convert png to a smaller size
-      args <- c(filename, "-density", "36x36", "-write", 
-                file.path(plotly_thumb_dir, paste0(name, ".png")), "+delete")
-      system2("convert", args)
-    } else {
-      stop(shQuote(name), " has already been used to save_outputs() in another test.")
-    }
-    
-    # if missing, save the ggplot2
-    # do an else if to take advantage of both builds?
-    if (!name %in% gg_names) {
-      gg_file <- file.path(gg_dir, paste0(name, ".png"))
-      png(gg_file, width = 700, height = 500)
-      try(print(gg))
-      dev.off()
-      # now convert png to a smaller size
-      args <- c(gg_file, "-density", "72x72", "-write", 
-                file.path(gg_thumb_dir, paste0(name, ".png")), "+delete")
-      system2("convert", args)
+  p <- plotly_build(gg)
+  if (check_tests) {
+    # save a hash of the R object
+    plot_hash <- digest::digest(p)
+    info <- paste(this_hash, name, plot_hash, sep = ",")
+    cat(paste(info, "\n"), file = hash_file, append = T)
+    # if the plot hash is different from master, build using the master branch
+    test_info <- master_info[master_info$test %in% name, ]
+    if (!isTRUE(plot_hash == test_info$hash)) {
+      # hack to transfer workspace to the other R session
+      rs_assign <- function(obj, name) RSassign(conn, obj, name)
+      res <- mapply(rs_assign, mget(ls()), ls())
+      # also need to transfer over the plotly environment to enable NSE
+      res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
+      res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
+      res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
+      pm <- RSeval(conn, "plotly::plotly_build(gg)")
+      # it could be that the hash didn't exist, so make sure they're different
+      if (plot_hash != digest::digest(pm)) {
+        test_dir <- file.path(this_dir, gsub("\\s+", "-", name))
+        if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
+        dir.create(test_dir, recursive = T)
+        # copy over diffing template
+        file.copy(
+          file.path(table_dir, "template", "template", "index.html"), 
+          test_dir, 
+          recursive = T
+        )
+        # overwrite the default JSON
+        writeLines(
+          paste("New =", plotly:::to_JSON(p)), 
+          file.path(test_dir, "New.json")
+        )
+        writeLines(
+          paste("Old =", plotly:::to_JSON(pm)), 
+          file.path(test_dir, "Old.json")
+        )
+      }
     }
   }
   p
 }
 
-tryWhile <- function(expr, times = 20) {
-  e <- try(expr)
-  while (inherits(e, "try-error") && times > 0) {
-    Sys.sleep(0.5)
-    times <- times - 1
-    e <- try(expr)
-  }
-  e
-}
 
 test_check("plotly")
+
+# shut down the other R session
+if (check_tests) {
+  RSshutdown(conn)
+  RSclose(conn)
+}

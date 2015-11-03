@@ -7,9 +7,9 @@
 \method{print}{plotly}(x, ...)
 }
 \arguments{
-\item{x}{an object with class 'plotly'}
+\item{x}{a plotly object}
 
-\item{...}{other arguments}
+\item{...}{additional arguments (currently ignored)}
 }
 \description{
 Print a plotly object

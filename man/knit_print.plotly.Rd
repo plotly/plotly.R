@@ -2,21 +2,16 @@
 % Please edit documentation in R/print.R
 \name{knit_print.plotly}
 \alias{knit_print.plotly}
-\title{Embed a plotly iframe into an R markdown document via \code{knit_print}}
+\title{Print a plotly object in a knitr doc}
 \usage{
-knit_print.plotly(x, options, ...)
+knit_print.plotly(x, ...)
 }
 \arguments{
-\item{x}{named list of ggplots and option lists to pass to \code{animint2dir}.}
+\item{x}{a plotly object}
 
-\item{options}{knitr options.}
-
-\item{...}{placeholder.}
+\item{...}{additional arguments (currently ignored)}
 }
 \description{
-Embed a plotly iframe into an R markdown document via \code{knit_print}
-}
-\references{
-https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
+Print a plotly object in a knitr doc
 }
 

@@ -6,8 +6,8 @@
 #' Reference section (see below). 
 #' 
 #' @param data A data frame (optional).
-#' @param ... These arguments are documented in the references section below.
-#' Note that acceptable arguments depend on the trace type.
+#' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
+#' Note that acceptable arguments depend on the value of \code{type}.
 #' @param type A charater string describing the type of trace.
 #' @param group Either a variable name or a vector to use for grouping. If used, 
 #' a different trace will be created for each unique value.
@@ -19,19 +19,11 @@
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
-#' @param filename character string describing the name of the plot in your plotly account. 
-#' Use / to specify directories. If a directory path does not exist it will be created.
-#' If this argument is not specified and the title of the plot exists,
-#' that will be used for the filename.
-#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-#' "append" data to existing plotly, or "extend" it.
-#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
-#' by anyone who has the link and in the owner's plotly account.
-#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
+#' @param width	Width in pixels (optional, defaults to automatic sizing).
+#' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
-#' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -47,6 +39,25 @@
 #' # change the font
 #' layout(p3, font = list(family = "Courier New, monospace"))
 #' 
+#' # using the color argument
+#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
+#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, 
+#'   colors = terrain.colors(5), mode = "markers")
+#'   
+#' # function to extract the decade of a given date
+#' decade <- function(x) {
+#'   factor(floor(as.numeric(format(x, "%Y")) / 10) * 10)
+#' }
+#' plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
+#' 
+#' # plotly loves pipelines
+#' economics %>%
+#'  transform(rate = unemploy / pop) %>%
+#'  plot_ly(x = date, y = rate) %>%
+#'  loess(rate ~ as.numeric(date), data = .) %>%
+#'  broom::augment() %>%
+#'  add_trace(y = .fitted)
+#' 
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
@@ -54,10 +65,17 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
-                    filename, fileopt, world_readable = TRUE,
-                    inherit = TRUE, evaluate = FALSE) {
+                    width = NULL, height = NULL, inherit = TRUE, 
+                    evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
+  # old arguments to this function that are no longer supported
+  if (!is.null(argz$filename)) 
+    warning("Ignoring filename. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$fileopt)) 
+    warning("Ignoring fileopt. Use plotly_POST() if you want to post figures to plotly.")
+  if (!is.null(argz$world_readable)) 
+    warning("Ignoring world_readable. Use plotly_POST() if you want to post figures to plotly.")
   # tack on "special" arguments
   if (!missing(group)) argz$group <- substitute(group)
   if (!missing(color)) argz$color <- substitute(color)
@@ -77,12 +95,10 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   p <- list(
     data = list(tr),
     layout = NULL,
-    url = NULL
+    url = NULL,
+    width = width,
+    height = height
   )
-  # tack on special keyword arguments
-  if (!missing(filename)) p$filename <- filename
-  if (!missing(fileopt)) p$fileopt <- fileopt
-  p$world_readable <- world_readable
   
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
@@ -160,6 +176,53 @@ layout <- function(p = last_plot(), ...,
   hash_plot(data, p)
 }
 
+#' Set the default configuration for plotly
+#' 
+#' @param staticPlot for export or image generation
+#' @param workspace we're in the workspace, so need toolbar etc (TODO describe functionality instead)?
+#' @param editable edit titles, move annotations, etc
+#' @param autosizable respect layout.autosize=true and infer its container size?
+#' @param fillFrame if we DO autosize, do we fill the container or the screen?
+#' @param scrollZoom mousewheel or two-finger scroll zooms the plot
+#' @param doubleClick double click interaction (false, 'reset', 'autosize' or 'reset+autosize')
+#' @param showTips see some hints about interactivity
+#' @param showLink link to open this plot in plotly
+#' @param sendData if we show a link, does it contain data or just link to a plotly file?
+#' @param linkText text appearing in the sendData link
+#' @param displayModeBar display the modebar (T, F, or 'hover')
+#' @param displaylogo add the plotly logo on the end of the modebar
+#' @param plot3dPixelRatio increase the pixel ratio for 3D plot images
+#' @author Carson Sievert
+#' @export
+
+# TODO: use htmlwidgets::JS() to specify setBackground function?
+# https://github.com/ropensci/plotly/issues/284#issue-108153160
+config <- function(p = last_plot(), staticPlot = F, workspace = F, editable = F,
+                   autosizable = F, fillFrame = F, scrollZoom = F,
+                   doubleClick = 'reset+autosize', showTips = F, showLink = T, 
+                   sendData = T, linkText = 'Edit chart', displayModeBar = 'hover',
+                   displaylogo = T, plot3dPixelRatio = 2) {
+  conf <- list(
+    staticPlot = staticPlot,
+    workspace = workspace,
+    editable = editable,
+    autosizable = autosizable,
+    fillFrame = fillFrame,
+    scrollZoom = scrollZoom,
+    doubleClick = doubleClick,
+    showTips = showTips,
+    showLink = showLink,
+    sendData = sendData,
+    linkText = linkText,
+    displayModeBar = displayModeBar,
+    displaylogo = displaylogo,
+    plot3dPixelRatio = plot3dPixelRatio
+  )
+  p <- last_plot(p)
+  p$config <- c(p$config, conf)
+  hash_plot(if (is.data.frame(p)) p else list(), p)
+}
+
 #' Modify trace(s)
 #'
 #' Modify trace(s) of an existing plotly visualization. Useful when used in
@@ -220,7 +283,7 @@ plotly_build <- function(l = last_plot()) {
     # if appropriate, evaluate trace arguments in a suitable environment
     idx <- names(d) %in% c("args", "env", "enclos")
     if (sum(idx) == 3) {
-      dat <- c(d[!idx], eval(d$args, as.list(d$env), d$enclos))
+      dat <- c(d[!idx], eval(d$args, as.list(d$env, all.names = TRUE), d$enclos))
       dat[c("args", "env", "enclos")] <- NULL
       # start processing specially named arguments
       s <- dat[["size"]]
@@ -277,7 +340,7 @@ plotly_build <- function(l = last_plot()) {
     layout <- l$layout[[i]]
     idx <- names(layout) %in% c("args", "env", "enclos")
     x$layout[[i]] <- if (sum(idx) == 3) {
-      c(layout[!idx], eval(layout$args, as.list(layout$env), layout$enclos)) 
+      c(layout[!idx], eval(layout$args, as.list(layout$env, all.names = TRUE), layout$enclos)) 
     } else {
       layout
     }
@@ -288,7 +351,7 @@ plotly_build <- function(l = last_plot()) {
     for (i in seq_along(l$style)) {
       sty <- l$style[[i]]
       idx <- names(sty) %in% c("args", "env", "enclos")
-      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env), sty$enclos)) else sty
+      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env, all.names = TRUE), sty$enclos)) else sty
       for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
     }
   }
@@ -455,33 +518,4 @@ plotly_empty <- function() {
     zeroline = FALSE
   )
   layout(plot_ly(), xaxis = eaxis, yaxis = eaxis)
-}
-
-
-#' Main interface to plotly 
-#' 
-#' Deprecated: see \link{signup} for credentials/configuration storage details.
-#' See \link{ggplotly} for the new ggplot2 interface.
-#' 
-#' @param username plotly username
-#' @param key plotly API key
-#' @export
-plotly <- function(username, key) {
-  
-  if (!missing(username)) {
-    message("Storing 'username' as the environment variable 'plotly_username'")
-    Sys.setenv("plotly_username" = username)
-  } else {
-    usr <- verify("username")
-  }
-  if (!missing(key)) {
-    message("Storing 'key' as the environment variable 'plotly_api_key'")
-    Sys.setenv("plotly_api_key" = key)
-  } else {
-    key <- verify("api_key")
-  }
-  
-  .Deprecated("ggplotly")
-  .Deprecated("plot_ly")
-  invisible(NULL)
 }

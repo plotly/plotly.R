@@ -5,14 +5,14 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, filename, fileopt, world_readable = TRUE,
-  inherit = TRUE, evaluate = FALSE)
+  symbol, symbols, size, width = NULL, height = NULL, inherit = TRUE,
+  evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
 
-\item{...}{These arguments are documented in the references section below.
-Note that acceptable arguments depend on the trace type.}
+\item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
+Note that acceptable arguments depend on the value of \code{type}.}
 
 \item{type}{A charater string describing the type of trace.}
 
@@ -32,17 +32,9 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
-\item{filename}{character string describing the name of the plot in your plotly account.
-Use / to specify directories. If a directory path does not exist it will be created.
-If this argument is not specified and the title of the plot exists,
-that will be used for the filename.}
+\item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
-\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly,
-"append" data to existing plotly, or "extend" it.}
-
-\item{world_readable}{logical. If \code{TRUE}, the graph is viewable
-by anyone who has the link and in the owner's plotly account.
-If \code{FALSE}, graph is only viewable in the owner's plotly account.}
+\item{height}{Height in pixels (optional, defaults to automatic sizing).}
 
 \item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
@@ -68,6 +60,25 @@ p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
 # change the font
 layout(p3, font = list(family = "Courier New, monospace"))
 
+# using the color argument
+plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
+plot_ly(economics, x = date, y = unemploy / pop, color = pop,
+  colors = terrain.colors(5), mode = "markers")
+
+# function to extract the decade of a given date
+decade <- function(x) {
+  factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
+}
+plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
+
+# plotly loves pipelines
+economics \%>\%
+ transform(rate = unemploy / pop) \%>\%
+ plot_ly(x = date, y = rate) \%>\%
+ loess(rate ~ as.numeric(date), data = .) \%>\%
+ broom::augment() \%>\%
+ add_trace(y = .fitted)
+
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
@@ -75,9 +86,6 @@ plot_ly(z = volcano, type = "surface")
 }
 \author{
 Carson Sievert
-}
-\references{
-\url{https://plot.ly/r/reference/}
 }
 \seealso{
 \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
