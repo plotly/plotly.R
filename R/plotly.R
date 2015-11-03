@@ -156,7 +156,7 @@ layout <- function(p = last_plot(), ...,
   )
   p <- last_plot(p)
   p$layout <- c(p$layout, list(layout))
-  if (evaluate) p <- ld(p)
+  if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
 
