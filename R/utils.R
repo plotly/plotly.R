@@ -1,20 +1,11 @@
 #' @importFrom grDevices col2rgb
 #' @importFrom utils getFromNamespace modifyList
+#' @importFrom stats setNames
 
 is.plotly <- function(x) inherits(x, "plotly")
 
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
-}
-
-#' @importFrom stats setNames
-setNames <- stats::setNames
-
-# this function is called after the package is loaded
-.onAttach <- function(...) {
-  usr <- verify("username", warn = FALSE)
-  if (nchar(usr) > 0) packageStartupMessage("\n", "Howdy, ", usr, "!")
-  invisible(NULL)
 }
 
 # special enviroment that tracks trace/layout information
@@ -60,7 +51,6 @@ get_plot <- function(data = NULL, last = FALSE) {
 #' @seealso \link{plotly_build}
 #' @param data (optional) a data frame with a class of plotly (and a plotly_hash attribute).
 #' @export
-#' 
 last_plot <- function(data = NULL) {
   p <- try(get_plot(data, last = TRUE), silent = TRUE)
   if (inherits(p, "try-error")) p <- try(ggplotly(), silent = TRUE)
