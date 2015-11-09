@@ -4,8 +4,10 @@ library("RSclient")
 
 # is this a pull request? if so, we compare results from this test with master
 check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
+# should we save pngs for building the ggplot2 comparison table?
+save_pngs <- Sys.getenv("SAVE_PNGS") == "TRUE"
 
-# objects that should only be created once
+# stuff that should be done once (not everytime save_outputs() is called)
 if (check_tests) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
@@ -78,6 +80,26 @@ save_outputs <- function(gg, name) {
         )
       }
     }
+  }
+  if (save_pngs) {
+    filename <- paste0(gsub("\\s+", "-", name), ".png")
+    ggFile <- paste0(Sys.getenv("GGPLOT_PREFIX"), filename)
+    plotlyFile <- paste0(Sys.getenv("PLOTLY_PREFIX"), filename)
+    res <- tryCatch(ggsave(ggFile, gg), 
+      error = function(e) {
+        err <- qplot() + 
+          annotate("text", label = paste("Error:", e$message), 
+                   x = 1, y = 1, color = "red")
+        ggsave(ggFile, err, width = 3, height = 2, units = "in")
+      })
+    res <- tryCatch(plotly_IMAGE(p, out_file = plotlyFile, width = Sys.getenv("PNG_WIDTH"), height = Sys.getenv("PNG_HEIGHT")),
+      error = function(e) {
+        err <- qplot() + 
+          annotate("text", label = paste("Error:", e$message), 
+                   x = 1, y = 1, color = "red")
+        # TODO: convert pixels to inches?
+        ggsave(plotlyFile, err, width = 3, height = 2, units = "in")
+      })
   }
   p
 }
