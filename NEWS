@@ -1,3 +1,7 @@
+2.0.0 -- 12 Nov 2015
+
+Documentation and other fixes for initial CRAN release!
+
 2.0.0 -- 2 Nov 2015
 
 Added a dependency on htmlwidgets and 'offline' plots are now the default. If you want to create a figure on a plotly server, you need to use `plotly_POST()`. Also added a `config()` function to control the default appearance of the interactive plot
