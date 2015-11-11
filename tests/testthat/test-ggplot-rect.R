@@ -13,7 +13,6 @@ expect_traces <- function(gg, n.traces, name) {
   list(traces=has.data, layout=L$layout)
 }
 
-set.seed(1)
 df <- data.frame(
   x = sample(10, 20, replace = TRUE),
   y = sample(10, 20, replace = TRUE)

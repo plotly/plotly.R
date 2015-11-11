@@ -28,7 +28,6 @@ test_that("class Date is supported", {
 })
 
 test_that("scale_x_date and irregular time series work", {
-  set.seed(423)
   df <- data.frame(date = seq(as.Date("2121-12-12"), len=100, by="1 day")[sample(100, 50)],
                    price = runif(50))
   df <- df[order(df$date), ]
