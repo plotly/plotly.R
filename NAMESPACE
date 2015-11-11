@@ -3,7 +3,6 @@
 S3method(print,plotly)
 export("%>%")
 export(add_trace)
-export(build_table)
 export(config)
 export(embed_notebook)
 export(get_figure)

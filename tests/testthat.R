@@ -2,38 +2,44 @@ library("testthat")
 library("plotly")
 library("RSclient")
 
-# is this a pull request? if so, we compare results from this test with master
-check_tests <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
-# should we save pngs for building the ggplot2 comparison table?
-save_pngs <- Sys.getenv("SAVE_PNGS") == "TRUE"
+# report any differences in plot (list) hashes if this is a Travis pull request
+report_diffs <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
+# build a ggplot2 comparison table?
+build_table <- Sys.getenv("PLOTLY_TABLE") == "TRUE"
 
 # stuff that should be done once (not everytime save_outputs() is called)
-if (check_tests) {
+if (report_diffs || build_table) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
-  RSeval(conn, "library(methods); devtools::install_github('ropensci/plotly')")
-  # hash of the version being tested
-  this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
-  # hash of version to compare with (master)
-  master_hash <- RSeval(conn, "packageDescription('plotly')$GithubSHA1")
-  master_hash <- substr(master_hash, 1, 7)
-  # plotly-test-table repo hosts the diff pages & keeps track of previous versions
-  table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
-  this_dir <- file.path(table_dir, this_hash)
-  if (dir.exists(this_dir)) {
-    message("Tests were already run on this commit. Nuking the old results...")
-    unlink(this_dir, recursive = T)
+  # master version should _always_ depend on the CRAN version of ggplot2
+  RSeval(conn, "library(methods); options(repos = c(CRAN = 'https://cran.rstudio.com/'))")
+  RSeval(conn, "install.packages('ggplot2')")
+  RSeval(conn, "devtools::install_github('ropensci/plotly')")
+  RSeval(conn, "library(plotly)")
+  if (report_diffs) {
+    # hash of the version being tested
+    this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
+    # hash of version to compare with (master)
+    master_hash <- RSeval(conn, "packageDescription('plotly')$GithubSHA1")
+    master_hash <- substr(master_hash, 1, 7)
+    # plotly-test-table repo hosts the diff pages & keeps track of previous versions
+    table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
+    this_dir <- file.path(table_dir, this_hash)
+    if (dir.exists(this_dir)) {
+      message("Tests were already run on this commit. Nuking the old results...")
+      unlink(this_dir, recursive = T)
+    }
+    master_dir <- file.path(table_dir, master_hash)
+    # csv file that tracks plot hashes
+    hash_file <- file.path(table_dir, "hashes.csv")
+    if (!file.exists(hash_file)) {
+      file.create(hash_file)
+      cat("commit,test,hash\n", file = hash_file, append = T)
+    }
+    hash_info <- utils::read.csv(hash_file)
+    master_info <- hash_info[hash_info$commit %in% master_hash, ]
   }
-  master_dir <- file.path(table_dir, master_hash)
-  # csv file that tracks plot hashes
-  hash_file <- file.path(table_dir, "hashes.csv")
-  if (!file.exists(hash_file)) {
-    file.create(hash_file)
-    cat("commit,test,hash\n", file = hash_file, append = T)
-  }
-  hash_info <- utils::read.csv(hash_file)
-  master_info <- hash_info[hash_info$commit %in% master_hash, ]
 }
 
 # This function is called within testthat/test-*.R files.
@@ -42,64 +48,77 @@ if (check_tests) {
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
   p <- plotly_build(gg)
-  if (check_tests) {
+  has_diff <- if (report_diffs) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
     info <- paste(this_hash, name, plot_hash, sep = ",")
     cat(paste(info, "\n"), file = hash_file, append = T)
-    # if the plot hash is different from master, build using the master branch
     test_info <- master_info[master_info$test %in% name, ]
-    if (!isTRUE(plot_hash == test_info$hash)) {
-      # hack to transfer workspace to the other R session
-      rs_assign <- function(obj, name) RSassign(conn, obj, name)
-      res <- mapply(rs_assign, mget(ls()), ls())
-      # also need to transfer over the plotly environment to enable NSE
-      res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
-      res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
-      res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
-      pm <- RSeval(conn, "plotly::plotly_build(gg)")
-      # it could be that the hash didn't exist, so make sure they're different
-      if (plot_hash != digest::digest(pm)) {
-        test_dir <- file.path(this_dir, gsub("\\s+", "-", name))
-        if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
-        dir.create(test_dir, recursive = T)
-        # copy over diffing template
-        file.copy(
-          file.path(table_dir, "template", "template", "index.html"), 
-          test_dir, 
-          recursive = T
-        )
-        # overwrite the default JSON
-        writeLines(
-          paste("New =", plotly:::to_JSON(p)), 
-          file.path(test_dir, "New.json")
-        )
-        writeLines(
-          paste("Old =", plotly:::to_JSON(pm)), 
-          file.path(test_dir, "Old.json")
-        )
+    # is the plot hash different from master?
+    !isTRUE(plot_hash == test_info$hash)
+  } else FALSE
+  if (has_diff || build_table) {
+    # hack to transfer workspace to the other R session
+    rs_assign <- function(obj, name) RSassign(conn, obj, name)
+    res <- mapply(rs_assign, mget(ls()), ls())
+    # also need to transfer over the plotly environment to enable NSE
+    res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
+    res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
+    res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
+    browser()
+    pm <- RSeval(conn, "plotly::plotly_build(gg)")
+    if (build_table) {
+      # save pngs of ggplot
+      filename <- paste0(gsub("\\s+", "-", name), ".png")
+      ggFile <- paste("ggplot", filename, sep = "-")
+      res <- tryCatch(ggsave(ggFile, gg), 
+                      error = function(e) {
+                        err <- qplot() + 
+                          annotate('text', label = paste('Error:', e$message), 
+                                   x = 1, y = 1, color = 'red')
+                        ggsave(ggFile, err, width = 3, height = 2, units = 'in')
+                      })
+      img <- function(x, f) {
+        tryCatch(plotly_IMAGE(x, out_file = f, width = 300, height = 400),
+                 error = function(e) {
+                   err <- qplot() + 
+                     annotate('text', label = paste('Error:', e$message), 
+                              x = 1, y = 1, color = 'red')
+                   # TODO: convert pixels to inches?
+                   ggsave(plotlyFile, err, width = 3, height = 2, units = 'in')
+                 })
       }
+      # save _this_ plotly version
+      plotlyFile <- paste("plotly", this_hash, filename, sep = "-")
+      res <- img(p, plotlyFile)
+      # save _master_ plotly version
+      plotlyFile <- paste("plotly", "master", filename, sep = "-")
+      RSassign(conn, plotlyFile, "plotlyFile")
+      RSassign(conn, img, "img")
+      res <- RSeval(conn, "img(p, plotlyFile)")
     }
-  }
-  if (save_pngs) {
-    filename <- paste0(gsub("\\s+", "-", name), ".png")
-    ggFile <- paste0(Sys.getenv("GGPLOT_PREFIX"), filename)
-    plotlyFile <- paste0(Sys.getenv("PLOTLY_PREFIX"), filename)
-    res <- tryCatch(ggsave(ggFile, gg), 
-      error = function(e) {
-        err <- qplot() + 
-          annotate("text", label = paste("Error:", e$message), 
-                   x = 1, y = 1, color = "red")
-        ggsave(ggFile, err, width = 3, height = 2, units = "in")
-      })
-    res <- tryCatch(plotly_IMAGE(p, out_file = plotlyFile, width = Sys.getenv("PNG_WIDTH"), height = Sys.getenv("PNG_HEIGHT")),
-      error = function(e) {
-        err <- qplot() + 
-          annotate("text", label = paste("Error:", e$message), 
-                   x = 1, y = 1, color = "red")
-        # TODO: convert pixels to inches?
-        ggsave(plotlyFile, err, width = 3, height = 2, units = "in")
-      })
+    # it could be that the hash didn't exist, so make sure they're different
+    # before build a diff page
+    if (plot_hash != digest::digest(pm)) {
+      test_dir <- file.path(this_dir, gsub("\\s+", "-", name))
+      if (dir.exists(test_dir)) stop(shQuote(name), " has already been used to save_outputs() in another test.")
+      dir.create(test_dir, recursive = T)
+      # copy over diffing template
+      file.copy(
+        file.path(table_dir, "template", "template", "index.html"), 
+        test_dir, 
+        recursive = T
+      )
+      # overwrite the default JSON
+      writeLines(
+        paste("New =", plotly:::to_JSON(p)), 
+        file.path(test_dir, "New.json")
+      )
+      writeLines(
+        paste("Old =", plotly:::to_JSON(pm)), 
+        file.path(test_dir, "Old.json")
+      )
+    }
   }
   p
 }
@@ -108,7 +127,43 @@ save_outputs <- function(gg, name) {
 test_check("plotly")
 
 # shut down the other R session
-if (check_tests) {
+if (report_diffs || build_table) {
   RSshutdown(conn)
   RSclose(conn)
+}
+
+# now, actually build the table if necessary
+if (build_table) {
+  imgfy <- function(pat) {
+    sprintf(
+      "<img src='%s' width='%s' height='%s' />", 
+      dir(pattern = pat), width, height
+    )
+  }
+  imgs <- data.frame(
+    imgfy("^ggplot-"),
+    imgfy(paste0("^plotly-", this_hash)),
+    imgfy("^plotly-master")
+  )
+  imgs <- cbind(
+    sub("\\.png", "", sub("^[a-z]+1-", "", dir(pattern = "^ggplot-"))),
+    imgs
+  )
+  setNames(imgs, c("ggplot2", this_hash, "master"))
+  
+  html <- sprintf(
+    '<!DOCTYPE html>
+    <html>
+     <head>
+      <meta charset=\"utf-8\"/>
+      <style type=\"text/css\" media=\"screen\"> table td tr { border:1px solid #FF0000;} </style>
+     </head>
+     <body>
+      %s
+     </body>
+    </html>', as.character(knitr::kable(imgs, format = "html", escape = FALSE)))
+  tbl <- file.path(tmpDir, "index.html")
+  writeLines(html, tbl)
+  browseURL(tbl)
+  invisible(tbl)
 }
