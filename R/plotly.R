@@ -381,10 +381,6 @@ plotly_build <- function(l = last_plot()) {
   kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
   # empty keyword arguments can cause problems
   kwargs <- kwargs[sapply(kwargs, length) > 0]
-  # filename & fileopt are keyword arguments required by the API
-  if (!is.null(x$url) || !is.null(kwargs$filename)) 
-    kwargs$fileopt <- "overwrite"
-  kwargs$fileopt <- kwargs$fileopt %||% "new"
   # try our damndest to assign a sensible filename
   if (is.null(kwargs$filename)) {
     kwargs$filename <- 

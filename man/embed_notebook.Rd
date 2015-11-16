@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{embed_notebook}
 \alias{embed_notebook}
-\title{Embed a plotly iframe into a IPython Notebook}
+\title{Embed a plotly figure as an iframe into a IPython Notebook}
 \usage{
 embed_notebook(x, width = "100\%", height = "525")
 }
@@ -14,6 +14,6 @@ embed_notebook(x, width = "100\%", height = "525")
 \item{height}{attribute of the iframe}
 }
 \description{
-Embed a plotly iframe into a IPython Notebook
+Embed a plotly figure as an iframe into a IPython Notebook
 }
 
