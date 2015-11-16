@@ -126,7 +126,6 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
-#' 
 add_trace <- function(p = last_plot(), ...,
                       group, color, colors, symbol, symbols, size,
                       data = NULL, evaluate = FALSE) {
@@ -161,7 +160,6 @@ add_trace <- function(p = last_plot(), ...,
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @author Carson Sievert
 #' @export
-#' 
 layout <- function(p = last_plot(), ..., 
                    data = NULL, evaluate = FALSE) {
   data <- data %||% if (is.data.frame(p)) p else list()
@@ -178,6 +176,7 @@ layout <- function(p = last_plot(), ...,
 
 #' Set the default configuration for plotly
 #' 
+#' @param p a plotly object
 #' @param staticPlot for export or image generation
 #' @param workspace we're in the workspace, so need toolbar etc (TODO describe functionality instead)?
 #' @param editable edit titles, move annotations, etc
@@ -235,7 +234,6 @@ config <- function(p = last_plot(), staticPlot = F, workspace = F, editable = F,
 #' @seealso \code{\link{get_figure}()}
 #' @author Carson Sievert
 #' @export
-#'
 style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
   idx <- traces >= length(p$data)
   if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
@@ -383,10 +381,6 @@ plotly_build <- function(l = last_plot()) {
   kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
   # empty keyword arguments can cause problems
   kwargs <- kwargs[sapply(kwargs, length) > 0]
-  # filename & fileopt are keyword arguments required by the API
-  if (!is.null(x$url) || !is.null(kwargs$filename)) 
-    kwargs$fileopt <- "overwrite"
-  kwargs$fileopt <- kwargs$fileopt %||% "new"
   # try our damndest to assign a sensible filename
   if (is.null(kwargs$filename)) {
     kwargs$filename <- 

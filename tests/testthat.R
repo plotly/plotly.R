@@ -10,6 +10,9 @@ if (check_tests) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
+  # some tests use randomized data
+  set.seed(1)
+  RSeval(conn, "set.seed(1)")
   RSeval(conn, "library(methods); devtools::install_github('ropensci/plotly')")
   # hash of the version being tested
   this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)

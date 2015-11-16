@@ -139,7 +139,6 @@ test_that("log10 with exponents on tick labels", {
 })
 
 # Data where x ranges from 0-10, y ranges from 0-30
-set.seed(202)
 dat <- data.frame(xval = runif(40,0,10), yval = runif(40,0,30))
 sp <- ggplot(dat, aes(xval, yval)) + geom_point()
 

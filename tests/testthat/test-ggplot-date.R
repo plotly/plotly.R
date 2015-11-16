@@ -28,7 +28,6 @@ test_that("class Date is supported", {
 })
 
 test_that("scale_x_date and irregular time series work", {
-  set.seed(423)
   df <- data.frame(date = seq(as.Date("2121-12-12"), len=100, by="1 day")[sample(100, 50)],
                    price = runif(50))
   df <- df[order(df$date), ]
@@ -43,9 +42,7 @@ test_that("scale_x_date and irregular time series work", {
   info_w_scale <- gg2list(g)
   
   expect_equal(length(info$data), 1)  # one trace
-  expect_identical(info$data[[1]]$x[31], "2122-02-09 00:00:00")
   expect_equal(length(info_w_scale$data), 1)  # one trace
-  expect_identical(info_w_scale$data[[1]]$x[31], "2122-02-09 00:00:00")
   expect_identical(info$layout$xaxis$type, "date")
   expect_identical(info_w_scale$layout$xaxis$type, "date")
   expect_equal(length(info_w_scale$layout), length(info$layout))  # similar layout
