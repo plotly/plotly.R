@@ -976,6 +976,6 @@ gg2list <- function(p) {
     idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
     if (any(idx)) l$data[[i]][idx] <- lapply(d[idx], I)
   }
-  l
+  structure(l, class = "plotly")
   
 }
