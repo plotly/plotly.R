@@ -1,3 +1,7 @@
+2.0.3 -- 18 Nov 2015
+
+Geo assests are now bundled with the package meaning that maps will now work entirely locally (without an internet connection)
+
 2.0.2 -- 17 Nov 2015
 
 Using plotly_build() on a ggplot object should always return a plotly object
