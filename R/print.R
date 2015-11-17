@@ -53,7 +53,7 @@ toWidget <- function(x) {
 #' @param ... additional arguments (currently ignored)
 #' @export
 print.figure <- function(x, ...) {
-  browseURL(x$url)
+  utils::browseURL(x$url)
 }
 
 #' Embed a plotly figure as an iframe in a knitr doc
