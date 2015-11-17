@@ -6,7 +6,7 @@ An R package for creating interactive web-based graphs via [plotly](https://plot
 
 ## Installation
 
-__plotly__ is not (yet) available on CRAN, but you can install it via [devtools](http://cran.r-project.org/web/packages/devtools/):
+__plotly__ is not (yet) available on CRAN, but you can install it via [devtools](http://cran.r-project.org/package=devtools):
 
 ```r
 devtools::install_github("ropensci/plotly")
@@ -14,7 +14,7 @@ devtools::install_github("ropensci/plotly")
 
 ## Introduction
 
-If you use [ggplot2](http://cran.r-project.org/web/packages/ggplot2/index.html), simply call `ggplotly()` to convert your ggplot to an interactive, web-based version!
+If you use [ggplot2](http://cran.r-project.org/package=ggplot2), simply call `ggplotly()` to convert your ggplot to an interactive, web-based version!
 
 ```r
 library(plotly)
