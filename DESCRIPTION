@@ -46,4 +46,5 @@ Suggests:
     RSclient,
     broom
 LazyData: true
+VignetteBuilder: knitr
 RoxygenNote: 5.0.1

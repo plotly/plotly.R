@@ -4,10 +4,12 @@
 \alias{knit_print.plotly}
 \title{Print a plotly object in a knitr doc}
 \usage{
-knit_print.plotly(x, ...)
+knit_print.plotly(x, options, ...)
 }
 \arguments{
 \item{x}{a plotly object}
+
+\item{options}{knitr options.}
 
 \item{...}{additional arguments (currently ignored)}
 }
