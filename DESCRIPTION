@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via Plotly's JavaScript Graphing Library
-Version: 2.0.2
+Version: 2.0.3
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -46,4 +46,5 @@ Suggests:
     RSclient,
     broom
 LazyData: true
+VignetteBuilder: knitr
 RoxygenNote: 5.0.1

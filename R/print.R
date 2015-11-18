@@ -13,11 +13,12 @@ print.plotly <- function(x, ...) {
 #' Print a plotly object in a knitr doc
 #' 
 #' @param x a plotly object
+#' @param options knitr options.
 #' @param ... additional arguments (currently ignored)
 #' @export
-knit_print.plotly <- function(x, ...) {
+knit_print.plotly <- function(x, options, ...) {
   w <- toWidget(x)
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options)
 }
 
 #' Convert a plotly object to an htmlwidget object
