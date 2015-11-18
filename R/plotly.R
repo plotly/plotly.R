@@ -8,7 +8,7 @@
 #' @param data A data frame (optional).
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
-#' @param type A charater string describing the type of trace.
+#' @param type A character string describing the type of trace.
 #' @param group Either a variable name or a vector to use for grouping. If used, 
 #' a different trace will be created for each unique value.
 #' @param color Either a variable name or a vector to use for color mapping.
