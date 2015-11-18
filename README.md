@@ -6,7 +6,13 @@ An R package for creating interactive web-based graphs via [plotly](https://plot
 
 ## Installation
 
-__plotly__ is not (yet) available on CRAN, but you can install it via [devtools](http://cran.r-project.org/package=devtools):
+Install from CRAN:
+
+```r
+install.packages("plotly")
+```
+
+Or install the latest development version (on GitHub) via devtools:
 
 ```r
 devtools::install_github("ropensci/plotly")
