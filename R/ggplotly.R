@@ -928,24 +928,29 @@ gg2list <- function(p) {
   }
   
   l <- list(data = flipped.traces, layout = flipped.layout)
-  for (i in seq_along(l$data)) {
-    d <- l$data[[i]]
-    # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
-    # https://github.com/jeroenooms/jsonlite/issues/29
-    d[sapply(d, is.null)] <- NA
-    # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
-    # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
-    # x/y/etc so that they don't get unboxed when they are of length 1.
-    # unfortunately, this conflicts when using I() in qplot. For example,
-    # qplot(1:10, 1:10, size = I(10))
-    idx <- sapply(d, inherits, "AsIs")
-    for (j in which(idx)) l$data[[i]][[j]] <- unclass(l$data[[i]][[j]])
-    # some object keys require an array, even if length one
-    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-    # by to_JSON(), is to attach a class of AsIs (via I())
-    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
-    if (any(idx)) l$data[[i]][idx] <- lapply(d[idx], I)
-  }
-  structure(l, class = "plotly")
 
+  structure(
+    lapply(l, clean_list), 
+    class = "plotly"
+  )
+
+}
+
+
+clean_list <- function(x) {
+  # strip any existing 'AsIs' list elements of their 'AsIs' status.
+  # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
+  # returns list element with their 'AsIs' class, 
+  # which conflicts with our JSON unboxing strategy.
+  idx <- sapply(x, inherits, "AsIs")
+  for (i in which(idx)) class(x[[i]]) <- setdiff(class(x[[i]]), "AsIs")
+  # some plotly properties require an array, even if length one
+  # one way to ensure atomic vectors of length 1 are not automatically unboxed,
+  # by to_JSON(), is to attach a class of AsIs (via I())
+  idx <- names(x) %in% get_boxed() & sapply(x, length) == 1
+  if (any(idx)) x[idx] <- lapply(x[idx], I)
+  
+  # plotly server has trouble with empty properties
+  x <- x[sapply(x, length) > 0]
+  if (is.list(x)) lapply(x, clean_list) else x
 }
