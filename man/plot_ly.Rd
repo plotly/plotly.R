@@ -14,7 +14,7 @@ plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
 
-\item{type}{A charater string describing the type of trace.}
+\item{type}{A character string describing the type of trace.}
 
 \item{group}{Either a variable name or a vector to use for grouping. If used, 
 a different trace will be created for each unique value.}

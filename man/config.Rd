@@ -11,6 +11,8 @@ config(p = last_plot(), staticPlot = F, workspace = F, editable = F,
   displaylogo = T, plot3dPixelRatio = 2)
 }
 \arguments{
+\item{p}{a plotly object}
+
 \item{staticPlot}{for export or image generation}
 
 \item{workspace}{we're in the workspace, so need toolbar etc (TODO describe functionality instead)?}

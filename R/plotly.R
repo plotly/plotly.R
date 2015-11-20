@@ -8,7 +8,7 @@
 #' @param data A data frame (optional).
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
-#' @param type A charater string describing the type of trace.
+#' @param type A character string describing the type of trace.
 #' @param group Either a variable name or a vector to use for grouping. If used, 
 #' a different trace will be created for each unique value.
 #' @param color Either a variable name or a vector to use for color mapping.
@@ -176,6 +176,7 @@ layout <- function(p = last_plot(), ...,
 
 #' Set the default configuration for plotly
 #' 
+#' @param p a plotly object
 #' @param staticPlot for export or image generation
 #' @param workspace we're in the workspace, so need toolbar etc (TODO describe functionality instead)?
 #' @param editable edit titles, move annotations, etc
@@ -380,10 +381,6 @@ plotly_build <- function(l = last_plot()) {
   kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
   # empty keyword arguments can cause problems
   kwargs <- kwargs[sapply(kwargs, length) > 0]
-  # filename & fileopt are keyword arguments required by the API
-  if (!is.null(x$url) || !is.null(kwargs$filename)) 
-    kwargs$fileopt <- "overwrite"
-  kwargs$fileopt <- kwargs$fileopt %||% "new"
   # try our damndest to assign a sensible filename
   if (is.null(kwargs$filename)) {
     kwargs$filename <- 

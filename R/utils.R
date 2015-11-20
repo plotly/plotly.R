@@ -1,5 +1,5 @@
 #' @importFrom grDevices col2rgb
-#' @importFrom utils getFromNamespace modifyList
+#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
 #' @importFrom stats setNames
 
 is.plotly <- function(x) inherits(x, "plotly")

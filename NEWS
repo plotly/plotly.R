@@ -1,3 +1,15 @@
+2.0.3 -- 18 Nov 2015
+
+Fixed bug causing knitr options to be ignored. Also added VignetteBuilder to DESCRIPTION to vignette is available.
+
+2.0.2 -- 17 Nov 2015
+
+Using plotly_build() on a ggplot object should always return a plotly object
+
+2.0.1 -- 17 Nov 2015
+
+Better printing of server figures. Documentation and other fixes for initial CRAN release!
+
 2.0.0 -- 2 Nov 2015
 
 Added a dependency on htmlwidgets and 'offline' plots are now the default. If you want to create a figure on a plotly server, you need to use `plotly_POST()`. Also added a `config()` function to control the default appearance of the interactive plot

@@ -51,5 +51,5 @@ plotly_POST <- function(x, filename, fileopt = "new", world_readable = TRUE) {
                 new = "Success! Created a new plotly here -> ",
                 overwrite = "Success! Modified your plotly here -> ")
   message(msg, con$url)
-  con
+  structure(con, class = "figure")
 }

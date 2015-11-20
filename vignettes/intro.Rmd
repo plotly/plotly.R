@@ -1,14 +1,19 @@
 ---
 title: "An overview of plotly's R API"
 author: "Carson Sievert"
-output: html_document
-vignette: |
+output: rmarkdown::html_vignette
+vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteIndexEntry{Plotly DSL}
 ---
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 3
+)
 ```
 
 To create a plotly visualization, start with `plot_ly()`.
