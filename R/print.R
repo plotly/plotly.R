@@ -6,7 +6,7 @@
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
 print.plotly <- function(x, ...) {
-  w <- toWidget(x)
+  w <- as.widget(x)
   get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
 
@@ -17,7 +17,7 @@ print.plotly <- function(x, ...) {
 #' @param ... additional arguments (currently ignored)
 #' @export
 knit_print.plotly <- function(x, options, ...) {
-  w <- toWidget(x)
+  w <- as.widget(x)
   get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options)
 }
 
@@ -27,8 +27,9 @@ knit_print.plotly <- function(x, options, ...) {
 #' 
 #' @param x a plotly object.
 #' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @export
 #' 
-toWidget <- function(x, ...) {
+as.widget <- function(x, ...) {
   p <- plotly_build(x)
   # set some margin defaults if none are provided
   p$layout$margin <- modifyList(

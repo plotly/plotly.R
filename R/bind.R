@@ -20,7 +20,18 @@
 #'   "alert('You selected ['+pts.x+', '+pts.y+']');"
 #'  )
 #' bind(p, callback = cb)
-#'
+#' 
+#' w1 <- dplyr::count(mtcars, cyl) %>%
+#'   plot_ly(x = cyl, y = n, type = "bar") %>%
+#'   bind() %>%
+#'   as.widget()
+#'   
+#'  w2 <- mtcars %>%
+#'    plot_ly(x = mpg, type = "histogram") %>%
+#'    as.widget()
+#' 
+#' library(htmltools)
+#' browsable(tagList(w1, w2))
 
 bind <- function(p, event = "plotly_click", callback = "console.log(event, data)") {
   p <- last_plot(p)

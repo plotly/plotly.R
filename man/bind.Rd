@@ -30,5 +30,19 @@ cb <- c(
  )
 bind(p, callback = cb)
 
+w1 <- dplyr::count(mtcars, cyl) \%>\%
+  plot_ly(x = cyl, y = n, type = "bar") \%>\%
+  bind(callback = "") \%>\%
+  as.widget()
+  
+ w2 <- mtcars \%>\%
+   plot_ly(x = mpg, type = "hist") \%>\%
+   as.widget()
+
+library(htmltools)
+browsable(tagList(w1, w2))
+
+
+
 }
 
