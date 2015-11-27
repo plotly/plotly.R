@@ -11,8 +11,9 @@ bind(p, event = "plotly_click", callback = "console.log(event, data)")
 
 \item{event}{A valid DOM event}
 
-\item{callback}{the body of a JavaScript callback function 
-with the arguments \code{event} and \code{data} to be applied to the plotly instance}
+\item{callback}{character string containing the body of a JavaScript 
+callback function with the arguments \code{event} and \code{data} 
+to be applied to the plotly instance.}
 }
 \description{
 This functionality is an experiment
@@ -23,7 +24,10 @@ p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
 # open this in a web browser, click on a point, and open your console
 bind(p)
 # access the clicked point and display alert box
-cb <- "var pts = data.points[0]; alert('You selected ['+pts.x+', '+pts.y+']');"
+cb <- c(
+  "var pts = data.points[0];",
+  "alert('You selected ['+pts.x+', '+pts.y+']');"
+ )
 bind(p, callback = cb)
 
 }
