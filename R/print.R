@@ -26,8 +26,9 @@ knit_print.plotly <- function(x, options, ...) {
 #' Users shouldn't need to use this function. It's exported for internal reasons.
 #' 
 #' @param x a plotly object.
+#' @param ... other options passed onto \code{htmlwidgets::createWidget}
 #' 
-toWidget <- function(x) {
+toWidget <- function(x, ...) {
   p <- plotly_build(x)
   # set some margin defaults if none are provided
   p$layout$margin <- modifyList(
@@ -44,7 +45,9 @@ toWidget <- function(x) {
     htmlwidgets::sizingPolicy(
       padding = 5, 
       browser.fill = TRUE
-    )
+    ),
+    elementId = p$elementId,
+    ...
   )
 }
 

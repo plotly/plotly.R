@@ -4,10 +4,12 @@
 \alias{toWidget}
 \title{Convert a plotly object to an htmlwidget object}
 \usage{
-toWidget(x)
+toWidget(x, ...)
 }
 \arguments{
 \item{x}{a plotly object.}
+
+\item{...}{other options passed onto \code{htmlwidgets::createWidget}}
 }
 \description{
 Users shouldn't need to use this function. It's exported for internal reasons.

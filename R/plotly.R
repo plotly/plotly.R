@@ -97,7 +97,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL,
     width = width,
-    height = height
+    height = height,
+    elementId = digest::digest(Sys.time())
   )
   
   if (evaluate) p <- plotly_build(p)
