@@ -138,7 +138,6 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
       p$data[[i]]$yaxis <- info$yaxis
     }
   }
-  browser()
   hash_plot(data.frame(), p)
 }
 
