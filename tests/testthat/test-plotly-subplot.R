@@ -24,7 +24,9 @@ test_that("nrows argument works", {
   expect_identical(s$data[[2]]$xaxis, s$layout[["yaxis2"]][["anchor"]])
   expect_identical(s$data[[2]]$yaxis, s$layout[["xaxis2"]][["anchor"]])
   doms <- lapply(s$layout, "[[", "domain")
-  expect_true(doms$yaxis[1] >= doms$yaxis2[2])
+  expect_true(doms$yaxis[2] > doms$yaxis[1])
+  expect_true(doms$yaxis[1] > doms$yaxis2[2])
+  expect_true(doms$yaxis2[2] > doms$yaxis2[1])
 })
 
 test_that("group + [x/y]axis works", {

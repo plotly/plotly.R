@@ -107,8 +107,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
     info <- p_info[i, ]
-    xdom <- c(info$xstart, info$xend)
-    ydom <- c(info$ystart, info$yend)
+    xdom <- sort(c(info$xstart, info$xend))
+    ydom <- sort(c(info$ystart, info$yend))
     p$data[[i]] <- dots[[info$plot]]$data[[info$trace]]
     if (grepl("^geo", info$geo)) {
       # carry over first geo object if this one is missing
@@ -138,6 +138,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
       p$data[[i]]$yaxis <- info$yaxis
     }
   }
+  browser()
   hash_plot(data.frame(), p)
 }
 
