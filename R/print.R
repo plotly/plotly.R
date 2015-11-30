@@ -6,19 +6,19 @@
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
 print.plotly <- function(x, ...) {
-  w <- as.widget(x)
-  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
+  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
+  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, ...)
 }
 
 #' Print a plotly object in a knitr doc
 #' 
 #' @param x a plotly object
 #' @param options knitr options.
-#' @param ... additional arguments (currently ignored)
+#' @param ... additional arguments
 #' @export
 knit_print.plotly <- function(x, options, ...) {
-  w <- as.widget(x)
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options)
+  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, options = options, ...)
 }
 
 #' Convert a plotly object to an htmlwidget object
@@ -43,10 +43,11 @@ as.widget <- function(x, ...) {
     x = p,
     width = x$width,
     height = x$height,
-    htmlwidgets::sizingPolicy(
+    sizingPolicy = htmlwidgets::sizingPolicy(
       padding = 5, 
       browser.fill = TRUE
     ),
+    dependencies = crosstalk::dependencies,
     elementId = p$elementId,
     ...
   )

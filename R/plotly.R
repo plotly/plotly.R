@@ -21,6 +21,8 @@
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
+#' @param source Interaction source.
+#' @param target Interaction target.
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -65,8 +67,8 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
-                    width = NULL, height = NULL, inherit = TRUE, 
-                    evaluate = FALSE) {
+                    width = NULL, height = NULL, source = NULL, 
+                    target = NULL, inherit = TRUE, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
   # old arguments to this function that are no longer supported
@@ -98,6 +100,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     url = NULL,
     width = width,
     height = height,
+    source = source,
+    target = target,
     elementId = digest::digest(Sys.time())
   )
   
