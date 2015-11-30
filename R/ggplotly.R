@@ -929,28 +929,18 @@ gg2list <- function(p) {
   
   l <- list(data = flipped.traces, layout = flipped.layout)
 
-  structure(
-    lapply(l, clean_list), 
-    class = "plotly"
-  )
-
+  structure(rm_asis(l), class = "plotly")
 }
 
-
-clean_list <- function(x) {
+rm_asis <- function(x) {
+  # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
+  # https://github.com/jeroenooms/jsonlite/issues/29
+  if (is.null(x)) return(NA)
+  if (is.list(x)) lapply(x, rm_asis) 
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
   # returns list element with their 'AsIs' class, 
   # which conflicts with our JSON unboxing strategy.
-  idx <- sapply(x, inherits, "AsIs")
-  for (i in which(idx)) class(x[[i]]) <- setdiff(class(x[[i]]), "AsIs")
-  # some plotly properties require an array, even if length one
-  # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-  # by to_JSON(), is to attach a class of AsIs (via I())
-  idx <- names(x) %in% get_boxed() & sapply(x, length) == 1
-  if (any(idx)) x[idx] <- lapply(x[idx], I)
-  
-  # plotly server has trouble with empty properties
-  x <- x[sapply(x, length) > 0]
-  if (is.list(x)) lapply(x, clean_list) else x
+  else if (inherits(x, "AsIs")) class(x) <- setdiff(class(x), "AsIs")
+  else x
 }
