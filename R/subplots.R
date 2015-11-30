@@ -18,7 +18,7 @@
 #' @examples \dontrun{
 #' p1 <- plot_ly(economics, x = date, y = uempmed, showlegend = F)
 #' p2 <- plot_ly(economics, x = date, y = unemploy, showlegend = F)
-#' offline(subplot(p1, p2, p1, p2, nrows = 2))
+#' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
 
@@ -107,8 +107,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
     info <- p_info[i, ]
-    xdom <- c(info$xstart, info$xend)
-    ydom <- c(info$ystart, info$yend)
+    xdom <- sort(c(info$xstart, info$xend))
+    ydom <- sort(c(info$ystart, info$yend))
     p$data[[i]] <- dots[[info$plot]]$data[[info$trace]]
     if (grepl("^geo", info$geo)) {
       # carry over first geo object if this one is missing
