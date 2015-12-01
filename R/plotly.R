@@ -19,10 +19,9 @@
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
+#' @param key a selection variable for linked views
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
-#' @param source Interaction source.
-#' @param target Interaction target.
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
@@ -66,9 +65,9 @@
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
-                    group, color, colors, symbol, symbols, size,
-                    width = NULL, height = NULL, source = NULL, 
-                    target = NULL, inherit = TRUE, evaluate = FALSE) {
+                    group, color, colors, symbol, symbols, size, 
+                    key, width = NULL, height = NULL, 
+                    inherit = TRUE, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
   # old arguments to this function that are no longer supported
@@ -85,6 +84,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
+  if (!missing(key)) argz$key <- substitute(key)
   # trace information
   tr <- list(
     type = type,
@@ -93,15 +93,14 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     enclos = parent.frame(), # if objects aren't found in env, look here
     inherit = inherit
   )
-  # plotly objects should always have a _list_ of trace(s)
+  
   p <- list(
+    # plotly objects should always have a _list_ of trace(s)
     data = list(tr),
     layout = NULL,
     url = NULL,
     width = width,
     height = height,
-    source = source,
-    target = target,
     elementId = digest::digest(Sys.time())
   )
   

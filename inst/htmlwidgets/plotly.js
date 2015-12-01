@@ -3,7 +3,7 @@ HTMLWidgets.widget({
   name: "plotly",
   type: "output",
   
-  initialize: function(el, width, height){
+  initialize: function(el, width, height) {
     return {};
   },
   
@@ -21,38 +21,69 @@ HTMLWidgets.widget({
       Plotly.newPlot(el.id, x.data, x.layout);
     }
     
-    // TODO: pass in group from R?
+    // TODO: pass in group from R!
     var ctgrp = crosstalk.group('grp');
     
-    // check if a source interaction is specified for this plot
-    if (typeof x.source === "string" || x.source instanceof String) {
-      var sources = x.source.split("+");
-      // TODO: pass in event from R?
-      $('#'+el.id).bind('plotly_click', function(event, data) {
-        // let crosstalk know about the selection
-        for (var i = 0; i < sources.length; i++) {
-          var j = sources[i];
-          ctgrp.var(j).set(data.points[0][j]);
-        }
-        // TODO: how to visually modify this thing we've selected?
-        // note that 'this' is actually the whole widget
-      });
-    }
+    console.log(x.elementId);
+    dat = x.data;
     
-    // check if a target interaction is specified for this plot
-    if (typeof x.target === "string" || x.target instanceof String) {
-      var tgt = x.target.split("+");
-      for (var i = 0; i < tgt.length; i++) {
-        var j = tgt[i];
-        ctgrp.var(j).on('change', function(e) {
-          var b = x.data[0][j].filter(function(d) { return d == e.value; }); 
-          console.log(b);
-          //Plotly.addTraces(x.elementId, b);
+    // was a selection key specified?
+    if (x.data[0].hasOwnProperty("key")) {
+      // TODO: pass in event from R!
+      $('#'+el.id).on('plotly_click', function(event, data) {
+        
+        pts = data.points;
+        keys = data.points.map(function(pt){
+          return pt.data.key[pt.pointNumber];
         });
-      }
+        ctgrp.var("tdb").set(keys);
+      });
+      
+      ctgrp.var("tdb").on('change', function(e) {
+        console.log(e.value);
+        
+        var opacity = x.data.map(function(tr) {
+           var o = tr.key.map(function(k) {
+             // TODO: what is the JS equivalent of %in% ?
+             if (k == e.value[0]) return 1; else return 0.2;
+           });
+           return o;
+        });
+       
+        op = {"opacity": opacity};
+        
+        Plotly.restyle(el, op);
+      });
       
     }
     
   }
   
 });
+
+
+/*
+        // decrease the opacity of every point
+        var op = [];
+        for (var i = 0; i < x.data.length; i++) {
+           var d = x.data[i];
+           var n = d.key.length;
+           // TODO: smart preservation of specified opacity?
+           var o = [];
+           for (j = 0; j < n; j++) {
+             o.push(0.2);
+           }
+           op.push(o);
+        }
+        
+        // increase the opacity of clicked point(s)
+        for (var k = 0; k < data.points.length; k++) {
+          var pt = data.points[k];
+          op[pt.curveNumber][pt.pointNumber] = 1;
+        }
+        
+        var opacity = {"opacity": op};
+        
+        ctgrp.var("tdb").set(opacity);
+        */
+        
