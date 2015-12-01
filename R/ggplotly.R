@@ -941,18 +941,5 @@ gg2list <- function(p) {
   
   l <- list(data = flipped.traces, layout = flipped.layout)
 
-  structure(rm_asis(l), class = "plotly")
-}
-
-rm_asis <- function(x) {
-  # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
-  # https://github.com/jeroenooms/jsonlite/issues/29
-  if (is.null(x)) return(NA)
-  if (is.list(x)) lapply(x, rm_asis) 
-  # strip any existing 'AsIs' list elements of their 'AsIs' status.
-  # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
-  # returns list element with their 'AsIs' class, 
-  # which conflicts with our JSON unboxing strategy.
-  else if (inherits(x, "AsIs")) class(x) <- setdiff(class(x), "AsIs")
-  else x
+  structure(add_boxed(rm_asis(l)), class = "plotly")
 }
