@@ -41,8 +41,8 @@ as.widget <- function(x, ...) {
   htmlwidgets::createWidget(
     name = "plotly",
     x = p,
-    width = x$width,
-    height = x$height,
+    width = p$width,
+    height = p$height,
     sizingPolicy = htmlwidgets::sizingPolicy(
       padding = 5, 
       browser.fill = TRUE
