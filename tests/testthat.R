@@ -123,16 +123,20 @@ save_outputs <- function(gg, name) {
   p
 }
 
-
-test_check("plotly")
-
-# shut down the other R session
-if (report_diffs || build_table) {
-  RSshutdown(conn)
-  RSclose(conn)
+# use me just like testthat::test_check()
+test_run <- function(...) {
+  # shut down the other R session on exit
+  if (report_diffs || build_table) {
+    on.exit(RSshutdown(conn))
+    on.exit(RSclose(conn), add = TRUE)
+  }
+  test_check(...)
 }
 
-# now, actually build the table if necessary
+test_run("plotly")
+
+
+# now, actually build the table (if necessary)
 if (build_table) {
   imgfy <- function(pat) {
     sprintf(
