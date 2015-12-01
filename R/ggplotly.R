@@ -99,6 +99,17 @@ type <- function(x, y) {
   sub(y, "", tolower(class(x[[y]])[[1]]))
 }
 
+guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
+                                   "color", "colour", "size", "linetype")) {
+  sc <- as.list(p$scales)$scales
+  nms <- lapply(sc, "[[", "name")
+  if (length(nms) > 0) {
+    names(nms) <- lapply(sc, "[[", "aesthetics")
+    if (is.null(unlist(nms))) {nms <- list()}
+  }
+  unlist(modifyList(p$labels[names(p$labels) %in% aes], nms))
+}
+
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
@@ -676,15 +687,16 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
+  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
-    # Retrieve legend title
-    legend.elements <- unlist(sapply(traces, "[[", "name"))
-    legend.title <- ""
-    for (i in 1:ncol(p$data)) {
-      if (all(legend.elements %in% unique(p$data[, i])))
-        legend.title <- colnames(p$data)[i]
-    }
+      # Retrieve legend title
+      temp.title <- guide_names(p)
+      legend.title <- if (length(unique(temp.title)) > 1){
+        paste(temp.title, collapse = " / ")
+      } else {
+        unique(temp.title)
+      }
     legend.title <- paste0("<b>", legend.title, "</b>")
     
     # Create legend title element as an annotation
