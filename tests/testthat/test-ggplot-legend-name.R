@@ -120,7 +120,7 @@ lp <- ggplot(df, aes(x=xval, y=yval, group = cond)) +
 
 # tests
 test_that("points and line, same legend name", {
-  info <- expect_traces(lp, 2, "lines_points_same_legend_name")
+  info <- expect_traces(lp, 2, "lines_points_same_legend_name2")
   layout <- info$layout
   expect_identical(layout$annotations[[1]]$text, "<b>cond</b>")
 })
