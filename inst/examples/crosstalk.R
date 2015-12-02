@@ -25,8 +25,38 @@ browsable(tagList(
   as.widget(p2)
 ))
 
+# access renderPlotly() selections on a shiny server
+library(shiny)
+library(plotly)
 
-# brushing on a static ggplot and targeting a plotly
+mtcars$gear <- factor(mtcars$gear)
+
+ui <- fluidPage(
+  plotlyOutput("scatter1"),
+  textOutput("stuff")
+)
+
+server <- function(input, output, session) {
+  output$scatter1 <- renderPlotly({
+    plot_ly(mtcars, x = wt, y = mpg, color = gear, mode = "markers", 
+            key = gear, set = "A", width = 400)
+  })
+  rv <- reactive({
+    cv <- crosstalk::ClientValue$new("tdb")
+    cv$get()
+  })
+  output$stuff <- renderPrint({
+    rv()
+  })
+}
+
+shinyApp(ui, server)
+
+
+# TODO: pass selections from another htmlwidget (rcdimple?) to renderPlotly()
+
+
+# this actually need crosstalk, but might be interesting to compare the difference
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -43,29 +73,22 @@ server <- function(input, output, session) {
       geom_point()
   })
   
-  sd <- crosstalk::SharedData$new(iris %>% add_rownames(), "rowname", group = "A")
-  
   output$plot1 <- renderPlotly({
-    df <- sd$data(TRUE)
-    d <- count(iris, Species)
     p <- iris %>%
       count(Species) %>%
       plot_ly(x = Species, y = n, opacity = 0.5, type = "bar") %>%
       layout(barmode = "overlay", showlegend = FALSE)
-    if (all(!is.na(df$selected_))) { 
-      s <- df %>%
-        filter(selected_) %>%
+    if (!is.null(input$brush)) { 
+      br <- input$brush
+      s <- iris %>%
+        filter(br$xmin <= Sepal.Length, Sepal.Length <= br$xmax) %>%
+        filter(br$ymin <= Sepal.Width, Sepal.Width <= br$ymax) %>%
         count(Species)
       p <- add_trace(p, x = Species, y = n, data = s)
     }
     p
   })
-  
-  observeEvent(input$brush, {
-    df <- brushedPoints(sd$data(FALSE), input$brush, allRows = TRUE)
-    selected <- row.names(df)[df$selected_]
-    sd$selection(selected)
-  }, ignoreNULL = FALSE)
 }
 
 shinyApp(ui, server)
+
