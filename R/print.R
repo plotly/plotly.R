@@ -53,6 +53,9 @@ as.widget <- function(x, ...) {
   )
 }
 
+# for legacy reasons
+toWidget <- as.widget
+
 #' Print a plotly figure object
 #' 
 #' @param x a plotly figure object
