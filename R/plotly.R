@@ -20,6 +20,7 @@
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param key a selection variable for linked views
+#' @param set share selections across this grouping variable.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
@@ -66,7 +67,7 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size, 
-                    key, width = NULL, height = NULL, 
+                    key, set = "A", width = NULL, height = NULL, 
                     inherit = TRUE, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
