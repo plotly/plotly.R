@@ -92,7 +92,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     args = argz,
     env = list2env(data),    # environment in which to evaluate arguments
     enclos = parent.frame(), # if objects aren't found in env, look here
-    inherit = inherit
+    inherit = inherit,
+    set = set
   )
   
   p <- list(
