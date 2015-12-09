@@ -5,7 +5,7 @@ before_install:
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
   # password is encrypted below
-  - echo "Sys.setenv('plotly_username' = 'dfvd')" > ~/.Rprofile
+  - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
 
 install:
   - ./travis-tool.sh install_deps
@@ -20,16 +20,11 @@ script:
 
 after_success:
   - cd ../plotly-test-table
-  - ls -R
   - Rscript ../plotly/inst/build-push-comment.R
 
 env:
   global:
     # plotly_api_key (for posting to plot.ly)
-    - secure: "eHO4OUmgLusU9i4xSvr3daZxnsMZw3x4FH8BYVEC8Ja+Ey6kkAFFSh2iAC/CqewEYJ7I/M8aIJYqlyTMGRYUgy36WU7iWHAGgaZOU8fIB5dWzMwHbIvS4Naq2sdU7lRT7sxkS+40K1+rplpWDoLF2yt8vSRWo9rjNzp+yc8PjXM="
+    - secure: "UAETDsmeXkXm9eUpZa3JTm8/cv+jyLmArXE0TQD0yQNICFNPkGeNergoQmkesRqG+ifLu6V1lPXu1XlqQPdXY60clUHThDN+AjsBmcv9F170k6RtBSV8pIKL9fsW8t0v/maEet86qOSf3cNa5+gK8GjBH1pmLrN2rF9r7RhwUdg="
     # GITHUB_PAT (for pushing to plotly-test-table)
-    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
-    # plotlyjs_full (link to the full offline bundle)
-    - secure: "ivxfqGwbzpBpVJe+jVcOBktcmLrT38W/ZapAk/FNDu+yaBhag1eCYErAPPx6Snc4GzwatMt22v4SxAqXQF4SAhTRtmrWVaWnbhzuNqpTkiS6IKEd6EqaoyUZvUTgXh1ruyik00zl3ET9898O3vFfqafodljE0lCLVICHq6ANo68="
-    # plotlyjs_no_jq (link to the offline bundle w/o jQuery)
-    - secure: "i5cYEs2lCFSYgrSTHMmzzs8hRwAwiz89GpgM16fqUDQz8T1QMWofNugQInS7fIfKL36FoTz8BaiLs2D98/2kDkkZ0LTHnfrdrY9PO+7D+CmL8QeLLp4atBT0i682nwy8RzEqlvB8yAVQo/i0Eh8tmT97pppddsxttZKoUidfOeA=" 
+    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="    

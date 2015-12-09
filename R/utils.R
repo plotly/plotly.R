@@ -1,26 +1,11 @@
+#' @importFrom grDevices col2rgb
+#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
+#' @importFrom stats setNames
+
 is.plotly <- function(x) inherits(x, "plotly")
-is.offline <- function(x) inherits(x, "offline")
 
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
-}
-
-# this function is called after the package is loaded
-.onAttach <- function(...) {
-  usr <- verify("username")
-  if (nchar(usr) > 0) 
-    packageStartupMessage("\n", "Howdy, ", usr, "!")
-  key <- verify("api_key")
-  if (nchar(key) > 0) {
-    packageStartupMessage("Sweet, you have an API key already! \n",
-                          "Start making plots with ggplotly() or plot_ly().")
-  }
-  # set a default for the offline bundle directory 
-  if (Sys.getenv("plotly_offline") == "") {
-    Sys.setenv("plotly_offline" = "~/.plotly/plotlyjs")
-    # maybe rely a message if bundle is (or isn't) found?
-  }
-  invisible(NULL)
 }
 
 # special enviroment that tracks trace/layout information
@@ -61,13 +46,15 @@ get_plot <- function(data = NULL, last = FALSE) {
   }
 }
 
-#' Retrive last plotly to be modified or created
+#' Retrive and create the last plotly (or ggplot).
 #' 
 #' @seealso \link{plotly_build}
+#' @param data (optional) a data frame with a class of plotly (and a plotly_hash attribute).
 #' @export
-#' 
-last_plot <- function(...) {
-  p <- get_plot(..., last = TRUE)
+last_plot <- function(data = NULL) {
+  p <- try(get_plot(data, last = TRUE), silent = TRUE)
+  if (inherits(p, "try-error")) p <- try(ggplotly(), silent = TRUE)
+  if (inherits(p, "try-error")) stop("The last plot doesn't exist")
   structure(
     p, 
     class = unique(c("plotly", class(p)))
@@ -75,9 +62,9 @@ last_plot <- function(...) {
 }
 
 # Check for credentials/configuration and throw warnings where appropriate
-verify <- function(what = "username") {
+verify <- function(what = "username", warn = TRUE) {
   val <- grab(what)
-  if (val == "") {
+  if (val == "" && warn) {
     switch(what,
            username = warning("You need a plotly username. See help(signup, package = 'plotly')", call. = FALSE),
            api_key = warning("You need an api_key. See help(signup, package = 'plotly')", call. = FALSE))
@@ -135,25 +122,41 @@ struct <- function(x, y, ...) {
 get_domain <- function(type = "main") {
   if (type == "stream") {
     Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
+  } else if (type == "v2") {
+    Sys.getenv("plotly_domain", "https://api.plot.ly/v2/")
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }
-  
 }
 
 # plotly's special keyword arguments in POST body
 get_kwargs <- function() {
-  c("filename", "fileopt", "style", "traces", "layout", 
-    "world_readable", "kwarg_example")
+  c("filename", "fileopt", "style", "traces", "layout", "world_readable")
 }
 
 # POST header fields
-plotly_headers <- function() {
-  httr::add_headers(.headers = c(
-    "plotly-username" = verify("username"),
-    "plotly-apikey" = verify("api_key"),
-    "plotly-version" = as.character(packageVersion("plotly")),
-    "plotly-platform" = "R"))
+#' @importFrom base64enc base64encode
+plotly_headers <- function(type = "main") {
+  usr <- verify("username")
+  key <- verify("api_key")
+  v <- as.character(packageVersion("plotly"))
+  h <- if (type == "v2") {
+    auth <- base64enc::base64encode(charToRaw(paste(usr, key, sep = ":")))
+    c(
+      "authorization" = paste("Basic", auth),
+      "plotly-client-platform" = paste("R", v),
+      "plotly_version" = v,
+      "content-type" = "application/json"
+    )
+  } else {
+    c(
+      "plotly-username" = usr,
+      "plotly-apikey" = key,
+      "plotly-version" = v,
+      "plotly-platform" = "R"
+    )
+  }
+  httr::add_headers(.headers = h)
 }
 
 # try to write environment variables to an .Rprofile

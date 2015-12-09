@@ -1,6 +1,79 @@
+2.0.6 -- 2 Dec 2015
+
+Upgrade to plotlyjs 1.1.1. Fixes #319.
+
+2.0.5 -- 1 Dec 2015
+
+Fix for legend names. See #236.
+
+2.0.4 -- 28 Nov 2015
+
+Fix #313.
+
+2.0.3 -- 18 Nov 2015
+
+Fixed bug causing knitr options to be ignored. Also added VignetteBuilder to DESCRIPTION to vignette is available.
+
+2.0.2 -- 17 Nov 2015
+
+Using plotly_build() on a ggplot object should always return a plotly object
+
+2.0.1 -- 17 Nov 2015
+
+Better printing of server figures. Documentation and other fixes for initial CRAN release!
+
+2.0.0 -- 2 Nov 2015
+
+Added a dependency on htmlwidgets and 'offline' plots are now the default. If you want to create a figure on a plotly server, you need to use `plotly_POST()`. Also added a `config()` function to control the default appearance of the interactive plot
+
+1.0.10 -- 3 Nov 2015
+
+Fixed #292.
+
+1.0.9 -- 28 Sep 2015
+
+Fixed filename, fileopt arguments in plot_ly. Specifying the same filename will now overwrite the plot if it exists.
+
+1.0.8 -- 14 Sep 2015
+
+Added the plotly_IMAGES() function which interfaces to the images endpoint https://api.plot.ly/v2/#images
+
+Details -> https://github.com/ropensci/plotly/pull/279
+
+1.0.7 -- 26 Aug 2015
+
+See https://github.com/ropensci/plotly/pull/275
+
+1.0.6 -- 25 Aug 2015
+
+Fix a bug with subplot domain calculations (see https://github.com/ropensci/plotly/pull/274)
+
+1.0.5 -- 20 Aug 2015
+
+Fix issue converting plotly offline markdown documents to HTML when using `markdown::markdownToHTML`
+
+1.0.4 -- 14 Aug 2015
+
+Bug fix for subplot. See #265
+
+1.0.3 -- 7 Aug 2015
+
+Improved legend positioning. See #241
+
+1.0.2 -- 2 Aug 2015
+
+* last_plot() will now look for the last plotly object; if not found, it will try to find the last ggplot object.
+* Officially added the filename, fileopt, and world_readable arguments to plot_ly() and ggplotly().
+* If plotly offline is not available, the shiny.launch.browser option is changed to open a web brower. See #245.
+* Various namespace/documentation improvements for R CMD check.
+
+1.0.1 -- 2 Aug 2015
+
+Removed the stream() function as it wasn't ready to be included.
+
 1.0.0 -- 31 July 2015
 
-A major reworking of package internals which includes a few backwards incompatible changes. 
+A major reworking of package internals which includes a few backwards incompatible changes.
 
 Major changes include:
 
@@ -30,7 +103,7 @@ Let gg2list() return a figure object (backwards incompatible change).
 
 0.5.29 -- 16 April 2015
 
-geom_density() as filled area chart #202 
+geom_density() as filled area chart #202
 
 0.5.28 -- 15 April 2015
 

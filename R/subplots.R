@@ -13,11 +13,12 @@
 #' If a single value is provided, it will be used as all four margins. 
 #' @return A plotly object
 #' @export
+#' @importFrom plyr join
 #' @author Carson Sievert
 #' @examples \dontrun{
 #' p1 <- plot_ly(economics, x = date, y = uempmed, showlegend = F)
 #' p2 <- plot_ly(economics, x = date, y = unemploy, showlegend = F)
-#' offline(subplot(p1, p2, p1, p2, nrows = 2))
+#' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
 
@@ -75,12 +76,13 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   # bump x/y axis anchors appropriately
   p_info$xaxis <- sub("x1", "x", paste0("x", p_info$key))
   p_info$yaxis <- sub("y1", "y", paste0("y", p_info$key))
-  
   # Only do domain computations if they are _completely_ missing
   # (I don't think it makes sense to support partial specification of domains)
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
-    p_info[c("xstart", "xend", "yend", "ystart")] <- 
-      get_domains(max(p_info$key), nrows, margin)
+    doms <- get_domains(max(p_info$key), nrows, margin)
+    doms$key <- as.character(seq_len(nrow(doms)))
+    p_info <- p_info[!names(p_info) %in% c("xstart", "xend", "ystart", "yend")]
+    p_info <- plyr::join(p_info, doms, by = "key")
   }
   # empty plot container that we'll fill up with new info
   p <- list(
@@ -105,8 +107,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   p_info$trace <- as.numeric(p_info$trace)
   for (i in seq_along(p$data)) {
     info <- p_info[i, ]
-    xdom <- c(info$xstart, info$xend)
-    ydom <- c(info$ystart, info$yend)
+    xdom <- sort(c(info$xstart, info$xend))
+    ydom <- sort(c(info$ystart, info$yend))
     p$data[[i]] <- dots[[info$plot]]$data[[info$trace]]
     if (grepl("^geo", info$geo)) {
       # carry over first geo object if this one is missing

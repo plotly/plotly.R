@@ -928,7 +928,7 @@ ax <- list(
 )
 s <- seq(-1, 4)
 plot_ly(x = s, y = s) %>%
-  layout(xaxis = ax, yaxis = ax) %>% offline
+  layout(xaxis = ax, yaxis = ax)
 
 #' Hide Axes Title, Lines, Ticks, and Labels
 
@@ -942,7 +942,7 @@ ax <- list(
 )
 
 plot_ly(x = c(1, 2), y = c(1, 2)) %>%
-  layout(xaxis = ax, yaxis = ax) %>% offline
+  layout(xaxis = ax, yaxis = ax)
 
 #' Reversed Axes
 

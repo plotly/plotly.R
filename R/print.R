@@ -1,108 +1,94 @@
-# ----------------------------------------------------------------------------
-# Printing methods
-# ----------------------------------------------------------------------------
-
 #' Print a plotly object
 #' 
-#' @param x an object with class 'plotly'
-#' @param ... other arguments
+#' @param x a plotly object
+#' @param ... additional arguments (currently ignored)
 #' @export
+#' @importFrom htmlwidgets createWidget
+#' @importFrom htmlwidgets sizingPolicy
 print.plotly <- function(x, ...) {
-  l <- plotly_POST(x)
-  if (!is.null(l$url)) {
-    if (httr::url_ok(l$url) && interactive()) browseURL(l$url)
-  }
-  # get_figure() instead?
-  invisible(l)
+  w <- toWidget(x)
+  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
 }
 
-#' Embed a plotly iframe into an R markdown document via \code{knit_print}
-#' @param x named list of ggplots and option lists to pass to \code{animint2dir}.
+#' Print a plotly object in a knitr doc
+#' 
+#' @param x a plotly object
+#' @param options knitr options.
+#' @param ... additional arguments (currently ignored)
+#' @export
+knit_print.plotly <- function(x, options, ...) {
+  w <- toWidget(x)
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options)
+}
+
+#' Convert a plotly object to an htmlwidget object
+#' 
+#' Users shouldn't need to use this function. It's exported for internal reasons.
+#' 
+#' @param x a plotly object.
+#' 
+toWidget <- function(x) {
+  p <- plotly_build(x)
+  # set some margin defaults if none are provided
+  p$layout$margin <- modifyList(
+    list(b = 40, l = 60, t = 25, r = 10),
+    p$layout$margin %||% list()
+  )
+  # customize the JSON serializer (for htmlwidgets)
+  attr(p, 'TOJSON_FUNC') <- to_JSON
+  htmlwidgets::createWidget(
+    name = "plotly",
+    x = p,
+    width = x$width,
+    height = x$height,
+    htmlwidgets::sizingPolicy(
+      padding = 5, 
+      browser.fill = TRUE
+    )
+  )
+}
+
+#' Print a plotly figure object
+#' 
+#' @param x a plotly figure object
+#' @param ... additional arguments (currently ignored)
+#' @export
+print.figure <- function(x, ...) {
+  utils::browseURL(x$url)
+}
+
+#' Embed a plotly figure as an iframe in a knitr doc
+#' 
+#' @param x a plotly figure object
 #' @param options knitr options.
 #' @param ... placeholder.
 #' @export
 #' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
-knit_print.plotly <- function(x, options, ...) {
+knit_print.figure <- function(x, options, ...) {
   if (!requireNamespace("knitr")) {
     warning("Please install.packages('knitr')")
     return(x)
   }
-  resp <- print(x)
   w <- if (is.null(options[["width"]])) "800" else options[["width"]]
   h <- if (is.null(options[["height"]])) "600" else options[["height"]]
-  iframe <- plotly_iframe(resp$url, w, h)
+  iframe <- plotly_iframe(x$url, w, h)
   knitr::asis_output(iframe)
 }
 
-#' Print an "offline" (local) plotly object
-#' 
-#' @param x an object with class 'offline'
-#' @param ... other arguments
-#' @export
-print.offline <- function(x, ...) {
-  off <- offline_bundle(jq = TRUE)
-  plotlyjs <- readChar(off, file.info(off)$size)
-  html <- sprintf(
-    '<!DOCTYPE html><html lang="en">
-     <head>
-     	<meta charset="utf-8">
-      <script type="text/javascript">%s</script>
-     	<title>My Plotly</title>
-     </head>
-     
-     <body>
-       %s
-     </body>', plotlyjs, with(x, new_offline(data, layout, height, width, id))
-  )
-  d <- if (is.null(x$out_dir)) {
-    tempdir()
-  } else {
-    if (!dir.exists(x$out_dir)) dir.create(x$out_dir, recursive = TRUE)
-    x$out_dir
-  }
-  index <- file.path(d, "index.html")
-  res <- writeLines(html, index)
-  if (!is.null(x$viewer)) x$viewer(index)
-}
-
-#' Embed a plotly iframe into an R markdown document via \code{knit_print}
-#' @param x named list of ggplots and option lists to pass to \code{animint2dir}.
-#' @param options knitr options.
-#' @param ... placeholder.
-#' @export
-#' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
-knit_print.offline <- function(x, options, ...) {
-  if (!requireNamespace("knitr")) {
-    warning("Please install.packages('knitr')")
-    return(x)
-  }
-  p <- with(x, new_offline(data, layout, height, width, id))
-  # if this is the first plot, place bundle just before the plot
-  if (length(knitr::knit_meta(class = "plotly", clean = FALSE)) == 0) {
-    off <- offline_bundle(jq = TRUE)
-    b <- readChar(off, file.info(off)$size)
-    p <- paste0(
-      sprintf('<script type="text/javascript">%s</script>', b),
-      p
-    )
-  }
-  knitr::asis_output(p, meta = list(plotly = structure("", class = "plotly")))
-}
-
-#' Embed a plotly iframe into a IPython Notebook
+#' Embed a plotly figure as an iframe into a IPython Notebook
 #' @param x a plotly object
 #' @param width attribute of the iframe
 #' @param height attribute of the iframe
 #' @export
 embed_notebook <- function(x, width = "100%", height = "525") {
-  if (!requireNamespace("IRdisplay")) {
+  if (!"figure" %in% class(x)) stop("x must be a plotly figure")
+  if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
     return(x)
   }
-  resp <- print(x)
-  iframe <- plotly_iframe(attr(resp, "url"), width, height)
-  IRdisplay::display_html(iframe)
+  iframe <- plotly_iframe(x$url, width, height)
+  get("display_html", envir = asNamespace("IRdisplay"))(iframe)
 }
 
 plotly_iframe <- function(url, width, height) {

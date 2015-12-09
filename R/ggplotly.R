@@ -4,6 +4,15 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
+#' @param filename character string describing the name of the plot in your plotly account. 
+#' Use / to specify directories. If a directory path does not exist it will be created.
+#' If this argument is not specified and the title of the plot exists,
+#' that will be used for the filename.
+#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
+#' "append" data to existing plotly, or "extend" it.
+#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
+#' by anyone who has the link and in the owner's plotly account.
+#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
 #' @export
@@ -23,8 +32,13 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = last_plot()) {
+ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt, 
+                     world_readable = TRUE) {
   l <- gg2list(p)
+  # tack on special keyword arguments
+  if (!missing(filename)) l$filename <- filename
+  if (!missing(fileopt)) l$fileopt <- fileopt
+  l$world_readable <- world_readable
   hash_plot(p$data, l)
 }
 
@@ -101,6 +115,17 @@ markLegends <-
 markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- c(markLegends,list(boxplot=c("x")))
+
+guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
+                                   "color", "colour", "size", "linetype")) {
+  sc <- as.list(p$scales)$scales
+  nms <- lapply(sc, "[[", "name")
+  if (length(nms) > 0) {
+    names(nms) <- lapply(sc, "[[", "aesthetics")
+    if (is.null(unlist(nms))) {nms <- list()}
+  }
+  unlist(modifyList(p$labels[names(p$labels) %in% aes], nms))
+}
 
 #' Convert a ggplot to a list.
 #' @import ggplot2
@@ -354,7 +379,7 @@ gg2list <- function(p) {
   # x axis scale instead of on the grid 0-1 scale). This allows
   # transformations to be used out of the box, with no additional d3
   # coding.
-  theme.pars <- ggplot2:::plot_theme(p)
+  theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
   
   # Flip labels if coords are flipped - transform does not take care
   # of this. Do this BEFORE checking if it is blank or not, so that
@@ -659,12 +684,14 @@ gg2list <- function(p) {
   
   # Legend.
   layout$margin$r <- 10
-  if (exists("increase_margin_r", where = as.environment("package:plotly"))) {
+  if (exists("increase_margin_r")) {
     layout$margin$r <- 60
   }
-  layout$legend <- list(bordercolor="transparent", 
-                        x=1.05, y=1/2,
-                        xanchor="center", yanchor="top")
+  layout$legend <- list(bordercolor = "transparent", 
+                        x = 1.01, 
+                        y = 0.075 * 0.5* length(trace.list) + 0.45,
+                        xref="paper", yref="paper",
+                        xanchor = "left", yanchor = "top")
   
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
@@ -690,33 +717,34 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
+  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
-    # Retrieve legend title
-    legend.elements <- unlist(sapply(traces, "[[", "name"))
-    legend.title <- ""
-    for (i in 1:ncol(p$data)) {
-      if (all(legend.elements %in% unique(p$data[, i])))
-        legend.title <- colnames(p$data)[i]
-    }
+      # Retrieve legend title
+      temp.title <- guide_names(p)
+      legend.title <- if (length(unique(temp.title)) > 1){
+        paste(temp.title, collapse = " / ")
+      } else {
+        unique(temp.title)
+      }
     legend.title <- paste0("<b>", legend.title, "</b>")
+    
     # Create legend title element as an annotation
-    if (exists("annotations", where = as.environment("package:plotly"))) {
-        nann <- nann + 1
-    } else{
+    if (exists("annotations")) {
+      nann <- nann + 1
+    } else {
       annotations <- list()
       nann <- 1
     }
     annotations[[nann]] <- list(text=legend.title,
-                                x=layout$legend$x,
-                                y=layout$legend$y * 1.04,
+                                x = layout$legend$x * 1.0154,
+                                y = 0.075 * 0.5* length(trace.list) + 0.55,
                                 showarrow=FALSE,
                                 xref="paper", yref="paper",
-                                xanchor="center",
+                                xanchor="left", yanchor = "top",
                                 textangle=0)
     layout$annotations <- annotations
   }
-  
   # Family font for text
   if (!is.null(theme.pars$text$family)) {
     layout$titlefont$family   <- theme.pars$text$family
@@ -941,16 +969,25 @@ gg2list <- function(p) {
   }
   
   l <- list(data = flipped.traces, layout = flipped.layout)
-  # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
-  # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
-  # x/y/etc so that they don't get unboxed when they are of length 1.
-  # unfortunately, this conflicts when using I() in qplot. For example,
-  # qplot(1:10, 1:10, size = I(10))
-  un <- function(x) {
-    if (is.null(x)) return(NA)
-    if (is.list(x)) lapply(x, un) 
-    else if (inherits(x, "AsIs")) unclass(x) 
-    else x
+  
+  for (i in seq_along(l$data)) {
+    d <- l$data[[i]]
+    # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
+    # https://github.com/jeroenooms/jsonlite/issues/29
+    d[sapply(d, is.null)] <- NA
+    # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
+    # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
+    # x/y/etc so that they don't get unboxed when they are of length 1.
+    # unfortunately, this conflicts when using I() in qplot. For example,
+    # qplot(1:10, 1:10, size = I(10))
+    idx <- sapply(d, inherits, "AsIs")
+    for (j in which(idx)) l$data[[i]][[j]] <- unclass(l$data[[i]][[j]])
+    # some object keys require an array, even if length one
+    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
+    # by to_JSON(), is to attach a class of AsIs (via I())
+    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
+    if (any(idx)) l$data[[i]][idx] <- lapply(d[idx], I)
   }
-  lapply(l, un)
+  structure(l, class = "plotly")
+  
 }
