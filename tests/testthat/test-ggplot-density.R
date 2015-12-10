@@ -18,7 +18,7 @@ base <- ggplot(mtcars, aes(wt))
 
 test_that("geom_density() is translated to area chart", {
   info <- expect_traces(base + geom_density(), 1, "simple")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_identical(tr$type, "scatter")
   expect_identical(tr$fill, "tozeroy")
   expect_identical(tr$fillcolor, "rgba(51,51,51,0)")
@@ -49,7 +49,7 @@ g <- base +
   
 test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
   info <- expect_traces(g, 2, "histogram")
-  trs <- info$traces
+  trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))
   expect_identical(sort(type), c("bar", "scatter"))
 })
