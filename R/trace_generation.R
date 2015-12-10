@@ -403,6 +403,14 @@ toBasic <- list(
     g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
     group2NA(g, "path")
   },
+  jitter=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g$geom <- "point"
+    g
+  },
   point=function(g) {
     if (length(unique(g$data$size)) > 1 && is.null(g$data$text)) {
       g$data$text <- paste("size:", g$data$size)
