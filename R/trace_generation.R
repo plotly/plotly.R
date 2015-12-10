@@ -51,7 +51,7 @@ layer2traces <- function(l, d, misc) {
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {
         a.name <- paste0(a, ".name")
-        col.name <- g$aes[aes.used]
+        col.name <- g$aes[a.name]
         dtemp <- l$data[[col.name]]
         if (is.null(dtemp)) {
           if (!is.null(g$data[[a.name]])) {
