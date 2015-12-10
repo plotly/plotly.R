@@ -97,7 +97,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL,
     width = width,
-    height = height
+    height = height,
+    base_url = get_domain()
   )
   
   if (evaluate) p <- plotly_build(p)
