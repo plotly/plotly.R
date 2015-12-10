@@ -58,7 +58,7 @@ save_outputs <- function(gg, name) {
       res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
       res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
       res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
-      pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg), function(e) 'plotly build error'")
+      pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg), error = function(e) 'plotly build error')")
       # it could be that the hash didn't exist, so make sure they're different
       if (plot_hash != digest::digest(pm)) {
         test_dir <- file.path(this_dir, gsub("\\s+", "-", name))
