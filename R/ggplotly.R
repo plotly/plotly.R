@@ -372,7 +372,7 @@ gg2list <- function(p) {
   trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
-    coord.lim <- p$coord$limits[[xy]]
+    coord.lim <- p$coordinates$limits[[xy]] %||% p$scales$get_scales(xy)$limits
     if(is.numeric(coord.lim)){
       ## TODO: maybe test for more exotic coord specification types
       ## involving NA, Inf, etc?
@@ -492,6 +492,10 @@ gg2list <- function(p) {
     # translate to plotly:
     !is.blank(s("axis.line.%s"))
     layout[[s("%saxis")]] <- ax.list
+    # remove traces that are outside the range of (discrete) scales
+    nms <- unlist(lapply(traces, "[[", "name"))
+    if (is.discrete(ax.list$range) && !is.null(nms)) 
+      trace.list <- trace.list[nms %in% ax.list$range]
   }
   # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title

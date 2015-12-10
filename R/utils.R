@@ -8,6 +8,10 @@ is.plotly <- function(x) inherits(x, "plotly")
   if (length(x) > 0) x else y
 }
 
+is.discrete <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
+}
+
 # special enviroment that tracks trace/layout information
 plotlyEnv <- new.env(parent = emptyenv())
 
