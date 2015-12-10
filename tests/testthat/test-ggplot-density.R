@@ -10,7 +10,7 @@ expect_traces <- function(gg, n.traces, name) {
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data=has.data, layout=L$layout)
 }
 
 # Draw a probability density estimation using geom_density
@@ -27,7 +27,7 @@ test_that("geom_density() is translated to area chart", {
 test_that("geom_density() respects fill aesthetic", {
   gg <- base + geom_density(aes(fill=factor(vs)), alpha = 0.3)
   info <- expect_traces(gg, 2, "fill")
-  trs <- info$traces
+  trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))
   fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
@@ -36,7 +36,7 @@ test_that("geom_density() respects fill aesthetic", {
 
 test_that("geom_density() respects colour aesthetic", {
   info <- expect_traces(base + geom_density(aes(colour=factor(vs))), 2, "color")
-  trs <- info$traces
+  trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))
   fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
@@ -56,18 +56,12 @@ test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
 
 # Check if the traces are in the correct order when position = stack
 # Generate ggplot object
-p <- ggplot(data = movies, aes(x = rating, fill = mpaa,)) + 
+p <- ggplot(data = mtcars, aes(x = mpg, fill = factor(cyl))) + 
   geom_density(position = "stack")
-# Test 
+
 test_that("traces are ordered correctly in geom_density", {
-  info <- expect_traces(p, 5, "traces_order")
-  tr <- info$traces[[1]]
-  la <- info$layout
-  expect_identical(tr$type, "scatter")
-  # check trace order
-  trace.names <- rev(levels(movies$mpaa))
-  for (i in 1:5){
-    expect_identical(info$traces[[i]]$name, trace.names[i])
-  }
+  info <- expect_traces(p, 3, "traces_order")
+  nms <- sapply(info$data, "[[", "name")
+  expect_identical(nms, c("8", "6", "4"))
 })
 
