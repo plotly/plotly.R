@@ -15,7 +15,6 @@ layer2traces <- function(l, d, misc) {
     data = d,
     prestats.data = l$prestats.data
   )
-  
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -81,8 +80,9 @@ layer2traces <- function(l, d, misc) {
                                    "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
-        } else if (inherits(data.vec, "factor")) {
+        } else if (inherits(data.vec, c("character", "factor"))) {
           # Re-order data so that Plotly gets it right from ggplot2.
+          data.vec <- as.factor(data.vec)
           g$data <- g$data[order(g$data[[a]]), ]
           vec.i <- match(g$data[[a]], as.numeric(data.vec))
           if(anyNA(vec.i)){
@@ -97,6 +97,7 @@ layer2traces <- function(l, d, misc) {
           if (!is.factor(pdata.vec))
             pdata.vec <- g$prestats.data[[a.name]]
         }
+        
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
       }
