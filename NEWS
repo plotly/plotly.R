@@ -1,3 +1,7 @@
+2.0.9 -- 10 Dec 2015
+
+Fix #333
+
 2.0.8 -- 10 Dec 2015
 
 Fix a bug with geom_segment (see #321 & #228) 
