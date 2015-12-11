@@ -99,6 +99,7 @@ markLegends <-
   # Legends based on sizes not implemented yet in Plotly
   #  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
+       hex=c("count", "density"),
        path=c("linetype", "size", "colour", "shape"),
        ## NOTE: typically "group" should not be present here, since
        ## that would mean creating a separate plotly legend for each
