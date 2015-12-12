@@ -42,3 +42,20 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   expect_identical(L$data[[1]]$type, "box")
   expect_identical(L$data[[1]]$y, as.character(df$y))
 })
+
+dat <- data.frame(
+  cond = factor(rep(c("A", "B", "C", "D"), each = 200)), 
+  col = factor(rep(c("C1", "C2"), each = 400)), 
+  rating = c(rnorm(200), rnorm(200, mean=.8), rnorm(200, mean=.4), rnorm(200, mean=.2))
+)
+g <- ggplot(dat, aes(x = cond, y = rating)) + 
+  geom_boxplot(outlier.shape = NA, aes(fill = col))
+
+test_that("correct # of unique fillcolors", {
+  L <- save_outputs(g, "boxplot-fillcolor")
+  expect_equal(length(L$data), 4)
+  expect_identical(L$data[[1]]$type, "box")
+  fills <- sapply(L$data, "[[", "fillcolor")
+  expect_equal(length(unique(fills)), length(unique(dat$col)))
+})
+
