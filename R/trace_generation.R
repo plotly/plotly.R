@@ -294,7 +294,7 @@ layer2traces <- function(l, d, misc) {
     s <- no.sort[[tr.i]]$sort
     no.sort[[tr.i]]$showlegend <-
       if (is.numeric(s)) {
-        if (s == Inf){
+        if (all(s %in% Inf)){
           FALSE
         } else {
           TRUE

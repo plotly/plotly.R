@@ -105,8 +105,9 @@ markLegends <-
        ## group, even when they have the exact same visual
        ## characteristics and could be drawn using just 1 trace!
        polygon=c("colour", "fill", "linetype", "size"),
-       bar = c("colour", "fill"),
-       density = c("colour", "fill", "linetype"),
+       bar=c("colour", "fill"),
+       density=c("colour", "fill", "linetype"),
+       boxplot=c("colour", "fill", "size"),
        errorbar=c("colour", "linetype"),
        errorbarh=c("colour", "linetype"),
        area=c("colour", "fill"),
@@ -115,7 +116,8 @@ markLegends <-
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
-markSplit <- c(markLegends,list(boxplot=c("x")))
+markSplit <- markLegends
+markSplit$boxplot <- c(markSplit$boxplot, "x")
 
 guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
                                    "color", "colour", "size", "linetype")) {
@@ -306,9 +308,6 @@ gg2list <- function(p) {
     traces <- layer2traces(L, df, misc)
     
     possible.legends <- markLegends[[L$geom$objname]]
-    if (L$geom$objname == "boxplot"){
-      possible.legends <- markSplit[[L$geom$objname]]
-    }
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
