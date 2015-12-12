@@ -401,6 +401,14 @@ toBasic <- list(
     g$params$yend <- max(g$prestats.data$globymax)
     g
   },
+  jitter=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g$geom <- "point"
+    g
+  },
   point=function(g) {
     if ("size" %in% names(g$data)) {
       g$params$sizemin <- min(g$prestats.data$globsizemin)
