@@ -825,7 +825,7 @@ gg2list <- function(p) {
         tr.attr <- tr[[must.be.equal]]
         criteria[[must.be.equal]] <- isTRUE(all.equal(other.attr, tr.attr))
       }
-      if(all(criteria)){
+      if(all(criteria) && tr$type != "bar"){
         can.merge[[other.i]] <- TRUE
       }
     }

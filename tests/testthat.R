@@ -65,8 +65,7 @@ save_outputs <- function(gg, name) {
     res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
     res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
     res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
-    browser()
-    pm <- RSeval(conn, "plotly::plotly_build(gg)")
+    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg), error = function(e) 'plotly build error')")
     if (build_table) {
       # save pngs of ggplot
       filename <- paste0(gsub("\\s+", "-", name), ".png")

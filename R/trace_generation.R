@@ -256,6 +256,16 @@ layer2traces <- function(l, d, misc) {
     }
   })
   
+  # reverse the traces in the following cases:
+  # geom_area
+  # geom_density with position = stack
+  if (g$geom == "area" | 
+        g$geom == "density" & l$position$.super$objname == "stack"){
+    traces <- rev(traces)
+  } else{
+    traces
+  }
+  
   ord <- order(sort.val)
   no.sort <- traces[ord]
   for(tr.i in seq_along(no.sort)){
