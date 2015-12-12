@@ -15,12 +15,8 @@ expect_traces <- function(gg, n_traces, name) {
   list(traces = has_data, layout = L$layout)
 }
 
-# Data where x ranges from 0-10, y ranges from 0-30
-set.seed(202)
-dat <- data.frame(xval = runif(40,0,10), yval = runif(40,0,30))
-
 # Force equal scaling
-p <- ggplot(dat, aes(xval, yval)) + geom_point() + coord_fixed()
+p <- ggplot(mtcars, aes(mpg, qsec)) + geom_point() + coord_fixed()
 # Test 
 test_that("coord_fixed() is translated to the right height-width ratio", {
   info <- expect_traces(p, 1, "force_equal_scaling")
@@ -28,14 +24,14 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   la <- info$layout
   expect_identical(tr$type, "scatter")
   # height-width ratio check
-  x_range <- range(p$data$xval, na.rm = TRUE)
-  y_range <- range(p$data$yval, na.rm = TRUE)
+  x_range <- range(p$data$mpg, na.rm = TRUE)
+  y_range <- range(p$data$qsec, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
   expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, tolerance = 0.10)
 })
 
 # Equal scaling, with each 1 on the x axis the same length as y on x axis
-p <- ggplot(dat, aes(xval, yval)) + geom_point() + coord_fixed(1/3)
+p <- ggplot(dat, aes(mpg, qsec)) + geom_point() + coord_fixed(1/3)
 # Test 
 test_that("coord_fixed() is translated to the right height-width ratio", {
   info <- expect_traces(p, 1, "force_equal_scaling")
@@ -43,8 +39,8 @@ test_that("coord_fixed() is translated to the right height-width ratio", {
   la <- info$layout
   expect_identical(tr$type, "scatter")
   # height-width ratio check
-  x_range <- range(p$data$xval, na.rm = TRUE)
-  y_range <- range(p$data$yval, na.rm = TRUE)
+  x_range <- range(p$data$mpg, na.rm = TRUE)
+  y_range <- range(p$data$qsec, na.rm = TRUE)
   yx_ratio <- (y_range[2] - y_range[1]) / (x_range[2] - x_range[1])
   expect_equal(la$height/la$width, yx_ratio * p$coordinates$ratio, tolerance = 0.10)
 })
