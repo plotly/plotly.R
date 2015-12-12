@@ -259,8 +259,7 @@ layer2traces <- function(l, d, misc) {
   # reverse the traces in the following cases:
   # geom_area
   # geom_density with position = stack
-  if (g$geom == "area" | 
-        g$geom == "density" & l$position$.super$objname == "stack"){
+  if (g$geom %in% c("area", "density") && type(l, "position") == "stack"){
     traces <- rev(traces)
   } else{
     traces
@@ -332,6 +331,11 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
+    # Preserve default colour values using fill:
+    if (!is.null(g$data$fill)) {
+      g$prestats.data$fill <- NULL
+      g$prestats.data <- plyr::join(g$prestats.data, g$data[c("x", "fill")], by = "x")
+    }
     g$data <- g$prestats.data
     g
   },
