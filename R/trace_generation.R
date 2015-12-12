@@ -354,10 +354,10 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
-    # Preserve default colour values usign fill:
+    # Preserve default colour values using fill:
     if (!is.null(g$data$fill)) {
-      levels(g$prestats.data$fill) <- g$data$fill
-      g$prestats.data$fill <- as.character(g$prestats.data$fill)
+      g$prestats.data$fill <- NULL
+      g$prestats.data <- plyr::join(g$prestats.data, g$data[c("x", "fill")], by = "x")
     }
     g$data <- g$prestats.data
     g
