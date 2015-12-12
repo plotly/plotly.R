@@ -55,7 +55,7 @@ test_that("correct # of unique fillcolors", {
   L <- save_outputs(g, "boxplot-fillcolor")
   expect_equal(length(L$data), 4)
   expect_identical(L$data[[1]]$type, "box")
-  fills <- sapply(l$data, "[[", "fillcolor")
+  fills <- sapply(L$data, "[[", "fillcolor")
   expect_equal(length(unique(fills)), length(unique(dat$col)))
 })
 
