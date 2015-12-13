@@ -106,6 +106,8 @@ markLegends <-
        ## characteristics and could be drawn using just 1 trace!
        polygon=c("colour", "fill", "linetype", "size"),
        bar=c("colour", "fill"),
+       density=c("colour", "fill", "linetype"),
+       boxplot=c("colour", "fill", "size"),
        errorbar=c("colour", "linetype"),
        errorbarh=c("colour", "linetype"),
        area=c("colour", "fill"),
@@ -114,7 +116,8 @@ markLegends <-
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
-markSplit <- c(markLegends,list(boxplot=c("x")))
+markSplit <- markLegends
+markSplit$boxplot <- "x"
 
 guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
                                    "color", "colour", "size", "linetype")) {

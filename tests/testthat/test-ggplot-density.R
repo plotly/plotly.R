@@ -32,6 +32,10 @@ test_that("geom_density() respects fill aesthetic", {
   fill <- unique(sapply(trs, "[[", "fill"))
   expect_identical(type, "scatter")
   expect_identical(fill, "tozeroy")
+  # check legend exists
+  expect_true(info$layout$showlegend, TRUE)
+  # check legend for each fill exists
+  expect_true(all(sapply(trs, "[[", "showlegend")))
 })
 
 test_that("geom_density() respects colour aesthetic", {
