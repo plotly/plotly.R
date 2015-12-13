@@ -117,7 +117,7 @@ markLegends <-
 markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- markLegends
-markSplit$boxplot <- c(markSplit$boxplot, "x")
+markSplit$boxplot <- "x"
 
 guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
                                    "color", "colour", "size", "linetype")) {
