@@ -819,16 +819,18 @@ gg2list <- function(p) {
     not.merged <- not.merged[-1]
     # Are there any traces that have not yet been merged, and can be
     # merged with tr?
-    can.merge <- rep(FALSE, l=length(not.merged))
+    can.merge <- logical(length(not.merged))
     for(other.i in seq_along(not.merged)){
       other <- not.merged[[other.i]]
       criteria <- c()
       for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
         other.attr <- other[[must.be.equal]]
         tr.attr <- tr[[must.be.equal]]
-        criteria[[must.be.equal]] <- isTRUE(all.equal(other.attr, tr.attr))
+        criteria[[must.be.equal]] <- 
+          isTRUE(all.equal(other.attr, tr.attr)) && 
+          unique(other$type, tr$type) == "scatter"
       }
-      if(all(criteria) && tr$type != "bar"){
+      if(all(criteria)){
         can.merge[[other.i]] <- TRUE
       }
     }
@@ -840,7 +842,7 @@ gg2list <- function(p) {
       }, error=function(e){
         NA
       })
-      if(is.character(new.mode) && !is.na(new.mode)){
+      if(is.character(new.mode) && !is.na(new.mode %||% NA)){
         tr$mode <- new.mode
       }
       attrs <- c("error_x", "error_y", "marker", "line")
