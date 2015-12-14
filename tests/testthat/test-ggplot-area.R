@@ -23,8 +23,6 @@ test_that("transparency alpha in geom_area is converted", {
   expect_identical(L$data[[1]]$fillcolor, "rgba(51,51,51,0.4)")
 })
 
-save_outputs(gg, "area-fillcolor")
-
 # Test that the order of traces is correct
 # Expect traces function
 expect_traces <- function(gg, n_traces, name) {
