@@ -334,7 +334,8 @@ toBasic <- list(
     # Preserve default colour values using fill:
     if (!is.null(g$data$fill)) {
       g$prestats.data$fill <- NULL
-      g$prestats.data <- plyr::join(g$prestats.data, g$data[c("x", "fill")], by = "x")
+      dat <- unique(g$data[c("x", "fill")])
+      g$prestats.data <- plyr::join(g$prestats.data, dat, by = "x")
     }
     g$data <- g$prestats.data
     g
