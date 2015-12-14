@@ -103,7 +103,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     url = NULL,
     width = width,
     height = height,
-    elementId = digest::digest(Sys.time())
+    base_url = get_domain()
   )
   
   if (evaluate) p <- plotly_build(p)

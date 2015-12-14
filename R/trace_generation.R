@@ -57,7 +57,7 @@ layer2traces <- function(l, d, misc) {
       aes.used <- aes.names[aes.names %in% names(g$aes)]
       for(a in aes.used) {
         a.name <- paste0(a, ".name")
-        col.name <- g$aes[aes.used]
+        col.name <- g$aes[a.name]
         dtemp <- l$data[[col.name]]
         if (is.null(dtemp)) {
           if (!is.null(g$data[[a.name]])) {
@@ -252,7 +252,7 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap")) bargap else "default"
+      tr$bargap <- if (exists("bargap", where = environment())) bargap else "default"
       pos <- l$position$.super$objname
       tr$barmode <-
         if (pos %in% "identity" && tr$bargap == 0) {
@@ -277,6 +277,16 @@ layer2traces <- function(l, d, misc) {
       0
     }
   })
+  
+  # reverse the traces in the following cases:
+  # geom_area
+  # geom_density with position = stack
+  if (g$geom == "area" | 
+        g$geom == "density" & l$position$.super$objname == "stack"){
+    traces <- rev(traces)
+  } else{
+    traces
+  }
   
   ord <- order(sort.val)
   no.sort <- traces[ord]
@@ -344,10 +354,10 @@ toBasic <- list(
     group2NA(g, "path")
   },
   boxplot=function(g) {
-    # Preserve default colour values usign fill:
+    # Preserve default colour values using fill:
     if (!is.null(g$data$fill)) {
-      levels(g$prestats.data$fill) <- g$data$fill
-      g$prestats.data$fill <- as.character(g$prestats.data$fill)
+      g$prestats.data$fill <- NULL
+      g$prestats.data <- plyr::join(g$prestats.data, g$data[c("x", "fill")], by = "x")
     }
     g$data <- g$prestats.data
     g
@@ -389,6 +399,14 @@ toBasic <- list(
   vline=function(g) {
     g$params$ystart <- min(g$prestats.data$globymin)
     g$params$yend <- max(g$prestats.data$globymax)
+    g
+  },
+  jitter=function(g) {
+    if ("size" %in% names(g$data)) {
+      g$params$sizemin <- min(g$prestats.data$globsizemin)
+      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    }
+    g$geom <- "point"
     g
   },
   point=function(g) {
