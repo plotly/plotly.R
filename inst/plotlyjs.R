@@ -13,8 +13,8 @@ download.file(
 library(jsonlite)
 pkg <- fromJSON("https://raw.githubusercontent.com/plotly/plotly.js/master/package.json")
 deps <- pkg$dependencies
-nms <- names(deps)
-deps <- sub("^\\^", "", as.character(deps))
+nms <- c(pkg$name, names(deps))
+deps <- c(pkg$version, sub("^\\^", "", as.character(deps)))
 
 f <- function(x, y) {
   list(name = x, 
@@ -23,6 +23,8 @@ f <- function(x, y) {
        script = "plotly-latest.min.js"
   )
 }
+
+
 
 depz <- list(dependencies = Map(f, nms, deps))
 writeLines(yaml::as.yaml(depz), "inst/htmlwidgets/plotly.yaml")

@@ -1,4 +1,9 @@
 dependencies:
+  plotly.js:
+    name: plotly.js
+    version: 1.2.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
   3d-view:
     name: 3d-view
     version: 2.0.0
