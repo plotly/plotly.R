@@ -1,9 +1,187 @@
 dependencies:
-  - name: plotlyjs
-    version: 1.2.1
-    src: "htmlwidgets/lib/plotlyjs"
+  3d-view:
+    name: 3d-view
+    version: 2.0.0
+    src: htmlwidgets/lib/plotlyjs
     script: plotly-latest.min.js
-  - name: d3
+  alpha-shape:
+    name: alpha-shape
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  arraytools:
+    name: arraytools
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  convex-hull:
+    name: convex-hull
+    version: 1.0.3
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  d3:
+    name: d3
     version: 3.5.6
-    src: "htmlwidgets/lib/plotlyjs"
+    src: htmlwidgets/lib/plotlyjs
     script: plotly-latest.min.js
+  delaunay-triangulate:
+    name: delaunay-triangulate
+    version: 1.1.6
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  es6-promise:
+    name: es6-promise
+    version: 3.0.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  fast-isnumeric:
+    name: fast-isnumeric
+    version: 1.1.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  fs-extra:
+    name: fs-extra
+    version: 0.26.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-error2d:
+    name: gl-error2d
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-error3d:
+    name: gl-error3d
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-line2d:
+    name: gl-line2d
+    version: 1.2.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-line3d:
+    name: gl-line3d
+    version: 1.0.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-mat4:
+    name: gl-mat4
+    version: 1.1.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-mesh3d:
+    name: gl-mesh3d
+    version: 1.0.4
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-plot2d:
+    name: gl-plot2d
+    version: 1.1.6
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-plot3d:
+    name: gl-plot3d
+    version: 1.3.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-scatter2d:
+    name: gl-scatter2d
+    version: 1.0.5
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-scatter2d-fancy:
+    name: gl-scatter2d-fancy
+    version: 1.1.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-scatter3d:
+    name: gl-scatter3d
+    version: 1.0.4
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-select-box:
+    name: gl-select-box
+    version: 1.0.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-spikes2d:
+    name: gl-spikes2d
+    version: 1.0.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  gl-surface3d:
+    name: gl-surface3d
+    version: 1.0.6
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  mouse-change:
+    name: mouse-change
+    version: 1.1.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  mouse-wheel:
+    name: mouse-wheel
+    version: 1.0.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  ndarray:
+    name: ndarray
+    version: 1.0.16
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  ndarray-fill:
+    name: ndarray-fill
+    version: 1.0.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  ndarray-homography:
+    name: ndarray-homography
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  ndarray-ops:
+    name: ndarray-ops
+    version: 1.2.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  node-sass:
+    name: node-sass
+    version: 3.4.1
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  right-now:
+    name: right-now
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  robust-orientation:
+    name: robust-orientation
+    version: 1.1.3
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  sane-topojson:
+    name: sane-topojson
+    version: 1.2.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  superscript-text:
+    name: superscript-text
+    version: 1.0.0
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  tinycolor2:
+    name: tinycolor2
+    version: 1.1.2
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  topojson:
+    name: topojson
+    version: 1.6.19
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+  xml2js:
+    name: xml2js
+    version: 0.4.15
+    src: htmlwidgets/lib/plotlyjs
+    script: plotly-latest.min.js
+
