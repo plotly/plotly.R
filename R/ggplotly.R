@@ -50,33 +50,6 @@ ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt,
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
-default.marker.sizeref <- 1
-marker.size.mult <- 10
-
-marker.defaults <- list(alpha=1,
-                        shape="16",
-                        size=marker.size.mult,
-                        sizeref=default.marker.sizeref,
-                        sizemode="area",
-                        colour="black")
-
-line.defaults <- list(linetype="solid",
-                      colour="black",
-                      size=1,
-                      direction="linear")
-
-boxplot.defaults <- line.defaults
-boxplot.defaults$colour <- "grey20"
-
-ribbon.line.defaults <- line.defaults
-ribbon.line.defaults$colour <- NA
-
-polygon.line.defaults <- line.defaults
-polygon.line.defaults$colour <- NA
-
-# Convert R lty line type codes to plotly "dash" codes.
-lty2dash <- c(numeric.lty, named.lty, coded.lty)
-
 aesConverters <- list(
   linetype=function(lty) {
     lty2dash[as.character(lty)]
@@ -84,7 +57,12 @@ aesConverters <- list(
   colour=function(col) {
     toRGB(col)
   },
-  size=identity,
+  # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
+  # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
+  # from R, but it seems 96 is a reasonable assumption.
+  size=function(mm) {
+    (mm * 96) / 25.4
+  },
   sizeref=identity,
   sizemode=identity,
   alpha=identity,
@@ -119,6 +97,11 @@ markUnique <- as.character(unique(unlist(markLegends)))
 markSplit <- markLegends
 markSplit$boxplot <- "x"
 
+# obtain the "type" of geom/position/etc.
+type <- function(x, y) {
+  sub(y, "", tolower(class(x[[y]])[[1]]))
+}
+
 guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
                                    "color", "colour", "size", "linetype")) {
   sc <- as.list(p$scales)$scales
@@ -136,21 +119,8 @@ guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
 #' @return figure object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p) {
-  if(length(p$layers) == 0) {
-    stop("No layers in plot")
-  }
-  # Always use identity size scale so that plot.ly gets the real
-  # units for the size variables.
-  original.p <- p
-  p <- tryCatch({
-    # this will be an error for discrete variables.
-    suppressMessages({
-      ggplot_build(p+scale_size_continuous())
-      p+scale_size_identity()
-    })
-  },error=function(e){
-    p
-  })
+  # ggplot now applies geom_blank() (instead of erroring) when no layers exist
+  if (length(p$layers) == 0) p <- p + geom_blank()
   layout <- list()
   trace.list <- list()
   
@@ -188,7 +158,7 @@ gg2list <- function(p) {
       misc[[misc.name]][[a]] <- tryCatch({
         fun <- get(fun.name)
         suppressMessages({
-          with.scale <- original.p + fun()
+          with.scale <- p + fun()
         })
         ggplot_build(with.scale)
         TRUE
@@ -307,7 +277,7 @@ gg2list <- function(p) {
     # This extracts essential info for this geom/layer.
     traces <- layer2traces(L, df, misc)
     
-    possible.legends <- markLegends[[L$geom$objname]]
+    possible.legends <- markLegends[[type(L, "geom")]]
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
@@ -405,7 +375,7 @@ gg2list <- function(p) {
   trace.name.map <- c()
   for(xy in c("x","y")){
     ax.list <- list()
-    coord.lim <- p$coord$limits[[xy]]
+    coord.lim <- p$coordinates$limits[[xy]] %||% p$scales$get_scales(xy)$limits
     if(is.numeric(coord.lim)){
       ## TODO: maybe test for more exotic coord specification types
       ## involving NA, Inf, etc?
@@ -525,6 +495,10 @@ gg2list <- function(p) {
     # translate to plotly:
     !is.blank(s("axis.line.%s"))
     layout[[s("%saxis")]] <- ax.list
+    # remove traces that are outside the range of (discrete) scales
+    nms <- unlist(lapply(traces, "[[", "name"))
+    if (is.discrete(ax.list$range) && !is.null(nms)) 
+      trace.list <- trace.list[nms %in% ax.list$range]
   }
   # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title
@@ -955,7 +929,8 @@ gg2list <- function(p) {
   # each axis.
   flipped.traces <- named.traces
   flipped.layout <- layout
-  if("flip" %in% attr(built$plot$coordinates, "class")){
+  coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
+  if("flip" %in% coord_cl){
     if(!inherits(p$facet, "null")){
       stop("coord_flip + facet conversion not supported")
     }
@@ -974,25 +949,6 @@ gg2list <- function(p) {
   }
   
   l <- list(data = flipped.traces, layout = flipped.layout)
-  
-  for (i in seq_along(l$data)) {
-    d <- l$data[[i]]
-    # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
-    # https://github.com/jeroenooms/jsonlite/issues/29
-    d[sapply(d, is.null)] <- NA
-    # When auto_unbox is T in jsonlite::toJSON() it doesn't unbox objects of 
-    # class AsIs. We use this in plotly::to_JSON() and tag special fields such as
-    # x/y/etc so that they don't get unboxed when they are of length 1.
-    # unfortunately, this conflicts when using I() in qplot. For example,
-    # qplot(1:10, 1:10, size = I(10))
-    idx <- sapply(d, inherits, "AsIs")
-    for (j in which(idx)) l$data[[i]][[j]] <- unclass(l$data[[i]][[j]])
-    # some object keys require an array, even if length one
-    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-    # by to_JSON(), is to attach a class of AsIs (via I())
-    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
-    if (any(idx)) l$data[[i]][idx] <- lapply(d[idx], I)
-  }
-  structure(l, class = "plotly")
-  
+
+  structure(add_boxed(rm_asis(l)), class = "plotly")
 }

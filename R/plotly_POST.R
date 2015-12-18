@@ -24,7 +24,6 @@
 #' plotly_POST(p, filename = "mtcars-bar-plot")
 #' }
 
-# TODO: support all the API arguments???
 plotly_POST <- function(x, filename, fileopt = "new", world_readable = TRUE) {
   x <- plotly_build(x)
   if (!missing(filename)) x$filename <- filename
@@ -34,7 +33,8 @@ plotly_POST <- function(x, filename, fileopt = "new", world_readable = TRUE) {
   if (!is.null(x$world_readable)) 
     warning("world_readable was specified in the wrong place. Please specify in plotly_POST()")
   x$world_readable <- world_readable
-  
+  # plotly server has trouble with empty properties
+  x <- x[sapply(x, length) > 0]
   # construct body of message to plotly server
   bod <- list(
     un = verify("username"),

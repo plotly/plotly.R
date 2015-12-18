@@ -11,7 +11,6 @@ test_that("segments become one path", {
   tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
   expect_true(any(is.na(tr$y)))
-  save_outputs(gg, "segment")
 })
 
 test_that("with non-numeric data, we can have more than one segment", {

@@ -77,7 +77,7 @@ test_that("Color and shape, labs and discrete scales, same name", {
 test_that("Color and shape, labs and discrete scales, same name", {
   p7 <- p + labs(shape = "Group Shape") + 
     scale_color_discrete(name = "Group Color")
-  info <- expect_traces(p7, 2, "scatter_scale_lab_same_legend_name")
+  info <- expect_traces(p7, 2, "scatter_scale_lab_same_legend_name2")
   layout <- info$layout
   expect_identical(layout$annotations[[1]]$text, 
                    "<b>Group Shape / Group Color</b>")

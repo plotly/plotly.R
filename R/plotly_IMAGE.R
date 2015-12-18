@@ -12,9 +12,7 @@
 #' @param ... arguments passed onto \code{httr::POST}
 #' @export
 #' @examples \dontrun{
-#' 
 #' p <- plot_ly(x = 1:10)
-#' 
 #' Png <- plotly_IMAGE(p, out_file = "plotly-test-image.png")
 #' Jpeg <- plotly_IMAGE(p, format = "jpeg", out_file = "plotly-test-image.jpeg")
 #' Svg <- plotly_IMAGE(p, format = "svg",  out_file = "plotly-test-image.svg")

@@ -21,7 +21,6 @@ test_that("geom_density() is translated to area chart", {
   tr <- info$data[[1]]
   expect_identical(tr$type, "scatter")
   expect_identical(tr$fill, "tozeroy")
-  expect_identical(tr$fillcolor, "rgba(51,51,51,0)")
 })
 
 test_that("geom_density() respects fill aesthetic", {

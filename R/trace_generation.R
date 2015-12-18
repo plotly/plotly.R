@@ -7,15 +7,14 @@
 #' @importFrom plyr summarise
 #' @export
 layer2traces <- function(l, d, misc) {
-  not.na <- function(df){
-    na.mat <- is.na(df)
-    to.exclude <- apply(na.mat, 1, any)
-    df[!to.exclude, ]
-  }
-  g <- list(geom=l$geom$objname,
-            data=not.na(d),
-            prestats.data=not.na(l$prestats.data))
   
+  # TODO: do we really need to remove records with any NAs?
+  # New version of ggplot2 allows NA for aes (e.g., alpha)
+  g <- list(
+    geom = type(l, "geom"),
+    data = d,
+    prestats.data = l$prestats.data
+  )
   # needed for when group, etc. is an expression.
   g$aes <- sapply(l$mapping, function(k) as.character(as.expression(k)))
   # Partial conversion for geom_violin (Plotly does not offer KDE yet)
@@ -42,11 +41,6 @@ layer2traces <- function(l, d, misc) {
       misc$smoothLine <- TRUE
       g$geom <- "smoothLine"
     }
-  }
-  # histogram is essentially a bar chart with no gaps (after stats are computed)
-  if (g$geom == "histogram") {
-    g$geom <- "bar"
-    bargap <- 0
   }
   
   # For non-numeric data on the axes, we should take the values from
@@ -86,8 +80,9 @@ layer2traces <- function(l, d, misc) {
                                    "%Y-%m-%d %H:%M:%S"), silent=TRUE)
           pdata.vec <- strftime(as.Date(g$prestats.data[[a]], origin=the.epoch),
                                 "%Y-%m-%d %H:%M:%S")
-        } else if (inherits(data.vec, "factor")) {
+        } else if (inherits(data.vec, c("character", "factor"))) {
           # Re-order data so that Plotly gets it right from ggplot2.
+          data.vec <- as.factor(data.vec)
           g$data <- g$data[order(g$data[[a]]), ]
           vec.i <- match(g$data[[a]], as.numeric(data.vec))
           if(anyNA(vec.i)){
@@ -102,6 +97,7 @@ layer2traces <- function(l, d, misc) {
           if (!is.factor(pdata.vec))
             pdata.vec <- g$prestats.data[[a.name]]
         }
+        
         g$data[[a]] <- data.vec
         g$prestats.data[[a]] <- pdata.vec
       }
@@ -125,27 +121,15 @@ layer2traces <- function(l, d, misc) {
   # cases of basic geoms. In ggplot2, this processing is done in the
   # draw method of the geoms.
   
-  # Every plotly trace has one of these types
-  # type=scatter,bar,box,histogramx,histogram2d,heatmap
-  
-  # for type=scatter, you can define
+  # for type='scatter', you can define
   # mode=none,markers,lines,lines+markers where "lines" is the
   # default for 20 or more points, "lines+markers" is the default for
   # <20 points. "none" is useful mainly if fill is used to make area
   # plots with no lines.
   
-  # marker=list(size,line,color="rgb(54,144,192)",opacity,symbol)
-  
-  # symbol=circle,square,diamond,cross,x,
-  # triangle-up,triangle-down,triangle-left,triangle-right
-  
   # First convert to a "basic" geom, e.g. segments become lines.
   convert <- toBasic[[g$geom]]
-  basic <- if(is.null(convert)){
-    g
-  }else{
-    convert(g)
-  }
+  basic <- if (is.function(convert)) convert(g) else g
   # Then split on visual characteristics that will get different
   # legend entries.
   data.list <- if (basic$geom %in% names(markSplit)) {
@@ -178,18 +162,6 @@ layer2traces <- function(l, d, misc) {
       })
     }
   }
-  # Split hline and vline when multiple panels or intercepts:
-  # Need multiple traces accordingly.
-  if (g$geom %in% c("hline", "vline")) {
-    intercept <- paste0(ifelse(g$geom == "hline", "y", "x"), "intercept")
-    vec.list <- basic$data[c("PANEL", intercept)]
-    df.list <- split(basic$data, vec.list, drop=TRUE)
-    data.list <- lapply(df.list, function(df) {
-      params <- basic$params
-      list(data=df,
-           params=params)
-    })
-  }
   
   # case of no legend, if either of the two ifs above failed.
   if(is.null(data.list)){
@@ -198,17 +170,22 @@ layer2traces <- function(l, d, misc) {
   }
   getTrace <- geom2trace[[basic$geom]]
   if(is.null(getTrace)){
-    warning("Conversion not implemented for geom_",
-            g$geom, " (basic geom_", basic$geom, "), ignoring. ",
-            "Please open an issue with your example code at ",
-            "https://github.com/ropensci/plotly/issues")
-    return(list())
+    getTrace <- geom2trace[["blank"]]
+    warning("geom_", g$geom, " has yet to be implemented in plotly.\n",
+            "  If you'd like to see this geom implemented,\n",
+            "  Please open an issue with your example code at\n",
+            "  https://github.com/ropensci/plotly/issues")
   }
   traces <- NULL
   names.in.legend <- NULL
   for (data.i in seq_along(data.list)) {
     data.params <- data.list[[data.i]]
-    data.params$params$stat.type <- l$stat$objname
+    data.params$params$stat.type <- type(l, "stat")
+    # as of ggplot2 version 1.1, param defaults can be obtained from the data
+    data.params$params <- modifyList(
+      dat2params(data.params$data),
+      data.params$params
+    )
     tr <- do.call(getTrace, data.params)
     for (v.name in c("x", "y")) {
       vals <- tr[[v.name]]
@@ -252,16 +229,17 @@ layer2traces <- function(l, d, misc) {
     
     # special handling for bars
     if (g$geom == "bar") {
-      tr$bargap <- if (exists("bargap", where = environment())) bargap else "default"
-      pos <- l$position$.super$objname
+      is_hist <- misc$is.continuous[["x"]]
+      tr$bargap <- if (is_hist) 0 else "default"
+      pos <- type(l, "position")
       tr$barmode <-
-        if (pos %in% "identity" && tr$bargap == 0) {
+        if (pos %in% "identity" && is_hist) {
           "overlay" 
         } else if (pos %in% c("identity", "stack", "fill")) {
           "stack"
         } else {
-        "group"
-      }
+          "group"
+        }
     }
     
     traces <- c(traces, list(tr))
@@ -281,8 +259,7 @@ layer2traces <- function(l, d, misc) {
   # reverse the traces in the following cases:
   # geom_area
   # geom_density with position = stack
-  if (g$geom == "area" | 
-        g$geom == "density" & l$position$.super$objname == "stack"){
+  if (g$geom %in% c("area", "density") && type(l, "position") == "stack"){
     traces <- rev(traces)
   } else{
     traces
@@ -357,7 +334,8 @@ toBasic <- list(
     # Preserve default colour values using fill:
     if (!is.null(g$data$fill)) {
       g$prestats.data$fill <- NULL
-      g$prestats.data <- plyr::join(g$prestats.data, g$data[c("x", "fill")], by = "x")
+      dat <- unique(g$data[c("x", "fill")])
+      g$prestats.data <- plyr::join(g$prestats.data, dat, by = "x")
     }
     g$data <- g$prestats.data
     g
@@ -382,24 +360,63 @@ toBasic <- list(
     g
   },
   abline=function(g) {
-    g$params$xstart <- min(g$prestats.data$globxmin)
-    g$params$xend <- max(g$prestats.data$globxmax)
-    g
+    N <- nrow(g$data)
+    m <- g$data$slope
+    b <- g$data$intercept
+    xmin <- min(g$prestats.data$globxmin, na.rm = T)
+    xmax <- max(g$prestats.data$globxmax, na.rm = T)
+    g$data$plotly_id <- seq_len(N)
+    l <- list()
+    for (i in seq_len(N)) {
+      # the NAs tell plotly to draw different traces for each line
+      l$x <- c(l$x, xmin, xmax, NA) 
+      l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
+    }
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
+    group2NA(g, "path")
   },
   hline=function(g) {
+    N <- nrow(g$data)
+    yint <- g$data$yintercept
     if (is.factor(g$data$x)) {
-      g$params$xstart <- as.character(sort(g$data$x)[1])
-      g$params$xend <- as.character(sort(g$data$x)[length(g$data$x)])
+      s <- sort(g$data$x)
+      xmin <- as.character(s[1])
+      xmax <- as.character(s[length(s)])
     } else {
-      g$params$xstart <- min(g$prestats.data$globxmin)
-      g$params$xend <- max(g$prestats.data$globxmax)
+      xmin <- min(g$prestats.data$globxmin, na.rm = T)
+      xmax <- max(g$prestats.data$globxmax, na.rm = T)
     }
-    g
+    g$data$plotly_id <- seq_len(N)
+    l <- list()
+    for (i in seq_len(N)) {
+      l$x <- c(l$x, xmin, xmax, NA) 
+      l$y <- c(l$y, yint[i], yint[i], NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
+    }
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
+    group2NA(g, "path")
   },
   vline=function(g) {
-    g$params$ystart <- min(g$prestats.data$globymin)
-    g$params$yend <- max(g$prestats.data$globymax)
-    g
+    N <- nrow(g$data)
+    xint <- g$data$xintercept
+    if (is.factor(g$data$y)) {
+      s <- sort(g$data$y)
+      ymin <- as.character(s[1])
+      ymax <- as.character(s[length(s)])
+    } else {
+      ymin <- min(g$prestats.data$globxmin, na.rm = T)
+      ymax <- max(g$prestats.data$globxmax, na.rm = T)
+    }
+    g$data$plotly_id <- seq_len(N)
+    l <- list()
+    for (i in seq_len(N)) {
+      l$x <- c(l$x, xint[i], xint[i], NA) 
+      l$y <- c(l$y, ymin, ymax, NA)
+      l$plotly_id <- c(l$plotly_id, rep(i, 3))
+    }
+    g$data <- plyr::join(g$data, data.frame(l), by = "plotly_id")
+    group2NA(g, "path")
   },
   jitter=function(g) {
     if ("size" %in% names(g$data)) {
@@ -410,9 +427,8 @@ toBasic <- list(
     g
   },
   point=function(g) {
-    if ("size" %in% names(g$data)) {
-      g$params$sizemin <- min(g$prestats.data$globsizemin)
-      g$params$sizemax <- max(g$prestats.data$globsizemax)
+    if (length(unique(g$data$size)) > 1 && is.null(g$data$text)) {
+      g$data$text <- paste("size:", g$data$size)
     }
     g
   },
@@ -480,25 +496,23 @@ group2NA <- function(g, geom) {
 # Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
 # error_x.
 make.errorbar <- function(data, params, xy){
-  tr <-
-    list(x=data$x,
-         y=data$y,
-         type="scatter",
-         mode="none")
+  tr <- list(
+    x = data$x,
+    y = data$y,
+    type = "scatter",
+    mode = "none"
+  )
   err.name <- paste0("error_", xy)
   min.name <- paste0(xy, "min")
   max.name <- paste0(xy, "max")
-  e <-
-    list(array=data[[max.name]]-data[[xy]],
-         type="data",
-         width=params$width,
-         symmetric=TRUE,
-         color=if(!is.null(params$colour)){
-           toRGB(params$colour)
-         }else{
-           toRGB(data$colour)
-         })
-  arrayminus <- data[[xy]]-data[[min.name]]
+  e <- list(
+    array = data[[max.name]] - data[[xy]],
+    type = "data",
+    width = params$width,
+    symmetric = TRUE,
+    color = toRGB(params$colour)
+  )
+  arrayminus <- data[[xy]] - data[[min.name]]
   if(!isTRUE(all.equal(e$array, arrayminus))){
     e$arrayminus <- arrayminus
     e$symmetric <- FALSE
@@ -527,56 +541,66 @@ ribbon_dat <- function(dat) {
   rbind(dat1, dat2)
 }
 
+
+dat2params <- function(d) {
+  params <- c(names(aesConverters), "fill")
+  l <- as.list(d[names(d) %in% params])
+  lapply(l, unique)
+}
+
 # Convert basic geoms to traces.
 geom2trace <- list(
+  blank=function(data, params) {
+    list(
+      x=data$x,
+      y=data$y,
+      name=params$name,
+      text=data$text,
+      type="scatter",
+      mode="markers",
+      marker=list(opacity = 0)
+    )
+  },
   path=function(data, params) {
+    # when converting ggplot2 size to plotly size, we assume size is an _area_,
+    # but "size" for lines really means linewidth, so size is a _length_ in this case
+    # (see aesConverters$size)
+    params$size <- sqrt(params$size)
     list(x=data$x,
          y=data$y,
          name=params$name,
          text=data$text,
          type="scatter",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
   },
   polygon=function(data, params){
-    g <- list(data=data, geom="polygon")
+    g <- list(data = data, geom = "polygon")
     g <- group2NA(g, "polygon")
-    list(x=g$data$x,
-         y=g$data$y,
-         name=params$name,
-         text=g$data$text,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, polygon.line.defaults),
-         fill="tozerox",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-                                              params$alpha)))
+    list(
+      x = g$data$x,
+      y = g$data$y,
+      name = params$name,
+      text = g$data$text,
+      type = "scatter",
+      mode = "lines",
+      line = paramORdefault(params, aes2line, ggplot2::GeomPolygon$default_aes),
+      fill = "tozerox",
+      fillcolor = toRGB(params$fill, params$alpha)
+    )
   },
   point=function(data, params){
-    L <- list(x=data$x,
-              y=data$y,
-              name=params$name,
-              text=as.character(data$text),
-              type="scatter",
-              mode="markers",
-              marker=paramORdefault(params, aes2marker, marker.defaults))
-    if("size" %in% names(data)){
-      if(!("text" %in% names(data))) {
-        L$text <- paste("size:", data$size)
-      }
-      L$marker$sizeref <- default.marker.sizeref
-      # Make sure sizes are passed as a list even when there is only one element.
-      s <- data$size
-      marker.size <- 5 * (s - params$sizemin)/(params$sizemax - params$sizemin) + 0.25
-      marker.size <- marker.size * marker.size.mult
-      L$marker$size <- if (length(s) > 1) marker.size else list(marker.size)
-      L$marker$line$width <- 0
-    }
+    L <- list(
+      x = data$x,
+      y = data$y,
+      name = params$name,
+      text = as.character(data$text),
+      type = "scatter",
+      mode = "markers",
+      marker = paramORdefault(params, aes2marker, ggplot2::GeomPoint$default_aes)
+    )
     if (!is.null(params$shape) && params$shape %in% c(21:25)) {
-      L$marker$color <- ifelse(!is.null(params$fill), toRGB(params$fill), "rgba(0,0,0,0)")
-      if (!is.null(params$colour))
-        L$marker$line$color <- toRGB(params$colour)
-      L$marker$line$width <- 1
+      L$marker$color <- toRGB(params$fill %||% "black")
     }
     if (!is.null(params$shape) && params$shape %in% c(32)) {
       L$visible <- FALSE
@@ -611,16 +635,18 @@ geom2trace <- list(
     data$x <- x
     dat <- plyr::ddply(data, c("x", "PANEL", if ("group" %in% names(data)) "group"),
                        plyr::summarise, count = max(y))
-    L <- list(x = dat$x,
-              y = dat$count,
-              type = "bar",
-              # text only makes sense if no dimension reduction occurred
-              text = if (nrow(dat) == nrow(data)) data$text else NULL,
-              name = params$name,
-              marker = list(color = toRGB(params$fill)))
+    L <- list(
+      x = dat$x,
+      y = dat$count,
+      type = "bar",
+      # text only makes sense if no dimension reduction occurred
+      text = if (nrow(dat) == nrow(data)) data$text else NULL,
+      name = params$name,
+      marker = list(color = toRGB(params$fill))
+    )
     if (!is.null(params$colour)) {
       L$marker$line <- list(color = toRGB(params$colour))
-      L$marker$line$width <- if (is.null(params$size)) 1 else params$size
+      L$marker$line$width <- params$size %||% 1
     }
     if (!is.null(params$alpha)) L$opacity <- params$alpha
     L
@@ -631,7 +657,7 @@ geom2trace <- list(
          name=params$name,
          type="scatter",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes))
   },
   tile=function(data, params) {
     list(x=unique(data$x),
@@ -641,14 +667,17 @@ geom2trace <- list(
          name=params$name,
          type="heatmap",
          mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+         line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
   },
   boxplot=function(data, params) {
-    list(y=data$y,
-         name=params$name,
-         type="box",
-         line=paramORdefault(params, aes2line, boxplot.defaults),
-         fillcolor=ifelse(!is.null(data$fill), toRGB(data$fill), toRGB("white")))
+    list(
+      y = data$y,
+      name = params$name,
+      type = "box",
+      # TODO: translate marker styling for outliers!
+      line = paramORdefault(params, aes2line, ggplot2::GeomBoxplot$default_aes),
+      fillcolor = toRGB(params$fill %||% "white")
+    )
   },
   contour=function(data, params) {
     L <- list(x=unique(data$x),
@@ -657,7 +686,7 @@ geom2trace <- list(
                          ncol=length(unique(data$y)))),
               name=params$name,
               type="contour",
-              line=paramORdefault(params, aes2line, line.defaults))
+              line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
     L$contours=list(coloring="lines")
     L
   },
@@ -666,7 +695,7 @@ geom2trace <- list(
               y=data$y,
               name=params$name,
               type="histogram2dcontour",
-              line=paramORdefault(params, aes2line, line.defaults))
+              line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
     L$contours=list(coloring="lines")
     L
   },
@@ -677,38 +706,14 @@ geom2trace <- list(
     make.errorbar(data, params, "x")
   },
   area=function(data, params) {
-    list(x=c(data$x[1], data$x, tail(data$x, n=1)),
-         y=c(0, data$y, 0),
-         name=params$name,
-         type="scatter",
-         line=paramORdefault(params, aes2line, ribbon.line.defaults),
-         fill="tozeroy",
-         fillcolor=toFill(params$fill, ifelse(is.null(params$alpha), 1,
-                                              params$alpha)))
-  },
-  abline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(params$intercept + params$xstart * params$slope,
-             params$intercept + params$xend * params$slope),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
-  },
-  hline=function(data, params) {
-    list(x=c(params$xstart, params$xend),
-         y=c(unique(data$yintercept), unique(data$yintercept)),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
-  },
-  vline=function(data, params) {
-    list(x=c(data$xintercept, data$xintercept),
-         y=c(params$ystart, params$yend),
-         name=params$name,
-         type="scatter",
-         mode="lines",
-         line=paramORdefault(params, aes2line, line.defaults))
+    list(
+      x = c(data$x[1], data$x, tail(data$x, n = 1)),
+      y = c(0, data$y, 0),
+      name = params$name,
+      type = "scatter",
+      line = paramORdefault(params, aes2line, ggplot2::GeomRibbon$default_aes),
+      fill = "tozeroy",
+      fillcolor = toRGB(params$fill %||% "grey20", params$alpha)
+    )
   }
 )

@@ -359,18 +359,7 @@ plotly_build <- function(l = last_plot()) {
   # tack on other keyword arguments, if necessary
   idx <- !names(l) %in% c("data", "layout")
   if (any(idx)) x <- c(x, l[idx])
-  for (i in seq_along(x$data)) {
-    # if any traces don't have a type, fall back on scatter
-    # (this could happen if inherit = FALSE in plot_ly() and add_trace()
-    # doesn't have a type argument)
-    d <- x$data[[i]]
-    x$data[[i]][["type"]] <- d[["type"]] %||% "scatter"
-    # some object keys require an array, even if length one
-    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-    # by to_JSON(), is to attach a class of AsIs (via I())
-    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
-    if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
-  }
+  x <- add_boxed(x)
   # ugh, annotations _must_ be an _array_ of object(s)...
   a <- x$layout$annotations
   if (!is.null(a) && !is.null(names(a))) {
