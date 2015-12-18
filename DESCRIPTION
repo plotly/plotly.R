@@ -20,7 +20,7 @@ Description: Easily translate ggplot2 graphs to an interactive web-based version
 URL: https://plot.ly/r, https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
-    ggplot2 (> 1.0.1)
+    ggplot2 (>= 2.0.0)
 Imports:
     scales,
     httr,
