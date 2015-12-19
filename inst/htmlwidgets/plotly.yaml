@@ -3,3 +3,7 @@ dependencies:
     version: 1.2.1
     src: "htmlwidgets/lib/plotlyjs"
     script: plotly-latest.min.js
+  - name: plotlyjs-geo
+    version: 1.2.1
+    src: "htmlwidgets/lib/plotlyjs"
+    script: plotly-geo-assets.js
