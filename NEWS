@@ -1,3 +1,8 @@
+
+Geo assests are now bundled with the package meaning that maps will now work entirely locally (without an internet connection)
+
+Default scale value in plotly_IMAGE() should be 1.
+
 2.0.16 -- 18 Dec 2015
 
 Require ggplot2 2.0.0 or higher. For details, see #269.
@@ -52,7 +57,7 @@ Fix #313.
 
 2.0.3 -- 18 Nov 2015
 
-Fixed bug causing knitr options to be ignored. Also added VignetteBuilder to DESCRIPTION to vignette is available.
+Fixed bug causing knitr options to be ignored. Also added VignetteBuilder to DESCRIPTION so vignette is available.
 
 2.0.2 -- 17 Nov 2015
 
