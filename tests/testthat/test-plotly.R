@@ -64,7 +64,7 @@ test_that("Passing hex codes to colors argument works", {
   d <- data.frame(Category = LETTERS[1:5], Value = 1:5, stringsAsFactors = F)
   p <- plot_ly(d, x = Category, y = Value, type = "bar", 
                color = Category, colors = colz)
-  l <- expect_traces(p, 3, "bar-color-factor-custom")
+  l <- expect_traces(p, 5, "bar-color-factor-custom")
   colz2 <- sapply(l$data, function(x) x[["marker"]][["color"]])
   expect_identical(sort(colz), sort(colz2))
 })
