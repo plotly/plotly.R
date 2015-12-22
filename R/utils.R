@@ -3,7 +3,7 @@
 #' @importFrom stats setNames
 
 is.plotly <- function(x) inherits(x, "plotly")
-
+  
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
 }
@@ -188,6 +188,25 @@ plotly_headers <- function(type = "main") {
     )
   }
   httr::add_headers(.headers = h)
+}
+
+
+perform_eval <- function(x) {
+  if (should_eval(x)) do_eval(x) else x
+}
+
+# env/enclos are special properties specific to the R API 
+# if they appear _and_ are environments, then evaluate arguments
+# (sometimes figures return these properties but evaluation doesn't make sense)
+should_eval <- function(x) { 
+  any(vapply(x[c("env", "enclos")], is.environment, logical(1))) 
+}
+
+# perform evaluation of arguments, keeping other list elements
+do_eval <- function(x) {
+  y <- c(x, eval(x$args, as.list(x$env, all.names = TRUE), x$enclos))
+  y[c("args", "env", "enclos")] <- NULL
+  y
 }
 
 # try to write environment variables to an .Rprofile
