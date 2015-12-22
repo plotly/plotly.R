@@ -1,5 +1,14 @@
 dependencies:
+  - name: d3
+    version: 3.5.6
+    src: "htmlwidgets/lib/d3"
+    script: d3.min.js
+  - name: topojson
+    version: 1.6.19
+    src: "htmlwidgets/lib/topojson"
+    script: topojson.min.js
   - name: plotlyjs
     version: 1.2.1
     src: "htmlwidgets/lib/plotlyjs"
-    script: plotly-latest.min.js
+    script: plotly-x.min.js
+  
