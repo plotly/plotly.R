@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via Plotly's JavaScript Graphing Library
-Version: 2.0.17
+Version: 2.0.18
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
