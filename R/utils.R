@@ -3,7 +3,7 @@
 #' @importFrom stats setNames
 
 is.plotly <- function(x) inherits(x, "plotly")
-  
+
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
 }

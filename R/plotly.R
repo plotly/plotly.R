@@ -273,15 +273,15 @@ plotly_build <- function(l = last_plot()) {
   } else if (any(idx)) {
     c(data = c(l$data, l[idx]), l[!idx])
   } else l
-  # carry over unevaluated arguments, if necessary
-  if (length(l$data) > 1 && isTRUE(l$data[[1]]$inherit) && should_eval(l$data[[1]])) {
+  # carry over properties, if necessary
+  if (length(l$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
     for (i in seq.int(2, length(l$data))) {
       l$data[[i]] <- modifyList(l$data[[i]], l$data[[1]])
     }
   }
   # 'x' is the same as 'l', but with arguments evaluated
-  # this is ugly, but we don't know how many traces we'll have until
-  # we evaluate arguments and call traceify() (or similar)
+  # this is ugly, but I think it is necessary, since we don't know how many 
+  # traces we have until we evaluate args and call traceify() (or similar)
   x <- list()
   for (i in seq_along(l$data)) {
     d <- l$data[[i]]
