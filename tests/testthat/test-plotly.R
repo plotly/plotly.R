@@ -59,6 +59,16 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   expect_identical(sort(cols[1:3]), sort(colz))
 })
 
+test_that("Passing hex codes to colors argument works", {
+  colz <- c('#FE8268', '#81E8FE', '#FED681', '#81FED6', '#FE81A9')
+  d <- data.frame(Category = LETTERS[1:5], Value = 1:5, stringsAsFactors = F)
+  p <- plot_ly(d, x = Category, y = Value, type = "bar", 
+               color = Category, colors = colz)
+  l <- expect_traces(p, 5, "bar-color-factor-custom")
+  colz2 <- sapply(l$data, function(x) x[["marker"]][["color"]])
+  expect_identical(sort(colz), sort(colz2))
+})
+
 test_that("Mapping a numeric variable to color works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Petal.Width, mode = "markers")
