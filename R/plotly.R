@@ -170,7 +170,7 @@ layout <- function(p = last_plot(), ...,
     enclos = parent.frame()
   )
   p <- last_plot(p)
-  p$layout <- c(p$layout, list(layout))
+  p$layout <- c(p$layout, list(layout = layout))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
@@ -273,10 +273,12 @@ plotly_build <- function(l = last_plot()) {
   } else if (any(idx)) {
     c(data = c(l$data, l[idx]), l[!idx])
   } else l
-  # carry over properties, if necessary
+  # carry over properties, if necessary (but don't carry over evaluation envir)
   if (length(l$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
+    d <- l$data[[1]]
+    d <- d[!names(d) %in% c("env", "enclos")]
     for (i in seq.int(2, length(l$data))) {
-      l$data[[i]] <- modifyList(l$data[[i]], l$data[[1]])
+      l$data[[i]] <- modifyList(l$data[[i]], d)
     }
   }
   # 'x' is the same as 'l', but with arguments evaluated
@@ -322,17 +324,10 @@ plotly_build <- function(l = last_plot()) {
       x$data <- c(x$data, list(d))
     }
   }
-  # layout() tacks on an unnamed list element to potentially pre-existing
-  # layout(s). Note that ggplotly() will return a named list 
-  # of length n >= 1 (so we need to carefully merge them ).
+  # it's possible have nested layouts (e.g., plot_ly() %>% layout() %>% layout())
   nms <- names(l$layout)
-  if (!is.null(nms) && any(idx <- nms %in% "")) {
-    # TODO: does this always preserve the correct order to layouts?
-    # (important since we use modifyList at a later point)
-    l$layout <- c(list(l$layout[!idx]), l$layout[idx])
-  } else {
-    l$layout <- list(l$layout)
-  }
+  idx <- nms %in% "layout"
+  l$layout <- c(list(l$layout[!idx]), setNames(l$layout[idx], NULL))
   for (i in seq_along(l$layout)) {
     x$layout[[i]] <- perform_eval(l$layout[[i]])
   }
