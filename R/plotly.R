@@ -387,6 +387,12 @@ plotly_build <- function(l = last_plot()) {
   x <- c(x, kwargs)
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
+  # if this is a non-line scatter trace and no hovermode exists, 
+  # set hovermode to closest
+  if (is.null(x$data[[1]]$type) || isTRUE(x$data[[1]]$type == "scatter")) {
+    if (!grepl("lines", x$data[[1]]$mode %||% "lines"))
+      x$layout$hovermode <- x$layout$hovermode %||% "closest"
+  }
   # add plotly class mainly for printing method
   structure(x, class = unique("plotly", class(x)))
 }
