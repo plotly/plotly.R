@@ -26,7 +26,14 @@
 
 plotly_POST <- function(x, filename, fileopt = "new", world_readable = TRUE) {
   x <- plotly_build(x)
-  if (!missing(filename)) x$filename <- filename
+  x$filename <- if (!missing(filename)) { 
+    filename
+  } else {
+    # try our damndest to assign a sensible filename
+    x$filename %||% as.character(x$layout$title) %||% 
+      paste(c(x$layout$xaxis$title, x$layout$yaxis$title, x$layout$zaxis$title), 
+            collapse = " vs. ") %||% "plot from api" 
+  }
   if (!is.null(x$fileopt)) 
     warning("fileopt was specified in the wrong place. Please specify in plotly_POST()")
   x$fileopt <- fileopt

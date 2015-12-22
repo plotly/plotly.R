@@ -351,26 +351,6 @@ plotly_build <- function(l = last_plot()) {
   if (!is.null(a) && !is.null(names(a))) {
     x$layout$annotations <- list(x$layout$annotations)
   }
-  # search for keyword args in traces and place them at the top level
-  kwargs <- lapply(x$data, function(z) z[get_kwargs()])
-  # 'top-level' keywords args take precedence
-  kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
-  # empty keyword arguments can cause problems
-  kwargs <- kwargs[sapply(kwargs, length) > 0]
-  # try our damndest to assign a sensible filename
-  if (is.null(kwargs$filename)) {
-    kwargs$filename <- 
-      as.character(kwargs$layout$title) %||% 
-      paste(
-        c(kwargs$layout$xaxis$title, 
-          kwargs$layout$yaxis$title, 
-          kwargs$layout$zaxis$title), 
-        collapse = " vs. "
-      ) %||%
-      "plot from api" 
-  }
-  # tack on keyword arguments
-  x <- c(x, kwargs)
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method
