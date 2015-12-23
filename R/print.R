@@ -1,33 +1,37 @@
 #' Print a plotly object
 #' 
 #' @param x a plotly object
-#' @param ... additional arguments (currently ignored)
+#' @param ... additional arguments
 #' @export
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
 print.plotly <- function(x, ...) {
-  w <- toWidget(x)
-  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w)
+  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
+  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, ...)
 }
 
 #' Print a plotly object in a knitr doc
 #' 
 #' @param x a plotly object
 #' @param options knitr options.
-#' @param ... additional arguments (currently ignored)
+#' @param ... additional arguments
 #' @export
 knit_print.plotly <- function(x, options, ...) {
-  w <- toWidget(x)
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options)
+  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
+  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(w, options = options, ...)
 }
 
 #' Convert a plotly object to an htmlwidget object
 #' 
-#' Users shouldn't need to use this function. It's exported for internal reasons.
-#' 
 #' @param x a plotly object.
+#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @export
+#' @examples \dontrun{
+#' p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
+#' htmlwidgets::saveWidget(as.widget(p), "index.html")
+#' }
 #' 
-toWidget <- function(x) {
+as.widget <- function(x, ...) {
   p <- plotly_build(x)
   # set some margin defaults if none are provided
   p$layout$margin <- modifyList(
@@ -41,12 +45,16 @@ toWidget <- function(x) {
     x = p,
     width = p$width,
     height = p$height,
-    htmlwidgets::sizingPolicy(
+    sizingPolicy = htmlwidgets::sizingPolicy(
       padding = 5, 
       browser.fill = TRUE
-    )
+    ),
+    ...
   )
 }
+
+# for legacy reasons
+toWidget <- as.widget
 
 #' Print a plotly figure object
 #' 
