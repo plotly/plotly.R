@@ -1,7 +1,7 @@
 #' Print a plotly object
 #' 
 #' @param x a plotly object
-#' @param ... additional arguments (currently ignored)
+#' @param ... additional arguments
 #' @export
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
@@ -23,11 +23,13 @@ knit_print.plotly <- function(x, options, ...) {
 
 #' Convert a plotly object to an htmlwidget object
 #' 
-#' Users shouldn't need to use this function. It's exported for internal reasons.
-#' 
 #' @param x a plotly object.
 #' @param ... other options passed onto \code{htmlwidgets::createWidget}
 #' @export
+#' @examples \dontrun{
+#' p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
+#' htmlwidgets::saveWidget(as.widget(p), "index.html")
+#' }
 #' 
 as.widget <- function(x, ...) {
   p <- plotly_build(x)
