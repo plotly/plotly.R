@@ -11,7 +11,7 @@ knit_print.plotly(x, options, ...)
 
 \item{options}{knitr options.}
 
-\item{...}{additional arguments (currently ignored)}
+\item{...}{additional arguments}
 }
 \description{
 Print a plotly object in a knitr doc
