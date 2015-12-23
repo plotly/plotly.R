@@ -3,3 +3,7 @@ dependencies:
     version: 1.2.1
     src: "htmlwidgets/lib/plotlyjs"
     script: plotly-latest.min.js
+  - name: jquery
+    version: 2.1.4
+    src: "htmlwidgets/lib/jquery"
+    script: jquery.min.js

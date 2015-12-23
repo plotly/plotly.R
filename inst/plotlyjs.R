@@ -7,3 +7,9 @@ download.file(
   "https://raw.githubusercontent.com/plotly/plotly.js/master/LICENSE",
   "inst/htmlwidgets/lib/plotlyjs/LICENSE"
 )
+
+
+download.file(
+  "https://code.jquery.com/jquery-2.1.4.min.js",
+  "inst/htmlwidgets/lib/jquery/jquery.min.js"
+)
