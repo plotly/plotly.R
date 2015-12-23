@@ -23,6 +23,13 @@ Sys.setenv('TRAVIS_COMMIT' = substr(system('git rev-parse HEAD', intern = T), 1,
 devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 ```
 
+You can also build a ggplot2/plotly comparison table:
+
+```r
+Sys.setenv('PLOTLY_TEST' = 'TRUE')
+devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
+```
+
 ## Code of Conduct
 
 We want to encourage a warm, welcoming, and safe environment for contributing to this project. See the [code of conduct](https://github.com/ropensci/plotly/blob/master/CONDUCT.md) for more information.
