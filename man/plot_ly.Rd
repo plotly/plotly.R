@@ -5,8 +5,8 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, width = NULL, height = NULL, inherit = TRUE,
-  evaluate = FALSE)
+  symbol, symbols, size, key, set = "A", width = NULL, height = NULL,
+  inherit = TRUE, evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -31,6 +31,10 @@ or a color interpolation function like \code{colorRamp()}.}
 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
+
+\item{key}{a selection variable for linked views}
+
+\item{set}{share selections across this grouping variable.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
