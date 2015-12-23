@@ -12,6 +12,13 @@ as.widget(x, ...)
 \item{...}{other options passed onto \code{htmlwidgets::createWidget}}
 }
 \description{
-Users shouldn't need to use this function. It's exported for internal reasons.
+Convert a plotly object to an htmlwidget object
+}
+\examples{
+\dontrun{
+p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
+htmlwidgets::saveWidget(as.widget(p), "index.html")
+}
+
 }
 
