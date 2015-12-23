@@ -48,7 +48,6 @@ as.widget <- function(x, ...) {
       browser.fill = TRUE
     ),
     dependencies = crosstalk::dependencies,
-    elementId = p$elementId,
     ...
   )
 }

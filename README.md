@@ -20,7 +20,7 @@ devtools::install_github("ropensci/plotly")
 
 ## Introduction
 
-If you use [ggplot2](http://cran.r-project.org/package=ggplot2), simply call `ggplotly()` to convert your ggplot to an interactive, web-based version!
+If you use [ggplot2](http://cran.r-project.org/package=ggplot2), use `ggplotly()` to convert your ggplot to an interactive, web-based version!
 
 ```r
 library(plotly)
@@ -50,19 +50,15 @@ The `ggplotly()` function converts a ggplot object to a plotly object, so if you
 layout(gg, hovermode = "closest")
 ```
 
-## Learn more
+## Documentation
 
-* [An overview of plotly's R API](https://cdn.rawgit.com/ropensci/plotly/master/vignettes/intro.html)
-* Peruse the examples on plotly's [R homepage](https://plot.ly/r) and [ggplot2 homepage](https://plot.ly/ggplot2)
+* [An introduction to plotly's R API](https://cran.r-project.org/web/packages/plotly/vignettes/intro.html)
+* Examples and vignettes on plotly's R homepage - <https://plot.ly/r>
+* The complete figure reference guide - <https://plot.ly/r/reference>
 
 ## Contributing
 
-- We love collaboration! See the [wiki](https://github.com/ropensci/plotly/wiki/Development-guidelines) and the [code of conduct](https://github.com/ropensci/plotly/blob/master/CONDUCT.md) for more information.
-
-## Stay in touch
-
-- <feedback@plot.ly>
-- [@plotlygraphs](https://twitter.com/plotlygraphs)
+Please read through our [contributing guidelines](https://github.com/ropensci/plotly/blob/master/CONTRIBUTING.md). Included are directions for opening issues, asking questions, contributing changes to plotly, and our code of conduct. 
 
 ---
 

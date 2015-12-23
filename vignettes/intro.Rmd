@@ -39,7 +39,7 @@ p <- plot_ly(economics, x = date, y = unemploy / pop, name = "raw")
 add_trace(p, y = fitted(m), name = "loess")
 ```
 
-__plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to modify your plots:
+__plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to create a visualization pipeline:
 
 ```{r}
 economics %>%
@@ -63,10 +63,20 @@ economics %>%
 
 Although these functions output special "plotly data frames", `plot_ly()` doesn't require a data frame for input. This makes chart types that accept a `z` argument especially easy to use if you have a numeric matrix:
 
-```{r}
-plot_ly(z = volcano, type = "surface")
-plot_ly(z = volcano, type = "contour")
+```{r, eval = FALSE}
+s <- plot_ly(z = volcano, type = "surface")
 ```
+
+If you have [a free plotly account](https://plot.ly/r/getting-started/), `plotly_POST()` makes it easy to host/share any plotly figure.
+
+```{r, eval = FALSE}
+plotly_POST(s)
+```
+
+```{r, results = 'asis', echo = FALSE}
+cat(plotly:::plotly_iframe("https://plot.ly/~agvd/1794/", 600, 600))
+```
+
 
 ## Special arguments
 

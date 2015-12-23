@@ -1,11 +1,11 @@
 context("means and error bars")
 
-one.line.df <-
-  data.frame(
-    x = c(1, 2, 3, 4), 
-    y = c(2, 1, 3, 4), 
-    array = c(0.1, 0.2, 0.1, 0.1), 
-    arrayminus = c(0.2, 0.4, 1, 0.2))
+one.line.df <- data.frame(
+  x = c(1, 2, 3, 4), 
+  y = c(2, 1, 3, 4), 
+  array = c(0.1, 0.2, 0.1, 0.1), 
+  arrayminus = c(0.2, 0.4, 1, 0.2)
+)
 
 none.json <- list(
   list(
@@ -24,7 +24,7 @@ none.json <- list(
 
 test_that("only asymmetric error bars", {
   error.gg <- ggplot(one.line.df, aes(x, y)) +
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
+    geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array))
   generated.json <- gg2list(error.gg)
   traces <- generated.json$data
   expect_identical(length(traces), 1L)
@@ -56,7 +56,7 @@ test_that("asymmetric error bars, geom_errorbar last", {
   one.line.gg <- ggplot(one.line.df, aes(x, y)) +
     geom_line() +
     geom_point() +
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array))
+    geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array))
   generated.json <- gg2list(one.line.gg)
   ## when there is 1 trace with error bars, lines, and markers, plotly
   ## shows error bars in the background, lines in the middle and
@@ -75,7 +75,7 @@ test_that("asymmetric error bars, geom_errorbar last", {
 
 test_that("asymmetric error bars, geom_errorbar first", {
   one.line.gg <- ggplot(one.line.df, aes(x, y)) +
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array)) +
+    geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array)) +
     geom_line() +
     geom_point()
   generated.json <- gg2list(one.line.gg)
@@ -110,9 +110,9 @@ colors.json <- list(
 
 test_that("different colors for error bars, points, and lines", {
   one.line.gg <- ggplot(one.line.df, aes(x, y)) +
-    geom_errorbar(aes(ymin=y-arrayminus, ymax=y+array), color="red") +
-    geom_line(color="violet") +
-    geom_point(color="blue", size=14)
+    geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array), color = "red") +
+    geom_line(color = "violet") +
+    geom_point(color = "blue", size = 14)
   generated.json <- gg2list(one.line.gg)
   traces <- generated.json$data
   expect_identical(length(traces), 1L)
@@ -120,7 +120,6 @@ test_that("different colors for error bars, points, and lines", {
   expect_identical(tr$mode, "lines+markers")
   expect_identical(tr$type, "scatter")
   expect_identical(tr$marker$color, toRGB("blue"))
-  expect_identical(tr$marker$size, 14)
   expect_identical(tr$line$color, toRGB("violet"))
   ey <- tr$error_y
   expect_identical(ey$type, "data")
@@ -139,8 +138,8 @@ df <- ToothGrowth
 ## groupvars: a vector containing names of columns that contain grouping variables
 ## na.rm: a boolean that indicates whether to ignore NA's
 ## conf.interval: the percent range of the confidence interval (default is 95%)
-summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
-                      conf.interval=.95, .drop=TRUE) {
+summarySE <- function(data = NULL, measurevar, groupvars = NULL, na.rm = FALSE,
+                      conf.interval = .95, .drop = TRUE) {
   require(plyr)
   length2 <- function (x, na.rm=FALSE) {
     if (na.rm) sum(!is.na(x))
@@ -151,10 +150,10 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
                    c(N = length2(xx[[col]], na.rm=na.rm),
                      mean = mean (xx[[col]], na.rm=na.rm),
                      sd = sd (xx[[col]], na.rm=na.rm)
-                     )
+                   )
                  },
                  measurevar
-                 )
+  )
   datac <- rename(datac, c("mean" = measurevar))
   datac$se <- datac$sd / sqrt(datac$N) # Calculate standard error of the mean   
   ciMult <- qt(conf.interval/2 + .5, datac$N-1)
@@ -162,21 +161,21 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   return(datac)
 }
 
-dfc <- summarySE(df, measurevar="len", groupvars=c("supp","dose"))
-color.code <- c(OJ="orange", VC="violet")
+dfc <- summarySE(df, measurevar = "len", groupvars = c("supp", "dose"))
+color.code <- c(OJ = "orange", VC = "violet")
 supp.list <- split(dfc, dfc$supp)
 
 test_that("errorbar(aes(color)) + other geoms", {
   before <-
-    ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
-      geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
-      geom_line() +
-      scale_color_manual(values=color.code)+
-      geom_point()
-
+    ggplot(dfc, aes(x = dose, y = len, colour = supp)) +
+    geom_errorbar(aes(ymin = len - se, ymax = len + se), width = .1) +
+    geom_line() +
+    scale_color_manual(values = color.code)+
+    geom_point()
+  
   before.json <- gg2list(before)
   traces <- before.json$data
-
+  
   expect_identical(length(traces), 2L)
   for(tr in traces) {
     expected.color <- toRGB(color.code[[tr$name]])
@@ -196,12 +195,12 @@ test_that("errorbar(aes(color)) + other geoms", {
 
 test_that("other geoms + errorbar(aes(color))", {
   after <-
-    ggplot(dfc, aes(x=dose, y=len, colour=supp)) +
-      geom_line() +
-      geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
-      geom_point() +
-      scale_color_manual(values=color.code)
-
+    ggplot(dfc, aes(x = dose, y = len, colour = supp)) +
+    geom_line() +
+    geom_errorbar(aes(ymin = len - se, ymax = len + se), width = .1) +
+    geom_point() +
+    scale_color_manual(values = color.code)
+  
   after.json <- gg2list(after)
   traces <- after.json$data
   

@@ -27,6 +27,7 @@ process.figure <- function(resp) {
   con <- from_JSON(content(resp, as = "text"))
   fig <- con$payload$figure
   fig$url <- sub("apigetfile/", "~", resp$url)
+  fig <- add_boxed(fig)
   # any reasonable way to return a data frame?
   hash_plot(data.frame(), fig)
 }

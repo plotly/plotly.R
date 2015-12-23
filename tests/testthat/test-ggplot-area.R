@@ -1,9 +1,9 @@
 context("Area")
 
-huron <- data.frame(year=1875:1972, level=as.vector(LakeHuron))
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 huron$decade <- plyr::round_any(huron$year, 10, floor)
 
-ar <- ggplot(huron) + geom_area(aes(x=year, y=level))
+ar <- ggplot(huron) + geom_area(aes(x = year, y = level))
 L <- save_outputs(ar, "area")
 
 test_that("sanity check for geom_area", {
@@ -15,15 +15,13 @@ test_that("sanity check for geom_area", {
 })
 
 # Test alpha transparency in fill color
-gg <- ggplot(huron) + geom_area(aes(x=year, y=level), alpha=0.4)
+gg <- ggplot(huron) + geom_area(aes(x = year, y = level), alpha = 0.4)
 L <- save_outputs(gg, "area-fillcolor")
 
 test_that("transparency alpha in geom_area is converted", {
   expect_identical(L$data[[1]]$line$color, "transparent")
   expect_identical(L$data[[1]]$fillcolor, "rgba(51,51,51,0.4)")
 })
-
-save_outputs(gg, "area-fillcolor")
 
 # Test that the order of traces is correct
 # Expect traces function

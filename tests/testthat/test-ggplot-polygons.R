@@ -10,19 +10,21 @@ expect_traces <- function(gg, n.traces, name){
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data = has.data, layout = L$layout)
 }
 
-poly.df <- data.frame(x=c(0, 1, 1, 0, 2, 3, 3, 2)+10,
-                      y=c(0, 0, 1, 1, 0, 0, 1, 1),
-                      g=c(1, 1, 1, 1, 2, 2, 2, 2),
-                      lab=rep(c("left", "right"), each=4))
+poly.df <- data.frame(
+  x = c(0, 1, 1, 0, 2, 3, 3, 2) + 10,
+  y = c(0, 0, 1, 1, 0, 0, 1, 1),
+  g = c(1, 1, 1, 1, 2, 2, 2, 2),
+  lab = rep(c("left", "right"), each = 4)
+)
 
 test_that("polygons filled with the same color become one trace", {
-  gg <- ggplot(poly.df)+
-    geom_polygon(aes(x, y, group=g))
+  gg <- ggplot(poly.df) +
+    geom_polygon(aes(x, y, group = g))
   info <- expect_traces(gg, 1, "black")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expected.x <-
     c(10, 11, 11, 10, 10, NA,
       12, 13, 13, 12, 12, NA,
@@ -34,19 +36,17 @@ test_that("polygons filled with the same color become one trace", {
       0, 0, 1, 1, 0, NA,
       0, 0)
   expect_equal(tr$y, expected.y)
-  expect_identical(tr$line$color, "transparent")
-  expect_identical(tr$line$color, "transparent")
 })
 
 blue.color <- rgb(0.23, 0.45, 0.67)
 
 test_that("polygons with different color become separate traces", {
-  gg <- ggplot(poly.df)+
-    geom_polygon(aes(x, y, color=lab), fill="grey")+
-    scale_color_manual(values=c(left=blue.color, right="springgreen3"))
+  gg <- ggplot(poly.df) +
+    geom_polygon(aes(x, y, color = lab), fill = "grey")+
+    scale_color_manual(values = c(left = blue.color, right = "springgreen3"))
   info <- expect_traces(gg, 2, "aes-color")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$fillcolor, toRGB("grey"))
     expect_equal(tr$fill, "tozerox")
     traces.by.name[[tr$name]] <- tr
@@ -60,12 +60,12 @@ test_that("polygons with different color become separate traces", {
 })
 
 test_that("geom_polygon(aes(fill)) -> fillcolor + line$color transparent", {
-  gg <- ggplot(poly.df)+
-    geom_polygon(aes(x, y, fill=lab))+
-    scale_fill_manual(values=c(left=blue.color, right="springgreen3"))
+  gg <- ggplot(poly.df) +
+    geom_polygon(aes(x, y, fill = lab)) +
+    scale_fill_manual(values = c(left = blue.color, right = "springgreen3"))
   info <- expect_traces(gg, 2, "aes-fill")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$line$color, "transparent")
     traces.by.name[[tr$name]] <- tr
   }
@@ -78,12 +78,12 @@ test_that("geom_polygon(aes(fill)) -> fillcolor + line$color transparent", {
 })
 
 test_that("geom_polygon(aes(fill), color) -> line$color", {
-  gg <- ggplot(poly.df)+
-    geom_polygon(aes(x, y, fill=lab), color="black")+
-    scale_fill_manual(values=c(left=blue.color, right="springgreen3"))
+  gg <- ggplot(poly.df) +
+    geom_polygon(aes(x, y, fill = lab), color = "black")+
+    scale_fill_manual(values = c(left = blue.color, right = "springgreen3"))
   info <- expect_traces(gg, 2, "color-aes-fill")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$line$color, toRGB("black"))
     expect_equal(tr$fill, "tozerox")
     traces.by.name[[tr$name]] <- tr
@@ -97,12 +97,12 @@ test_that("geom_polygon(aes(fill), color) -> line$color", {
 })
 
 test_that("geom_polygon(aes(linetype), fill, color)", {
-  gg <- ggplot(poly.df)+
-    geom_polygon(aes(x, y, linetype=lab), fill="red", colour="blue")+
-    scale_linetype_manual(values=c(left="dotted", right="dashed"))
+  gg <- ggplot(poly.df) +
+    geom_polygon(aes(x, y, linetype = lab), fill = "red", colour = "blue")+
+    scale_linetype_manual(values = c(left = "dotted", right = "dashed"))
   info <- expect_traces(gg, 2, "color-fill-aes-linetype")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$fillcolor, toRGB("red"))
     expect_equal(tr$line$color, toRGB("blue"))
     expect_equal(tr$fill, "tozerox")
@@ -122,7 +122,7 @@ test_that("geom_polygon(aes(size), fill, colour)", {
     scale_size_manual(values=c(left=2, right=3))
   info <- expect_traces(gg, 2, "color-fill-aes-size")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$fillcolor, toRGB("orange"))
     expect_equal(tr$line$color, toRGB("black"))
     expect_equal(tr$fill, "tozerox")
@@ -137,14 +137,11 @@ test_that("geom_polygon(aes(size), fill, colour)", {
 })
 
 test_that("borders become one trace with NA", {
-  library(maps)
-  data(canada.cities)
-  gg <- ggplot(canada.cities, aes(long, lat))+
-    borders(regions="canada", name="borders")
+  gg <- ggplot(maps::canada.cities, aes(long, lat)) +
+    borders(regions = "canada")
   info <- save_outputs(gg, "polygons-canada-borders")
   expect_equal(length(info$data), 1)
-  tr <- info$data[[1]]
-  expect_true(any(is.na(tr$x)))
+  expect_true(any(is.na(info$data[[1]]$x)))
 })
 
 x <- c(0, -1, 2, -2, 1)
@@ -157,7 +154,7 @@ star.group <- ggplot(stars)+
 
 test_that("geom_polygon(aes(group)) -> 1 trace", {
   info <- expect_traces(star.group, 1, "star-group")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_equal(tr$fill, "tozerox")
   expect_equal(tr$x,
                c(0, -1, 2, -2, 1, 0, NA,
@@ -174,7 +171,7 @@ star.group.color <- ggplot(stars)+
 
 test_that("geom_polygon(aes(group), color) -> 1 trace", {
   info <- expect_traces(star.group.color, 1, "star-group-color")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_equal(tr$fill, "tozerox")
   expect_equal(tr$line$color, toRGB("red"))
   expect_equal(tr$x,
@@ -192,9 +189,9 @@ star.fill.color <- ggplot(stars)+
 
 test_that("geom_polygon(aes(group, fill), color) -> 2 trace", {
   info <- expect_traces(star.fill.color, 2, "star-fill-color")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_equal(tr$line$color, toRGB("black"))
     expect_equal(tr$fill, "tozerox")
     expect_equal(tr$y, c(2, 0, 1, 1, 0, 2))

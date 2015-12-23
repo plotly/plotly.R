@@ -1,27 +1,16 @@
 context("Unimplemented geoms")
 
-library(proto)
-geom_unimplemented <- function(...) {
-  GeomUnimplemented <- proto(ggplot2:::GeomLine, {
-    objname <- "unimplemented"
-  })
-  GeomUnimplemented$new(...)
-}
 
 test_that("un-implemented geoms are ignored with a warning", {
-  gg <- ggplot(iris, aes(Sepal.Width, Petal.Length))
-  expect_error({
-    gg2list(gg)
-  }, "No layers in plot")
-
-  un <- gg + geom_unimplemented()
-  expect_error({
-    gg2list(un)
-  }, "No exportable traces")
-
-  ok <- un + geom_point()
+  
+  dmod <- lm(price ~ cut, data=diamonds)
+  cuts <- data.frame(
+    cut = unique(diamonds$cut), 
+    predict(dmod, data.frame(cut = unique(diamonds$cut)), se=TRUE)[c("fit","se.fit")]
+  )
+  se <- ggplot(cuts, aes(cut, fit, ymin = fit - se.fit, ymax = fit + se.fit, colour = cut))
+  
   expect_warning({
-    info <- gg2list(ok)
-  }, "Conversion not implemented")
-  expect_equal(length(info), 2)
+    info <- gg2list(se + geom_linerange())
+  }, "geom_linerange() has yet to be implemented in plotly")
 })
