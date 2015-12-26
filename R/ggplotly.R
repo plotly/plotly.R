@@ -77,7 +77,7 @@ markLegends <-
   # Legends based on sizes not implemented yet in Plotly
   #  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
-       path=c("linetype", "size", "colour", "shape"),
+       path=c("linetype", "colour", "shape"),
        ## NOTE: typically "group" should not be present here, since
        ## that would mean creating a separate plotly legend for each
        ## group, even when they have the exact same visual
