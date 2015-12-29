@@ -28,6 +28,7 @@ process.figure <- function(resp) {
   fig <- con$payload$figure
   fig$url <- sub("apigetfile/", "~", resp$url)
   fig <- add_boxed(fig)
+  fig$data[[1]]$inherit <- FALSE
   # any reasonable way to return a data frame?
   hash_plot(data.frame(), fig)
 }
