@@ -65,7 +65,7 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
-                    width = NULL, height = NULL, inherit = TRUE, 
+                    width = NULL, height = NULL, inherit = FALSE, 
                     evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
@@ -170,7 +170,7 @@ layout <- function(p = last_plot(), ...,
     enclos = parent.frame()
   )
   p <- last_plot(p)
-  p$layout <- c(p$layout, list(layout))
+  p$layout <- c(p$layout, list(layout = layout))
   if (evaluate) p <- plotly_build(p)
   hash_plot(data, p)
 }
@@ -265,9 +265,6 @@ plotly_build <- function(l = last_plot()) {
   # ggplot objects don't need any special type of handling
   if (is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
-  # plots without NSE don't need it either
-  nmz <- c(lapply(l$data, names), lapply(l$layout, names), lapply(l$style, names))
-  if (!all(c("args", "env") %in% unlist(nmz))) return(structure(l, class = unique("plotly", class(l))))
   # assume unnamed list elements are data/traces
   nms <- names(l)
   idx <- nms %in% ""
@@ -276,14 +273,22 @@ plotly_build <- function(l = last_plot()) {
   } else if (any(idx)) {
     c(data = c(l$data, l[idx]), l[!idx])
   } else l
-  dats <- list()
+  # carry over properties, if necessary (but don't carry over evaluation envir)
+  if (length(l$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
+    d <- l$data[[1]]
+    d <- d[!names(d) %in% c("env", "enclos")]
+    for (i in seq.int(2, length(l$data))) {
+      l$data[[i]] <- modifyList(l$data[[i]], d)
+    }
+  }
+  # 'x' is the same as 'l', but with arguments evaluated
+  # this is ugly, but I think it is necessary, since we don't know how many 
+  # traces we have until we evaluate args and call traceify() (or similar)
+  x <- list()
   for (i in seq_along(l$data)) {
     d <- l$data[[i]]
-    # if appropriate, evaluate trace arguments in a suitable environment
-    idx <- names(d) %in% c("args", "env", "enclos")
-    if (sum(idx) == 3) {
-      dat <- c(d[!idx], eval(d$args, as.list(d$env, all.names = TRUE), d$enclos))
-      dat[c("args", "env", "enclos")] <- NULL
+    if (should_eval(d)) {
+      dat <- do_eval(d)
       # start processing specially named arguments
       s <- dat[["size"]]
       if (!is.null(s)) {
@@ -309,49 +314,30 @@ plotly_build <- function(l = last_plot()) {
       has_group <- !is.null(dat[["group"]])
       if (has_color) {
         title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
-        dats <- c(dats, colorize(dat, title))
+        x$data <- c(x$data, colorize(dat, title))
       }
       # TODO: add a legend title (is this only possible via annotations?!?)
-      if (has_symbol) dats <- c(dats, symbolize(dat))
-      if (has_group) dats <- c(dats, traceify(dat, "group"))
-      if (!has_color && !has_symbol && !has_group) dats <- c(dats, list(dat))
+      if (has_symbol) x$data <- c(x$data, symbolize(dat))
+      if (has_group) x$data <- c(x$data, traceify(dat, "group"))
+      if (!has_color && !has_symbol && !has_group) x$data <- c(x$data, list(dat))
     } else {
-      dats <- c(dats, list(d))
+      x$data <- c(x$data, list(d))
     }
   }
-  x <- list(data = dats)
-  # carry over properties/data from first trace (if appropriate)
-  if (length(x$data) > 1 && isTRUE(l$data[[1]]$inherit)) {
-    for (i in seq.int(2, length(x$data))) {
-      x$data[[i]] <- modifyList(x$data[[1]], x$data[[i]])
-    }
-  }
-  # layout() tacks on an unnamed list element to potentially pre-existing
-  # layout(s). Note that ggplotly() will return a named list 
-  # of length n >= 1 (so we need to carefully merge them ).
+  # it's possible have nested layouts (e.g., plot_ly() %>% layout() %>% layout())
   nms <- names(l$layout)
-  if (!is.null(nms) && any(idx <- nms %in% "")) {
-    # TODO: does this always preserve the correct order to layouts?
-    # (important since we use modifyList at a later point)
-    l$layout <- c(list(l$layout[!idx]), l$layout[idx])
-  }
+  idx <- nms %in% "layout"
+  l$layout <- c(list(l$layout[!idx]), setNames(l$layout[idx], NULL))
   for (i in seq_along(l$layout)) {
-    layout <- l$layout[[i]]
-    idx <- names(layout) %in% c("args", "env", "enclos")
-    x$layout[[i]] <- if (sum(idx) == 3) {
-      c(layout[!idx], eval(layout$args, as.list(layout$env, all.names = TRUE), layout$enclos)) 
-    } else {
-      layout
-    }
+    x$layout[[i]] <- perform_eval(l$layout[[i]])
   }
   x$layout <- Reduce(modifyList, x$layout)
   # if style is not null, use it to modify existing traces
   if (!is.null(l$style)) {
     for (i in seq_along(l$style)) {
-      sty <- l$style[[i]]
-      idx <- names(sty) %in% c("args", "env", "enclos")
-      new_sty <- if (sum(idx) == 3) c(sty[!idx], eval(sty$args, as.list(sty$env, all.names = TRUE), sty$enclos)) else sty
-      for (k in sty$traces) x$data[[k]] <- modifyList(x$data[[k]], new_sty)
+      sty <- perform_eval(l$style[[i]])
+      for (k in l$style[[i]]$traces) 
+        x$data[[k]] <- modifyList(x$data[[k]], sty)
     }
   }
   # add appropriate axis title (if they don't already exist)
@@ -365,26 +351,6 @@ plotly_build <- function(l = last_plot()) {
   if (!is.null(a) && !is.null(names(a))) {
     x$layout$annotations <- list(x$layout$annotations)
   }
-  # search for keyword args in traces and place them at the top level
-  kwargs <- lapply(x$data, function(z) z[get_kwargs()])
-  # 'top-level' keywords args take precedence
-  kwargs <- Reduce(modifyList, c(kwargs, list(x[get_kwargs()])))
-  # empty keyword arguments can cause problems
-  kwargs <- kwargs[sapply(kwargs, length) > 0]
-  # try our damndest to assign a sensible filename
-  if (is.null(kwargs$filename)) {
-    kwargs$filename <- 
-      as.character(kwargs$layout$title) %||% 
-      paste(
-        c(kwargs$layout$xaxis$title, 
-          kwargs$layout$yaxis$title, 
-          kwargs$layout$zaxis$title), 
-        collapse = " vs. "
-      ) %||%
-      "plot from api" 
-  }
-  # tack on keyword arguments
-  x <- c(x, kwargs)
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
   # add plotly class mainly for printing method

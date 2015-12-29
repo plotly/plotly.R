@@ -1,3 +1,7 @@
+2.1.0 -- 29 Dec 2015
+
+plot_ly() now defaults to inherit=FALSE and plotly_build() is now idempotent. Fixes #280 and #277. See #368 for details.
+
 2.0.19 -- 23 Dec 2015
 
 Added as.widget() function for conveniency in converting plotly object to htmlwidget objects. See #294.
