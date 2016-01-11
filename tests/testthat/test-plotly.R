@@ -98,3 +98,16 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$yaxis$title, "Petal.Width")
   expect_identical(scene$zaxis$title, "Sepal.Width")
 })
+
+test_that("inheriting properties works as expected", {
+  library(dplyr)
+  p <- iris %>%
+    count(Species) %>%
+    plot_ly(x = Species, y = n, opacity = 0.5, type = "bar", inherit = TRUE) %>%
+    layout(barmode = "overlay", showlegend = FALSE)
+  s <- count(iris[sample(nrow(iris), 10), ], Species)
+  p2 <- add_trace(p, data = s)
+  l <- plotly_build(p2)
+  expect_equal(l$data[[2]]$opacity, 0.5)
+  expect_true(all(l$data[[1]]$y > l$data[[2]]$y))
+})
