@@ -77,6 +77,7 @@ markLegends <-
   # Legends based on sizes not implemented yet in Plotly
   #  list(point=c("colour", "fill", "shape", "size"),
   list(point=c("colour", "fill", "shape"),
+       line=c("linetype", "colour", "shape"),
        path=c("linetype", "colour", "shape"),
        ## NOTE: typically "group" should not be present here, since
        ## that would mean creating a separate plotly legend for each
@@ -96,6 +97,7 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- markLegends
 markSplit$boxplot <- "x"
+markSplit$line <- c(markSplit$line, "group")
 
 # obtain the "type" of geom/position/etc.
 type <- function(x, y) {

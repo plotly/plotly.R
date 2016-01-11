@@ -327,8 +327,30 @@ toBasic <- list(
     group2NA(g, "path")
   },
   line=function(g) {
-    g$data <- g$data[order(g$data$x), ]
-    group2NA(g, "path")
+    browser()
+    # most of this comes from GeomLine$draw_panel
+    if (!anyDuplicated(g$data$group)) {
+      message_wrap("geom_path: Each group consists of only one observation. ", 
+                   "Do you need to adjust the group aesthetic?")
+    }
+    data <- data[order(g$data$group), , drop = FALSE]
+    munched <- coord_munch(coord, data, panel_scales)
+    rows <- stats::ave(seq_len(nrow(munched)), munched$group, 
+                       FUN = length)
+    munched <- munched[rows >= 2, ]
+    if (nrow(munched) < 2) 
+      return(zeroGrob())
+    attr <- plyr::ddply(munched, "group", function(df) {
+      data.frame(solid = identical(unique(df$linetype), 1), 
+                 constant = nrow(unique(df[, c("alpha", "colour", 
+                                               "size", "linetype")])) == 1)
+    })
+    
+    browser()
+    plyr::ddply(g$data, c("PANEL", "group"), )
+    split(g$data, interaction(g$data$PANEL, g$data$group))
+    
+    g
   },
   boxplot=function(g) {
     # Preserve default colour values using fill:
@@ -573,6 +595,20 @@ geom2trace <- list(
          type="scatter",
          mode="lines",
          line=paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes))
+  },
+  line=function(data, params) {
+    # when converting ggplot2 size to plotly size, we assume size is an _area_,
+    # but "size" for lines really means linewidth, so size is a _length_ in this case
+    # (see aesConverters$size)
+    browser()
+    params$size <- ifelse(params$size < 1, params$size ^ 2, sqrt(params$size))
+    list(x=data$x,
+         y=data$y,
+         name=params$name,
+         text=data$text,
+         type="scatter",
+         mode="lines",
+         line=paramORdefault(params, aes2line, ggplot2::GeomLine$default_aes))
   },
   polygon=function(data, params){
     g <- list(data = data, geom = "polygon")
