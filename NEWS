@@ -1,3 +1,7 @@
+2.1.1 -- 11 Jan 2015
+
+Upgraded to plotlyjs 1.4. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.0
+
 2.1.0 -- 29 Dec 2015
 
 plot_ly() now defaults to inherit=FALSE and plotly_build() is now idempotent. Fixes #280 and #277. See #368 for details.
