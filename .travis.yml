@@ -9,6 +9,7 @@ before_install:
 
 install:
   - ./travis-tool.sh install_deps
+  - ./travis-tool.sh install_github cpsievert/htmlwidgets
 
 before_script:
   - git config --global user.name "cpsievert"
