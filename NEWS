@@ -1,3 +1,7 @@
+2.1.2 -- 11 Jan 2015
+
+Upgraded to plotlyjs 1.4.1. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.1
+
 2.1.1 -- 11 Jan 2015
 
 Upgraded to plotlyjs 1.4. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.0
