@@ -11,8 +11,3 @@ file.copy(l, "inst/htmlwidgets/lib/plotlyjs/LICENSE", overwrite = T)
 unlink("plotly-plotly.js*", recursive = T)
 # update plotly.yml with version
 basename(zip)
-
-download.file(
-  "https://code.jquery.com/jquery-2.1.4.min.js",
-  "inst/htmlwidgets/lib/jquery/jquery.min.js"
-)
