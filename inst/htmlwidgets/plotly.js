@@ -8,6 +8,7 @@ HTMLWidgets.widget({
   },
   
   resize: function(el, width, height, instance) {
+    // TODO: impose fixed coordinates, if specified (see #342)
     Plotly.relayout(el.id, {width: width, height: height});
   },  
   
@@ -16,18 +17,20 @@ HTMLWidgets.widget({
     window.PLOTLYENV = window.PLOTLYENV || {};
     window.PLOTLYENV.BASE_URL = x.base_url;
     
+    var graphDiv = document.getElementById(el.id);
+    
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      Plotly.plot(el.id, x.data, x.layout, x.config);
+      Plotly.plot(graphDiv, x.data, x.layout, x.config);
       instance.plotly = true;
     } else {
-      Plotly.newPlot(el.id, x.data, x.layout);
+      Plotly.newPlot(graphDiv, x.data, x.layout);
     }
     
     var g = x.data[0].set;
     var grp = crosstalk.group(g);
     
-    $('#'+el.id).on('plotly_click', function(event, data) {
+    graphDiv.on('plotly_click', function(event, data) {
       // extract only the data we may want to access in R
       var d = data.points.map(function(pt) {
         var obj = {
@@ -48,15 +51,12 @@ HTMLWidgets.widget({
       
       // tell crosstalk about click data so we can access it in R (and JS)
       grp.var("plotly_click").set(d);
-      // TODO: provide visual clue that we've selected point(s)
-      // (it's possible this will be handled natively in plotlyjs...)
     });
       
-    grp.var('plotly_click').on('change', function(e) {
-      console.log(e.value);
-      // TODO: if e.value.x !=  e.oldValue.x, then newPlot? Otherwise, restyle?
-    });
-    
+    graphDiv.on('plotly_selected', function(eventData) {
+      grp.var("plotly_selected").set(eventData.points);
+    });  
+      
   }
   
 });

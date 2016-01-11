@@ -9,7 +9,7 @@ before_install:
 
 install:
   - ./travis-tool.sh install_deps
-  - ./travis-tool.sh install_github jcheng5/crosstalk
+  - ./travis-tool.sh install_github rstudio/crosstalk
 
 before_script:
   - git config --global user.name "cpsievert"
