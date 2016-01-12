@@ -54,7 +54,18 @@ HTMLWidgets.widget({
     });
       
     graphDiv.on('plotly_selected', function(eventData) {
-      grp.var("plotly_selected").set(eventData.points);
+      if (eventData !== undefined) {
+        // convert the array of objects to object of arrays so this converts
+        // to data frame in R as opposed to a vector
+        var pts = eventData.points;
+        var obj = {
+          curveNumber: pts.map(function(pt) {return pt.curveNumber; }),
+          pointNumber: pts.map(function(pt) {return pt.pointNumber; }), 
+          x: pts.map(function(pt) {return pt.x; }),
+          y: pts.map(function(pt) {return pt.y; })
+        };
+        grp.var("plotly_selected").set(obj);
+      }
     });  
       
   }
