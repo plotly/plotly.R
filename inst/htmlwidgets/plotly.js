@@ -30,9 +30,9 @@ HTMLWidgets.widget({
     var g = x.data[0].set;
     var grp = crosstalk.group(g);
     
-    graphDiv.on('plotly_click', function(event, data) {
+    graphDiv.on('plotly_click', function(eventData) {
       // extract only the data we may want to access in R
-      var d = data.points.map(function(pt) {
+      var d = eventData.points.map(function(pt) {
         var obj = {
             curveNumber: pt.curveNumber, 
             pointNumber: pt.pointNumber, 
