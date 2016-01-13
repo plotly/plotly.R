@@ -590,6 +590,10 @@ geom2trace <- list(
     )
   },
   point=function(data, params){
+    # params contains unique values, but we need _all_ values from the data
+    for (i in names(params)) {
+      if (length(params[[i]]) > 1) params[[i]] <- data[[i]]
+    }
     L <- list(
       x = data$x,
       y = data$y,
