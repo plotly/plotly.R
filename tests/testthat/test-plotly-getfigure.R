@@ -28,3 +28,12 @@ test_that("retrieving a public figure ... works.", {
   p <- plotly_build(fig)
   expect_equivalent(p$data[[1]]$x, c("1", "2", "3"))
 })
+
+test_that("can add traces to a subplot figure", {
+  skip_on_cran()
+  fig <- get_figure('chelsea_lyn', 6366)
+  p <- add_trace(fig, x=c(1, 2, 3), y=c(4, 2, 4))
+  l <- plotly_build(p)
+  expect_equivalent(length(fig$data) + 1, length(l$data))
+})
+

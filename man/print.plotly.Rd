@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{a plotly object}
 
-\item{...}{additional arguments (currently ignored)}
+\item{...}{additional arguments}
 }
 \description{
 Print a plotly object
