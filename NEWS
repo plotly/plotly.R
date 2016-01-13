@@ -1,3 +1,7 @@
+2.2.0 -- 13 Jan 2015
+
+The default for layout.hovermode is now 'closest' for non-line scatter traces
+
 2.1.3 -- 12 Jan 2015
 
 Fix size and alpha translation for geom_point. Fixes #386
