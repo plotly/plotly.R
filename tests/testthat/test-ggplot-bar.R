@@ -184,3 +184,11 @@ test_that("For a given x value, if multiple y exist, sum them. ", {
   y <- y[info$data[[1]]$x]
   expect_equal(info$data[[1]]$y, as.numeric(y))
 })
+
+p <- ggplot(mtcars, aes(factor(cyl))) + geom_bar() + coord_flip()
+
+test_that("geom_bar() + coord_flip() works", {
+  info <- expect_traces(g, 1, "coord-flip")
+  expect_identical(info$data[[1]]$orientation, "h")
+})
+
