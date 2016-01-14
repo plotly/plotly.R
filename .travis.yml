@@ -8,6 +8,7 @@ addons:
     packages:
       - r-base-dev
       - r-recommended
+      - qpdf
 
 env:
   - R_LIBS_USER=~/R/library NOT_CRAN=true
@@ -29,6 +30,8 @@ before_script:
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
   - Rscript -e 'library(devtools);update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - Rscript -e 'plotly:::verify("username")'
+  - Rscript -e 'plotly:::verify("api_key")'
 
 script:
   - Rscript -e 'devtools::check()'
