@@ -34,6 +34,6 @@ test_that("can add traces to a subplot figure", {
   fig <- get_figure('chelsea_lyn', 6366)
   p <- add_trace(fig, x=c(1, 2, 3), y=c(4, 2, 4))
   l <- plotly_build(p)
-  expect_equivalent(length(fig$data) + 1, length(l$data))
+  expect_equivalent(length(plotly_build(fig)$data) + 1, length(l$data))
 })
 
