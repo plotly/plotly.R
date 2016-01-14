@@ -5,7 +5,7 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, width = NULL, height = NULL, inherit = TRUE,
+  symbol, symbols, size, width = NULL, height = NULL, inherit = FALSE,
   evaluate = FALSE)
 }
 \arguments{
