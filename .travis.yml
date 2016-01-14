@@ -32,7 +32,7 @@ before_script:
   - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 
 script:
-  - Rscript -e 'devtools::check()'
+  - Rscript -e 'devtools::install(); source("tests/testthat.R", chdir = T)'
 
 after_success:
   - cd ../plotly-test-table
