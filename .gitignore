@@ -1,8 +1,5 @@
-R/.Rhistory
 Rapp.history
-/Karthik_local.R
 *~
-.Rhistory
-.RData
-Makefile
-.Rproj.user
+*.Rhistory
+*.RData
+*.Rproj.user
