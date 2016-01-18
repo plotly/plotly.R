@@ -1,6 +1,10 @@
-2.2.1 -- 13 Jan 2015
+2.2.2 -- 18 Jan 2015
 
 Fix bar orientation when we detect geom_bar() + coord_flip() in ggplotly(). Fixes #390.
+
+2.2.1 -- 18 Jan 2015
+
+Search for axis title in scene object. fixes #393.
 
 2.2.0 -- 13 Jan 2015
 

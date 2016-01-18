@@ -3,3 +3,4 @@ Rapp.history
 *.Rhistory
 *.RData
 *.Rproj.user
+.Rproj.user

@@ -449,7 +449,7 @@ axis_titles <- function(x, l) {
   scene <- if (isTRUE(d$type %in% c("scatter3d", "surface"))) TRUE else FALSE
   for (i in c("x", "y", "z")) {
     ax <- paste0(i, "axis")
-    t <- x$layout[[ax]]$title
+    t <- x$layout[[ax]]$title %||% x$layout$scene[[ax]]$title
     if (is.null(t)) {
       idx <- which(names(argz) %in% i)
       if (length(idx)) {
