@@ -32,7 +32,10 @@ before_script:
   - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 
 script:
-  - Rscript -e 'devtools::check()'
+  # run R CMD check on the non-pull request build
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then Rscript -e 'devtools::check()'"
+  # we do some fancy stuff on the pull request build that confuses R CMD check
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'devtools::install(); source(\"tests/testhat.R\", chdir = T)'"
 
 after_success:
   - cd ../plotly-test-table
