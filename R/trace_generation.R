@@ -405,8 +405,8 @@ toBasic <- list(
       ymin <- as.character(s[1])
       ymax <- as.character(s[length(s)])
     } else {
-      ymin <- min(g$prestats.data$globxmin, na.rm = T)
-      ymax <- max(g$prestats.data$globxmax, na.rm = T)
+      ymin <- min(g$prestats.data$globymin, na.rm = T)
+      ymax <- max(g$prestats.data$globymax, na.rm = T)
     }
     g$data$plotly_id <- seq_len(N)
     l <- list()
