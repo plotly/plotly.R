@@ -1,39 +1,30 @@
 language: c
-sudo: false
 
-addons:
-  apt:
-    sources:
-      - r-packages-precise
-    packages:
-      - r-base-dev
-      - r-recommended
-      - qpdf
+before_install:
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+  # password is encrypted below
+  - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
 
-env:
-  - NOT_CRAN=true R_LIBS_USER=~/R/library
-  global:
-    # plotly_api_key (for posting to plot.ly)
-    - secure: "UAETDsmeXkXm9eUpZa3JTm8/cv+jyLmArXE0TQD0yQNICFNPkGeNergoQmkesRqG+ifLu6V1lPXu1XlqQPdXY60clUHThDN+AjsBmcv9F170k6RtBSV8pIKL9fsW8t0v/maEet86qOSf3cNa5+gK8GjBH1pmLrN2rF9r7RhwUdg="
-    # GITHUB_PAT (for pushing to plotly-test-table)
-    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
-
-cache:
-  directories:
-    $R_LIBS_USER
+install:
+  - ./travis-tool.sh install_deps
 
 before_script:
-  - mkdir -p "$R_LIBS_USER"
-  - echo "Sys.setenv('plotly_username' = 'RTestBot3000')" > ~/.Rprofile
+  - git config --global user.name "cpsievert"
+  - git config --global user.email "cpsievert1@gmail.com"
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
-  - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
-  - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
-  - Rscript -e 'library(devtools);update_packages("devtools", repos = "http://cran.rstudio.com")'
-  - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 
 script:
-  - Rscript -e 'devtools::install(); source("tests/testthat.R", chdir = T)'
+  - Rscript -e "devtools::install(); source('tests/testthat.R', chdir = TRUE)"
 
 after_success:
   - cd ../plotly-test-table
   - Rscript ../plotly/inst/build-push-comment.R
+
+env:
+  global:
+    # plotly_api_key (for posting to plot.ly)
+    - secure: "UAETDsmeXkXm9eUpZa3JTm8/cv+jyLmArXE0TQD0yQNICFNPkGeNergoQmkesRqG+ifLu6V1lPXu1XlqQPdXY60clUHThDN+AjsBmcv9F170k6RtBSV8pIKL9fsW8t0v/maEet86qOSf3cNa5+gK8GjBH1pmLrN2rF9r7RhwUdg="
+    # GITHUB_PAT (for pushing to plotly-test-table)
+    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="    
