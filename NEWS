@@ -1,3 +1,7 @@
+2.2.1 -- 18 Jan 2015
+
+Search for axis title in scene object. fixes #393.
+
 2.2.0 -- 13 Jan 2015
 
 The default for layout.hovermode is now 'closest' for non-line scatter traces
