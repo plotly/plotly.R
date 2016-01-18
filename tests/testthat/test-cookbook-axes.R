@@ -105,7 +105,7 @@ test_that("log2 scaling of the y axis (with visually-equal spacing)", {
   expect_legend(info, leg())
 })
 
-sp.log2.coord <- sp + coord_trans(ytrans="log2")
+sp.log2.coord <- sp + coord_trans(y="log2")
 
 test_that("log2 coordinate transformation with visually-diminishing spacing", {
   info <- expect_traces(sp.log2.coord, 1, "log2-coord")

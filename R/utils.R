@@ -8,6 +8,10 @@ is.plotly <- function(x) inherits(x, "plotly")
   if (length(x) > 0) x else y
 }
 
+is.discrete <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
+}
+
 # special enviroment that tracks trace/layout information
 plotlyEnv <- new.env(parent = emptyenv())
 
@@ -99,7 +103,8 @@ try_file <- function(f, what) {
 
 # preferred defaults for toJSON mapping
 to_JSON <- function(x, ...) {
-  jsonlite::toJSON(x, digits = 50, auto_unbox = TRUE, force = TRUE, ...)
+  jsonlite::toJSON(x, digits = 50, auto_unbox = TRUE, force = TRUE,
+                   null = "null", na = "null", ...)
 }
 
 # preferred defaults for toJSON mapping
@@ -111,6 +116,32 @@ from_JSON <- function(x, ...) {
 get_boxed <- function() {
   c("x", "y", "lat", "lon", "text")
 }
+
+add_boxed <- function(x) {
+  for (i in seq_along(x$data)) {
+    # some object keys require an array, even if length one
+    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
+    # by to_JSON(), is to attach a class of AsIs (via I())
+    d <- x$data[[i]]
+    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
+    if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
+  }
+  x
+}
+
+rm_asis <- function(x) {
+  # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
+  # https://github.com/jeroenooms/jsonlite/issues/29
+  if (is.null(x)) return(NA)
+  if (is.list(x)) lapply(x, rm_asis) 
+  # strip any existing 'AsIs' list elements of their 'AsIs' status.
+  # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
+  # returns list element with their 'AsIs' class, 
+  # which conflicts with our JSON unboxing strategy.
+  else if (inherits(x, "AsIs")) class(x) <- setdiff(class(x), "AsIs")
+  else x
+}
+
 
 # add a class to an object only if it is new, and keep any existing classes of 
 # that object
@@ -157,6 +188,25 @@ plotly_headers <- function(type = "main") {
     )
   }
   httr::add_headers(.headers = h)
+}
+
+
+perform_eval <- function(x) {
+  if (should_eval(x)) do_eval(x) else x
+}
+
+# env/enclos are special properties specific to the R API 
+# if they appear _and_ are environments, then evaluate arguments
+# (sometimes figures return these properties but evaluation doesn't make sense)
+should_eval <- function(x) { 
+  any(vapply(x[c("env", "enclos")], is.environment, logical(1))) 
+}
+
+# perform evaluation of arguments, keeping other list elements
+do_eval <- function(x) {
+  y <- c(x, eval(x$args, as.list(x$env, all.names = TRUE), x$enclos))
+  y[c("args", "env", "enclos")] <- NULL
+  y
 }
 
 # try to write environment variables to an .Rprofile

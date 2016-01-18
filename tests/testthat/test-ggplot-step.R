@@ -7,20 +7,6 @@ oranges <- subset(Orange, Tree %in% c(1, 2))
 gg <- ggplot(oranges, aes(x=age, y=circumference,
                           group=Tree, colour=factor(Tree)))
 
-test_that("direction of geom_line is translated to shape=linear", {
-  gg.linear <- gg + geom_line()
-  L <- save_outputs(gg.linear, "step-gg.linear-geom_line")
-  expect_equal(length(L$data), 2)
-  expect_identical(L$data[[1]]$line$shape, "linear")
-})
-
-test_that("direction of geom_path is translated to shape=linear", {
-  gg.lin <- gg + geom_path()
-  L <- save_outputs(gg.lin, "step-gg.linear-geom_path")
-  expect_equal(length(L$data), 2)
-  expect_identical(L$data[[1]]$line$shape, "linear")
-})
-
 test_that("direction hv is translated to shape=hv", {
   gg.hv <- gg + geom_step()
   L <- save_outputs(gg.hv, "step-gg.hv")

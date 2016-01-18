@@ -59,6 +59,16 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   expect_identical(sort(cols[1:3]), sort(colz))
 })
 
+test_that("Passing hex codes to colors argument works", {
+  colz <- c('#FE8268', '#81E8FE', '#FED681', '#81FED6', '#FE81A9')
+  d <- data.frame(Category = LETTERS[1:5], Value = 1:5, stringsAsFactors = F)
+  p <- plot_ly(d, x = Category, y = Value, type = "bar", 
+               color = Category, colors = colz)
+  l <- expect_traces(p, 5, "bar-color-factor-custom")
+  colz2 <- sapply(l$data, function(x) x[["marker"]][["color"]])
+  expect_identical(sort(colz), sort(colz2))
+})
+
 test_that("Mapping a numeric variable to color works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, 
                color = Petal.Width, mode = "markers")
@@ -87,4 +97,17 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$xaxis$title, "Petal.Length")
   expect_identical(scene$yaxis$title, "Petal.Width")
   expect_identical(scene$zaxis$title, "Sepal.Width")
+})
+
+test_that("inheriting properties works as expected", {
+  library(dplyr)
+  p <- iris %>%
+    count(Species) %>%
+    plot_ly(x = Species, y = n, opacity = 0.5, type = "bar", inherit = TRUE) %>%
+    layout(barmode = "overlay", showlegend = FALSE)
+  s <- count(iris[sample(nrow(iris), 10), ], Species)
+  p2 <- add_trace(p, data = s)
+  l <- plotly_build(p2)
+  expect_equal(l$data[[2]]$opacity, 0.5)
+  expect_true(all(l$data[[1]]$y > l$data[[2]]$y))
 })

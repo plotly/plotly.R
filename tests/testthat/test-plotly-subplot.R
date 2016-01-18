@@ -34,7 +34,8 @@ test_that("group + [x/y]axis works", {
   p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
                xaxis = paste0("x", id), mode = "markers")
   s <- expect_traces(subplot(p, margin = 0.05), 3, "group")
-  doms <- lapply(s$layout, "[[", "domain")
+  ax <- s$layout[grepl("^[x-y]axis", names(s$layout))]
+  doms <- lapply(ax, "[[", "domain")
   # make sure y domain is [0, 1] on every axis
   ydom <- doms[grepl("^y", names(doms))]
   expect_equal(sort(unique(unlist(ydom))), c(0, 1))

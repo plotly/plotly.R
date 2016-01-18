@@ -1,10 +1,6 @@
 .travis.yml
-Karthik_local.R
-Makefile
-man-roxygen
-man-roxygen/^.*\.Rproj$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
-vignettes/margins.sty
 CONDUCT.md
+CONTRIBUTING.md
