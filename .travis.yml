@@ -11,16 +11,16 @@ addons:
       - qpdf
 
 env:
-  - R_LIBS_USER=~/R/library NOT_CRAN=true
-
-cache:
-  directories:
-    $R_LIBS_USER
   global:
+    - R_LIBS_USER=~/R/library NOT_CRAN=true
     # plotly_api_key (for posting to plot.ly)
     - secure: "UAETDsmeXkXm9eUpZa3JTm8/cv+jyLmArXE0TQD0yQNICFNPkGeNergoQmkesRqG+ifLu6V1lPXu1XlqQPdXY60clUHThDN+AjsBmcv9F170k6RtBSV8pIKL9fsW8t0v/maEet86qOSf3cNa5+gK8GjBH1pmLrN2rF9r7RhwUdg="
     # GITHUB_PAT (for pushing to plotly-test-table)
     - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
+
+cache:
+  directories:
+    $R_LIBS_USER
 
 before_script:
   - mkdir -p "$R_LIBS_USER"
@@ -30,10 +30,6 @@ before_script:
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
   - Rscript -e 'library(devtools);update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
-  # for debugging
-  - Rscript -e 'devtools::install()'
-  - Rscript -e 'plotly:::verify("username")'
-  - Rscript -e 'plotly:::verify("api_key")'
 
 script:
   - Rscript -e 'devtools::check()'
