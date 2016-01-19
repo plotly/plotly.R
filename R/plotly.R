@@ -358,6 +358,12 @@ plotly_build <- function(l = last_plot()) {
   }
   # traces shouldn't have any names
   x$data <- setNames(x$data, NULL)
+  # if this is a non-line scatter trace and no hovermode exists, 
+  # set hovermode to closest
+  if (is.null(x$data[[1]]$type) || isTRUE(x$data[[1]]$type == "scatter")) {
+    if (!grepl("lines", x$data[[1]]$mode %||% "lines"))
+      x$layout$hovermode <- x$layout$hovermode %||% "closest"
+  }
   # add plotly class mainly for printing method
   structure(x, class = unique("plotly", class(x)))
 }
@@ -448,7 +454,7 @@ axis_titles <- function(x, l) {
   scene <- if (isTRUE(d$type %in% c("scatter3d", "surface"))) TRUE else FALSE
   for (i in c("x", "y", "z")) {
     ax <- paste0(i, "axis")
-    t <- x$layout[[ax]]$title
+    t <- x$layout[[ax]]$title %||% x$layout$scene[[ax]]$title
     if (is.null(t)) {
       idx <- which(names(argz) %in% i)
       if (length(idx)) {
