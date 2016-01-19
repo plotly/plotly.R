@@ -19,7 +19,7 @@
 #' Plotly to view this graph. You can privately share this graph with other 
 #' Plotly users in your online Plotly account and they will need to be logged 
 #' in to view this plot.
-#' If 'secret', anyone with this secret link can view this chart. It will
+#' If 'hidden', anyone with this hidden link can view this chart. It will
 #' not appear in the Plotly feed, your profile, or search engines. 
 #' If it is embedded inside a webpage or an IPython notebook, anybody who is 
 #' viewing that page will be able to view the graph. 
@@ -36,7 +36,7 @@
 #' }
 
 plotly_POST <- function(x, filename, fileopt = "new", 
-                        sharing = c("public", "private", "secret")) {
+                        sharing = c("public", "private", "hidden")) {
   x <- plotly_build(x)
   x$filename <- if (!missing(filename)) { 
     filename
@@ -52,8 +52,10 @@ plotly_POST <- function(x, filename, fileopt = "new",
   }
   x$fileopt <- fileopt
   if (!is.null(x$world_readable)) {
-    warning("world_readable was specified in the wrong place.",
-            "Please use the sharing argument in plotly_POST()")
+    warning('world_readable is no longer supported. Instead, set the sharing\n',
+            'argument to "private" (you must be logged in to access),\n',
+            '"hidden" (anybody with the obscured URL can access) or "public"\n', 
+            '(anybody can view).')
   }
   x$world_readable <- if (sharing[1] == "public") TRUE else FALSE
   
@@ -72,7 +74,7 @@ plotly_POST <- function(x, filename, fileopt = "new",
   base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
   con <- process(struct(resp, "clientresp"))
-  if (sharing[1] == "secret") {
+  if (sharing[1] == "hidden") {
     bits <- strsplit(con$url, "/")[[1]]
     plot_id <- bits[length(bits)]
     url <- paste0(get_domain("v2"), "files/", verify("username"), ":", plot_id)
