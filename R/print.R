@@ -85,13 +85,15 @@ knit_print.figure <- function(x, options, ...) {
 
 #' Embed a plotly figure as an iframe into a IPython Notebook
 #' @param x a plotly object
-#' @param width attribute of the iframe
-#' @param height attribute of the iframe
+#' @param width attribute of the iframe. If \code{NULL}, the width in
+#' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
+#' @param height attribute of the iframe. If \code{NULL}, the height in
+#' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
 #' @param dir a directory for placing 
 #' @param file a filename for saving the standalone HTML 
 #' (only used if x is a non-figure object)
 #' @export
-embed_notebook <- function(x, width = "100%", height = "400", 
+embed_notebook <- function(x, width = NULL, height = NULL, 
                            file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html")) {
   if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
@@ -109,13 +111,13 @@ embed_notebook <- function(x, width = "100%", height = "400",
   } else {
     paste0(l$url, ".embed")
   }
-  iframe <- plotly_iframe(src, width, height)
+  iframe <- plotly_iframe(src, width %||% l$width, height %||% l$height)
   get("display_html", envir = asNamespace("IRdisplay"))(iframe)
 }
 
-plotly_iframe <- function(url, width, height) {
+plotly_iframe <- function(url = "", width = NULL, height = NULL) {
   sprintf(
     '<iframe src="%s" width="%s" height="%s" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>', 
-    url, width, height
+    url, width %||% "100%", height %||% "400"
   )
 }
