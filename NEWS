@@ -1,3 +1,7 @@
+2.3.0 -- 19 Jan 2015
+
+Add sharing argument and deprecate world_readable. Fixes #332
+
 2.2.4 -- 18 Jan 2015
 
 Fix for error in embed_notebook(). See #409.
