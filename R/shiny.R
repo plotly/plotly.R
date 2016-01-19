@@ -7,6 +7,8 @@
 #' @param width,height Must be a valid CSS unit (like \code{"100\%"},
 #'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
 #'   string and have \code{"px"} appended.
+#' @param inline use an inline (\code{span()}) or block container 
+#' (\code{div()}) for the output
 #' @param expr An expression that generates a plotly
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This 
@@ -17,8 +19,16 @@
 #' @name plotly-shiny
 #'
 #' @export
-plotlyOutput <- function(outputId, width = "100%", height = "400px") {
-  htmlwidgets::shinyWidgetOutput(outputId, "plotly", width, height, package = "plotly")
+plotlyOutput <- function(outputId, width = "100%", height = "400px", 
+                         inline = FALSE) {
+  htmlwidgets::shinyWidgetOutput(
+    outputId = outputId, 
+    name = "plotly", 
+    width = width, 
+    height = height, 
+    inline = inline, 
+    package = "plotly"
+  )
 }
 
 #' @rdname plotly-shiny
