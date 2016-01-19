@@ -229,3 +229,62 @@ cat_profile <- function(key, value, path = "~") {
   message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
 }
+
+get_assets <- function(p) {
+  types <- unlist(lapply(p$data, "[[", "type"))
+  deps <- list(NULL)
+  # if there are any geo trace(s), add the geo assets dependency
+  if (any(grepl("geo|choropleth", types))) {
+    deps[[1]] <- plotly_dist("geo")
+  }
+  if (isTRUE(p$config$mathjax)) {
+    deps[[2]] <- plotly_dist("mathjax")
+  }
+  deps
+}
+
+# helper function for including large plotlyjs assets
+plotly_dist <- function(extra = c("mathjax", "geo")) {
+  path <- Sys.getenv("plotly_jsdir", unset = NA)
+  if (extra[1] == "mathjax") {
+    if (is.na(path)) {
+      stop("MathJax support requires a local clone of the plotly.js repo \n",
+           "https://github.com/plotly/plotly.js \n",
+           "Once you have plotly.js locally, set the plotly_jsdir \n",
+           "environment variable with the path to plotly.js")
+    } else {
+      mj <- file.path(path, "dist", "extras", "mathjax", "MathJax.js")
+      if (!file.exists(mj)) stop("Couldn't locate MathJax.js")
+      # parse the version
+      mathjax <- readLines(mj)
+      pat <- 'MathJax.fileversion="[0-9]+.[0-9]+.[0-9]+'
+      ver <- regmatches(mathjax, regexpr(pat, mathjax))
+      ver <- sub('"', '', strsplit(ver, "=")[[1]][2])
+      htmltools::htmlDependency(
+        name = "mathjax", 
+        version = ver, 
+        src = dirname(mj),
+        script = basename(mj)
+      )
+    }
+  }
+  if (extra[1] == "geo") {
+    if (is.na(path)) {
+      warning("Rendering 'geo' traces without an internet connection \n",
+              "requires a local clone of the plotly.js repo \n",
+              "https://github.com/plotly/plotly.js \n",
+              "Once you have plotly.js locally, set the plotly_jsdir \n",
+              "environment variable with the path to plotly.js")
+      return(NULL)
+    } else {
+      geo <- file.path(path, "dist", "plotly-geo-assets.js")
+      if (!file.exists(geo)) stop("Couldn't locate plotly-geo-assets.js")
+      htmltools::htmlDependency(
+        name = "plotly-geo-assets",
+        src = dirname(geo),
+        version = "1.0",
+        script = basename(geo)
+      )
+    }
+  }
+}
