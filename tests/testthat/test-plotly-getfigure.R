@@ -37,3 +37,10 @@ test_that("can add traces to a subplot figure", {
   expect_equivalent(length(plotly_build(fig)$data) + 1, length(l$data))
 })
 
+test_that("posting a hidden plot returns a secret key", {
+  skip_on_cran()
+  res <- plotly_POST(plot_ly(), sharing = "hidden")
+  key <- strsplit(res$url, "=")[[1]][2]
+  expect_true(nchar(key) > 1)
+})
+
