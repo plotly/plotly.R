@@ -235,10 +235,10 @@ get_assets <- function(p) {
   deps <- list(NULL)
   # if there are any geo trace(s), add the geo assets dependency
   if (any(grepl("geo|choropleth", types))) {
-    deps[[1]] <- plotly_dist("geo")
+    deps <- c(deps, plotly_dist("geo"))
   }
   if (isTRUE(p$config$mathjax)) {
-    deps[[2]] <- plotly_dist("mathjax")
+    deps <- c(deps, plotly_dist("mathjax"))
   }
   deps
 }
@@ -260,12 +260,13 @@ plotly_dist <- function(extra = c("mathjax", "geo")) {
       pat <- 'MathJax.fileversion="[0-9]+.[0-9]+.[0-9]+'
       ver <- regmatches(mathjax, regexpr(pat, mathjax))
       ver <- sub('"', '', strsplit(ver, "=")[[1]][2])
-      htmltools::htmlDependency(
+      dep <- htmltools::htmlDependency(
         name = "mathjax", 
         version = ver, 
         src = dirname(mj),
         script = basename(mj)
       )
+      return(list(dep))
     }
   }
   if (extra[1] == "geo") {
@@ -279,12 +280,13 @@ plotly_dist <- function(extra = c("mathjax", "geo")) {
     } else {
       geo <- file.path(path, "dist", "plotly-geo-assets.js")
       if (!file.exists(geo)) stop("Couldn't locate plotly-geo-assets.js")
-      htmltools::htmlDependency(
+      dep <- htmltools::htmlDependency(
         name = "plotly-geo-assets",
         src = dirname(geo),
         version = "1.0",
         script = basename(geo)
       )
+      return(list(dep))
     }
   }
 }
