@@ -1,3 +1,7 @@
+2.2.4 -- 18 Jan 2015
+
+Fix for error in embed_notebook(). See #409.
+
 2.2.3 -- 18 Jan 2015
 
 Fix for geom_vline(). See #402.
