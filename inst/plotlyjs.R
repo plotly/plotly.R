@@ -8,6 +8,8 @@ p <- Sys.glob("plotly-plotly.js*/dist/plotly.min.js")
 file.copy(p, "inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", overwrite = T)
 l <- Sys.glob("plotly-plotly.js*/LICENSE")
 file.copy(l, "inst/htmlwidgets/lib/plotlyjs/LICENSE", overwrite = T)
+l <- Sys.glob("plotly-plotly.js*/package.json")
+file.copy(l, "inst/htmlwidgets/lib/plotlyjs/package.json", overwrite = T)
 unlink("plotly-plotly.js*", recursive = T)
 # update plotly.yml with version
 basename(zip)

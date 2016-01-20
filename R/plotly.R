@@ -192,9 +192,12 @@ layout <- function(p = last_plot(), ...,
 #' @param displayModeBar display the modebar (T, F, or 'hover')
 #' @param displaylogo add the plotly logo on the end of the modebar
 #' @param plot3dPixelRatio increase the pixel ratio for 3D plot images
-#' @param mathjax whether to include mathjax. If \code{TRUE}, you must have
-#' a local copy of plotly.js and set the environment variable plotly_jsdir to 
-#' its location
+#' @param mathjax If \code{FALSE}, don't attempt to include mathjax. 
+#' If \code{'cdn'}, mathjax will be loaded externally (meaning an internet
+#' connection is needed to view the graph). If \code{'local'}, a local copy
+#' of mathjax will be included. For this to work, you'll need a local copy of 
+#' plotly.js and set the environment variable plotly_jsdir to its location on
+#' your machine.
 #' @author Carson Sievert
 #' @export
 

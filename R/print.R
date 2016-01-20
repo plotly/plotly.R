@@ -40,8 +40,6 @@ as.widget <- function(x, ...) {
   )
   # customize the JSON serializer (for htmlwidgets)
   attr(p, 'TOJSON_FUNC') <- to_JSON
-  # get plotlyjs assets, if necessary
-  deps <- get_assets(p)
   htmlwidgets::createWidget(
     name = "plotly",
     x = p,
@@ -51,7 +49,7 @@ as.widget <- function(x, ...) {
       padding = 5, 
       browser.fill = TRUE
     ),
-    dependencies = deps,
+    dependencies = plotly_dependencies(p),
     ...
   )
 }
