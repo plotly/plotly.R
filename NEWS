@@ -1,3 +1,7 @@
+2.3.1 -- 20 Jan 2015
+
+more accurate list of data_array properties. fixes #415
+
 2.3.0 -- 19 Jan 2015
 
 Add sharing argument and deprecate world_readable. Fixes #332
