@@ -6,7 +6,7 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
   symbol, symbols, size, width = NULL, height = NULL, inherit = FALSE,
-  evaluate = FALSE)
+  evaluate = FALSE, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -39,6 +39,8 @@ or a color interpolation function like \code{colorRamp()}.}
 \item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
+
+\item{source}{Only relevant for \link{event_data}}
 }
 \description{
 Transform data into a plotly visualization.

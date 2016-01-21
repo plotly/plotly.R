@@ -29,3 +29,34 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   expr <- call("as.widget", expr)
   shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
 }
+
+
+#' Access plotly user input event data in shiny
+#' 
+#' This function must be called within a reactive shiny context.
+#' 
+#' @param event The type of plotly event. Currently 'plotly_click' and 
+#' 'plotly_selected' are supported.
+#' @param source Which plot should the listener be tied to? This 
+#' (character string) should match the value of \code{source} in \link{plot_ly}.
+#' @export
+#' @author Carson Sievert
+#' @examples \dontrun{
+#' shiny::runApp(system.file("examples", "events", package = "plotly"))
+#' }
+
+event_data <- function(event = c("plotly_click", "plotly_selected"), 
+                       source = "A") {
+  session <- shiny::getDefaultReactiveDomain()
+  if (is.null(session)) {
+    stop("No reactive domain detected. This function can only be called \n",
+         "from within a reactive shiny context.")
+  }
+  # TODO: is this safe?
+  val <- session$input[[sprintf(".clientValue-%s-%s", event[1], source)]]
+  if (event[1] == "plotly_selected" && !is.null(val)) {
+    data.frame(lapply(val, as.numeric))
+  } else  {
+    val
+  }
+}
