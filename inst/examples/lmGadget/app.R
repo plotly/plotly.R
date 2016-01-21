@@ -32,14 +32,15 @@ lmGadget <- function(dat, x, y) {
   # mechanism for managing selected points
   init <- function() {
     selected <- rep(FALSE, nrow(dat))
-    function(x = "clear") {
-      selected <<- if (identical(x, "clear")) rep(FALSE, nrow(dat)) else xor(selected, x)
+    function(x) {
+      selected <<- xor(selected, x)
       selected
     }
   }
   selection <- init()
   
   server <- function(input, output) {
+    
     # obtain a subset of the data that is still under consideration
     left <- reactive({
       d <- event_data("plotly_click")
@@ -48,6 +49,7 @@ lmGadget <- function(dat, x, y) {
       }
       dat
     })
+    
     # fit a model to subsetted data
     refit <- reactive({
       req(input$degree)
@@ -62,21 +64,16 @@ lmGadget <- function(dat, x, y) {
       dat2$yhat <- as.numeric(fitted(refit()))
       # sort data by 'x' variable so we draw a line (not a path)
       dat2 <- dat2[order(dat2[, x]), ]
-      rows <- row.names(dat)
-      rows2 <- row.names(dat2)
       
-      plot_ly(x = dat[, x], y = dat[, y], key = rows, mode = "markers",
-              marker = list(color = toRGB("grey90"))) %>%
-        add_trace(x = dat2[, x], y = dat2[, y], key = rows2, mode = "markers",
-                  marker = list(color = toRGB("black"))) %>%
+      plot_ly(x = dat[, x], y = dat[, y], key = row.names(dat), mode = "markers",
+              marker = list(color = toRGB("grey90"), size = 10)) %>%
+        add_trace(x = dat2[, x], y = dat2[, y], mode = "markers",
+                  marker = list(color = toRGB("black"), size = 10)) %>%
         add_trace(x = dat2[, x], y = dat2$yhat, mode = "lines",
                   marker = list(color = toRGB("black"))) %>%
         layout(showlegend = FALSE, xaxis = list(title = x), yaxis = list(title = y))
     })
-    # Clear selected points
-    observeEvent(input$exclude_reset, {
-      selection()
-    })
+    
     # Return the most recent fitted model, when we press "done"
     observeEvent(input$done, {
       stopApp(refit())
