@@ -126,7 +126,8 @@ add_boxed <- function(x) {
 
 # plotlyjs properties that must _always_ be an array (even if length 1)
 get_boxed <- function(type = "scatter") {
-  boxers[[type]]
+  # if the trace type isn't found, provide some sensible defaults
+  boxers[[type]] %||% c("x", "y", "z", "lat", "lon", "text", "locations")
 }
 
 # if this ever needs updating see
