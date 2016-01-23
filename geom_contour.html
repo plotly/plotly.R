@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_contour. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Display contours of a 3d surface in 2d.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_contour(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"contour", position&nbsp;=&nbsp;"identity", lineend&nbsp;=&nbsp;"butt", linejoin&nbsp;=&nbsp;"round", linemitre&nbsp;=&nbsp;1, na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_contour(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"contour", position&nbsp;=&nbsp;"identity", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>stat</dt>
+      <dd>The statistical transformation to use on the data for this
+layer, as a string.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>lineend</dt>
+      <dd>Line end style (round, butt, square)</dd>
+      <dt>linejoin</dt>
+      <dd>Line join style (round, mitre, bevel)</dd>
+      <dt>linemitre</dt>
+      <dd>Line mitre limit (number greater than 1)</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+      <dt>geom</dt>
+      <dd>The geometric object to use display the data</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Display contours of a 3d surface in 2d.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>geom_contour</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>x</strong></code>
+  </li>
+<li> <code><strong>y</strong></code>
+  </li>
+<li> <code>alpha</code>
+  </li>
+<li> <code>colour</code>
+  </li>
+<li> <code>linetype</code>
+  </li>
+<li> <code>size</code>
+  </li>
+<li> <code>weight</code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+
+    <div class="Computed variables">
+      <h2>Computed variables</h2>
+
+      <p></p>
+  
+      <p><dl>
+ <dt>level</dt><dd>height of contour</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>#&#39; # Basic plot
+v &lt;- ggplot(faithfuld, aes(waiting, eruptions, z = density))
+v + geom_contour()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Or compute from raw data
+ggplot(faithful, aes(waiting, eruptions)) +
+  geom_density_2d()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+
+# Setting bins creates evenly spaced contours in the range of the data
+v + geom_contour(bins = 2)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>v + geom_contour(bins = 10)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Setting binwidth does the same thing, parameterised by the distance
+# between contours
+v + geom_contour(binwidth = 0.01)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>v + geom_contour(binwidth = 0.001)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Other parameters
+v + geom_contour(aes(colour = ..level..))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>v + geom_contour(colour = &quot;red&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>v + geom_raster(aes(fill = density)) +
+  geom_contour(colour = &quot;white&quot;)
+</div>
+<strong class='warning'>Warning message:
+geom_raster has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_contour</li><li>stat_contour</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='geom_density_2d.html'>geom_density_2d</a></code>: 2d density contours
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_contour'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

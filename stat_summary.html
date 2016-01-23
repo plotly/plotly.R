@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stat_summary_bin. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Summarise y values at unique/binned x x.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stat_summary_bin(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"pointrange", fun.data&nbsp;=&nbsp;NULL, fun.y&nbsp;=&nbsp;NULL, fun.ymax&nbsp;=&nbsp;NULL, fun.ymin&nbsp;=&nbsp;NULL, fun.args&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, position&nbsp;=&nbsp;"identity", show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_summary(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"pointrange", fun.data&nbsp;=&nbsp;NULL, fun.y&nbsp;=&nbsp;NULL, fun.ymax&nbsp;=&nbsp;NULL, fun.ymin&nbsp;=&nbsp;NULL, fun.args&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, position&nbsp;=&nbsp;"identity", show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>geom</dt>
+      <dd>Use to override the default connection between
+<code>geom_histogram</code>/<code>geom_freqpoly</code> and <code>stat_bin</code>.</dd>
+      <dt>fun.data</dt>
+      <dd>A function that is given the complete data and should
+return a data frame with variables <code>ymin</code>, <code>y</code>, and <code>ymax</code>.</dd>
+      <dt>fun.ymin, fun.y, fun.ymax</dt>
+      <dd>Alternatively, supply three individual
+functions that are each passed a vector of x's and should return a
+single number.</dd>
+      <dt>fun.args</dt>
+      <dd>Optional additional arguments passed on to the functions.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>stat_summary</code> operates on unique <code>x</code>; <code>stat_summary_bin</code>
+operators on binned <code>x</code>. They are more flexible versions of
+<code><a href='geom_histogram.html'>stat_bin</a></code>: instead of just counting, the can compute any
+aggregate.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>stat_summary</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>x</strong></code>
+  </li>
+<li> <code><strong>y</strong></code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+
+    <div class="Summary functions">
+      <h2>Summary functions</h2>
+
+      <p></p>
+  
+      <p>You can either supply summary functions individually (<code>fun.y</code>,
+<code>fun.ymax</code>, <code>fun.ymin</code>), or as a single function (<code>fun.data</code>):</p>
+  
+      <p><dl>
+  <dt>fun.data</dt><dd>Complete summary function. Should take numeric vector as
+     input and return data frame as output</dd></p>
+  
+      <p><dt>fun.ymin</dt><dd>ymin summary function (should take numeric vector and
+    return single number)</dd></p>
+  
+      <p><dt>fun.y</dt><dd>y summary function (should take numeric vector and return
+    single number)</dd></p>
+  
+      <p><dt>fun.ymax</dt><dd>ymax summary function (should take numeric vector and
+    return single number)</dd></p>
+  
+      <p></dl></p>
+  
+      <p>A simple vector function is easiest to work with as you can return a single
+number, but is somewhat less flexible. If your summary function computes
+multiple values at once (e.g. ymin and ymax), use <code>fun.data</code>.</p>
+  
+      <p>If no aggregation functions are suppled, will default to
+<code><a href='mean_se.html'>mean_se</a></code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>d &lt;- ggplot(mtcars, aes(cyl, mpg)) + geom_point()
+d + stat_summary(fun.data = &quot;mean_cl_boot&quot;, colour = &quot;red&quot;, size = 2)
+</div>
+<strong class='warning'>Warning message:
+geom_pointrange has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# You can supply individual functions to summarise the value at
+# each x:
+d + stat_summary(fun.y = &quot;median&quot;, colour = &quot;red&quot;, size = 2)
+</div>
+<strong class='warning'>Warning message:
+geom_pointrange has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>d + stat_summary(fun.y = &quot;mean&quot;, colour = &quot;red&quot;, size = 2)
+</div>
+<strong class='warning'>Warning message:
+geom_pointrange has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>d + aes(colour = factor(vs)) + stat_summary(fun.y = mean, geom=&quot;line&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+d + stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max,
+  colour = &quot;red&quot;)
+</div>
+<strong class='warning'>Warning message:
+geom_pointrange has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+#&#39; d &lt;- ggplot(diamonds, aes(carat, price))
+d + geom_smooth()
+</div>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+pseudoinverse used at 3.98</strong>
+<strong class='warning'>Warning message:
+neighborhood radius 4.02</strong>
+<strong class='warning'>Warning message:
+reciprocal condition number  2.0055e-16</strong>
+<strong class='warning'>Warning message:
+There are other near singularities as well. 16.16</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>d + geom_line(stat = &quot;summary_bin&quot;, binwidth = 0.1, fun.y = &quot;mean&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+d &lt;- ggplot(diamonds, aes(cut))
+d + geom_bar()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>d + stat_summary_bin(aes(y = price), fun.y = &quot;mean&quot;, geom = &quot;bar&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# A set of useful summary functions is provided from the Hmisc package:
+stat_sum_df &lt;- function(fun, geom=&quot;crossbar&quot;, ...) {
+  stat_summary(fun.data=fun, colour=&quot;red&quot;, geom=geom, width=0.2, ...)
+}
+
+# Don&#39;t use ylim to zoom into a summary plot - this throws the
+# data away
+p &lt;- ggplot(mtcars, aes(cyl, mpg)) +
+  stat_summary(fun.y = &quot;mean&quot;, geom = &quot;point&quot;)
+p
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + ylim(15, 30)
+</div>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+Removed 9 rows containing non-finite values (stat_summary).</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'># Instead use coord_cartesian
+p + coord_cartesian(ylim = c(15, 30))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# The crossbar geom needs grouping to be specified when used with
+# a continuous x axis.
+d + stat_sum_df(&quot;mean_cl_boot&quot;, mapping = aes(group = cyl))
+</div>
+<strong class='error'>Error in eval(expr, envir, enclos): object &#39;cyl&#39; not found</strong>
+<div class='input'>d + stat_sum_df(&quot;mean_sdl&quot;, mapping = aes(group = cyl))
+</div>
+<strong class='error'>Error in eval(expr, envir, enclos): object &#39;cyl&#39; not found</strong>
+<div class='input'>d + stat_sum_df(&quot;mean_sdl&quot;, mult = 1, mapping = aes(group = cyl))
+</div>
+<strong class='error'>Error: Unknown parameters: mult</strong>
+<div class='input'>d + stat_sum_df(&quot;median_hilow&quot;, mapping = aes(group = cyl))
+</div>
+<strong class='error'>Error in eval(expr, envir, enclos): object &#39;cyl&#39; not found</strong>
+<div class='input'>
+# There are lots of different geoms you can use to display the summaries
+
+d + stat_sum_df(&quot;mean_cl_normal&quot;, mapping = aes(group = cyl))
+</div>
+<strong class='error'>Error in eval(expr, envir, enclos): object &#39;cyl&#39; not found</strong>
+<div class='input'>d + stat_sum_df(&quot;mean_cl_normal&quot;, geom = &quot;errorbar&quot;)
+</div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+argument is not numeric or logical: returning NA</strong>
+<strong class='error'>Error in seq.default(from = best$lmin, to = best$lmax, by = best$lstep): &#39;from&#39; must be of length 1</strong>
+<div class='input'>d + stat_sum_df(&quot;mean_cl_normal&quot;, geom = &quot;pointrange&quot;)
+</div>
+<strong class='error'>Error: Unknown parameters: width</strong>
+<div class='input'>d + stat_sum_df(&quot;mean_cl_normal&quot;, geom = &quot;smooth&quot;)
+</div>
+<strong class='error'>Error: Unknown parameters: width</strong>
+<div class='input'>
+# Summaries are more useful with a bigger data set:
+mpg2 &lt;- subset(mpg, cyl != 5L)
+m &lt;- ggplot(mpg2, aes(x=cyl, y=hwy)) +
+        geom_point() +
+        stat_summary(fun.data = &quot;mean_sdl&quot;, geom = &quot;linerange&quot;,
+                     colour = &quot;red&quot;, size = 2, mult = 1) +
+       xlab(&quot;cyl&quot;)
+</div>
+<strong class='error'>Error: Unknown parameters: mult</strong>
+<div class='input'>m
+</div>
+<strong class='error'>Error in eval(expr, envir, enclos): object &#39;m&#39; not found</strong>
+<div class='input'># An example with highly skewed distributions:
+if (require(&quot;ggplot2movies&quot;)) {
+set.seed(596)
+mov &lt;- movies[sample(nrow(movies), 1000), ]
+ m2 &lt;- ggplot(mov, aes(x= factor(round(rating)), y=votes)) + geom_point()
+ m2 &lt;- m2 + stat_summary(fun.data = &quot;mean_cl_boot&quot;, geom = &quot;crossbar&quot;,
+                         colour = &quot;red&quot;, width = 0.3) + xlab(&quot;rating&quot;)
+m2
+# Notice how the overplotting skews off visual perception of the mean
+# supplementing the raw data with summary statistics is _very_ important
+
+# Next, we&#39;ll look at votes on a log scale.
+
+# Transforming the scale means the data are transformed
+# first, after which statistics are computed:
+m2 + scale_y_log10()
+# Transforming the coordinate system occurs after the
+# statistic has been computed. This means we&#39;re calculating the summary on the raw data
+# and stretching the geoms onto the log scale.  Compare the widths of the
+# standard errors.
+m2 + coord_trans(y=&quot;log10&quot;)
+}
+</div>
+<strong class='warning'>Warning message:
+geom_crossbar has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stat_summary</li><li>stat_summary_bin</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='geom_linerange.html'>geom_errorbar</a></code>, <code><a href='geom_linerange.html'>geom_pointrange</a></code>,
+ <code><a href='geom_linerange.html'>geom_linerange</a></code>, <code><a href='geom_linerange.html'>geom_crossbar</a></code> for geoms to
+ display summarised data
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=stat_summary_bin'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

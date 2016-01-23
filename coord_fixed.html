@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>coord_fixed. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Cartesian coordinates with fixed relationship between x and y scales.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>coord_fixed(ratio&nbsp;=&nbsp;1, xlim&nbsp;=&nbsp;NULL, ylim&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;TRUE)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>ratio</dt>
+      <dd>aspect ratio, expressed as <code>y / x</code></dd>
+      <dt>xlim</dt>
+      <dd>Limits for the x and y axes.</dd>
+      <dt>ylim</dt>
+      <dd>Limits for the x and y axes.</dd>
+      <dt>expand</dt>
+      <dd>If <code>TRUE</code>, the default, adds a small expansion factor to
+the limits to ensure that data and axes don't overlap. If <code>FALSE</code>,
+limits are taken exactly from the data or <code>xlim</code>/<code>ylim</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>A fixed scale coordinate system forces a specified ratio between the
+physical representation of data units on the axes. The ratio represents the
+number of units on the y-axis equivalent to one unit on the x-axis. The
+default, <code>ratio = 1</code>, ensures that one unit on the x-axis is the same
+length as one unit on the y-axis. Ratios higher than one make units on the
+y axis longer than units on the x-axis, and vice versa. This is similar to
+<code><a href='http://www.inside-r.org/r-doc/MASS/eqscplot'>eqscplot</a></code>, but it works for all types of graphics.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># ensures that the ranges of axes are equal to the specified ratio by
+# adjusting the plot aspect ratio
+
+p &lt;- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+p + coord_fixed(ratio = 1)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + coord_fixed(ratio = 5)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + coord_fixed(ratio = 1/5)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Resize the plot to see that the specified aspect ratio is maintained
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>coord_equal</li><li>coord_fixed</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=coord_fixed'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

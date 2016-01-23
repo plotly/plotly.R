@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>qplot. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Quick plot</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>qplot(x, y&nbsp;=&nbsp;NULL, ..., data, facets&nbsp;=&nbsp;NULL, margins&nbsp;=&nbsp;FALSE, geom&nbsp;=&nbsp;"auto", xlim&nbsp;=&nbsp;c(NA, NA), ylim&nbsp;=&nbsp;c(NA, NA), log&nbsp;=&nbsp;"", main&nbsp;=&nbsp;NULL, xlab&nbsp;=&nbsp;deparse(substitute(x)), ylab&nbsp;=&nbsp;deparse(substitute(y)), asp&nbsp;=&nbsp;NA, stat&nbsp;=&nbsp;NULL, position&nbsp;=&nbsp;NULL)</div>
+<div>quickplot(x, y&nbsp;=&nbsp;NULL, ..., data, facets&nbsp;=&nbsp;NULL, margins&nbsp;=&nbsp;FALSE, geom&nbsp;=&nbsp;"auto", xlim&nbsp;=&nbsp;c(NA, NA), ylim&nbsp;=&nbsp;c(NA, NA), log&nbsp;=&nbsp;"", main&nbsp;=&nbsp;NULL, xlab&nbsp;=&nbsp;deparse(substitute(x)), ylab&nbsp;=&nbsp;deparse(substitute(y)), asp&nbsp;=&nbsp;NA, stat&nbsp;=&nbsp;NULL, position&nbsp;=&nbsp;NULL)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>x, y, ...</dt>
+      <dd>Aesthetics passed into each layer</dd>
+      <dt>data</dt>
+      <dd>Data frame to use (optional).  If not specified, will create
+one, extracting vectors from the current environment.</dd>
+      <dt>facets</dt>
+      <dd>faceting formula to use. Picks <code><a href='facet_wrap.html'>facet_wrap</a></code> or
+<code><a href='facet_grid.html'>facet_grid</a></code> depending on whether the formula is one-
+or two-sided</dd>
+      <dt>margins</dt>
+      <dd>See <code>facet_grid</code>: display marginal facets?</dd>
+      <dt>geom</dt>
+      <dd>Character vector specifying geom(s) to draw. Defaults to
+"point" if x and y are specified, and "histogram" if only x is specified.</dd>
+      <dt>xlim, ylim</dt>
+      <dd>X and y axis limits</dd>
+      <dt>log</dt>
+      <dd>Which variables to log transform ("x", "y", or "xy")</dd>
+      <dt>main, xlab, ylab</dt>
+      <dd>Character vector (or expression) giving plot title,
+x axis label, and y axis label respectively.</dd>
+      <dt>asp</dt>
+      <dd>The y/x aspect ratio</dd>
+      <dt>stat, position</dt>
+      <dd>DEPRECATED.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>qplot</code> is the basic plotting function in the ggplot2 package,
+designed to be familiar if you're used to base <code><a href='http://www.inside-r.org/r-doc/graphics/plot'>plot</a>()</code>.
+It's a convenient wrapper for creating a number of different types of plots
+using a consistent calling scheme.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># Use data from data.frame
+qplot(mpg, wt, data = mtcars)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(mpg, wt, data = mtcars, colour = cyl)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(mpg, wt, data = mtcars, size = cyl)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(mpg, wt, data = mtcars, facets = vs ~ am)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+
+qplot(1:10, rnorm(10), colour = runif(10))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(1:10, letters[1:10])
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>mod &lt;- lm(mpg ~ wt, data=mtcars)
+qplot(resid(mod), fitted(mod))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+f &lt;- function() {
+   a &lt;- 1:10
+   b &lt;- a ^ 2
+   qplot(a, b)
+}
+f()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# To set aesthetics, wrap in I()
+qplot(mpg, wt, data = mtcars, colour = I(&quot;red&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# qplot will attempt to guess what geom you want depending on the input
+# both x and y supplied = scatterplot
+qplot(mpg, wt, data = mtcars)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'># just x supplied = histogram
+qplot(mpg, data = mtcars)
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'># just y supplied = scatterplot, with x = seq_along(y)
+qplot(y = mpg, data = mtcars)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Use different geoms
+qplot(mpg, wt, data = mtcars, geom = &quot;path&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(factor(cyl), wt, data = mtcars, geom = c(&quot;boxplot&quot;, &quot;jitter&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>qplot(mpg, data = mtcars, geom = &quot;dotplot&quot;)
+</div>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='warning'>Warning message:
+geom_dotplot has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>qplot</li><li>quickplot</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=qplot'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

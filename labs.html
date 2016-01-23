@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>labs. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Change axis labels and legend titles</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>labs(...)</div>
+<div>xlab(label)</div>
+<div>ylab(label)</div>
+<div>ggtitle(label)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>a list of new names in the form aesthetic = "new name"</dd>
+      <dt>label</dt>
+      <dd>The text for the axis or plot title.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Change axis labels and legend titles</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>p &lt;- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+p + labs(title = &quot;New plot title&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + labs(x = &quot;New x label&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + xlab(&quot;New x label&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + ylab(&quot;New y label&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + ggtitle(&quot;New plot title&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# This should work independently of other functions that modify the
+# the scale names
+p + ylab(&quot;New y label&quot;) + ylim(2, 4)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p + ylim(2, 4) + ylab(&quot;New y label&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# The labs function also modifies legend labels
+p &lt;- ggplot(mtcars, aes(mpg, wt, colour = cyl)) + geom_point()
+p + labs(colour = &quot;Cylinders&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Can also pass in a list, if that is more convenient
+p + labs(list(title = &quot;Title&quot;, x = &quot;X&quot;, y = &quot;Y&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>ggtitle</li><li>labs</li><li>xlab</li><li>ylab</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=labs'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

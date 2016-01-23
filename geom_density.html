@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_density. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Display a smooth density estimate.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_density(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"density", position&nbsp;=&nbsp;"identity", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_density(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"area", position&nbsp;=&nbsp;"stack", adjust&nbsp;=&nbsp;1, kernel&nbsp;=&nbsp;"gaussian", trim&nbsp;=&nbsp;FALSE, na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+      <dt>geom, stat</dt>
+      <dd>Use to override the default connection between
+<code>geom_density</code> and <code>stat_density</code>.</dd>
+      <dt>adjust</dt>
+      <dd>see <code><a href='http://www.inside-r.org/r-doc/stats/density'>density</a></code> for details</dd>
+      <dt>kernel</dt>
+      <dd>kernel used for density estimation, see
+<code><a href='http://www.inside-r.org/r-doc/stats/density'>density</a></code> for details</dd>
+      <dt>trim</dt>
+      <dd>This parameter only matters if you are displaying multiple
+densities in one plot. If <code>FALSE</code>, the default, each density is
+computed on the full range of the data. If <code>TRUE</code>, each density
+is computed over the range of that group: this typically means the
+estimated x values will not line-up, and hence you won't be able to
+stack density values.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>A kernel density estimate, useful for display the distribution of variables
+with underlying smoothness.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>geom_density</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>x</strong></code>
+  </li>
+<li> <code><strong>y</strong></code>
+  </li>
+<li> <code>alpha</code>
+  </li>
+<li> <code>colour</code>
+  </li>
+<li> <code>fill</code>
+  </li>
+<li> <code>linetype</code>
+  </li>
+<li> <code>size</code>
+  </li>
+<li> <code>weight</code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+
+    <div class="Computed variables">
+      <h2>Computed variables</h2>
+
+      <p></p>
+  
+      <p><dl>
+  <dt>density</dt><dd>density estimate</dd></p>
+  
+      <p><dt>count</dt><dd>density * number of points - useful for stacked density
+     plots</dd></p>
+  
+      <p><dt>scaled</dt><dd>density estimate, scaled to maximum of 1</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>ggplot(diamonds, aes(carat)) +
+  geom_density()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(diamonds, aes(carat)) +
+  geom_density(adjust = 1/5)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>ggplot(diamonds, aes(carat)) +
+  geom_density(adjust = 5)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(diamonds, aes(depth, colour = cut)) +
+  geom_density() +
+  xlim(55, 70)
+</div>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>ggplot(diamonds, aes(depth, fill = cut, colour = cut)) +
+  geom_density(alpha = 0.1) +
+  xlim(55, 70)
+</div>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+Removed 45 rows containing non-finite values (stat_density).</strong>
+<strong class='warning'>Warning message:
+the condition has length &gt; 1 and only the first element will be used</strong>
+<strong class='warning'>Warning message:
+the condition has length &gt; 1 and only the first element will be used</strong>
+<strong class='warning'>Warning message:
+the condition has length &gt; 1 and only the first element will be used</strong>
+<strong class='warning'>Warning message:
+the condition has length &gt; 1 and only the first element will be used</strong>
+<strong class='warning'>Warning message:
+the condition has length &gt; 1 and only the first element will be used</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+
+# Stacked density plots: if you want to create a stacked density plot, you
+# probably want to &#39;count&#39; (density * n) variable instead of the default
+# density
+
+# Loses marginal densities
+ggplot(diamonds, aes(carat, fill = cut)) +
+  geom_density(position = &quot;stack&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'># Preserves marginal densities
+ggplot(diamonds, aes(carat, ..count.., fill = cut)) +
+  geom_density(position = &quot;stack&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# You can use position=&quot;fill&quot; to produce a conditional density estimate
+ggplot(diamonds, aes(carat, ..count.., fill = cut)) +
+  geom_density(position = &quot;fill&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_density</li><li>stat_density</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+See <code><a href='geom_histogram.html'>geom_histogram</a></code>, <code><a href='geom_histogram.html'>geom_freqpoly</a></code> for
+  other methods of displaying continuous distribution.
+  See <code><a href='geom_violin.html'>geom_violin</a></code> for a compact density display.
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_density'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

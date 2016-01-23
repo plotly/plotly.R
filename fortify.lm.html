@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>fortify.lm. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Supplement the data fitted to a linear model with model fit statistics.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>"fortify"(model, data&nbsp;=&nbsp;model$model, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>model</dt>
+      <dd>linear model</dd>
+      <dt>data</dt>
+      <dd>data set, defaults to data used to fit model</dd>
+      <dt>...</dt>
+      <dd>not used by this method</dd>
+    </dl>
+    
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+The original data with extra columns:
+  <dt>.hat</dt><dd>Diagonal of the hat matrix</dd></p>
+  
+      <p><dt>.sigma</dt><dd>Estimate of residual standard deviation when
+    corresponding observation is dropped from model</dd></p>
+  
+      <p><dt>.cooksd</dt><dd>Cooks distance, <code><a href='http://www.inside-r.org/r-doc/stats/influence.measures'>cooks.distance</a></code></dd></p>
+  
+      <p><dt>.fitted</dt><dd>Fitted values of model</dd></p>
+  
+      <p><dt>.resid</dt><dd>Residuals</dd></p>
+  
+      <p><dt>.stdresid</dt><dd>Standardised residuals</dd></p>
+  
+      <p></dl></p>
+  
+    </div>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>If you have missing values in your model data, you may need to refit
+the model with <code>na.action = na.exclude</code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>mod &lt;- lm(mpg ~ wt, data = mtcars)
+head(fortify(mod))
+</div>
+<div class='output'>                   mpg    wt       .hat   .sigma      .cooksd  .fitted
+Mazda RX4         21.0 2.620 0.04326896 3.067494 1.327407e-02 23.28261
+Mazda RX4 Wag     21.0 2.875 0.03519677 3.093068 1.723963e-03 21.91977
+Datsun 710        22.8 2.320 0.05837573 3.072127 1.543937e-02 24.88595
+Hornet 4 Drive    21.4 3.215 0.03125017 3.088268 3.020558e-03 20.10265
+Hornet Sportabout 18.7 3.440 0.03292182 3.097722 7.599578e-05 18.90014
+Valiant           18.1 3.460 0.03323551 3.095184 9.210650e-04 18.79325
+                      .resid   .stdresid
+Mazda RX4         -2.2826106 -0.76616765
+Mazda RX4 Wag     -0.9197704 -0.30743051
+Datsun 710        -2.0859521 -0.70575249
+Hornet 4 Drive     1.2973499  0.43275114
+Hornet Sportabout -0.2001440 -0.06681879
+Valiant           -0.6932545 -0.23148309
+</div>
+<div class='input'>head(fortify(mod, mtcars))
+</div>
+<div class='output'>                   mpg cyl disp  hp drat    wt  qsec vs am gear carb       .hat
+Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4 0.04326896
+Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4 0.03519677
+Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1 0.05837573
+Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1 0.03125017
+Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2 0.03292182
+Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1 0.03323551
+                    .sigma      .cooksd  .fitted     .resid   .stdresid
+Mazda RX4         3.067494 1.327407e-02 23.28261 -2.2826106 -0.76616765
+Mazda RX4 Wag     3.093068 1.723963e-03 21.91977 -0.9197704 -0.30743051
+Datsun 710        3.072127 1.543937e-02 24.88595 -2.0859521 -0.70575249
+Hornet 4 Drive    3.088268 3.020558e-03 20.10265  1.2973499  0.43275114
+Hornet Sportabout 3.097722 7.599578e-05 18.90014 -0.2001440 -0.06681879
+Valiant           3.095184 9.210650e-04 18.79325 -0.6932545 -0.23148309
+</div>
+<div class='input'>
+plot(mod, which = 1)
+</div>
+<p><img src='fortify.lm-6.png' alt='' width='540' height='400' /></p>
+<div class='input'>
+ggplot(mod, aes(.fitted, .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  geom_smooth(se = FALSE)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(mod, aes(.fitted, .stdresid)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  geom_smooth(se = FALSE)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(fortify(mod, mtcars), aes(.fitted, .stdresid)) +
+  geom_point(aes(colour = factor(cyl)))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(fortify(mod, mtcars), aes(mpg, .stdresid)) +
+  geom_point(aes(colour = factor(cyl)))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(mod, which = 2)
+</div>
+<p><img src='fortify.lm-40.png' alt='' width='540' height='400' /></p>
+<div class='input'>ggplot(mod) +
+  stat_qq(aes(sample = .stdresid)) +
+  geom_abline()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(mod, which = 3)
+</div>
+<p><img src='fortify.lm-50.png' alt='' width='540' height='400' /></p>
+<div class='input'>ggplot(mod, aes(.fitted, sqrt(abs(.stdresid)))) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(mod, which = 4)
+</div>
+<p><img src='fortify.lm-60.png' alt='' width='540' height='400' /></p>
+<div class='input'>ggplot(mod, aes(seq_along(.cooksd), .cooksd)) +
+  geom_bar(stat = &quot;identity&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(mod, which = 5)
+</div>
+<p><img src='fortify.lm-70.png' alt='' width='540' height='400' /></p>
+<div class='input'>ggplot(mod, aes(.hat, .stdresid)) +
+  geom_vline(size = 2, colour = &quot;white&quot;, xintercept = 0) +
+  geom_hline(size = 2, colour = &quot;white&quot;, yintercept = 0) +
+  geom_point() + geom_smooth(se = FALSE)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(mod, aes(.hat, .stdresid)) +
+  geom_point(aes(size = .cooksd)) +
+  geom_smooth(se = FALSE, size = 0.5)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(mod, which = 6)
+</div>
+<p><img src='fortify.lm-88.png' alt='' width='540' height='400' /></p>
+<div class='input'>ggplot(mod, aes(.hat, .cooksd)) +
+  geom_vline(xintercept = 0, colour = NA) +
+  geom_abline(slope = seq(0, 3, by = 0.5), colour = &quot;white&quot;) +
+  geom_smooth(se = FALSE) +
+  geom_point()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+ggplot(mod, aes(.hat, .cooksd)) +
+  geom_point(aes(size = .cooksd / .hat)) +
+  scale_size_area()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>fortify.lm</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=fortify.lm'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

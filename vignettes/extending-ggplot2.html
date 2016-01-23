@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Hadley Wickham" />
+
+<meta name="date" content="2016-01-22" />
+
+<title>Extending ggplot2</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<link href="data:text/css,body%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20max%2Dwidth%3A%20700px%3B%0A%20%20overflow%3A%20visible%3B%0A%20%20padding%2Dleft%3A%202em%3B%0A%20%20padding%2Dright%3A%202em%3B%0A%20%20font%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E35%3B%0A%7D%0A%0A%23header%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23TOC%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%200%200%2010px%2010px%3B%0A%20%20padding%3A%204px%3B%0A%20%20width%3A%20400px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20border%2Dradius%3A%205px%3B%0A%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%201%2E3%3B%0A%7D%0A%20%20%23TOC%20%2Etoctitle%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%20%20font%2Dsize%3A%2015px%3B%0A%20%20%20%20margin%2Dleft%3A%205px%3B%0A%20%20%7D%0A%0A%20%20%23TOC%20ul%20%7B%0A%20%20%20%20padding%2Dleft%3A%2040px%3B%0A%20%20%20%20margin%2Dleft%3A%20%2D1%2E5em%3B%0A%20%20%20%20margin%2Dtop%3A%205px%3B%0A%20%20%20%20margin%2Dbottom%3A%205px%3B%0A%20%20%7D%0A%20%20%23TOC%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dleft%3A%20%2D2em%3B%0A%20%20%7D%0A%20%20%23TOC%20li%20%7B%0A%20%20%20%20line%2Dheight%3A%2016px%3B%0A%20%20%7D%0A%0Atable%20%7B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20border%2Dstyle%3A%20outset%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0A%20%20border%2Dwidth%3A%202px%3B%0A%20%20padding%3A%205px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%20%20line%2Dheight%3A%2018px%3B%0A%20%20padding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Ap%20%7B%0A%20%20margin%3A%200%2E5em%200%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20padding%3A%200%2E25em%200%2E75em%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20border%2Dstyle%3A%20solid%3B%0A%20%20border%3A%20none%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23777%3B%0A%20%20margin%3A%2028px%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%20%20dl%20dd%20%7B%0A%20%20%20%20margin%2Dbottom%3A%2013px%3B%0A%20%20%20%20margin%2Dleft%3A%2013px%3B%0A%20%20%7D%0A%20%20dl%20dt%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%7D%0A%0Aul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%20%20ul%20li%20%7B%0A%20%20%20%20list%2Dstyle%3A%20circle%20outside%3B%0A%20%20%7D%0A%20%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dbottom%3A%200%3B%0A%20%20%7D%0A%0Apre%2C%20code%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20color%3A%20%23333%3B%0A%7D%0Apre%20%7B%0A%20%20white%2Dspace%3A%20pre%2Dwrap%3B%20%20%20%20%2F%2A%20Wrap%20long%20lines%20%2A%2F%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20margin%3A%205px%200px%2010px%200px%3B%0A%20%20padding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0A%20%20padding%3A%202px%200px%3B%0A%7D%0A%0Adiv%2Efigure%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20padding%3A%202px%3B%0A%20%20border%3A%201px%20solid%20%23DDDDDD%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20margin%3A%200%205px%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20font%2Dsize%3A%2035px%3B%0A%20%20line%2Dheight%3A%2040px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20padding%2Dbottom%3A%202px%3B%0A%20%20font%2Dsize%3A%20145%25%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20border%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20font%2Dsize%3A%20120%25%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0A%20%20margin%2Dleft%3A%208px%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Ah5%2C%20h6%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%230033dd%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%20%20a%3Ahover%20%7B%0A%20%20%20%20color%3A%20%236666ff%3B%20%7D%0A%20%20a%3Avisited%20%7B%0A%20%20%20%20color%3A%20%23800080%3B%20%7D%0A%20%20a%3Avisited%3Ahover%20%7B%0A%20%20%20%20color%3A%20%23BB00BB%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%0A%2F%2A%20Class%20described%20in%20https%3A%2F%2Fbenjeffrey%2Ecom%2Fposts%2Fpandoc%2Dsyntax%2Dhighlighting%2Dcss%0A%20%20%20Colours%20from%20https%3A%2F%2Fgist%2Egithub%2Ecom%2Frobsimmons%2F1172277%20%2A%2F%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Keyword%20%2A%2F%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%2F%2A%20DataType%20%2A%2F%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%2F%2A%20DecVal%20%28decimal%20values%29%20%2A%2F%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20BaseN%20%2A%2F%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Float%20%2A%2F%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Char%20%2A%2F%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20String%20%2A%2F%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%2F%2A%20Comment%20%2A%2F%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%2F%2A%20OtherToken%20%2A%2F%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20AlertToken%20%2A%2F%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Function%20calls%20%2A%2F%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%2F%2A%20ErrorTok%20%2A%2F%0A%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div id="header">
+<h1 class="title">Extending ggplot2</h1>
+<h4 class="author"><em>Hadley Wickham</em></h4>
+<h4 class="date"><em>2016-01-22</em></h4>
+</div>
+
+
+<p>This vignette documents the official extension mechanism provided in ggplot2 1.1.0. This vignette is a high-level adjunct to the low-level details found in <code>?Stat</code>, <code>?Geom</code> and <code>?theme</code>. You’ll learn how to extend ggplot2 by creating a new stat, geom, or theme.</p>
+<p>As you read this document, you’ll see many things that will make you scratch your head and wonder why on earth is it designed this way? Mostly it’s historical accident - I wasn’t a terribly good R programmer when I started writing ggplot2 and I made a lot of questionable decisions. We cleaned up as many of those issues as possible in the 1.1.0 release, but some fixes simply weren’t worth the effort.</p>
+<div id="ggproto" class="section level2">
+<h2>ggproto</h2>
+<p>All ggplot2 objects are built using the ggproto system of object oriented programming. This OO system is used only in one place: ggplot2. This is mostly historical accident: ggplot2 started off using <a href="https://cran.r-project.org/package=proto">proto</a> because I needed mutable objects. This was well before the creation of (the briefly lived) <a href="http://vita.had.co.nz/papers/mutatr.html">mutatr</a>, reference classes and R6: proto was the only game in town.</p>
+<p>But why ggproto? Well when we turned to add an official extension mechanism to ggplot2, we found a major problem that caused problems when proto objects were extended in a different package (methods were evaluated in ggplot2, not the package where the extension was added). We tried converting to R6, but it was a poor fit for the needs of ggplot2. We could’ve modified proto, but that would’ve first involved understand exactly how proto worked, and secondly making sure that the changes didn’t affect other users of proto.</p>
+<p>It’s strange to say, but this is a case where inventing a new OO system was actually the right answer to the problem! Fortunately Winston is now very good at creating OO systems, so it only took him a day to come up with ggproto: it maintains all the features of proto that ggplot2 needs, while allowing cross package inheritance to work.</p>
+<p>Here’s a quick demo of ggproto in action:</p>
+<pre class="sourceCode r"><code class="sourceCode r">A &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;A&quot;</span>, <span class="ot">NULL</span>,
+  <span class="dt">x =</span> <span class="dv">1</span>,
+  <span class="dt">inc =</span> function(self) {
+    self$x &lt;-<span class="st"> </span>self$x +<span class="st"> </span><span class="dv">1</span>
+  }
+)
+A$x
+<span class="co">#&gt; [1] 1</span>
+A$<span class="kw">inc</span>()
+A$x
+<span class="co">#&gt; [1] 2</span>
+A$<span class="kw">inc</span>()
+A$<span class="kw">inc</span>()
+A$x
+<span class="co">#&gt; [1] 4</span></code></pre>
+<p>The majority of ggplot2 classes are immutable and static: the methods neither use nor modify state in the class. They’re mostly used as a convenient way of bundling related methods together.</p>
+<p>To create a new geom or stat, you will just create a new ggproto that inherits from <code>Stat</code>, <code>Geom</code> and override the methods described below.</p>
+</div>
+<div id="creating-a-new-stat" class="section level2">
+<h2>Creating a new stat</h2>
+<div id="the-simplest-stat" class="section level3">
+<h3>The simplest stat</h3>
+<p>We’ll start by creating a very simple stat: one that gives the convex hull (the <em>c</em> hull) of a set of points. First we create a new ggproto object that inherits from <code>Stat</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatChull &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatChull&quot;</span>, Stat,
+  <span class="dt">compute_group =</span> function(data, scales) {
+    data[<span class="kw">chull</span>(data$x, data$y), , drop =<span class="st"> </span><span class="ot">FALSE</span>]
+  },
+  
+  <span class="dt">required_aes =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)
+)</code></pre>
+<p>The two most important components are the <code>compute_group()</code> method (which does the computation), and the <code>required_aes</code> field, which lists which aesthetics must be present in order to for the stat to work.</p>
+<p>Next we write a layer function. Unfortunately, due to an early design mistake I called these either <code>stat_()</code> or <code>geom_()</code>. A better decision would have been to call them <code>layer_()</code> functions: that’s a more accurate description because every layer involves a stat <em>and</em> a geom.</p>
+<p>All layer functions follow the same form - you specify defaults in the function arguments and then call the <code>layer()</code> function, sending <code>...</code> into the <code>params</code> argument. The arguments in <code>...</code> will either be arguments for the geom (if you’re making a stat wrapper), arguments for the stat (if you’re making a geom wrapper), or aesthetics to be set. <code>layer()</code> takes care of teasing the different parameters apart and making sure they’re stored in the right place:</p>
+<pre class="sourceCode r"><code class="sourceCode r">stat_chull &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">geom =</span> <span class="st">&quot;polygon&quot;</span>,
+                       <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                       <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatChull, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping, <span class="dt">geom =</span> geom, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">na.rm =</span> na.rm, ...)
+  )
+}</code></pre>
+<p>(Note that if you’re writing this in your own package, you’ll either need to call <code>ggplot2::layer()</code> explicitly, or import the <code>layer()</code> function into your package namespace.)</p>
+<p>Once we have a layer function we can try our new stat:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_chull</span>(<span class="dt">fill =</span> <span class="ot">NA</span>, <span class="dt">colour =</span> <span class="st">&quot;black&quot;</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>(We’ll see later how to change the defaults of the geom so that you don’t need to specify <code>fill = NA</code> every time.)</p>
+<p>Once we’ve written this basic object, ggplot2 gives a lot for free. For example, ggplot2 automatically preserves aesthetics that are constant within each group:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy, <span class="dt">colour =</span> drv)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_chull</span>(<span class="dt">fill =</span> <span class="ot">NA</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>We can also override the default geom to display the convex hull in a different way:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_chull</span>(<span class="dt">geom =</span> <span class="st">&quot;point&quot;</span>, <span class="dt">size =</span> <span class="dv">4</span>, <span class="dt">colour =</span> <span class="st">&quot;red&quot;</span>) +
+<span class="st">  </span><span class="kw">geom_point</span>()
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+</div>
+<div id="stat-parameters" class="section level3">
+<h3>Stat parameters</h3>
+<p>A more complex stat will do some computation. Let’s implement a simple version of <code>geom_smooth()</code> that adds a line of best fit to a plot. We create a <code>StatLm</code> that inherits from <code>Stat</code> and a layer function, <code>stat_lm()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatLm &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatLm&quot;</span>, Stat, 
+  <span class="dt">required_aes =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>),
+  
+  <span class="dt">compute_group =</span> function(data, scales) {
+    rng &lt;-<span class="st"> </span><span class="kw">range</span>(data$x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
+    grid &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> rng)
+    
+    mod &lt;-<span class="st"> </span><span class="kw">lm</span>(y ~<span class="st"> </span>x, <span class="dt">data =</span> data)
+    grid$y &lt;-<span class="st"> </span><span class="kw">predict</span>(mod, <span class="dt">newdata =</span> grid)
+    
+    grid
+  }
+)
+
+stat_lm &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">geom =</span> <span class="st">&quot;line&quot;</span>,
+                    <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                    <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatLm, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping, <span class="dt">geom =</span> geom, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_lm</span>()
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p><code>StatLm</code> is inflexible because it has no parameters. We might want to allow the user to control the model formula and the number of points used to generate the grid. To do so, we add arguments to the <code>compute_group()</code> method and our wrapper function:</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatLm &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatLm&quot;</span>, Stat, 
+  <span class="dt">required_aes =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>),
+  
+  <span class="dt">compute_group =</span> function(data, scales, params, <span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">formula =</span> y ~<span class="st"> </span>x) {
+    rng &lt;-<span class="st"> </span><span class="kw">range</span>(data$x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
+    grid &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="kw">seq</span>(rng[<span class="dv">1</span>], rng[<span class="dv">2</span>], <span class="dt">length =</span> n))
+    
+    mod &lt;-<span class="st"> </span><span class="kw">lm</span>(formula, <span class="dt">data =</span> data)
+    grid$y &lt;-<span class="st"> </span><span class="kw">predict</span>(mod, <span class="dt">newdata =</span> grid)
+    
+    grid
+  }
+)
+
+stat_lm &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">geom =</span> <span class="st">&quot;line&quot;</span>,
+                    <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                    <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, <span class="dt">n =</span> <span class="dv">50</span>, <span class="dt">formula =</span> y ~<span class="st"> </span>x, 
+                    ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatLm, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping, <span class="dt">geom =</span> geom, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">n =</span> n, <span class="dt">formula =</span> formula, <span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_lm</span>(<span class="dt">formula =</span> y ~<span class="st"> </span><span class="kw">poly</span>(x, <span class="dv">10</span>)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_lm</span>(<span class="dt">formula =</span> y ~<span class="st"> </span><span class="kw">poly</span>(x, <span class="dv">10</span>), <span class="dt">geom =</span> <span class="st">&quot;point&quot;</span>, <span class="dt">colour =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">n =</span> <span class="dv">20</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>Note that we don’t <em>have</em> to explicitly include the new parameters in the arguments for the layer, <code>...</code> will get passed to the right place anyway. But you’ll need to document them somewhere so the user knows about them. Here’s a brief example. Note <code>@inheritParams ggplot2::stat_identity</code>: that will automatically inherit documentation for all the parameters also defined for <code>stat_identity()</code>.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">#' @inheritParams ggplot2::stat_identity</span>
+<span class="co">#' @param formula The modelling formula passed to \code{lm}. Should only </span>
+<span class="co">#'   involve \code{y} and \code{x}</span>
+<span class="co">#' @param n Number of points used for interpolation.</span>
+stat_lm &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">geom =</span> <span class="st">&quot;line&quot;</span>,
+                    <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                    <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, <span class="dt">n =</span> <span class="dv">50</span>, <span class="dt">formula =</span> y ~<span class="st"> </span>x, 
+                    ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatLm, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping, <span class="dt">geom =</span> geom, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">n =</span> n, <span class="dt">formula =</span> formula, <span class="dt">na.rm =</span> na.rm, ...)
+  )
+}</code></pre>
+</div>
+<div id="picking-defaults" class="section level3">
+<h3>Picking defaults</h3>
+<p>Sometimes you have calculations that should be performed once for the complete dataset, not once for each group. This is useful for picking sensible default values. For example, if we want to do a density estimate, it’s reasonable to pick one bandwidth for the whole plot. The following Stat creates a variation of the <code>stat_density()</code> that picks one bandwidth for all groups by choosing the mean of the “best” bandwidth for each group (I have no theoretical justification for this, but it doesn’t seem unreasonable).</p>
+<p>To do this we override the <code>setup_params()</code> method. It’s passed the data and a list of params, and returns an updated list.</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatDensityCommon &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatDensityCommon&quot;</span>, Stat, 
+  <span class="dt">required_aes =</span> <span class="st">&quot;x&quot;</span>,
+  
+  <span class="dt">setup_params =</span> function(data, params) {
+    if (!<span class="kw">is.null</span>(params$bandwidth))
+      <span class="kw">return</span>(params)
+    
+    xs &lt;-<span class="st"> </span><span class="kw">split</span>(data$x, data$group)
+    bws &lt;-<span class="st"> </span><span class="kw">vapply</span>(xs, bw.nrd0, <span class="kw">numeric</span>(<span class="dv">1</span>))
+    bw &lt;-<span class="st"> </span><span class="kw">mean</span>(bws)
+    <span class="kw">message</span>(<span class="st">&quot;Picking bandwidth of &quot;</span>, <span class="kw">signif</span>(bw, <span class="dv">3</span>))
+    
+    params$bandwidth &lt;-<span class="st"> </span>bw
+    params
+  },
+  
+  <span class="dt">compute_group =</span> function(data, scales, <span class="dt">bandwidth =</span> <span class="dv">1</span>) {
+    d &lt;-<span class="st"> </span><span class="kw">density</span>(data$x, <span class="dt">bw =</span> bandwidth)
+    <span class="kw">data.frame</span>(<span class="dt">x =</span> d$x, <span class="dt">y =</span> d$y)
+  }  
+)
+
+stat_density_common &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">geom =</span> <span class="st">&quot;line&quot;</span>,
+                                <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                                <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, <span class="dt">bandwidth =</span> <span class="ot">NULL</span>,
+                                ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatDensityCommon, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping, <span class="dt">geom =</span> geom, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">bandwidth =</span> bandwidth, <span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, <span class="dt">colour =</span> drv)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>()
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Picking bandwidth of 0.345</span>
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span>
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, <span class="dt">colour =</span> drv)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>(<span class="dt">bandwidth =</span> <span class="fl">0.5</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>I recommend using <code>NULL</code> as a default value. If you pick important parameters automatically, it’s a good idea to <code>message()</code> to the user (and when printing a floating point parameter, using <code>signif()</code> to show only a few significant digits).</p>
+</div>
+<div id="variable-names-and-default-aesthetics" class="section level3">
+<h3>Variable names and default aesthetics</h3>
+<p>This stat illustrates another important point. If we want to make this stat usable with other geoms, we should return a variable called <code>density</code> instead of <code>y</code>. Then we can set up the <code>default_aes</code> to automatically map <code>density</code> to <code>y</code>, which allows the user to override it to use with different geoms:</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatDensityCommon &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatDensity2&quot;</span>, Stat, 
+  <span class="dt">required_aes =</span> <span class="st">&quot;x&quot;</span>,
+  <span class="dt">default_aes =</span> <span class="kw">aes</span>(<span class="dt">y =</span> ..density..),
+
+  <span class="dt">compute_group =</span> function(data, scales, <span class="dt">bandwidth =</span> <span class="dv">1</span>) {
+    d &lt;-<span class="st"> </span><span class="kw">density</span>(data$x, <span class="dt">bw =</span> bandwidth)
+    <span class="kw">data.frame</span>(<span class="dt">x =</span> d$x, <span class="dt">density =</span> d$y)
+  }  
+)
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, drv, <span class="dt">colour =</span> ..density..)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>(<span class="dt">bandwidth =</span> <span class="dv">1</span>, <span class="dt">geom =</span> <span class="st">&quot;point&quot;</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>However, using this stat with the area geom doesn’t work quite right. The areas don’t stack on top of each other:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, <span class="dt">fill =</span> drv)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>(<span class="dt">bandwidth =</span> <span class="dv">1</span>, <span class="dt">geom =</span> <span class="st">&quot;area&quot;</span>, <span class="dt">position =</span> <span class="st">&quot;stack&quot;</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>This is because each density is computed independently, and the estimated <code>x</code>s don’t line up. We can resolve that issue by computing the range of the data once in <code>setup_params()</code>.</p>
+<pre class="sourceCode r"><code class="sourceCode r">StatDensityCommon &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;StatDensityCommon&quot;</span>, Stat, 
+  <span class="dt">required_aes =</span> <span class="st">&quot;x&quot;</span>,
+  <span class="dt">default_aes =</span> <span class="kw">aes</span>(<span class="dt">y =</span> ..density..),
+
+  <span class="dt">setup_params =</span> function(data, params) {
+    min &lt;-<span class="st"> </span><span class="kw">min</span>(data$x) -<span class="st"> </span><span class="dv">3</span> *<span class="st"> </span>params$bandwidth
+    max &lt;-<span class="st"> </span><span class="kw">max</span>(data$x) +<span class="st"> </span><span class="dv">3</span> *<span class="st"> </span>params$bandwidth
+    
+    <span class="kw">list</span>(
+      <span class="dt">bandwidth =</span> params$bandwidth,
+      <span class="dt">min =</span> min,
+      <span class="dt">max =</span> max,
+      <span class="dt">na.rm =</span> params$na.rm
+    )
+  },
+  
+  <span class="dt">compute_group =</span> function(data, scales, min, max, <span class="dt">bandwidth =</span> <span class="dv">1</span>) {
+    d &lt;-<span class="st"> </span><span class="kw">density</span>(data$x, <span class="dt">bw =</span> bandwidth, <span class="dt">from =</span> min, <span class="dt">to =</span> max)
+    <span class="kw">data.frame</span>(<span class="dt">x =</span> d$x, <span class="dt">density =</span> d$y)
+  }  
+)
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, <span class="dt">fill =</span> drv)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>(<span class="dt">bandwidth =</span> <span class="dv">1</span>, <span class="dt">geom =</span> <span class="st">&quot;area&quot;</span>, <span class="dt">position =</span> <span class="st">&quot;stack&quot;</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span>
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, drv, <span class="dt">fill =</span> ..density..)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">stat_density_common</span>(<span class="dt">bandwidth =</span> <span class="dv">1</span>, <span class="dt">geom =</span> <span class="st">&quot;raster&quot;</span>)
+<span class="co">#&gt; Warning in layer2traces(L, df, misc): geom_raster has yet to be implemented in plotly.</span>
+<span class="co">#&gt;   If you'd like to see this geom implemented,</span>
+<span class="co">#&gt;   Please open an issue with your example code at</span>
+<span class="co">#&gt;   https://github.com/ropensci/plotly/issues</span>
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<ol style="list-style-type: decimal">
+<li><p>Extend <code>stat_chull</code> to compute the alpha hull, as from the <a href="https://cran.r-project.org/package=alphahull">alphahull</a> package. Your new stat should take an <code>alpha</code> argument.</p></li>
+<li><p>Modify the final version of <code>StatDensityCommon</code> to allow the user to specify the <code>min</code> and <code>max</code> parameters. You’ll need to modify both the layer function and the <code>compute_group()</code> method.</p></li>
+<li><p>Compare and contrast <code>StatLm</code> to <code>ggplot2::StatSmooth</code>. What key differences make <code>StatSmooth</code> more complex than <code>StatLm</code>?</p></li>
+</ol>
+</div>
+</div>
+<div id="creating-a-new-geom" class="section level2">
+<h2>Creating a new geom</h2>
+<p>It’s harder to create a new geom than a new stat because you also need to know some grid. ggplot2 is built on top of grid, so you’ll need to know the basics of drawing with grid. If you’re serious about adding a new geom, I’d recommend buying <a href="http://amzn.com/B00I60M26G">R graphics</a> by Paul Murrell. It tells you everything you need to know about drawing with grid.</p>
+<div id="a-simple-geom" class="section level3">
+<h3>A simple geom</h3>
+<p>It’s easiest to start with a simple example. The code below is a simplified version of <code>geom_point()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">GeomSimplePoint &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;GeomSimplePoint&quot;</span>, Geom,
+  <span class="dt">required_aes =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>),
+  <span class="dt">default_aes =</span> <span class="kw">aes</span>(<span class="dt">shape =</span> <span class="dv">19</span>, <span class="dt">colour =</span> <span class="st">&quot;black&quot;</span>),
+  <span class="dt">draw_key =</span> draw_key_point,
+
+  <span class="dt">draw_panel =</span> function(data, panel_scales, coord) {
+    coords &lt;-<span class="st"> </span>coord$<span class="kw">transform</span>(data, panel_scales)
+    grid::<span class="kw">pointsGrob</span>(
+      coords$x, coords$y,
+      <span class="dt">pch =</span> coords$shape,
+      <span class="dt">gp =</span> grid::<span class="kw">gpar</span>(<span class="dt">col =</span> coords$colour)
+    )
+  }
+)
+
+geom_simple_point &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>,
+                              <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                              <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">geom =</span> GeomSimplePoint, <span class="dt">mapping =</span> mapping,  <span class="dt">data =</span> data, <span class="dt">stat =</span> stat, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_simple_point</span>()
+<span class="co">#&gt; Warning in layer2traces(L, df, misc): geom_simplepoint has yet to be implemented in plotly.</span>
+<span class="co">#&gt;   If you'd like to see this geom implemented,</span>
+<span class="co">#&gt;   Please open an issue with your example code at</span>
+<span class="co">#&gt;   https://github.com/ropensci/plotly/issues</span>
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>This is very similar to defining a new stat. You always need to provide fields/methods for the four pieces shown above:</p>
+<ul>
+<li><p><code>required_aes</code> is a character vector which lists all the aesthetics that the user must provide.</p></li>
+<li><p><code>default_aes</code> lists the aesthetics that have default values.</p></li>
+<li><p><code>draw_key</code> provides the function used to draw the key in the legend. You can see a list of all the build in key functions in <code>?draw_key</code></p></li>
+<li><p><code>draw_group()</code> is where the magic happens. This function takes three arguments and returns a grid grob. It is called once for each panel. It’s the most complicated part and is described in more detail below.</p></li>
+</ul>
+<p><code>draw_group()</code> has three arguments:</p>
+<ul>
+<li><p><code>data</code>: a data frame with one column for each aesthetic.</p></li>
+<li><p><code>panel_scales</code>: a list containing information about the x and y scales for the current panel.</p></li>
+<li><p><code>coord</code>: an object describing the coordinate system.</p></li>
+</ul>
+<p>Generally you won’t use <code>panel_scales</code> and <code>coord</code> directly, but you will always use them to transform the data: <code>coords &lt;- coord$transform(data, panel_scales)</code>. This creates a data frame where position variables are scaled to the range 0–1. You then take this data and call a grid grob function. (Transforming for non-Cartesian coordinate systems is quite complex - you’re best of transforming your data to the form accepted by an existing ggplot2 geom and passing it.)</p>
+</div>
+<div id="collective-geoms" class="section level3">
+<h3>Collective geoms</h3>
+<p>Overriding <code>draw_panel()</code> is most appropriate if there is one graphic element per row. In other cases, you want graphic element per group. For example, take polygons: each row gives one vertex of a polygon. In this case, you should instead override <code>draw_group()</code>:</p>
+<p>The following code makes a simplified version of <code>GeomPolygon</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">GeomSimplePolygon &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;GeomPolygon&quot;</span>, Geom,
+  <span class="dt">required_aes =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>),
+  
+  <span class="dt">default_aes =</span> <span class="kw">aes</span>(
+    <span class="dt">colour =</span> <span class="ot">NA</span>, <span class="dt">fill =</span> <span class="st">&quot;grey20&quot;</span>, <span class="dt">size =</span> <span class="fl">0.5</span>,
+    <span class="dt">linetype =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>
+  ),
+
+  <span class="dt">draw_key =</span> draw_key_polygon,
+
+  <span class="dt">draw_group =</span> function(data, panel_scales, coord) {
+    n &lt;-<span class="st"> </span><span class="kw">nrow</span>(data)
+    if (n &lt;=<span class="st"> </span><span class="dv">2</span>) <span class="kw">return</span>(grid::<span class="kw">nullGrob</span>())
+
+    coords &lt;-<span class="st"> </span>coord$<span class="kw">transform</span>(data, panel_scales)
+    <span class="co"># A polygon can only have a single colour, fill, etc, so take from first row</span>
+    first_row &lt;-<span class="st"> </span>coords[<span class="dv">1</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
+
+    grid::<span class="kw">polygonGrob</span>(
+      coords$x, coords$y, 
+      <span class="dt">default.units =</span> <span class="st">&quot;native&quot;</span>,
+      <span class="dt">gp =</span> grid::<span class="kw">gpar</span>(
+        <span class="dt">col =</span> first_row$colour,
+        <span class="dt">fill =</span> scales::<span class="kw">alpha</span>(first_row$fill, first_row$alpha),
+        <span class="dt">lwd =</span> first_row$size *<span class="st"> </span>.pt,
+        <span class="dt">lty =</span> first_row$linetype
+      )
+    )
+  }
+)
+geom_simple_polygon &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, <span class="dt">stat =</span> <span class="st">&quot;chull&quot;</span>,
+                                <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                                <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">geom =</span> GeomSimplePolygon, <span class="dt">mapping =</span> mapping, <span class="dt">data =</span> data, <span class="dt">stat =</span> stat, 
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_simple_polygon</span>(<span class="kw">aes</span>(<span class="dt">colour =</span> class), <span class="dt">fill =</span> <span class="ot">NA</span>)
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>There are a few things to note here:</p>
+<ul>
+<li><p>We override <code>draw_group()</code> instead of <code>draw_layer()</code> because we want one polygon per group, not one polygon per row. If you look at the source code for the original <code>GeomPolygon</code> you’ll see it actually overrides <code>geom_layer()</code> because it uses some tricks to make <code>polygonGrob()</code> produce multiple polygons in one call. This is considerably more complicated, but gives better performance.</p></li>
+<li><p>If the data contains two or fewer points, there’s no point trying to draw a polygon, so we return a <code>nullGrob()</code>. This is the graphical equivalent of <code>NULL</code>: it’s a grob that doesn’t draw anything and doesn’t take up any space.</p></li>
+<li><p>Note the units: <code>x</code> and <code>y</code> should always be drawn in “native” units. (The default units for <code>pointGrob()</code> is a native, so we didn’t need to change it there). <code>lwd</code> is measured in points, but ggplot2 uses mm, so we need to multiply it by the adjustment factor <code>.pt</code>.</p></li>
+</ul>
+</div>
+<div id="inheriting-from-an-existing-geom" class="section level3">
+<h3>Inheriting from an existing Geom</h3>
+<p>Sometimes you just want to make a small modification to an existing geom. In this case, rather than inheriting from <code>Geom</code> you can inherit from an existing subclass. For example, we might want to change the defaults for <code>GeomPolygon</code> to work better with <code>StatChull</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">GeomPolygonHollow &lt;-<span class="st"> </span><span class="kw">ggproto</span>(<span class="st">&quot;GeomPolygonHollow&quot;</span>, GeomPolygon,
+  <span class="dt">default_aes =</span> <span class="kw">aes</span>(<span class="dt">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="dt">fill =</span> <span class="ot">NA</span>, <span class="dt">size =</span> <span class="fl">0.5</span>, <span class="dt">linetype =</span> <span class="dv">1</span>,
+    <span class="dt">alpha =</span> <span class="ot">NA</span>)
+  )
+geom_chull &lt;-<span class="st"> </span>function(<span class="dt">mapping =</span> <span class="ot">NULL</span>, <span class="dt">data =</span> <span class="ot">NULL</span>, 
+                       <span class="dt">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">na.rm =</span> <span class="ot">FALSE</span>, <span class="dt">show.legend =</span> <span class="ot">NA</span>, 
+                       <span class="dt">inherit.aes =</span> <span class="ot">TRUE</span>, ...) {
+  <span class="kw">layer</span>(
+    <span class="dt">stat =</span> StatChull, <span class="dt">geom =</span> GeomPolygonHollow, <span class="dt">data =</span> data, <span class="dt">mapping =</span> mapping,
+    <span class="dt">position =</span> position, <span class="dt">show.legend =</span> show.legend, <span class="dt">inherit.aes =</span> inherit.aes,
+    <span class="dt">params =</span> <span class="kw">list</span>(<span class="dt">na.rm =</span> na.rm, ...)
+  )
+}
+
+<span class="kw">ggplot</span>(mpg, <span class="kw">aes</span>(displ, hwy)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_chull</span>()
+<span class="co">#&gt; Warning in layer2traces(L, df, misc): geom_polygonhollow has yet to be implemented in plotly.</span>
+<span class="co">#&gt;   If you'd like to see this geom implemented,</span>
+<span class="co">#&gt;   Please open an issue with your example code at</span>
+<span class="co">#&gt;   https://github.com/ropensci/plotly/issues</span>
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>This doesn’t allow you to use different geoms with the stat, but that seems appropriate here since the convex hull is primarily a polygonal feature.</p>
+</div>
+<div id="exercises-1" class="section level3">
+<h3>Exercises</h3>
+<ol style="list-style-type: decimal">
+<li><p>Compare and contrast <code>GeomPoint</code> with <code>GeomSimplePoint</code>.</p></li>
+<li><p>Compare and contract <code>GeomPolygon</code> with <code>GeomSimplePolygon</code>.</p></li>
+</ol>
+</div>
+</div>
+<div id="creating-your-own-theme" class="section level2">
+<h2>Creating your own theme</h2>
+<p>If you’re going to create your own complete theme, there are a few things you need to know:</p>
+<ul>
+<li>Overriding existing elements, rather than modifying them</li>
+<li>The four global elements that affect (almost) every other theme element</li>
+<li>Complete vs. incomplete elements</li>
+</ul>
+<div id="overriding-elements" class="section level3">
+<h3>Overriding elements</h3>
+<p>By default, when you add a new theme element, it inherits values from the existing theme. For example, the following code sets the key colour to red, but it inherits the existing fill colour:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">theme_grey</span>()$legend.key
+<span class="co">#&gt; List of 4</span>
+<span class="co">#&gt;  $ fill    : chr &quot;grey95&quot;</span>
+<span class="co">#&gt;  $ colour  : chr &quot;white&quot;</span>
+<span class="co">#&gt;  $ size    : NULL</span>
+<span class="co">#&gt;  $ linetype: NULL</span>
+<span class="co">#&gt;  - attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;</span>
+
+new_theme &lt;-<span class="st"> </span><span class="kw">theme_grey</span>() +<span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.key =</span> <span class="kw">element_rect</span>(<span class="dt">colour =</span> <span class="st">&quot;red&quot;</span>))
+new_theme$legend.key
+<span class="co">#&gt; List of 4</span>
+<span class="co">#&gt;  $ fill    : chr &quot;grey95&quot;</span>
+<span class="co">#&gt;  $ colour  : chr &quot;red&quot;</span>
+<span class="co">#&gt;  $ size    : NULL</span>
+<span class="co">#&gt;  $ linetype: NULL</span>
+<span class="co">#&gt;  - attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;</span></code></pre>
+<p>To override it completely, use <code>%+replace%</code> instead of <code>+</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">new_theme &lt;-<span class="st"> </span><span class="kw">theme_grey</span>() %+replace%<span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.key =</span> <span class="kw">element_rect</span>(<span class="dt">colour =</span> <span class="st">&quot;red&quot;</span>))
+new_theme$legend.key
+<span class="co">#&gt; List of 4</span>
+<span class="co">#&gt;  $ fill    : NULL</span>
+<span class="co">#&gt;  $ colour  : chr &quot;red&quot;</span>
+<span class="co">#&gt;  $ size    : NULL</span>
+<span class="co">#&gt;  $ linetype: NULL</span>
+<span class="co">#&gt;  - attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;</span></code></pre>
+</div>
+<div id="global-elements" class="section level3">
+<h3>Global elements</h3>
+<p>There are four elements that affect the global appearance of the plot:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Element</th>
+<th align="left">Theme function</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">line</td>
+<td align="left"><code>element_line()</code></td>
+<td align="left">all line elements</td>
+</tr>
+<tr class="even">
+<td align="left">rect</td>
+<td align="left"><code>element_rect()</code></td>
+<td align="left">all rectangular elements</td>
+</tr>
+<tr class="odd">
+<td align="left">text</td>
+<td align="left"><code>element_text()</code></td>
+<td align="left">all text</td>
+</tr>
+<tr class="even">
+<td align="left">title</td>
+<td align="left"><code>element_text()</code></td>
+<td align="left">all text in title elements (plot, axes &amp; legend)</td>
+</tr>
+</tbody>
+</table>
+<p>These set default properties that are inherited by more specific settings. These are most useful for setting an overall “background” colour and overall font settings (e.g. family and size).</p>
+<pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">1</span>:<span class="dv">3</span>, <span class="dt">y =</span> <span class="dv">1</span>:<span class="dv">3</span>)
+base &lt;-<span class="st"> </span><span class="kw">ggplot</span>(df, <span class="kw">aes</span>(x, y)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() +<span class="st"> </span>
+<span class="st">  </span><span class="kw">theme_minimal</span>()
+
+base
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span>
+base +<span class="st"> </span><span class="kw">theme</span>(<span class="dt">text =</span> <span class="kw">element_text</span>(<span class="dt">colour =</span> <span class="st">&quot;red&quot;</span>))
+<span class="co">#&gt; Warning: You need a plotly username. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find username</span>
+<span class="co">#&gt; Warning: You need an api_key. See help(signup, package = 'plotly')</span>
+<span class="co">#&gt; Warning: Couldn't find api_key</span>
+<span class="co">#&gt; Aw, snap! We don't have an account for ''. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Don't have an account? plot.ly</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Questions? support@plot.lyFALSE</span>
+<span class="co">#&gt; Success! Created a new plotly here -&gt;</span></code></pre>
+<p>You should generally start creating a theme by modifying these values.</p>
+</div>
+<div id="complete-vs-incomplete" class="section level3">
+<h3>Complete vs incomplete</h3>
+<p>It is useful to understand the difference between complete and incomplete theme objects. A <em>complete</em> theme object is one produced by calling a theme function with the attribute <code>complete = TRUE</code>.</p>
+<p>Theme functions <code>theme_grey()</code> and <code>theme_bw()</code> are examples of complete theme functions. Calls to <code>theme()</code> produce <em>incomplete</em> theme objects, since they represent (local) modifications to a theme object rather than returning a complete theme object per se. When adding an incomplete theme to a complete one, the result is a complete theme.</p>
+<p>Complete and incomplete themes behave somewhat differently when added to a ggplot object:</p>
+<ul>
+<li><p>Adding an incomplete theme augments the current theme object, replacing only those properties of elements defined in the call to <code>theme()</code>.</p></li>
+<li><p>Adding a complete theme wipes away the existing theme and applies the new theme.</p></li>
+</ul>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>ggproto. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Create a new ggproto object</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>ggproto(`_class`&nbsp;=&nbsp;NULL, `_inherit`&nbsp;=&nbsp;NULL, ...)</div>
+<div>ggproto_parent(parent, self)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>_class</dt>
+      <dd>Class name to assign to the object. This is stored as the class
+attribute of the object. If <code>NULL</code> (the default), no class name will
+be added to the object.</dd>
+      <dt>_inherit</dt>
+      <dd>ggproto object to inherit from. If <code>NULL</code>, don't inherit
+from any object.</dd>
+      <dt>...</dt>
+      <dd>A list of members in the ggproto object.</dd>
+      <dt>parent, self</dt>
+      <dd>Access parent class <code>parent</code> of object <code>self</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>ggproto is inspired by the proto package, but it has some important
+differences. Notably, it cleanly supports cross-package inheritance, and has
+faster performance.</p>
+  
+    </div>
+
+    <div class="Calling ggproto methods">
+      <h2>Calling ggproto methods</h2>
+
+      <p></p>
+  
+      <p>ggproto methods can take an optional <code>self</code> argument: if it is present,
+it is a regular method; if it's absent, it's a "static" method (i.e. it
+doesn't use any fields).</p>
+  
+      <p>Imagine you have a ggproto object <code>Adder</code>, which has a
+method <code>addx = function(self, n) n + self$x</code>. Then, to call this
+function, you would use <code>Adder$addx(10)</code> -- the <code>self</code> is passed
+in automatically by the wrapper function. <code>self</code> be located anywhere
+in the function signature, although customarily it comes first.</p>
+  
+    </div>
+
+    <div class="Calling methods in a parent">
+      <h2>Calling methods in a parent</h2>
+
+      <p></p>
+  
+      <p>To explicitly call a methods in a parent, use
+<code>ggproto_parent(Parent, self)</code>.</p>
+  
+    </div>
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>ggproto</li><li>ggproto_parent</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=ggproto'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

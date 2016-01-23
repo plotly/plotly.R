@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>fortify.sp. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Fortify method for classes from the sp package.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>"fortify"(model, data, region&nbsp;=&nbsp;NULL, ...)</div>
+<div>"fortify"(model, data, ...)</div>
+<div>"fortify"(model, data, ...)</div>
+<div>"fortify"(model, data, ...)</div>
+<div>"fortify"(model, data, ...)</div>
+<div>"fortify"(model, data, ...)</div>
+<div>"fortify"(model, data, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>model</dt>
+      <dd><code>SpatialPolygonsDataFrame</code> to convert into a dataframe.</dd>
+      <dt>data</dt>
+      <dd>not used by this method</dd>
+      <dt>region</dt>
+      <dd>name of variable used to split up regions</dd>
+      <dt>...</dt>
+      <dd>not used by this method</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>To figure out the correct variable name for region, inspect
+<code>as.data.frame(model)</code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>if (require(&quot;maptools&quot;)) {
+ sids &lt;- system.file(&quot;shapes/sids.shp&quot;, package=&quot;maptools&quot;)
+ nc1 &lt;- readShapePoly(sids,
+   proj4string = CRS(&quot;+proj=longlat +datum=NAD27&quot;))
+ nc1_df &lt;- fortify(nc1)
+}
+</div>
+<strong class='message'>Loading required package: maptools</strong>
+<strong class='message'>Loading required package: sp</strong>
+<strong class='message'>Checking rgeos availability: FALSE
+ 	Note: when rgeos is not available, polygon geometry 	computations in maptools depend on gpclib,
+ 	which has a restricted licence. It is disabled by default;
+ 	to enable gpclib, type gpclibPermit()</strong>
+<strong class='message'>Regions defined for each Polygons</strong></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>fortify.Line</li><li>fortify.Lines</li><li>fortify.Polygon</li><li>fortify.Polygons</li><li>fortify.SpatialLinesDataFrame</li><li>fortify.SpatialPolygons</li><li>fortify.SpatialPolygonsDataFrame</li><li>fortify.sp</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=fortify.sp'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

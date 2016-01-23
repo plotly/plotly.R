@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>guide_colourbar. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Continuous colour bar guide.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>guide_colourbar(title&nbsp;=&nbsp;waiver(), title.position&nbsp;=&nbsp;NULL, title.theme&nbsp;=&nbsp;NULL, title.hjust&nbsp;=&nbsp;NULL, title.vjust&nbsp;=&nbsp;NULL, label&nbsp;=&nbsp;TRUE, label.position&nbsp;=&nbsp;NULL, label.theme&nbsp;=&nbsp;NULL, label.hjust&nbsp;=&nbsp;NULL, label.vjust&nbsp;=&nbsp;NULL, barwidth&nbsp;=&nbsp;NULL, barheight&nbsp;=&nbsp;NULL, nbin&nbsp;=&nbsp;20, raster&nbsp;=&nbsp;TRUE, ticks&nbsp;=&nbsp;TRUE, draw.ulim&nbsp;=&nbsp;TRUE, draw.llim&nbsp;=&nbsp;TRUE, direction&nbsp;=&nbsp;NULL, default.unit&nbsp;=&nbsp;"line", reverse&nbsp;=&nbsp;FALSE, order&nbsp;=&nbsp;0, ...)</div>
+<div>guide_colorbar(title&nbsp;=&nbsp;waiver(), title.position&nbsp;=&nbsp;NULL, title.theme&nbsp;=&nbsp;NULL, title.hjust&nbsp;=&nbsp;NULL, title.vjust&nbsp;=&nbsp;NULL, label&nbsp;=&nbsp;TRUE, label.position&nbsp;=&nbsp;NULL, label.theme&nbsp;=&nbsp;NULL, label.hjust&nbsp;=&nbsp;NULL, label.vjust&nbsp;=&nbsp;NULL, barwidth&nbsp;=&nbsp;NULL, barheight&nbsp;=&nbsp;NULL, nbin&nbsp;=&nbsp;20, raster&nbsp;=&nbsp;TRUE, ticks&nbsp;=&nbsp;TRUE, draw.ulim&nbsp;=&nbsp;TRUE, draw.llim&nbsp;=&nbsp;TRUE, direction&nbsp;=&nbsp;NULL, default.unit&nbsp;=&nbsp;"line", reverse&nbsp;=&nbsp;FALSE, order&nbsp;=&nbsp;0, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>title</dt>
+      <dd>A character string or expression indicating a title of guide.
+If <code>NULL</code>, the title is not shown. By default
+(<code><a href='waiver.html'>waiver</a></code>), the name of the scale object or the name
+specified in <code><a href='labs.html'>labs</a></code> is used for the title.</dd>
+      <dt>title.position</dt>
+      <dd>A character string indicating the position of a
+ title. One of "top" (default for a vertical guide), "bottom", "left"
+(default for a horizontal guide), or "right."</dd>
+      <dt>title.theme</dt>
+      <dd>A theme object for rendering the title text. Usually the
+object of <code><a href='element_text.html'>element_text</a></code> is expected. By default, the theme is
+specified by <code>legend.title</code> in <code><a href='theme.html'>theme</a></code> or theme.</dd>
+      <dt>title.hjust</dt>
+      <dd>A number specifying horizontal justification of the
+title text.</dd>
+      <dt>title.vjust</dt>
+      <dd>A number specifying vertical justification of the title
+text.</dd>
+      <dt>label</dt>
+      <dd>logical. If <code>TRUE</code> then the labels are drawn. If
+<code>FALSE</code> then the labels are invisible.</dd>
+      <dt>label.position</dt>
+      <dd>A character string indicating the position of a
+label. One of "top", "bottom" (default for horizontal guide), "left", or
+"right" (default for vertical guide).</dd>
+      <dt>label.theme</dt>
+      <dd>A theme object for rendering the label text. Usually the
+object of <code><a href='element_text.html'>element_text</a></code> is expected. By default, the theme is
+specified by <code>legend.text</code> in <code><a href='theme.html'>theme</a></code> or theme.</dd>
+      <dt>label.hjust</dt>
+      <dd>A numeric specifying horizontal justification of the
+label text.</dd>
+      <dt>label.vjust</dt>
+      <dd>A numeric specifying vertical justification of the label
+text.</dd>
+      <dt>barwidth</dt>
+      <dd>A numeric or a <code><a href='http://www.inside-r.org/r-doc/grid/unit'>unit</a></code> object specifying
+the width of the colorbar. Default value is <code>legend.key.width</code> or
+<code>legend.key.size</code> in <code><a href='theme.html'>theme</a></code> or theme.</dd>
+      <dt>barheight</dt>
+      <dd>A numeric or a <code><a href='http://www.inside-r.org/r-doc/grid/unit'>unit</a></code> object specifying
+the height of the colorbar. Default value is <code>legend.key.height</code> or
+<code>legend.key.size</code> in <code><a href='theme.html'>theme</a></code> or theme.</dd>
+      <dt>nbin</dt>
+      <dd>A numeric specifying the number of bins for drawing colorbar. A
+smoother colorbar for a larger value.</dd>
+      <dt>raster</dt>
+      <dd>A logical. If <code>TRUE</code> then the colorbar is rendered as a
+raster object. If <code>FALSE</code> then the colorbar is rendered as a set of
+rectangles. Note that not all graphics devices are capable of rendering
+raster image.</dd>
+      <dt>ticks</dt>
+      <dd>A logical specifying if tick marks on colorbar should be
+visible.</dd>
+      <dt>draw.ulim</dt>
+      <dd>A logical specifying if the upper limit tick marks should
+be visible.</dd>
+      <dt>draw.llim</dt>
+      <dd>A logical specifying if the lower limit tick marks should
+be visible.</dd>
+      <dt>direction</dt>
+      <dd>A character string indicating the direction of the guide.
+One of "horizontal" or "vertical."</dd>
+      <dt>default.unit</dt>
+      <dd>A character string indicating <code><a href='http://www.inside-r.org/r-doc/grid/unit'>unit</a></code>
+for <code>barwidth</code> and <code>barheight</code>.</dd>
+      <dt>reverse</dt>
+      <dd>logical. If <code>TRUE</code> the colorbar is reversed. By default,
+the highest value is on the top and the lowest value is on the bottom</dd>
+      <dt>order</dt>
+      <dd>positive integer less that 99 that specifies the order of
+this guide among multiple guides. This controls the order in which
+multiple guides are displayed, not the contents of the guide itself.
+If 0 (default), the order is determined by a secret algorithm.</dd>
+      <dt>...</dt>
+      <dd>ignored.</dd>
+    </dl>
+    
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+A guide object
+</dl></p>
+  
+    </div>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Colour bar guide shows continuous color scales mapped onto values.
+Colour bar is available with <code>scale_fill</code> and <code>scale_colour</code>.
+For more information, see the inspiration for this function:
+<a href = 'http://www.mathworks.com/help/techdoc/ref/colorbar.html'>Matlab's colorbar function</a>.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Guides can be specified in each <code>scale_*</code> or in <code><a href='guides.html'>guides</a></code>.
+<code>guide="legend"</code> in <code>scale_*</code> is syntactic sugar for
+<code>guide=guide_legend()</code> (e.g. <code>scale_color_manual(guide = "legend")</code>).
+As for how to specify the guide for each scale in more detail,
+see <code><a href='guides.html'>guides</a></code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>df &lt;- reshape2::melt(outer(1:4, 1:4), varnames = c(&quot;X1&quot;, &quot;X2&quot;))
+
+p1 &lt;- ggplot(df, aes(X1, X2)) + geom_tile(aes(fill = value))
+p2 &lt;- p1 + geom_point(aes(size = value))
+
+# Basic form
+p1 + scale_fill_continuous(guide = &quot;colorbar&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p1 + scale_fill_continuous(guide = guide_colorbar())
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p1 + guides(fill = guide_colorbar())
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Control styles
+
+# bar size
+p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# no label
+p1 + guides(fill = guide_colorbar(label = FALSE))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# no tick marks
+p1 + guides(fill = guide_colorbar(ticks = FALSE))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# label position
+p1 + guides(fill = guide_colorbar(label.position = &quot;left&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# label theme
+p1 + guides(fill = guide_colorbar(label.theme = element_text(colour = &quot;blue&quot;, angle = 0)))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# small number of bins
+p1 + guides(fill = guide_colorbar(nbin = 3))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# large number of bins
+p1 + guides(fill = guide_colorbar(nbin = 100))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# make top- and bottom-most ticks invisible
+p1 + scale_fill_continuous(limits = c(0,20), breaks=c(0, 5, 10, 15, 20),
+ guide = guide_colorbar(nbin=100, draw.ulim = FALSE, draw.llim = FALSE))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# guides can be controlled independently
+p2 +
+  scale_fill_continuous(guide = &quot;colorbar&quot;) +
+  scale_size(guide = &quot;legend&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>p2 + guides(fill = &quot;colorbar&quot;, size = &quot;legend&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+p2 +
+  scale_fill_continuous(guide = guide_colorbar(direction = &quot;horizontal&quot;)) +
+  scale_size(guide = guide_legend(direction = &quot;vertical&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>guide_colorbar</li><li>guide_colourbar</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+Other guides: <code><a href='guide_legend.html'>guide_legend</a></code>,
+  <code><a href='guides.html'>guides</a></code>
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=guide_colourbar'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

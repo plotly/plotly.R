@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>translate_qplot_ggplot. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Translating between qplot and ggplot</h1>
+
+<div class="row">
+  <div class="span8">
+        
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Within ggplot2, there are two basic methods to create plots, with qplot()
+and ggplot(). qplot() is designed primarily for interactive use: it makes
+a number of assumptions that speed most cases, but when designing multilayered
+plots with different data sources it can get in the way. This section
+describes what those defaults are, and how they map to the fuller ggplot()
+syntax.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+# By default, qplot() assumes that you want a scatterplot,
+# i.e., you want to use geom_point()
+# qplot(x, y, data = data)
+# ggplot(data, aes(x, y)) + geom_point()
+
+# Using Aesthetics
+
+# If you map additional aesthetics, these will be added to the defaults. With
+# qplot() there is no way to use different aesthetic mappings (or data) in
+# different layers
+# qplot(x, y, data = data, shape = shape, colour = colour)
+# ggplot(data, aes(x, y, shape = shape, colour = colour)) + geom_point()
+#
+# Aesthetic parameters in qplot() always try to map the aesthetic to a
+# variable. If the argument is not a variable but a value, effectively a new column
+# is added to the original dataset with that value. To set an aesthetic to a
+# value and override the default appearance, you surround the value with I() in
+# qplot(), or pass it as a parameter to the layer.
+# qplot(x, y, data = data, colour = I(&quot;red&quot;))
+# ggplot(data, aes(x, y)) + geom_point(colour = &quot;red&quot;)
+
+# Changing the geom parameter changes the geom added to the plot
+# qplot(x, y, data = data, geom = &quot;line&quot;)
+# ggplot(data, aes(x, y)) + geom_line()
+
+# Not all geoms require both x and y, e.g., geom_bar() and geom_histogram().
+# For these two geoms, if the y aesthetic is not supplied, both qplot and
+# ggplot commands default to &quot;count&quot; on the y-axis
+# ggplot(data, aes(x)) + geom_bar()
+# qplot(x, data = data, geom = &quot;bar&quot;)
+
+# If a vector of multiple geom names is supplied to the geom argument, each
+# geom will be added in turn
+# qplot(x, y, data = data, geom = c(&quot;point&quot;, &quot;smooth&quot;))
+# ggplot(data, aes(x, y)) + geom_point() + geom_smooth()
+
+# Unlike the rest of ggplot2, stats and geoms are independent
+# qplot(x, y, data = data, stat = &quot;bin&quot;)
+# ggplot(data, aes(x, y)) + geom_point(stat = &quot;bin&quot;)
+#
+# Any layer parameters will be passed on to all layers. Most layers will ignore
+# parameters that they don&#39;t need
+# qplot(x, y, data = data, geom = c(&quot;point&quot;, &quot;smooth&quot;), method = &quot;lm&quot;)
+# ggplot(data, aes(x, y)) + geom_point(method = &quot;lm&quot;) + geom_smooth(method = &quot;lm&quot;)
+
+# Scales and axes
+
+# You can control basic properties of the x and y scales with the xlim, ylim,
+# xlab and ylab arguments
+# qplot(x, y, data = data, xlim = c(1, 5), xlab = &quot;my label&quot;)
+# ggplot(data, aes(x, y)) + geom_point() +
+# scale_x_continuous(&quot;my label&quot;, limits = c(1, 5))
+
+# qplot(x, y, data = data, xlim = c(1, 5), ylim = c(10, 20))
+# ggplot(data, aes(x, y)) + geom_point() +
+# scale_x_continuous(limits = c(1, 5)) + scale_y_continuous(limits = c(10, 20))
+
+# Like plot(), qplot() has a convenient way of log transforming the axes.
+# qplot(x, y, data = data, log = &quot;xy&quot;)
+# ggplot(data, aes(x, y)) + geom_point() + scale_x_log10() + scale_y_log10()
+# There are many other possible transformations, but not all are
+# accessible from within qplot(), see ?scale_continuous for more
+
+# Plot options
+
+# qplot() recognises the same options as plot does, and converts them to their
+# ggplot2 equivalents. See ?theme for more on ggplot options
+# qplot(x, y, data = data, main=&quot;title&quot;, asp = 1)
+# ggplot(data, aes(x, y)) + geom_point() + labs(title = &quot;title&quot;) + theme(aspect.ratio = 1)
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>translate_qplot_ggplot</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=translate_qplot_ggplot'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

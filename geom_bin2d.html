@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_bin2d. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Add heatmap of 2d bin counts.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_bin2d(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"bin2d", position&nbsp;=&nbsp;"identity", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_bin_2d(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"tile", position&nbsp;=&nbsp;"identity", bins&nbsp;=&nbsp;30, binwidth&nbsp;=&nbsp;NULL, drop&nbsp;=&nbsp;TRUE, na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+      <dt>geom, stat</dt>
+      <dd>Use to override the default connection between
+<code>geom_bin2d</code> and <code>stat_bin2d</code>.</dd>
+      <dt>bins</dt>
+      <dd>numeric vector giving number of bins in both vertical and
+horizontal directions. Set to 30 by default.</dd>
+      <dt>binwidth</dt>
+      <dd>Numeric vector giving bin width in both vertical and
+horizontal directions. Overrides <code>bins</code> if both set.</dd>
+      <dt>drop</dt>
+      <dd>if <code>TRUE</code> removes all cells with 0 counts.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Add heatmap of 2d bin counts.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>stat_bin2d</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>x</strong></code>
+  </li>
+<li> <code><strong>y</strong></code>
+  </li>
+<li> <code>fill</code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>d &lt;- ggplot(diamonds, aes(x, y)) + xlim(4, 10) + ylim(4, 10)
+d + geom_bin2d()
+</div>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<div class='input'>
+# You can control the size of the bins by specifying the number of
+# bins in each direction:
+d + geom_bin2d(bins = 10)
+</div>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<div class='input'>d + geom_bin2d(bins = 30)
+</div>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<div class='input'>
+# Or by specifying the width of the bins
+d + geom_bin2d(binwidth = c(0.1, 0.1))
+</div>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 328 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 460 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='warning'>Warning message:
+Removed 478 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_bin2d</li><li>stat_bin2d</li><li>stat_bin_2d</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='geom_hex.html'>stat_binhex</a></code> for hexagonal binning
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_bin2d'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

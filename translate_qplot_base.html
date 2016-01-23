@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>translate_qplot_base. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Translating between qplot and base graphics</h1>
+
+<div class="row">
+  <div class="span8">
+        
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>There are two types of graphics functions in base graphics, those that draw
+complete graphics and those that add to existing graphics.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>qplot() has been designed to mimic plot(), and can do the job of all other
+high-level plotting commands. There are only two graph types from base
+graphics that cannot be replicated with ggplot2: filled.contour() and
+persp()</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+
+# High-level plotting commands
+
+x &lt;- runif(10)
+y &lt;- 1:10
+plot(x, y); dotchart(x, y)
+</div>
+<p><img src='translate_qplot_base-2.png' alt='' width='540' height='400' /></p>
+<p><img src='translate_qplot_base-3.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(x, y, type = &quot;l&quot;)
+</div>
+<p><img src='translate_qplot_base-13.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, geom = &quot;line&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(x, y, type = &quot;s&quot;)
+</div>
+<p><img src='translate_qplot_base-23.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, geom = &quot;step&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+plot(x, y, type = &quot;b&quot;)
+</div>
+<p><img src='translate_qplot_base-33.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, geom = c(&quot;point&quot;, &quot;line&quot;))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+boxplot(x, y)
+</div>
+<p><img src='translate_qplot_base-43.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, geom = &quot;boxplot&quot;)
+</div>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+Continuous x aesthetic -- did you forget aes(group=...)?</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+hist(x)
+</div>
+<p><img src='translate_qplot_base-64.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, geom = &quot;histogram&quot;)
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# cdplot(factor(x), y)
+# qplot(x, fill = y, geom = &quot;density&quot;, position = &quot;fill&quot;)
+
+# coplot(y ~ x | a + b)
+# qplot(x, y, facets = a ~ b)
+
+# Many of the geoms are parameterised differently than base graphics. For
+# example, hist() is parameterised in terms of the number of bins, while
+# geom_histogram() is parameterised in terms of the width of each bin.
+hist(x, bins = 10)
+</div>
+<strong class='warning'>Warning message:
+&quot;bins&quot; is not a graphical parameter</strong>
+<strong class='warning'>Warning message:
+&quot;bins&quot; is not a graphical parameter</strong>
+<strong class='warning'>Warning message:
+&quot;bins&quot; is not a graphical parameter</strong>
+<strong class='warning'>Warning message:
+&quot;bins&quot; is not a graphical parameter</strong>
+<p><img src='translate_qplot_base-91.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, geom = &quot;histogram&quot;, binwidth = .1)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# qplot() often requires data in a slightly different format to the base
+# graphics functions. For example, the bar geom works with untabulated data,
+# not tabulated data like barplot(); the tile and contour geoms expect data
+# in a data frame, not a matrix like image() and contour().
+barplot(table(x))
+</div>
+<p><img src='translate_qplot_base-101.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, geom = &quot;bar&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+barplot(x)
+</div>
+<p><img src='translate_qplot_base-111.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(seq_along(x), x, geom = &quot;bar&quot;, stat = &quot;identity&quot;)
+</div>
+<strong class='warning'>Warning message:
+`stat` is deprecated</strong>
+<strong class='error'>Error: stat_count() must not be used with a y aesthetic.</strong>
+<div class='input'>
+# image(x)
+# qplot(X1, X2, data = melt(x), geom = &quot;tile&quot;, fill = value)
+
+# contour(x)
+# qplot(X1, X2, data = melt(x), geom = &quot;contour&quot;, fill = value)
+
+# Generally, the base graphics functions work with individual vectors, not
+# data frames like ggplot2. qplot() will try to construct a data frame if one
+# is not specified, but it is not always possible. If you get strange errors,
+# you may need to create the data frame yourself.
+df &lt;- data.frame(x = x, y = y)
+with(df, plot(x, y))
+</div>
+<p><img src='translate_qplot_base-116.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, data = df)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# By default, qplot() maps values to aesthetics with a scale. To override
+# this behaviour and set aesthetics, overriding the defaults, you need to use I().
+plot(x, y, col = &quot;red&quot;, cex = 1)
+</div>
+<p><img src='translate_qplot_base-126.png' alt='' width='540' height='400' /></p>
+<div class='input'>qplot(x, y, colour = I(&quot;red&quot;), size = I(1))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Low-level drawing
+
+# The low-level drawing functions which add to an existing plot are equivalent
+# to adding a new layer in ggplot2.
+
+# Base function       ggplot2 layer
+# curve()             geom_curve()
+# hline()             geom_hline()
+# lines()             geom_line()
+# points()            geom_point()
+# polygon()           geom_polygon()
+# rect()              geom_rect()
+# rug()               geom_rug()
+# segments()          geom_segment()
+# text()              geom_text()
+# vline()             geom_vline()
+# abline(lm(y ~ x))   geom_smooth(method = &quot;lm&quot;)
+# lines(density(x))   geom_density()
+# lines(loess(x, y))  geom_smooth()
+
+plot(x, y)
+</div>
+<div class='input'>lines(x, y)
+</div>
+<p><img src='translate_qplot_base-137.png' alt='' width='540' height='400' /></p>
+<div class='input'>
+qplot(x, y) + geom_line()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Or, building up piece-meal
+qplot(x, y)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>last_plot() + geom_line()
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Legends, axes and grid lines
+
+# In ggplot2, the appearance of legends and axes is controlled by the scales.
+# Axes are produced by the x and y scales, while all other scales produce legends.
+# See ?theme for help changing the appearance of axes and legends.
+# The appearance of grid lines is controlled by the grid.major and grid.minor
+# theme options, and their position by the breaks of the x and y scales.
+
+# Colour palettes
+
+# Instead of global colour palettes, ggplot2 has scales for individual plots. Much
+# of the time you can rely on the default colour scale (which has somewhat better
+# perceptual properties), but if you want to reuse an existing colour palette, you
+# can use scale_colour_manual(). You will need to make sure that the colour
+# is a factor for this to work.
+
+palette(rainbow(5))
+plot(1:5, 1:5, col = 1:5, pch = 19, cex = 4)
+</div>
+<p><img src='translate_qplot_base-163.png' alt='' width='540' height='400' /></p>
+<div class='input'>
+qplot(1:5, 1:5, col = factor(1:5), size = I(4))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>last_plot() + scale_colour_manual(values = rainbow(5))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# In ggplot2, you can also use palettes with continuous values,
+# with intermediate values being linearly interpolated.
+
+qplot(0:100, 0:100, col = 0:100, size = I(4)) +
+  scale_colour_gradientn(colours = rainbow(7))
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>last_plot() + scale_colour_gradientn(colours = terrain.colors(7))
+</div>
+<strong class='message'>Scale for &#39;colour&#39; is already present. Adding another scale for &#39;colour&#39;,
+which will replace the existing scale.</strong>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'>
+# Graphical parameters
+
+# The majority of par settings have some analogue within the theme system, or
+# in the defaults of the geoms and scales. The appearance plot border drawn
+# by box() can be controlled in a similar way by the panel.background and
+# plot.background theme elements. Instead of using title(), the plot title is
+# set with the title option. See ?theme for more theme elements.
+last_plot() + labs(title = &quot;My Plot Title&quot;)
+</div>
+<strong class='warning'>Warning message:
+You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find username</strong>
+<strong class='warning'>Warning message:
+You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
+<strong class='warning'>Warning message:
+Couldn&#39;t find api_key</strong>
+<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
+
+Don&#39;t have an account? plot.ly
+
+Questions? support@plot.lyFALSE</strong>
+<strong class='message'>Success! Created a new plotly here -&gt; </strong>
+<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>translate_qplot_base</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=translate_qplot_base'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
