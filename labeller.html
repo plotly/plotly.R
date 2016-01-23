@@ -121,41 +121,15 @@ p1 &lt;- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
 p1 + facet_grid(vs + am ~ gear,
   labeller = labeller(vs = label_both, am = label_value))
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8722</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8722" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Or whole margins:
 p1 + facet_grid(vs + am ~ gear,
   labeller = labeller(.rows = label_both, .cols = label_value))
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8724</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8724" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You can supply functions operating on strings:
 capitalize &lt;- function(string) {
@@ -165,21 +139,8 @@ capitalize &lt;- function(string) {
 p2 &lt;- ggplot(msleep, aes(x = sleep_total, y = awake)) + geom_point()
 p2 + facet_grid(vore ~ conservation, labeller = labeller(vore = capitalize))
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8726</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8726" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Or use character vectors as lookup tables:
 conservation_status &lt;- c(
@@ -197,21 +158,8 @@ p2 + facet_grid(vore ~ conservation, labeller = labeller(
   conservation = conservation_status
 ))
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8728</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8728" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # In the following example, we rename the levels to the long form,
 # then apply a wrap labeller to the columns to prevent cropped text
@@ -220,41 +168,15 @@ msleep$conservation2 &lt;- plyr::revalue(msleep$conservation,
 
 p2 %+% msleep + facet_grid(vore ~ conservation2)
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8730</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8730" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p2 %+% msleep +
   facet_grid(vore ~ conservation2,
     labeller = labeller(conservation2 = label_wrap_gen(10))
   )
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8732</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8732" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # labeller() is especially useful to act as a global labeller. You
 # can set it up once and use it on a range of different plots with
@@ -269,55 +191,16 @@ global_labeller &lt;- labeller(
 
 p2 + facet_grid(vore ~ conservation, labeller = global_labeller)
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8734</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8734" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p2 + facet_wrap(~vore, labeller = global_labeller)
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8736</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8736" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p2 %+% msleep + facet_wrap(~conservation2, labeller = global_labeller)
 </div>
-<strong class='warning'>Warning message:
-You need a plotly username. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find username</strong>
-<strong class='warning'>Warning message:
-You need an api_key. See help(signup, package = &#39;plotly&#39;)</strong>
-<strong class='warning'>Warning message:
-Couldn&#39;t find api_key</strong>
-<strong class='message'>Aw, snap! We don&#39;t have an account for &#39;&#39;. Want to try again? You can authenticate with your email address or username. Sign in is not case sensitive.
-
-Don&#39;t have an account? plot.ly
-
-Questions? support@plot.lyFALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; </strong>
-<div class='output'><iframe src="" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8738</strong>
+<div class='output'><iframe src="https://plot.ly/~cpsievert/8738" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">
