@@ -24,7 +24,7 @@ cache:
 before_script:
   - mkdir -p "$R_LIBS_USER"
   - git config --global user.email "cpsievert1@gmail.com"
-  - git config --global user.name "Carson Sievert"
+  - git config --global user.name "cpsievert"
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
