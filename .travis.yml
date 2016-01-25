@@ -35,8 +35,7 @@ script:
   # run R CMD check on the non-pull request build
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then Rscript -e 'devtools::check()'; fi"
   # we do some fancy stuff on the pull request build that confuses R CMD check
-  - R CMD install --help
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then R CMD install ./; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then R CMD install ../plotly ; fi"
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"tests/testthat.R\", chdir = T)'; fi"
 
 after_success:
