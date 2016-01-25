@@ -1,3 +1,7 @@
+2.3.1 -- 25 Jan 2015
+
+More accurate conversion of path width. Fixes #373.
+
 2.3.0 -- 19 Jan 2015
 
 Add sharing argument and deprecate world_readable. Fixes #332
