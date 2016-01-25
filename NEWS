@@ -1,6 +1,10 @@
-2.3.1 -- 20 Jan 2015
+2.3.2 -- 25 Jan 2015
 
-more accurate list of data_array properties. fixes #415
+More accurate list of data_array properties. Fixes #415
+
+2.3.1 -- 25 Jan 2015
+
+More accurate conversion of path width. Fixes #373.
 
 2.3.0 -- 19 Jan 2015
 
