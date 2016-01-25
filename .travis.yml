@@ -41,5 +41,5 @@ script:
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"plotly/tests/testthat.R\", chdir = T)'; fi"
 
 after_success:
-  - cd ../plotly-test-table
+  - cd plotly-test-table
   - Rscript ../plotly/inst/build-push-comment.R
