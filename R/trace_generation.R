@@ -427,8 +427,8 @@ toBasic <- list(
       ymin <- as.character(s[1])
       ymax <- as.character(s[length(s)])
     } else {
-      ymin <- min(g$prestats.data$globxmin, na.rm = T)
-      ymax <- max(g$prestats.data$globxmax, na.rm = T)
+      ymin <- min(g$prestats.data$globymin, na.rm = T)
+      ymax <- max(g$prestats.data$globymax, na.rm = T)
     }
     g$data$plotly_id <- seq_len(N)
     l <- list()
@@ -626,6 +626,10 @@ geom2trace <- list(
     )
   },
   point=function(data, params){
+    # params contains unique values, but we need _all_ values from the data
+    for (i in names(params)) {
+      if (length(params[[i]]) > 1) params[[i]] <- data[[i]]
+    }
     L <- list(
       x = data$x,
       y = data$y,

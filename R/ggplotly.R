@@ -942,6 +942,7 @@ gg2list <- function(p) {
       y <- tr[["y"]]
       tr[["y"]] <- x
       tr[["x"]] <- y
+      if (isTRUE(tr[["type"]] == "bar")) tr$orientation <- "h"
       flipped.traces[[trace.i]] <- tr
     }
     x <- layout[["xaxis"]]
