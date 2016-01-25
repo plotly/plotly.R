@@ -269,12 +269,13 @@ html_dependency_mathjax <- function(p) {
     }
   }
   if (isTRUE(p$config$mathjax == "cdn")) {
-    htmltools::htmlDependency(
+    dep <- htmltools::htmlDependency(
       name = "mathjax-cdn", 
-      version = "latest",
+      version = "1.0",
       src = system.file("htmlwidgets", "lib", "mathjax", package = "plotly"),
       script = "mathjax-cdn.js"
     )
+    return(dep)
   }
   return(NULL)
 }
