@@ -30,9 +30,9 @@ before_script:
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
   - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - cd ..; R CMD install plotly
 
 script:
-  - Rscript -e "library(plotly); devtools::session_info()"
   # run R CMD check on the non-pull request build
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then Rscript -e 'devtools::check()'; fi"
   # we do some fancy stuff on the pull request build that confuses R CMD check
