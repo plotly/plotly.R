@@ -28,7 +28,6 @@ before_script:
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
-  - Rscript -e 'devtools::install_github("hadley/devtools")'
   - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 
@@ -36,7 +35,8 @@ script:
   # run R CMD check on the non-pull request build
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then Rscript -e 'devtools::check()'; fi"
   # we do some fancy stuff on the pull request build that confuses R CMD check
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'devtools::install(); source(\"tests/testthat.R\", chdir = T)'; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then R CMD install ./; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"tests/testthat.R\", chdir = T)'; fi"
 
 after_success:
   - cd ../plotly-test-table
