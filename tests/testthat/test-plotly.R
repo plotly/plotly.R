@@ -111,3 +111,12 @@ test_that("inheriting properties works as expected", {
   expect_equal(l$data[[2]]$opacity, 0.5)
   expect_true(all(l$data[[1]]$y > l$data[[2]]$y))
 })
+
+test_that("x/y/z properties have a class of AsIs", {
+  p <- plot_ly(x = 1, y = 1, z = 1, type = "scatter3d")
+  l <- plotly_build(p)
+  tr <- l$data[[1]]
+  expect_true(inherits(tr$x, "AsIs"))
+  expect_true(inherits(tr$y, "AsIs"))
+  expect_true(inherits(tr$z, "AsIs"))
+})
