@@ -120,6 +120,11 @@ add_boxed <- function(x) {
     d <- x$data[[i]]
     idx <- names(d) %in% get_boxed(d$type %||% "scatter") & sapply(d, length) == 1
     if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
+    # (safely) mark individual nested properties
+    d$error_x$array <- i(d$error_x$array)
+    d$error_y$array <- i(d$error_y$array)
+    d$error_x$arrayminus <- i(d$error_x$arrayminus)
+    d$error_y$arrayminus <- i(d$error_y$arrayminus)
   }
   x
 }
@@ -146,6 +151,23 @@ boxers <- list(
   scattergeo = c("lon", "lat", "locations"),
   surface = c("x", "y", "z", "text")
 )
+
+i <- function(x) if (is.null(x)) x else I(x)
+
+#' Pick an element from a nested list
+#' @param x a list
+#' @param nms a character vector specifying a search path
+#' @example
+#' x <- list(a = list(b = list(c = "Come and get it!")))
+#' pick(x, c("a", "b", "c"))
+#' #> [1] "Come and get it!"
+pick <- function(x, nms) {
+  for (i in seq_along(nms)) {
+    nm <- nms[i]
+    x <- x[[nm]]
+  }
+  x
+}
 
 
 rm_asis <- function(x) {
