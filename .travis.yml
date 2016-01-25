@@ -38,7 +38,7 @@ script:
   # run R CMD check on the non-pull request build
   - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then R CMD check ${R_PKG}_*.tar.gz --no-manual; fi"
   # we do some fancy stuff on the pull request build that confuses R CMD check
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'testthat::test_check(\"plotly\")'; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"plotly/tests/testthat.R\", chdir = T)'; fi"
 
 after_success:
   - cd ../plotly-test-table
