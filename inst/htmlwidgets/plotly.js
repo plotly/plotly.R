@@ -19,13 +19,6 @@ HTMLWidgets.widget({
     if (!instance.plotly) {
       Plotly.plot(el.id, x.data, x.layout, x.config);
       instance.plotly = true;
-      if (x.config.mathjax == "cdn" && !instance.mathjax) {
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG";
-        document.getElementsByTagName("head")[0].appendChild(script);
-        instance.mathjax = true;
-      }
     } else {
       Plotly.newPlot(el.id, x.data, x.layout);
     }
