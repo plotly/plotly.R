@@ -32,6 +32,7 @@ before_script:
   - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
   - R CMD INSTALL ${R_PKG}_*.tar.gz
+  - cd plotly
 
 script:
   # run R CMD check on the non-pull request build
