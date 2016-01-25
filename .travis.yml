@@ -28,8 +28,9 @@ before_script:
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
-  - Rscript -e 'library(devtools);update_packages("devtools", repos = "http://cran.rstudio.com")'
-  - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - Rscript -e 'devtools::install_github("hadley/devtools")'
+  - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
+  - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 
 script:
   # run R CMD check on the non-pull request build
