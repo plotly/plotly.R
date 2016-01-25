@@ -152,7 +152,15 @@ boxers <- list(
   surface = c("x", "y", "z", "text")
 )
 
-i <- function(x) if (is.null(x)) x else I(x)
+i <- function(x) {
+  if (is.null(x)) {
+    return(NULL)
+  } else if (length(x) == 1) {
+    return(I(x))
+  } else{
+    return(x)
+  }
+}
 
 rm_asis <- function(x) {
   # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
