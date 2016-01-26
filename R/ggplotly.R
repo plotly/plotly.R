@@ -693,7 +693,7 @@ gg2list <- function(p) {
   }
   layout$showlegend <- if(length(legends.present) == 0) FALSE else TRUE
   for(a in legends.present){
-    if(is.hidden(p$guides[[a]])){
+    if(is.hidden(p$gFuides[[a]])){
       layout$showlegend <- FALSE
     }
   }
@@ -704,7 +704,6 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
-  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
       # Retrieve legend title
