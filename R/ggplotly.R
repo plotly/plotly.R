@@ -50,6 +50,21 @@ ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt,
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
+# ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
+# we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
+# from R, but it seems 96 is a reasonable assumption.
+mm2pixels <- function(mm) { 
+  (mm * 96) / 25.4 
+}
+# convert an aribitrary grid unit to pixels
+unit2pixels <- function(u) {
+  mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
+}
+# TODO: the correct way to convert sizes would be to send 'npc' (0, 1)
+# units to the browser & use HTMLwidget's resize method to scale everything
+# to the display. Only problem is that this would require extensive knowledge
+# of things that need resizing 
+
 aesConverters <- list(
   linetype=function(lty) {
     lty2dash[as.character(lty)]
@@ -57,12 +72,7 @@ aesConverters <- list(
   colour=function(col) {
     toRGB(col)
   },
-  # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
-  # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
-  # from R, but it seems 96 is a reasonable assumption.
-  size=function(mm) {
-    (mm * 96) / 25.4
-  },
+  size=mm2pixels,
   sizeref=identity,
   sizemode=identity,
   alpha=identity,
@@ -948,8 +958,34 @@ gg2list <- function(p) {
     flipped.layout[["xaxis"]] <- y
     flipped.layout[["yaxis"]] <- x
   }
-  
   l <- list(data = flipped.traces, layout = flipped.layout)
-
+  # translate margins
+  pm <- unit2pixels(theme.pars$plot.margin)
+  xtitle <- unit2pixels(theme.pars$axis.title.x$margin)
+  ytitle <- unit2pixels(theme.pars$axis.title.y$margin)
+  title <- if (!is.null(built$plot$labels$title)) {
+    unit2pixels(unit(ggplot2::calc_element('plot.title', theme.pars)$size, "points"))
+  } else {
+    0
+  }
+  # NOTE: We only support _bottom_ x-axis text & _left_ y-axis margins since
+  # plotly.js has no sense of padding between axis tick and text
+  l$layout$margin <- list(
+    # apparently title margins are ignored by ggplot2???
+    t = pm[[1]] + title,
+    r = pm[[2]],
+    b = pm[[3]] + xtitle[[3]] + ytitle[[3]] + 
+      unit2pixels(unit(ggplot2::calc_element('axis.title.x', theme.pars)$size, 
+                       "points")) +
+      unit2pixels(unit(ggplot2::calc_element('axis.text.x', theme.pars)$size, 
+                       "points")) +
+      unit2pixels(theme.pars$axis.text.x$margin[3]),
+    l = pm[[4]] + xtitle[[4]] + ytitle[[4]] +
+      unit2pixels(unit(ggplot2::calc_element('axis.title.y', theme.pars)$size, 
+                       "points")) +
+      unit2pixels(unit(ggplot2::calc_element('axis.text.y', theme.pars)$size, 
+                       "points")) +
+      unit2pixels(theme.pars$axis.text.y$margin[4])
+  )
   structure(add_boxed(rm_asis(l)), class = "plotly")
 }
