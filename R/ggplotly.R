@@ -63,6 +63,9 @@ mm2pixels <- function(mm) {
 }
 # convert an aribitrary grid unit to pixels
 unit2pixels <- function(u) {
+  if (!length(u)) return(0)
+  # most ggplot2 sizes seem to use points
+  if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
   mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
 }
 # TODO: the correct way to convert sizes would be to send 'npc' (0, 1)
@@ -296,9 +299,6 @@ gg2list <- function(p) {
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
-    # Do we really need to coord_transform?
-    # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-    #                                     built$panel$ranges[[1]])
     trace.list <- c(trace.list, traces)
   }
   
@@ -308,9 +308,12 @@ gg2list <- function(p) {
   barmodes <- barmodes[!is.null(barmodes)]
   if (length(barmodes) > 0) {    
     layout$barmode <- barmodes[1]
-    if (!all(barmodes == barmodes[1]))
-      warning(paste0("You have multiple barcharts or histograms with different positions; ",
-                     "Plotly's layout barmode will be '", layout$barmode, "'."))
+    if (!all(barmodes == barmodes[1])) {
+      warning(
+        "You have multiple barcharts or histograms with different positions; ",
+        "Plotly's layout barmode will be '", layout$barmode, "'."
+      )
+    }
     # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
     if (layout$barmode == "stack") {
       # could speed up this function with environments or C/C++
@@ -388,7 +391,7 @@ gg2list <- function(p) {
     text2font <- function(x) {
       list(
         family = x$family,
-        size = unit2pixels(grid::unit(x$size, "points")),
+        size = if (length(x$size)) unit2pixels(grid::unit(x$size, "points")) else 0,
         color = toRGB(x$colour)
       )
     }
@@ -396,18 +399,20 @@ gg2list <- function(p) {
     # set some axis defaults (and override some of them later)
     # https://plot.ly/r/reference/#layout-xaxis
     axisObj <- list(
-      title = sc$name %||% built$plot$labels[[xy]],
+      title = if (!is.null(axisTitle)) sc$name %||% built$plot$labels[[xy]],
       titlefont = text2font(axisTitle),
       type = "linear",
-      # we compute the range/tickval later
       autorange = FALSE,
+      range = ranges.list[[xy]],
       tickmode = "array",
+      # TODO: facets!
       ticktext = built$panel$ranges[[1]][[paste0(xy, ".labels")]],
+      tickvals = built$panel$ranges[[1]][[paste0(xy, ".major")]],
       ticks = if (is_blank(axisTicks)) "" else "outside",
       tickcolor = toRGB(axisTicks$colour),
       ticklen = unit2pixels(theme.pars$axis.ticks.length),
-      # TODO: convert this size? Is this in points?
-      tickwidth = unit2pixels(grid::unit(axisTicks$size, "points")),
+      # TODO: convert this size? Is this in points? If so, be careful to check length b4 using grid::unit()
+      tickwidth = axisTicks$size,
       showticklabels = TRUE,
       tickfont = text2font(axisText),
       tickangle = -axisText$angle,
@@ -421,28 +426,50 @@ gg2list <- function(p) {
       gridwidth = panelGrid$size,
       zeroline = FALSE  # ggplot2 never shows zero lines
     )
-    # tick locations are always on a 0-1 scale
-    major <- built$panel$ranges[[1]][[paste0(xy, ".major")]]
-    # TODO: yes, apparently it is possible for [x/y] to be both? (fix it above)
+    # TODO: apparently it is possible for [x/y] to be both? (fix it above)
     if (misc$is.discrete[[xy]] && !misc$is.continuous[[xy]]) {
-      axisObj$range  <- c(0, 1)
-      axisObj$tickvals <- major
+      axisObj$type <- "category"
+      axisObj$range <- axisObj$ticktext
+      axisObj$autorange <- TRUE
+      axisObj$tickvals <- NULL
+      # order traces according to the order of the scale
+      # plotly.js may provide a more elegant solution to this
+      # https://github.com/plotly/plotly.js/issues/189
+      nms <- unlist(lapply(traces, "[[", "name"))
+      trace.list <- trace.list[match(nms, axisObj$range)]
+      # remove traces that are outside the range of (discrete) scales
+      if (!is.null(sc$limits)) {
+        trace.list <- trace.list[nms %in% sc$limits]
+      }
     } else {
-      axisObj$range <- ranges.list[[xy]]
+      # these tick locations are always on a 0-1 scale, but we want them on the
+      # data scale
       axisObj$tickvals <- scales::rescale(
-        major, to = axisObj$range, from = c(0, 1)
+        axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
     }
     if (identical(sc$trans$name, "reverse")) {
       axisObj$range <- sort(-axisObj$range, decreasing = TRUE)
     }
-    # remove traces that are outside the range of (discrete) scales
-    nms <- unlist(lapply(traces, "[[", "name"))
-    if (misc$is.discrete[[xy]] && !is.null(nms))
-      trace.list <- trace.list[nms %in% axisObj$ticktext]
-    
     # tack axis object onto the layout
     layout[[paste0(xy, "axis")]] <- axisObj
+    # start figuring out margins for add axis title/text
+    side <- if (xy == "x") "b" else "l"
+    # plotly.js has no sense of padding between axis tick and text so we
+    # just support _bottom_ x-axis text & _left_ y-axis margins
+    idx <- if (xy == "x") 3 else 4
+    # 'size' refers to vertical size of a character
+    # this is a rough estimation of the horiziontal size
+    horizSize <- max(nchar(axisObj$ticktext)) / 2
+    # account for the angle of the text
+    radians <- abs(axisObj$tickangle * (pi/180))
+    # tickangle of 0 means horizontal & sin(0) == 0
+    trig <- if (xy == "x") sin else cos
+    mult <- horizSize * trig(radians) + 1
+    
+    layout$margin[[side]] <- unit2pixels(axisTitle$margin[idx]) + 
+      unit2pixels(axisText$margin[idx]) + 
+      mult * axisObj$tickfont$size + axisObj$titlefont$size
   }
   
   # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
@@ -747,10 +774,6 @@ gg2list <- function(p) {
   #    layout$legend$bgcolor <- toRGB(s(rect_fill))
   #}
   
-  if (length(trace.list) == 0) {
-    stop("No exportable traces")
-  }
-  
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
   mode.mat["markers", "lines"] <-
@@ -885,33 +908,31 @@ gg2list <- function(p) {
     flipped.layout[["yaxis"]] <- x
   }
   l <- list(data = flipped.traces, layout = flipped.layout)
-  
-  # translate margins
+  # translate plot margin
   pm <- unit2pixels(theme.pars$plot.margin)
-  # NOTE: We only support _bottom_ x-axis text & _left_ y-axis margins since
-  # plotly.js has no sense of padding between axis tick and text
-  xTitle <- unit2pixels(theme.pars$axis.title.x$margin[3])
-  xText <- unit2pixels(theme.pars$axis.text.x$margin[3])
-  yTitle <- unit2pixels(theme.pars$axis.title.y$margin[4])
-  yText <- unit2pixels(theme.pars$axis.title.y$margin[4])
-  title <- if (!is.null(built$plot$labels$title)) {
-    unit2pixels(unit(theme.pars$plot.title$size, "points"))
-  } else {
-    0
-  }
-  # 'size' refers to vertical size of a character. 
-  # this is very rough estimation of the horizontal size needed
-  # TODO: make this better, and what about rotations?
-  N <- max(nchar(l$layout$yaxis$ticktext)) / 2
-  l$layout$margin <- list(
-    # apparently title margins are ignored by ggplot2???
-    t = pm[[1]] + title,
-    r = pm[[2]],
-    b = pm[[3]] + xTitle + xText +
-      with(l$layout$xaxis, titlefont$size + tickfont$size),
-    l = pm[[4]] + yTitle + yText +
-      with(l$layout$yaxis, titlefont$size + N * tickfont$size)
-  )
-  
+  title <- if (is.null(built$plot$labels$title)) 0 else unit2pixels(theme.pars$plot.title$size)
+  l <- add_margin(l, pm[[1]] + title, pm[[2]], pm[[3]], pm[[4]])
   structure(add_boxed(rm_asis(l)), class = "plotly")
+}
+
+
+
+
+
+#' Add plot margins
+#' 
+#' @param p a plotly (or ggplot2) object
+#' @param t the top margin
+#' @param r the right margin
+#' @param b the bottom margin
+#' @param l the left margin
+
+add_margin <- function(p, t = 0, r = 0, b = 0, l = 0) {
+  p <- plotly_build(p)
+  p$layout$margin$t <- p$layout$margin$t %||% 0 + t
+  p$layout$margin$r <- p$layout$margin$r %||% 0 + r
+  p$layout$margin$b <- p$layout$margin$b %||% 0 + b
+  p$layout$margin$l <- p$layout$margin$l %||% 0 + l
+  # TODO: expose this to users??
+  p
 }
