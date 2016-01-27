@@ -92,3 +92,14 @@ test_that("facet_grid(..., scales = 'free') doesnt create interior scales.", {
   expect_axes(info, 2L)
   expect_axes(info, 1L, "y")
 })
+
+gg <- ggplot(mtcars, aes(mpg, wt)) + 
+  geom_point() + geom_line() + 
+  facet_wrap(~vs, scales = "free")
+
+test_that("facet_wrap(..., scales = 'free') can handle multiple traces on each panel", {
+  info <- save_outputs(gg, "facet_wrap_free_mult")
+  yaxes <- sapply(info$data, "[[", "yaxis")
+  modes <- sapply(info$data, "[[", "mode")
+  expect_true(length(unique(paste(yaxes, modes))) == 4)
+})

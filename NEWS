@@ -1,3 +1,7 @@
+2.3.3 -- 27 Jan 2015
+
+Bump axis number for each trace matching a panel number. fixes #318
+
 2.3.2 -- 25 Jan 2015
 
 More accurate list of data_array properties. Fixes #415
