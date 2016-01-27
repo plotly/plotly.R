@@ -546,13 +546,23 @@ gg2list <- function(p) {
         if (p$facet$free$y && panel > 1) {
           # draw a y-axis on each panel
           yaxis.name <- paste0("yaxis", panel)
-          trace.list[[i]]$yaxis <- paste0("y", panel)
+          for (j in seq_along(trace.list)) {
+            tr <- trace.list[[j]]
+            if (tr$PANEL == panel) {
+              trace.list[[j]]$yaxis <- paste0("y", panel)
+            }
+          }
           yanchor <- if (p$facet$free$x) paste0("x", panel) else paste0("x",col)
         } 
         if (p$facet$free$x && panel > 1) {
           # draw an x-axis on each panel
           xaxis.name <- paste0("xaxis", panel)
-          trace.list[[i]]$xaxis <- paste0("x", panel)
+          for (j in seq_along(trace.list)) {
+            tr <- trace.list[[j]]
+            if (tr$PANEL == panel) {
+              trace.list[[j]]$xaxis <- paste0("x", panel)
+            }
+          }
           xanchor <- if (p$facet$free$y) paste0("y", panel) else paste0("y",row)
         }
       } 
