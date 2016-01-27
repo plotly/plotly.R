@@ -13,7 +13,7 @@ expect_traces <- function(gg, n.traces, name) {
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data=has.data, layout=L$layout)
 }
 
 get_legend <- function(L) {
@@ -21,7 +21,7 @@ get_legend <- function(L) {
     return(data.frame())
   }
   legend.list <- list()
-  for (tr in L$traces) {
+  for (tr in L$data) {
     if (is.character(tr$name)) {
       legend.list[[tr$name]] <-
         data.frame(name=tr$name, showlegend=tr$showlegend)
@@ -53,7 +53,7 @@ bp.flevels <- bp + scale_x_discrete(limits=flevels)
 
 test_that("factor levels determine tick order", {
   info <- expect_traces(bp.flevels, 3, "flevels")
-  trace.names <- sapply(info$traces, "[[", "name")
+  trace.names <- sapply(info$data, "[[", "name")
   expect_identical(as.character(trace.names),
                    c("trt2", "trt1", "ctrl"))
   expect_legend(info, leg())
@@ -67,18 +67,22 @@ test_that("ylim hides points", {
   expect_legend(info, leg())
 })
 
-bp.scale.hide <- bp + scale_y_continuous(limits=c(5, 7.5))
+bp.scale.hide <- bp + scale_y_continuous(limits = c(5, 7.5))
 test_that("scale_y(limits) hides points", {
   info <- expect_traces(bp.scale.hide, 3, "scale.hide")
   expect_legend(info, leg())
-  expect_equal(info$layout$yaxis$range, c(5, 7.5))
+  expect_equal(range(info$layout$yaxis$tickvals), c(5, 7.5))
+  y <- unlist(lapply(info$data, "[[", "y"))
+  expect_true(all(5 <= y & y <= 7.5, na.rm = TRUE))
 })
 
-bp.coord <- bp + coord_cartesian(ylim=c(5, 7.5))
+bp.coord <- bp + coord_cartesian(ylim = c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
   info <- expect_traces(bp.coord, 3, "coord-ylim")
   expect_legend(info, leg())
-  expect_equal(info$layout$yaxis$range, c(5, 7.5))
+  expect_equal(range(info$layout$yaxis$tickvals), c(5, 7.5))
+  y <- unlist(lapply(info$data, "[[", "y"))
+  expect_false(all(5 <= y & y <= 7.5))
 })
 
 # Create some noisy exponentially-distributed data
@@ -97,7 +101,6 @@ test_that("A scatterplot with regular (linear) axis scaling", {
 })
 
 library(scales)
-# TODO: Add package "scales" to the list of dependencies?
 sp.log2.scale <- sp + scale_y_continuous(trans=log2_trans())
 
 test_that("log2 scaling of the y axis (with visually-equal spacing)", {
@@ -138,24 +141,6 @@ test_that("log10 with exponents on tick labels", {
   expect_legend(info, leg())
 })
 
-# Data where x ranges from 0-10, y ranges from 0-30
-dat <- data.frame(xval = runif(40,0,10), yval = runif(40,0,30))
-sp <- ggplot(dat, aes(xval, yval)) + geom_point()
-
-sp.fixed <- sp + coord_fixed()
-
-test_that("Force equal scaling", {
-  info <- expect_traces(sp.fixed, 1, "coord-fixed")
-  expect_legend(info, leg())
-})
-
-sp.ratio <- sp + coord_fixed(ratio=1/3)
-
-test_that("coord_fixed(ratio)", {
-  info <- expect_traces(sp.ratio, 1, "coord-fixed-ratio")
-  expect_legend(info, leg())
-})
-
 no.x.title <- bp +
   theme(axis.title.x = element_blank()) +   # Remove x-axis label
   ylab("Weight (Kg)")                    # Set y-axis label
@@ -182,21 +167,20 @@ test_that("scale(name)", {
 #   since the labels are rotated), and 16 points
 
 bp.fonts <- bp +
-  theme(axis.title.x = element_text(face="bold", colour="#990000", size=20),
-        axis.text.x  = element_text(angle=90, vjust=0.5, size=16))
+  theme(
+    axis.title.x = element_text(face = "bold", colour = "#990000", size = 20),
+    axis.text.x  = element_text(angle = 90, vjust = 0.5, size = 16)
+  )
 
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 3, "fonts")
   expect_legend(info, leg())
   x <- info$layout$xaxis
-  xtitle <- x[["titlefont"]]
-  xtick <- x[["tickfont"]]
-  expect_identical(xtitle$color, toRGB("#990000"))
-  expect_equal(xtitle$size, 20)
-  ## TODO: does plotly support bold text?
+  expect_identical(x$titlefont$color, toRGB("#990000"))
+  expect_equal(x$titlefont$size, 20)
   expect_equal(x$tickangle, -90)
   ## TODO: can we test for vjust?
-  expect_equal(xtick$size, 16)
+  expect_equal(x$tickfont$size, 16)
 })
 
 # Label formatters
