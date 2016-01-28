@@ -30,10 +30,10 @@ test_that("3 facets becomes 3 panels", {
     theme_bw() +
     theme(panel.margin=grid::unit(0, "cm"))
   info <- gg2list(gg)
-  yaxes <- unique(sapply(info$data, "[[", "yaxis"))
-  xaxes <- unique(sapply(info$data, "[[", "xaxis"))
-  expect_true(length(yaxes) == 3)
-  expect_true(length(xaxes) == 3)
+  yaxes <- sapply(info$data, "[[", "yaxis")
+  xaxes <- sapply(info$data, "[[", "xaxis")
+  expect_true(all(c("y", "y2", "y3") %in% yaxes))
+  expect_true(all(c("x", "x2", "x3") %in% xaxes))
 })
 
 # expect a certain number of _unique_ [x/y] axes
@@ -87,9 +87,10 @@ gg <- ggplot(mtcars, aes(mpg, wt)) +
 
 test_that("facet_wrap(..., scales = 'free') can handle multiple traces on each panel", {
   info <- save_outputs(gg, "facet_wrap_free_mult")
-  yaxes <- sapply(info$data, "[[", "yaxis")
-  modes <- sapply(info$data, "[[", "mode")
-  for (i in sub("y", "", unique(yaxes))) {
-    expect_equal(sort(modes[grepl(i, yaxes)]), c("lines", "markers"))
+  yaxes <- unique(sapply(info$data, "[[", "yaxis"))
+  for (i in yaxes) {
+    dat <- info$data[sapply(info$data, "[[", "yaxis") %in% i]
+    modes <- sort(sapply(dat, "[[", "mode"))
+    expect_equal(modes, c("lines", "markers"))
   }
 })
