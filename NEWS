@@ -1,3 +1,7 @@
+2.3.4 -- 28 Jan 2015
+
+Fixed a bug with free scales and multiple rows of panels (which really fixes #318)
+
 2.3.3 -- 27 Jan 2015
 
 Bump axis number for each trace matching a panel number. fixes #318
