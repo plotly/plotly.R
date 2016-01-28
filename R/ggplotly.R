@@ -527,8 +527,8 @@ gg2list <- function(p) {
       xanchor <- sub("1$", "", paste0("y", panel))
       yanchor <- sub("1$", "", paste0("x", panel))
       for (j in seq_along(trace.list)) {
-        trace.list[[j]]$yaxis <- paste0("y", trace.list[[j]]$PANEL)
-        trace.list[[j]]$xaxis <- paste0("x", trace.list[[j]]$PANEL)
+        trace.list[[j]]$yaxis <- sub("1$", "", paste0("y", trace.list[[j]]$PANEL))
+        trace.list[[j]]$xaxis <- sub("1$", "", paste0("x", trace.list[[j]]$PANEL))
       }
       # in wrap layout, axes can be drawn on interior (if scales are free)
       if ("wrap" %in% class(p$facet)) {
