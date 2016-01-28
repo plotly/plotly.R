@@ -192,7 +192,11 @@ spf <- sp + facet_grid(. ~ cond)
 test_that("scatter facet -> 2 traces", {
   info <- expect_traces_shapes(spf, 2, 0, "scatter-facet")
   expect_true(info$traces[[1]]$xaxis != info$traces[[2]]$xaxis)
-  expect_true(info$traces[[1]]$yaxis == info$traces[[2]]$yaxis)
+  expect_true(info$traces[[1]]$yaxis != info$traces[[2]]$yaxis)
+  # second axis is hidden
+  y2 <- info$layout$yaxis2
+  expect_false(y2$showticklabels)
+  expect_identical(y2$ticks, "")
 })
 
 temp <- spf + geom_hline(aes(yintercept=10))

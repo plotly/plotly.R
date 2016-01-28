@@ -30,22 +30,10 @@ test_that("3 facets becomes 3 panels", {
     theme_bw() +
     theme(panel.margin=grid::unit(0, "cm"))
   info <- gg2list(gg)
-  traces <- info$data
-  trace.axes <- list()
-  for(N in c("xaxis", "yaxis")){
-    trace.axes[[N]] <- axes.vec <- 
-      sapply(traces, function(t) {
-        if(N %in% names(t)) {
-          t[[N]]
-        } else {
-          NA
-        }
-      })
-    expect_true(all(!is.na(axes.vec)))
-  }
-  trace.axes.df <- as.data.frame(trace.axes)
-  u <- unique(trace.axes.df)
-  expect_identical(nrow(u), 3L)
+  yaxes <- unique(sapply(info$data, "[[", "yaxis"))
+  xaxes <- unique(sapply(info$data, "[[", "xaxis"))
+  expect_true(length(yaxes) == 3)
+  expect_true(length(xaxes) == 3)
 })
 
 # expect a certain number of _unique_ [x/y] axes
