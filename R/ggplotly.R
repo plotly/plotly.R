@@ -243,7 +243,7 @@ gg2list <- function(p) {
     # Add ROW and COL to df: needed to link axes to traces; keep df's
     # original ordering while merging.
     df$order <- seq_len(nrow(df))
-    df <- merge(df, gglayout[, c("PANEL", "plotly.row", "COL")])
+    df <- merge(df, gglayout[, c("PANEL", "plotly.row", "plotly.panel", "COL")])
     df <- df[order(df$order),]
     df$order <- NULL
     
@@ -503,13 +503,14 @@ gg2list <- function(p) {
   # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
   xaxis.title <- layout$xaxis$title
   yaxis.title <- layout$yaxis$title
-  inner.margin <- 0.01 # between facets
+  inner.margin <- 0.02 # between facets
   outer.margin <- 0.05 # to put titles outside of the plots
   orig.xaxis <- layout$xaxis
   orig.yaxis <- layout$yaxis
   if (nrow(gglayout) > 1) {
-    row.size <- 1. / max(gglayout$ROW)
-    col.size <- 1. / max(gglayout$COL)
+    # TODO: make this a function of the range of space="free"
+    row.size <- 1 / max(gglayout$ROW)
+    col.size <- 1 / max(gglayout$COL)
     npanels <- nrow(gglayout)
     for (i in seq_len(npanels)) {
       row <- gglayout[i, "plotly.row"]
@@ -521,12 +522,10 @@ gg2list <- function(p) {
       y <- row * row.size
       ymin <- y - row.size
       ymax <- y - inner.margin
-      # assume grid layout by default where axes are restrict to the exterior
-      xaxis.name <- if (col == 1) "xaxis" else paste0("xaxis", col)
-      yaxis.name <- if (row == 1) "yaxis" else paste0("yaxis", row)
-      # anchor needs to be incremented if the corresponding axis is "free"
-      xanchor <- "y"
-      yanchor <- "x"
+      xaxis.name <- sub("1$", "", paste0("xaxis", panel))
+      yaxis.name <- sub("1$", "", paste0("yaxis", panel))
+      xanchor <- sub("1$", "", paste0("y", panel))
+      yanchor <- sub("1$", "", paste0("x", panel))
       if ("wrap" %in% class(p$facet)) {
         # in wrap layout, axes can be drawn on interior (if scales are free)
         # make room for facet strip label
@@ -539,33 +538,28 @@ gg2list <- function(p) {
         }
         # make room for xaxis labels
         if (row == 1) {
-          ymax <- ymax - 0.02
+          ymax <- ymax - 0.06
         } else {
-          ymin <- ymin + 0.02
+          ymin <- ymin + 0.06
         }
         if (p$facet$free$y && panel > 1) {
-          # draw a y-axis on each panel
-          yaxis.name <- paste0("yaxis", panel)
           for (j in seq_along(trace.list)) {
-            tr <- trace.list[[j]]
-            if (tr$PANEL == panel) {
-              trace.list[[j]]$yaxis <- paste0("y", panel)
-            }
+            trace.list[[j]]$yaxis <- paste0("y", trace.list[[j]]$PANEL)
           }
-          yanchor <- if (p$facet$free$x) paste0("x", panel) else paste0("x",col)
+          if (!p$facet$free$x) {
+            layout[[paste0("xaxis", panel)]]$showticklabels <- FALSE
+          }
         } 
         if (p$facet$free$x && panel > 1) {
-          # draw an x-axis on each panel
-          xaxis.name <- paste0("xaxis", panel)
           for (j in seq_along(trace.list)) {
-            tr <- trace.list[[j]]
-            if (tr$PANEL == panel) {
-              trace.list[[j]]$xaxis <- paste0("x", panel)
-            }
+            trace.list[[j]]$xaxis <- paste0("x", trace.list[[j]]$PANEL)
           }
-          xanchor <- if (p$facet$free$y) paste0("y", panel) else paste0("y",row)
+          if (!p$facet$free$y) {
+            layout[[paste0("xaxis", panel)]]$showticklabels <- FALSE
+          }
         }
       } 
+      #if (xaxis.name == "xaxis") browser()
       layout[[xaxis.name]] <- orig.xaxis
       layout[[xaxis.name]]$domain <- c(xmin, xmax)
       layout[[xaxis.name]]$anchor <- xanchor
