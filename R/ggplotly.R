@@ -526,8 +526,12 @@ gg2list <- function(p) {
       yaxis.name <- sub("1$", "", paste0("yaxis", panel))
       xanchor <- sub("1$", "", paste0("y", panel))
       yanchor <- sub("1$", "", paste0("x", panel))
+      for (j in seq_along(trace.list)) {
+        trace.list[[j]]$yaxis <- paste0("y", trace.list[[j]]$PANEL)
+        trace.list[[j]]$xaxis <- paste0("x", trace.list[[j]]$PANEL)
+      }
+      # in wrap layout, axes can be drawn on interior (if scales are free)
       if ("wrap" %in% class(p$facet)) {
-        # in wrap layout, axes can be drawn on interior (if scales are free)
         # make room for facet strip label
         ymax <- ymax - 0.04
         # make room for yaxis labels (this should be a function of label size)
@@ -542,24 +546,7 @@ gg2list <- function(p) {
         } else {
           ymin <- ymin + 0.06
         }
-        if (p$facet$free$y && panel > 1) {
-          for (j in seq_along(trace.list)) {
-            trace.list[[j]]$yaxis <- paste0("y", trace.list[[j]]$PANEL)
-          }
-          if (!p$facet$free$x) {
-            layout[[paste0("xaxis", panel)]]$showticklabels <- FALSE
-          }
-        } 
-        if (p$facet$free$x && panel > 1) {
-          for (j in seq_along(trace.list)) {
-            trace.list[[j]]$xaxis <- paste0("x", trace.list[[j]]$PANEL)
-          }
-          if (!p$facet$free$y) {
-            layout[[paste0("xaxis", panel)]]$showticklabels <- FALSE
-          }
-        }
       } 
-      #if (xaxis.name == "xaxis") browser()
       layout[[xaxis.name]] <- orig.xaxis
       layout[[xaxis.name]]$domain <- c(xmin, xmax)
       layout[[xaxis.name]]$anchor <- xanchor
@@ -580,6 +567,16 @@ gg2list <- function(p) {
       if (orig.yaxis$type == "linear") {
         layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
         layout[[yaxis.name]]$autorange <- FALSE
+      }
+      if ("grid" %in% class(p$facet)) {
+        if (!p$facet$free$x && row != min(gglayout$plotly.row)) {
+          layout[[xaxis.name]]$showticklabels <- FALSE
+          layout[[xaxis.name]]$ticks <- ""
+        }
+        if (!p$facet$free$y && col != 1) {
+          layout[[yaxis.name]]$showticklabels <- FALSE
+          layout[[yaxis.name]]$ticks <- ""
+        }
       }
     }
     # add panel titles as annotations
