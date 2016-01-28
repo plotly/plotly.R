@@ -94,3 +94,14 @@ test_that("facet_wrap(..., scales = 'free') can handle multiple traces on each p
     expect_equal(modes, c("lines", "markers"))
   }
 })
+
+test_that("facet_wrap() does create interior scales", {
+  g <- ggplot(mtcars, aes(mpg, wt)) + geom_point() + facet_wrap(~cyl)
+  info <- save_outputs(g, "facet_wrap")
+  y2 <- info$layout$yaxis2
+  y3 <- info$layout$yaxis3
+  expect_false(y2$showticklabels)
+  expect_false(y3$showticklabels)
+  expect_equal(y2$ticks, "")
+  expect_equal(y3$ticks, "")
+})

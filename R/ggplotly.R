@@ -526,10 +526,6 @@ gg2list <- function(p) {
       yaxis.name <- sub("1$", "", paste0("yaxis", panel))
       xanchor <- sub("1$", "", paste0("y", panel))
       yanchor <- sub("1$", "", paste0("x", panel))
-      for (j in seq_along(trace.list)) {
-        trace.list[[j]]$yaxis <- sub("1$", "", paste0("y", trace.list[[j]]$PANEL))
-        trace.list[[j]]$xaxis <- sub("1$", "", paste0("x", trace.list[[j]]$PANEL))
-      }
       # in wrap layout, axes can be drawn on interior (if scales are free)
       if ("wrap" %in% class(p$facet)) {
         # make room for facet strip label
@@ -568,15 +564,16 @@ gg2list <- function(p) {
         layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
         layout[[yaxis.name]]$autorange <- FALSE
       }
-      if ("grid" %in% class(p$facet)) {
-        if (!p$facet$free$x && row != min(gglayout$plotly.row)) {
-          layout[[xaxis.name]]$showticklabels <- FALSE
-          layout[[xaxis.name]]$ticks <- ""
-        }
-        if (!p$facet$free$y && col != 1) {
-          layout[[yaxis.name]]$showticklabels <- FALSE
-          layout[[yaxis.name]]$ticks <- ""
-        }
+      # hide axes if necessary
+      fix_x <- !p$facet$free$x || "grid" %in% class(p$facet)
+      fix_y <- !p$facet$free$y || "grid" %in% class(p$facet)
+      if (fix_x && row != min(gglayout$plotly.row)) {
+        layout[[xaxis.name]]$showticklabels <- FALSE
+        layout[[xaxis.name]]$ticks <- ""
+      }
+      if (fix_y && col != 1) {
+        layout[[yaxis.name]]$showticklabels <- FALSE
+        layout[[yaxis.name]]$ticks <- ""
       }
     }
     # add panel titles as annotations
