@@ -220,7 +220,7 @@ layer2traces <- function(l, d, misc) {
     if ("PANEL" %in% names(dpd) && nrow(dpd) > 0) {
       tr$xaxis <- paste0("x", dpd[1, "COL"])
       tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
-      tr$PANEL <- dpd[1, "PANEL"]
+      tr$PANEL <- dpd[1, "plotly.panel"]
     }
     
     if (is.null(tr$name) || tr$name %in% names.in.legend)
