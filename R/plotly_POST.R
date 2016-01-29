@@ -77,7 +77,7 @@ plotly_POST <- function(x, filename, fileopt = "new",
   if (sharing[1] == "hidden") {
     bits <- strsplit(con$url, "/")[[1]]
     plot_id <- bits[length(bits)]
-    url <- paste0(get_domain("v2"), "files/", verify("username"), ":", plot_id)
+    url <- file.path(get_domain("v2"), "files", paste0(verify("username"), ":", plot_id))
     bod <- list(share_key_enabled = TRUE)
     con2 <- httr::PATCH(url, plotly_headers("v2"), body = bod, encode = "json")
     con$url <- paste0(con$url, "?share_key=", content(con2)$share_key)

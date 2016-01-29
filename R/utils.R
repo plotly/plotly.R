@@ -184,13 +184,14 @@ struct <- function(x, y, ...) {
 
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "main") {
-  if (type == "stream") {
-    Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
-  } else if (type == "v2") {
-    Sys.getenv("plotly_domain", "https://api.plot.ly/v2/")
-  } else {
-    Sys.getenv("plotly_domain", "https://plot.ly")
+  dom <- Sys.getenv("plotly_domain", "https://plot.ly")
+  if (type == "v2") {
+    u <- httr::parse_url(dom)
+    u$hostname <- paste0("api.", u$hostname)
+    u$path <- "v2"
+    dom <- httr::build_url(u)
   }
+  dom
 }
 
 # plotly's special keyword arguments in POST body
