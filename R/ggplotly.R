@@ -142,7 +142,6 @@ gg2list <- function(p) {
       p$layers[[layer.i]]$data <- p$data
     }
   }
-  
   # Test fill and color to see if they encode a quantitative
   # variable. This may be useful for several reasons: (1) it is
   # sometimes possible to plot several different colors in the same
@@ -222,30 +221,20 @@ gg2list <- function(p) {
     ggsizemin <- min(unlist(sizerange))
     ggsizemax <- max(unlist(sizerange))
   }
-  
+
   layer.legends <- list()
   for(i in seq_along(built$plot$layers)){
     # This is the layer from the original ggplot object.
     L <- p$layers[[i]]
     
-    # for each layer, there is a correpsonding data.frame which
-    # evaluates the aesthetic mapping.
-    df <- built$data[[i]]    
+    # for consistency in the layout between grid/wrap
+    if (!inherits(p$facet, "wrap")) {
+      built$panel$layout$AXIS_X <- with(built$panel$layout, ROW == max(ROW))
+      built$panel$layout$AXIS_Y <- with(built$panel$layout, COL == 1)
+    }
     
-    # get gglayout now because we need some of its info in layer2traces
-    gglayout <- built$panel$layout
-    # invert rows so that plotly and ggplot2 show panels in the same order
-    gglayout$plotly.row <- max(gglayout$ROW) - gglayout$ROW + 1
-    # ugh, ggplot counts panel right-to-left & top-to-bottom
-    # plotly count them right-to-left & *bottom-to-top*
-    gglayout$plotly.panel <- with(gglayout, order(plotly.row, COL))
-    
-    # Add ROW and COL to df: needed to link axes to traces; keep df's
-    # original ordering while merging.
-    df$order <- seq_len(nrow(df))
-    df <- merge(df, gglayout[, c("PANEL", "plotly.row", "plotly.panel", "COL")])
-    df <- df[order(df$order),]
-    df$order <- NULL
+    # TODO: do we really need to merge?
+    df <- merge(built$data[[i]], built$panel$layout, sort = FALSE)
     
     prestats <- built$prestats.data[[i]]
     # scale_reverse multiples x/y data by -1, so here we undo that so
@@ -254,9 +243,8 @@ gg2list <- function(p) {
     for (a in replace.aes) {
       prestats[[a]] <- -1 * prestats[[a]]
     }
-    L$prestats.data <-
-      merge(prestats,
-            gglayout[, c("PANEL", "plotly.row", "COL")])
+    # need layout in layers2traces() in order to place traces on correct axis
+    L$prestats.data <- merge(prestats, built$panel$layout, sort = FALSE)
     
     # Add global range info.
     for(xy in names(ranges.list)){
@@ -500,154 +488,68 @@ gg2list <- function(p) {
     if (is.discrete(ax.list$range) && !is.null(nms)) 
       trace.list <- trace.list[nms %in% ax.list$range]
   }
-  # copy [x/y]axis to [x/y]axisN and set domain, range, etc. for each
-  xaxis.title <- layout$xaxis$title
-  yaxis.title <- layout$yaxis$title
-  inner.margin <- 0.02 # between facets
-  outer.margin <- 0.05 # to put titles outside of the plots
-  orig.xaxis <- layout$xaxis
-  orig.yaxis <- layout$yaxis
-  if (nrow(gglayout) > 1) {
-    # TODO: make this a function of the range of space="free"
-    row.size <- 1 / max(gglayout$ROW)
-    col.size <- 1 / max(gglayout$COL)
+  
+  if (has_facet(p)) {
+    # each axis should _not_ have it's own title!
+    layout$annotations <- c(
+      layout$annotations, 
+      # TODO: spacing should respect theme(axis.text)
+      make.label(layout$xaxis$title, 0.5, -0.05, 
+                 yanchor = "top"),
+      make.label(layout$yaxis$title, -0.05, 0.5, 
+                 xanchor = "bottom", textangle = -90)
+    )
+    layout <- strip_axis(layout)
+    gglayout <- built$panel$layout
     npanels <- nrow(gglayout)
+    # TODO: 
+    # (1) hMargin should respect theme(axis.text.y)
+    # (2) vMargin should respect theme(axis.text.x) + theme(strip.text) 
+    hMargin <- if (isTRUE(p$facet$free$y)) c(.02, .02) else c(0, 0)
+    vMargin <- if (isTRUE(p$facet$free$x)) c(.08, .08) else c(0, 0)
+    # determine the appropriate domains/anchor for each panel
+    doms <- get_domains(npanels, max(gglayout$ROW), c(hMargin, vMargin))
+    gglayout$XAXIS <- with(gglayout, ifelse(AXIS_X, PANEL, COL))
+    gglayout$YAXIS <- with(gglayout, ifelse(AXIS_Y, PANEL, ROW))
     for (i in seq_len(npanels)) {
-      row <- gglayout[i, "plotly.row"]
-      col <- gglayout[i, "COL"]
-      panel <- gglayout[i, "plotly.panel"]
-      x <- col * col.size
-      xmin <- x - col.size
-      xmax <- x - inner.margin
-      y <- row * row.size
-      ymin <- y - row.size
-      ymax <- y - inner.margin
-      xaxis.name <- sub("1$", "", paste0("xaxis", panel))
-      yaxis.name <- sub("1$", "", paste0("yaxis", panel))
-      xanchor <- sub("1$", "", paste0("y", panel))
-      yanchor <- sub("1$", "", paste0("x", panel))
-      # in wrap layout, axes can be drawn on interior (if scales are free)
-      if ("wrap" %in% class(p$facet)) {
-        # make room for facet strip label
-        ymax <- ymax - 0.04
-        # make room for yaxis labels (this should be a function of label size)
-        if (col == 1) {
-          xmax <- xmax - 0.02
-        } else {
-          xmin <- xmin + 0.02
-        }
-        # make room for xaxis labels
-        if (row == 1) {
-          ymax <- ymax - 0.06
-        } else {
-          ymin <- ymin + 0.06
-        }
-      } 
-      layout[[xaxis.name]] <- orig.xaxis
-      layout[[xaxis.name]]$domain <- c(xmin, xmax)
-      layout[[xaxis.name]]$anchor <- xanchor
-      layout[[xaxis.name]]$title <- NULL
-      layout[[yaxis.name]] <- orig.yaxis
-      layout[[yaxis.name]]$domain <- c(ymin, ymax)
-      layout[[yaxis.name]]$anchor <- yanchor
-      layout[[yaxis.name]]$title <- NULL
-      if (is.null(layout[[xaxis.name]]$anchor)) 
-        layout[[xaxis.name]]$anchor <- "y"
-      if (is.null(layout[[yaxis.name]]$anchor)) 
-        layout[[yaxis.name]]$anchor <- "x"
-      # range only makes sense for numeric data
-      if (orig.xaxis$type == "linear") {
-        layout[[xaxis.name]]$range <- built$panel$ranges[[i]]$x.range
-        layout[[xaxis.name]]$autorange <- FALSE
-      }
-      if (orig.yaxis$type == "linear") {
-        layout[[yaxis.name]]$range <- built$panel$ranges[[i]]$y.range
-        layout[[yaxis.name]]$autorange <- FALSE
-      }
-      # hide axes if necessary
-      fix_x <- !p$facet$free$x || "grid" %in% class(p$facet)
-      fix_y <- !p$facet$free$y || "grid" %in% class(p$facet)
-      if (fix_x && row != min(gglayout$plotly.row)) {
-        layout[[xaxis.name]]$showticklabels <- FALSE
-        layout[[xaxis.name]]$ticks <- ""
-      }
-      if (fix_y && col != 1) {
-        layout[[yaxis.name]]$showticklabels <- FALSE
-        layout[[yaxis.name]]$ticks <- ""
+      lay <- gglayout[i, ]
+      # tack on domain anchors to the existing [x/y]axis
+      # and create new objects if necessary
+      x <- sub("1", "", lay$XAXIS)
+      y <- sub("1", "", lay$YAXIS)
+      xaxis <- list(
+        domain = sort(as.numeric(doms[i, c("xstart", "xend")])),
+        anchor = paste0("y", y)
+      )
+      layout[[paste0("xaxis", x)]] <- modifyList(layout[["xaxis"]], xaxis)
+      yaxis <- list(
+        domain = sort(as.numeric(doms[i, c("ystart", "yend")])),
+        anchor = paste0("x", x)
+      )
+      layout[[paste0("yaxis", y)]] <- modifyList(layout[["yaxis"]], yaxis)
+      # annotations for facet strip text
+      # TODO: 
+      # (1) use built$plot$facet$labeller for the actual strip text!
+      # (2) use a rect shape for the strip background!
+      if (inherits(p$facet, "grid")) {
+        col_txt <- paste(lay[, as.character(built$plot$facet$cols)], collapse = ", ")
+        row_txt <- paste(lay[, as.character(built$plot$facet$rows)], collapse = ", ")
+          layout$annotations <- c(
+            layout$annotations,
+            make.label(col_txt, mean(xaxis$domain), max(yaxis$domain), 
+                       xanchor = "center", yanchor = "bottom"),
+            make.label(row_txt, max(xaxis$domain), mean(yaxis$domain), 
+                       xanchor = "bottom", yanchor = "center")
+          )
+      } else {
+        txt <- paste(lay[, as.character(built$plot$facet$facets)], collapse = ", ")
+        layout$annotations <- c(
+          layout$annotations,
+          make.label(txt, mean(xaxis$domain), max(yaxis$domain), 
+                     xanchor = "center", yanchor = "bottom")
+        )
       }
     }
-    # add panel titles as annotations
-    annotations <- list()
-    nann <- 1
-    make.label <- function(text, x, y, xanchor="auto", yanchor="auto", textangle=0)
-      list(text=text, showarrow=FALSE, x=x, y=y, ax=0, ay=0, 
-           xref="paper", yref="paper", xanchor=xanchor, yanchor=yanchor, 
-           textangle=textangle)
-    if ("grid" %in% class(p$facet)) {
-      frows <- names(p$facet$rows)
-      nann <- 1
-      
-      for (i in seq_len(max(gglayout$ROW))) {
-        text <- paste(lapply(gglayout[gglayout$ROW == i, frows, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        if (text != "") {  # to not create extra annotations
-          increase_margin_r <- TRUE
-          annotations[[nann]] <- make.label(text,
-                                            1 + outer.margin - 0.04,
-                                            row.size * (max(gglayout$ROW)-i+0.5),
-                                            xanchor="center",
-                                            textangle=90)
-          nann <- nann + 1
-        }
-      }
-      fcols <- names(p$facet$cols)
-      for (i in seq_len(max(gglayout$COL))) {
-        text <- paste(lapply(gglayout[gglayout$COL == i, fcols, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        if (text!="") {
-          annotations[[nann]] <- make.label(text,
-                                            col.size * (i-0.5) - inner.margin/2,
-                                            1 + outer.margin,
-                                            xanchor="center")
-          nann <- nann + 1
-        }
-      }
-      
-      # add empty traces everywhere so that the background shows even if there
-      # is no data for a facet
-      for (r in seq_len(max(gglayout$ROW)))
-        for (c in seq_len(max(gglayout$COL)))
-          trace.list <- c(trace.list, list(list(xaxis=paste0("x", c), yaxis=paste0("y", r), showlegend=FALSE)))
-    } else if ("wrap" %in% class(p$facet)) {
-      facets <- names(p$facet$facets)
-      for (i in seq_len(max(as.numeric(gglayout$PANEL)))) {
-        ix <- gglayout$PANEL == i
-        row <- gglayout$ROW[ix]
-        col <- gglayout$COL[ix]
-        text <- paste(lapply(gglayout[ix, facets, drop=FALSE][1,],
-                             as.character),
-                      collapse=", ")
-        annotations[[nann]] <- make.label(text, 
-                                          col.size * (col-0.5) - inner.margin/2,
-                                          row.size * (max(gglayout$ROW) - row + 0.985),
-                                          xanchor="center",
-                                          yanchor="top")
-        nann <- nann + 1
-      }
-    }
-    # axes titles
-    annotations[[nann]] <- make.label(xaxis.title,
-                                      0.5,
-                                      -outer.margin,
-                                      yanchor="top")
-    nann <- nann + 1
-    annotations[[nann]] <- make.label(yaxis.title,
-                                      -outer.margin,
-                                      0.5,
-                                      textangle=-90)
-    layout$annotations <- annotations
   }
   
   # Main plot title.
@@ -658,10 +560,7 @@ gg2list <- function(p) {
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
   
   # Legend.
-  layout$margin$r <- 10
-  if (exists("increase_margin_r")) {
-    layout$margin$r <- 60
-  }
+  layout$margin$r <- layout$margin$r %||% 0 + 10
   layout$legend <- list(bordercolor = "transparent", 
                         x = 1.01, 
                         y = 0.075 * 0.5* length(trace.list) + 0.45,
@@ -705,20 +604,18 @@ gg2list <- function(p) {
     legend.title <- paste0("<b>", legend.title, "</b>")
     
     # Create legend title element as an annotation
-    if (exists("annotations")) {
-      nann <- nann + 1
-    } else {
-      annotations <- list()
-      nann <- 1
-    }
-    annotations[[nann]] <- list(text=legend.title,
-                                x = layout$legend$x * 1.0154,
-                                y = 0.075 * 0.5* length(trace.list) + 0.55,
-                                showarrow=FALSE,
-                                xref="paper", yref="paper",
-                                xanchor="left", yanchor = "top",
-                                textangle=0)
-    layout$annotations <- annotations
+    layout$annotations <- c(
+      layout$annotations,
+      list(
+        text = legend.title,
+        x = layout$legend$x * 1.0154,
+        y = 0.075 * 0.5* length(trace.list) + 0.55,
+        showarrow = FALSE,
+        xref = "paper", yref = "paper",
+        xanchor = "left", yanchor = "top",
+        textangle = 0
+      )
+    )
   }
   # Family font for text
   if (!is.null(theme.pars$text$family)) {
@@ -950,4 +847,36 @@ gg2list <- function(p) {
   l <- list(data = flipped.traces, layout = flipped.layout)
 
   structure(add_boxed(rm_asis(l)), class = "plotly")
+}
+
+
+
+make.label <- function(text, x, y, xanchor = "auto", yanchor = "auto", 
+                       textangle = 0) {
+  list(list(
+    text = text, 
+    showarrow = FALSE, 
+    x = x, 
+    y = y, 
+    ax = 0, 
+    ay = 0, 
+    xref = "paper", 
+    yref = "paper", 
+    xanchor = xanchor, 
+    yanchor = yanchor, 
+    textangle = textangle
+  ))
+}
+
+has_facet <- function(x) { 
+  inherits(x$facet, c("grid", "wrap"))
+}
+
+# remove a property from an axis element
+strip_axis <- function(x, y = "title") {
+  idx <- grepl("[x-y]axis", names(x))
+  axes <- x[idx]
+  axes <- lapply(axes, function(x) { x[[y]] <- NULL; x })
+  x[idx] <- axes
+  x
 }

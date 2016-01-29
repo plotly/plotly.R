@@ -217,9 +217,13 @@ layer2traces <- function(l, d, misc) {
         tr$name <- as.character(name.list[[1]])
     }
     dpd <- data.params$data
-    if ("plotly.panel" %in% names(dpd) && nrow(dpd) > 0) {
-      tr$xaxis <- sub("1$", "", paste0("x", dpd[1, "plotly.panel"]))
-      tr$yaxis <- sub("1$", "", paste0("y", dpd[1, "plotly.panel"]))
+    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0) {
+      lay <- unique(dpd[, c("PANEL", "COL", "ROW", "AXIS_X", "AXIS_Y")])
+      if (nrow(lay) != 1) stop("Unexpected case")
+      x <- if (lay$AXIS_X) lay$PANEL else lay$COL
+      y <- if (lay$AXIS_Y) lay$PANEL else lay$ROW
+      tr$xaxis <- sub("1$", "", paste0("x", x))
+      tr$yaxis <- sub("1$", "", paste0("y", y))
     }
     
     if (is.null(tr$name) || tr$name %in% names.in.legend)
