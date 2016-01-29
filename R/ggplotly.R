@@ -50,6 +50,29 @@ ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt,
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
+# detect a blank theme element
+is_blank <- function(x) {
+  inherits(x, "element_blank") && inherits(x, "element")
+}
+
+# ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
+# we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
+# from R, but it seems 96 is a reasonable assumption.
+mm2pixels <- function(mm) { 
+  (mm * 96) / 25.4 
+}
+# convert an aribitrary grid unit to pixels
+unit2pixels <- function(u) {
+  if (!length(u)) return(0)
+  # most ggplot2 sizes seem to use points
+  if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
+  mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
+}
+# TODO: the correct way to convert sizes would be to send 'npc' (0, 1)
+# units to the browser & use HTMLwidget's resize method to scale everything
+# to the display. Only problem is that this would require extensive knowledge
+# of things that need resizing 
+
 aesConverters <- list(
   linetype=function(lty) {
     lty2dash[as.character(lty)]
@@ -57,12 +80,7 @@ aesConverters <- list(
   colour=function(col) {
     toRGB(col)
   },
-  # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
-  # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
-  # from R, but it seems 96 is a reasonable assumption.
-  size=function(mm) {
-    (mm * 96) / 25.4
-  },
+  size=mm2pixels,
   sizeref=identity,
   sizemode=identity,
   alpha=identity,
@@ -150,7 +168,7 @@ gg2list <- function(p) {
   # sent to plotly as characters, not as numeric data (which is
   # what ggplot_build gives us).
   misc <- list()
-  for(a in c("fill", "colour", "x", "y", "size")){
+  for (a in c("fill", "colour", "x", "y", "size")) {
     for(data.type in c("continuous", "date", "datetime", "discrete")){
       fun.name <- sprintf("scale_%s_%s", a, data.type)
       misc.name <- paste0("is.", data.type)
@@ -269,9 +287,6 @@ gg2list <- function(p) {
     actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
     layer.legends[[paste(i)]] <- actual.legends
     
-    # Do we really need to coord_transform?
-    # g$data <- ggplot2:::coord_transform(built$plot$coord, g$data,
-    #                                     built$panel$ranges[[1]])
     trace.list <- c(trace.list, traces)
   }
   
@@ -281,9 +296,12 @@ gg2list <- function(p) {
   barmodes <- barmodes[!is.null(barmodes)]
   if (length(barmodes) > 0) {    
     layout$barmode <- barmodes[1]
-    if (!all(barmodes == barmodes[1]))
-      warning(paste0("You have multiple barcharts or histograms with different positions; ",
-                     "Plotly's layout barmode will be '", layout$barmode, "'."))
+    if (!all(barmodes == barmodes[1])) {
+      warning(
+        "You have multiple barcharts or histograms with different positions; ",
+        "Plotly's layout barmode will be '", layout$barmode, "'."
+      )
+    }
     # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
     if (layout$barmode == "stack") {
       # could speed up this function with environments or C/C++
@@ -335,158 +353,108 @@ gg2list <- function(p) {
     }
   }
   
-  # Export axis specification as a combination of breaks and labels, on
-  # the relevant axis scale (i.e. so that it can be passed into d3 on the
-  # x axis scale instead of on the grid 0-1 scale). This allows
-  # transformations to be used out of the box, with no additional d3
-  # coding.
+  # obtain _calculated_ theme elements
   theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
+  for (i in names(theme.pars)) {
+    theme.pars[[i]] <- ggplot2::calc_element(i, theme.pars)
+  }
+  # Background color.
+  layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
+  layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
   
-  # Flip labels if coords are flipped - transform does not take care
-  # of this. Do this BEFORE checking if it is blank or not, so that
-  # individual axes can be hidden appropriately, e.g. #1.
-  # ranges <- built$panel$ranges[[1]]
-  # if("flip"%in%attr(built$plot$coordinates, "class")){
-  #   temp <- built$plot$labels$x
-  #   built$plot$labels$x <- built$plot$labels$y
-  #   built$plot$labels$y <- temp
-  # }
-  e <- function(el.name){
-    ggplot2::calc_element(el.name, p$theme)
+  # generic function for translating element_text() to a plotly font object
+  text2font <- function(x) {
+    list(
+      color = toRGB(x$colour),
+      family = x$family,
+      size = if (length(x$size)) unit2pixels(grid::unit(x$size, "points")) else 0
+    )
   }
-  is.blank <- function(el.name, null.is.blank=FALSE) {
-    # NULL shows ticks and hides borders
-    cls <- attr(e(el.name),"class")
-    "element_blank" %in% cls || null.is.blank && is.null(cls)
-  }
-  trace.order.list <- list()
-  trace.name.map <- c()
-  for(xy in c("x","y")){
-    ax.list <- list()
-    coord.lim <- p$coordinates$limits[[xy]] %||% p$scales$get_scales(xy)$limits
-    if(is.numeric(coord.lim)){
-      ## TODO: maybe test for more exotic coord specification types
-      ## involving NA, Inf, etc?
-      ax.list$range <- coord.lim
+  # global font (all other font objects inherit from it)
+  layout$font <- text2font(theme.pars$text)
+  # Main plot title.
+  layout$title <- faced(built$plot$labels$title, theme.pars$plot.title$face)
+  layout$titlefont <- text2font(theme.pars$plot.title)
+  # avoid sending redundant info
+  if (identical(layout$font, layout$titlefont)) layout$titlefont <- NULL
+  
+  # remaining floating variables that should die eventually 
+  layout$margin <- list()
+  # TODO: apparently it is possible for [x/y] to be both? (fix it above)
+  xDiscrete <- misc$is.discrete[["x"]] && !misc$is.continuous[["x"]]
+  yDiscrete <- misc$is.discrete[["y"]] && !misc$is.continuous[["y"]]
+  
+  # Translate [x/y]axis 
+  for (xy in c("x", "y")) {
+    # find axis specific theme elements that inherit from their parent
+    theme_el <- function(el) {
+      theme.pars[[paste0(el, ".", xy)]] %||% theme.pars[[el]]
     }
-    s <- function(tmp)sprintf(tmp, xy)
-    ax.list$tickcolor <- toRGB(theme.pars$axis.ticks$colour)
+    axisTicks <- theme_el("axis.ticks")
+    axisText <- theme_el("axis.text")
+    axisTitle <- theme_el("axis.title")
+    axisLine <- theme_el("axis.line")
+    panelGrid <- theme_el("panel.grid.major")
+    # TODO: 
+    # (1) We currently ignore minor grid lines. Would it makes sense to 
+    # create another axis object just for the minor grid?
+    # (2) translate panel.border to a rect shape
+    # (3) Does it make sense to translate other theme elements?
+    sc <- p$scales$get_scales(xy)
+    # set some axis defaults (and override some of them later)
+    # https://plot.ly/r/reference/#layout-xaxis
+    axisObj <- list(
+      title = if (!is.null(axisTitle)) sc$name %||% built$plot$labels[[xy]],
+      titlefont = text2font(axisTitle),
+      type = "linear",
+      autorange = FALSE,
+      tickmode = "array",
+      range = built$panel$ranges[[1]][[paste0(xy, ".range")]],
+      ticktext = built$panel$ranges[[1]][[paste0(xy, ".labels")]],
+      tickvals = built$panel$ranges[[1]][[paste0(xy, ".major")]],
+      ticks = if (is_blank(axisTicks)) "" else "outside",
+      tickcolor = toRGB(axisTicks$colour),
+      ticklen = unit2pixels(theme.pars$axis.ticks.length),
+      # TODO: convert this size? Is this in points? If so, be careful to check length b4 using grid::unit()
+      tickwidth = axisTicks$size,
+      showticklabels = TRUE,
+      tickfont = text2font(axisText),
+      tickangle = -axisText$angle,
+      showline = !is_blank(axisLine),
+      linecolor = toRGB(axisLine$colour),
+      # TODO: convert this size? Is this in points?
+      linewidth = axisLine$size,
+      showgrid = !is_blank(panelGrid),
+      gridcolor = toRGB(panelGrid$colour),
+      # TODO: convert this size? Is this in points?
+      gridwidth = panelGrid$size,
+      zeroline = FALSE  # ggplot2 never shows zero lines
+    )
+    # bold/italisixe title
+    axisObj$title <- faced(axisObj$title, theme.pars$axis.text$face)
     
-    # When gridlines are dotted or dashed:
-    grid <- theme.pars$panel.grid
-    grid.major <- theme.pars$panel.grid.major
-    if ((!is.null(grid$linetype) || !is.null(grid.major$linetype)) && 
-          c(grid$linetype, grid.major$linetype) %in% c(2, 3, "dashed", "dotted")) {
-      ax.list$gridcolor <- ifelse(is.null(grid.major$colour),
-                                  toRGB(grid$colour, 0.1),
-                                  toRGB(grid.major$colour, 0.1))
-    } else {
-      ax.list$gridcolor <- toRGB(grid.major$colour)
-    }
+    disc <- if (xy == "x") xDiscrete else yDiscrete
+    axisObj <- re_scale(axisObj, disc)
     
-    ax.list$showgrid <- !is.blank(s("panel.grid.major.%s"))
-    # These numeric length variables are not easily convertible.
-    #ax.list$gridwidth <- as.numeric(theme.pars$panel.grid.major$size)
-    #ax.list$ticklen <- as.numeric(theme.pars$axis.ticks.length)
+    # tack axis object onto the layout
+    layout[[paste0(xy, "axis")]] <- axisObj
     
-    theme2font <- function(text){
-      if(!is.null(text)){
-        list(family=text$family,
-             size=text$size,
-             color=toRGB(text$colour))
-      }
-    }
-    # Ticks.
-    if (is.blank("axis.ticks")) {
-      ax.list$ticks <- ""
-    } else if (is.blank(s("axis.ticks.%s"))) {
-      ax.list$ticks <- ""
-    } else {
-      ax.list$ticks <- "outside"  # by default ggplot2 plots have ticks
-    } 
-    ax.list$tickwidth <- theme.pars$axis.ticks$size
-    tick.text.name <- s("axis.text.%s")
-    ax.list$showticklabels <- !is.blank(tick.text.name)
-    tick.text <- e(tick.text.name)
-    if (is.numeric(tick.text$angle)) {
-      ax.list$tickangle <- -tick.text$angle
-    }
-    ax.list$tickfont <- theme2font(tick.text)
-    
-    ## determine axis type first, since this information is used later
-    ## (trace.order.list is only used for type=category).
-    title.text <- e(s("axis.title.%s"))
-    ax.list$titlefont <- theme2font(title.text)
-    ax.list$type <- if (misc$is.continuous[[xy]]){
-      "linear"
-    } else if (misc$is.discrete[[xy]]){
-      "category"
-    } else if (misc$is.date[[xy]] || misc$is.datetime[[xy]]){
-      "date"
-    } else {
-      stop("unrecognized data type for ", xy, " axis")
-    }
-    
-    # Translate axes labels.
-    scale.i <- which(p$scales$find(xy))
-    ax.list$title <- if(length(scale.i)){
-      sc <- p$scales$scales[[scale.i]]
-      if(ax.list$type == "category"){
-        trace.order.list[[xy]] <- sc$limits
-        if(is.character(sc$breaks)){
-          if(is.character(sc$labels)){
-            trace.name.map[sc$breaks] <- sc$labels
-          }
-          ##TODO: if(is.function(sc$labels)){
-        }
-      }
-      if (is.null(sc$breaks)) {
-        ax.list$showticklabels <- FALSE
-        ax.list$showgrid <- FALSE
-        ax.list$ticks <- ""
-      }
-      if (is.numeric(sc$breaks)) {
-        dticks <- diff(sc$breaks)
-        dt <- dticks[1]
-        if(all(dticks == dt)){
-          ax.list$dtick <- dt
-          ax.list$autotick <- FALSE
-        }
-      }
-      ax.list$range <- if(!is.null(sc$limits)){
-        sc$limits
-      }else{
-        if(misc$is.continuous[[xy]]){
-          built$panel$ranges[[1]][[s("%s.range")]] #TODO: facets!
-        }else{ # for a discrete scale, range should be NULL.
-          NULL
-        }
-      }
-      if(is.character(sc$trans$name) && sc$trans$name == "reverse"){
-        ax.list$range <- sort(-ax.list$range, decreasing = TRUE)
-      }
-      if(!is.null(sc$name)){
-        sc$name
-      }else{
-        p$labels[[xy]]
-      }
-    }else{
-      p$labels[[xy]]
-    }
-    
-    ax.list$zeroline <- FALSE  # ggplot2 plots do not show zero lines
-    # Lines drawn around the plot border.
-    ax.list$showline <- !is.blank("panel.border", TRUE)
-    ax.list$linecolor <- toRGB(theme.pars$panel.border$colour)
-    ax.list$linewidth <- theme.pars$panel.border$size
-    # Some other params that we used in animint but we don't yet
-    # translate to plotly:
-    !is.blank(s("axis.line.%s"))
-    layout[[s("%saxis")]] <- ax.list
-    # remove traces that are outside the range of (discrete) scales
-    nms <- unlist(lapply(traces, "[[", "name"))
-    if (is.discrete(ax.list$range) && !is.null(nms)) 
-      trace.list <- trace.list[nms %in% ax.list$range]
+    # margins for add axis title/text
+    side <- if (xy == "x") "b" else "l"
+    # plotly.js has no sense of padding between axis tick and text so we
+    # just support _bottom_ x-axis text & _left_ y-axis margins
+    idx <- if (xy == "x") 3 else 4
+    # 'size' refers to vertical size of a character
+    # this is a rough estimation of the horiziontal size
+    horizSize <- max(nchar(axisObj$ticktext)) / 2
+    # account for the angle of the text
+    radians <- abs(axisObj$tickangle * (pi/180))
+    # tickangle of 0 means horizontal & sin(0) == 0
+    trig <- if (xy == "x") sin else cos
+    mult <- horizSize * trig(radians) + 1
+    layout$margin[[side]] <- unit2pixels(axisTitle$margin[idx]) + 
+      unit2pixels(axisText$margin[idx]) + 
+      mult * axisObj$tickfont$size + axisObj$titlefont$size
   }
   
   if (has_facet(p)) {
@@ -519,14 +487,22 @@ gg2list <- function(p) {
       y <- sub("1", "", lay$YAXIS)
       xaxis <- list(
         domain = sort(as.numeric(doms[i, c("xstart", "xend")])),
-        anchor = paste0("y", y)
+        anchor = paste0("y", y),
+        range = built$panel$ranges[[i]][["x.range"]],
+        ticktext = built$panel$ranges[[i]][["x.labels"]],
+        tickvals = built$panel$ranges[[i]][["x.major"]]
       )
       layout[[paste0("xaxis", x)]] <- modifyList(layout[["xaxis"]], xaxis)
+      layout[[paste0("xaxis", x)]] <- re_scale(layout[[paste0("xaxis", x)]], xDiscrete)
       yaxis <- list(
         domain = sort(as.numeric(doms[i, c("ystart", "yend")])),
-        anchor = paste0("x", x)
+        anchor = paste0("x", x),
+        range = built$panel$ranges[[i]][["y.range"]],
+        ticktext = built$panel$ranges[[i]][["y.labels"]],
+        tickvals = built$panel$ranges[[i]][["y.major"]]
       )
       layout[[paste0("yaxis", y)]] <- modifyList(layout[["yaxis"]], yaxis)
+      layout[[paste0("yaxis", y)]] <- re_scale(layout[[paste0("yaxis", y)]], yDiscrete)
       # annotations for facet strip text
       # TODO: 
       # (1) use built$plot$facet$labeller for the actual strip text!
@@ -551,21 +527,29 @@ gg2list <- function(p) {
       }
     }
   }
+  ### TODO: trace
+  ## order traces according to the order of the scale
+  ## plotly.js may provide a more elegant solution to this
+  ## https://github.com/plotly/plotly.js/issues/189
+  #nms <- unlist(lapply(traces, "[[", "name"))
+  #trace.list <- trace.list[match(nms, axisObj$range)]
+  ## remove traces that are outside the range of (discrete) scales
+  #if (!is.null(sc$limits)) {
+  #  trace.list <- trace.list[nms %in% sc$limits]
+  #}
   
-  # Main plot title.
-  layout$title <- built$plot$labels$title
+  # TODO: I don't think we need to worry about transformations?
+  #if (identical(sc$trans$name, "reverse")) {
+  #  axisObj$range <- sort(-axisObj$range, decreasing = TRUE)
+  #}
   
-  # Background color.
-  layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
-  layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
-  
-  # Legend.
-  layout$margin$r <- layout$margin$r %||% 0 + 10
-  layout$legend <- list(bordercolor = "transparent", 
-                        x = 1.01, 
-                        y = 0.075 * 0.5* length(trace.list) + 0.45,
-                        xref="paper", yref="paper",
-                        xanchor = "left", yanchor = "top")
+  layout$legend <- list(
+    bordercolor = "transparent", 
+    x = 1.01, 
+    y = 0.075 * 0.5* length(trace.list) + 0.45,
+    xref="paper", yref="paper",
+    xanchor = "left", yanchor = "top"
+  )
   
   ## Legend hiding when guides(fill="none").
   legends.present <- unique(unlist(layer.legends))
@@ -580,7 +564,7 @@ gg2list <- function(p) {
   }
   layout$showlegend <- if(length(legends.present) == 0) FALSE else TRUE
   for(a in legends.present){
-    if(is.hidden(p$guides[[a]])){
+    if(is.hidden(p$gFuides[[a]])){
       layout$showlegend <- FALSE
     }
   }
@@ -591,7 +575,6 @@ gg2list <- function(p) {
   
   # Only show a legend title if there is at least 1 trace with
   # showlegend=TRUE.
-  ggplot_labels <- ggplot2::labs(p)$labels
   trace.showlegend <- sapply(trace.list, "[[", "showlegend")
   if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
       # Retrieve legend title
@@ -607,7 +590,7 @@ gg2list <- function(p) {
     layout$annotations <- c(
       layout$annotations,
       list(
-        text = legend.title,
+        text = faced(legend.title, theme.pars$legend.text$face),
         x = layout$legend$x * 1.0154,
         y = 0.075 * 0.5* length(trace.list) + 0.55,
         showarrow = FALSE,
@@ -617,89 +600,10 @@ gg2list <- function(p) {
       )
     )
   }
-  # Family font for text
-  if (!is.null(theme.pars$text$family)) {
-    layout$titlefont$family   <- theme.pars$text$family
-    layout$legend$font$family <- theme.pars$text$family
-  }
   
-  # Family font for title
-  if (!is.null(theme.pars$plot.title$family)) {
-    layout$titlefont$family <- theme.pars$plot.title$family
-  }
-  
-  # Family font for legend
-  if (!is.null(theme.pars$legend.text$family)) {
-    layout$legend$font$family <- theme.pars$legend.text$family
-  }
-  
-  # Bold, italic and bold.italic face for text
-  text_face <- theme.pars$text$face
-  if (!is.null(text_face)) {
-    if (text_face=="bold") {
-      layout$title <- paste0("<b>", layout$title, "</b>")
-      layout$yaxis$title <- paste0("<b>", layout$yaxis$title, "</b>")
-      layout$xaxis$title <- paste0("<b>", layout$xaxis$title, "</b>")
-    } else if (text_face=="italic") {
-      layout$title <- paste0("<i>", layout$title, "</i>")
-      layout$yaxis$title <- paste0("<i>", layout$yaxis$title, "</i>")
-      layout$xaxis$title <- paste0("<i>", layout$xaxis$title, "</i>")
-    } else if (text_face=="bold.italic") {
-      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
-      layout$yaxis$title <- paste0("<b><i>", layout$yaxis$title, "</i></b>")
-      layout$xaxis$title <- paste0("<b><i>", layout$xaxis$title, "</i></b>")
-    }
-  }
-  
-  # Bold, italic and bold.italic face for title
-  title_face <- theme.pars$plot.title$face
-  if (!is.null(title_face)) {
-    if (title_face=="bold") {
-      layout$title <- paste0("<b>", layout$title, "</b>")
-    } else if (title_face=="italic") {
-      layout$title <- paste0("<i>", layout$title, "</i>")
-    } else if (title_face=="bold.italic") {
-      layout$title <- paste0("<b><i>", layout$title, "</i></b>")
-    }
-  }
-  
-  # Bold, italic, and bold.italic face for axis title
-  title_face <- list(theme.pars$axis.title.y$face,
-                     theme.pars$axis.title.x$face)
-  sub_elem <- c("yaxis", "xaxis")
-  
-  for (i in seq_along(title_face)) {
-    if (!is.null(title_face[[i]])) {
-      if (title_face[[i]]=="bold") {
-        layout[[sub_elem[i]]]["title"] <- paste0("<b>",
-                                                 layout[[sub_elem[i]]]["title"],
-                                                 "</b>")
-      } else if (title_face[[i]]=="italic") {
-        layout[[sub_elem[i]]]["title"] <- paste0("<i>",
-                                                 layout[[sub_elem[i]]]["title"],
-                                                 "</i>")
-      } else if (title_face[[i]]=="bold.italic") {
-        layout[[sub_elem[i]]]["title"] <- paste0("<b><i>",
-                                                 layout[[sub_elem[i]]]["title"],
-                                                 "</b></i>")
-      }
-    }
-  }
-  
-  # If background elements are NULL, and background rect (rectangle) is defined:
-  rect_fill <- theme.pars$rect$fill
-  if (!is.null(rect_fill)) {
-    if (is.null(layout$plot_bgcolor))
-      layout$plot_bgcolor <- toRGB(s(rect_fill))
-    if (is.null(layout$paper_bgcolor))
-      layout$paper_bgcolor <- toRGB(s(rect_fill))
-    if (is.null(layout$legend$bgcolor))
-      layout$legend$bgcolor <- toRGB(s(rect_fill))
-  }
-  
-  if (length(trace.list) == 0) {
-    stop("No exportable traces")
-  }
+  layout$legend$font <- text2font(theme.pars$legend.text)
+  # avoid sending redundant info
+  if (identical(layout$font, layout$legend$font)) layout$legend$font <- NULL
   
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
@@ -763,7 +667,7 @@ gg2list <- function(p) {
   # convenient for extracting name/value of legend entries (ignoring alpha)
   entries <- function(x, y) {
     z <- try(x[[y]], silent = TRUE)
-    if (inherits(e, "try-error")) {
+    if (inherits(z, "try-error")) {
       paste0(x$name, "-")
     } else {
       paste0(x$name, "-", rm_alpha(z))
@@ -799,36 +703,25 @@ gg2list <- function(p) {
   # be used for sorting traces that come from different geoms
   # (currently we don't have a test for this). TODO: write such a
   # test, delete the trace$rank code, and have it work here instead.
-  trace.order <- unlist(trace.order.list)
-  ordered.traces <- if(length(trace.order)){
-    trace.order.score <- seq_along(trace.order)
-    names(trace.order.score) <- trace.order
-    trace.name <- sapply(merged.traces, "[[", "name")
-    trace.score <- trace.order.score[trace.name]
-    merged.traces[order(trace.score)]
-  }else{
-    merged.traces
-  }
   
-  # Translate scale(labels) to trace name.
-  named.traces <- ordered.traces
-  for(trace.i in seq_along(named.traces)){
-    tr.name <- named.traces[[trace.i]][["name"]]
-    new.name <- trace.name.map[[tr.name]]
-    if(!is.null(new.name)){
-      named.traces[[trace.i]][["name"]] <- new.name
-    }
-  }
+  #trace.order <- unlist(merged.traces)
+  #ordered.traces <- if(length(trace.order)){
+  #  trace.order.score <- seq_along(trace.order)
+  #  names(trace.order.score) <- trace.order
+  #  trace.name <- sapply(merged.traces, "[[", "name")
+  #  trace.score <- trace.order.score[trace.name]
+  #  merged.traces[order(trace.score)]
+  #}else{
+  #  merged.traces
+  #}
   
   # If coord_flip is defined, then flip x/y in each trace, and in
   # each axis.
-  flipped.traces <- named.traces
+  flipped.traces <- merged.traces
   flipped.layout <- layout
   coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
-  if("flip" %in% coord_cl){
-    if(!inherits(p$facet, "null")){
-      stop("coord_flip + facet conversion not supported")
-    }
+  if ("flip" %in% coord_cl) {
+    if (has_facet()) warning("coord_flip + facet conversion not supported by plotly")
     for(trace.i in seq_along(flipped.traces)){
       tr <- flipped.traces[[trace.i]]
       x <- tr[["x"]]
@@ -843,14 +736,16 @@ gg2list <- function(p) {
     flipped.layout[["xaxis"]] <- y
     flipped.layout[["yaxis"]] <- x
   }
-  
   l <- list(data = flipped.traces, layout = flipped.layout)
-
+  # translate plot margin
+  pm <- unit2pixels(theme.pars$plot.margin)
+  title <- if (is.null(built$plot$labels$title)) 0 else unit2pixels(theme.pars$plot.title$size)
+  l <- add_margin(l, pm[[1]] + title, pm[[2]], pm[[3]], pm[[4]])
   structure(add_boxed(rm_asis(l)), class = "plotly")
 }
 
-
-
+#-----------------------------------------------------------------------------
+# ggplotly 'utility' functions
 make.label <- function(text, x, y, xanchor = "auto", yanchor = "auto", 
                        textangle = 0) {
   list(list(
@@ -879,4 +774,53 @@ strip_axis <- function(x, y = "title") {
   axes <- lapply(axes, function(x) { x[[y]] <- NULL; x })
   x[idx] <- axes
   x
+}
+
+#' Add plot margins
+#' 
+#' @param p a plotly (or ggplot2) object
+#' @param t the top margin
+#' @param r the right margin
+#' @param b the bottom margin
+#' @param l the left margin
+
+add_margin <- function(p, t = 0, r = 0, b = 0, l = 0) {
+  p <- plotly_build(p)
+  p$layout$margin$t <- p$layout$margin$t %||% 0 + t
+  p$layout$margin$r <- p$layout$margin$r %||% 0 + r
+  p$layout$margin$b <- p$layout$margin$b %||% 0 + b
+  p$layout$margin$l <- p$layout$margin$l %||% 0 + l
+  # TODO: expose this to users??
+  p
+}
+
+# wrap text in bold/italics according to the text "face"
+faced <- function(txt, face) {
+  x <- switch(face,
+              plain = txt,
+              bold = bold(txt),
+              italic = italic(txt),
+              bold.italic = bold(italic(txt))
+  )
+  # if, for some reason, a face we don't support is used, return the text
+  if (is.null(x)) txt else x
+}
+bold <- function(x) paste("<b>", x, "</b>")
+italic <- function(x) paste("<i>", x, "</i>")
+
+
+re_scale <- function(axisObj, discrete = TRUE) {
+  if (discrete) {
+    axisObj$type <- "category"
+    axisObj$range <- axisObj$ticktext
+    axisObj$autorange <- TRUE
+    axisObj$tickvals <- NULL
+  } else {
+    # these tick locations are always on a 0-1 scale, but we want them on the
+    # data scale
+    axisObj$tickvals <- scales::rescale(
+      axisObj$tickvals, to = axisObj$range, from = c(0, 1)
+    )
+  }
+  axisObj
 }
