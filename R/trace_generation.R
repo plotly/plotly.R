@@ -630,13 +630,7 @@ geom2trace <- list(
   },
   bar=function(data, params) {
     x <- if ("x.name" %in% names(data)) data$x.name else data$x
-    if (inherits(x, "POSIXt")) {
-      # Convert seconds into milliseconds
-      x <- as.numeric(x) * 1000
-    } else if (inherits(x, "Date")) {
-      # Convert days into milliseconds
-      x <- as.numeric(x) * 24 * 60 * 60 * 1000
-    }
+    x <- to_milliseconds(x)
     # if there is more than one y-value for a particular combination of
     # x, PANEL, and group; then take the _max_ y.
     data$x <- x

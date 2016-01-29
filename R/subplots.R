@@ -169,7 +169,7 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
 
 list2df <- function(x, nms) {
   stopifnot(length(unique(sapply(x, length))) == 1)
-  m <- Reduce(rbind, x)
+  m <- if (length(x) == 1) t(x[[1]]) else Reduce(rbind, x)
   row.names(m) <- NULL
   df <- data.frame(m)
   if (!missing(nms)) setNames(df, nms) else df
