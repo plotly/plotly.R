@@ -5,7 +5,7 @@
 \title{Create/Modify plotly graphs}
 \usage{
 plotly_POST(x, filename, fileopt = "new", sharing = c("public", "private",
-  "secret"))
+  "hidden"))
 }
 \arguments{
 \item{x}{either a ggplot object, a plotly object, or a list.}
@@ -27,7 +27,7 @@ Plotly feed, your profile, or search engines. You must be logged in to
 Plotly to view this graph. You can privately share this graph with other 
 Plotly users in your online Plotly account and they will need to be logged 
 in to view this plot.
-If 'secret', anyone with this secret link can view this chart. It will
+If 'hidden', anyone with this hidden link can view this chart. It will
 not appear in the Plotly feed, your profile, or search engines. 
 If it is embedded inside a webpage or an IPython notebook, anybody who is 
 viewing that page will be able to view the graph. 
