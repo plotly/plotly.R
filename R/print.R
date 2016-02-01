@@ -49,6 +49,7 @@ as.widget <- function(x, ...) {
       padding = 5, 
       browser.fill = TRUE
     ),
+    dependencies = plotly_dependencies(p),
     ...
   )
 }

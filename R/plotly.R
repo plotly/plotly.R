@@ -192,6 +192,12 @@ layout <- function(p = last_plot(), ...,
 #' @param displayModeBar display the modebar (T, F, or 'hover')
 #' @param displaylogo add the plotly logo on the end of the modebar
 #' @param plot3dPixelRatio increase the pixel ratio for 3D plot images
+#' @param mathjax If \code{FALSE}, don't attempt to include mathjax. 
+#' If \code{'cdn'}, mathjax will be loaded externally (meaning an internet
+#' connection is needed to view the graph). If \code{'local'}, a local copy
+#' of mathjax will be included. For this to work, you'll need a local copy of 
+#' plotly.js and set the environment variable plotly_jsdir to its location on
+#' your machine.
 #' @author Carson Sievert
 #' @export
 
@@ -201,7 +207,7 @@ config <- function(p = last_plot(), staticPlot = F, workspace = F, editable = F,
                    autosizable = F, fillFrame = F, scrollZoom = F,
                    doubleClick = 'reset+autosize', showTips = F, showLink = T, 
                    sendData = T, linkText = 'Edit chart', displayModeBar = 'hover',
-                   displaylogo = T, plot3dPixelRatio = 2) {
+                   displaylogo = T, plot3dPixelRatio = 2, mathjax = FALSE) {
   conf <- list(
     staticPlot = staticPlot,
     workspace = workspace,
@@ -216,7 +222,8 @@ config <- function(p = last_plot(), staticPlot = F, workspace = F, editable = F,
     linkText = linkText,
     displayModeBar = displayModeBar,
     displaylogo = displaylogo,
-    plot3dPixelRatio = plot3dPixelRatio
+    plot3dPixelRatio = plot3dPixelRatio,
+    mathjax = mathjax
   )
   p <- last_plot(p)
   p$config <- c(p$config, conf)

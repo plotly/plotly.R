@@ -8,7 +8,7 @@ config(p = last_plot(), staticPlot = F, workspace = F, editable = F,
   autosizable = F, fillFrame = F, scrollZoom = F,
   doubleClick = "reset+autosize", showTips = F, showLink = T,
   sendData = T, linkText = "Edit chart", displayModeBar = "hover",
-  displaylogo = T, plot3dPixelRatio = 2)
+  displaylogo = T, plot3dPixelRatio = 2, mathjax = FALSE)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -40,6 +40,13 @@ config(p = last_plot(), staticPlot = F, workspace = F, editable = F,
 \item{displaylogo}{add the plotly logo on the end of the modebar}
 
 \item{plot3dPixelRatio}{increase the pixel ratio for 3D plot images}
+
+\item{mathjax}{If \code{FALSE}, don't attempt to include mathjax. 
+If \code{'cdn'}, mathjax will be loaded externally (meaning an internet
+connection is needed to view the graph). If \code{'local'}, a local copy
+of mathjax will be included. For this to work, you'll need a local copy of 
+plotly.js and set the environment variable plotly_jsdir to its location on
+your machine.}
 }
 \description{
 Set the default configuration for plotly

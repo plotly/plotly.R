@@ -260,3 +260,92 @@ cat_profile <- function(key, value, path = "~") {
   message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
 }
+
+
+# Needed since we can't control the order of conditional dependencies
+plotly_dependencies <- function(p) {
+  deps <- list(
+    html_dependency_mathjax(p),
+    html_dependency_geo(p),
+    # TODO: build plotlyjs without d3/topojson and include separately?
+    html_dependency_plotly()
+  )
+  # mathjax/geo dependencies may return NULL which can cause problems
+  Filter(Negate(is.null), deps)
+}
+
+html_dependency_mathjax <- function(p) {
+  if (isTRUE(p$config$mathjax == "local")) {
+    path <- Sys.getenv("plotly_jsdir", unset = NA)
+    if (is.na(path)) {
+      stop("Local mathjax requires a local clone of the plotly.js repo \n",
+           "https://github.com/plotly/plotly.js \n",
+           "Once you have plotly.js locally, set the plotly_jsdir \n",
+           "environment variable with the path to plotly.js")
+    } else {
+      mj <- file.path(path, "dist", "extras", "mathjax", "MathJax.js")
+      if (!file.exists(mj)) stop("Couldn't locate MathJax.js")
+      # parse the version
+      mathjax <- readLines(mj)
+      pat <- 'MathJax.fileversion="[0-9]+.[0-9]+.[0-9]+'
+      ver <- regmatches(mathjax, regexpr(pat, mathjax))
+      ver <- sub('"', '', strsplit(ver, "=")[[1]][2])
+      dep <- htmltools::htmlDependency(
+        name = "mathjax", 
+        version = ver, 
+        src = dirname(mj),
+        script = c(basename(mj), "config/TeX-AMS-MML_SVG.js")
+      )
+      return(dep)
+    }
+  }
+  if (isTRUE(p$config$mathjax == "cdn")) {
+    dep <- htmltools::htmlDependency(
+      name = "mathjax-cdn", 
+      version = "1.0",
+      src = system.file("htmlwidgets", "lib", "mathjax", package = "plotly"),
+      script = "mathjax-cdn.js"
+    )
+    return(dep)
+  }
+  return(NULL)
+}
+
+html_dependency_geo <- function(p) {
+  types <- unlist(lapply(p$data, "[[", "type"))
+  # if there are any geo trace(s), add the geo assets dependency
+  if (any(grepl("geo|choropleth", types))) {
+    path <- Sys.getenv("plotly_jsdir", unset = NA)
+    if (is.na(path)) {
+      warning("Rendering 'geo' traces without an internet connection \n",
+              "requires a local clone of the plotly.js repo \n",
+              "https://github.com/plotly/plotly.js \n",
+              "Once you have plotly.js locally, set the plotly_jsdir \n",
+              "environment variable with the path to plotly.js")
+      return(NULL)
+    } else {
+      geo <- file.path(path, "dist", "plotly-geo-assets.js")
+      if (!file.exists(geo)) stop("Couldn't locate plotly-geo-assets.js")
+      dep <- htmltools::htmlDependency(
+        name = "plotly-geo-assets",
+        src = dirname(geo),
+        version = plotly_version(),
+        script = basename(geo)
+      )
+    }
+  }
+}
+
+html_dependency_plotly <- function() {
+  htmltools::htmlDependency(
+    name = "plotly.js",
+    src = system.file("htmlwidgets", "lib", "plotlyjs", package = "plotly"),
+    version = plotly_version(),
+    script = "plotly-latest.min.js"
+  )
+}
+
+plotly_version <- function() {
+  pkg <- system.file("htmlwidgets", "lib", "plotlyjs", "package.json", package = "plotly")
+  jsonlite::fromJSON(pkg)$version
+}
