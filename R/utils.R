@@ -183,11 +183,9 @@ struct <- function(x, y, ...) {
 } 
 
 # TODO: what are some other common configuration options we want to support??
-get_domain <- function(type = "main") {
-  if (type == "stream") {
-    Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
-  } else if (type == "v2") {
-    Sys.getenv("plotly_domain", "https://api.plot.ly/v2/")
+get_domain <- function(type = "") {
+  if (type == "api") {
+    Sys.getenv("plotly_api_domain", "https://api.plot.ly")
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }

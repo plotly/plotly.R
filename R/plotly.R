@@ -178,46 +178,16 @@ layout <- function(p = last_plot(), ...,
 #' Set the default configuration for plotly
 #' 
 #' @param p a plotly object
-#' @param staticPlot for export or image generation
-#' @param workspace we're in the workspace, so need toolbar etc (TODO describe functionality instead)?
-#' @param editable edit titles, move annotations, etc
-#' @param autosizable respect layout.autosize=true and infer its container size?
-#' @param fillFrame if we DO autosize, do we fill the container or the screen?
-#' @param scrollZoom mousewheel or two-finger scroll zooms the plot
-#' @param doubleClick double click interaction (false, 'reset', 'autosize' or 'reset+autosize')
-#' @param showTips see some hints about interactivity
-#' @param showLink link to open this plot in plotly
-#' @param sendData if we show a link, does it contain data or just link to a plotly file?
-#' @param linkText text appearing in the sendData link
-#' @param displayModeBar display the modebar (T, F, or 'hover')
-#' @param displaylogo add the plotly logo on the end of the modebar
-#' @param plot3dPixelRatio increase the pixel ratio for 3D plot images
+#' @param ... these arguments are documented at 
+#' \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}
 #' @author Carson Sievert
 #' @export
+#' @examples \dontrun{
+#' config(plot_ly(), displaylogo = FALSE, modeBarButtonsToRemove = list('sendDataToCloud'))
+#' }
 
-# TODO: use htmlwidgets::JS() to specify setBackground function?
-# https://github.com/ropensci/plotly/issues/284#issue-108153160
-config <- function(p = last_plot(), staticPlot = F, workspace = F, editable = F,
-                   autosizable = F, fillFrame = F, scrollZoom = F,
-                   doubleClick = 'reset+autosize', showTips = F, showLink = T, 
-                   sendData = T, linkText = 'Edit chart', displayModeBar = 'hover',
-                   displaylogo = T, plot3dPixelRatio = 2) {
-  conf <- list(
-    staticPlot = staticPlot,
-    workspace = workspace,
-    editable = editable,
-    autosizable = autosizable,
-    fillFrame = fillFrame,
-    scrollZoom = scrollZoom,
-    doubleClick = doubleClick,
-    showTips = showTips,
-    showLink = showLink,
-    sendData = sendData,
-    linkText = linkText,
-    displayModeBar = displayModeBar,
-    displaylogo = displaylogo,
-    plot3dPixelRatio = plot3dPixelRatio
-  )
+config <- function(p = last_plot(), ...) {
+  conf <- list(...)
   p <- last_plot(p)
   p$config <- c(p$config, conf)
   hash_plot(if (is.data.frame(p)) p else list(), p)

@@ -4,45 +4,21 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p = last_plot(), staticPlot = F, workspace = F, editable = F,
-  autosizable = F, fillFrame = F, scrollZoom = F,
-  doubleClick = "reset+autosize", showTips = F, showLink = T,
-  sendData = T, linkText = "Edit chart", displayModeBar = "hover",
-  displaylogo = T, plot3dPixelRatio = 2)
+config(p = last_plot(), ...)
 }
 \arguments{
 \item{p}{a plotly object}
 
-\item{staticPlot}{for export or image generation}
-
-\item{workspace}{we're in the workspace, so need toolbar etc (TODO describe functionality instead)?}
-
-\item{editable}{edit titles, move annotations, etc}
-
-\item{autosizable}{respect layout.autosize=true and infer its container size?}
-
-\item{fillFrame}{if we DO autosize, do we fill the container or the screen?}
-
-\item{scrollZoom}{mousewheel or two-finger scroll zooms the plot}
-
-\item{doubleClick}{double click interaction (false, 'reset', 'autosize' or 'reset+autosize')}
-
-\item{showTips}{see some hints about interactivity}
-
-\item{showLink}{link to open this plot in plotly}
-
-\item{sendData}{if we show a link, does it contain data or just link to a plotly file?}
-
-\item{linkText}{text appearing in the sendData link}
-
-\item{displayModeBar}{display the modebar (T, F, or 'hover')}
-
-\item{displaylogo}{add the plotly logo on the end of the modebar}
-
-\item{plot3dPixelRatio}{increase the pixel ratio for 3D plot images}
+\item{...}{these arguments are documented at 
+\url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}}
 }
 \description{
 Set the default configuration for plotly
+}
+\examples{
+\dontrun{
+config(plot_ly(), displaylogo = FALSE, modeBarButtonsToRemove = list('sendDataToCloud'))
+}
 }
 \author{
 Carson Sievert
