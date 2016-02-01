@@ -4,17 +4,11 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
-#' @param filename character string describing the name of the plot in your plotly account. 
-#' Use / to specify directories. If a directory path does not exist it will be created.
-#' If this argument is not specified and the title of the plot exists,
-#' that will be used for the filename.
-#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-#' "append" data to existing plotly, or "extend" it.
-#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
-#' by anyone who has the link and in the owner's plotly account.
-#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
+#' @param width	Width in pixels (optional, defaults to automatic sizing).
+#' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
+#' @return a plotly object
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
@@ -32,22 +26,19 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt, 
-                     world_readable = TRUE) {
-  l <- gg2list(p)
-  # tack on special keyword arguments
-  if (!missing(filename)) l$filename <- filename
-  if (!missing(fileopt)) l$fileopt <- fileopt
-  l$world_readable <- world_readable
+ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL) {
+  l <- gg2list(p, width = width, height = height)
   hash_plot(p$data, l)
 }
 
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
-#' @return figure object (list with names "data" and "layout").
+#' @param width	Width in pixels (optional, defaults to automatic sizing).
+#' @param height Height in pixels (optional, defaults to automatic sizing).
+#' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p) {
+gg2list <- function(p, width = NULL, height = NULL) {
   # ggplot now applies geom_blank() (instead of erroring) when no layers exist
   if (length(p$layers) == 0) p <- p + geom_blank()
   layout <- list()
@@ -284,48 +275,64 @@ gg2list <- function(p) {
   if (!is.null(layout[["title"]])) {
     layout$margin$t <- layout$margin$t + layout$titlefont$size
   }
-  
-  # find axis specific theme elements that inherit from their parent
-  theme_el <- function(el) {
-    theme.pars[[paste0(el, ".", xy)]] %||% theme.pars[[el]]
+  # before computing panel domains, figure out the margins _between_
+  # panels (only relevant for free x/y scales and interior column strips)
+  yAxisText <- theme.pars[["axis.text.y"]] %||% theme.pars[["axis.text"]]
+  xAxisText <- theme.pars[["axis.text.x"]] %||% theme.pars[["axis.text"]]
+  pts2npc <- function(x) {
+    as.numeric(grid::convertUnit(grid::unit(x, "points"), "npc"))
   }
-  axisTicks <- theme_el("axis.ticks")
-  axisText <- theme_el("axis.text")
-  axisTitle <- theme_el("axis.title")
-  axisLine <- theme_el("axis.line")
-  panelGrid <- theme_el("panel.grid.major")
-  stripText <- theme_el("strip.text")
-  
+  yAxisSize <- pts2npc(yAxisText$size)
+  xAxisSize <- pts2npc(xAxisText$size)
+  stripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
+  stripSize <- pts2npc(stripText$size)
+  # assume no margin between panels, and add margins, if appropriate
+  margins <- rep(0, 4)
   gglayout <- built$panel$layout
-  npanels <- nrow(gglayout)
-  # TODO: 
-  # (1) hMargin should respect theme(axis.text.y)
-  # (2) vMargin should respect theme(axis.text.x) + theme(strip.text) 
-  hMargin <- if (isTRUE(p$facet$free$y) && max(gglayout$COL) > 1) {
-    rep(unit2pixels(axisText$size), 2)
-  } else {
-    c(0, 0)
+  # space for interior yaxes
+  if (isTRUE(p$facet$free$y) && max(gglayout$COL) > 1) {
+    margins[1:2] <- yAxisSize
   }
-  vMargin <- if (isTRUE(p$facet$free$x) && max(gglayout$ROW) > 1) {
-    rep(unit2pixels(stripText$size), 2)
-  } else {
-    c(0, 0)
+  # space for interior column strips
+  if (isTRUE(p$facet$free$y) && max(gglayout$COL) > 1) {
+    margins[3:4] <- stripSize
   }
+  # space for interior xaxes
+  if (isTRUE(p$facet$free$x) && max(gglayout$ROW) > 1) {
+    margins[3:4] <- margins[3:4] + xAxisSize
+  }
+  
   # determine the appropriate domains/anchor for each panel
-  doms <- get_domains(npanels, max(gglayout$ROW), c(hMargin, vMargin))
+  npanels <- nrow(gglayout)
+  doms <- get_domains(npanels, max(gglayout$ROW), margins)
   gglayout$xaxis <- with(gglayout, ifelse(AXIS_X, PANEL, COL))
+  gglayout$xaxis <- paste0("xaxis", sub("1", "", gglayout$xaxis))
   gglayout$yaxis <- with(gglayout, ifelse(AXIS_Y, PANEL, ROW))
+  gglayout$yaxis <- paste0("yaxis", sub("1", "", gglayout$yaxis))
   
   for (i in seq_len(npanels)) {
+    lay <- gglayout[i, ]
     for (xy in c("x", "y")) {
-      axisPrefix <- paste0(xy, "axis")
-      axisSuffix <- sub("1", "", gglayout[i, axisPrefix])
-      axisName <- paste0(axisPrefix, axisSuffix)
+      # find axis specific theme elements that inherit from their parent
+      theme_el <- function(el) {
+        theme.pars[[paste0(el, ".", xy)]] %||% theme.pars[[el]]
+      }
+      axisTicks <- theme_el("axis.ticks")
+      axisText <- theme_el("axis.text")
+      axisTitle <- theme_el("axis.title")
+      axisLine <- theme_el("axis.line")
+      panelGrid <- theme_el("panel.grid.major")
+      stripText <- theme_el("strip.text")
       # TODO: 
       # (1) We currently ignore minor grid lines. Would it makes sense to 
       # create another axis object just for the minor grid?
       # (2) translate panel.border to a rect shape
       # (3) Does it make sense to translate other theme elements?
+      
+      axisName <- lay[, paste0(xy, "axis")]
+      anchor <- sub("axis", "", lay[, paste0(setdiff(c("x", "y"), xy), "axis")])
+      rng <- built$panel$ranges[[i]]
+      
       sc <- p$scales$get_scales(xy)
       # set some axis defaults (and override some of them later)
       # https://plot.ly/r/reference/#layout-xaxis
@@ -335,9 +342,9 @@ gg2list <- function(p) {
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
-        range = built$panel$ranges[[i]][[paste0(xy, ".range")]],
-        ticktext = built$panel$ranges[[i]][[paste0(xy, ".labels")]],
-        tickvals = built$panel$ranges[[i]][[paste0(xy, ".major")]],
+        range = rng[[paste0(xy, ".range")]],
+        ticktext = rng[[paste0(xy, ".labels")]],
+        tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unit2pixels(theme.pars$axis.ticks.length),
@@ -356,7 +363,7 @@ gg2list <- function(p) {
         # TODO: convert this size? Is this in points?
         gridwidth = panelGrid$size,
         zeroline = FALSE,  # ggplot2 never shows zero lines
-        anchor = paste0(setdiff(c("x", "y"), xy), axisSuffix)
+        anchor = anchor
       )
       # bold/italic axis title
       axisObj$title <- faced(axisObj$title, theme.pars$axis.text$face)
@@ -377,66 +384,66 @@ gg2list <- function(p) {
       layout$margin[[side]] <- layout$margin[[side]] + 
         unit2pixels(axisTitle$margin[idx]) + 
         unit2pixels(axisText$margin[idx]) + 
-        with(axisObject, bbox(ticktext, tickangle, tickfont$size))[[way]] +
+        with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
         axisObj$titlefont$size
-      
-     # # facet strips -> plotly annotations
-     # draw_x <- inherits(p$facet, "wrap") || 
-     #   (inherits(p$facet, "grid") && gglayout[i, "ROW"] == 1)
-     # draw_y <- inherits(p$facet, "grid") && gglayout[i, "COL"] == max(gglayout$COL)
-     # if (draw_x) {
-     #   with(build$plot$facet, facets)
-     # }
-     # 
-     # lay <- gglayout[i, ]
-     # xdom <- layout[[paste0("xaxis", sub("1", "", lay$xaxis))]]$domain
-     # ydom <- layout[[paste0("yaxis", sub("1", "", lay$yaxis))]]$domain
-     # # TODO: 
-     # # (1) add space for top strip text to margin
-     # # (2) use a rect shape for the strip background!
-     # # (3) use built$plot$facet$labeller for the actual strip text!
-     # 
-     # vars <- ifelse(inherits(p$facet, "wrap"), "facets", ifelse(xy == "x", "cols", "rows"))
-     # txt <- paste(gglayout[i, as.character(built$plot$facet[[vars]])], collapse = ", ")
-     # layout$annotations <- c(
-     #   layout$annotations,
-     #   make_label(txt, mean(xdom), max(ydom), 
-     #              xanchor = "center", yanchor = "bottom")
-     # )
-     # 
-     # if (inherits(p$facet, "grid")) {
-     #   col_txt <- paste(gglayout[i, as.character(built$plot$facet$cols)], collapse = ", ")
-     #   row_txt <- paste(gglayout[i, as.character(built$plot$facet$rows)], collapse = ", ")
-     #   layout$annotations <- c(
-     #     layout$annotations,
-     #     make_label(col_txt, mean(xdom), max(ydom), 
-     #                xanchor = "center", yanchor = "bottom"),
-     #     make_label(row_txt, max(xdom), mean(ydom), 
-     #                xanchor = "bottom", yanchor = "center")
-     #   )
-     # } else {
-     #   txt <- paste(gglayout[i, as.character(built$plot$facet$facets)], collapse = ", ")
-     #   layout$annotations <- c(
-     #     layout$annotations,
-     #     make.label(txt, mean(xdom), max(ydom), 
-     #                xanchor = "center", yanchor = "bottom")
-     #   )
-     # }
-     # 
     } # axis loop
     
+    xdom <- layout[[lay[, "xaxis"]]]$domain
+    ydom <- layout[[lay[, "yaxis"]]]$domain
+    
+    # facet strips -> plotly annotations
+    # TODO: 
+    # (1) use a rect shape for the strip background!
+    # (2) use built$plot$facet$labeller for the actual strip text!
+    if (inherits(p$facet, "grid") && lay$COL == max(gglayout$COL)) {
+      txt <- paste(
+        lay[, as.character(built$plot$facet$rows)], 
+        collapse = ", "
+      )
+      lab <- make_label(txt, mean(xdom), mean(ydom), 
+                        xanchor = "center", yanchor = "bottom")
+      layout$annotations <- c(layout$annotations, lab)
+    }
+    
+    if (inherits(p$facet, "wrap") || 
+        inherits(p$facet, "grid") && lay$ROW == 1) {
+      vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
+      txt <- paste(
+        lay[, as.character(built$plot$facet[[vars]])], 
+        collapse = ", "
+      )
+      lab <- make_label(txt, mean(xdom), max(ydom), 
+                        xanchor = "center", yanchor = "bottom")
+      layout$annotations <- c(layout$annotations, lab)
+    }
   }   # panel loop
 
   if (has_facet(p)) {
+    # space for the first row of strip text goes in plot margin 
+    # (other rows are accounted for in the axes domains)
+    xStripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
+    yStripText <- theme.pars[["strip.text.y"]] %||% theme.pars[["strip.text"]]
+    layout$margin$t <- layout$margin$t + pts2npc(xStripText$size)
+    layout$margin$r <- layout$margin$r + pts2npc(yStripText$size)
+    
     # each axis should _not_ have it's own title!
-    axisTitle <- theme_el("axis.title")
+    yAxes <- layout[grepl("^yaxis", names(layout))]
+    xAxes <- layout[grepl("^xaxis", names(layout))]
+    yTickText <- lapply(yAxes, "[[", "ticktext")
+    xTickText <- lapply(xAxes, "[[", "ticktext")
+    yTickTextMax <- yTickText[max(nchar(yTickText))]
+    xTickTextMax <- xTickText[max(nchar(xTickText))]
+    yPad <- with(layout$yaxis, bbox(yTickTextMax, tickangle, pts2npc(tickfont$size))$h)
+    xPad <- with(layout$xaxis, bbox(xTickTextMax, tickangle, pts2npc(tickfont$size))$v)
+    xAxisTitle <- theme.pars[["axis.title.x"]] %||% theme.pars[["axis.title"]]
+    yAxisTitle <- theme.pars[["axis.title.y"]] %||% theme.pars[["axis.title"]]
     layout$annotations <- c(
       layout$annotations, 
-      # TODO: spacing should respect theme(axis.text)
-      make_label(layout$xaxis$title, 0.5, -0.05, axisTitle, yanchor = "top"),
-      make_label(layout$yaxis$title, -0.05, 0.5, axisTitle, xanchor = "bottom")
+      # TODO: what are the appropriate x/yanchors
+      make_label(layout$xaxis$title, 0.5, -yPad, xAxisTitle, yanchor = "top"),
+      make_label(layout$yaxis$title, -xPad, 0.5, yAxisTitle, xanchor = "top")
     )
-    layout <- strip_axis(layout)
+    layout <- strip_axis(layout, "title")
   }
 
   ### TODO: trace ordering
@@ -448,11 +455,6 @@ gg2list <- function(p) {
   ## remove traces that are outside the range of (discrete) scales
   #if (!is.null(sc$limits)) {
   #  trace.list <- trace.list[nms %in% sc$limits]
-  #}
-  
-  # TODO: I don't think we need to worry about transformations?
-  #if (identical(sc$trans$name, "reverse")) {
-  #  axisObj$range <- sort(-axisObj$range, decreasing = TRUE)
   #}
   
   layout$legend <- list(
@@ -514,8 +516,6 @@ gg2list <- function(p) {
   }
   
   layout$legend$font <- text2font(theme.pars$legend.text)
-  # avoid sending redundant info
-  if (identical(layout$font, layout$legend$font)) layout$legend$font <- NULL
   
   mode.mat <- matrix(NA, 3, 3)
   rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
@@ -685,41 +685,42 @@ unit2pixels <- function(u) {
 # of things that need resizing 
 
 aesConverters <- list(
-  linetype=function(lty) {
+  linetype = function(lty) {
     lty2dash[as.character(lty)]
   },
-  colour=function(col) {
+  colour = function(col) {
     toRGB(col)
   },
-  size=mm2pixels,
-  sizeref=identity,
-  sizemode=identity,
-  alpha=identity,
-  shape=function(pch) {
+  size = mm2pixels,
+  sizeref = identity,
+  sizemode = identity,
+  alpha = identity,
+  shape = function(pch) {
     pch2symbol[as.character(pch)]
   },
-  direction=identity
+  direction = identity
 )
 
-markLegends <-
-  # NOTE: Do we also want to split on size?
-  # Legends based on sizes not implemented yet in Plotly
-  #  list(point=c("colour", "fill", "shape", "size"),
-  list(point=c("colour", "fill", "shape"),
-       path=c("linetype", "size", "colour", "shape"),
-       ## NOTE: typically "group" should not be present here, since
-       ## that would mean creating a separate plotly legend for each
-       ## group, even when they have the exact same visual
-       ## characteristics and could be drawn using just 1 trace!
-       polygon=c("colour", "fill", "linetype", "size"),
-       bar=c("colour", "fill"),
-       density=c("colour", "fill", "linetype"),
-       boxplot=c("colour", "fill", "size"),
-       errorbar=c("colour", "linetype"),
-       errorbarh=c("colour", "linetype"),
-       area=c("colour", "fill"),
-       step=c("linetype", "size", "colour"),
-       text=c("colour"))
+# NOTE: Do we also want to split on size?
+# Legends based on sizes not implemented yet in Plotly
+#  list(point=c("colour", "fill", "shape", "size"),
+markLegends <- list(
+  point = c("colour", "fill", "shape"),
+  path = c("linetype", "size", "colour", "shape"),
+  ## NOTE: typically "group" should not be present here, since
+  ## that would mean creating a separate plotly legend for each
+  ## group, even when they have the exact same visual
+  ## characteristics and could be drawn using just 1 trace!
+  polygon = c("colour", "fill", "linetype", "size"),
+  bar = c("colour", "fill"),
+  density = c("colour", "fill", "linetype"),
+  boxplot = c("colour", "fill", "size"),
+  errorbar = c("colour", "linetype"),
+  errorbarh = c("colour", "linetype"),
+  area = c("colour", "fill"),
+  step = c("linetype", "size", "colour"),
+  text = c("colour")
+)
 
 markUnique <- as.character(unique(unlist(markLegends)))
 
@@ -744,10 +745,13 @@ guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
 
 # given text, and x/y coordinates on 0-1 scale, 
 # convert ggplot2::element_text() to plotly annotation
-make_label <- function(txt, x, y, el = ggplot2::element_text(), ...) {
-  if (is_blank(x)) return(NULL)
+make_label <- function(txt = "", x, y, el = ggplot2::element_text(), ...) {
+  if (is_blank(el) || is.null(txt) || nchar(txt) == 0 || length(txt) == 0) {
+    return(NULL)
+  }
+  angle <- el$angle %||% 0
   list(list(
-    text = text, 
+    text = txt, 
     x = x, 
     y = y,
     showarrow = FALSE, 
@@ -757,7 +761,7 @@ make_label <- function(txt, x, y, el = ggplot2::element_text(), ...) {
     font = text2font(el),
     xref = "paper",
     yref = "paper", 
-    textangle = -el$angle,
+    textangle = -angle,
     ...
   ))
 }
