@@ -1,3 +1,8 @@
+2.4.0 -- 1 Feb 2015
+
+* Pass plot configuration using ... to avoid conflicts in defaults/documentation
+* Upgrade to plotly.js 1.5.1
+
 2.3.4 -- 1 Feb 2015
 
 Added a plotly_api_domain environment variable for configuring the API domain. Fixes #441
