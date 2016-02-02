@@ -257,13 +257,15 @@ gg2list <- function(p, width = NULL, height = NULL) {
   
   # obtain _calculated_ theme elements
   theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
-  for (i in names(theme.pars)) {
+  elements <- names(which(sapply(theme.pars, inherits, "element")))
+  for (i in elements) {
     theme.pars[[i]] <- ggplot2::calc_element(i, theme.pars)
   }
   # Translate plot wide theme elements
   layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
   layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
   # Initiate the plot margin
+  
   pm <- unit2pixels(theme.pars$plot.margin)
   layout$margin <- list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]])
   
@@ -376,16 +378,18 @@ gg2list <- function(p, width = NULL, height = NULL) {
       layout[[axisName]] <- axisObj
       
       # account for axis title/text in plot margins
-      side <- if (xy == "x") "b" else "l"
-      way <- if (xy == "x") "v" else "h"
-      # just support _bottom_ x-axis text & _left_ y-axis margins
-      # (plotly.js has no sense of padding between ticks and ticktext)
-      idx <- if (xy == "x") 3 else 4
-      layout$margin[[side]] <- layout$margin[[side]] + 
-        unit2pixels(axisTitle$margin[idx]) + 
-        unit2pixels(axisText$margin[idx]) + 
-        with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
-        axisObj$titlefont$size
+      if (i == 1) {
+        side <- if (xy == "x") "b" else "l"
+        way <- if (xy == "x") "v" else "h"
+        # just support _bottom_ x-axis text & _left_ y-axis margins
+        # (plotly.js has no sense of padding between ticks and ticktext)
+        idx <- if (xy == "x") 3 else 4
+        layout$margin[[side]] <- layout$margin[[side]] + 
+          unit2pixels(axisTitle$margin[idx]) + 
+          unit2pixels(axisText$margin[idx]) + 
+          with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
+          axisObj$titlefont$size
+      }
     } # axis loop
     
     xdom <- layout[[lay[, "xaxis"]]]$domain
@@ -418,6 +422,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
     }
   }   # panel loop
 
+  
   if (has_facet(p)) {
     # space for the first row of strip text goes in plot margin 
     # (other rows are accounted for in the axes domains)
@@ -441,10 +446,11 @@ gg2list <- function(p, width = NULL, height = NULL) {
       layout$annotations, 
       # TODO: what are the appropriate x/yanchors
       make_label(layout$xaxis$title, 0.5, -yPad, xAxisTitle, yanchor = "top"),
-      make_label(layout$yaxis$title, -xPad, 0.5, yAxisTitle, xanchor = "top")
+      make_label(layout$yaxis$title, -xPad, 0.5, yAxisTitle, xanchor = "bottom")
     )
     layout <- strip_axis(layout, "title")
   }
+  
 
   ### TODO: trace ordering
   ## order traces according to the order of the scale
@@ -648,8 +654,13 @@ gg2list <- function(p, width = NULL, height = NULL) {
     flipped.layout[["xaxis"]] <- y
     flipped.layout[["yaxis"]] <- x
   }
-  l <- list(data = flipped.traces, layout = flipped.layout)
-  structure(add_boxed(rm_asis(l)), class = "plotly")
+  # TODO: what to send in gglayout?
+  l <- list(data = flipped.traces, layout = flipped.layout, gglayout = list("hey there!"))
+  # ensure properties are boxed correctly
+  l <- add_boxed(rm_asis(l))
+  l$width <- width
+  l$height <- height
+  structure(l, class = "plotly")
 }
 
 
@@ -661,28 +672,17 @@ gg2list <- function(p, width = NULL, height = NULL) {
 now <- Sys.time()
 the.epoch <- now - as.numeric(now)
 
-# detect a blank theme element
-is_blank <- function(x) {
-  inherits(x, "element_blank") && inherits(x, "element")
-}
-
 # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
 # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(mm) { 
   (mm * 96) / 25.4 
 }
-# convert an aribitrary grid unit to pixels
-unit2pixels <- function(u) {
-  if (!length(u)) return(0)
-  # most ggplot2 sizes seem to use points
-  if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
-  mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
-}
+
 # TODO: the correct way to convert sizes would be to send 'npc' (0, 1)
 # units to the browser & use HTMLwidget's resize method to scale everything
-# to the display. Only problem is that this would require extensive knowledge
-# of things that need resizing 
+# to the display. This would work fine locally, but wouldn't work when 
+# posting figures to the server.
 
 aesConverters <- list(
   linetype = function(lty) {
@@ -726,6 +726,20 @@ markUnique <- as.character(unique(unlist(markLegends)))
 
 markSplit <- markLegends
 markSplit$boxplot <- "x"
+
+
+# convert an aribitrary grid unit to pixels
+unit2pixels <- function(u) {
+  if (!length(u)) return(0)
+  # most ggplot2 sizes seem to use points
+  if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
+  mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
+}
+
+# detect a blank theme element
+is_blank <- function(x) {
+  inherits(x, "element_blank") && inherits(x, "element")
+}
 
 # obtain the "type" of geom/position/etc.
 type <- function(x, y) {

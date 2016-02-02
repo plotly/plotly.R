@@ -1,6 +1,12 @@
 2.5.0
 
+FEATURES:
+
+* The following theme elements are now supported
+
 CHANGES:
+
+* Instead of (trying to) translate both major and minor grid lines, we now just translate major grid lines. This generally produces a result closer to the actual ggplot2 result since ggplot2 doesn't draw ticks on minor grid lines.
 
 * Added width/height and deprecated figure creation arguments in ggplotly() (these should be specified in plotly_POST()).
 
