@@ -1,3 +1,7 @@
+2.4.1 -- 2 Feb 2015
+
+Attach base_url in as.widget() so it works in multiple contexts
+
 2.4.0 -- 1 Feb 2015
 
 * Pass plot configuration using ... to avoid conflicts in defaults/documentation
