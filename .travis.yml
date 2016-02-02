@@ -8,11 +8,10 @@ addons:
     packages:
       - r-base-dev
       - r-recommended
-      - qpdf
 
 env:
   global:
-    - R_LIBS_USER=~/R/library NOT_CRAN=true
+    - R_LIBS_USER=~/R/library NOT_CRAN=true R_PKG="$(basename $TRAVIS_REPO_SLUG)"
     # plotly_api_key (for posting to plot.ly)
     - secure: "jlIAFoBGaDWUQDh6oGNb2BgU31/80iioM4y4xwx35yWkGKkNIID1eMEuiIn+/ipLvOVHkPTDS6DYnOtD8EIBpROgAKHFY33gM1h7P6NRxVszzC6WLP2ASnq95DWq36DAC2Oevy05V7nwSRFilPwSt6JLppYUInG+WdaZ+QOSRi4="
     # GITHUB_PAT (for pushing to plotly-test-table)
@@ -24,19 +23,23 @@ cache:
 
 before_script:
   - mkdir -p "$R_LIBS_USER"
+  - git config --global user.email "cpsievert1@gmail.com"
+  - git config --global user.name "cpsievert"
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
-  - Rscript -e 'library(devtools);update_packages("devtools", repos = "http://cran.rstudio.com")'
-  - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
+  - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
+  - R CMD INSTALL ${R_PKG}_*.tar.gz
 
 script:
   # run R CMD check on the non-pull request build
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then Rscript -e 'devtools::check()'; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then R CMD check ${R_PKG}_*.tar.gz --no-manual; fi"
   # we do some fancy stuff on the pull request build that confuses R CMD check
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'devtools::install(); source(\"tests/testthat.R\", chdir = T)'; fi"
+  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"plotly/tests/testthat.R\", chdir = T)'; fi"
 
 after_success:
-  - cd ../plotly-test-table
+  - cd plotly-test-table
   - Rscript ../plotly/inst/build-push-comment.R

@@ -217,10 +217,10 @@ layer2traces <- function(l, d, misc) {
         tr$name <- as.character(name.list[[1]])
     }
     dpd <- data.params$data
-    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0)
-    {
+    if ("PANEL" %in% names(dpd) && nrow(dpd) > 0) {
       tr$xaxis <- paste0("x", dpd[1, "COL"])
       tr$yaxis <- paste0("y", dpd[1, "plotly.row"])
+      tr$PANEL <- dpd[1, "PANEL"]
     }
     
     if (is.null(tr$name) || tr$name %in% names.in.legend)
@@ -565,7 +565,7 @@ geom2trace <- list(
     # when converting ggplot2 size to plotly size, we assume size is an _area_,
     # but "size" for lines really means linewidth, so size is a _length_ in this case
     # (see aesConverters$size)
-    params$size <- sqrt(params$size)
+    params$size <- ifelse(params$size < 1, params$size ^ 2, sqrt(params$size))
     list(x=data$x,
          y=data$y,
          name=params$name,

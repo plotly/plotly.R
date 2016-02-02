@@ -112,21 +112,54 @@ from_JSON <- function(x, ...) {
   jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
-# plotlyjs properties that must _always_ be an array (even if length 1)
-get_boxed <- function() {
-  c("x", "y", "lat", "lon", "text")
-}
-
 add_boxed <- function(x) {
   for (i in seq_along(x$data)) {
     # some object keys require an array, even if length one
     # one way to ensure atomic vectors of length 1 are not automatically unboxed,
     # by to_JSON(), is to attach a class of AsIs (via I())
     d <- x$data[[i]]
-    idx <- names(d) %in% get_boxed() & sapply(d, length) == 1
+    idx <- names(d) %in% get_boxed(d$type %||% "scatter") & sapply(d, length) == 1
     if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
+    # (safely) mark individual nested properties
+    x$data[[i]]$error_x$array <- i(d$error_x$array)
+    x$data[[i]]$error_y$array <- i(d$error_y$array)
+    x$data[[i]]$error_x$arrayminus <- i(d$error_x$arrayminus)
+    x$data[[i]]$error_y$arrayminus <- i(d$error_y$arrayminus)
   }
   x
+}
+
+# plotlyjs properties that must _always_ be an array (even if length 1)
+get_boxed <- function(type = "scatter") {
+  # if the trace type isn't found, provide some sensible defaults
+  boxers[[type]] %||% c("x", "y", "z", "lat", "lon", "text", "locations")
+}
+
+# if this ever needs updating see
+# https://github.com/ropensci/plotly/issues/415#issuecomment-173353138
+boxers <- list(
+  choropleth = c("locations", "z", "text"),
+  box = c("x", "y"),
+  heatmap = c("z", "text"),
+  histogram = c("x", "y"),
+  histogram2d = c("z", "color"),
+  mesh3d = c("x", "y", "z", "i", "j", "k", "intensity", "vertexcolor", "facecolor"),
+  # TODO: what to do about marker.colors?
+  pie = c("labels", "values", "text"),
+  scatter = c("x", "y", "r", "t"),
+  scatter3d = c("x", "y", "z"),
+  scattergeo = c("lon", "lat", "locations"),
+  surface = c("x", "y", "z", "text")
+)
+
+i <- function(x) {
+  if (is.null(x)) {
+    return(NULL)
+  } else if (length(x) == 1) {
+    return(I(x))
+  } else{
+    return(x)
+  }
 }
 
 rm_asis <- function(x) {
@@ -150,11 +183,9 @@ struct <- function(x, y, ...) {
 } 
 
 # TODO: what are some other common configuration options we want to support??
-get_domain <- function(type = "main") {
-  if (type == "stream") {
-    Sys.getenv("plotly_streaming_domain", "http://stream.plot.ly")
-  } else if (type == "v2") {
-    Sys.getenv("plotly_domain", "https://api.plot.ly/v2/")
+get_domain <- function(type = "") {
+  if (type == "api") {
+    Sys.getenv("plotly_api_domain", "https://api.plot.ly")
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }

@@ -1,3 +1,28 @@
+2.4.1 -- 2 Feb 2015
+
+Attach base_url in as.widget() so it works in multiple contexts
+
+2.4.0 -- 1 Feb 2015
+
+* Pass plot configuration using ... to avoid conflicts in defaults/documentation
+* Upgrade to plotly.js 1.5.1
+
+2.3.4 -- 1 Feb 2015
+
+Added a plotly_api_domain environment variable for configuring the API domain. Fixes #441
+
+2.3.3 -- 27 Jan 2015
+
+Bump axis number for each trace matching a panel number. fixes #318
+
+2.3.2 -- 25 Jan 2015
+
+More accurate list of data_array properties. Fixes #415
+
+2.3.1 -- 25 Jan 2015
+
+More accurate conversion of path width. Fixes #373.
+
 2.3.0 -- 19 Jan 2015
 
 Add sharing argument and deprecate world_readable. Fixes #332
