@@ -277,41 +277,18 @@ gg2list <- function(p, width = NULL, height = NULL) {
   if (!is.null(layout[["title"]])) {
     layout$margin$t <- layout$margin$t + layout$titlefont$size
   }
-  # before computing panel domains, figure out the margins _between_
-  # panels (only relevant for free x/y scales and interior column strips)
-  yAxisText <- theme.pars[["axis.text.y"]] %||% theme.pars[["axis.text"]]
-  xAxisText <- theme.pars[["axis.text.x"]] %||% theme.pars[["axis.text"]]
-  pts2npc <- function(x) {
-    as.numeric(grid::convertUnit(grid::unit(x, "points"), "npc"))
-  }
-  yAxisSize <- pts2npc(yAxisText$size)
-  xAxisSize <- pts2npc(xAxisText$size)
-  stripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
-  stripSize <- pts2npc(stripText$size)
-  # assume no margin between panels, and add margins, if appropriate
-  margins <- rep(0, 4)
-  gglayout <- built$panel$layout
-  # space for interior yaxes
-  if (isTRUE(p$facet$free$y) && max(gglayout$COL) > 1) {
-    margins[1:2] <- yAxisSize
-  }
-  # space for interior column strips
-  if (isTRUE(p$facet$free$y) && max(gglayout$COL) > 1) {
-    margins[3:4] <- stripSize
-  }
-  # space for interior xaxes
-  if (isTRUE(p$facet$free$x) && max(gglayout$ROW) > 1) {
-    margins[3:4] <- margins[3:4] + xAxisSize
-  }
   
+  gglayout <- built$panel$layout
   # determine the appropriate domains/anchor for each panel
-  npanels <- nrow(gglayout)
-  doms <- get_domains(npanels, max(gglayout$ROW), margins)
   gglayout$xaxis <- with(gglayout, ifelse(AXIS_X, PANEL, COL))
   gglayout$xaxis <- paste0("xaxis", sub("1", "", gglayout$xaxis))
   gglayout$yaxis <- with(gglayout, ifelse(AXIS_Y, PANEL, ROW))
   gglayout$yaxis <- paste0("yaxis", sub("1", "", gglayout$yaxis))
   
+  npanels <- nrow(gglayout)
+  # domains are actually dynamically computed (see inst/htmlwidgets/plotly.js)
+  # this assumes no margins (sorry plotly_POST()) but we'll adjust later
+  doms <- get_domains(npanels, max(gglayout$ROW), rep(0, 4))
   for (i in seq_len(npanels)) {
     lay <- gglayout[i, ]
     for (xy in c("x", "y")) {
@@ -421,37 +398,38 @@ gg2list <- function(p, width = NULL, height = NULL) {
       layout$annotations <- c(layout$annotations, lab)
     }
   }   # panel loop
-
   
-  if (has_facet(p)) {
-    # space for the first row of strip text goes in plot margin 
-    # (other rows are accounted for in the axes domains)
-    xStripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
-    yStripText <- theme.pars[["strip.text.y"]] %||% theme.pars[["strip.text"]]
-    layout$margin$t <- layout$margin$t + pts2npc(xStripText$size)
-    layout$margin$r <- layout$margin$r + pts2npc(yStripText$size)
-    
-    # each axis should _not_ have it's own title!
-    yAxes <- layout[grepl("^yaxis", names(layout))]
-    xAxes <- layout[grepl("^xaxis", names(layout))]
-    yTickText <- lapply(yAxes, "[[", "ticktext")
-    xTickText <- lapply(xAxes, "[[", "ticktext")
-    yTickTextMax <- yTickText[max(nchar(yTickText))]
-    xTickTextMax <- xTickText[max(nchar(xTickText))]
-    yPad <- with(layout$yaxis, bbox(yTickTextMax, tickangle, pts2npc(tickfont$size))$h)
-    xPad <- with(layout$xaxis, bbox(xTickTextMax, tickangle, pts2npc(tickfont$size))$v)
-    xAxisTitle <- theme.pars[["axis.title.x"]] %||% theme.pars[["axis.title"]]
-    yAxisTitle <- theme.pars[["axis.title.y"]] %||% theme.pars[["axis.title"]]
-    layout$annotations <- c(
-      layout$annotations, 
-      # TODO: what are the appropriate x/yanchors
-      make_label(layout$xaxis$title, 0.5, -yPad, xAxisTitle, yanchor = "top"),
-      make_label(layout$yaxis$title, -xPad, 0.5, yAxisTitle, xanchor = "bottom")
-    )
-    layout <- strip_axis(layout, "title")
-  }
+  # TODO: compute annotation positions in the client as well?
   
-
+  #if (has_facet(p)) {
+  #  # space for the first row of strip text goes in plot margin 
+  #  # (other rows are accounted for in the axes domains)
+  #  xStripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
+  #  yStripText <- theme.pars[["strip.text.y"]] %||% theme.pars[["strip.text"]]
+  #  layout$margin$t <- layout$margin$t + pts2npc(xStripText$size)
+  #  layout$margin$r <- layout$margin$r + pts2npc(yStripText$size)
+  #  
+  #  # each axis should _not_ have it's own title!
+  #  yAxes <- layout[grepl("^yaxis", names(layout))]
+  #  xAxes <- layout[grepl("^xaxis", names(layout))]
+  #  yTickText <- lapply(yAxes, "[[", "ticktext")
+  #  xTickText <- lapply(xAxes, "[[", "ticktext")
+  #  yTickTextMax <- yTickText[max(nchar(yTickText))]
+  #  xTickTextMax <- xTickText[max(nchar(xTickText))]
+  #  yPad <- with(layout$yaxis, bbox(yTickTextMax, tickangle, pts2npc(tickfont$size))$h)
+  #  xPad <- with(layout$xaxis, bbox(xTickTextMax, tickangle, pts2npc(tickfont$size))$v)
+  #  xAxisTitle <- theme.pars[["axis.title.x"]] %||% theme.pars[["axis.title"]]
+  #  yAxisTitle <- theme.pars[["axis.title.y"]] %||% theme.pars[["axis.title"]]
+  #  layout$annotations <- c(
+  #    layout$annotations, 
+  #    # TODO: what are the appropriate x/yanchors
+  #    make_label(layout$xaxis$title, 0.5, -yPad, xAxisTitle, yanchor = "top"),
+  #    make_label(layout$yaxis$title, -xPad, 0.5, yAxisTitle, xanchor = "bottom")
+  #  )
+  #  layout <- strip_axis(layout, "title")
+  #}
+  #
+  
   ### TODO: trace ordering
   ## order traces according to the order of the scale
   ## plotly.js may provide a more elegant solution to this
@@ -654,8 +632,27 @@ gg2list <- function(p, width = NULL, height = NULL) {
     flipped.layout[["xaxis"]] <- y
     flipped.layout[["yaxis"]] <- x
   }
-  # TODO: what to send in gglayout?
-  l <- list(data = flipped.traces, layout = flipped.layout, gglayout = list("hey there!"))
+  yAxisText <- theme.pars[["axis.text.y"]] %||% theme.pars[["axis.text"]]
+  xAxisText <- theme.pars[["axis.text.x"]] %||% theme.pars[["axis.text"]]
+  stripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
+  l <- list(
+    data = flipped.traces, 
+    layout = flipped.layout, 
+    domains = list(
+      xaxis = gglayout$xaxis,
+      yaxis = gglayout$yaxis,
+      nRows = max(gglayout$ROW),
+      nCols = max(gglayout$COL),
+      nPlots = npanels,
+      margins = c(
+        # space for interior yaxes
+        rep(isTRUE(p$facet$free$y) && max(gglayout$COL) > 1 * yAxisText$size / 2, 2),
+        # space for interior column strips
+        (inherits(p$facets, "wrap") && max(gglayout$ROW) > 1) * stripText$size,
+        (isTRUE(p$facet$free$x) && max(gglayout$ROW) > 1) * xAxisText$size
+      )
+    )
+  )
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$width <- width
