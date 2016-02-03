@@ -664,9 +664,8 @@ gg2list <- function(p, width = NULL, height = NULL) {
     lay <- gglayout[i, ]
     layout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin)
     layout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin)
-    # yuck
-    layout$xaxes <- c(layout$xaxes, lay$xaxis)
-    layout$yaxes <- c(layout$yaxes, lay$yaxis)
+    layout$xaxes[[i]] <- ifelse(npanels == 1, list(lay$xaxis), lay$xaxis)
+    layout$yaxes[[i]] <- ifelse(npanels == 1, list(lay$yaxis), lay$yaxis)
   }
   l <- list(data = merged.traces, layout = layout)
   # ensure properties are boxed correctly

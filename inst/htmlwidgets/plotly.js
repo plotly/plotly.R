@@ -48,7 +48,6 @@ HTMLWidgets.widget({
           y.domain[1] - y.margins[1]
         ];
       }
-      console.log(layout);
       return layout;
     };
     
