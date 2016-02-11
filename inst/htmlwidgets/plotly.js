@@ -30,20 +30,22 @@ HTMLWidgets.widget({
     
     var alterDomain = function(layout) {
       var xNorm = function(x) { return x / instance.width };
-      for (i = 0; i <= layout.xaxes.length - 1; i++) {
-        var x = layout[layout.xaxes[i]];
+      var xAxes = layout.xaxes || [];
+      for (i = 0; i <= xAxes.length - 1; i++) {
+        var x = layout[xAxes[i]];
         // translate pixels to 0-1 scale
         x.margins = x.margins.map(xNorm);
-        layout[layout.xaxes[i]].domain = [
+        layout[xAxes[i]].domain = [
           x.domain[0] + x.margins[0], 
           x.domain[1] - x.margins[1]
         ];
       }
       var yNorm = function(x) { return x / instance.height };
-      for (i = 0; i <= layout.yaxes.length - 1; i++) {
-        var y = layout[layout.yaxes[i]];
+      var yAxes = layout.yaxes || [];
+      for (i = 0; i <= yAxes.length - 1; i++) {
+        var y = layout[yAxes[i]];
         y.margins = y.margins.map(yNorm);
-        layout[layout.yaxes[i]].domain = [
+        layout[yAxes[i]].domain = [
           y.domain[0] + y.margins[0], 
           y.domain[1] - y.margins[1]
         ];
