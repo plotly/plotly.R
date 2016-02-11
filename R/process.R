@@ -9,6 +9,8 @@ process <- function(resp) {
 process.clientresp <- function(resp) {
   httr::stop_for_status(resp)
   con <- from_JSON(httr::content(resp, as = "text"))
+  # make sure that we always return a HTTPS link
+  con$url <- sub("^http[s]?:", "https:", con$url)
   if (nchar(con$error) > 0) stop(con$error, call. = FALSE)
   if (nchar(con$warning) > 0) warning(con$warning, call. = FALSE)
   if (nchar(con$message) > 0) message(con$message, call. = FALSE)
@@ -27,6 +29,8 @@ process.figure <- function(resp) {
   con <- from_JSON(content(resp, as = "text"))
   fig <- con$payload$figure
   fig$url <- sub("apigetfile/", "~", resp$url)
+  # make sure that we always return a HTTPS link
+  con$url <- sub("^http[s]?:", "https:", con$url)
   fig <- add_boxed(fig)
   fig$data[[1]]$inherit <- FALSE
   # any reasonable way to return a data frame?

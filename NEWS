@@ -1,3 +1,7 @@
+2.4.3 -- 11 Feb 2015
+
+Ensure that we always return HTTPS links. Fixes #455
+
 2.4.2 -- 9 Feb 2015
 
 Fix for on-premise domain configuration. 
