@@ -31,7 +31,9 @@ knit_print.plotly <- function(x, options, ...) {
 #' htmlwidgets::saveWidget(as.widget(p), "index.html")
 #' }
 #' 
+
 as.widget <- function(x, ...) {
+  if (inherits(x, "htmlwidget")) return(x)
   p <- plotly_build(x)
   # set some margin defaults if none are provided
   p$layout$margin <- modifyList(
