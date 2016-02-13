@@ -1,3 +1,7 @@
+2.4.4 -- 13 Feb 2015
+
+as.widget() now returns htmlwidget objects untouched. See #449.
+
 2.4.3 -- 11 Feb 2015
 
 Ensure that we always return HTTPS links. Fixes #455
