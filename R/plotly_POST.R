@@ -73,7 +73,7 @@ plotly_POST <- function(x, filename, fileopt = "new",
   )
   base_url <- "https://plot.ly/clientresp"
   resp <- httr::POST(base_url, body = bod)
-  con <- process(struct(resp, "clientresp"))
+  con <- process(append_class(resp, "clientresp"))
   if (sharing[1] == "hidden") {
     bits <- strsplit(con$url, "/")[[1]]
     plot_id <- bits[length(bits)]

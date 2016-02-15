@@ -13,7 +13,6 @@
 #' If a single value is provided, it will be used as all four margins. 
 #' @return A plotly object
 #' @export
-#' @importFrom plyr join
 #' @author Carson Sievert
 #' @examples \dontrun{
 #' p1 <- plot_ly(economics, x = date, y = uempmed, showlegend = F)

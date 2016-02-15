@@ -1,11 +1,11 @@
-#' @importFrom grDevices col2rgb
-#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
-#' @importFrom stats setNames
-
 is.plotly <- function(x) inherits(x, "plotly")
 
 "%||%" <- function(x, y) {
   if (length(x) > 0) x else y
+}
+
+compact <- function(x) {
+  Filter(Negate(is.null), x)
 }
 
 is.discrete <- function(x) {
@@ -166,6 +166,7 @@ rm_asis <- function(x) {
   # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
   # https://github.com/jeroenooms/jsonlite/issues/29
   if (is.null(x)) return(NA)
+  if (is.data.frame(x)) return(x)
   if (is.list(x)) lapply(x, rm_asis) 
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
@@ -178,9 +179,16 @@ rm_asis <- function(x) {
 
 # add a class to an object only if it is new, and keep any existing classes of 
 # that object
-struct <- function(x, y, ...) {
-  structure(x, class = unique(c(class(x), y)), ...)
-} 
+append_class <- function(x, y) {
+  structure(x, class = unique(c(class(x), y)))
+}
+prefix_class <- function(x, y) {
+  structure(x, class = unique(c(y, class(x))))
+}
+replace_class <- function(x, new, old) {
+  class(x) <- sub(old, new, class(x))
+  x
+}
 
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "") {

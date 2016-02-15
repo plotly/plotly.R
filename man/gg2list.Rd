@@ -4,13 +4,17 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p)
+gg2list(p, width = NULL, height = NULL)
 }
 \arguments{
 \item{p}{ggplot2 plot.}
+
+\item{width}{Width in pixels (optional, defaults to automatic sizing).}
+
+\item{height}{Height in pixels (optional, defaults to automatic sizing).}
 }
 \value{
-figure object (list with names "data" and "layout").
+a 'built' plotly object (list with names "data" and "layout").
 }
 \description{
 Convert a ggplot to a list.

@@ -36,6 +36,6 @@ plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png",
   resp <- httr::POST(base_url, plotly_headers("v2"), body = to_JSON(bod), 
                      if (!missing(out_file)) write_disk(out_file, overwrite = TRUE), 
                      ...)
-  con <- process(struct(resp, "image"))
+  con <- process(append_class(resp, "image"))
   invisible(con)
 }

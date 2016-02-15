@@ -45,7 +45,7 @@ signup <- function(username, email, save = TRUE) {
   )
   base_url <- "https://plot.ly/apimkacct"
   resp <- httr::POST(base_url, body = bod)
-  con <- process(struct(resp, "signup"))
+  con <- process(append_class(resp, "signup"))
   if (save) {
     # store API key as an environment variable in .Rprofile
     cat_profile("username", con$un)

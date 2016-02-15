@@ -7,7 +7,6 @@
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @seealso \link{signup}, \link{plot_ly}
-#' @import httr jsonlite
 #' @return a plotly object
 #' @export
 #' @author Carson Sievert
@@ -39,262 +38,133 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL) {
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL) {
-  # ggplot now applies geom_blank() (instead of erroring) when no layers exist
-  if (length(p$layers) == 0) p <- p + geom_blank()
-  layout <- list()
-  trace.list <- list()
-  
-  # Before building the ggplot, we would like to add aes(name) to
-  # figure out what the object group is later. This also copies any
-  # needed global aes/data values to each layer, so we do not have to
-  # worry about combining global and layer-specific aes/data later.
-  for(layer.i in seq_along(p$layers)) {
-    layer.aes <- p$layers[[layer.i]]$mapping
-    if(p$layers[[layer.i]]$inherit.aes){
-      to.copy <- names(p$mapping)[!names(p$mapping) %in% names(layer.aes)]
-      layer.aes[to.copy] <- p$mapping[to.copy]
-    }
-    mark.names <- names(layer.aes) # make aes.name for all aes.
-    name.names <- sprintf("%s.name", mark.names)
-    layer.aes[name.names] <- layer.aes[mark.names]
-    p$layers[[layer.i]]$mapping <- layer.aes
-    if(!is.data.frame(p$layers[[layer.i]]$data)){
-      p$layers[[layer.i]]$data <- p$data
-    }
+  # We need access to internal ggplot2 functions in several places
+  # this helps us import functions in a way that R CMD check won't cry about
+  ggfun <- function(x) getFromNamespace(x, "ggplot2")
+  # ------------------------------------------------------------------------
+  # Our internal version of ggplot2::ggplot_build(). Taken from
+  # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
+  # ------------------------------------------------------------------------
+  p <- ggfun("plot_clone")(p)
+  if (length(p$layers) == 0) {
+    p <- p + geom_blank()
   }
-  # Test fill and color to see if they encode a quantitative
-  # variable. This may be useful for several reasons: (1) it is
-  # sometimes possible to plot several different colors in the same
-  # trace (e.g. points), and that is faster for large numbers of
-  # data points and colors; (2) factors on x or y axes should be
-  # sent to plotly as characters, not as numeric data (which is
-  # what ggplot_build gives us).
-  misc <- list()
-  for (a in c("fill", "colour", "x", "y", "size")) {
-    for(data.type in c("continuous", "date", "datetime", "discrete")){
-      fun.name <- sprintf("scale_%s_%s", a, data.type)
-      misc.name <- paste0("is.", data.type)
-      misc[[misc.name]][[a]] <- tryCatch({
-        fun <- get(fun.name)
-        suppressMessages({
-          with.scale <- p + fun()
-        })
-        ggplot_build(with.scale)
-        TRUE
-      }, error=function(e){
-        FALSE
-      })
+  layers <- p$layers
+  layer_data <- lapply(layers, function(y) y$layer_data(p$data))
+  scales <- p$scales
+  by_layer <- function(f) {
+    out <- vector("list", length(data))
+    for (i in seq_along(data)) {
+      out[[i]] <- f(l = layers[[i]], d = data[[i]])
     }
+    out
   }
-  
-  ## scales are needed for legend ordering.
-  misc$breaks <- list()
-  for(sc in p$scales$scales){
-    a.vec <- sc$aesthetics
-    default.breaks <- inherits(sc$breaks, "waiver")
-    if (length(a.vec) == 1 && (!default.breaks) ) {
-      ## TODO: generalize for x/y scales too.
-      br <- sc$breaks
-      ranks <- seq_along(br)
-      names(ranks) <- br
-      misc$breaks[[a.vec]] <- ranks
-    }
-    ## store if this is a reverse scale so we can undo that later.
-    if(is.character(sc$trans$name)){
-      misc$trans[sc$aesthetics] <- sc$trans$name
-    }
+  panel <- ggfun("new_panel")()
+  panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
+  data <- ggfun("map_layout")(panel, p$facet, layer_data)
+  data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
+  data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
+  scale_x <- function() scales$get_scales("x")
+  scale_y <- function() scales$get_scales("y")
+  panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
+  data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
+  # for some geoms (e.g. boxplots) it's better to send the 
+  # "pre-statistics" data and let plotly compute statistics
+  prestats_data <- data
+  data <- by_layer(function(l, d) l$compute_statistic(d, panel))
+  data <- by_layer(function(l, d) l$map_statistic(d, p))
+  ggfun("scales_add_missing")(p, c("x", "y"), p$plot_env)
+  data <- by_layer(function(l, d) l$compute_geom_1(d))
+  data <- by_layer(function(l, d) l$compute_position(d, p))
+  ggfun("reset_scales")(panel)
+  panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
+  data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
+  npscales <- scales$non_position_scales()
+  if (npscales$n() > 0) {
+    lapply(data, ggfun("scales_train_df"), scales = npscales)
+    data <- lapply(data, ggfun("scales_map_df"), scales = npscales)
   }
-  reverse.aes <- names(misc$trans)[misc$trans=="reverse"]
+  panel <- ggfun("train_ranges")(panel, p$coordinates)
+  data <- by_layer(function(l, d) l$compute_geom_2(d))
+  # ------------------------------------------------------------------------
+  # end of ggplot_build(), start of layer -> trace conversion
+  # ------------------------------------------------------------------------
   
-  # Extract data from built ggplots
-  built <- ggplot_build2(p)
-  # Get global ranges now because we need some of its info in layer2traces
-  ranges.list <- list()
-  for(xy in c("x", "y")){
-    use.ranges <-
-      misc$is.continuous[[xy]] ||
-      misc$is.date[[xy]] ||
-      misc$is.datetime[[xy]] 
-    range.values <- if(use.ranges){
-      range.name <- paste0(xy, ".range")
-      sapply(built$panel$ranges, "[[", range.name)
-    }else{
-      ## for categorical variables on the axes, panel$ranges info is
-      ## meaningless.
-      name.name <- paste0(xy, ".name")
-      sapply(built$data, function(df){
-        if(name.name %in% names(df)){
-          ## usually for discrete data there is a .name column.
-          paste(df[[name.name]])
-        }else{
-          ## for heatmaps there may not be.
-          df[[xy]]
-        }
-      })
-    }
-    ranges.list[[xy]] <- range(range.values)
+  # for consistency in the layout data structure across grid/wrap
+  if (!inherits(p$facet, "wrap")) {
+    panel$layout$AXIS_X <- panel$layout$ROW == nRows
+    panel$layout$AXIS_Y <- panel$layout$COL == 1
+  }
+  # domains/anchor for each panel
+  panel$layout$xaxis <- with(panel$layout, ifelse(AXIS_X, PANEL, COL))
+  panel$layout$xaxis <- paste0("xaxis", sub("1", "", panel$layout$xaxis))
+  panel$layout$yaxis <- with(panel$layout, ifelse(AXIS_Y, PANEL, ROW))
+  panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
+  
+  # merge the panel -> axis info with each _layer_ of data
+  lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
+  lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
+  lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
+  lay_outs <- vector("list", length(data))
+  for (i in seq_len(length(data))) {
+    lay_outs[[i]] <- lay_out
+  }
+  data <- Map(function(x, y) { merge(x, y, sort = FALSE) }, data, lay_outs)
+  
+  # layers -> plotly.js traces
+  trace.list <- layers2traces(data, prestats_data, layers)
+  # collapse lists of lists to a list of traces 
+  # TODO: attach the appropriate panel/axis/legendgroup info to each trace!
+  traces <- list()
+  for (i in seq_along(trace.list)) {
+    traces <- c(traces, trace.list[[i]])
   }
   
-  # Get global size range because we need some of its info in layer2traces
-  if ("size.name" %in% name.names) {
-    sizerange <- sapply(built$prestats.data, `[[`, "size")
-    ggsizemin <- min(unlist(sizerange))
-    ggsizemax <- max(unlist(sizerange))
-  }
-
-  layer.legends <- list()
-  for(i in seq_along(built$plot$layers)){
-    # This is the layer from the original ggplot object.
-    L <- p$layers[[i]]
-    
-    # for consistency in the layout between grid/wrap
-    if (!inherits(p$facet, "wrap")) {
-      built$panel$layout$AXIS_X <- with(built$panel$layout, ROW == max(ROW))
-      built$panel$layout$AXIS_Y <- with(built$panel$layout, COL == 1)
-    }
-    
-    # TODO: do we really need to merge?
-    df <- merge(built$data[[i]], built$panel$layout, sort = FALSE)
-    
-    prestats <- built$prestats.data[[i]]
-    # scale_reverse multiples x/y data by -1, so here we undo that so
-    # that the actual data can be uploaded to plotly.
-    replace.aes <- intersect(names(prestats), reverse.aes)
-    for (a in replace.aes) {
-      prestats[[a]] <- -1 * prestats[[a]]
-    }
-    # need layout in layers2traces() in order to place traces on correct axis
-    L$prestats.data <- merge(prestats, built$panel$layout, sort = FALSE)
-    
-    # Add global range info.
-    for(xy in names(ranges.list)){
-      range.vec <- ranges.list[[xy]]
-      names(range.vec) <- c("min", "max")
-      for(range.name in names(range.vec)){
-        glob.name <- paste0("glob", xy, range.name)
-        L$prestats.data[[glob.name]] <- range.vec[[range.name]]
-      }
-    }
-    
-    # Add global size info if relevant
-    if ("size.name" %in% name.names) {
-      L$prestats.data$globsizemin <- ggsizemin
-      L$prestats.data$globsizemax <- ggsizemax
-    }
-    
-    # This extracts essential info for this geom/layer.
-    traces <- layer2traces(L, df, misc)
-    
-    possible.legends <- markLegends[[type(L, "geom")]]
-    actual.legends <- possible.legends[possible.legends %in% names(L$mapping)]
-    layer.legends[[paste(i)]] <- actual.legends
-    
-    trace.list <- c(trace.list, traces)
-  }
+  # don't show legends that are automatically created from these traces
+  # later on, when legends/guides are created, 
+  # we may tack on more traces with visible="legendonly"
+  traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
   
-  # for barcharts, verify that all traces have the same barmode; we don't
-  # support different barmodes on the same plot yet.
-  barmodes <- do.call(c, lapply(trace.list, function (x) x$barmode))
-  barmodes <- barmodes[!is.null(barmodes)]
-  if (length(barmodes) > 0) {    
-    layout$barmode <- barmodes[1]
-    if (!all(barmodes == barmodes[1])) {
-      warning(
-        "You have multiple barcharts or histograms with different positions; ",
-        "Plotly's layout barmode will be '", layout$barmode, "'."
-      )
-    }
-    # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
-    if (layout$barmode == "stack") {
-      # could speed up this function with environments or C/C++
-      unStack <- function(vec) {
-        n <- length(vec)
-        if (n == 1) return(vec)
-        seq.n <- seq_len(n)
-        names(vec) <- seq.n
-        vec <- sort(vec)
-        for (k in seq(2, n)) {
-          vec[k] <- vec[k] - sum(vec[seq(1, k-1)])
-        }
-        as.numeric(vec[as.character(seq.n)])
-      }
-      ys <- lapply(trace.list, "[[", "y")
-      xs <- lapply(trace.list, "[[", "x")
-      x.vals <- unique(unlist(xs))
-      # if there are two or more y-values (for a particular x value),
-      # then modify those y-values so they *add up* to the correct value(s)
-      for (val in x.vals) {
-        zs <- lapply(xs, function(x) which(x == val))
-        ys.given.x <- Map(function(x, y) y[x], zs, ys)
-        if (length(unlist(ys.given.x)) < 2) next
-        st <- unStack(unlist(ys.given.x))
-        lens <- sapply(ys.given.x, length)
-        trace.seq <- seq_along(trace.list)
-        ws <- split(st, rep(trace.seq, lens))
-        for (tr in seq_along(ws)) {
-          idx <- zs[[tr]]
-          replacement <- ws[[tr]]
-          if (length(idx) > 0  && length(replacement) > 0) 
-            trace.list[[tr]]$y[idx] <- replacement
-        }
-      }
-    }
-  }
+  # ------------------------------------------------------------------------
+  # axis/facet/margin conversion
+  # ------------------------------------------------------------------------
   
-  # Bar Gap for histograms should be 0
-  bargaps <- do.call(c, lapply(trace.list, function (x) x$bargap))
-  if (length(bargaps) > 0) {
-    if (any(bargaps == 0)) {
-      layout$bargap <- 0
-      if (!all(bargaps == 0)) {
-        warning("You have multiple bar charts and histograms;\n
-              Plotly's layout bargap will be 0 for all of them.")
-      }
-    } else {
-      bargaps <- NULL  # Do not specify anything
-    }
-  }
-  
-  # obtain _calculated_ theme elements
-  theme.pars <- getFromNamespace("plot_theme", "ggplot2")(p)
-  elements <- names(which(sapply(theme.pars, inherits, "element")))
+  # obtain _calculated_ theme elements (necessary for axis/label formatting)
+  theme <- ggfun("plot_theme")(p)
+  elements <- names(which(sapply(theme, inherits, "element")))
   for (i in elements) {
-    theme.pars[[i]] <- ggplot2::calc_element(i, theme.pars)
+    theme[[i]] <- ggplot2::calc_element(i, theme)
   }
-  # Translate plot wide theme elements
-  layout$plot_bgcolor <- toRGB(theme.pars$panel.background$fill)
-  layout$paper_bgcolor <- toRGB(theme.pars$plot.background$fill)
-  # Initiate the plot margin
+  # Translate plot wide theme elements to plotly.js layout
+  pm <- unit2pixels(theme$plot.margin)
+  gglayout <- list(
+    margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
+    plot_bgcolor = toRGB(theme$panel.background$fill),
+    paper_bgcolor = toRGB(theme$plot.background$fill),
+    # global font (all other font objects inherit from it)
+    font = text2font(theme$text),
+    # Main plot title.
+    title = faced(p$labels$title, theme$plot.title$face),
+    titlefont = text2font(theme$plot.title)
+  )
   
-  pm <- unit2pixels(theme.pars$plot.margin)
-  layout$margin <- list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]])
-  
-  # global font (all other font objects inherit from it)
-  layout$font <- text2font(theme.pars$text)
-  # Main plot title.
-  layout$title <- faced(built$plot$labels$title, theme.pars$plot.title$face)
-  layout$titlefont <- text2font(theme.pars$plot.title)
-  if (!is.null(layout[["title"]])) {
-    layout$margin$t <- layout$margin$t + layout$titlefont$size
+  if (nchar(gglayout[["title"]] %||% "") > 0) {
+    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
   
-  gglayout <- built$panel$layout
-  # determine the appropriate domains/anchor for each panel
-  gglayout$xaxis <- with(gglayout, ifelse(AXIS_X, PANEL, COL))
-  gglayout$xaxis <- paste0("xaxis", sub("1", "", gglayout$xaxis))
-  gglayout$yaxis <- with(gglayout, ifelse(AXIS_Y, PANEL, ROW))
-  gglayout$yaxis <- paste0("yaxis", sub("1", "", gglayout$yaxis))
+  nPanels <- nrow(panel$layout)
+  nRows <- max(panel$layout$ROW)
+  nCols <- max(panel$layout$COL)
   
-  npanels <- nrow(gglayout)
   # domains are actually dynamically computed (see inst/htmlwidgets/plotly.js)
   # this assumes no margins (sorry plotly_POST()) but we'll adjust later
-  doms <- get_domains(npanels, max(gglayout$ROW), rep(0, 4))
-  for (i in seq_len(npanels)) {
-    lay <- gglayout[i, ]
+  doms <- get_domains(nPanels, nRows, rep(0, 4))
+  for (i in seq_len(nPanels)) {
+    lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
       # find axis specific theme elements that inherit from their parent
       theme_el <- function(el) {
-        theme.pars[[paste0(el, ".", xy)]] %||% theme.pars[[el]]
+        theme[[paste0(el, ".", xy)]] %||% theme[[el]]
       }
       axisTicks <- theme_el("axis.ticks")
       axisText <- theme_el("axis.text")
@@ -310,13 +180,13 @@ gg2list <- function(p, width = NULL, height = NULL) {
       
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- sub("axis", "", lay[, paste0(setdiff(c("x", "y"), xy), "axis")])
-      rng <- built$panel$ranges[[i]]
+      rng <- panel$ranges[[i]]
       
-      sc <- p$scales$get_scales(xy)
+      sc <- scales$get_scales(xy)
       # set some axis defaults (and override some of them later)
       # https://plot.ly/r/reference/#layout-xaxis
       axisObj <- list(
-        title = if (!is.null(axisTitle)) sc$name %||% built$plot$labels[[xy]],
+        title = if (!is.null(axisTitle)) sc$name %||% p$labels[[xy]],
         titlefont = text2font(axisTitle),
         type = "linear",
         autorange = FALSE,
@@ -326,7 +196,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
         tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
-        ticklen = unit2pixels(theme.pars$axis.ticks.length),
+        ticklen = unit2pixels(theme$axis.ticks.length),
         # TODO: convert this size? Is this in points? If so, be careful to check length b4 using grid::unit()
         tickwidth = axisTicks$size,
         showticklabels = TRUE,
@@ -345,14 +215,11 @@ gg2list <- function(p, width = NULL, height = NULL) {
         anchor = anchor
       )
       # bold/italic axis title
-      axisObj$title <- faced(axisObj$title, theme.pars$axis.text$face)
-      
-      # TODO: apparently it is possible for [x/y] to be both? (fix it above)
-      disc <- misc$is.discrete[[xy]] && !misc$is.continuous[[xy]]
-      axisObj <- re_scale(axisObj, disc)
+      axisObj$title <- faced(axisObj$title, theme$axis.text$face)
+      axisObj <- re_scale(axisObj, sc)
       
       # tack axis object onto the layout
-      layout[[axisName]] <- axisObj
+      gglayout[[axisName]] <- axisObj
       
       # account for axis title/text in plot margins
       if (i == 1) {
@@ -361,61 +228,60 @@ gg2list <- function(p, width = NULL, height = NULL) {
         # just support _bottom_ x-axis text & _left_ y-axis margins
         # (plotly.js has no sense of padding between ticks and ticktext)
         idx <- if (xy == "x") 3 else 4
-        layout$margin[[side]] <- layout$margin[[side]] + 
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + 
           unit2pixels(axisTitle$margin[idx]) + 
           unit2pixels(axisText$margin[idx]) + 
           with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
           axisObj$titlefont$size
       }
+      
     } # axis loop
     
-    xdom <- layout[[lay[, "xaxis"]]]$domain
-    ydom <- layout[[lay[, "yaxis"]]]$domain
+    xdom <- gglayout[[lay[, "xaxis"]]]$domain
+    ydom <- gglayout[[lay[, "yaxis"]]]$domain
     
     # facet strips -> plotly annotations
     # TODO: 
     # (1) use a rect shape for the strip background!
-    # (2) use built$plot$facet$labeller for the actual strip text!
-    if (inherits(p$facet, "grid") && lay$COL == max(gglayout$COL)) {
+    # (2) use p$facet$labeller for the actual strip text!
+    if (inherits(p$facet, "grid") && lay$COL == nCols) {
       txt <- paste(
-        lay[, as.character(built$plot$facet$rows)], 
+        lay[, as.character(p$facet$rows)], 
         collapse = ", "
       )
       lab <- make_label(
         txt, x = mean(xdom), y = mean(ydom), 
-        el = theme.pars[["strip.text.y"]] %||% theme.pars[["strip.text"]],
+        el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
         xanchor = "center", yanchor = "bottom"
       )
-      layout$annotations <- c(layout$annotations, lab)
+      gglayout$annotations <- c(gglayout$annotations, lab)
     }
     
     if (inherits(p$facet, "wrap") || 
         inherits(p$facet, "grid") && lay$ROW == 1) {
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       txt <- paste(
-        lay[, as.character(built$plot$facet[[vars]])], 
+        lay[, as.character(p$facet[[vars]])], 
         collapse = ", "
       )
       lab <- make_label(
         txt, x = mean(xdom), y = max(ydom), 
-        el = theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]],
+        el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
         xanchor = "center", yanchor = "bottom"
       )
-      layout$annotations <- c(layout$annotations, lab)
+      gglayout$annotations <- c(gglayout$annotations, lab)
     }
   }   # panel loop
   
   if (has_facet(p)) {
     # space for the first row of strip text goes in plot margin 
     # (other rows are accounted for in the axes domains)
-    xStripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
-    yStripText <- theme.pars[["strip.text.y"]] %||% theme.pars[["strip.text"]]
-    layout$margin$t <- layout$margin$t + unit2pixels(xStripText$size)
+    xStripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
+    yStripText <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
+    gglayout$margin$t <- gglayout$margin$t + unit2pixels(xStripText$size)
     if (inherits(p$facets, "grid")) {
-      layout$margin$r <- layout$margin$r + unit2pixels(xStripText$size)
+      gglayout$margin$r <- gglayout$margin$r + unit2pixels(xStripText$size)
     }
-    
-    
     # each axis should _not_ have it's own title!
     #yAxes <- layout[grepl("^yaxis", names(layout))]
     #xAxes <- layout[grepl("^xaxis", names(layout))]
@@ -425,249 +291,209 @@ gg2list <- function(p, width = NULL, height = NULL) {
     #xTickTextMax <- xTickText[max(nchar(xTickText))]
     #yPad <- with(layout$yaxis, bbox(yTickTextMax, tickangle, pts2npc(tickfont$size))$h)
     #xPad <- with(layout$xaxis, bbox(xTickTextMax, tickangle, pts2npc(tickfont$size))$v)
-    xAxisTitle <- theme.pars[["axis.title.x"]] %||% theme.pars[["axis.title"]]
-    yAxisTitle <- theme.pars[["axis.title.y"]] %||% theme.pars[["axis.title"]]
-    layout$annotations <- c(
-      layout$annotations, 
+    xAxisTitle <- theme[["axis.title.x"]] %||% theme[["axis.title"]]
+    yAxisTitle <- theme[["axis.title.y"]] %||% theme[["axis.title"]]
+    gglayout$annotations <- c(
+      gglayout$annotations, 
       # TODO: compute annotation positions in the client as well?
-      make_label(layout$xaxis$title, 0.5, 0, xAxisTitle, yanchor = "top"),
-      make_label(layout$yaxis$title, 0, 0.5, yAxisTitle, xanchor = "bottom")
+      make_label(gglayout$xaxis$title, 0.5, 0, xAxisTitle, yanchor = "top"),
+      make_label(gglayout$yaxis$title, 0, 0.5, yAxisTitle, xanchor = "bottom")
     )
-    layout <- strip_axis(layout, "title")
+    gglayout <- strip_axis(gglayout, "title")
   }
   
+  # ------------------------------------------------------------------------
+  # guide/legend conversion
+  # ------------------------------------------------------------------------ 
   
-  ### TODO: trace ordering
-  ## order traces according to the order of the scale
-  ## plotly.js may provide a more elegant solution to this
-  ## https://github.com/plotly/plotly.js/issues/189
-  #nms <- unlist(lapply(traces, "[[", "name"))
-  #trace.list <- trace.list[match(nms, axisObj$range)]
-  ## remove traces that are outside the range of (discrete) scales
-  #if (!is.null(sc$limits)) {
-  #  trace.list <- trace.list[nms %in% sc$limits]
-  #}
-  
-  layout$legend <- list(
-    bordercolor = "transparent", 
-    x = 1.01, 
-    y = 0.075 * 0.5* length(trace.list) + 0.45,
-    xref="paper", yref="paper",
-    xanchor = "left", yanchor = "top"
-  )
-  
-  ## Legend hiding when guides(fill="none").
-  legends.present <- unique(unlist(layer.legends))
-  is.false <- function(x){
-    is.logical(x) && length(x) == 1 && x == FALSE
-  }
-  is.none <- function(x){
-    is.character(x) && length(x) == 1 && x == "none"
-  }
-  is.hidden <- function(x){
-    is.false(x) || is.none(x)
-  }
-  layout$showlegend <- if(length(legends.present) == 0) FALSE else TRUE
-  for(a in legends.present){
-    if(is.hidden(p$gFuides[[a]])){
-      layout$showlegend <- FALSE
-    }
-  }
-  # Legend hiding from theme.
-  if(theme.pars$legend.position=="none"){
-    layout$showlegend <- FALSE
-  }
-  
-  # Only show a legend title if there is at least 1 trace with
-  # showlegend=TRUE.
-  trace.showlegend <- sapply(trace.list, "[[", "showlegend")
-  if (any(trace.showlegend) && layout$showlegend && length(p$data)) {
-      # Retrieve legend title
-      temp.title <- guide_names(p)
-      legend.title <- if (length(unique(temp.title)) > 1){
-        paste(temp.title, collapse = " / ")
-      } else {
-        unique(temp.title)
-      }
-    legend.title <- paste0("<b>", legend.title, "</b>")
+  # if there are no non-positional scales or if theme(legend.position = "none")
+  # is used, don't show a legend at all.
+  if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
+    gglayout$showlegend  <- FALSE
+  } else {
+    # Strategy: Obtain and translate the output of ggplot2:::guides_train()
+    # To do so, we copy some of the body of ggplot2:::guides_build()
     
-    # Create legend title element as an annotation
-    layout$annotations <- c(
-      layout$annotations,
-      list(
-        text = faced(legend.title, theme.pars$legend.text$face),
-        x = layout$legend$x * 1.0154,
-        y = 0.075 * 0.5* length(trace.list) + 0.55,
-        showarrow = FALSE,
-        xref = "paper", yref = "paper",
-        xanchor = "left", yanchor = "top",
-        textangle = 0
+    # by default, guide boxes are vertically aligned
+    theme$legend.box <- theme$legend.box %||% "vertical"
+    
+    # size of key (also used for bar in colorbar guide)
+    theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
+    theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
+    
+    # legend direction must be vertical
+    theme$legend.direction <- theme$legend.direction %||% "vertical"
+    if (!identical(theme$legend.direction, "vertical")) {
+      warning(
+        "plotly.js does not (yet) support horizontal legend items \n",
+        "You can track progress here: \n",
+        "https://github.com/plotly/plotly.js/issues/53 \n",
+        call. = FALSE
       )
-    )
-  }
-  
-  layout$legend$font <- text2font(theme.pars$legend.text)
-  
-  mode.mat <- matrix(NA, 3, 3)
-  rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
-  mode.mat["markers", "lines"] <-
-    mode.mat["lines", "markers"] <- "lines+markers"
-  mode.mat["markers", "none"] <- mode.mat["none", "markers"] <- "markers"
-  mode.mat["lines", "none"] <- mode.mat["none", "lines"] <- "lines"
-  merged.traces <- list()
-  not.merged <- trace.list
-  while(length(not.merged)){
-    tr <- not.merged[[1]]
-    not.merged <- not.merged[-1]
-    # Are there any traces that have not yet been merged, and can be
-    # merged with tr?
-    can.merge <- logical(length(not.merged))
-    for(other.i in seq_along(not.merged)){
-      other <- not.merged[[other.i]]
-      criteria <- c()
-      for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
-        other.attr <- other[[must.be.equal]]
-        tr.attr <- tr[[must.be.equal]]
-        criteria[[must.be.equal]] <- 
-          isTRUE(all.equal(other.attr, tr.attr)) && 
-          unique(other$type, tr$type) == "scatter"
-      }
-      if(all(criteria)){
-        can.merge[[other.i]] <- TRUE
-      }
+      theme$legend.direction <- "vertical"
     }
-    to.merge <- not.merged[can.merge]
-    not.merged <- not.merged[!can.merge]
-    for(other in to.merge){
-      new.mode <- tryCatch({
-        mode.mat[tr$mode, other$mode]
-      }, error=function(e){
-        NA
-      })
-      if(is.character(new.mode) && !is.na(new.mode %||% NA)){
-        tr$mode <- new.mode
+    
+    # justification of legend boxes
+    theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
+    
+    # scales -> data for guides
+    gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
+    gdefs <- ggfun("guides_merge")(gdefs)
+    gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
+    
+    # guide data -> plotly.js traces
+    gdef2trace <- function(gdef) {
+      if (inherits(gdef, "colorbar")) {
+        # should always be numeric (it's a colorbar!)
+        gdef$key$.value <- scales::rescale(gdef$key$.value)
+        return(list(
+          x = gglayout$xaxis$tickvals,
+          y = gglayout$yaxis$tickvals,
+          type = "scatter",
+          mode = "markers",
+          opacity = 0,
+          hoverinfo = "none",
+          showlegend = FALSE,
+          marker = list(
+            color = gdef$key$.value,
+            colorscale = setNames(gdef$key[c(".value", "fill")], NULL),
+            colorbar = list(
+              title = gdef$title,
+              titlefont = text2font(gdef$title.theme),
+              tickmode = "array",
+              ticktext = gdef$key$.label,
+              tickvals = gdef$key$.value
+            )
+          )
+        ))
       }
-      attrs <- c("error_x", "error_y", "marker", "line")
-      for(attr in attrs){
-        if(!is.null(other[[attr]]) && is.null(tr[[attr]])){
-          tr[[attr]] <- other[[attr]]
-        }
+      # TODO: convert legends. Connect with traces via legendgroup!
+      if (inherits(gdef, "legend")) {
+        # str(gdef$geoms)
+        # problem: multiple geoms can belong to a single legend. 
+        # How to convert multiple geoms to a single trace? Just take the first?
+        NULL
       }
+      return(NULL)
     }
-    merged.traces[[length(merged.traces)+1]] <- tr
+    
+    traces <- c(traces, lapply(gdefs, gdef2trace))
+    
+    # TODO: 
+    # (1) shrink guide size(s). Set fractions in colorbar.lenmode
+    # (2) position guide(s)?
+    # (3) 
+    
+    # legend position is always determined by an x/y pair
+    #theme$legend.position <- if (is.numeric(theme$legend.position)) {
+    #  theme$legend.position
+    #} else {
+    #  switch(
+    #    left = c(0, 0.5),
+    #    right = c(),
+    #    bottom = c(),
+    #    top = c()
+    #  )
+    #}
+    
   }
   
-  # -------------------------------
-  # avoid redundant legends entries
-  # -------------------------------
-  # remove alpha from a color entry
-  rm_alpha <- function(x) {
-    if (length(x) == 0) return(x)
-    pat <- "^rgba\\("
-    if (!grepl(pat, x)) return(x)
-    sub(",\\s*[0]?[.]?[0-9]+\\)$", ")", sub(pat, "rgb(", x))
-  }
-  # convenient for extracting name/value of legend entries (ignoring alpha)
-  entries <- function(x, y) {
-    z <- try(x[[y]], silent = TRUE)
-    if (inherits(z, "try-error")) {
-      paste0(x$name, "-")
-    } else {
-      paste0(x$name, "-", rm_alpha(z))
-    }
-  }
-  fill_set <- unlist(lapply(merged.traces, entries, "fillcolor"))
-  line_set <- unlist(lapply(merged.traces, entries, c("line", "color")))
-  mark_set <- unlist(lapply(merged.traces, entries, c("marker", "color")))
-  mode_set <- lapply(merged.traces, "[[", "mode")
-  legend_intersect <- function(x, y) {
-    i <- intersect(x, y)
-    # restrict intersection to valid legend entries
-    i[grepl("-rgb[a]?\\(", i)]
-  }
-  # if there is a mark & line legend, get rid of line
-  t1 <- line_set %in% legend_intersect(mark_set, line_set)
-  # that is, unless the mode is 'lines+markers'...
-  t1 <- t1 & !(mode_set %in% "lines+markers")
-  # if there is a mark & fill legend, get rid of fill
-  t2 <- fill_set %in% legend_intersect(mark_set, fill_set)
-  # if there is a line & fill legend, get rid of fill
-  t3 <- fill_set %in% legend_intersect(line_set, fill_set)
-  t <- t1 | t2 | t3
-  for (m in seq_along(merged.traces)) 
-    if (isTRUE(merged.traces[[m]]$showlegend && t[m]))
-      merged.traces[[m]]$showlegend <- FALSE
   
-  # Put the traces in correct order, according to any manually
-  # specified scales. This seems to be repetitive with the trace$rank
-  # attribute in layer2traces (which is useful for sorting traces that
-  # get different legend entries but come from the same geom, as in
-  # test-ggplot-legend.R), but in fact this is better since it could
-  # be used for sorting traces that come from different geoms
-  # (currently we don't have a test for this). TODO: write such a
-  # test, delete the trace$rank code, and have it work here instead.
+  #gglayout$legend <- list(
+  #  bordercolor = "transparent", 
+  #  bgcolor = toRGB(theme$legend.background$fill),
+  #  x = 1.01, 
+  #  y = 0.075 * 0.5* length(trace.list) + 0.45,
+  #  xref="paper", yref="paper",
+  #  # these should always be "center"?
+  #  xanchor = "center", 
+  #  yanchor = "center",
+  #  font = text2font(theme$legend.text)
+  #)
   
-  #trace.order <- unlist(merged.traces)
-  #ordered.traces <- if(length(trace.order)){
-  #  trace.order.score <- seq_along(trace.order)
-  #  names(trace.order.score) <- trace.order
-  #  trace.name <- sapply(merged.traces, "[[", "name")
-  #  trace.score <- trace.order.score[trace.name]
-  #  merged.traces[order(trace.score)]
-  #}else{
-  #  merged.traces
+  #mode.mat <- matrix(NA, 3, 3)
+  #rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
+  #mode.mat["markers", "lines"] <-
+  #  mode.mat["lines", "markers"] <- "lines+markers"
+  #mode.mat["markers", "none"] <- mode.mat["none", "markers"] <- "markers"
+  #mode.mat["lines", "none"] <- mode.mat["none", "lines"] <- "lines"
+  #merged.traces <- list()
+  #not.merged <- trace.list
+  #while(length(not.merged)){
+  #  tr <- not.merged[[1]]
+  #  not.merged <- not.merged[-1]
+  #  # Are there any traces that have not yet been merged, and can be
+  #  # merged with tr?
+  #  can.merge <- logical(length(not.merged))
+  #  for(other.i in seq_along(not.merged)){
+  #    other <- not.merged[[other.i]]
+  #    criteria <- c()
+  #    for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
+  #      other.attr <- other[[must.be.equal]]
+  #      tr.attr <- tr[[must.be.equal]]
+  #      criteria[[must.be.equal]] <- 
+  #        isTRUE(all.equal(other.attr, tr.attr)) && 
+  #        unique(other$type, tr$type) == "scatter"
+  #    }
+  #    if(all(criteria)){
+  #      can.merge[[other.i]] <- TRUE
+  #    }
+  #  }
+  #  to.merge <- not.merged[can.merge]
+  #  not.merged <- not.merged[!can.merge]
+  #  for(other in to.merge){
+  #    new.mode <- tryCatch({
+  #      mode.mat[tr$mode, other$mode]
+  #    }, error=function(e){
+  #      NA
+  #    })
+  #    if(is.character(new.mode) && !is.na(new.mode %||% NA)){
+  #      tr$mode <- new.mode
+  #    }
+  #    attrs <- c("error_x", "error_y", "marker", "line")
+  #    for(attr in attrs){
+  #      if(!is.null(other[[attr]]) && is.null(tr[[attr]])){
+  #        tr[[attr]] <- other[[attr]]
+  #      }
+  #    }
+  #  }
+  #  merged.traces[[length(merged.traces)+1]] <- tr
   #}
   
-  # If coord_flip is defined, then flip x/y in each trace, and in
-  # each axis.
-  coord_cl <- sub("coord", "", tolower(class(built$plot$coordinates)))
-  if ("flip" %in% coord_cl) {
-    if (has_facet()) warning("coord_flip + facet conversion not supported by plotly")
-    for (i in seq_along(merged.traces)) {
-      x <- merged.traces[[i]]$x
-      y <- merged.traces[[i]]$y
-      merged.traces[[i]]$x <- y
-      merged.traces[[i]]$y <- x
-      if (isTRUE(tr[["type"]] == "bar")) {
-        merged.traces[[i]]$orientation <- "h"
-      }
-    }
-    x <- layout[["xaxis"]]
-    y <- layout[["yaxis"]]
-    layout[["xaxis"]] <- y
-    layout[["yaxis"]] <- x
-  }
-  yAxisText <- theme.pars[["axis.text.y"]] %||% theme.pars[["axis.text"]]
-  xAxisText <- theme.pars[["axis.text.x"]] %||% theme.pars[["axis.text"]]
-  stripText <- theme.pars[["strip.text.x"]] %||% theme.pars[["strip.text"]]
-  gglayout$tMargin <- ifelse(
-    gglayout$ROW > 1 & inherits(p$facet, "wrap"), 
+  
+  # add space for axis/facet strip text
+  # TODO: move this up?
+  yAxisText <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
+  xAxisText <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
+  stripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
+  panel$layout$tMargin <- ifelse(
+    panel$layout$ROW > 1 & inherits(p$facet, "wrap"), 
     unit2pixels(stripText$size) * 2.1, 
     0
   )
-  gglayout$rMargin <- ifelse(
-    gglayout$COL < max(gglayout$COL) & isTRUE(p$facet$free$y),
+  panel$layout$rMargin <- ifelse(
+    panel$layout$COL < nCols & isTRUE(p$facet$free$y),
     unit2pixels(yAxisText$size) * 1.5, 
     0
   )
-  gglayout$bMargin <- ifelse(
-    gglayout$ROW < max(gglayout$ROW) & isTRUE(p$facet$free$x),
+  panel$layout$bMargin <- ifelse(
+    panel$layout$ROW < nRows & isTRUE(p$facet$free$x),
     unit2pixels(xAxisText$size) * 2.1,
     0
   )
-  gglayout$lMargin <- ifelse(
-    gglayout$COL > 1 & isTRUE(p$facet$free$y), 
+  panel$layout$lMargin <- ifelse(
+    panel$layout$COL > 1 & isTRUE(p$facet$free$y), 
     unit2pixels(yAxisText$size) * 1.5, 
     0
   )
-  for (i in seq_len(npanels)) {
-    lay <- gglayout[i, ]
-    layout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin)
-    layout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin)
-    layout$xaxes[[i]] <- ifelse(npanels == 1, list(lay$xaxis), lay$xaxis)
-    layout$yaxes[[i]] <- ifelse(npanels == 1, list(lay$yaxis), lay$yaxis)
+  for (i in seq_len(nPanels)) {
+    lay <- panel$layout[i, ]
+    gglayout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin)
+    gglayout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin)
+    gglayout$xaxes[[i]] <- ifelse(nPanels == 1, list(lay$xaxis), lay$xaxis)
+    gglayout$yaxes[[i]] <- ifelse(nPanels == 1, list(lay$yaxis), lay$yaxis)
   }
-  l <- list(data = merged.traces, layout = layout)
+  l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$width <- width
@@ -677,68 +503,24 @@ gg2list <- function(p, width = NULL, height = NULL) {
 
 
 #-----------------------------------------------------------------------------
-# ggplotly 'utility' functions (and floating variables :/ )
+# ggplotly 'utility' functions
 #-----------------------------------------------------------------------------
 
-# calc. the epoch
-now <- Sys.time()
-the.epoch <- now - as.numeric(now)
-
-# ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
-# we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
-# from R, but it seems 96 is a reasonable assumption.
-mm2pixels <- function(mm) { 
-  (mm * 96) / 25.4 
-}
-
-# TODO: the correct way to convert sizes would be to send 'npc' (0, 1)
-# units to the browser & use HTMLwidget's resize method to scale everything
-# to the display. This would work fine locally, but wouldn't work when 
-# posting figures to the server.
-
-aesConverters <- list(
-  linetype = function(lty) {
-    lty2dash[as.character(lty)]
-  },
-  colour = function(col) {
-    toRGB(col)
-  },
-  size = mm2pixels,
-  sizeref = identity,
-  sizemode = identity,
-  alpha = identity,
-  shape = function(pch) {
-    pch2symbol[as.character(pch)]
-  },
-  direction = identity
+# aesthetics that should have a trace for each unique value
+markSplit <- list(
+  GeomBoxplot = "x",
+  GeomPoint = c("colour", "fill", "shape"),
+  GeomPath = c("linetype", "size", "colour", "shape"),
+  GeomPolygon = c("colour", "fill", "linetype", "size"),
+  GeomBar = c("colour", "fill"),
+  GeomDensity = c("colour", "fill", "linetype"),
+  GeomBoxplot = c("colour", "fill", "size"),
+  GeomErrorbar = c("colour", "linetype"),
+  GeomErrorbarh = c("colour", "linetype"),
+  GeomArea = c("colour", "fill"),
+  GeomStep = c("linetype", "size", "colour"),
+  GeomText = c("colour")
 )
-
-# NOTE: Do we also want to split on size?
-# Legends based on sizes not implemented yet in Plotly
-#  list(point=c("colour", "fill", "shape", "size"),
-markLegends <- list(
-  point = c("colour", "fill", "shape"),
-  path = c("linetype", "size", "colour", "shape"),
-  ## NOTE: typically "group" should not be present here, since
-  ## that would mean creating a separate plotly legend for each
-  ## group, even when they have the exact same visual
-  ## characteristics and could be drawn using just 1 trace!
-  polygon = c("colour", "fill", "linetype", "size"),
-  bar = c("colour", "fill"),
-  density = c("colour", "fill", "linetype"),
-  boxplot = c("colour", "fill", "size"),
-  errorbar = c("colour", "linetype"),
-  errorbarh = c("colour", "linetype"),
-  area = c("colour", "fill"),
-  step = c("linetype", "size", "colour"),
-  text = c("colour")
-)
-
-markUnique <- as.character(unique(unlist(markLegends)))
-
-markSplit <- markLegends
-markSplit$boxplot <- "x"
-
 
 # convert an aribitrary grid unit to pixels
 unit2pixels <- function(u) {
@@ -746,6 +528,13 @@ unit2pixels <- function(u) {
   # most ggplot2 sizes seem to use points
   if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
   mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
+}
+
+# ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
+# we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
+# from R, but it seems 96 is a reasonable assumption.
+mm2pixels <- function(mm) { 
+  (mm * 96) / 25.4 
 }
 
 # detect a blank theme element
@@ -756,17 +545,6 @@ is_blank <- function(x) {
 # obtain the "type" of geom/position/etc.
 type <- function(x, y) {
   sub(y, "", tolower(class(x[[y]])[[1]]))
-}
-
-guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
-                                   "color", "colour", "size", "linetype")) {
-  sc <- as.list(p$scales)$scales
-  nms <- lapply(sc, "[[", "name")
-  if (length(nms) > 0) {
-    names(nms) <- lapply(sc, "[[", "aesthetics")
-    if (is.null(unlist(nms))) {nms <- list()}
-  }
-  unlist(modifyList(p$labels[names(p$labels) %in% aes], nms))
 }
 
 # given text, and x/y coordinates on 0-1 scale, 
@@ -849,8 +627,9 @@ bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
 
-re_scale <- function(axisObj, discrete = TRUE) {
-  if (discrete) {
+re_scale <- function(axisObj, scale) {
+  cl <- class(scale)
+  if ("ScaleDiscrete" %in% cl) {
     axisObj$type <- "category"
     axisObj$range <- axisObj$ticktext
     axisObj$autorange <- TRUE
@@ -876,4 +655,10 @@ to_milliseconds <- function(x, warn = FALSE) {
     if (warn) warning("Expected a date or datetime")
   }
   x
+}
+
+# if a vector has one unique value, return that value
+uniq <- function(x) {
+  u <- unique(x)
+  if (length(u) == 1) u else x
 }
