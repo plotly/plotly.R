@@ -12,15 +12,15 @@ HTMLWidgets.widget({
   
    /*
     When you view a normal ggplot2 plot, and resize your graphics device,
-    the graph 'domains' change, but everything else is fixed (I think).
+    the graph 'domains' change, but everything else is fixed.
     This only matters when we have more than one panel, free scales,
-    and/or interior facet strips, since our only option is add space in axis
+    and/or facet strips, since our only option is add space in axis
     domains (measured on a 0-1 scale)
    */
   
   resize: function(el, width, height, instance) {
-    instance.width = width;
-    instance.height = height;
+    instance.layout.width = width;
+    instance.layout.height = height;
     this.renderValue(el, undefined, instance);
   },  
   
@@ -28,27 +28,37 @@ HTMLWidgets.widget({
     
     var graphDiv = document.getElementById(el.id);
     
+    // function to reduce `layout.axisid.domain` by `layout.axisid.margins` 
+    // (if specified)
     var alterDomain = function(layout) {
+      // pixels -> 0-1 scale
       var xNorm = function(x) { return x / instance.width };
-      var xAxes = layout.xaxes || [];
-      for (i = 0; i <= xAxes.length - 1; i++) {
-        var x = layout[xAxes[i]];
-        // translate pixels to 0-1 scale
-        x.margins = x.margins.map(xNorm);
-        layout[xAxes[i]].domain = [
-          x.domain[0] + x.margins[0], 
-          x.domain[1] - x.margins[1]
-        ];
-      }
       var yNorm = function(x) { return x / instance.height };
-      var yAxes = layout.yaxes || [];
-      for (i = 0; i <= yAxes.length - 1; i++) {
-        var y = layout[yAxes[i]];
-        y.margins = y.margins.map(yNorm);
-        layout[yAxes[i]].domain = [
-          y.domain[0] + y.margins[0], 
-          y.domain[1] - y.margins[1]
-        ];
+      var layoutKeys = Object.keys(layout);
+      for (i = 0; i <= layoutKeys.length - 1; i++) {
+        // adjust x domain
+        if (layoutKeys[i].match(/^xaxis/)) {
+          var x = layout[layoutKeys[i]];
+          if (x !== undefined && x.hasOwnProperty("margins")) {
+            var xMargins = x.margins.map(xNorm);
+            layout[layoutKeys[i]].domain = [
+              x.domain[0] + xMargins[0], 
+              x.domain[1] - xMargins[1]
+            ];
+          }
+        }
+        // adjust y domain
+        if (layoutKeys[i].match(/^yaxis/)) {
+          var y = layout[layoutKeys[i]];
+          if (y !== undefined && y.hasOwnProperty("margins")) {
+            var yMargins = y.margins.map(yNorm);
+            layout[layoutKeys[i]].domain = [
+              y.domain[0] + yMargins[0], 
+              y.domain[1] - yMargins[1]
+            ];
+          }
+        }
+        
       }
       return layout;
     };
@@ -58,24 +68,28 @@ HTMLWidgets.widget({
       instance.plot = true;
       // attach layout to the instance so we can access it during a resize event
       instance.layout = x.layout;
+      // TODO: get rid of me when you figure out Plotly.relayout()
+      instance.data = x.data;
       // make sure plots don't get created outside the network
       window.PLOTLYENV = window.PLOTLYENV || {};
       window.PLOTLYENV.BASE_URL = x.base_url;
       Plotly.plot(graphDiv, x.data, alterDomain(x.layout), x.config);
+      console.log("plot");
       
-    // resize event
     } else if (x === undefined) {
-      // TODO: why are the annotations being removed?
+      // TODO: use Plotly.relayout() instead of Plotly.newPlot()
+      // For some reason, even this was throwing an TypeError:
+      // Plotly.relayout(graphDiv, {title: "hi there" })
+      // Uncaught TypeError: Cannot read property 'selectAll' of undefined(…)
+      //var lay = instance.layout;
       console.log(instance.layout);
-      var lay = alterDomain(instance.layout);
-      console.log(lay);
-      Plotly.relayout(graphDiv, lay);
-    // render a new plot if in, e.g., a shiny context
+      Plotly.newPlot(graphDiv, instance.data, alterDomain(instance.layout));
+      //instance.layout = lay;
+      
     } else {
       Plotly.newPlot(graphDiv, x.data, x.layout);
     }
+    
   }
-  
-  
   
 });

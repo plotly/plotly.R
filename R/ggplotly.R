@@ -38,11 +38,8 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL) {
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL) {
-  # We need access to internal ggplot2 functions in several places
-  # this helps us import functions in a way that R CMD check won't cry about
-  ggfun <- function(x) getFromNamespace(x, "ggplot2")
   # ------------------------------------------------------------------------
-  # Our internal version of ggplot2::ggplot_build(). Taken from
+  # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
   p <- ggfun("plot_clone")(p)
@@ -90,18 +87,27 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # end of ggplot_build(), start of layer -> trace conversion
   # ------------------------------------------------------------------------
   
+  nPanels <- nrow(panel$layout)
+  nRows <- max(panel$layout$ROW)
+  nCols <- max(panel$layout$COL)
+  
   # for consistency in the layout data structure across grid/wrap
   if (!inherits(p$facet, "wrap")) {
     panel$layout$AXIS_X <- panel$layout$ROW == nRows
     panel$layout$AXIS_Y <- panel$layout$COL == 1
   }
-  # domains/anchor for each panel
+  # panel -> plotly.js axis info
   panel$layout$xaxis <- with(panel$layout, ifelse(AXIS_X, PANEL, COL))
   panel$layout$xaxis <- paste0("xaxis", sub("1", "", panel$layout$xaxis))
   panel$layout$yaxis <- with(panel$layout, ifelse(AXIS_Y, PANEL, ROW))
   panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
+  # panel -> plotly.js axis anchor info
+  panel$layout$xanchor <- with(panel$layout, ifelse(AXIS_X, PANEL, nRows))
+  panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
+  panel$layout$yanchor <- with(panel$layout, ifelse(AXIS_Y, PANEL, 1))
+  panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
   
-  # merge the panel -> axis info with each _layer_ of data
+  # merge the panel/axis info with each _layer_ of data
   lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
   lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
   lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
@@ -136,29 +142,25 @@ gg2list <- function(p, width = NULL, height = NULL) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
   }
   # Translate plot wide theme elements to plotly.js layout
-  pm <- unit2pixels(theme$plot.margin)
+  pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
     margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
     plot_bgcolor = toRGB(theme$panel.background$fill),
     paper_bgcolor = toRGB(theme$plot.background$fill),
     # global font (all other font objects inherit from it)
-    font = text2font(theme$text),
-    # Main plot title.
-    title = faced(p$labels$title, theme$plot.title$face),
-    titlefont = text2font(theme$plot.title)
+    font = text2font(theme$text)
   )
-  
-  if (nchar(gglayout[["title"]] %||% "") > 0) {
+  # main plot title
+  if (nchar(p$labels$title %||% "") > 0) {
+    gglayout$title <- faced(p$labels$title, theme$plot.title$face)
+    gglayout$titlefont <- text2font(theme$plot.title)
+    # TODO: account for theme$plot.margin$margin here as well?
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
   
-  nPanels <- nrow(panel$layout)
-  nRows <- max(panel$layout$ROW)
-  nCols <- max(panel$layout$COL)
-  
   # domains are actually dynamically computed (see inst/htmlwidgets/plotly.js)
   # this assumes no margins (sorry plotly_POST()) but we'll adjust later
-  doms <- get_domains(nPanels, nRows, rep(0, 4))
+  doms <- get_domains(nPanels, nRows, 0)
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
@@ -177,9 +179,8 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # create another axis object just for the minor grid?
       # (2) translate panel.border to a rect shape
       # (3) Does it make sense to translate other theme elements?
-      
       axisName <- lay[, paste0(xy, "axis")]
-      anchor <- sub("axis", "", lay[, paste0(setdiff(c("x", "y"), xy), "axis")])
+      anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
       
       sc <- scales$get_scales(xy)
@@ -196,16 +197,15 @@ gg2list <- function(p, width = NULL, height = NULL) {
         tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
-        ticklen = unit2pixels(theme$axis.ticks.length),
-        # TODO: convert this size? Is this in points? If so, be careful to check length b4 using grid::unit()
-        tickwidth = axisTicks$size,
+        ticklen = unitConvert(theme$axis.ticks.length, "pixels", "height"),
+        tickwidth = unitConvert(axisTicks$size, "pixels", "height"),
         showticklabels = TRUE,
         tickfont = text2font(axisText),
         tickangle = -axisText$angle,
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
         # TODO: convert this size? Is this in points?
-        linewidth = axisLine$size,
+        linewidth = unitConvert(axisLine$size, "pixels", "width"),
         showgrid = !is_blank(panelGrid),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
@@ -229,21 +229,19 @@ gg2list <- function(p, width = NULL, height = NULL) {
         # (plotly.js has no sense of padding between ticks and ticktext)
         idx <- if (xy == "x") 3 else 4
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
-          unit2pixels(axisTitle$margin[idx]) + 
-          unit2pixels(axisText$margin[idx]) + 
+          unitConvert(axisTitle$margin %||% rep(0, 4), "pixels")[idx] + 
+          unitConvert(axisText$margin %||% rep(0, 4), "pixels")[idx] + 
           with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
           axisObj$titlefont$size
       }
       
     } # axis loop
-    
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     
     # facet strips -> plotly annotations
     # TODO: 
-    # (1) use a rect shape for the strip background!
-    # (2) use p$facet$labeller for the actual strip text!
+    # (1) use p$facet$labeller for the actual strip text!
     if (inherits(p$facet, "grid") && lay$COL == nCols) {
       txt <- paste(
         lay[, as.character(p$facet$rows)], 
@@ -255,6 +253,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
         xanchor = "center", yanchor = "bottom"
       )
       gglayout$annotations <- c(gglayout$annotations, lab)
+      # draw the strip label as a rect shape
+      strip <- make_strip_rect(xdom, ydom, theme, "right")
+      gglayout$shapes <- c(gglayout$shapes, strip)
     }
     
     if (inherits(p$facet, "wrap") || 
@@ -270,6 +271,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
         xanchor = "center", yanchor = "bottom"
       )
       gglayout$annotations <- c(gglayout$annotations, lab)
+      # draw the strip label as a rect shape
+      strip <- make_strip_rect(xdom, ydom, theme, "top")
+      gglayout$shapes <- c(gglayout$shapes, strip)
     }
   }   # panel loop
   
@@ -278,9 +282,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
     # (other rows are accounted for in the axes domains)
     xStripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
     yStripText <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
-    gglayout$margin$t <- gglayout$margin$t + unit2pixels(xStripText$size)
+    gglayout$margin$t <- gglayout$margin$t + unitConvert(xStripText$size, "pixels", "height")
     if (inherits(p$facets, "grid")) {
-      gglayout$margin$r <- gglayout$margin$r + unit2pixels(xStripText$size)
+      gglayout$margin$r <- gglayout$margin$r + unitConvert(xStripText$size, "pixels", "height")
     }
     # each axis should _not_ have it's own title!
     #yAxes <- layout[grepl("^yaxis", names(layout))]
@@ -384,18 +388,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
     # (2) position guide(s)?
     # (3) 
     
-    # legend position is always determined by an x/y pair
-    #theme$legend.position <- if (is.numeric(theme$legend.position)) {
-    #  theme$legend.position
-    #} else {
-    #  switch(
-    #    left = c(0, 0.5),
-    #    right = c(),
-    #    bottom = c(),
-    #    top = c()
-    #  )
-    #}
-    
   }
   
   
@@ -468,30 +460,34 @@ gg2list <- function(p, width = NULL, height = NULL) {
   stripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
   panel$layout$tMargin <- ifelse(
     panel$layout$ROW > 1 & inherits(p$facet, "wrap"), 
-    unit2pixels(stripText$size) * 2.1, 
+    unitConvert(stripText$size, "pixels", "height") * 2.1, 
     0
   )
   panel$layout$rMargin <- ifelse(
     panel$layout$COL < nCols & isTRUE(p$facet$free$y),
-    unit2pixels(yAxisText$size) * 1.5, 
+    unitConvert(yAxisText$size, "pixels", "height") * 1.5, 
     0
   )
   panel$layout$bMargin <- ifelse(
     panel$layout$ROW < nRows & isTRUE(p$facet$free$x),
-    unit2pixels(xAxisText$size) * 2.1,
+    unitConvert(xAxisText$size, "pixels", "height") * 2.1,
     0
   )
   panel$layout$lMargin <- ifelse(
     panel$layout$COL > 1 & isTRUE(p$facet$free$y), 
-    unit2pixels(yAxisText$size) * 1.5, 
+    unitConvert(yAxisText$size, "pixels", "height") * 1.5, 
     0
   )
+  # note that `layout.axisid.margins` is not a plotly.js property
+  # but is used in the HTMLwidget.resize() method for dynamic resizing
+  # the margins are measured in pixels here, but are normalized to a 0-1
+  # scale based on the height/width of the client window.
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
-    gglayout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin)
-    gglayout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin)
-    gglayout$xaxes[[i]] <- ifelse(nPanels == 1, list(lay$xaxis), lay$xaxis)
-    gglayout$yaxes[[i]] <- ifelse(nPanels == 1, list(lay$yaxis), lay$yaxis)
+    gglayout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin) +
+      unitConvert(theme$panel.margin.x %||% theme$panel.margin, "pixels")
+    gglayout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin) +
+      unitConvert(theme$panel.margin.y %||% theme$panel.margin, "pixels")
   }
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
@@ -522,20 +518,62 @@ markSplit <- list(
   GeomText = c("colour")
 )
 
-# convert an aribitrary grid unit to pixels
-unit2pixels <- function(u) {
-  if (!length(u)) return(0)
-  # most ggplot2 sizes seem to use points
-  if (is.null(attr(u, "unit"))) u <- grid::unit(u, "points")
-  mm2pixels(as.numeric(grid::convertUnit(u, "mm")))
+# convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
+unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
+  u <- verifyUnit(u)
+
+  convert <- switch(
+    type[1], 
+    x = grid::convertX,
+    y = grid::convertY,
+    width = grid::convertWidth,
+    height = grid::convertHeight
+  )
+  
+  # convert everything to npc first
+  if (inherits(u, "margin")) {
+    # margins consist of 4 parts: top, right, bottom, and left
+    u[1] <- grid::convertHeight(u[1], "npc")
+    u[2] <- grid::convertWidth(u[2], "npc")
+    u[3] <- grid::convertHeight(u[3], "npc")
+    u[4] <- grid::convertWidth(u[4], "npc")
+  } else {
+    u <- convert(u, "npc")
+  }
+  
+  if (to[1] == "pixels") {
+    if (inherits(u, "margin")) {
+      u[1] <- mm2pixels(grid::convertHeight(u[1], "mm"))
+      u[2] <- mm2pixels(grid::convertWidth(u[2], "mm"))
+      u[3] <- mm2pixels(grid::convertHeight(u[3], "mm"))
+      u[4] <- mm2pixels(grid::convertWidth(u[4], "mm"))
+    } else {
+      u <- mm2pixels(convert(u, "mm"))
+    }
+  }
+  as.numeric(u)
 }
 
 # ggplot2 size is in millimeters. plotly is in pixels. To do this correctly, 
 # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
 # from R, but it seems 96 is a reasonable assumption.
-mm2pixels <- function(mm) { 
-  (mm * 96) / 25.4 
+mm2pixels <- function(u) {
+  u <- verifyUnit(u)
+  if (attr(u, "unit") != "mm") {
+    stop("Unit must be in millimeters")
+  }
+  (as.numeric(u) * 96) / 25.4 
+} 
+
+verifyUnit <- function(u) {
+  u <- u %||% 0
+  # the default unit in ggplot2 is millimeters
+  if (is.null(attr(u, "unit"))) {
+    u <- grid::unit(u, "mm")
+  }
+  u
 }
+
 
 # detect a blank theme element
 is_blank <- function(x) {
@@ -608,7 +646,7 @@ text2font <- function(x = ggplot2::element_text()) {
   list(
     color = toRGB(x$colour),
     family = x$family,
-    size = if (length(x$size)) unit2pixels(x$size) else 0
+    size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", "height")
   )
 }
 
@@ -661,4 +699,39 @@ to_milliseconds <- function(x, warn = FALSE) {
 uniq <- function(x) {
   u <- unique(x)
   if (length(u) == 1) u else x
+}
+
+# We need access to internal ggplot2 functions in several places
+# this helps us import functions in a way that R CMD check won't cry about
+ggfun <- function(x) getFromNamespace(x, "ggplot2")
+
+make_strip_rect <- function(xdom, ydom, theme, side = "top") {
+  rekt <- list(
+    type = "rect",
+    fillcolor = toRGB(theme[["strip.background"]]$fill),
+    line = list(color = "transparent"),
+    yref = "paper",
+    xref = "paper"
+  )
+  stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
+  stripTextX <- unitConvert(stripTextX$size, "npc", "height")
+  stripTextY <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
+  stripTextY <- unitConvert(stripTextY$size, "npc", "height")
+  panelMarginX <- theme[["panel.margin.x"]] %||% theme[["panel.margin"]]
+  panelMarginX <- unitConvert(panelMarginX, "npc", "height")
+  panelMarginY <- theme[["panel.margin.y"]] %||% theme[["panel.margin"]]
+  panelMarginY <- unitConvert(panelMarginY, "npc", "height")
+  if ("right" %in% side) {
+    rekt$x0 <- xdom[2] 
+    rekt$x1 <- xdom[2] 
+    rekt$y0 <- ydom[1]
+    rekt$y1 <- ydom[2]
+  }
+  if ("top" %in% side) {
+    rekt$x0 <- xdom[1] + panelMarginX
+    rekt$x1 <- xdom[2] - panelMarginX
+    rekt$y0 <- ydom[2] - panelMarginY
+    rekt$y1 <- ydom[2] + panelMarginY + stripTextY
+  }
+  list(rekt)
 }

@@ -266,6 +266,7 @@ geom2trace.GeomPolygon <- function(data, params) {
 
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
+  shape <- uniq(data$shape %||% GeomPoint$default_aes$shape)
   L <- list(
     x = data$x,
     y = data$y,
@@ -274,20 +275,25 @@ geom2trace.GeomPoint <- function(data, params) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = uniq(data$fill %||% toRGB(GeomPoint$default_aes$fill)),
+      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
       opacity = uniq(data$alpha %||% 1),
       size = mm2pixels(uniq(data$size %||% GeomPoint$default_aes$size)),
-      symbol = pch2symbol(uniq(data$shape %||% GeomPoint$default_aes$shape)),
+      symbol = pch2symbol(shape),
       line = list(
         width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
-        color = uniq(data$colour %||% toRGB(GeomPoint$default_aes$colour))
+        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
       )
     )
   )
-  # pch=32 is a transparent circle
-  idx <- L$marker$symbol %in% 32
+  # fill is only relevant for pch=15:20
+  idx <- shape %in% 15:20
   if (any(idx)) {
-    L$marker$opacity[idx] <- 0
+    L$marker$color[idx] <- L$marker$line$color[idx]
+  }
+  # `marker.color` should actually be `marker.line.color` for pch != 
+  # pch=32 is a transparent circle
+  if (any(shape %in% 32)) {
+    L$marker$opacity[shape %in% 32] <- 0
   }
   L
 }
@@ -628,7 +634,7 @@ pch2symbol <- function(x) {
     "O" = "circle-open",
     "+" = "cross-thin-open"
   )
-  as.character(lookup[x])
+  as.character(lookup[as.character(x)])
 }
 
 # Convert R lty line type codes to plotly "dash" codes.
@@ -661,5 +667,5 @@ lty2dash <- function(x) {
     "224282F2" = "dash",
     "F1" = "dash"
   )
-  as.character(lookup[x])
+  as.character(lookup[as.character(x)])
 }
