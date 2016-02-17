@@ -42,7 +42,7 @@ to_basic.GeomViolin <- function(data, prestats_data, ...) {
     "Converting to boxplot instead.",
     call. = FALSE
   )
-  to_basic.Geomboxplot(data, prestats_data)
+  to_basic.GeomBoxplot(data, prestats_data)
 }
 
 #' @export
@@ -55,6 +55,14 @@ to_basic.GeomBoxplot <- function(data, prestats_data, ...) {
   }
   prefix_class(prestats_data, "GeomBoxplot")
 }
+
+##' @export
+#to_basic.GeomSmooth <- function(data, prestats_data, ...) {
+#  list(
+#    prefix_class(data, "GeomPath"),
+#    prefix_class(data, "GeomRibbon")
+#  )
+#}
 
 #' @export
 to_basic.GeomSegment <- function(data, prestats_data, ...) {
@@ -233,10 +241,6 @@ geom2trace.GeomBlank <- function(data, params) {
 
 #' @export
 geom2trace.GeomPath <- function(data, params) {
-  # when converting ggplot2 size to plotly size, we assume size is an _area_,
-  # but "size" for lines really means linewidth, so size is a _length_ in this case
-  # (see aesConverters$size)
-  params$size <- ifelse(params$size < 1, params$size ^ 2, sqrt(params$size))
   list(
     x = data$x,
     y = data$y,
@@ -244,23 +248,14 @@ geom2trace.GeomPath <- function(data, params) {
     text = data$text,
     type = "scatter",
     mode = "lines",
-    line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes)
-  )
-}
-
-#' @export
-geom2trace.GeomPolygon <- function(data, params) {
-  data <- group2NA(data, "polygon")
-  list(
-    x = data$x,
-    y = data$y,
-    name = params$name,
-    text = data$text,
-    type = "scatter",
-    mode = "lines",
-    line = paramORdefault(params, aes2line, ggplot2::GeomPolygon$default_aes),
-    fill = "tozerox",
-    fillcolor = toRGB(params$fill, params$alpha)
+    line = list(
+      # TODO: 
+      # (1) track plotly.js issue for line.fill
+      # (2) What about alpha? Does that go in colour?
+      width = mm2pixels(uniq(data$size %||% GeomPath$default_aes$size)),
+      color = toRGB(uniq(data$colour %||% GeomPath$default_aes$colour)),
+      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
+    )
   )
 }
 
@@ -297,6 +292,32 @@ geom2trace.GeomPoint <- function(data, params) {
   }
   L
 }
+
+#' @export
+geom2trace.GeomPolygon <- function(data, params) {
+  list(
+    x = data$x,
+    y = data$y,
+    name = params$name,
+    text = data$text,
+    type = "scatter",
+    mode = "lines",
+    line = list(
+      # TODO: 
+      # (1) track plotly.js issue for line.fill
+      # (2) What about alpha? Does that go in colour?
+      width = mm2pixels(uniq(data$size %||% GeomPath$default_aes$size)),
+      color = toRGB(uniq(data$colour %||% GeomPath$default_aes$colour)),
+      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
+    ),
+    fill = "tozerox",
+    fillcolor = toRGB(
+      uniq(data$fill %||% GeomPolygon$default_aes$fill), 
+      uniq(data$alpha %||% GeomPolygon$default_aes$alpha)
+    )
+  )
+}
+
 
 #' @export
 geom2trace.GeomText <- function(data, params) {
@@ -470,10 +491,8 @@ geom2trace.GeomArea <- function(data, params) {
 
 #' @export
 geom2trace.GeomSmooth <- function(data, params) {
-  list(
-    geom2trace.line(data),
-    if (identical(params$se, FALSE)) geom2trace.ribbon(data) else NULL
-  )
+  #TODO: how to two geoms?
+  geom2trace.GeomPath(data, params)
 }
 
 #' @export

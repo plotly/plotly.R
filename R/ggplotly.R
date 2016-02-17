@@ -198,7 +198,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", "height"),
-        tickwidth = unitConvert(axisTicks$size, "pixels", "height"),
+        tickwidth = unitConvert(axisTicks$size, "pixels", "width"),
         showticklabels = TRUE,
         tickfont = text2font(axisText),
         tickangle = -axisText$angle,
@@ -224,15 +224,17 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # account for axis title/text in plot margins
       if (i == 1) {
         side <- if (xy == "x") "b" else "l"
-        way <- if (xy == "x") "v" else "h"
+        type <- if (xy == "x") "height" else "width"
         # just support _bottom_ x-axis text & _left_ y-axis margins
         # (plotly.js has no sense of padding between ticks and ticktext)
         idx <- if (xy == "x") 3 else 4
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
           unitConvert(axisTitle$margin %||% rep(0, 4), "pixels")[idx] + 
           unitConvert(axisText$margin %||% rep(0, 4), "pixels")[idx] + 
-          with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
-          axisObj$titlefont$size
+          unitConvert(axisText$size, "pixels", type) +
+          unitConvert(axisTicks$size, "pixels", type)
+          # nice idea, but not right (yet)
+          #with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
       }
       
     } # axis loop
@@ -286,22 +288,25 @@ gg2list <- function(p, width = NULL, height = NULL) {
     if (inherits(p$facets, "grid")) {
       gglayout$margin$r <- gglayout$margin$r + unitConvert(xStripText$size, "pixels", "height")
     }
-    # each axis should _not_ have it's own title!
-    #yAxes <- layout[grepl("^yaxis", names(layout))]
-    #xAxes <- layout[grepl("^xaxis", names(layout))]
-    #yTickText <- lapply(yAxes, "[[", "ticktext")
-    #xTickText <- lapply(xAxes, "[[", "ticktext")
-    #yTickTextMax <- yTickText[max(nchar(yTickText))]
-    #xTickTextMax <- xTickText[max(nchar(xTickText))]
-    #yPad <- with(layout$yaxis, bbox(yTickTextMax, tickangle, pts2npc(tickfont$size))$h)
-    #xPad <- with(layout$xaxis, bbox(xTickTextMax, tickangle, pts2npc(tickfont$size))$v)
+    # each plot should only have _one_ axis title
     xAxisTitle <- theme[["axis.title.x"]] %||% theme[["axis.title"]]
     yAxisTitle <- theme[["axis.title.y"]] %||% theme[["axis.title"]]
     gglayout$annotations <- c(
       gglayout$annotations, 
-      # TODO: compute annotation positions in the client as well?
-      make_label(gglayout$xaxis$title, 0.5, 0, xAxisTitle, yanchor = "top"),
-      make_label(gglayout$yaxis$title, 0, 0.5, yAxisTitle, xanchor = "bottom")
+      make_label(
+        gglayout$xaxis$title, 
+        x = 0.5, 
+        y = 0 - unitConvert(gglayout$xaxis$titlefont$size, "npc", "height"),
+        el = xAxisTitle, 
+        yanchor = "bottom"
+      ),
+      make_label(
+        gglayout$yaxis$title, 
+        x = 0 - unitConvert(gglayout$yaxis$titlefont$size, "npc", "width"), 
+        y = 0.5, 
+        el = yAxisTitle, 
+        xanchor = "bottom"
+      )
     )
     gglayout <- strip_axis(gglayout, "title")
   }
@@ -709,16 +714,20 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   rekt <- list(
     type = "rect",
     fillcolor = toRGB(theme[["strip.background"]]$fill),
-    line = list(color = "transparent"),
+    line = list(
+      color = toRGB(theme[["strip.background"]]$colour),
+      width = unitConvert(theme[["strip.background"]]$size, "pixels", "height"),
+      linetype = lty2dash(theme[["strip.background"]]$linetype)
+    ),
     yref = "paper",
     xref = "paper"
   )
   stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-  stripTextX <- unitConvert(stripTextX$size, "npc", "height")
+  stripTextX <- unitConvert(stripTextX$size, "npc", "width")
   stripTextY <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
   stripTextY <- unitConvert(stripTextY$size, "npc", "height")
   panelMarginX <- theme[["panel.margin.x"]] %||% theme[["panel.margin"]]
-  panelMarginX <- unitConvert(panelMarginX, "npc", "height")
+  panelMarginX <- unitConvert(panelMarginX, "npc", "width")
   panelMarginY <- theme[["panel.margin.y"]] %||% theme[["panel.margin"]]
   panelMarginY <- unitConvert(panelMarginY, "npc", "height")
   if ("right" %in% side) {
