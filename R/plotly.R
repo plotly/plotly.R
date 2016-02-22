@@ -254,48 +254,54 @@ plotly_build <- function(l = last_plot()) {
   # this is ugly, but I think it is necessary, since we don't know how many 
   # traces we have until we evaluate args and call traceify() (or similar)
   x <- list()
-  for (i in seq_along(l$data)) {
-    d <- l$data[[i]]
+  x$data <- unlist(lapply(l$data, function(d) {
     if (should_eval(d)) {
       dat <- do_eval(d)
+      # put everything into a single trace
+      trace <- dat
+      trace[["indices"]] <- seq_along(trace[["x"]]) # indices of the original data elements used in the trace FIXME properly define data length
       # start processing specially named arguments
-      s <- dat[["size"]]
+      s <- trace[["size"]]
       if (!is.null(s)) {
         if (!is.numeric(s)) warning("size should be numeric", call. = FALSE)
         # if autosizing is used, guess that the plot is 300 by 600
-        auto <- dat[["layout"]][["autosize"]] %||% TRUE
+        auto <- trace[["layout"]][["autosize"]] %||% TRUE
         hw <- if (auto) c(300, 600)
-        else c(dat[["layout"]][["height"]], dat[["layout"]][["width"]])
+        else c(trace[["layout"]][["height"]], trace[["layout"]][["width"]])
         # ensure that markers cover 30% of the plot area
         m <- list(
           size = 0.3 * prod(hw) * (s/sum(s)),
           sizemode = "area"
         )
         # the marker object is the only type of object which respects size
-        dat[["marker"]] <- modifyList(dat[["marker"]] %||% list(), m)
+        trace[["marker"]] <- modifyList(trace[["marker"]] %||% list(), m)
         # either add some appropriate hover text
         txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
-        dat[["text"]] <- if (is.null(dat[["text"]])) txt else paste0(dat[["text"]], "<br>", txt)
+        trace[["text"]] <- if (is.null(trace[["text"]])) txt else paste0(trace[["text"]], "<br>", txt)
       }
-      has_color <- !is.null(dat[["color"]]) || 
-        isTRUE(!is.null(dat[["z"]]) && !dat[["type"]] %in% "scatter3d")
-      has_symbol <- !is.null(dat[["symbol"]])
-      has_group <- !is.null(dat[["group"]])
+      has_color <- !is.null(trace[["color"]]) || 
+        isTRUE(!is.null(trace[["z"]]) && !trace[["type"]] %in% "scatter3d")
+      has_symbol <- !is.null(trace[["symbol"]])
+      has_group <- !is.null(trace[["group"]])
+      # put the whole dat into a single trace first
+      traces <- list(trace)
       if (has_color) {
         title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
-        x$data <- c(x$data, colorize(dat, title))
+        traces <- colorize(traces, dat, title)
       }
       # TODO: add a legend title (is this only possible via annotations?!?)
-      if (has_symbol) x$data <- c(x$data, symbolize(dat))
-      if (has_group) x$data <- c(x$data, traceify(dat, "group"))
-      if (!has_color && !has_symbol && !has_group) x$data <- c(x$data, list(dat))
+      if (has_symbol) traces <- symbolize(traces, dat)
+      if (has_group) traces <- subdivide_traces(traces, dat, "group")
+      traces <- lapply(traces, function(trace) {#print(attributes(trace)); 
+        trace$indices<-NULL;
+      trace})
+      traces
     } else {
-      x$data <- c(x$data, list(d))
+      list(d)
     }
-  }
+  }), recursive=FALSE)
   # it's possible have nested layouts (e.g., plot_ly() %>% layout() %>% layout())
-  nms <- names(l$layout)
-  idx <- nms %in% "layout"
+  idx <- names(l$layout) %in% "layout"
   l$layout <- c(list(l$layout[!idx]), setNames(l$layout[idx], NULL))
   for (i in seq_along(l$layout)) {
     x$layout[[i]] <- perform_eval(l$layout[[i]])
@@ -333,7 +339,7 @@ plotly_build <- function(l = last_plot()) {
 }
 
 # returns a _list of traces_.
-colorize <- function(dat, title = "") {
+colorize <- function(traces, dat, title = "") {
   cols <- dat[["color"]] %||% dat[["z"]]
   if (is.numeric(cols)) {
     # by default, use viridis::viridis(10) -> http://rud.is/b/2015/07/20/using-the-new-viridis-colormap-in-r-thanks-to-simon-garnier/
@@ -348,17 +354,20 @@ colorize <- function(dat, title = "") {
       colorbar = list(title = as.character(title)),
       colorscale = setNames(df, NULL)
     )
-    # scatter-like traces can have both line and marker objects
-    if (grepl("scatter", dat[["type"]] %||% "scatter")) {
-      col_list$color <- cols
-      dat[["marker"]] <- modifyList(col_list, dat[["marker"]] %||% list())
-      #mode <- dat[["mode"]] %||% "markers+lines"
-      # can't have a colorscale for both markers and lines???
-      #dat[["line"]] <- modifyList(col_list, dat[["line"]] %||% list())
-    } else {
-      dat <- c(dat, col_list)
-    }
-    dat <- list(dat)
+    traces <- lapply(traces, function(trace) {
+      # scatter-like traces can have both line and marker objects
+      if (grepl("scatter", trace[["type"]] %||% "scatter")) {
+        trace[["marker"]] <- modifyList(col_list, trace[["marker"]] %||% list())
+        trace[["marker"]]$color <- cols[trace$indices]
+        #mode <- dat[["mode"]] %||% "markers+lines"
+        # can't have a colorscale for both markers and lines???
+        #dat[["line"]] <- modifyList(col_list, dat[["line"]] %||% list())
+      } else {
+        trace <- c(trace, col_list)
+      }
+      trace$color <- NULL; trace$colors <- NULL
+      trace
+    })
   } else { # discrete color scale
     lvls <- unique(cols)
     N <- length(lvls)
@@ -366,50 +375,75 @@ colorize <- function(dat, title = "") {
     else RColorBrewer::brewer.pal(N, "Set2")
     colors <- dat[["colors"]] %||% default
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
-    dat <- traceify(dat, "color")
-    dat <- Map(function(x, y) { x[["marker"]] <- c(x[["marker"]], list(color = y)); x }, 
-               dat, colz)
+    traces <- subdivide_traces(traces, dat, "color", function(sub_trace, lvl) {
+      sub_trace$marker <- c(sub_trace$marker, list(color = colz[lvl]))
+      sub_trace$color <- NULL
+      sub_trace$colors <- NULL
+      sub_trace
+    })
   }
-  dat <- lapply(dat, function(x) { x$color <- NULL; x$colors <- NULL; x })
-  dat
+  traces
 }
 
-symbolize <- function(dat) {
-  # symbols really only make sense when markers are in the mode, right?
-  dat$mode <- dat$mode %||% "markers"
-  dat <- traceify(dat, "symbol")
-  dat <- lapply(dat, function(x) { x$symbol <- NULL; x })
-  N <- length(dat)
+symbolize <- function(traces, dat) {
+  N <- length(unique(dat[["symbol"]]))
   if (N > 8) warning("Plotly supports 8 different symbols, but you have ", N, " levels!")
   symbols <- c('dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up')
-  sym <- dat[[1]][["symbols"]][seq_len(N)] %||% symbols[seq_len(N)]
-  dat <- Map(function(x, y) { x$marker$symbol <- y; x }, dat, sym)
-  dat
+  sym <- dat[["symbols"]][seq_len(N)] %||% symbols[seq_len(N)]
+  subdivide_traces(traces, dat, "symbol", function(trace, lvl) {
+    trace$symbol <- NULL
+    trace$marker <- c(trace$marker, list(symbol=sym[[lvl]]))
+    # symbols really only make sense when markers are in the mode, right?
+    trace$mode <- dat$mode %||% "markers"
+    trace
+  })
 }
 
-# break up a single trace into multiple traces according to values stored 
-# a particular key name
-traceify <- function(dat, nm = "group") {
-  x <- dat[[nm]]
+# break up each trace in a list into a smaller traces according to the values of
+# a given property and apply FUN to each resulting subtrace
+# FUN <- function(sub_trace, level_index) is a function taking the new sub-trace and
+# the corresponding index of the property value as its input and returning
+# the modified sub-trace
+subdivide_traces <- function(traces, dat, prop="group", FUN=function(trace, lvl) trace, ...){
+  x <- dat[[prop]]
   if (is.null(x)) {
-    return(list(dat))
-  } else {
-    # the order of lvls determines the order in which traces are drawn
-    # for ordered factors at least, it makes sense to draw the highest level first
-    # since that _should_ be the darkest color in a sequential pallette
-    lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
-    n <- length(x)
-    # recursively search for a non-list of appropriate length (if it is, subset it)
-    recurse <- function(z, n, idx) {
-      if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
-    }
-    new_dat <- list()
-    for (j in seq_along(lvls)) {
-      new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
-      new_dat[[j]]$name <- lvls[j]
-    }
-    return(new_dat)
+    return(traces) # property not found, no traces change
   }
+
+  # the order of lvls determines the order in which traces are drawn
+  # for ordered factors at least, it makes sense to draw the highest level first
+  # since that _should_ be the darkest color in a sequential pallette
+  lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
+  n <- length(x)
+
+  new_traces <- unlist(lapply(seq_along(lvls), function(lvl_ix) {
+    lvl <- lvls[[lvl_ix]]
+    indices <- which(x %in% lvl)
+
+    lvl_subtraces <- lapply(traces, function(trace){
+      mask <- trace$indices %in% indices
+      if (!any(mask)) return(NULL) # empty trace
+
+      trace_size <- length(mask)
+      # subset the properties that are subsettable
+      for (i in 1:length(trace)) {
+        # FIXME better check for subsettable property
+        tr_prop <- trace[[i]]
+        if ((is.vector(tr_prop) || is.factor(tr_prop)) && (length(tr_prop) == trace_size)) {
+          trace[[i]] <- tr_prop[mask]
+        }
+      }
+      if ("name" %in% names(trace)) {
+        # append lvl to an existing name
+        trace$name <- paste0(trace$name, '/', lvl)
+      } else {
+        trace$name <- lvl
+      }
+      FUN(trace, lvl_ix, ...) # customize subtrace
+    })
+  }), recursive=FALSE)
+  new_traces <- new_traces[!sapply(new_traces, is.null)]  # remove NULL subtraces
+  new_traces
 }
 
 axis_titles <- function(x, l) {
