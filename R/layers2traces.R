@@ -2,41 +2,59 @@
 layers2traces <- function(data, prestats_data, layers) {
   # attach a "geom class" to each layer of data for method dispatch 
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
-  # transform special case geoms into their "basic" counterpart
-  # (e.g., geom_line() is really geom_path() with data sorted by x)
-  data <- Map(to_basic, data, prestats_data)
+  # extract parameters for each layer
+  params <- lapply(layers, function(x) {
+    y <- c(x$geom_params, x$stat_params)
+    y[!duplicated(y)]
+  })
+  # mark special case geoms with their "basic" counterpart
+  # and transform the data, if necessary, for example:
+  # 1. geom_line() is really geom_path() with data sorted by x)
+  # 2. geom_smooth() is really geom_path() + geom_ribbon()
+  data <- Map(to_basic, data, prestats_data, params)
+  # since some layers are really two layers, we may need to replicate
+  # certain data/layers/params
+  datz <- list()
+  paramz <- list()
+  for (i in seq_along(data)) {
+    d <- data[[i]]
+    pm <- params[[i]]
+    if (inherits(d, "list")) {
+      pm <- replicate(length(d), pm, simplify = FALSE)
+    } else {
+      d <- list(d)
+    }
+    datz <- c(datz, d)
+    paramz <- c(paramz, pm)
+  }
   # each ggplot2 layer can be comprised of one or more plotly.js traces
   # so, we split each layer of data into chunks (one chunk per trace)
-  data <- lapply(data, function(x) {
+  datz <- lapply(datz, function(x) {
     idx <- names(x) %in% c(markSplit[[class(x)[1]]], "PANEL")
     idx <- idx & !sapply(x, anyNA)
     s <- interaction(as.list(x[idx]))
     split(x, s, drop = TRUE)
   })
-  params <- lapply(layers, function(x) {
-    y <- c(x$geom_params, x$stat_params)
-    y[!duplicated(y)]
-  })
   # convert each layer to a list of traces
-  trace.list <- lapply(data, function(x) lapply(x, geom2trace, params))
+  trace.list <- lapply(datz, function(x) lapply(x, geom2trace, paramz))
   # attach axis anchors for each trace
   Map(function(x, y) { 
     Map(function(s, t) { 
       s$xaxis <- unique(t$xaxis); s$yaxis <- unique(t$yaxis); s 
     }, x, y)
-  }, trace.list, data)
+  }, trace.list, datz)
 }
 
 # ---------------------------------------------------------------------------
 #' Convert a geom, which are special cases of other geoms, to "basic" geoms.
 #' --------------------------------------------------------------------------
 
-to_basic <- function(data, prestats_data, ...) {
+to_basic <- function(data, prestats_data, params, ...) {
   UseMethod("to_basic")
 }
 
 #' @export
-to_basic.GeomViolin <- function(data, prestats_data, ...) {
+to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
   warning(
     "plotly.js does not yet support violin plots. \n",
     "Converting to boxplot instead.",
@@ -46,7 +64,7 @@ to_basic.GeomViolin <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomBoxplot <- function(data, prestats_data, ...) {
+to_basic.GeomBoxplot <- function(data, prestats_data, params, ...) {
   # Preserve default colour values using fill:
   if (!is.null(data$fill)) {
     prestats_data$fill <- NULL
@@ -56,16 +74,28 @@ to_basic.GeomBoxplot <- function(data, prestats_data, ...) {
   prefix_class(prestats_data, "GeomBoxplot")
 }
 
-##' @export
-#to_basic.GeomSmooth <- function(data, prestats_data, ...) {
-#  list(
-#    prefix_class(data, "GeomPath"),
-#    prefix_class(data, "GeomRibbon")
-#  )
-#}
+#' @export
+to_basic.GeomSmooth <- function(data, prestats_data, params, ...) {
+  dat <- replace_class(data, "GeomPath", "GeomSmooth")
+  if (!identical(params$se, FALSE)) {
+    data$colour <- NULL
+    dat <- list(dat, prefix_class(ribbon_dat(data), "GeomPolygon"))
+  }
+  dat
+}
 
 #' @export
-to_basic.GeomSegment <- function(data, prestats_data, ...) {
+to_basic.GeomRibbon <- function(data, prestats_data, params, ...) {
+  prefix_class(ribbon_dat(data), "GeomPolygon")
+}
+
+#' @export
+to_basic.GeomPath <- function(data, prestats_data, params, ...) {
+  group2NA(data)
+}
+
+#' @export
+to_basic.GeomSegment <- function(data, prestats_data, params, ...) {
   # Every row is one segment, we convert to a line with several
   # groups which can be efficiently drawn by adding NA rows.
   data$group <- seq_len(nrow(data))
@@ -78,7 +108,7 @@ to_basic.GeomSegment <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomRect <- function(data, prestats_data, ...) {
+to_basic.GeomRect <- function(data, prestats_data, params, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
   g$data <- with(data, {
@@ -91,45 +121,34 @@ to_basic.GeomRect <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomRibbon <- function(data, prestats_data, ...) {
-  data <- ribbon_dat(data)
-  replace_class(data, "GeomPolygon", "GeomRibbon")
-}
-
-#' @export
-to_basic.GeomPath <- function(data, prestats_data, ...) {
-  group2NA(data)
-}
-
-#' @export
-to_basic.GeomLine <- function(data, prestats_data, ...) {
+to_basic.GeomLine <- function(data, prestats_data, params, ...) {
   data <- group2NA(data[order(data$x), ])
   replace_class(data, "GeomPath", "GeomLine")
 }
 
 #' @export
-to_basic.GeomBar <- function(data, prestats_data, ...) {
+to_basic.GeomBar <- function(data, prestats_data, params, ...) {
   data <- group2NA(data)
   data[!is.na(data$y), ]
 }
 
 #' @export
-to_basic.GeomContour <- function(data, prestats_data, ...) {
+to_basic.GeomContour <- function(data, prestats_data, params, ...) {
   prefix_class(prestats_data, "GeomContour")
 }
 
 #' @export
-to_basic.GeomDensity <- function(data, prestats_data, ...) {
+to_basic.GeomDensity <- function(data, prestats_data, params, ...) {
   replace_class(data, "GeomArea", "GeomDensity")
 }
 
 #' @export
-to_basic.GeomDensity2d <- function(data, prestats_data, ...) {
+to_basic.GeomDensity2d <- function(data, prestats_data, params, ...) {
   prefix_class(prestats_data, "GeomDensity2d")
 }
 
 #' @export
-to_basic.GeomAbline <- function(data, prestats_data, ...) {
+to_basic.GeomAbline <- function(data, prestats_data, params, ...) {
   N <- nrow(data)
   m <- data$slope
   b <- data$intercept
@@ -149,7 +168,7 @@ to_basic.GeomAbline <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomHline <- function(data, prestats_data, ...) {
+to_basic.GeomHline <- function(data, prestats_data, params, ...) {
   N <- nrow(data)
   yint <- data$yintercept
   if (is.factor(data$x)) {
@@ -173,7 +192,7 @@ to_basic.GeomHline <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomVline <- function(data, prestats_data, ...) {
+to_basic.GeomVline <- function(data, prestats_data, params, ...) {
   N <- nrow(data)
   xint <- data$xintercept
   if (is.factor(data$y)) {
@@ -197,7 +216,7 @@ to_basic.GeomVline <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomJitter <- function(data, prestats_data, ...) {
+to_basic.GeomJitter <- function(data, prestats_data, params, ...) {
   if ("size" %in% names(data)) {
     params$sizemin <- min(prestats_data$globsizemin)
     params$sizemax <- max(prestats_data$globsizemax)
@@ -206,7 +225,7 @@ to_basic.GeomJitter <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.GeomPoint <- function(data, prestats_data, ...) {
+to_basic.GeomPoint <- function(data, prestats_data, params, ...) {
   if (length(unique(data$size)) > 1 && is.null(data$text)) {
     data$text <- paste("size:", data$size)
   }
@@ -214,7 +233,7 @@ to_basic.GeomPoint <- function(data, prestats_data, ...) {
 }
 
 #' @export
-to_basic.default <- function(data, prestats_data, ...) {
+to_basic.default <- function(data, prestats_data, params, ...) {
   data
 }
 
@@ -295,6 +314,7 @@ geom2trace.GeomPoint <- function(data, params) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params) {
+  data <- group2NA(data)
   list(
     x = data$x,
     y = data$y,
@@ -306,11 +326,11 @@ geom2trace.GeomPolygon <- function(data, params) {
       # TODO: 
       # (1) track plotly.js issue for line.fill
       # (2) What about alpha? Does that go in colour?
-      width = mm2pixels(uniq(data$size %||% GeomPath$default_aes$size)),
-      color = toRGB(uniq(data$colour %||% GeomPath$default_aes$colour)),
-      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
+      width = mm2pixels(uniq(data$size %||% GeomPolygon$default_aes$size)),
+      color = toRGB(uniq(data$colour %||% GeomPolygon$default_aes$colour)),
+      dash = lty2dash(uniq(data$linetype %||% GeomPolygon$default_aes$linetype))
     ),
-    fill = "tozerox",
+    fill = "tozeroy",
     fillcolor = toRGB(
       uniq(data$fill %||% GeomPolygon$default_aes$fill), 
       uniq(data$alpha %||% GeomPolygon$default_aes$alpha)
