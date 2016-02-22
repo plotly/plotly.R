@@ -1,7 +1,7 @@
 is.plotly <- function(x) inherits(x, "plotly")
 
 "%||%" <- function(x, y) {
-  if (length(x) > 0) x else y
+  if (length(x) > 0 || is_blank(x)) x else y
 }
 
 compact <- function(x) {
@@ -12,7 +12,7 @@ is.discrete <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
 
-# special enviroment that tracks trace/layout information
+# special enviroment that enables NSE
 plotlyEnv <- new.env(parent = emptyenv())
 
 # hash plot info, assign it to the special plotly environment, & attach it to data

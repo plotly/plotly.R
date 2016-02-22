@@ -147,20 +147,30 @@ gg2list <- function(p, width = NULL, height = NULL) {
     margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
     plot_bgcolor = toRGB(theme$panel.background$fill),
     paper_bgcolor = toRGB(theme$plot.background$fill),
-    # global font (all other font objects inherit from it)
     font = text2font(theme$text)
   )
   # main plot title
   if (nchar(p$labels$title %||% "") > 0) {
     gglayout$title <- faced(p$labels$title, theme$plot.title$face)
     gglayout$titlefont <- text2font(theme$plot.title)
-    # TODO: account for theme$plot.margin$margin here as well?
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
   
   # domains are actually dynamically computed (see inst/htmlwidgets/plotly.js)
   # this assumes no margins (sorry plotly_POST()) but we'll adjust later
-  doms <- get_domains(nPanels, nRows, 0)
+  panelMarginX <- unitConvert(
+    theme[["panel.margin.x"]] %||% theme[["panel.margin"]],
+    "npc", "width"
+  )
+  panelMarginY <- unitConvert(
+    theme[["panel.margin.y"]] %||% theme[["panel.margin"]],
+    "npc", "height"
+  )
+  margins <- c(
+    rep(panelMarginX / 2, 2),
+    rep(panelMarginY / 2, 2)
+  )
+  doms <- get_domains(nPanels, nRows, margins)
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
@@ -174,11 +184,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
-      # TODO: 
-      # (1) We currently ignore minor grid lines. Would it makes sense to 
-      # create another axis object just for the minor grid?
-      # (2) translate panel.border to a rect shape
-      # (3) Does it make sense to translate other theme elements?
+      
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
@@ -186,8 +192,11 @@ gg2list <- function(p, width = NULL, height = NULL) {
       sc <- scales$get_scales(xy)
       # set some axis defaults (and override some of them later)
       # https://plot.ly/r/reference/#layout-xaxis
+      # 
+      # TODO: implement minor grid lines with another axis object 
+      # and _always_ hide ticks/text?
       axisObj <- list(
-        title = if (!is.null(axisTitle)) sc$name %||% p$labels[[xy]],
+        title = if (!is_blank(axisTitle)) sc$name %||% p$labels[[xy]],
         titlefont = text2font(axisTitle),
         type = "linear",
         autorange = FALSE,
@@ -198,20 +207,18 @@ gg2list <- function(p, width = NULL, height = NULL) {
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", "height"),
-        tickwidth = unitConvert(axisTicks$size, "pixels", "width"),
-        showticklabels = TRUE,
+        tickwidth = unitConvert(axisTicks, "pixels", "width"),
+        showticklabels = !is_blank(axisText),
         tickfont = text2font(axisText),
-        tickangle = -axisText$angle,
+        tickangle = - (axisText$angle %||% 0),
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
-        # TODO: convert this size? Is this in points?
-        linewidth = unitConvert(axisLine$size, "pixels", "width"),
+        linewidth = unitConvert(axisLine, "pixels", "width"),
         showgrid = !is_blank(panelGrid),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
-        # TODO: convert this size? Is this in points?
-        gridwidth = panelGrid$size,
-        zeroline = FALSE,  # ggplot2 never shows zero lines
+        gridwidth = unitConvert(panelGrid, "pixels", "width"),
+        zeroline = FALSE,  
         anchor = anchor
       )
       # bold/italic axis title
@@ -221,7 +228,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # tack axis object onto the layout
       gglayout[[axisName]] <- axisObj
       
-      # account for axis title/text in plot margins
+      # account for (exterior) axis/strip text in plot margins
       if (i == 1) {
         side <- if (xy == "x") "b" else "l"
         type <- if (xy == "x") "height" else "width"
@@ -231,85 +238,86 @@ gg2list <- function(p, width = NULL, height = NULL) {
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
           unitConvert(axisTitle$margin %||% rep(0, 4), "pixels")[idx] + 
           unitConvert(axisText$margin %||% rep(0, 4), "pixels")[idx] + 
-          unitConvert(axisText$size, "pixels", type) +
-          unitConvert(axisTicks$size, "pixels", type)
-          # nice idea, but not right (yet)
-          #with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
+          unitConvert(axisTitle, "pixels", type) +
+          unitConvert(axisText, "pixels", type) +
+          unitConvert(axisTicks, "pixels", type)
+        # nice idea, but not right (yet)
+        #with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
+        side2 <- if (xy == "x") "t" else "r"
+        gglayout$margin[[side2]] <- gglayout$margin[[side2]] +
+          unitConvert(stripText, "pixels", type)
       }
       
-    } # axis loop
+    } # end of axis loop
+    
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     
+    border <- make_panel_border(xdom, ydom, theme)
+    gglayout$shapes <- c(gglayout$shapes, border)
+    
     # facet strips -> plotly annotations
-    # TODO: 
-    # (1) use p$facet$labeller for the actual strip text!
+    # TODO: use p$facet$labeller for the actual strip text!
     if (inherits(p$facet, "grid") && lay$COL == nCols) {
       txt <- paste(
         lay[, as.character(p$facet$rows)], 
         collapse = ", "
       )
-      lab <- make_label(
-        txt, x = mean(xdom), y = mean(ydom), 
-        el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-        xanchor = "center", yanchor = "bottom"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      # draw the strip label as a rect shape
-      strip <- make_strip_rect(xdom, ydom, theme, "right")
-      gglayout$shapes <- c(gglayout$shapes, strip)
+      if (!is_blank(theme[["strip.text.y"]])) {
+        lab <- make_label(
+          txt, x = mean(xdom), y = mean(ydom), 
+          el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
+          xanchor = "center", yanchor = "bottom"
+        )
+        gglayout$annotations <- c(gglayout$annotations, lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "right")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
     }
-    
-    if (inherits(p$facet, "wrap") || 
-        inherits(p$facet, "grid") && lay$ROW == 1) {
+    if (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1){
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       txt <- paste(
         lay[, as.character(p$facet[[vars]])], 
         collapse = ", "
       )
-      lab <- make_label(
-        txt, x = mean(xdom), y = max(ydom), 
-        el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
-        xanchor = "center", yanchor = "bottom"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      # draw the strip label as a rect shape
-      strip <- make_strip_rect(xdom, ydom, theme, "top")
-      gglayout$shapes <- c(gglayout$shapes, strip)
+      if (!is_blank(theme[["strip.text.x"]])) {
+        lab <- make_label(
+          txt, x = mean(xdom), y = max(ydom), 
+          el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
+          xanchor = "center", yanchor = "bottom"
+        )
+        gglayout$annotations <- c(gglayout$annotations, lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "top")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
     }
-  }   # panel loop
+    
+  } # end of panel loop
   
+  # draw [x/y]axis title(s) as annotations if facets are present
   if (has_facet(p)) {
-    # space for the first row of strip text goes in plot margin 
-    # (other rows are accounted for in the axes domains)
-    xStripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-    yStripText <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
-    gglayout$margin$t <- gglayout$margin$t + unitConvert(xStripText$size, "pixels", "height")
-    if (inherits(p$facets, "grid")) {
-      gglayout$margin$r <- gglayout$margin$r + unitConvert(xStripText$size, "pixels", "height")
-    }
-    # each plot should only have _one_ axis title
     xAxisTitle <- theme[["axis.title.x"]] %||% theme[["axis.title"]]
     yAxisTitle <- theme[["axis.title.y"]] %||% theme[["axis.title"]]
     gglayout$annotations <- c(
-      gglayout$annotations, 
+      gglayout$annotations,
       make_label(
-        gglayout$xaxis$title, 
-        x = 0.5, 
+        gglayout$xaxis$title,
+        x = 0.5,
         y = 0 - unitConvert(gglayout$xaxis$titlefont$size, "npc", "height"),
-        el = xAxisTitle, 
+        el = xAxisTitle,
         yanchor = "bottom"
       ),
       make_label(
-        gglayout$yaxis$title, 
-        x = 0 - unitConvert(gglayout$yaxis$titlefont$size, "npc", "width"), 
-        y = 0.5, 
-        el = yAxisTitle, 
-        xanchor = "bottom"
+        gglayout$yaxis$title,
+        x = 0 - unitConvert(gglayout$yaxis$titlefont$size, "npc", "width"),
+        y = 0.5,
+        el = yAxisTitle,
+        xanchor = "top"
       )
     )
     gglayout <- strip_axis(gglayout, "title")
   }
+  
   
   # ------------------------------------------------------------------------
   # guide/legend conversion
@@ -457,43 +465,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
   #  merged.traces[[length(merged.traces)+1]] <- tr
   #}
   
-  
-  # add space for axis/facet strip text
-  # TODO: move this up?
-  yAxisText <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
-  xAxisText <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
-  stripText <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-  panel$layout$tMargin <- ifelse(
-    panel$layout$ROW > 1 & inherits(p$facet, "wrap"), 
-    unitConvert(stripText$size, "pixels", "height") * 2.1, 
-    0
-  )
-  panel$layout$rMargin <- ifelse(
-    panel$layout$COL < nCols & isTRUE(p$facet$free$y),
-    unitConvert(yAxisText$size, "pixels", "height") * 1.5, 
-    0
-  )
-  panel$layout$bMargin <- ifelse(
-    panel$layout$ROW < nRows & isTRUE(p$facet$free$x),
-    unitConvert(xAxisText$size, "pixels", "height") * 2.1,
-    0
-  )
-  panel$layout$lMargin <- ifelse(
-    panel$layout$COL > 1 & isTRUE(p$facet$free$y), 
-    unitConvert(yAxisText$size, "pixels", "height") * 1.5, 
-    0
-  )
-  # note that `layout.axisid.margins` is not a plotly.js property
-  # but is used in the HTMLwidget.resize() method for dynamic resizing
-  # the margins are measured in pixels here, but are normalized to a 0-1
-  # scale based on the height/width of the client window.
-  for (i in seq_len(nPanels)) {
-    lay <- panel$layout[i, ]
-    gglayout[[lay$xaxis]]$margins <- c(lay$lMargin, lay$rMargin) +
-      unitConvert(theme$panel.margin.x %||% theme$panel.margin, "pixels")
-    gglayout[[lay$yaxis]]$margins <- c(lay$bMargin, lay$tMargin) +
-      unitConvert(theme$panel.margin.y %||% theme$panel.margin, "pixels")
-  }
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
@@ -526,7 +497,7 @@ markSplit <- list(
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
   u <- verifyUnit(u)
-
+  
   convert <- switch(
     type[1], 
     x = grid::convertX,
@@ -571,10 +542,13 @@ mm2pixels <- function(u) {
 } 
 
 verifyUnit <- function(u) {
-  u <- u %||% 0
-  # the default unit in ggplot2 is millimeters
+  # the default unit in ggplot2 is millimeters (unless it's element_text())
   if (is.null(attr(u, "unit"))) {
-    u <- grid::unit(u, "mm")
+    u <- if (inherits(u, "element")) {
+      grid::unit(u$size %||% 0, "points") 
+    } else {
+      grid::unit(u %||% 0, "mm")
+    }
   }
   u
 }
@@ -618,10 +592,10 @@ has_facet <- function(x) {
 }
 
 # remove a property from an axis element
-strip_axis <- function(x, y = "title") {
+strip_axis <- function(x, y = c("title", "titlefont")) {
   idx <- grepl("[x-y]axis", names(x))
   axes <- x[idx]
-  axes <- lapply(axes, function(x) { x[[y]] <- NULL; x })
+  axes <- lapply(axes, function(x) { x[y] <- NULL; x })
   x[idx] <- axes
   x
 }
@@ -656,7 +630,8 @@ text2font <- function(x = ggplot2::element_text()) {
 }
 
 # wrap text in bold/italics according to the text "face"
-faced <- function(txt, face) {
+faced <- function(txt, face = "plain") {
+  if (is.null(face)) face <- "plain"
   x <- switch(face,
               plain = txt,
               bold = bold(txt),
@@ -711,36 +686,50 @@ uniq <- function(x) {
 ggfun <- function(x) getFromNamespace(x, "ggplot2")
 
 make_strip_rect <- function(xdom, ydom, theme, side = "top") {
-  rekt <- list(
-    type = "rect",
-    fillcolor = toRGB(theme[["strip.background"]]$fill),
-    line = list(
-      color = toRGB(theme[["strip.background"]]$colour),
-      width = unitConvert(theme[["strip.background"]]$size, "pixels", "height"),
-      linetype = lty2dash(theme[["strip.background"]]$linetype)
-    ),
-    yref = "paper",
-    xref = "paper"
-  )
+  rekt <- rect2shape(theme[["strip.background"]])
   stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-  stripTextX <- unitConvert(stripTextX$size, "npc", "width")
+  xTextSize <- unitConvert(stripTextX$size, "npc", "width")
   stripTextY <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
-  stripTextY <- unitConvert(stripTextY$size, "npc", "height")
+  yTextSize <- unitConvert(stripTextY$size, "npc", "height")
   panelMarginX <- theme[["panel.margin.x"]] %||% theme[["panel.margin"]]
   panelMarginX <- unitConvert(panelMarginX, "npc", "width")
   panelMarginY <- theme[["panel.margin.y"]] %||% theme[["panel.margin"]]
   panelMarginY <- unitConvert(panelMarginY, "npc", "height")
   if ("right" %in% side) {
+    # x-padding should be accounted for in `layout.margin.r`
     rekt$x0 <- xdom[2] 
-    rekt$x1 <- xdom[2] 
-    rekt$y0 <- ydom[1]
-    rekt$y1 <- ydom[2]
+    rekt$x1 <- xdom[2] + xTextSize
+    rekt$y0 <- ydom[1] + panelMarginY
+    rekt$y1 <- ydom[2] - panelMarginY
   }
   if ("top" %in% side) {
-    rekt$x0 <- xdom[1] + panelMarginX
-    rekt$x1 <- xdom[2] - panelMarginX
-    rekt$y0 <- ydom[2] - panelMarginY
-    rekt$y1 <- ydom[2] + panelMarginY + stripTextY
+    rekt$x0 <- xdom[1]# + panelMarginX
+    rekt$x1 <- xdom[2]# - panelMarginX
+    rekt$y0 <- ydom[2]# - panelMarginY
+    rekt$y1 <- ydom[2] + yTextSize #+ panelMarginY
   }
   list(rekt)
+}
+
+make_panel_border <- function(xdom, ydom, theme) {
+  rekt <- rect2shape(theme[["panel.border"]])
+  rekt$x0 <- xdom[1]
+  rekt$x1 <- xdom[2]
+  rekt$y0 <- ydom[1]
+  rekt$y1 <- ydom[2]
+  list(rekt)
+}
+
+rect2shape <- function(rekt = ggplot2::element_rect()) {
+  list(
+    type = "rect",
+    fillcolor = toRGB(rekt$fill),
+    line = list(
+      color = toRGB(rekt$colour),
+      width = unitConvert(rekt$size, "pixels", "height"),
+      linetype = lty2dash(rekt$linetype)
+    ),
+    yref = "paper",
+    xref = "paper"
+  )
 }
