@@ -142,6 +142,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
   }
   # Translate plot wide theme elements to plotly.js layout
+  # TODO: this plot margin conversion is wrong...
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
     margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
@@ -188,8 +189,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
-      
       sc <- scales$get_scales(xy)
+      # type of unit conversion
+      type <- if (xy == "x") "height" else "width"
       # set some axis defaults (and override some of them later)
       # https://plot.ly/r/reference/#layout-xaxis
       # 
@@ -197,7 +199,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # and _always_ hide ticks/text?
       axisObj <- list(
         title = if (!is_blank(axisTitle)) sc$name %||% p$labels[[xy]],
-        titlefont = text2font(axisTitle),
+        titlefont = text2font(axisTitle, type),
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
@@ -206,18 +208,18 @@ gg2list <- function(p, width = NULL, height = NULL) {
         tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
-        ticklen = unitConvert(theme$axis.ticks.length, "pixels", "height"),
-        tickwidth = unitConvert(axisTicks, "pixels", "width"),
+        ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
+        tickwidth = unitConvert(axisTicks, "pixels", type),
         showticklabels = !is_blank(axisText),
-        tickfont = text2font(axisText),
+        tickfont = text2font(axisText, type),
         tickangle = - (axisText$angle %||% 0),
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
-        linewidth = unitConvert(axisLine, "pixels", "width"),
+        linewidth = unitConvert(axisLine, "pixels", type),
         showgrid = !is_blank(panelGrid),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
-        gridwidth = unitConvert(panelGrid, "pixels", "width"),
+        gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,  
         anchor = anchor
       )
@@ -228,24 +230,49 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # tack axis object onto the layout
       gglayout[[axisName]] <- axisObj
       
+      
       # account for (exterior) axis/strip text in plot margins
       if (i == 1) {
         side <- if (xy == "x") "b" else "l"
-        type <- if (xy == "x") "height" else "width"
-        # just support _bottom_ x-axis text & _left_ y-axis margins
-        # (plotly.js has no sense of padding between ticks and ticktext)
-        idx <- if (xy == "x") 3 else 4
+        browser()
+        # apparently ggplot2 doesn't support axis.title/axis.text margins
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
-          unitConvert(axisTitle$margin %||% rep(0, 4), "pixels")[idx] + 
-          unitConvert(axisText$margin %||% rep(0, 4), "pixels")[idx] + 
-          unitConvert(axisTitle, "pixels", type) +
-          unitConvert(axisText, "pixels", type) +
-          unitConvert(axisTicks, "pixels", type)
+          1.01 * axisObj$titlefont$size + 
+          1.01 * axisObj$tickfont$size + 
+          1.01 * axisObj$ticklen
         # nice idea, but not right (yet)
         #with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
-        side2 <- if (xy == "x") "t" else "r"
-        gglayout$margin[[side2]] <- gglayout$margin[[side2]] +
-          unitConvert(stripText, "pixels", type)
+        
+        if (has_facet(p)) {
+          # draw axis titles as annotations
+          if (!is_blank(axisTitle) && nchar(axisObj$title %||% "") > 0) {
+            # Why is the unit here mm?
+            offset <- 0 - unitConvert(grid::unit(axisText$size %||% 0, "mm"), "npc", type) -
+                          unitConvert(grid::unit(theme$axis.ticks.length %||% 0, "mm"), "npc", type)
+            x <- if (xy == "x") 0.5 else offset
+            y <- if (xy == "x") offset else 0.5
+            gglayout$annotations <- c(
+              gglayout$annotations,
+              make_label(
+                axisObj$title, x, y, el = axisTitle, 
+                xanchor = "center", yanchor = "middle"
+              )
+            )
+          }
+          # add space for exterior facet strips in `layout.margin`
+          stripSize <- unitConvert(
+            # Why is the unit here mm?
+            grid::unit(stripText$size %||% 0, "mm"), 
+            "pixels", type
+          )
+          if (xy == "x") {
+            gglayout$margin$t <- gglayout$margin$t + stripSize
+          }
+          if (xy == "y" && inherits(p$facet, "grid")) {
+            gglayout$margin$r <- gglayout$margin$r + stripSize
+          } 
+        }
+        
       }
       
     } # end of axis loop
@@ -294,30 +321,10 @@ gg2list <- function(p, width = NULL, height = NULL) {
     
   } # end of panel loop
   
-  # draw [x/y]axis title(s) as annotations if facets are present
+  # if facets are present, wipe out 'official' [x/y]axis title(s)
   if (has_facet(p)) {
-    xAxisTitle <- theme[["axis.title.x"]] %||% theme[["axis.title"]]
-    yAxisTitle <- theme[["axis.title.y"]] %||% theme[["axis.title"]]
-    gglayout$annotations <- c(
-      gglayout$annotations,
-      make_label(
-        gglayout$xaxis$title,
-        x = 0.5,
-        y = 0 - unitConvert(gglayout$xaxis$titlefont$size, "npc", "height"),
-        el = xAxisTitle,
-        yanchor = "bottom"
-      ),
-      make_label(
-        gglayout$yaxis$title,
-        x = 0 - unitConvert(gglayout$yaxis$titlefont$size, "npc", "width"),
-        y = 0.5,
-        el = yAxisTitle,
-        xanchor = "top"
-      )
-    )
-    gglayout <- strip_axis(gglayout, "title")
+    gglayout <- strip_axis(gglayout, c("title", "titlefont"))
   }
-  
   
   # ------------------------------------------------------------------------
   # guide/legend conversion
@@ -553,15 +560,9 @@ verifyUnit <- function(u) {
   u
 }
 
-
 # detect a blank theme element
 is_blank <- function(x) {
   inherits(x, "element_blank") && inherits(x, "element")
-}
-
-# obtain the "type" of geom/position/etc.
-type <- function(x, y) {
-  sub(y, "", tolower(class(x[[y]])[[1]]))
 }
 
 # given text, and x/y coordinates on 0-1 scale, 
@@ -621,11 +622,12 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
 }
 
 # create a plotly font object from ggplot2::element_text() 
-text2font <- function(x = ggplot2::element_text()) {
+text2font <- function(x = ggplot2::element_text(), type = "height") {
   list(
     color = toRGB(x$colour),
     family = x$family,
-    size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", "height")
+    # TODO: what about the size of vertical text?
+    size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", type)
   )
 }
 
