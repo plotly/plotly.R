@@ -60,6 +60,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
   panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
   data <- ggfun("map_layout")(panel, p$facet, layer_data)
   data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
+  # TODO: detect dates here?
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
   scale_x <- function() scales$get_scales("x")
   scale_y <- function() scales$get_scales("y")
@@ -86,17 +87,17 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # ------------------------------------------------------------------------
   # end of ggplot_build(), start of layer -> trace conversion
   # ------------------------------------------------------------------------
-  
+
   nPanels <- nrow(panel$layout)
   nRows <- max(panel$layout$ROW)
   nCols <- max(panel$layout$COL)
   
-  # panel -> plotly.js axis/anchor info (assume a grid layout by default)
+  # panel -> plotly.js axis/anchor info 
+  # (assume a grid layout by default)
   panel$layout$xaxis <- panel$layout$COL
   panel$layout$yaxis <- panel$layout$ROW
   panel$layout$xanchor <- nRows
   panel$layout$yanchor <- 1
-  # wraps are weird
   if (inherits(p$facet, "wrap")) {
     if (p$facet$free$x) {
       panel$layout$xaxis <- panel$layout$PANEL
@@ -113,15 +114,14 @@ gg2list <- function(p, width = NULL, height = NULL) {
       panel$layout$yanchor <- panel$layout$PANEL
     }
   }
-  
   # format the axis/anchor to a format plotly.js respects
   panel$layout$xaxis <- paste0("xaxis", sub("1", "", panel$layout$xaxis))
   panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
   panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
   panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
   
-
-  # merge the panel/axis info with each _layer_ of data
+  # merge the panel/axis info with _each layer_ of data so we know where to put
+  # each trace
   lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
   lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
   lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
@@ -144,6 +144,19 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # later on, when legends/guides are created, 
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
+  
+  # bar geometry requires us to flip the orientation for flipped coordinates
+  if ("CoordFlip" %in% class(p$coordinates)) {
+    idx <- which(unlist(lapply(traces, "[[", "type")) %in% "bar")
+    for (i in idx) {
+      traces[[i]]$orientation <- "h"
+      y <- traces[[i]]$y
+      traces[[i]]$y <- traces[[i]]$x
+      traces[[i]]$x <- y
+    }
+  }
+  # TODO: set `layout.barmode`!
+  
   
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
@@ -276,17 +289,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # tack axis object onto the layout
       gglayout[[axisName]] <- axisObj
       
-      
       # account for (exterior) axis/strip text in plot margins
       if (i == 1) {
         side <- if (xy == "x") "b" else "l"
+        way <- if (xy == "x") "v" else "h"
         # apparently ggplot2 doesn't support axis.title/axis.text margins
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
           axisObj$titlefont$size + 
           axisObj$tickfont$size + 
-          axisObj$ticklen
-        # nice idea, but not right (yet)
-        #with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]] +
+          axisObj$ticklen +
+          with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]]
         
         if (has_facet(p)) {
           # draw axis titles as annotations
@@ -680,31 +692,39 @@ italic <- function(x) paste("<i>", x, "</i>")
 re_scale <- function(axisObj, scale) {
   cl <- class(scale)
   if ("ScaleDiscrete" %in% cl) {
-    axisObj$type <- "category"
-    axisObj$range <- axisObj$ticktext
-    axisObj$autorange <- TRUE
-    axisObj$tickvals <- NULL
+    #axisObj$type <- "category"
+    #axisObj$range <- axisObj$ticktext %||% axisObj$range
+    #axisObj$autorange <- TRUE
+    #axisObj$tickvals <- NULL
   } else {
     # these tick locations are always on a 0-1 scale, but we want them on the
     # data scale
+    #axisObj$tickvals <- scales::rescale(
+    #  axisObj$tickvals, to = axisObj$range, from = c(0, 1)
+    #)
+  }
+  
+  
+  
+  # hopefully scale_name doesn't go away (otherwise, we might have to determine
+  # date vs datetime from the raw data)
+  # https://github.com/hadley/ggplot2/issues/1312
+  if ("date" %in% scale$scale_name || "datetime" %in% scale$scale_name) {
+    # TODO: this should really be 'date', but tickvals/ticktext isn't supported?
+    axisObj$type <- "linear"
+    if ("date" %in% scale$scale_name) {
+      # convert dates to milliseconds (datetime)
+      axisObj$range <- axisObj$range * 24 * 60 * 60 * 1000
+      axisObj$tickvals <- scales::rescale(
+        axisObj$tickvals, to = axisObj$range, from = c(0, 1)
+      )
+    }
+  } else {
     axisObj$tickvals <- scales::rescale(
       axisObj$tickvals, to = axisObj$range, from = c(0, 1)
     )
   }
   axisObj
-}
-
-to_milliseconds <- function(x, warn = FALSE) {
-  if (inherits(x, "POSIXt")) {
-    # Convert seconds into milliseconds
-    x <- as.numeric(x) * 1000
-  } else if (inherits(x, "Date")) {
-    # Convert days into milliseconds
-    x <- as.numeric(x) * 24 * 60 * 60 * 1000
-  } else {
-    if (warn) warning("Expected a date or datetime")
-  }
-  x
 }
 
 # if a vector has one unique value, return that value

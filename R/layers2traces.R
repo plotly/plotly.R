@@ -11,6 +11,7 @@ layers2traces <- function(data, prestats_data, layers) {
   # and transform the data, if necessary, for example:
   # 1. geom_line() is really geom_path() with data sorted by x)
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
+  browser()
   data <- Map(to_basic, data, prestats_data, params)
   # since some layers are really two layers, we may need to replicate
   # certain data/layers/params
@@ -313,6 +314,24 @@ geom2trace.GeomPoint <- function(data, params) {
 }
 
 #' @export
+geom2trace.GeomBar <- function(data, params) {
+  list(
+    x = data$x,
+    y = data$y,
+    type = "bar",
+    marker = list(
+      autocolorscale = FALSE,
+      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
+      opacity = uniq(data$alpha %||% 1),
+      line = list(
+        width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
+        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
+      )
+    )
+  )
+}
+
+#' @export
 geom2trace.GeomPolygon <- function(data, params) {
   data <- group2NA(data)
   list(
@@ -352,72 +371,6 @@ geom2trace.GeomText <- function(data, params) {
     type = "scatter",
     mode = "text"
   )
-}
-
-#' @export
-geom2trace.GeomBar <- function(data, params) {
-  
-  # TODO: how to trigger orientation="h" for flipped coordinates?
-  
-  # # for stacked bar charts, plotly cumulates bar heights, but ggplot doesn't
-  # if (layout$barmode == "stack") {
-  #   # could speed up this function with environments or C/C++
-  #   unStack <- function(vec) {
-  #     n <- length(vec)
-  #     if (n == 1) return(vec)
-  #     seq.n <- seq_len(n)
-  #     names(vec) <- seq.n
-  #     vec <- sort(vec)
-  #     for (k in seq(2, n)) {
-  #       vec[k] <- vec[k] - sum(vec[seq(1, k-1)])
-  #     }
-  #     as.numeric(vec[as.character(seq.n)])
-  #   }
-  #   ys <- lapply(trace.list, "[[", "y")
-  #   xs <- lapply(trace.list, "[[", "x")
-  #   x.vals <- unique(unlist(xs))
-  #   # if there are two or more y-values (for a particular x value),
-  #   # then modify those y-values so they *add up* to the correct value(s)
-  #   for (val in x.vals) {
-  #     zs <- lapply(xs, function(x) which(x == val))
-  #     ys.given.x <- Map(function(x, y) y[x], zs, ys)
-  #     if (length(unlist(ys.given.x)) < 2) next
-  #     st <- unStack(unlist(ys.given.x))
-  #     lens <- sapply(ys.given.x, length)
-  #     trace.seq <- seq_along(trace.list)
-  #     ws <- split(st, rep(trace.seq, lens))
-  #     for (tr in seq_along(ws)) {
-  #       idx <- zs[[tr]]
-  #       replacement <- ws[[tr]]
-  #       if (length(idx) > 0  && length(replacement) > 0) 
-  #         trace.list[[tr]]$y[idx] <- replacement
-  #     }
-  #   }
-  # }
-  
-  
-  x <- if ("x.name" %in% names(data)) data$x.name else data$x
-  x <- to_milliseconds(x)
-  # if there is more than one y-value for a particular combination of
-  # x, PANEL, and group; then take the _max_ y.
-  data$x <- x
-  dat <- plyr::ddply(data, c("x", "PANEL", if ("group" %in% names(data)) "group"),
-                     plyr::summarise, count = max(y))
-  L <- list(
-    x = dat$x,
-    y = dat$count,
-    type = "bar",
-    # text only makes sense if no dimension reduction occurred
-    text = if (nrow(dat) == nrow(data)) data$text else NULL,
-    name = params$name,
-    marker = list(color = toRGB(params$fill))
-  )
-  if (!is.null(params$colour)) {
-    L$marker$line <- list(color = toRGB(params$colour))
-    L$marker$line$width <- params$size %||% 1
-  }
-  if (!is.null(params$alpha)) L$opacity <- params$alpha
-  L
 }
 
 #' @export
