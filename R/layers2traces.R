@@ -11,7 +11,6 @@ layers2traces <- function(data, prestats_data, layers) {
   # and transform the data, if necessary, for example:
   # 1. geom_line() is really geom_path() with data sorted by x)
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
-  browser()
   data <- Map(to_basic, data, prestats_data, params)
   # since some layers are really two layers, we may need to replicate
   # certain data/layers/params

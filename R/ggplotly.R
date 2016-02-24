@@ -60,14 +60,12 @@ gg2list <- function(p, width = NULL, height = NULL) {
   panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
   data <- ggfun("map_layout")(panel, p$facet, layer_data)
   data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
-  # TODO: detect dates here?
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
   scale_x <- function() scales$get_scales("x")
   scale_y <- function() scales$get_scales("y")
   panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
   data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
-  # for some geoms (e.g. boxplots) it's better to send the 
-  # "pre-statistics" data and let plotly compute statistics
+  # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
   prestats_data <- data
   data <- by_layer(function(l, d) l$compute_statistic(d, panel))
   data <- by_layer(function(l, d) l$map_statistic(d, p))
@@ -87,7 +85,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # ------------------------------------------------------------------------
   # end of ggplot_build(), start of layer -> trace conversion
   # ------------------------------------------------------------------------
-
+  
   nPanels <- nrow(panel$layout)
   nRows <- max(panel$layout$ROW)
   nCols <- max(panel$layout$COL)
@@ -145,18 +143,37 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
   
-  # bar geometry requires us to flip the orientation for flipped coordinates
-  if ("CoordFlip" %in% class(p$coordinates)) {
-    idx <- which(unlist(lapply(traces, "[[", "type")) %in% "bar")
-    for (i in idx) {
-      traces[[i]]$orientation <- "h"
-      y <- traces[[i]]$y
-      traces[[i]]$y <- traces[[i]]$x
-      traces[[i]]$x <- y
+  
+  traceTypes <- unlist(lapply(traces, "[[", "type"))
+  idx <- which(traceTypes %in% "bar")
+  # special handling for bars
+  if (length(idx)) {
+    # determine `layout.barmode`
+    positions <- sapply(layers, type, "position")
+    geoms <- sapply(layers, type, "geom")
+    # bar geometry requires us to flip the orientation for flipped coordinates
+    if ("CoordFlip" %in% class(p$coordinates)) {
+      for (i in idx) {
+        traces[[i]]$orientation <- "h"
+        y <- traces[[i]]$y
+        traces[[i]]$y <- traces[[i]]$x
+        traces[[i]]$x <- y
+      }
     }
   }
-  # TODO: set `layout.barmode`!
   
+  #
+  #
+  #
+  #bargeoms <- geoms[grepl("^bar$", geoms)]
+  #if (length(bargeoms)) {
+  #  list(
+  #    stack = "stack",
+  #    dodge = "group",
+  #    
+  #  )
+  #}
+  #
   
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
@@ -289,8 +306,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
       # tack axis object onto the layout
       gglayout[[axisName]] <- axisObj
       
-      # account for (exterior) axis/strip text in plot margins
+      
       if (i == 1) {
+        # convert days to milliseconds, if necessary
+        if ("date" %in% p$scales$get_scales(xy)$scale_name) {
+          traces <- lapply(traces, function(z) { 
+            z[[xy]] <- z[[xy]] * 24 * 60 * 60 * 1000
+            z
+          })
+        }
+        # account for (exterior) axis/strip text in plot margins
         side <- if (xy == "x") "b" else "l"
         way <- if (xy == "x") "v" else "h"
         # apparently ggplot2 doesn't support axis.title/axis.text margins
@@ -307,9 +332,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
             # but we really need offsets relative to the plotting region
             # (to do this correctly, we need the terminal height/width of the plot)
             offset <- 2 * (0 - 
-              unitConvert(axisText, "npc", type) -
-              unitConvert(axisTitle, "npc", type) / 2 -
-              unitConvert(theme$axis.ticks.length, "npc", type))
+                             unitConvert(axisText, "npc", type) -
+                             unitConvert(axisTitle, "npc", type) / 2 -
+                             unitConvert(theme$axis.ticks.length, "npc", type))
             x <- if (xy == "x") 0.5 else offset
             y <- if (xy == "x") offset else 0.5
             gglayout$annotations <- c(
@@ -334,12 +359,11 @@ gg2list <- function(p, width = NULL, height = NULL) {
       
     } # end of axis loop
     
+    # draw panel border
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
-    
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-    
     # facet strips -> plotly annotations
     # TODO: use p$facet$labeller for the actual strip text!
     if (inherits(p$facet, "grid") && lay$COL == nCols) {
@@ -464,58 +488,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
     # (1) shrink guide size(s). Set fractions in colorbar.lenmode
     # (2) position guide(s)?
     # (3) 
-    
   }
-  
-  # keep trace merging?
-  #mode.mat <- matrix(NA, 3, 3)
-  #rownames(mode.mat) <- colnames(mode.mat) <- c("markers", "lines", "none")
-  #mode.mat["markers", "lines"] <-
-  #  mode.mat["lines", "markers"] <- "lines+markers"
-  #mode.mat["markers", "none"] <- mode.mat["none", "markers"] <- "markers"
-  #mode.mat["lines", "none"] <- mode.mat["none", "lines"] <- "lines"
-  #merged.traces <- list()
-  #not.merged <- trace.list
-  #while(length(not.merged)){
-  #  tr <- not.merged[[1]]
-  #  not.merged <- not.merged[-1]
-  #  # Are there any traces that have not yet been merged, and can be
-  #  # merged with tr?
-  #  can.merge <- logical(length(not.merged))
-  #  for(other.i in seq_along(not.merged)){
-  #    other <- not.merged[[other.i]]
-  #    criteria <- c()
-  #    for(must.be.equal in c("x", "y", "xaxis", "yaxis")){
-  #      other.attr <- other[[must.be.equal]]
-  #      tr.attr <- tr[[must.be.equal]]
-  #      criteria[[must.be.equal]] <- 
-  #        isTRUE(all.equal(other.attr, tr.attr)) && 
-  #        unique(other$type, tr$type) == "scatter"
-  #    }
-  #    if(all(criteria)){
-  #      can.merge[[other.i]] <- TRUE
-  #    }
-  #  }
-  #  to.merge <- not.merged[can.merge]
-  #  not.merged <- not.merged[!can.merge]
-  #  for(other in to.merge){
-  #    new.mode <- tryCatch({
-  #      mode.mat[tr$mode, other$mode]
-  #    }, error=function(e){
-  #      NA
-  #    })
-  #    if(is.character(new.mode) && !is.na(new.mode %||% NA)){
-  #      tr$mode <- new.mode
-  #    }
-  #    attrs <- c("error_x", "error_y", "marker", "line")
-  #    for(attr in attrs){
-  #      if(!is.null(other[[attr]]) && is.null(tr[[attr]])){
-  #        tr[[attr]] <- other[[attr]]
-  #      }
-  #    }
-  #  }
-  #  merged.traces[[length(merged.traces)+1]] <- tr
-  #}
   
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
@@ -690,40 +663,19 @@ italic <- function(x) paste("<i>", x, "</i>")
 
 
 re_scale <- function(axisObj, scale) {
-  cl <- class(scale)
-  if ("ScaleDiscrete" %in% cl) {
-    #axisObj$type <- "category"
-    #axisObj$range <- axisObj$ticktext %||% axisObj$range
-    #axisObj$autorange <- TRUE
-    #axisObj$tickvals <- NULL
-  } else {
-    # these tick locations are always on a 0-1 scale, but we want them on the
-    # data scale
-    #axisObj$tickvals <- scales::rescale(
-    #  axisObj$tickvals, to = axisObj$range, from = c(0, 1)
-    #)
-  }
-  
-  
-  
   # hopefully scale_name doesn't go away (otherwise, we might have to determine
   # date vs datetime from the raw data)
   # https://github.com/hadley/ggplot2/issues/1312
   if ("date" %in% scale$scale_name || "datetime" %in% scale$scale_name) {
-    # TODO: this should really be 'date', but tickvals/ticktext isn't supported?
-    axisObj$type <- "linear"
+    axisObj$type <- "date"
+    # convert dates to milliseconds (so everything is a datetime)
     if ("date" %in% scale$scale_name) {
-      # convert dates to milliseconds (datetime)
       axisObj$range <- axisObj$range * 24 * 60 * 60 * 1000
-      axisObj$tickvals <- scales::rescale(
-        axisObj$tickvals, to = axisObj$range, from = c(0, 1)
-      )
     }
-  } else {
-    axisObj$tickvals <- scales::rescale(
-      axisObj$tickvals, to = axisObj$range, from = c(0, 1)
-    )
   }
+  axisObj$tickvals <- scales::rescale(
+    axisObj$tickvals, to = axisObj$range, from = c(0, 1)
+  )
   axisObj
 }
 
@@ -733,10 +685,7 @@ uniq <- function(x) {
   if (length(u) == 1) u else x
 }
 
-# We need access to internal ggplot2 functions in several places
-# this helps us import functions in a way that R CMD check won't cry about
-ggfun <- function(x) getFromNamespace(x, "ggplot2")
-
+# theme(strip.background) -> plotly.js rect shape
 make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   rekt <- rect2shape(theme[["strip.background"]])
   stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
@@ -759,6 +708,7 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   list(rekt)
 }
 
+# theme(panel.border) -> plotly.js rect shape
 make_panel_border <- function(xdom, ydom, theme) {
   rekt <- rect2shape(theme[["panel.border"]])
   rekt$x0 <- xdom[1]
@@ -768,6 +718,7 @@ make_panel_border <- function(xdom, ydom, theme) {
   list(rekt)
 }
 
+# element_rect -> plotly.js rect shape
 rect2shape <- function(rekt = ggplot2::element_rect()) {
   list(
     type = "rect",
@@ -780,4 +731,12 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
     yref = "paper",
     xref = "paper"
   )
+}
+
+# We need access to internal ggplot2 functions in several places
+# this helps us import functions in a way that R CMD check won't cry about
+ggfun <- function(x) getFromNamespace(x, "ggplot2")
+
+type <- function(x, y = "geom") {
+  sub(y, "", tolower(class(x[[y]])[1]))
 }
