@@ -208,7 +208,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
     theme[["panel.margin.y"]] %||% theme[["panel.margin"]],
     "npc", "height"
   )
-  
   # space for _interior_ facet strips
   if (inherits(p$facet, "wrap")) {
     stripSize <- unitConvert(
@@ -219,26 +218,26 @@ gg2list <- function(p, width = NULL, height = NULL) {
     panelMarginY <- panelMarginY + 1.5 * stripSize
     # space for ticks/text in free scales
     if (p$facet$free$x) {
-      axisTextX <- unitConvert(
-        theme[["axis.text.x"]] %||% theme[["axis.text"]],
-        "npc", "height"
-      )
       axisTicksX <- unitConvert(
         theme[["axis.ticks.x"]] %||% theme[["axis.ticks"]],
         "npc", "height"
       )
-      panelMarginY <- panelMarginY + axisTextX + axisTicksX
+      axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
+      labz <- unlist(lapply(panel$ranges, "[[", "x.labels"))
+      lab <- labz[which.max(nchar(labz))]
+      panelMarginY <- panelMarginY + axisTicksX +
+        bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))$v
     }
     if (p$facet$free$y) {
-      axisTextY <- unitConvert(
-        theme[["axis.text.y"]] %||% theme[["axis.text"]],
-        "npc", "width"
-      )
       axisTicksY <- unitConvert(
         theme[["axis.ticks.y"]] %||% theme[["axis.ticks"]],
         "npc", "width"
       )
-      panelMarginX <- panelMarginX + axisTextY + axisTicksY
+      axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
+      labz <- unlist(lapply(panel$ranges, "[[", "y.labels"))
+      lab <- labz[which.max(nchar(labz))]
+      panelMarginX <- panelMarginX + axisTicksY + 
+        bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))$h
     }
   }
   margins <- c(
@@ -317,12 +316,12 @@ gg2list <- function(p, width = NULL, height = NULL) {
         # account for (exterior) axis/strip text in plot margins
         side <- if (xy == "x") "b" else "l"
         way <- if (xy == "x") "v" else "h"
+        tickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
         # apparently ggplot2 doesn't support axis.title/axis.text margins
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + 
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
+          # account for rotated title (just like we've done for ticks?)
           axisObj$titlefont$size + 
-          axisObj$tickfont$size + 
-          axisObj$ticklen +
-          with(axisObj, bbox(ticktext, tickangle, tickfont$size))[[way]]
+          bbox(tickText, axisObj$tickangle, axisObj$tickfont$size)[[way]]
         
         if (has_facet(p)) {
           # draw axis titles as annotations
@@ -615,7 +614,7 @@ strip_axis <- function(x, y = c("title", "titlefont")) {
   x
 }
 
-#' Conservative estimate of height/width of a string
+#' Estimate bounding box of a rotated string
 #' 
 #' @param txt a character string of length 1
 #' @param angle sets the angle of the tick labels with respect to the 
@@ -627,6 +626,9 @@ strip_axis <- function(x, y = c("title", "titlefont")) {
 bbox <- function(txt = "foo", angle = 0, size = 12) {
   # assuming the horizontal size of a character is roughly half of the vertical
   w <- size * (nchar(txt) / 2)
+  # do the sensible thing in the majority of cases
+  if (angle == 0) return(list(v = size, h = w))
+  if (abs(angle) == 90) return(list(v = w, h = size))
   # first, compute the hypotenus
   hyp <- sqrt(size ^ 2 + w ^ 2)
   list(
