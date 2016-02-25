@@ -143,10 +143,12 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
   
-  
+  # Bars require all sorts of hackery:
+  # (1) position_*() is layer-specific, but `layout.barmode` is plot-specific.
+  # (2) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific
+  # (3) position_stack() non-sense
   traceTypes <- unlist(lapply(traces, "[[", "type"))
   idx <- which(traceTypes %in% "bar")
-  # special handling for bars
   if (length(idx)) {
     # determine `layout.barmode`
     positions <- sapply(layers, type, "position")
@@ -162,9 +164,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
     }
   }
   
-  #
-  #
-  #
   #bargeoms <- geoms[grepl("^bar$", geoms)]
   #if (length(bargeoms)) {
   #  list(
