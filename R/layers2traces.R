@@ -127,12 +127,6 @@ to_basic.GeomLine <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomBar <- function(data, prestats_data, params, ...) {
-  data <- group2NA(data)
-  data[!is.na(data$y), ]
-}
-
-#' @export
 to_basic.GeomContour <- function(data, prestats_data, params, ...) {
   prefix_class(prestats_data, "GeomContour")
 }
@@ -250,7 +244,6 @@ geom2trace.GeomBlank <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    name = params$name,
     text = data$text,
     type = "scatter",
     mode = "markers",
@@ -263,7 +256,6 @@ geom2trace.GeomPath <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    name = params$name,
     text = data$text,
     type = "scatter",
     mode = "lines",
@@ -316,7 +308,7 @@ geom2trace.GeomPoint <- function(data, params) {
 geom2trace.GeomBar <- function(data, params) {
   list(
     x = data$x,
-    y = data$y,
+    y = data$count,
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -336,7 +328,6 @@ geom2trace.GeomPolygon <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    name = params$name,
     text = data$text,
     type = "scatter",
     mode = "lines",
@@ -377,10 +368,9 @@ geom2trace.GeomStep <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    name = params$name,
     type = "scatter",
     mode = "lines",
-    line = paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes)
+    #line = paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes)
   )
 }
 
@@ -419,7 +409,6 @@ geom2trace.GeomContour <- function(data, params) {
     x = x,
     y = y,
     z = t(matrix(data$z, nrow = length(x), ncol = length(y))),
-    name = params$name,
     type = "contour",
     line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes),
     contours = list(coloring = "lines")
@@ -431,7 +420,6 @@ geom2trace.GeomDensity2d <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    name = params$name,
     type = "histogram2dcontour",
     line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes),
     contours = list(coloring = "lines")
@@ -453,7 +441,6 @@ geom2trace.GeomArea <- function(data, params) {
   list(
     x = c(data$x[1], data$x, tail(data$x, n = 1)),
     y = c(0, data$y, 0),
-    name = params$name,
     type = "scatter",
     line = paramORdefault(params, aes2line, ggplot2::GeomRibbon$default_aes),
     fill = "tozeroy",

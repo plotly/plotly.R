@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggplotly.R
 \name{bbox}
 \alias{bbox}
-\title{Conservative estimate of height/width of a string}
+\title{Estimate bounding box of a rotated string}
 \usage{
 bbox(txt = "foo", angle = 0, size = 12)
 }
@@ -15,7 +15,7 @@ horizontal (e.g., `tickangle` of -90 draws the tick labels vertically)}
 \item{size}{vertical size of a character}
 }
 \description{
-Conservative estimate of height/width of a string
+Estimate bounding box of a rotated string
 }
 \references{
 https://www.dropbox.com/s/nc6968prgw8ne4w/bbox.pdf?dl=0

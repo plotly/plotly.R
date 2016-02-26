@@ -83,9 +83,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
   panel <- ggfun("train_ranges")(panel, p$coordinates)
   data <- by_layer(function(l, d) l$compute_geom_2(d))
   # ------------------------------------------------------------------------
-  # end of ggplot_build(), start of layer -> trace conversion
+  # end of ggplot_build()
   # ------------------------------------------------------------------------
   
+  if (inherits(p$coordinates, "CoordFlip")) {
+    # flip labels
+    p$labels[c("x", "y")]  <- p$labels[c("y", "x")]
+    # TODO: is there anything else we need to flip? p$scales?
+  }
+  
+  # important panel summary stats
   nPanels <- nrow(panel$layout)
   nRows <- max(panel$layout$ROW)
   nCols <- max(panel$layout$COL)
@@ -143,37 +150,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
   
-  # Bars require all sorts of hackery:
-  # (1) position_*() is layer-specific, but `layout.barmode` is plot-specific.
-  # (2) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific
-  # (3) position_stack() non-sense
-  traceTypes <- unlist(lapply(traces, "[[", "type"))
-  idx <- which(traceTypes %in% "bar")
-  if (length(idx)) {
-    # determine `layout.barmode`
-    positions <- sapply(layers, type, "position")
-    geoms <- sapply(layers, type, "geom")
-    # bar geometry requires us to flip the orientation for flipped coordinates
-    if ("CoordFlip" %in% class(p$coordinates)) {
-      for (i in idx) {
-        traces[[i]]$orientation <- "h"
-        y <- traces[[i]]$y
-        traces[[i]]$y <- traces[[i]]$x
-        traces[[i]]$x <- y
-      }
-    }
-  }
-  
-  #bargeoms <- geoms[grepl("^bar$", geoms)]
-  #if (length(bargeoms)) {
-  #  list(
-  #    stack = "stack",
-  #    dodge = "group",
-  #    
-  #  )
-  #}
-  #
-  
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
   # ------------------------------------------------------------------------
@@ -198,8 +174,8 @@ gg2list <- function(p, width = NULL, height = NULL) {
     gglayout$titlefont <- text2font(theme$plot.title)
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
-  
-  # panel margins
+  # panel margins must be computed before panel/axis loops 
+  # (in order to use get_domains())
   panelMarginX <- unitConvert(
     theme[["panel.margin.x"]] %||% theme[["panel.margin"]],
     "npc", "width"
@@ -222,6 +198,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
         theme[["axis.ticks.x"]] %||% theme[["axis.ticks"]],
         "npc", "height"
       )
+      # allocate enough space for the _longest_ text label
       axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
       labz <- unlist(lapply(panel$ranges, "[[", "x.labels"))
       lab <- labz[which.max(nchar(labz))]
@@ -233,6 +210,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
         theme[["axis.ticks.y"]] %||% theme[["axis.ticks"]],
         "npc", "width"
       )
+      # allocate enough space for the _longest_ text label
       axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
       labz <- unlist(lapply(panel$ranges, "[[", "y.labels"))
       lab <- labz[which.max(nchar(labz))]
@@ -263,17 +241,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
-      sc <- scales$get_scales(xy)
+      sc <- if (inherits(p$coordinates, "CoordFlip")) {
+        scales$get_scales(setdiff(c("x", "y"), xy))
+      } else {
+        scales$get_scales(xy)
+      }
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
-      # set some axis defaults (and override some of them later)
       # https://plot.ly/r/reference/#layout-xaxis
-      # 
-      # TODO: implement minor grid lines with another axis object 
-      # and _always_ hide ticks/text?
       axisObj <- list(
-        title = if (!is_blank(axisTitle)) sc$name %||% p$labels[[xy]],
-        titlefont = text2font(axisTitle, type),
+        # this might be changed later in re_scale()
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
@@ -297,53 +274,21 @@ gg2list <- function(p, width = NULL, height = NULL) {
         zeroline = FALSE,  
         anchor = anchor
       )
-      # bold/italic axis title
-      axisObj$title <- faced(axisObj$title, theme$axis.text$face)
-      axisObj <- re_scale(axisObj, sc)
+      # TODO: implement minor grid lines with another axis object 
+      # and _always_ hide ticks/text?
+      gglayout[[axisName]] <- re_scale(axisObj, sc)
       
-      # tack axis object onto the layout
-      gglayout[[axisName]] <- axisObj
-      
-      
+      # do some stuff that should be done once for the entire plot
       if (i == 1) {
         # convert days to milliseconds, if necessary
-        if ("date" %in% p$scales$get_scales(xy)$scale_name) {
+        if ("date" %in% sc$scale_name) {
           traces <- lapply(traces, function(z) { 
             z[[xy]] <- z[[xy]] * 24 * 60 * 60 * 1000
             z
           })
         }
-        # account for (exterior) axis/strip text in plot margins
-        side <- if (xy == "x") "b" else "l"
-        way <- if (xy == "x") "v" else "h"
-        tickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
-        # apparently ggplot2 doesn't support axis.title/axis.text margins
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
-          # account for rotated title (just like we've done for ticks?)
-          axisObj$titlefont$size + 
-          bbox(tickText, axisObj$tickangle, axisObj$tickfont$size)[[way]]
-        
+        # add space for exterior facet strips in `layout.margin`
         if (has_facet(p)) {
-          # draw axis titles as annotations
-          if (!is_blank(axisTitle) && nchar(axisObj$title %||% "") > 0) {
-            # npc is on a 0-1 scale of the _entire_ device, 
-            # but we really need offsets relative to the plotting region
-            # (to do this correctly, we need the terminal height/width of the plot)
-            offset <- 2 * (0 - 
-                             unitConvert(axisText, "npc", type) -
-                             unitConvert(axisTitle, "npc", type) / 2 -
-                             unitConvert(theme$axis.ticks.length, "npc", type))
-            x <- if (xy == "x") 0.5 else offset
-            y <- if (xy == "x") offset else 0.5
-            gglayout$annotations <- c(
-              gglayout$annotations,
-              make_label(
-                axisObj$title, x, y, el = axisTitle, 
-                xanchor = "center", yanchor = "middle"
-              )
-            )
-          }
-          # add space for exterior facet strips in `layout.margin`
           stripSize <- unitConvert(stripText, "pixels", type)
           if (xy == "x") {
             gglayout$margin$t <- gglayout$margin$t + stripSize
@@ -352,7 +297,39 @@ gg2list <- function(p, width = NULL, height = NULL) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           } 
         }
-        
+        axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
+        axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
+        side <- if (xy == "x") "b" else "l"
+        way <- if (xy == "x") "v" else "h"
+        # account for axis ticks, ticks text, and titles in plot margins
+        # (apparently ggplot2 doesn't support axis.title/axis.text margins)
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
+          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[way]] +
+          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[way]]
+        # draw axis titles as annotations 
+        # (plotly.js axis titles aren't smart enough to dodge ticks & text)
+        if (!is_blank(axisTitle) && nchar(axisTitleText) > 0) {
+          axisTextSize <- unitConvert(axisText, "npc", type)
+          axisTitleSize <- unitConvert(axisTitle, "npc", type)
+          offset <- 
+            (0 - 
+               bbox(axisTickText, axisText$angle, axisTextSize)[[way]] -
+               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[way]] / 2 -
+               unitConvert(theme$axis.ticks.length, "npc", type))
+          # npc is on a 0-1 scale of the _entire_ device, 
+          # but these units _should_ be wrt to the plotting region
+          # multiplying the offset by 2 seems to work, but this is a terrible hack
+          offset <- 2 * offset
+          x <- if (xy == "x") 0.5 else offset
+          y <- if (xy == "x") offset else 0.5
+          gglayout$annotations <- c(
+            gglayout$annotations,
+            make_label(
+              faced(axisTitleText, axisTitle$face), x, y, el = axisTitle, 
+              xanchor = "center", yanchor = "middle"
+            )
+          )
+        }
       }
       
     } # end of axis loop
@@ -362,48 +339,39 @@ gg2list <- function(p, width = NULL, height = NULL) {
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
+    
     # facet strips -> plotly annotations
     # TODO: use p$facet$labeller for the actual strip text!
-    if (inherits(p$facet, "grid") && lay$COL == nCols) {
-      txt <- paste(
-        lay[, as.character(p$facet$rows)], 
-        collapse = ", "
-      )
-      if (!is_blank(theme[["strip.text.y"]])) {
-        lab <- make_label(
-          txt, x = max(xdom), y = mean(ydom), 
-          el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-          xanchor = "left", yanchor = "bottom"
-        )
-        gglayout$annotations <- c(gglayout$annotations, lab)
-        strip <- make_strip_rect(xdom, ydom, theme, "right")
-        gglayout$shapes <- c(gglayout$shapes, strip)
-      }
-    }
-    if (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1){
+    if (has_facet(p) && lay$ROW == 1 && !is_blank(theme[["strip.text.x"]])){
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       txt <- paste(
-        lay[, as.character(p$facet[[vars]])], 
-        collapse = ", "
+        lay[, as.character(p$facet[[vars]])], collapse = ", "
       )
-      if (!is_blank(theme[["strip.text.x"]])) {
-        lab <- make_label(
-          txt, x = mean(xdom), y = max(ydom), 
-          el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
-          xanchor = "center", yanchor = "bottom"
-        )
-        gglayout$annotations <- c(gglayout$annotations, lab)
-        strip <- make_strip_rect(xdom, ydom, theme, "top")
-        gglayout$shapes <- c(gglayout$shapes, strip)
-      }
+      lab <- make_label(
+        txt, x = mean(xdom), y = max(ydom), 
+        el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
+        xanchor = "center", yanchor = "bottom"
+      )
+      gglayout$annotations <- c(gglayout$annotations, lab)
+      strip <- make_strip_rect(xdom, ydom, theme, "top")
+      gglayout$shapes <- c(gglayout$shapes, strip)
+    }
+    if (inherits(p$facet, "grid") && lay$COL == nCols && 
+        !is_blank(theme[["strip.text.y"]])) {
+      txt <- paste(
+        lay[, as.character(p$facet$rows)], collapse = ", "
+      )
+      lab <- make_label(
+        txt, x = max(xdom), y = mean(ydom), 
+        el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
+        xanchor = "left", yanchor = "bottom"
+      )
+      gglayout$annotations <- c(gglayout$annotations, lab)
+      strip <- make_strip_rect(xdom, ydom, theme, "right")
+      gglayout$shapes <- c(gglayout$shapes, strip)
     }
     
   } # end of panel loop
-  
-  # if facets are present, wipe out 'official' [x/y]axis title(s)
-  if (has_facet(p)) {
-    gglayout <- strip_axis(gglayout, c("title", "titlefont"))
-  }
   
   # ------------------------------------------------------------------------
   # guide/legend conversion
@@ -480,12 +448,50 @@ gg2list <- function(p, width = NULL, height = NULL) {
       return(NULL)
     }
     
-    traces <- c(traces, lapply(gdefs, gdef2trace))
+    traces <- compact(c(traces, lapply(gdefs, gdef2trace)))
     
     # TODO: 
     # (1) shrink guide size(s). Set fractions in colorbar.lenmode
     # (2) position guide(s)?
     # (3) 
+  }
+  
+  # Bar hackery:
+  # (1) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific 
+  # (2) position_*() is layer-specific, but `layout.barmode` is plot-specific.
+  geoms <- sapply(layers, ggtype, "geom")
+  if (any(idx <- geoms %in% "bar")) {
+    gglayout$bargap <- 0
+    # since `layout.barmode` is plot-specific, we can't support multiple bar 
+    # geoms with different positions
+    positions <- sapply(layers, ggtype, "position")
+    position <- unique(positions[geoms %in% "bar"])
+    if (length(position) > 1) {
+      warning("plotly doesn't support multiple positions\n",
+              "across geom_bar() layers", call. = FALSE)
+      position <- position[1]
+    }
+    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
+    # (i.e., at this point, y should be the count/density)
+    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
+    gglayout$barmode <- if (position %in% "identity" && is_hist) {
+      "overlay" 
+    } else if (position %in% c("identity", "stack", "fill")) {
+      "stack"
+    } else {
+      "group"
+    }
+  }
+  
+  # flipped coordinates
+  if (inherits(p$coordinates, "CoordFlip")) {
+    for (i in seq_along(traces)) {
+      tr <- traces[[i]]
+      # flip x/y in traces
+      traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (identical(tr$type, "bar")) traces[[i]]$orientation <- "h"
+      # TODO: do I have to flip axis objects?
+    }
   }
   
   l <- list(data = compact(traces), layout = compact(gglayout))
@@ -603,15 +609,6 @@ make_label <- function(txt = "", x, y, el = ggplot2::element_text(), ...) {
 
 has_facet <- function(x) { 
   inherits(x$facet, c("grid", "wrap"))
-}
-
-# remove a property from an axis element
-strip_axis <- function(x, y = c("title", "titlefont")) {
-  idx <- grepl("[x-y]axis", names(x))
-  axes <- x[idx]
-  axes <- lapply(axes, function(x) { x[y] <- NULL; x })
-  x[idx] <- axes
-  x
 }
 
 #' Estimate bounding box of a rotated string
@@ -738,6 +735,7 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
 # this helps us import functions in a way that R CMD check won't cry about
 ggfun <- function(x) getFromNamespace(x, "ggplot2")
 
-type <- function(x, y = "geom") {
+ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
 }
+
