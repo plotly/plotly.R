@@ -5,13 +5,16 @@
 #' @export
 toRGB <- function(x, alpha = 1) {
   if (is.null(x)) return(x)
-  if (grepl("rgb\\(", x)) return(x)
-  if (identical(x, "NA")) x <- NA
+  if (all(grepl("rgb\\(", x))) return(x)
+  # for some reason ggplot2 has "NA" in some place (instead of NA)
+  if (is.character(x)) {
+    x[x == "NA"] <- NA
+  }
   # as of ggplot2 version 1.1, an NA alpha is treated as though it's 1
-  if (is.na(alpha)) alpha <- 1
-  if (alpha != 1) {
+  alpha[is.na(alpha)] <- 1
+  if (any(alpha != 1)) {
     rgb.matrix <- col2rgb(x, TRUE)
-    rgb.matrix["alpha", 1] <- alpha
+    rgb.matrix["alpha", ] <- alpha
     ch.vector <- "rgba(%s)"
   } else {
     rgb.matrix <- col2rgb(x)
