@@ -1,5 +1,5 @@
 # layer -> trace conversion
-layers2traces <- function(data, prestats_data, layers) {
+layers2traces <- function(data, prestats_data, layers, scales) {
   # attach a "geom class" to each layer of data for method dispatch 
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
   # extract parameters for each layer
@@ -27,10 +27,19 @@ layers2traces <- function(data, prestats_data, layers) {
     datz <- c(datz, d)
     paramz <- c(paramz, pm)
   }
+  
   # each ggplot2 layer can be comprised of one or more plotly.js traces
-  # so, we split each layer of data into chunks (one chunk per trace)
+  # we split each layer of data into chunks (one chunk per trace)
+  # if and only if discrete scale(s) (or multiple panels) exist
+  split_by <- c("colour", "fill", "shape", "linetype", "size")
+  for (i in split_by) {
+    if (tryCatch(scales$get_scales(i)$is_discrete(), error = function(e) FALSE)) {
+      next
+    } 
+    split_by <- setdiff(split_by, i)
+  }
   datz <- lapply(datz, function(x) {
-    idx <- names(x) %in% c(markSplit[[class(x)[1]]], "PANEL")
+    idx <- names(x) %in% c(split_by, "PANEL")
     idx <- idx & !sapply(x, anyNA)
     s <- interaction(as.list(x[idx]))
     split(x, s, drop = TRUE)
@@ -55,6 +64,9 @@ to_basic <- function(data, prestats_data, params, ...) {
 
 #' @export
 to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
+  # TODO: it should be possible to implement this via GeomPolygon
+  # just need preprocess the data, then:
+  # replace_class(data, "GeomPolygon",  "GeomViolin")
   warning(
     "plotly.js does not yet support violin plots. \n",
     "Converting to boxplot instead.",
@@ -65,13 +77,11 @@ to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, params, ...) {
-  # Preserve default colour values using fill:
-  if (!is.null(data$fill)) {
-    prestats_data$fill <- NULL
-    dat <- unique(data[c("x", "fill")])
-    prestats_data <- plyr::join(prestats_data, dat, by = "x")
-  }
-  prefix_class(prestats_data, "GeomBoxplot")
+  # 'trained' aesthetics that we're interested in mapping from data to prestats
+  aez <- c("fill", "size", "alpha", "linetype", "shape", "x")
+  dat <- data[names(data) %in% c(aez, "group")]
+  pre <- prestats_data[!names(prestats_data) %in% aez]
+  prefix_class(merge(pre, dat, by = "group", sort = FALSE), "GeomBoxplot")
 }
 
 #' @export
@@ -87,6 +97,17 @@ to_basic.GeomSmooth <- function(data, prestats_data, params, ...) {
 #' @export
 to_basic.GeomRibbon <- function(data, prestats_data, params, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
+}
+
+#' @export
+to_basic.GeomLine <- function(data, prestats_data, params, ...) {
+  data <- group2NA(data[order(data$x), ])
+  replace_class(data, "GeomPath", "GeomLine")
+}
+
+#' @export
+to_basic.GeomStep <- function(data, prestats_data, params, ...) {
+  prefix_class(group2NA(data), "GeomPath")
 }
 
 #' @export
@@ -120,25 +141,36 @@ to_basic.GeomRect <- function(data, prestats_data, params, ...) {
   replace_class(data, "GeomPolygon", "GeomRect")
 }
 
+
 #' @export
-to_basic.GeomLine <- function(data, prestats_data, params, ...) {
-  data <- group2NA(data[order(data$x), ])
-  replace_class(data, "GeomPath", "GeomLine")
+to_basic.GeomRaster <- function(data, prestats_data, params, ...) {
+  data$z <- prestats_data$fill
+  replace_class(data, "GeomTile", "GeomRaster")
+}
+
+#' @export
+to_basic.GeomTile <- function(data, prestats_data, params, ...) {
+  # TODO: 
+  # (1) what if nrow(data) != nrow(prestats_data)?
+  # (2) what if fill is categorical? Use geom_rect instead?!?
+  data$z <- scales::rescale(prestats_data$fill)
+  data
 }
 
 #' @export
 to_basic.GeomContour <- function(data, prestats_data, params, ...) {
+  browser()
   prefix_class(prestats_data, "GeomContour")
-}
-
-#' @export
-to_basic.GeomDensity <- function(data, prestats_data, params, ...) {
-  replace_class(data, "GeomArea", "GeomDensity")
 }
 
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, params, ...) {
   prefix_class(prestats_data, "GeomDensity2d")
+}
+
+#' @export
+to_basic.GeomDensity <- function(data, prestats_data, params, ...) {
+  replace_class(data, "GeomArea", "GeomDensity")
 }
 
 #' @export
@@ -241,38 +273,31 @@ geom2trace <- function(data, params) {
 
 #' @export
 geom2trace.GeomBlank <- function(data, params) {
-  list(
-    x = data$x,
-    y = data$y,
-    text = data$text,
-    type = "scatter",
-    mode = "markers",
-    marker = list(opacity = 0)
-  )
+  list()
 }
 
 #' @export
 geom2trace.GeomPath <- function(data, params) {
-  list(
+  L <- list(
     x = data$x,
     y = data$y,
     text = data$text,
     type = "scatter",
     mode = "lines",
     line = list(
-      # TODO: 
-      # (1) track plotly.js issue for line.fill
-      # (2) What about alpha? Does that go in colour?
-      width = mm2pixels(uniq(data$size %||% GeomPath$default_aes$size)),
-      color = toRGB(uniq(data$colour %||% GeomPath$default_aes$colour)),
-      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
+      # TODO: line width array? -- https://github.com/plotly/plotly.js/issues/147
+      width = mm2pixels(data$size[1]),
+      color = toRGB(uniq(data$colour)),
+      dash = lty2dash(uniq(data$linetype))
     )
   )
+  if (inherits(data, "GeomStep")) L$line$shape <- "hv"
+  L
 }
 
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
-  shape <- uniq(data$shape %||% GeomPoint$default_aes$shape)
+  shape <- uniq(data$shape)
   L <- list(
     x = data$x,
     y = data$y,
@@ -281,13 +306,13 @@ geom2trace.GeomPoint <- function(data, params) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
-      opacity = uniq(data$alpha %||% 1),
-      size = mm2pixels(uniq(data$size %||% GeomPoint$default_aes$size)),
+      color = toRGB(uniq(data$fill)),
+      opacity = uniq(data$alpha),
+      size = mm2pixels(uniq(data$size)),
       symbol = pch2symbol(shape),
       line = list(
-        width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
-        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
+        width = mm2pixels(uniq(data$stroke)),
+        color = toRGB(uniq(data$colour))
       )
     )
   )
@@ -308,15 +333,15 @@ geom2trace.GeomPoint <- function(data, params) {
 geom2trace.GeomBar <- function(data, params) {
   list(
     x = data$x,
-    y = data$count,
+    y = data$count %||% data$y,
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
-      opacity = uniq(data$alpha %||% 1),
+      color = toRGB(uniq(data$fill)),
+      opacity = uniq(data$alpha),
       line = list(
-        width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
-        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
+        width = mm2pixels(uniq(data$stroke)),
+        color = toRGB(uniq(data$colour))
       )
     )
   )
@@ -332,17 +357,36 @@ geom2trace.GeomPolygon <- function(data, params) {
     type = "scatter",
     mode = "lines",
     line = list(
-      # TODO: 
-      # (1) track plotly.js issue for line.fill
-      # (2) What about alpha? Does that go in colour?
-      width = mm2pixels(uniq(data$size %||% GeomPolygon$default_aes$size)),
-      color = toRGB(uniq(data$colour %||% GeomPolygon$default_aes$colour)),
-      dash = lty2dash(uniq(data$linetype %||% GeomPolygon$default_aes$linetype))
+      width = mm2pixels(data$size[1]),
+      color = toRGB(uniq(data$colour)),
+      dash = lty2dash(uniq(data$linetype))
     ),
     fill = "tozeroy",
-    fillcolor = toRGB(
-      uniq(data$fill %||% GeomPolygon$default_aes$fill), 
-      uniq(data$alpha %||% GeomPolygon$default_aes$alpha)
+    fillcolor = toRGB(uniq(data$fill), uniq(data$alpha))
+  )
+}
+
+#' @export
+geom2trace.GeomBoxplot <- function(data, params) {
+  list(
+    x = data$x,
+    y = data$y,
+    type = "box",
+    fillcolor = toRGB(uniq(data$fill)),
+    # marker styling must inherit from GeomPoint$default_aes
+    # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L77
+    marker = list(
+      opacity = GeomPoint$default_aes$alpha,
+      outliercolor = toRGB(GeomPoint$default_aes$colour),
+      line = list(
+        width = mm2pixels(GeomPoint$default_aes$stroke),
+        color = toRGB(GeomPoint$default_aes$colour)
+      ),
+      size = mm2pixels(GeomPoint$default_aes$size)
+    ),
+    line = list(
+      color = toRGB(uniq(data$colour)),
+      width = mm2pixels(uniq(data$size))
     )
   )
 }
@@ -355,8 +399,9 @@ geom2trace.GeomText <- function(data, params) {
     y = data$y,
     text = data$label,
     textfont = list(
-      size = data$size %||% 12,
-      color = data$colour
+      # TODO: how to translate fontface/family?
+      size = mm2pixels(uniq(data$size)),
+      color = toRGB(uniq(data$colour))
     ),
     type = "scatter",
     mode = "text"
@@ -364,54 +409,40 @@ geom2trace.GeomText <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomStep <- function(data, params) {
-  list(
-    x = data$x,
-    y = data$y,
-    type = "scatter",
-    mode = "lines",
-    #line = paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes)
-  )
-}
-
-#' @export
-geom2trace.GeomBoxplot <- function(data, params) {
-  list(
-    y = data$y,
-    name = params$name,
-    type = "box",
-    # TODO: translate marker styling for outliers!
-    line = paramORdefault(params, aes2line, ggplot2::GeomBoxplot$default_aes),
-    fillcolor = toRGB(params$fill %||% "white")
-  )
-}
-
-#' @export
 geom2trace.GeomTile <- function(data, params) {
-  x <- unique(data$x)
-  y <- unique(data$y)
+  x <- sort(unique(data$x))
+  y <- sort(unique(data$y))
+  # ensure ordering of values is correct
+  #data <- data[order(data$x, data$y), ]
+  which.rng <- c(which.min(data$z), which.max(data$z))
   list(
     x = x,
     y = y,
-    z = t(matrix(data$fill.name, nrow = length(x), ncol = length(y))),
-    name = params$name,
+    z = matrix(data$z, nrow = length(x), ncol = length(y)),
+    colorscale = setNames(data[which.rng, c("z", "fill")], NULL),
     type = "heatmap",
-    mode = "lines",
-    line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes)
+    showscale = FALSE,
+    autocolorscale = FALSE
   )
 }
 
 #' @export
 geom2trace.GeomContour <- function(data, params) {
-  x <- unique(data$x)
-  y <- unique(data$y)
+  browser()
+  x <- sort(unique(data$x))
+  y <- sort(unique(data$y))
   list(
     x = x,
     y = y,
-    z = t(matrix(data$z, nrow = length(x), ncol = length(y))),
+    z = matrix(data$z, nrow = length(x), ncol = length(y)),
     type = "contour",
-    line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes),
-    contours = list(coloring = "lines")
+    ncontours = params$bins,
+    contours = list(
+      coloring = "lines"
+    ),
+    line = list(
+      
+    )
   )
 }
 

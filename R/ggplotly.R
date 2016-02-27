@@ -86,10 +86,32 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # end of ggplot_build()
   # ------------------------------------------------------------------------
   
+  # initiate plotly.js layout with some plot-wide theming stuff
+  theme <- ggfun("plot_theme")(p)
+  elements <- names(which(sapply(theme, inherits, "element")))
+  for (i in elements) {
+    theme[[i]] <- ggplot2::calc_element(i, theme)
+  }
+  # Translate plot wide theme elements to plotly.js layout
+  pm <- unitConvert(theme$plot.margin, "pixels")
+  gglayout <- list(
+    margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
+    plot_bgcolor = toRGB(theme$panel.background$fill),
+    paper_bgcolor = toRGB(theme$plot.background$fill),
+    font = text2font(theme$text)
+  )
+  # main plot title
+  if (nchar(p$labels$title %||% "") > 0) {
+    gglayout$title <- faced(p$labels$title, theme$plot.title$face)
+    gglayout$titlefont <- text2font(theme$plot.title)
+    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
+  }
+  
+  # important stuff like panel$ranges is already flipped, but 
+  # p$scales/p$labels/data aren't. We flip x/y trace data at the very end 
+  # and scales in the axis loop below.
   if (inherits(p$coordinates, "CoordFlip")) {
-    # flip labels
-    p$labels[c("x", "y")]  <- p$labels[c("y", "x")]
-    # TODO: is there anything else we need to flip? p$scales?
+    p$labels[c("x", "y")] <- p$labels[c("y", "x")]
   }
   
   # important panel summary stats
@@ -135,9 +157,8 @@ gg2list <- function(p, width = NULL, height = NULL) {
     lay_outs[[i]] <- lay_out
   }
   data <- Map(function(x, y) { merge(x, y, sort = FALSE) }, data, lay_outs)
-  
   # layers -> plotly.js traces
-  trace.list <- layers2traces(data, prestats_data, layers)
+  trace.list <- layers2traces(data, prestats_data, layers, scales)
   # collapse lists of lists to a list of traces 
   # TODO: attach the appropriate legendgroup info to each trace!
   traces <- list()
@@ -149,31 +170,12 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # later on, when legends/guides are created, 
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
+
   
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
   # ------------------------------------------------------------------------
   
-  # obtain _calculated_ theme elements (necessary for axis/label formatting)
-  theme <- ggfun("plot_theme")(p)
-  elements <- names(which(sapply(theme, inherits, "element")))
-  for (i in elements) {
-    theme[[i]] <- ggplot2::calc_element(i, theme)
-  }
-  # Translate plot wide theme elements to plotly.js layout
-  pm <- unitConvert(theme$plot.margin, "pixels")
-  gglayout <- list(
-    margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
-    plot_bgcolor = toRGB(theme$panel.background$fill),
-    paper_bgcolor = toRGB(theme$plot.background$fill),
-    font = text2font(theme$text)
-  )
-  # main plot title
-  if (nchar(p$labels$title %||% "") > 0) {
-    gglayout$title <- faced(p$labels$title, theme$plot.title$face)
-    gglayout$titlefont <- text2font(theme$plot.title)
-    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
-  }
   # panel margins must be computed before panel/axis loops 
   # (in order to use get_domains())
   panelMarginX <- unitConvert(
@@ -241,6 +243,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
+      # stuff like panel$ranges is already flipped, but scales aren't
       sc <- if (inherits(p$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
       } else {
@@ -373,8 +376,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
     
   } # end of panel loop
   
+  
   # ------------------------------------------------------------------------
   # guide/legend conversion
+  #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
+  #   To do so, we borrow some of the body of ggplot2:::guides_build().
+  #
+  #   Once we have legend key(s). We use those keys to decide when/where to 
+  #   split layers into plotly.js traces. We also use the key name 
+  #   (e.g. fill, color, etc) to set the legendgroup property and the key
+  #   values to name the traces.
   # ------------------------------------------------------------------------ 
   
   # if there are no non-positional scales or if theme(legend.position = "none")
@@ -382,9 +393,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend  <- FALSE
   } else {
-    # Strategy: Obtain and translate the output of ggplot2:::guides_train()
-    # To do so, we copy some of the body of ggplot2:::guides_build()
-    
     # by default, guide boxes are vertically aligned
     theme$legend.box <- theme$legend.box %||% "vertical"
     
@@ -415,8 +423,12 @@ gg2list <- function(p, width = NULL, height = NULL) {
     # guide data -> plotly.js traces
     gdef2trace <- function(gdef) {
       if (inherits(gdef, "colorbar")) {
-        # should always be numeric (it's a colorbar!)
-        gdef$key$.value <- scales::rescale(gdef$key$.value)
+        # sometimes the key has missing values, which we can ignore
+        gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
+        # range of the scale
+        rng <- range(gdef$bar$value)
+        gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
+        gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
         return(list(
           x = gglayout$xaxis$tickvals,
           y = gglayout$yaxis$tickvals,
@@ -425,9 +437,10 @@ gg2list <- function(p, width = NULL, height = NULL) {
           opacity = 0,
           hoverinfo = "none",
           showlegend = FALSE,
+          # do everything on a 0-1 scale
           marker = list(
-            color = gdef$key$.value,
-            colorscale = setNames(gdef$key[c(".value", "fill")], NULL),
+            color = c(0, 1),
+            colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
             colorbar = list(
               title = gdef$title,
               titlefont = text2font(gdef$title.theme),
@@ -440,28 +453,43 @@ gg2list <- function(p, width = NULL, height = NULL) {
       }
       # TODO: convert legends. Connect with traces via legendgroup!
       if (inherits(gdef, "legend")) {
-        # str(gdef$geoms)
-        # problem: multiple geoms can belong to a single legend. 
+        # unfortunately we have no nice way to identify the geom type of gdef$geoms
+        # note: multiple geoms can belong to a single legend.
+        
         # How to convert multiple geoms to a single trace? Just take the first?
         NULL
       }
       return(NULL)
     }
-    
-    traces <- compact(c(traces, lapply(gdefs, gdef2trace)))
+    traces <- c(traces, lapply(gdefs, gdef2trace))
     
     # TODO: 
     # (1) shrink guide size(s). Set fractions in colorbar.lenmode
     # (2) position guide(s)?
-    # (3) 
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  # --------
+  # plot-wide hacks 
+  # ---------
   
   # Bar hackery:
   # (1) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific 
   # (2) position_*() is layer-specific, but `layout.barmode` is plot-specific.
   geoms <- sapply(layers, ggtype, "geom")
   if (any(idx <- geoms %in% "bar")) {
-    gglayout$bargap <- 0
+    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
+    # (i.e., at this point, y should be the count/density)
+    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
+    # TODO: get rid of this and use explicit width for bars 
+    # https://github.com/plotly/plotly.js/issues/80
+    if (is_hist) gglayout$bargap <- 0
     # since `layout.barmode` is plot-specific, we can't support multiple bar 
     # geoms with different positions
     positions <- sapply(layers, ggtype, "position")
@@ -471,9 +499,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
               "across geom_bar() layers", call. = FALSE)
       position <- position[1]
     }
-    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
-    # (i.e., at this point, y should be the count/density)
-    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
     gglayout$barmode <- if (position %in% "identity" && is_hist) {
       "overlay" 
     } else if (position %in% c("identity", "stack", "fill")) {
@@ -483,14 +508,13 @@ gg2list <- function(p, width = NULL, height = NULL) {
     }
   }
   
-  # flipped coordinates
+  # flip x/y in traces for flipped coordinates 
+  # (we've already done appropriate flipping for axis objects)
   if (inherits(p$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
-      # flip x/y in traces
       traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (identical(tr$type, "bar")) traces[[i]]$orientation <- "h"
-      # TODO: do I have to flip axis objects?
+      if (tr$type %in% c("bar", "box")) traces[[i]]$orientation <- "h"
     }
   }
   
@@ -506,22 +530,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
 #-----------------------------------------------------------------------------
 # ggplotly 'utility' functions
 #-----------------------------------------------------------------------------
-
-# aesthetics that should have a trace for each unique value
-markSplit <- list(
-  GeomBoxplot = "x",
-  GeomPoint = c("colour", "fill", "shape"),
-  GeomPath = c("linetype", "size", "colour", "shape"),
-  GeomPolygon = c("colour", "fill", "linetype", "size"),
-  GeomBar = c("colour", "fill"),
-  GeomDensity = c("colour", "fill", "linetype"),
-  GeomBoxplot = c("colour", "fill", "size"),
-  GeomErrorbar = c("colour", "linetype"),
-  GeomErrorbarh = c("colour", "linetype"),
-  GeomArea = c("colour", "fill"),
-  GeomStep = c("linetype", "size", "colour"),
-  GeomText = c("colour")
-)
 
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
