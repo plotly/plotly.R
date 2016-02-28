@@ -15,13 +15,11 @@
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
 #' ggplotly(ggiris)
 #' 
-#' # maps!!
 #' data(canada.cities, package = "maps")
 #' viz <- ggplot(canada.cities, aes(long, lat)) +
-#'   borders(regions = "canada", name = "borders") +
+#'   borders(regions = "canada") +
 #'   coord_equal() +
-#'   geom_point(aes(text = name, size = pop), colour = "red",
-#'                alpha = 1/2, name = "cities")
+#'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 #'  ggplotly(viz)
 #' }
 #' 
@@ -85,7 +83,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
-  
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(p)
   elements <- names(which(sapply(theme, inherits, "element")))

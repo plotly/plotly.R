@@ -39,6 +39,7 @@ layers2traces <- function(data, prestats_data, layers, scales) {
     split_by <- setdiff(split_by, i)
   }
   datz <- lapply(datz, function(x) {
+    if (inherits(x, "GeomPolygon")) split_by <- c(split_by, "fill")
     idx <- names(x) %in% c(split_by, "PANEL")
     idx <- idx & !sapply(x, anyNA)
     s <- interaction(as.list(x[idx]))
@@ -102,17 +103,12 @@ to_basic.GeomRibbon <- function(data, prestats_data, params, ...) {
 #' @export
 to_basic.GeomLine <- function(data, prestats_data, params, ...) {
   data <- group2NA(data[order(data$x), ])
-  replace_class(data, "GeomPath", "GeomLine")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
 to_basic.GeomStep <- function(data, prestats_data, params, ...) {
-  prefix_class(group2NA(data), "GeomPath")
-}
-
-#' @export
-to_basic.GeomPath <- function(data, prestats_data, params, ...) {
-  group2NA(data)
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -125,7 +121,7 @@ to_basic.GeomSegment <- function(data, prestats_data, params, ...) {
     rbind(cbind(x, y, others),
           cbind(x = xend, y = yend, others))
   })
-  group2NA(data, "GeomPath")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -138,39 +134,45 @@ to_basic.GeomRect <- function(data, prestats_data, params, ...) {
           cbind(x = xmax, y = ymax, others),
           cbind(x = xmax, y = ymin, others))
   })
-  replace_class(data, "GeomPolygon", "GeomRect")
+  prefix_class(data, "GeomPolygon")
 }
-
 
 #' @export
 to_basic.GeomRaster <- function(data, prestats_data, params, ...) {
+  # TODO: what if nrow(data) != nrow(prestats_data)?
   data$z <- prestats_data$fill
-  replace_class(data, "GeomTile", "GeomRaster")
+  if (is.discrete(prestats_data$fill)) {
+    data <- prefix_class(data, "GeomRect")
+    to_basic(data, prestats_data, params)
+  } else {
+    prefix_class(data, "GeomTile")
+  }
 }
 
 #' @export
 to_basic.GeomTile <- function(data, prestats_data, params, ...) {
-  # TODO: 
-  # (1) what if nrow(data) != nrow(prestats_data)?
-  # (2) what if fill is categorical? Use geom_rect instead?!?
-  data$z <- scales::rescale(prestats_data$fill)
-  data
+  data$z <- prestats_data$fill
+  if (is.discrete(prestats_data$fill)) {
+    data <- prefix_class(data, "GeomRect")
+    to_basic(data, prestats_data, params)
+  } else {
+    data
+  }
 }
 
 #' @export
 to_basic.GeomContour <- function(data, prestats_data, params, ...) {
-  browser()
-  prefix_class(prestats_data, "GeomContour")
+  prefix_class(data, "GeomPolygon")
 }
 
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, params, ...) {
-  prefix_class(prestats_data, "GeomDensity2d")
+  prefix_class(data, "GeomPolygon")
 }
 
 #' @export
 to_basic.GeomDensity <- function(data, prestats_data, params, ...) {
-  replace_class(data, "GeomArea", "GeomDensity")
+  prefix_class(data, "GeomArea")
 }
 
 #' @export
@@ -190,7 +192,7 @@ to_basic.GeomAbline <- function(data, prestats_data, params, ...) {
   }
   data <- plyr::join(data, data.frame(l), by = "plotly_id")
   data <- group2NA(data)
-  replace_class(data, "GeomPath", "GeomAbline")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -214,7 +216,7 @@ to_basic.GeomHline <- function(data, prestats_data, params, ...) {
   }
   data <- plyr::join(data, data.frame(l), by = "plotly_id")
   data <- group2NA(data)
-  replace_class(data, "GeomPath", "GeomHline")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -238,7 +240,7 @@ to_basic.GeomVline <- function(data, prestats_data, params, ...) {
   }
   data <- plyr::join(data, data.frame(l), by = "plotly_id")
   data <- group2NA(data)
-  replace_class(data, "GeomPath", "GeomVline")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -247,7 +249,7 @@ to_basic.GeomJitter <- function(data, prestats_data, params, ...) {
     params$sizemin <- min(prestats_data$globsizemin)
     params$sizemax <- max(prestats_data$globsizemax)
   }
-  replace_class(data, "GeomPoint", "GeomJitter")
+  prefix_class(data, "GeomPoint")
 }
 
 #' @export
@@ -278,6 +280,7 @@ geom2trace.GeomBlank <- function(data, params) {
 
 #' @export
 geom2trace.GeomPath <- function(data, params) {
+  data <- group2NA(data)
   L <- list(
     x = data$x,
     y = data$y,
@@ -350,20 +353,26 @@ geom2trace.GeomBar <- function(data, params) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params) {
   data <- group2NA(data)
+  # TODO: do this for more density-like measures??
+  if ("level" %in% names(data)) {
+    data$level <- paste("Level:", data$level)
+  }
   list(
     x = data$x,
     y = data$y,
-    text = data$text,
+    text = data$text %||% data$level,
     type = "scatter",
     mode = "lines",
+    # NOTE: line attributes must be constant on a polygon
     line = list(
       width = mm2pixels(data$size[1]),
-      color = toRGB(uniq(data$colour)),
-      dash = lty2dash(uniq(data$linetype))
+      color = toRGB(data$colour[1]),
+      dash = lty2dash(data$linetype[1])
     ),
-    fill = "tozeroy",
-    fillcolor = toRGB(uniq(data$fill), uniq(data$alpha))
+    fill = "tozerox",
+    fillcolor = toRGB(data$fill[1] %||% NA, data$alpha[1] %||% 1)
   )
+  
 }
 
 #' @export
@@ -412,8 +421,8 @@ geom2trace.GeomText <- function(data, params) {
 geom2trace.GeomTile <- function(data, params) {
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  # ensure ordering of values is correct
-  #data <- data[order(data$x, data$y), ]
+  # z should **always** be numeric
+  data$z <- scales::rescale(data$z)
   which.rng <- c(which.min(data$z), which.max(data$z))
   list(
     x = x,
@@ -423,37 +432,6 @@ geom2trace.GeomTile <- function(data, params) {
     type = "heatmap",
     showscale = FALSE,
     autocolorscale = FALSE
-  )
-}
-
-#' @export
-geom2trace.GeomContour <- function(data, params) {
-  browser()
-  x <- sort(unique(data$x))
-  y <- sort(unique(data$y))
-  list(
-    x = x,
-    y = y,
-    z = matrix(data$z, nrow = length(x), ncol = length(y)),
-    type = "contour",
-    ncontours = params$bins,
-    contours = list(
-      coloring = "lines"
-    ),
-    line = list(
-      
-    )
-  )
-}
-
-#' @export
-geom2trace.GeomDensity2d <- function(data, params) {
-  list(
-    x = data$x,
-    y = data$y,
-    type = "histogram2dcontour",
-    line = paramORdefault(params, aes2line, ggplot2::GeomPath$default_aes),
-    contours = list(coloring = "lines")
   )
 }
 
@@ -477,12 +455,6 @@ geom2trace.GeomArea <- function(data, params) {
     fill = "tozeroy",
     fillcolor = toRGB(params$fill %||% "grey20", params$alpha)
   )
-}
-
-#' @export
-geom2trace.GeomSmooth <- function(data, params) {
-  #TODO: how to two geoms?
-  geom2trace.GeomPath(data, params)
 }
 
 #' @export
@@ -512,7 +484,7 @@ group2NA <- function(data) {
   ## When group2NA is called on geom_polygon (or geom_rect, which is
   ## treated as a basic polygon), we need to retrace the first points
   ## of each group, see https://github.com/ropensci/plotly/pull/178
-  retrace.first.points <- "polygon" %in% class(data)
+  retrace.first.points <- inherits(data, "GeomPolygon")
   for (i in forward.i) {
     no.group <- poly.list[[i]][, !is.group, drop = FALSE]
     na.row <- no.group[1, ]
