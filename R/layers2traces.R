@@ -1,5 +1,5 @@
 # layer -> trace conversion
-layers2traces <- function(data, prestats_data, layers, scales) {
+layers2traces <- function(data, prestats_data, layers, panel, scales) {
   # attach a "geom class" to each layer of data for method dispatch 
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
   # extract parameters for each layer
@@ -10,7 +10,7 @@ layers2traces <- function(data, prestats_data, layers, scales) {
   # and transform the data, if necessary, for example:
   # 1. geom_line() is really geom_path() with data sorted by x)
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
-  data <- Map(to_basic, data, prestats_data, params)
+  data <- Map(to_basic, data, prestats_data, panel$ranges, params)
   # since some layers are really two layers, we may need to replicate
   # certain data/layers/params
   datz <- list()
@@ -58,12 +58,12 @@ layers2traces <- function(data, prestats_data, layers, scales) {
 #' Convert a geom, which are special cases of other geoms, to "basic" geoms.
 #' --------------------------------------------------------------------------
 
-to_basic <- function(data, prestats_data, params, ...) {
+to_basic <- function(data, prestats_data, ranges, params, ...) {
   UseMethod("to_basic")
 }
 
 #' @export
-to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
+to_basic.GeomViolin <- function(data, prestats_data, ranges, params, ...) {
   # TODO: it should be possible to implement this via GeomPolygon
   # just need preprocess the data, then:
   # replace_class(data, "GeomPolygon",  "GeomViolin")
@@ -76,7 +76,7 @@ to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomBoxplot <- function(data, prestats_data, params, ...) {
+to_basic.GeomBoxplot <- function(data, prestats_data, ranges, params, ...) {
   # 'trained' aesthetics that we're interested in mapping from data to prestats
   aez <- c("fill", "colour", "size", "alpha", "linetype", "shape", "x")
   dat <- data[names(data) %in% c(aez, "group")]
@@ -85,7 +85,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomSmooth <- function(data, prestats_data, params, ...) {
+to_basic.GeomSmooth <- function(data, prestats_data, ranges, params, ...) {
   dat <- replace_class(data, "GeomPath", "GeomSmooth")
   if (!identical(params$se, FALSE)) {
     data$colour <- NULL
@@ -95,28 +95,28 @@ to_basic.GeomSmooth <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomRibbon <- function(data, prestats_data, params, ...) {
+to_basic.GeomRibbon <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomArea <- function(data, prestats_data, params, ...) {
+to_basic.GeomArea <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomLine <- function(data, prestats_data, params, ...) {
+to_basic.GeomLine <- function(data, prestats_data, ranges, params, ...) {
   data <- group2NA(data[order(data$x), ])
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomStep <- function(data, prestats_data, params, ...) {
+to_basic.GeomStep <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomSegment <- function(data, prestats_data, params, ...) {
+to_basic.GeomSegment <- function(data, prestats_data, ranges, params, ...) {
   # Every row is one segment, we convert to a line with several
   # groups which can be efficiently drawn by adding NA rows.
   data$group <- seq_len(nrow(data))
@@ -129,7 +129,7 @@ to_basic.GeomSegment <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomRect <- function(data, prestats_data, params, ...) {
+to_basic.GeomRect <- function(data, prestats_data, ranges, params, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
   g$data <- with(data, {
@@ -142,7 +142,7 @@ to_basic.GeomRect <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomRaster <- function(data, prestats_data, params, ...) {
+to_basic.GeomRaster <- function(data, prestats_data, ranges, params, ...) {
   # TODO: what if nrow(data) != nrow(prestats_data)?
   data$z <- prestats_data$fill
   if (is.discrete(prestats_data$fill)) {
@@ -154,7 +154,7 @@ to_basic.GeomRaster <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomTile <- function(data, prestats_data, params, ...) {
+to_basic.GeomTile <- function(data, prestats_data, ranges, params, ...) {
   data$z <- prestats_data$fill
   if (is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
@@ -165,90 +165,66 @@ to_basic.GeomTile <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomContour <- function(data, prestats_data, params, ...) {
+to_basic.GeomContour <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(data, "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomDensity2d <- function(data, prestats_data, params, ...) {
+to_basic.GeomDensity2d <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(data, "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomDensity <- function(data, prestats_data, params, ...) {
+to_basic.GeomDensity <- function(data, prestats_data, ranges, params, ...) {
   prefix_class(data, "GeomArea")
 }
 
 #' @export
-to_basic.GeomAbline <- function(data, prestats_data, params, ...) {
-  N <- nrow(data)
-  m <- data$slope
-  b <- data$intercept
-  xmin <- min(prestats_data$globxmin, na.rm = T)
-  xmax <- max(prestats_data$globxmax, na.rm = T)
-  data$plotly_id <- seq_len(N)
-  l <- list()
-  for (i in seq_len(N)) {
-    # the NAs tell plotly to draw different traces for each line
-    l$x <- c(l$x, xmin, xmax, NA) 
-    l$y <- c(l$y, xmin * m[i] + b[i], xmax * m[i] + b[i], NA)
-    l$plotly_id <- c(l$plotly_id, rep(i, 3))
-  }
-  data <- plyr::join(data, data.frame(l), by = "plotly_id")
-  data <- group2NA(data)
-  prefix_class(data, "GeomPath")
+to_basic.GeomAbline <- function(data, prestats_data, ranges, params, ...) {
+  d <- unique(data[c("intercept", "slope")])
+  d$group <- seq_len(nrow(d))
+  rng <- rep(ranges$x.range, nrow(d))
+  d <- d[rep(seq_len(nrow(d)), each = 2), ]
+  d$y <- d$intercept + d$slope * rng
+  d$x <- with(d, (y - intercept) / slope)
+  data$group <- NULL
+  d <- merge(d, data, by = c("intercept", "slope"), sort = FALSE)
+  prefix_class(d, "GeomPath")
 }
 
 #' @export
-to_basic.GeomHline <- function(data, prestats_data, params, ...) {
-  N <- nrow(data)
-  yint <- data$yintercept
-  if (is.factor(data$x)) {
-    s <- sort(data$x)
-    xmin <- as.character(s[1])
-    xmax <- as.character(s[length(s)])
-  } else {
-    xmin <- min(prestats_data$globxmin, na.rm = TRUE)
-    xmax <- max(prestats_data$globxmax, na.rm = TRUE)
-  }
-  data$plotly_id <- seq_len(N)
-  l <- list()
-  for (i in seq_len(N)) {
-    l$x <- c(l$x, xmin, xmax, NA) 
-    l$y <- c(l$y, yint[i], yint[i], NA)
-    l$plotly_id <- c(l$plotly_id, rep(i, 3))
-  }
-  data <- plyr::join(data, data.frame(l), by = "plotly_id")
-  data <- group2NA(data)
-  prefix_class(data, "GeomPath")
+to_basic.GeomHline <- function(data, prestats_data, ranges, params, ...) {
+  data$y <- data$yintercept
+  data$yintercept <- NULL
+  yint <- unique(data$y)
+  d <- data.frame(
+    y = rep(yint, each = 2),
+    x = rep(ranges$x.range, length(yint)),
+    group = rep(seq_along(yint), each = 2)
+  )
+  data$group <- NULL
+  d <- merge(d, data, by = "y", sort = FALSE)
+  prefix_class(d, "GeomPath")
 }
 
 #' @export
-to_basic.GeomVline <- function(data, prestats_data, params, ...) {
-  N <- nrow(data)
-  xint <- data$xintercept
-  if (is.factor(data$y)) {
-    s <- sort(data$y)
-    ymin <- as.character(s[1])
-    ymax <- as.character(s[length(s)])
-  } else {
-    ymin <- min(prestats_data$globymin, na.rm = TRUE)
-    ymax <- max(prestats_data$globymax, na.rm = TRUE)
-  }
-  data$plotly_id <- seq_len(N)
-  l <- list()
-  for (i in seq_len(N)) {
-    l$x <- c(l$x, xint[i], xint[i], NA) 
-    l$y <- c(l$y, ymin, ymax, NA)
-    l$plotly_id <- c(l$plotly_id, rep(i, 3))
-  }
-  data <- plyr::join(data, data.frame(l), by = "plotly_id")
-  data <- group2NA(data)
-  prefix_class(data, "GeomPath")
+to_basic.GeomVline <- function(data, prestats_data, ranges, params, ...) {
+  data$x <- data$xintercept
+  data$xintercept <- NULL
+  data$group <- NULL
+  xint <- unique(data$x)
+  d <- data.frame(
+    x = rep(xint, each = 2),
+    y = rep(ranges$y.range, length(xint)),
+    group = rep(seq_along(xint), each = 2)
+  )
+  data$group <- NULL
+  d <- merge(d, data, by = "x", sort = FALSE)
+  prefix_class(d, "GeomPath")
 }
 
 #' @export
-to_basic.GeomJitter <- function(data, prestats_data, params, ...) {
+to_basic.GeomJitter <- function(data, prestats_data, ranges, params, ...) {
   if ("size" %in% names(data)) {
     params$sizemin <- min(prestats_data$globsizemin)
     params$sizemax <- max(prestats_data$globsizemax)
@@ -257,7 +233,7 @@ to_basic.GeomJitter <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.default <- function(data, prestats_data, params, ...) {
+to_basic.default <- function(data, prestats_data, ranges, params, ...) {
   data
 }
 
@@ -464,6 +440,7 @@ geom2trace.default <- function(data, params) {
 #' plotly when we convert groups of things that look the same to
 #' vectors with NA.
 group2NA <- function(data) {
+  if (!"group" %in% names(data)) return(data)
   poly.list <- split(data, data$group, drop = TRUE)
   is.group <- names(data) == "group"
   poly.na.list <- list()

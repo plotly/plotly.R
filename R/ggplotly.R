@@ -146,16 +146,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
   
   # merge the panel/axis info with _each layer_ of data so we know where to put
   # each trace
-  lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
-  lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
-  lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
-  lay_outs <- vector("list", length(data))
-  for (i in seq_len(length(data))) {
-    lay_outs[[i]] <- lay_out
-  }
-  data <- Map(function(x, y) { merge(x, y, sort = FALSE) }, data, lay_outs)
+  #lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
+  #lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
+  #lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
+  #lay_outs <- vector("list", length(data))
+  #for (i in seq_len(length(data))) {
+  #  lay_outs[[i]] <- lay_out
+  #}
+  #data <- Map(function(x, y) { merge(x, y, sort = FALSE) }, data, lay_outs)
   # layers -> plotly.js traces
-  trace.list <- layers2traces(data, prestats_data, layers, scales)
+  trace.list <- layers2traces(data, prestats_data, layers, panel, scales)
   # collapse lists of lists to a list of traces 
   # TODO: attach the appropriate legendgroup info to each trace!
   traces <- list()
