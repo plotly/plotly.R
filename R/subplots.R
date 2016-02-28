@@ -81,7 +81,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     doms <- get_domains(max(p_info$key), nrows, margin)
     doms$key <- as.character(seq_len(nrow(doms)))
     p_info <- p_info[!names(p_info) %in% c("xstart", "xend", "ystart", "yend")]
-    p_info <- plyr::join(p_info, doms, by = "key")
+    p_info <- merge(p_info, doms, by = "key", sort = FALSE)
   }
   # empty plot container that we'll fill up with new info
   p <- list(

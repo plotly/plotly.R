@@ -5,7 +5,7 @@
 \title{Convert a geom, which are special cases of other geoms, to "basic" geoms.
 --------------------------------------------------------------------------}
 \usage{
-to_basic(data, prestats_data, params, ...)
+to_basic(data, prestats_data, layout, params, ...)
 }
 \description{
 Convert a geom, which are special cases of other geoms, to "basic" geoms.

@@ -1,23 +1,22 @@
 # layer -> trace conversion
-layers2traces <- function(data, prestats_data, layers, panel, scales) {
+layers2traces <- function(data, prestats_data, layers, layout, scales) {
   # attach a "geom class" to each layer of data for method dispatch 
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
   # extract parameters for each layer
   params <- lapply(layers, function(x) {
     c(x$geom_params, x$stat_params)
   })
-  # mark special case geoms with their "basic" counterpart
-  # and transform the data, if necessary, for example:
-  # 1. geom_line() is really geom_path() with data sorted by x)
+  # Convert "high-level" geoms to their "low-level" counterpart
+  # This may involve preprocessing the data, for example:
+  # 1. geom_line() is really geom_path() with data sorted by x
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
-  data <- Map(to_basic, data, prestats_data, panel$ranges, params)
-  # since some layers are really two layers, we may need to replicate
-  # certain data/layers/params
+  # This has to be done in a loop, since some layers are really two layers, 
+  # (we may need to replicate data/params)
   datz <- list()
   paramz <- list()
   for (i in seq_along(data)) {
-    d <- data[[i]]
     pm <- params[[i]]
+    d <- to_basic(data[[i]], prestats_data[[i]], layout, pm)
     if (inherits(d, "list")) {
       pm <- replicate(length(d), pm, simplify = FALSE)
     } else {
@@ -26,7 +25,6 @@ layers2traces <- function(data, prestats_data, layers, panel, scales) {
     datz <- c(datz, d)
     paramz <- c(paramz, pm)
   }
-  
   # each ggplot2 layer can be comprised of one or more plotly.js traces
   # we split each layer of data into chunks (one chunk per trace)
   # if and only if discrete scale(s) (or multiple panels) exist
@@ -37,33 +35,40 @@ layers2traces <- function(data, prestats_data, layers, panel, scales) {
     } 
     split_by <- setdiff(split_by, i)
   }
-  datz <- lapply(datz, function(x) {
-    if (inherits(x, "GeomPolygon")) split_by <- c(split_by, "fill")
-    idx <- names(x) %in% c(split_by, "PANEL")
-    idx <- idx & !sapply(x, anyNA)
-    s <- interaction(as.list(x[idx]))
-    split(x, s, drop = TRUE)
-  })
-  # convert each layer to a list of traces
-  trace.list <- lapply(datz, function(x) lapply(x, geom2trace, paramz))
-  # attach axis anchors for each trace
-  Map(function(x, y) { 
-    Map(function(s, t) { 
-      s$xaxis <- unique(t$xaxis); s$yaxis <- unique(t$yaxis); s 
-    }, x, y)
-  }, trace.list, datz)
+  trace.list <- list()
+  for (i in seq_along(datz)) {
+    d <- datz[[i]]
+    # _always_ split on fill for polygons -- plotlyjs can't do two polygons
+    # with different fill in a single trace correctly
+    if (inherits(d, "GeomPolygon")) split_by <- c(split_by, "fill")
+    idx <- names(d) %in% c(split_by, "PANEL")
+    idx <- idx & !sapply(d, anyNA)
+    s <- interaction(as.list(d[idx]))
+    # split layer data into a list of data frames 
+    d <- split(d, s, drop = TRUE)
+    # list of traces for this layer (length should be equal to )
+    trs <- lapply(d, geom2trace, paramz)
+    # attach layout information to each trace
+    for (j in seq_along(trs)) {
+      panel <- unique(d[[j]]$PANEL)
+      trs[[j]]$xaxis <- sub("axis", "", layout[panel, "xaxis"])
+      trs[[j]]$yaxis <- sub("axis", "", layout[panel, "yaxis"])
+    }
+    trace.list <- c(trace.list, trs)
+  }
+  trace.list
 }
 
 # ---------------------------------------------------------------------------
 #' Convert a geom, which are special cases of other geoms, to "basic" geoms.
 #' --------------------------------------------------------------------------
 
-to_basic <- function(data, prestats_data, ranges, params, ...) {
+to_basic <- function(data, prestats_data, layout, params, ...) {
   UseMethod("to_basic")
 }
 
 #' @export
-to_basic.GeomViolin <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomViolin <- function(data, prestats_data, layout, params, ...) {
   # TODO: it should be possible to implement this via GeomPolygon
   # just need preprocess the data, then:
   # replace_class(data, "GeomPolygon",  "GeomViolin")
@@ -76,7 +81,7 @@ to_basic.GeomViolin <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.GeomBoxplot <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, ...) {
   # 'trained' aesthetics that we're interested in mapping from data to prestats
   aez <- c("fill", "colour", "size", "alpha", "linetype", "shape", "x")
   dat <- data[names(data) %in% c(aez, "group")]
@@ -85,7 +90,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.GeomSmooth <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomSmooth <- function(data, prestats_data, layout, params, ...) {
   dat <- replace_class(data, "GeomPath", "GeomSmooth")
   if (!identical(params$se, FALSE)) {
     data$colour <- NULL
@@ -95,28 +100,28 @@ to_basic.GeomSmooth <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.GeomRibbon <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomRibbon <- function(data, prestats_data, layout, params, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomArea <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomArea <- function(data, prestats_data, layout, params, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomLine <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomLine <- function(data, prestats_data, layout, params, ...) {
   data <- group2NA(data[order(data$x), ])
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomStep <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomStep <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomSegment <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
   # Every row is one segment, we convert to a line with several
   # groups which can be efficiently drawn by adding NA rows.
   data$group <- seq_len(nrow(data))
@@ -129,7 +134,7 @@ to_basic.GeomSegment <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.GeomRect <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
   g$data <- with(data, {
@@ -142,89 +147,72 @@ to_basic.GeomRect <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.GeomRaster <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
   # TODO: what if nrow(data) != nrow(prestats_data)?
   data$z <- prestats_data$fill
   if (is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
-    to_basic(data, prestats_data, params)
+    to_basic(data, prestats_data, layout, params)
   } else {
     prefix_class(data, "GeomTile")
   }
 }
 
 #' @export
-to_basic.GeomTile <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
   data$z <- prestats_data$fill
   if (is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
-    to_basic(data, prestats_data, params)
+    to_basic(data, prestats_data, layout, params)
   } else {
     data
   }
 }
 
 #' @export
-to_basic.GeomContour <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomDensity2d <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomDensity <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomArea")
 }
 
 #' @export
-to_basic.GeomAbline <- function(data, prestats_data, ranges, params, ...) {
-  d <- unique(data[c("intercept", "slope")])
-  d$group <- seq_len(nrow(d))
-  rng <- rep(ranges$x.range, nrow(d))
-  d <- d[rep(seq_len(nrow(d)), each = 2), ]
-  d$y <- d$intercept + d$slope * rng
-  d$x <- with(d, (y - intercept) / slope)
-  data$group <- NULL
-  d <- merge(d, data, by = c("intercept", "slope"), sort = FALSE)
-  prefix_class(d, "GeomPath")
+to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
+  data$group <- seq_len(nrow(data))
+  lay <- tidyr::gather(layout, variable, x, xmin:xmax)
+  data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
+  data$y <- with(data, intercept + slope * x)
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomHline <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
+  data$group <- seq_len(nrow(data))
+  lay <- tidyr::gather(layout, variable, x, xmin:xmax)
+  data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- data$yintercept
-  data$yintercept <- NULL
-  yint <- unique(data$y)
-  d <- data.frame(
-    y = rep(yint, each = 2),
-    x = rep(ranges$x.range, length(yint)),
-    group = rep(seq_along(yint), each = 2)
-  )
-  data$group <- NULL
-  d <- merge(d, data, by = "y", sort = FALSE)
-  prefix_class(d, "GeomPath")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomVline <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
+  data$group <- seq_len(nrow(data))
+  lay <- tidyr::gather(layout, variable, y, ymin:ymax)
+  data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data$x <- data$xintercept
-  data$xintercept <- NULL
-  data$group <- NULL
-  xint <- unique(data$x)
-  d <- data.frame(
-    x = rep(xint, each = 2),
-    y = rep(ranges$y.range, length(xint)),
-    group = rep(seq_along(xint), each = 2)
-  )
-  data$group <- NULL
-  d <- merge(d, data, by = "x", sort = FALSE)
-  prefix_class(d, "GeomPath")
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomJitter <- function(data, prestats_data, ranges, params, ...) {
+to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
   if ("size" %in% names(data)) {
     params$sizemin <- min(prestats_data$globsizemin)
     params$sizemax <- max(prestats_data$globsizemax)
@@ -233,7 +221,7 @@ to_basic.GeomJitter <- function(data, prestats_data, ranges, params, ...) {
 }
 
 #' @export
-to_basic.default <- function(data, prestats_data, ranges, params, ...) {
+to_basic.default <- function(data, prestats_data, params, ...) {
   data
 }
 

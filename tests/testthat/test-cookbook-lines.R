@@ -13,13 +13,12 @@ expect_traces <- function(gg, n.traces, name) {
   list(data = has.data, layout = L$layout)
 }
 
-
 # Some sample data
-df <- read.table(header = T, text = "
-     cond result
-  control     10
-treatment   11.5
-")
+df <- data.frame(
+  cond = c("control", "treatment"),
+  result  = c(10, 11.5),
+  hline = c(9, 12)
+)
 
 # Basic bar plot
 bp <- ggplot(df, aes(x = cond, y = result)) +
@@ -39,16 +38,11 @@ test_that("bar + hline = 2 traces", {
 temp <- bp + geom_hline(aes(yintercept=12), colour="#990000", linetype="dashed")
 test_that("bar + red dashed hline", {
   info <- expect_traces(temp, 2, "dashed-red-line")
-  hline.info <- info$traces[[2]]
+  hline.info <- info$data[[2]]
   expect_identical(hline.info$line$color, toRGB("#990000"))
   expect_identical(hline.info$line$dash, "dash")
 })
 
-# Draw separate hlines for each bar. First add another column to df
-df$hline <- c(9,12)
-#      cond result hline
-#   control   10.0     9
-# treatment   11.5    12
 
 # Need to re-specify bp, because the data has changed
 bp <- ggplot(df, aes(x=cond, y=result)) +
@@ -58,7 +52,7 @@ bp.err <- bp +
   geom_errorbar(aes(y = hline, ymax = hline, ymin = hline), 
                 colour = "#AA0000")
 test_that("Draw with separate lines for each bar", {
-  expect_traces(bp.err, 2, 0, "bar-error-wide")
+  expect_traces(bp.err, 2, "bar-error-wide")
 })
 
 bp.err.narrow <- bp +
@@ -71,10 +65,11 @@ test_that("Make the lines narrower", {
 
 # Can get the same result, even if we get the hline values from a second data frame
 # Define data frame with hline
-df.hlines <- data.frame(cond=c("control","treatment"), hline=c(9,12))
-#      cond hline
-#   control     9
-# treatment    12
+df.hlines <- data.frame(
+  cond = c("control","treatment"), 
+  hline = c(9,12)
+)
+
 
 bp.err.diff <- bp +
   geom_errorbar(data = df.hlines, aes(y = hline, ymax = hline, ymin = hline),
@@ -101,7 +96,7 @@ bp.err <-
 test_that("The error bars get plotted over one another", {
   # there are four but it looks like two.
   info <- expect_traces(bp.err, 3, "bar-dodge-color-error")
-  err.y <- info$traces[[3]]$y
+  err.y <- info$data[[3]]$y
   expect_equal(length(err.y), 4)
   expect_equal(length(unique(err.y)), 2)
 })
@@ -120,7 +115,7 @@ bp.err4 <- bp +
                 linetype = "dashed", position = position_dodge())
 test_that("4 error bars", {
   info <- expect_traces(bp.err4, 3, "bar-dodge-color-err4")
-  tr <- info$traces[[3]]
+  tr <- info$data[[3]]
   expect_equal(length(tr$y), 4)
   expect_equal(length(unique(tr$y)), 4)
   expect_equal(length(tr$x), 4)
@@ -167,8 +162,8 @@ temp <- sp +
 test_that("Add a red dashed vertical line", {
   info <- expect_traces(temp, 4, 0, "scatter-hline-vline")
   expect_true(info$layout$showlegend)
-  mode <- sapply(info$traces, "[[", "mode")
-  line.traces <- info$traces[mode == "lines"]
+  mode <- sapply(info$data, "[[", "mode")
+  line.traces <- info$data[mode == "lines"]
   expect_equal(length(line.traces), 2)
   dash <- sapply(line.traces, function(tr)tr$line$dash)
   dash.traces <- line.traces[dash == "dash"]
@@ -181,8 +176,8 @@ test_that("Add a red dashed vertical line", {
 spf <- sp + facet_grid(. ~ cond)
 test_that("scatter facet -> 2 traces", {
   info <- expect_traces(spf, 2, "scatter-facet")
-  expect_true(info$traces[[1]]$xaxis != info$traces[[2]]$xaxis)
-  expect_true(info$traces[[1]]$yaxis != info$traces[[2]]$yaxis)
+  expect_true(info$data[[1]]$xaxis != info$data[[2]]$xaxis)
+  expect_true(info$data[[1]]$yaxis != info$data[[2]]$yaxis)
   # second axis is hidden
   y2 <- info$layout$yaxis2
   expect_false(y2$showticklabels)
@@ -193,8 +188,8 @@ temp <- spf + geom_hline(aes(yintercept=10))
 test_that("geom_hline -> 2 more traces", {
   info <- expect_traces(temp, 4, "scatter-facet-hline")
   expect_true(info$layout$showlegend)
-  has.name <- sapply(info$traces, function(tr)is.character(tr$name))
-  named.traces <- info$traces[has.name]
+  has.name <- sapply(info$data, function(tr)is.character(tr$name))
+  named.traces <- info$data[has.name]
   expect_equal(length(named.traces), 2)
 })
 

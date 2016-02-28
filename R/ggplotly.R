@@ -143,32 +143,23 @@ gg2list <- function(p, width = NULL, height = NULL) {
   panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
   panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
   panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
+  # for some layers2traces computations, we need the range of each panel
+  panel$layout$xmin <- sapply(panel$ranges, function(z) min(z$x.range))
+  panel$layout$xmax <- sapply(panel$ranges, function(z) max(z$x.range))
+  panel$layout$ymin <- sapply(panel$ranges, function(z) min(z$y.range))
+  panel$layout$ymax <- sapply(panel$ranges, function(z) max(z$y.range))
   
-  # merge the panel/axis info with _each layer_ of data so we know where to put
-  # each trace
-  #lay_out <- panel$layout[c("PANEL", "xaxis", "yaxis")]
-  #lay_out$xaxis <- sub("axis", "", lay_out$xaxis)
-  #lay_out$yaxis <- sub("axis", "", lay_out$yaxis)
-  #lay_outs <- vector("list", length(data))
-  #for (i in seq_len(length(data))) {
-  #  lay_outs[[i]] <- lay_out
-  #}
-  #data <- Map(function(x, y) { merge(x, y, sort = FALSE) }, data, lay_outs)
   # layers -> plotly.js traces
-  trace.list <- layers2traces(data, prestats_data, layers, panel, scales)
-  # collapse lists of lists to a list of traces 
-  # TODO: attach the appropriate legendgroup info to each trace!
-  traces <- list()
-  for (i in seq_along(trace.list)) {
-    traces <- c(traces, trace.list[[i]])
-  }
+  # TODO: 
+  # (1) attach the appropriate legendgroup info to each trace!
+  # (2) how to ensure ordering of traces is correct?
+  traces <- layers2traces(data, prestats_data, layers, panel$layout, scales)
   
   # don't show legends that are automatically created from these traces
   # later on, when legends/guides are created, 
   # we may tack on more traces with visible="legendonly"
   traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
 
-  
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
   # ------------------------------------------------------------------------
@@ -762,4 +753,3 @@ ggfun <- function(x) getFromNamespace(x, "ggplot2")
 ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
 }
-
