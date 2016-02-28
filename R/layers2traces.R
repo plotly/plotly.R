@@ -101,6 +101,11 @@ to_basic.GeomRibbon <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
+to_basic.GeomArea <- function(data, prestats_data, params, ...) {
+  prefix_class(ribbon_dat(data), "GeomPolygon")
+}
+
+#' @export
 to_basic.GeomLine <- function(data, prestats_data, params, ...) {
   data <- group2NA(data[order(data$x), ])
   prefix_class(data, "GeomPath")
@@ -253,14 +258,6 @@ to_basic.GeomJitter <- function(data, prestats_data, params, ...) {
 }
 
 #' @export
-to_basic.GeomPoint <- function(data, prestats_data, params, ...) {
-  if (length(unique(data$size)) > 1 && is.null(data$text)) {
-    data$text <- paste("size:", data$size)
-  }
-  data
-}
-
-#' @export
 to_basic.default <- function(data, prestats_data, params, ...) {
   data
 }
@@ -301,10 +298,13 @@ geom2trace.GeomPath <- function(data, params) {
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
   shape <- uniq(data$shape)
+  if (length(unique(data$size)) > 1 && is.null(data$text)) {
+    data$text <- paste("size:", data$size)
+  }
   L <- list(
     x = data$x,
     y = data$y,
-    text = as.character(data$text),
+    text = data$text,
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -437,24 +437,12 @@ geom2trace.GeomTile <- function(data, params) {
 
 #' @export
 geom2trace.GeomErrorbar <- function(data, params) {
-  make.errorbar(data, params, "y")
+  make_errorbar(data, params, "y")
 }
 
 #' @export
 geom2trace.GeomErrorbarh <- function(data, params) {
-  make.errorbar(data, params, "x")
-}
-
-#' @export
-geom2trace.GeomArea <- function(data, params) {
-  list(
-    x = c(data$x[1], data$x, tail(data$x, n = 1)),
-    y = c(0, data$y, 0),
-    type = "scatter",
-    line = paramORdefault(params, aes2line, ggplot2::GeomRibbon$default_aes),
-    fill = "tozeroy",
-    fillcolor = toRGB(params$fill %||% "grey20", params$alpha)
-  )
+  make_errorbar(data, params, "x")
 }
 
 #' @export
@@ -517,7 +505,7 @@ group2NA <- function(data) {
 
 # Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
 # error_x.
-make.errorbar <- function(data, params, xy){
+make_errorbar <- function(data, params, xy){
   tr <- list(
     x = data$x,
     y = data$y,
@@ -530,9 +518,9 @@ make.errorbar <- function(data, params, xy){
   e <- list(
     array = data[[max.name]] - data[[xy]],
     type = "data",
-    width = params$width,
+    width = data$width[1] / 2,
     symmetric = TRUE,
-    color = toRGB(params$colour)
+    color = toRGB(uniq(data$colour))
   )
   arrayminus <- data[[xy]] - data[[min.name]]
   if(!isTRUE(all.equal(e$array, arrayminus))){

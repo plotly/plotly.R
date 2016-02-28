@@ -505,6 +505,21 @@ gg2list <- function(p, width = NULL, height = NULL) {
     }
   }
   
+  # Error bar widths in ggplot2 are on the range of the position scale,
+  # but plotly wants them in pixels:
+  for (xy in c("x", "y")) {
+    rng <- range(unlist(lapply(panel$ranges, "[[", paste0(xy, ".range"))))
+    type <- if (xy == "x") "width" else "height"
+    err <- if (xy == "x") "error_y" else "error_x"
+    for (i in seq_along(traces)) {
+      e <- traces[[i]][[err]]
+      if (!is.null(e)) {
+        w <- grid::unit(e$width / diff(rng), "npc")
+        traces[[i]][[err]]$width <- unitConvert(w, "pixels", type)
+      }
+    }
+  }
+  
   # flip x/y in traces for flipped coordinates 
   # (we've already done appropriate flipping for axis objects)
   if (inherits(p$coordinates, "CoordFlip")) {
