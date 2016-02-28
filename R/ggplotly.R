@@ -298,6 +298,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
           } 
         }
         axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
+        if (is_blank(axisTitle)) axisTitleText <- ""
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
         side <- if (xy == "x") "b" else "l"
         way <- if (xy == "x") "v" else "h"
@@ -308,7 +309,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
           bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[way]]
         # draw axis titles as annotations 
         # (plotly.js axis titles aren't smart enough to dodge ticks & text)
-        if (!is_blank(axisTitle) && nchar(axisTitleText) > 0) {
+        if (nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
           offset <- 
@@ -642,7 +643,10 @@ has_facet <- function(x) {
 
 bbox <- function(txt = "foo", angle = 0, size = 12) {
   # assuming the horizontal size of a character is roughly half of the vertical
+  n <- nchar(txt)
+  if (sum(n) == 0) return(list(v = 0, h = 0))
   w <- size * (nchar(txt) / 2)
+  angle <- angle %||% 0
   # do the sensible thing in the majority of cases
   if (angle == 0) return(list(v = size, h = w))
   if (abs(angle) == 90) return(list(v = w, h = size))

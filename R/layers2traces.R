@@ -4,8 +4,7 @@ layers2traces <- function(data, prestats_data, layers, scales) {
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
   # extract parameters for each layer
   params <- lapply(layers, function(x) {
-    y <- c(x$geom_params, x$stat_params)
-    y[!duplicated(y)]
+    c(x$geom_params, x$stat_params)
   })
   # mark special case geoms with their "basic" counterpart
   # and transform the data, if necessary, for example:
@@ -79,7 +78,7 @@ to_basic.GeomViolin <- function(data, prestats_data, params, ...) {
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, params, ...) {
   # 'trained' aesthetics that we're interested in mapping from data to prestats
-  aez <- c("fill", "size", "alpha", "linetype", "shape", "x")
+  aez <- c("fill", "colour", "size", "alpha", "linetype", "shape", "x")
   dat <- data[names(data) %in% c(aez, "group")]
   pre <- prestats_data[!names(prestats_data) %in% aez]
   prefix_class(merge(pre, dat, by = "group", sort = FALSE), "GeomBoxplot")
@@ -320,7 +319,7 @@ geom2trace.GeomPoint <- function(data, params) {
     )
   )
   # fill is only relevant for pch=15:20
-  idx <- shape %in% 15:20
+  idx <- shape %in% c(1, 15:20)
   if (any(idx)) {
     L$marker$color[idx] <- L$marker$line$color[idx]
   }
