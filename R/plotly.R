@@ -289,12 +289,12 @@ plotly_build <- function(l = last_plot()) {
       # TODO: add a legend title (is this only possible via annotations?!?)
       if (!is.null(trace[["symbol"]])) traces <- symbolize(traces, dat)
       if (!is.null(trace[["group"]])) traces <- subdivide_traces(traces, dat, "group")
-      if (!is.null(trace[["legendgroup"]])) {
-        legendgroups <- unique(trace[["legendgroup"]])
-        showlegend <- rep.int(TRUE, length(legendgroups))
-        traces <- subdivide_traces(traces, dat, "legendgroup", function(sub_trace, lvl) {
-          sub_trace$legendgroup <- legendgroups[[lvl]]
-          sub_trace$name <- legendgroups[[lvl]]     # override the trace name by legendgroup
+      if (!is.null(trace[["legenditem"]])) {
+        legenditems <- unique(trace[["legenditem"]])
+        showlegend <- rep.int(TRUE, length(legenditems))
+        traces <- subdivide_traces(traces, dat, "legenditem", function(sub_trace, lvl) {
+          sub_trace$legendgroup <- legenditems[[lvl]]
+          sub_trace$name <- legenditems[[lvl]]     # override the trace name by legendgroup
           sub_trace$showlegend <- showlegend[[lvl]] # put each group to legend once
           if (showlegend[[lvl]]) {
             showlegend[lvl] <<- FALSE
