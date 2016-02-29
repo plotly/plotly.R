@@ -1,56 +1,89 @@
 # layer -> trace conversion
-layers2traces <- function(data, prestats_data, layers, layout, scales) {
-  # attach a "geom class" to each layer of data for method dispatch 
+layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
+  # Attach a "geom class" to each layer of data for method dispatch 
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
-  # extract parameters for each layer
+  # Extract parameters for each layer
   params <- lapply(layers, function(x) {
-    c(x$geom_params, x$stat_params)
+    c(x$geom_params, x$stat_params, x$aes_params)
   })
+  # Discrete non_position_scales require multiple traces per layer
+  split_scales <- list()
+  for (sc in scales$non_position_scales()$scales) {
+    if (sc$is_discrete()) {
+      split_scales[[sc$aesthetics]] <- sc
+    }
+  }
   # Convert "high-level" geoms to their "low-level" counterpart
   # This may involve preprocessing the data, for example:
   # 1. geom_line() is really geom_path() with data sorted by x
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
+  #
   # This has to be done in a loop, since some layers are really two layers, 
-  # (we may need to replicate data/params)
+  # (we need to replicate the data/params in those cases)
+  #
+  # We also extract the domain/range of discrete mapping(s) for later use
   datz <- list()
   paramz <- list()
+  keyz <- list()
   for (i in seq_along(data)) {
-    pm <- params[[i]]
-    d <- to_basic(data[[i]], prestats_data[[i]], layout, pm)
-    if (inherits(d, "list")) {
-      pm <- replicate(length(d), pm, simplify = FALSE)
-    } else {
-      d <- list(d)
+    psd <- prestats_data[[i]]
+    key <- unique(psd[, names(psd) %in% names(split_scales), drop = FALSE])
+    # this order (should) determine the ordering of traces (within layer)
+    key <- key[do.call(order, key), , drop = FALSE]
+    for (j in names(key)) {
+      key[[paste0(j, "_range")]] <- scales$get_scales(j)$map_df(key)[[1]]
     }
-    datz <- c(datz, d)
+    pm <- params[[i]]
+    dat <- to_basic(data[[i]], psd, layout, pm)
+    if (inherits(dat, "list")) {
+      pm <- replicate(length(dat), pm, simplify = FALSE)
+      key <- replicate(length(dat), key, simplify = FALSE)
+    } else {
+      dat <- list(dat)
+      key <- list(key)
+    }
+    datz <- c(datz, dat)
     paramz <- c(paramz, pm)
+    keyz <- c(keyz, key)
   }
-  # each ggplot2 layer can be comprised of one or more plotly.js traces
-  # we split each layer of data into chunks (one chunk per trace)
-  # if and only if discrete scale(s) (or multiple panels) exist
-  split_by <- c("colour", "fill", "shape", "linetype", "size")
-  for (i in split_by) {
-    if (tryCatch(scales$get_scales(i)$is_discrete(), error = function(e) FALSE)) {
-      next
-    } 
-    split_by <- setdiff(split_by, i)
-  }
+  
+  # now to the actual layer -> trace conversion
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # _always_ split on fill for polygons -- plotlyjs can't do two polygons
-    # with different fill in a single trace correctly
-    if (inherits(d, "GeomPolygon")) split_by <- c(split_by, "fill")
+    # _always_ split on fill for polygons (plotly.js can't do two polygons
+    # with different fill in a single trace)
+    split_by <- c(names(split_scales), if (inherits(d, "GeomPolygon")) "fill")
     idx <- names(d) %in% c(split_by, "PANEL")
     idx <- idx & !sapply(d, anyNA)
     s <- interaction(as.list(d[idx]))
     # split layer data into a list of data frames 
-    d <- split(d, s, drop = TRUE)
-    # list of traces for this layer (length should be equal to )
-    trs <- lapply(d, geom2trace, paramz)
-    # attach layout information to each trace
+    dl <- split(d, s, drop = TRUE)
+    # list of traces for this layer
+    trs <- lapply(dl, geom2trace, paramz)
+    # attach name/legendgroup to this trace if appropriate
+    if (length(trs) > 1 && length(split_by) > 0 && prod(dim(keyz[[i]])) > 0) {
+      key <- keyz[[i]]
+      valz <- Map(function(x, y) paste0(x, ": ", y), labels[split_by], key[split_by])
+      entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
+      # build a dictionary for looking up the trace/entry names
+      key_range <- key[grepl("_range$", names(key))]
+      keys <- Reduce(function(x, y) paste0(x, ".", y), key_range)
+      entries <- setNames(entries, keys)
+      # strip off the trailing panel info
+      names(trs) <- sub("\\.[0-9]+$", "", names(trs))
+      # order traces to match the ordering of the scale mapping(s)
+      trs <- compact(trs[names(entries)])
+      for (k in names(trs)) {
+        trs[[k]]$name <- entries[[k]]
+        trs[[k]]$legendgroup <- entries[[k]]
+      }
+    } else {
+      trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x})
+    }
+    # finally, each trace is with respect to which axis?
     for (j in seq_along(trs)) {
-      panel <- unique(d[[j]]$PANEL)
+      panel <- unique(dl[[j]]$PANEL)
       trs[[j]]$xaxis <- sub("axis", "", layout[panel, "xaxis"])
       trs[[j]]$yaxis <- sub("axis", "", layout[panel, "yaxis"])
     }
@@ -186,6 +219,7 @@ to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
+  data <- unique(data[c("PANEL", "intercept", "slope", "group")])
   data$group <- seq_len(nrow(data))
   lay <- tidyr::gather(layout, variable, x, xmin:xmax)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
@@ -195,6 +229,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
+  data <- unique(data[c("PANEL", "yintercept", "group")])
   data$group <- seq_len(nrow(data))
   lay <- tidyr::gather(layout, variable, x, xmin:xmax)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
@@ -204,6 +239,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
+  data <- unique(data[c("PANEL", "xintercept", "group")])
   data$group <- seq_len(nrow(data))
   lay <- tidyr::gather(layout, variable, y, ymin:ymax)
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
@@ -249,9 +285,12 @@ geom2trace.GeomPath <- function(data, params) {
     mode = "lines",
     line = list(
       # TODO: line width array? -- https://github.com/plotly/plotly.js/issues/147
-      width = mm2pixels(data$size[1]),
-      color = toRGB(uniq(data$colour)),
-      dash = lty2dash(uniq(data$linetype))
+      width = mm2pixels(data$size[1] %||% GeomPath$default_aes$size),
+      color = toRGB(
+        uniq(data$colour %||% GeomPath$default_aes$colour),
+        uniq(data$alpha %||% GeomPath$default_aes$alpha)
+      ),
+      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
     )
   )
   if (inherits(data, "GeomStep")) L$line$shape <- "hv"
@@ -260,7 +299,7 @@ geom2trace.GeomPath <- function(data, params) {
 
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
-  shape <- uniq(data$shape)
+  shape <- uniq(data$shape %||% GeomPoint$default_aes$shape)
   if (length(unique(data$size)) > 1 && is.null(data$text)) {
     data$text <- paste("size:", data$size)
   }
@@ -272,13 +311,13 @@ geom2trace.GeomPoint <- function(data, params) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill)),
-      opacity = uniq(data$alpha),
-      size = mm2pixels(uniq(data$size)),
+      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
+      opacity = uniq(data$alpha %||% GeomPoint$default_aes$alpha),
+      size = mm2pixels(uniq(data$size %||% GeomPoint$default_aes$size)),
       symbol = pch2symbol(shape),
       line = list(
-        width = mm2pixels(uniq(data$stroke)),
-        color = toRGB(uniq(data$colour))
+        width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
+        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
       )
     )
   )
@@ -303,11 +342,11 @@ geom2trace.GeomBar <- function(data, params) {
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill)),
-      opacity = uniq(data$alpha),
+      color = toRGB(uniq(data$fill %||% GeomBar$default_aes$fill)),
+      opacity = uniq(data$alpha %||% GeomBar$default_aes$alpha),
       line = list(
-        width = mm2pixels(uniq(data$stroke)),
-        color = toRGB(uniq(data$colour))
+        width = mm2pixels(uniq(data$stroke %||% GeomBar$default_aes$size)),
+        color = toRGB(uniq(data$colour %||% GeomBar$default_aes$colour))
       )
     )
   )
@@ -326,14 +365,17 @@ geom2trace.GeomPolygon <- function(data, params) {
     text = data$text %||% data$level,
     type = "scatter",
     mode = "lines",
-    # NOTE: line attributes must be constant on a polygon
     line = list(
-      width = mm2pixels(data$size[1]),
-      color = toRGB(data$colour[1]),
-      dash = lty2dash(data$linetype[1])
+      # NOTE: line attributes must be constant on a polygon
+      width = aes2plotly(data, params, "size"),
+      color = aes2plotly(data, params, "colour"),
+      dash = aes2plotly(data, params, "linetype")
     ),
     fill = "tozerox",
-    fillcolor = toRGB(data$fill[1] %||% NA, data$alpha[1] %||% 1)
+    fillcolor = toRGB(
+      aes2plotly(data, params, "fill"),
+      aes2plotly(data, params, "alpha")
+    )
   )
   
 }
@@ -344,7 +386,10 @@ geom2trace.GeomBoxplot <- function(data, params) {
     x = data$x,
     y = data$y,
     type = "box",
-    fillcolor = toRGB(uniq(data$fill)),
+    fillcolor = toRGB(
+      uniq(data$fill %||% GeomBoxplot$default_aes$fill),
+      uniq(data$alpha %||% GeomBoxplot$default_aes$alpha)
+    ),
     # marker styling must inherit from GeomPoint$default_aes
     # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L77
     marker = list(
@@ -357,8 +402,8 @@ geom2trace.GeomBoxplot <- function(data, params) {
       size = mm2pixels(GeomPoint$default_aes$size)
     ),
     line = list(
-      color = toRGB(uniq(data$colour)),
-      width = mm2pixels(uniq(data$size))
+      color = toRGB(uniq(data$colour %||% GeomBoxplot$default_aes$colour)),
+      width = mm2pixels(uniq(data$size %||% GeomBoxplot$default_aes$size))
     )
   )
 }
@@ -372,8 +417,11 @@ geom2trace.GeomText <- function(data, params) {
     text = data$label,
     textfont = list(
       # TODO: how to translate fontface/family?
-      size = mm2pixels(uniq(data$size)),
-      color = toRGB(uniq(data$colour))
+      size = mm2pixels(uniq(data$size %||% GeomText$default_aes$size)),
+      color = toRGB(
+        uniq(data$colour %||% GeomText$default_aes$colour),
+        uniq(data$alpha %||% GeomText$default_aes$alpha)
+      )
     ),
     type = "scatter",
     mode = "text"
@@ -482,9 +530,9 @@ make_errorbar <- function(data, params, xy){
   e <- list(
     array = data[[max.name]] - data[[xy]],
     type = "data",
-    width = data$width[1] / 2,
+    width = data$width[1] %||% 0.5 / 2,
     symmetric = TRUE,
-    color = toRGB(uniq(data$colour))
+    color = toRGB(uniq(data$colour %||% "black"))
   )
   arrayminus <- data[[xy]] - data[[min.name]]
   if(!isTRUE(all.equal(e$array, arrayminus))){
@@ -515,11 +563,18 @@ ribbon_dat <- function(dat) {
   rbind(dat1, dat2)
 }
 
-
-dat2params <- function(d) {
-  params <- c(names(aesConverters), "fill")
-  l <- as.list(d[names(d) %in% params])
-  lapply(l, unique)
+aes2plotly <- function(data, params, aes = "size") {
+  geom <- ggfun(class(data)[1])
+  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% geom$default_aes[[aes]] 
+  converter <- switch(
+    aes, 
+    size = mm2pixels, 
+    colour = toRGB, 
+    fill = toRGB, 
+    linetype = lty2dash,
+    shape = pch2symbol
+  )
+  converter(vals)
 }
 
 # Convert R pch point codes to plotly "symbol" codes.

@@ -150,15 +150,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
   panel$layout$ymax <- sapply(panel$ranges, function(z) max(z$y.range))
   
   # layers -> plotly.js traces
-  # TODO: 
-  # (1) attach the appropriate legendgroup info to each trace!
-  # (2) how to ensure ordering of traces is correct?
-  traces <- layers2traces(data, prestats_data, layers, panel$layout, scales)
-  
-  # don't show legends that are automatically created from these traces
-  # later on, when legends/guides are created, 
-  # we may tack on more traces with visible="legendonly"
-  traces <- lapply(traces, function(x) { x$showlegend <- FALSE; x})
+  traces <- layers2traces(
+    data, prestats_data, layers, panel$layout, scales, p$labels
+  )
 
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
@@ -326,7 +320,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
       
     } # end of axis loop
     
-    # draw panel border
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
@@ -348,7 +341,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
       strip <- make_strip_rect(xdom, ydom, theme, "top")
       gglayout$shapes <- c(gglayout$shapes, strip)
     }
-    if (inherits(p$facet, "grid") && lay$COL == nCols && 
+    if (inherits(p$facet, "grid") && lay$COL == nCols && nRows > 1 &&
         !is_blank(theme[["strip.text.y"]])) {
       txt <- paste(
         lay[, as.character(p$facet$rows)], collapse = ", "
@@ -365,16 +358,10 @@ gg2list <- function(p, width = NULL, height = NULL) {
     
   } # end of panel loop
   
-  
   # ------------------------------------------------------------------------
-  # guide/legend conversion
+  # guide conversion
   #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
   #   To do so, we borrow some of the body of ggplot2:::guides_build().
-  #
-  #   Once we have legend key(s). We use those keys to decide when/where to 
-  #   split layers into plotly.js traces. We also use the key name 
-  #   (e.g. fill, color, etc) to set the legendgroup property and the key
-  #   values to name the traces.
   # ------------------------------------------------------------------------ 
   
   # if there are no non-positional scales or if theme(legend.position = "none")
@@ -409,60 +396,20 @@ gg2list <- function(p, width = NULL, height = NULL) {
     gdefs <- ggfun("guides_merge")(gdefs)
     gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
     
-    # guide data -> plotly.js traces
-    gdef2trace <- function(gdef) {
-      if (inherits(gdef, "colorbar")) {
-        # sometimes the key has missing values, which we can ignore
-        gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
-        # range of the scale
-        rng <- range(gdef$bar$value)
-        gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
-        gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
-        return(list(
-          x = gglayout$xaxis$tickvals,
-          y = gglayout$yaxis$tickvals,
-          type = "scatter",
-          mode = "markers",
-          opacity = 0,
-          hoverinfo = "none",
-          showlegend = FALSE,
-          # do everything on a 0-1 scale
-          marker = list(
-            color = c(0, 1),
-            colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
-            colorbar = list(
-              title = gdef$title,
-              titlefont = text2font(gdef$title.theme),
-              tickmode = "array",
-              ticktext = gdef$key$.label,
-              tickvals = gdef$key$.value
-            )
-          )
-        ))
-      }
-      # TODO: convert legends. Connect with traces via legendgroup!
-      if (inherits(gdef, "legend")) {
-        # unfortunately we have no nice way to identify the geom type of gdef$geoms
-        # note: multiple geoms can belong to a single legend.
-        
-        # How to convert multiple geoms to a single trace? Just take the first?
-        NULL
-      }
-      return(NULL)
-    }
-    traces <- c(traces, lapply(gdefs, gdef2trace))
-    
-    # TODO: 
-    # (1) shrink guide size(s). Set fractions in colorbar.lenmode
-    # (2) position guide(s)?
+    # colourbar -> plotly.js colorbar
+    traces <- c(traces, lapply(gdefs, gdef2trace, theme))
   }
   
+  # legend styling
+  gglayout$legend <- list(
+    bgcolor = toRGB(theme$legend.background$fill),
+    bordercolor = toRGB(theme$legend.background$colour),
+    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
+    font = text2font(theme$legend.text)
+  )
   
-  
-  
-  
-  
-  
+  # TODO: legend/guide positioning
+  # If we have _both_ a legend and colorbar, set x/y positions accordingly
   
   # --------
   # plot-wide hacks 
@@ -637,10 +584,10 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
   n <- nchar(txt)
   if (sum(n) == 0) return(list(v = 0, h = 0))
   w <- size * (nchar(txt) / 2)
-  angle <- angle %||% 0
+  angle <- abs(angle %||% 0)
   # do the sensible thing in the majority of cases
   if (angle == 0) return(list(v = size, h = w))
-  if (abs(angle) == 90) return(list(v = w, h = size))
+  if (angle == 90) return(list(v = w, h = size))
   # first, compute the hypotenus
   hyp <- sqrt(size ^ 2 + w ^ 2)
   list(
@@ -752,4 +699,51 @@ ggfun <- function(x) getFromNamespace(x, "ggplot2")
 
 ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
+}
+
+# colourbar -> plotly.js colorbar
+gdef2trace <- function(gdef, theme) {
+  if (inherits(gdef, "colorbar")) {
+    # sometimes the key has missing values, which we can ignore
+    gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
+    rng <- range(gdef$bar$value)
+    gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
+    gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    list(
+      x = gglayout$xaxis$tickvals,
+      y = gglayout$yaxis$tickvals,
+      type = "scatter",
+      mode = "markers",
+      opacity = 0,
+      hoverinfo = "none",
+      showlegend = FALSE,
+      # do everything on a 0-1 scale
+      marker = list(
+        color = c(0, 1),
+        colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
+        colorbar = list(
+          bgcolor = toRGB(theme$legend.background$fill),
+          bordercolor = toRGB(theme$legend.background$colour),
+          borderwidth = unitConvert(
+            theme$legend.background$size, "pixels", "width"
+          ),
+          thickness = unitConvert(
+            theme$legend.key.width, "pixels", "width"
+          ),
+          title = gdef$title,
+          titlefont = text2font(gdef$title.theme %||% theme$legend.title),
+          tickmode = "array",
+          ticktext = gdef$key$.label,
+          tickvals = gdef$key$.value,
+          tickfont = text2font(gdef$label.theme %||% theme$legend.text),
+          ticklen = 2,
+          len = 1/2
+        )
+      )
+    )
+  } else { 
+    # if plotly.js gets better support for multiple legends, 
+    # that conversion should go here
+    NULL
+  }
 }
