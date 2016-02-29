@@ -279,19 +279,16 @@ plotly_build <- function(l = last_plot()) {
         txt <- paste0(as.list(d$args)[["size"]], " (size): ", s)
         trace[["text"]] <- if (is.null(trace[["text"]])) txt else paste0(trace[["text"]], "<br>", txt)
       }
-      has_color <- !is.null(trace[["color"]]) || 
-        isTRUE(!is.null(trace[["z"]]) && !trace[["type"]] %in% "scatter3d")
-      has_symbol <- !is.null(trace[["symbol"]])
-      has_group <- !is.null(trace[["group"]])
       # put the whole dat into a single trace first
       traces <- list(trace)
-      if (has_color) {
+      if (!is.null(trace[["color"]]) || 
+          isTRUE(!is.null(trace[["z"]]) && !trace[["type"]] %in% "scatter3d")) {
         title <- as.list(d$args)[["color"]] %||% as.list(d$args)[["z"]] %||% ""
         traces <- colorize(traces, dat, title)
       }
       # TODO: add a legend title (is this only possible via annotations?!?)
-      if (has_symbol) traces <- symbolize(traces, dat)
-      if (has_group) traces <- subdivide_traces(traces, dat, "group")
+      if (!is.null(trace[["symbol"]])) traces <- symbolize(traces, dat)
+      if (!is.null(trace[["group"]])) traces <- subdivide_traces(traces, dat, "group")
       traces <- lapply(traces, function(trace) {#print(attributes(trace)); 
         trace$indices<-NULL;
       trace})
