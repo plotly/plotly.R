@@ -7,9 +7,9 @@
 toRGB(x, alpha = 1)
 }
 \arguments{
-\item{x}{character for colour, for example: "white"}
+\item{x}{see the \code{col} argument in \code{col2rgb} for valid specifications}
 
-\item{alpha}{transparency alpha}
+\item{alpha}{alpha channel on 0-1 scale}
 }
 \value{
 hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)

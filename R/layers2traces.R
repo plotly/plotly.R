@@ -285,12 +285,12 @@ geom2trace.GeomPath <- function(data, params) {
     mode = "lines",
     line = list(
       # TODO: line width array? -- https://github.com/plotly/plotly.js/issues/147
-      width = mm2pixels(data$size[1] %||% GeomPath$default_aes$size),
+      width = aes2plotly(data, params, "size")[1],
       color = toRGB(
-        uniq(data$colour %||% GeomPath$default_aes$colour),
-        uniq(data$alpha %||% GeomPath$default_aes$alpha)
+        aes2plotly(data, params, "colour"),
+        aes2plotly(data, params, "alpha")
       ),
-      dash = lty2dash(uniq(data$linetype %||% GeomPath$default_aes$linetype))
+      dash = aes2plotly(data, params, "linetype")
     )
   )
   if (inherits(data, "GeomStep")) L$line$shape <- "hv"
@@ -299,7 +299,7 @@ geom2trace.GeomPath <- function(data, params) {
 
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
-  shape <- uniq(data$shape %||% GeomPoint$default_aes$shape)
+  shape <- aes2plotly(data, params, "shape")
   if (length(unique(data$size)) > 1 && is.null(data$text)) {
     data$text <- paste("size:", data$size)
   }
@@ -311,26 +311,19 @@ geom2trace.GeomPoint <- function(data, params) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill %||% GeomPoint$default_aes$fill)),
-      opacity = uniq(data$alpha %||% GeomPoint$default_aes$alpha),
-      size = mm2pixels(uniq(data$size %||% GeomPoint$default_aes$size)),
-      symbol = pch2symbol(shape),
+      color = aes2plotly(data, params, "fill"),
+      opacity = aes2plotly(data, params, "alpha"),
+      size = aes2plotly(data, params, "size"),
+      symbol = shape,
       line = list(
-        width = mm2pixels(uniq(data$stroke %||% GeomPoint$default_aes$stroke)),
-        color = toRGB(uniq(data$colour %||% GeomPoint$default_aes$colour))
+        width = aes2plotly(data, params, "stroke"),
+        color = aes2plotly(data, params, "colour")
       )
     )
   )
-  # fill is only relevant for pch=15:20
-  idx <- shape %in% c(1, 15:20)
-  if (any(idx)) {
-    L$marker$color[idx] <- L$marker$line$color[idx]
-  }
-  # `marker.color` should actually be `marker.line.color` for pch != 
-  # pch=32 is a transparent circle
-  if (any(shape %in% 32)) {
-    L$marker$opacity[shape %in% 32] <- 0
-  }
+  # for 'closed' shapes, marker color should inherit from line color
+  idx <- !grepl("open", shape)
+  L$marker$color[idx] <- L$marker$line$color[idx]
   L
 }
 
@@ -342,11 +335,11 @@ geom2trace.GeomBar <- function(data, params) {
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
-      color = toRGB(uniq(data$fill %||% GeomBar$default_aes$fill)),
-      opacity = uniq(data$alpha %||% GeomBar$default_aes$alpha),
+      color = aes2plotly(data, params, "fill"),
+      opacity = aes2plotly(data, params, "alpha"),
       line = list(
-        width = mm2pixels(uniq(data$stroke %||% GeomBar$default_aes$size)),
-        color = toRGB(uniq(data$colour %||% GeomBar$default_aes$colour))
+        width = aes2plotly(data, params, "size"),
+        color = aes2plotly(data, params, "colour")
       )
     )
   )
@@ -387,8 +380,8 @@ geom2trace.GeomBoxplot <- function(data, params) {
     y = data$y,
     type = "box",
     fillcolor = toRGB(
-      uniq(data$fill %||% GeomBoxplot$default_aes$fill),
-      uniq(data$alpha %||% GeomBoxplot$default_aes$alpha)
+      aes2plotly(data, params, "fill"),
+      aes2plotly(data, params, "alpha")
     ),
     # marker styling must inherit from GeomPoint$default_aes
     # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L77
@@ -402,8 +395,8 @@ geom2trace.GeomBoxplot <- function(data, params) {
       size = mm2pixels(GeomPoint$default_aes$size)
     ),
     line = list(
-      color = toRGB(uniq(data$colour %||% GeomBoxplot$default_aes$colour)),
-      width = mm2pixels(uniq(data$size %||% GeomBoxplot$default_aes$size))
+      color = aes2plotly(data, params, "colour"),
+      width = aes2plotly(data, params, "size")
     )
   )
 }
@@ -417,10 +410,10 @@ geom2trace.GeomText <- function(data, params) {
     text = data$label,
     textfont = list(
       # TODO: how to translate fontface/family?
-      size = mm2pixels(uniq(data$size %||% GeomText$default_aes$size)),
+      size = aes2plotly(data, params, "size"),
       color = toRGB(
-        uniq(data$colour %||% GeomText$default_aes$colour),
-        uniq(data$alpha %||% GeomText$default_aes$alpha)
+        aes2plotly(data, params, "fill"),
+        aes2plotly(data, params, "alpha")
       )
     ),
     type = "scatter",
@@ -432,7 +425,7 @@ geom2trace.GeomText <- function(data, params) {
 geom2trace.GeomTile <- function(data, params) {
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  # z should **always** be numeric
+  # z should **always** be numeric (this is a heatmap!)
   data$z <- scales::rescale(data$z)
   which.rng <- c(which.min(data$z), which.max(data$z))
   list(
@@ -564,16 +557,34 @@ ribbon_dat <- function(dat) {
 }
 
 aes2plotly <- function(data, params, aes = "size") {
-  geom <- ggfun(class(data)[1])
-  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% geom$default_aes[[aes]] 
+  # data can have multiple "geom classes" -- we want default_aes from the 
+  # very first class
+  geom <- rev(grep("^Geom", class(data), value = TRUE))[1]
+  # modify %||% so that NA is considered NULL
+  #"%|x|%" <- function(x, y) {
+  #  if (length(x) == 1) {
+  #    if (is.na(x)) x <- NULL
+  #  }
+  #  x %||% y
+  #}
+  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% 
+    ggfun(geom)$default_aes[[aes]] %||% NA
   converter <- switch(
     aes, 
     size = mm2pixels, 
+    stroke = mm2pixels, 
     colour = toRGB, 
     fill = toRGB, 
     linetype = lty2dash,
-    shape = pch2symbol
+    shape = pch2symbol,
+    alpha = function(x) { x[is.na(x)] <- 1; x }
   )
+  if (is.null(converter)) {
+    warning("A converter for ", aes, " wasn't found. \n", 
+            "Please report this issue to: \n",
+            "https://github.com/ropensci/plotly/issues/new", call. = FALSE)
+    converter <- identity
+  }
   converter(vals)
 }
 

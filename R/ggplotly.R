@@ -397,7 +397,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
     gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
     
     # colourbar -> plotly.js colorbar
-    traces <- c(traces, lapply(gdefs, gdef2trace, theme))
+    traces <- c(traces, lapply(gdefs, gdef2trace, theme, gglayout))
   }
   
   # legend styling
@@ -702,7 +702,7 @@ ggtype <- function(x, y = "geom") {
 }
 
 # colourbar -> plotly.js colorbar
-gdef2trace <- function(gdef, theme) {
+gdef2trace <- function(gdef, theme, gglayout) {
   if (inherits(gdef, "colorbar")) {
     # sometimes the key has missing values, which we can ignore
     gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
