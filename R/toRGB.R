@@ -9,7 +9,12 @@ toRGB <- function(x, alpha = 1) {
   alpha[is.na(alpha)] <- 1
   # if we've already made the proper conversion, return the input
   if (inherits(x, "plotly_rgba")) return(x)
-  if (inherits(x, "plotly_rgb") && all(alpha == 1)) return(x)
+  if (inherits(x, "plotly_rgb")) {
+    if (all(alpha == 1)) return(x)
+    # all alpha channel
+    x <- sub("^rgb", "rgba", sub("\\)", paste0(",", alpha, ")"), x))
+    return(prefix_class(x, "plotly_rgba"))
+  }
   # for some reason ggplot2 has "NA" in some place (instead of NA)
   if (is.character(x)) {
     x[x == "NA"] <- NA

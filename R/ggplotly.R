@@ -376,7 +376,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
   )
   
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
-  if (identical(theme$legend.position, "none")) {
+  if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
   } else {
     # by default, guide boxes are vertically aligned
@@ -403,8 +403,10 @@ gg2list <- function(p, width = NULL, height = NULL) {
     
     # scales -> data for guides
     gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
-    gdefs <- ggfun("guides_merge")(gdefs)
-    gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
+    if (length(gdefs) > 0) {
+      gdefs <- ggfun("guides_merge")(gdefs)
+      gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
+    }
     
     # colourbar -> plotly.js colorbar
     colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
@@ -424,17 +426,9 @@ gg2list <- function(p, width = NULL, height = NULL) {
     traces <- c(traces, colorbar)
   }
   
-  # Bar/box hackery:
-  # (1) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific 
-  # (2) position_*() is layer-specific, but `layout.barmode` is plot-specific.
+  # geom_bar() hacks
   geoms <- sapply(layers, ggtype, "geom")
   if (any(idx <- geoms %in% "bar")) {
-    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
-    # (i.e., at this point, y should be the count/density)
-    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
-    # TODO: get rid of this and use explicit width for bars 
-    # https://github.com/plotly/plotly.js/issues/80
-    if (is_hist) gglayout$bargap <- 0
     # since `layout.barmode` is plot-specific, we can't support multiple bar 
     # geoms with different positions
     positions <- sapply(layers, ggtype, "position")
@@ -444,12 +438,20 @@ gg2list <- function(p, width = NULL, height = NULL) {
               "across geom_bar() layers", call. = FALSE)
       position <- position[1]
     }
-    gglayout$barmode <- if (position %in% "identity" && is_hist) {
-      "overlay" 
-    } else if (position %in% c("identity", "stack", "fill")) {
-      "stack"
+    # hacks for position_identity()
+    if (position == "identity") {
+      gglayout$barmode <- "overlay"
+      gglayout$legend$traceorder <- "reversed"
     } else {
-      "group"
+      gglayout$barmode <- "stack"
+    }
+    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
+    # (i.e., at this point, y should be the count/density)
+    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
+    # TODO: get rid of this and use explicit width for bars 
+    # https://github.com/plotly/plotly.js/issues/80
+    if (position == "dodge" || is_hist) {
+      gglayout$bargap <- 0
     }
   }
   

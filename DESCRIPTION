@@ -30,7 +30,8 @@ Imports:
     viridis,
     base64enc,
     htmlwidgets,
-    tidyr
+    tidyr,
+    plyr
 Suggests:
     dplyr,
     plyr,

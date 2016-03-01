@@ -85,20 +85,20 @@ treatment     A   11.5    12
   control     B     12     9
 treatment     B     14    12
 ")
+
 bp <- ggplot(df, aes(x = cond, y = result, fill = group)) +
   geom_bar(position = position_dodge(), stat = "identity")
+
 test_that("bar dodged colored -> 1 trace", {
   info <- expect_traces(bp, 2, "bar-dodge-color")
 })
+
 bp.err <- 
   bp + geom_errorbar(aes(y = hline, ymax = hline, ymin = hline), 
                      linetype = "dashed")
+
 test_that("The error bars get plotted over one another", {
-  # there are four but it looks like two.
-  info <- expect_traces(bp.err, 3, "bar-dodge-color-error")
-  err.y <- info$data[[3]]$y
-  expect_equal(length(err.y), 4)
-  expect_equal(length(unique(err.y)), 2)
+  info <- expect_traces(bp.err, 4, "bar-dodge-color-error")
 })
 
 df <- read.table(header = TRUE, text = "
@@ -108,11 +108,14 @@ treatment     A   11.5    12
   control     B     12  12.5
 treatment     B     14    15
 ")
+
 bp <- ggplot(df, aes(x = cond, y = result, fill = group)) +
   geom_bar(position = position_dodge(), stat = "identity")
+
 bp.err4 <- bp +
   geom_errorbar(aes(y = hline, ymax = hline, ymin = hline),
                 linetype = "dashed", position = position_dodge())
+
 test_that("4 error bars", {
   info <- expect_traces(bp.err4, 3, "bar-dodge-color-err4")
   tr <- info$data[[3]]
@@ -146,6 +149,7 @@ df <- read.table(header = T, text = "
  treatment 12.0 10.6
 ")
 sp <- ggplot(df, aes(x = xval, y = yval, colour = cond)) + geom_point()
+
 test_that("basic scatterplot", {
   info <- expect_traces(sp, 2, "scatter-basic")
 })

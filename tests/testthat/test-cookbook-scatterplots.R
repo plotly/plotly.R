@@ -10,7 +10,6 @@ dat <- data.frame(
 #   ...
 #    B 17.793359218 19.718587761
 #    B 19.319909163 19.647899863
-
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
   geom_point(shape=1)      # Use hollow circles
 save_outputs(g, "scatterplots-hollow")

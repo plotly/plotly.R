@@ -5,12 +5,12 @@ is.plotly <- function(x) inherits(x, "plotly")
 }
 
 # modify %||% so that NA is considered NULL
-#"%|x|%" <- function(x, y) {
-#  if (length(x) == 1) {
-#    if (is.na(x)) x <- NULL
-#  }
-#  x %||% y
-#}
+"%|x|%" <- function(x, y) {
+  if (length(x) == 1) {
+    if (is.na(x)) x <- NULL
+  }
+  x %||% y
+}
 
 compact <- function(x) {
   Filter(Negate(is.null), x)

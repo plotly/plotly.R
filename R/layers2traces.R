@@ -4,7 +4,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
   # Extract parameters for each layer
   params <- lapply(layers, function(x) {
-    c(x$geom_params, x$stat_params, x$aes_params)
+    c(x$geom_params, x$stat_params, x$aes_params, position = ggtype(x, "position"))
   })
   # Discrete non_position_scales require multiple traces per layer
   split_scales <- list()
@@ -41,6 +41,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     } else {
       dat <- list(dat)
       key <- list(key)
+      pm <- list(pm)
     }
     datz <- c(datz, dat)
     paramz <- c(paramz, pm)
@@ -51,17 +52,22 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # _always_ split on fill for polygons (plotly.js can't do two polygons
+    # if PANEL is always last, if makes it easier to construct trace names later
+    d <- d[c(setdiff(names(d), "PANEL"), "PANEL")]
+    split_by <- names(split_scales)
+    # _always_ split on fill for polygon/path (plotly.js can't do two polygon/path
     # with different fill in a single trace)
-    split_by <- c(names(split_scales), if (inherits(d, "GeomPolygon")) "fill")
+    if (inherits(d, "GeomPolygon") || inherits(d, "GeomPath")) {
+      split_by <- c(split_by, "fill")
+    }
     idx <- names(d) %in% c(split_by, "PANEL")
     idx <- idx & !sapply(d, anyNA)
     s <- interaction(as.list(d[idx]))
     # split layer data into a list of data frames 
     dl <- split(d, s, drop = TRUE)
     # list of traces for this layer
-    trs <- lapply(dl, geom2trace, paramz)
-    # attach name/legendgroup to this trace if appropriate
+    trs <- Map(geom2trace, dl, paramz)
+    # attach name/legendgroup/showlegend to this trace if appropriate
     if (length(trs) > 1 && length(split_by) > 0 && prod(dim(keyz[[i]])) > 0) {
       key <- keyz[[i]]
       valz <- Map(function(x, y) paste0(x, ": ", y), labels[split_by], key[split_by])
@@ -74,6 +80,10 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       names(trs) <- sub("\\.[0-9]+$", "", names(trs))
       # order traces to match the ordering of the scale mapping(s)
       trs <- compact(trs[names(entries)])
+      # also need to set `layout.legend.traceorder='reversed'` (YUCK!!!)
+      if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
+        trs <- rev(trs)
+      }
       for (k in names(trs)) {
         trs[[k]]$name <- entries[[k]]
         trs[[k]]$legendgroup <- entries[[k]]
@@ -125,10 +135,12 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, ...) {
-  dat <- replace_class(data, "GeomPath", "GeomSmooth")
+  dat <- prefix_class(data, "GeomPath")
+  dat$alpha <- NULL
   if (!identical(params$se, FALSE)) {
-    data$colour <- NULL
-    dat <- list(dat, prefix_class(ribbon_dat(data), "GeomPolygon"))
+    dat2 <- prefix_class(ribbon_dat(data), "GeomPolygon")
+    dat2$colour <- NULL
+    dat <- list(dat, dat2)
   }
   dat
 }
@@ -205,7 +217,8 @@ to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
-  prefix_class(data, "GeomPolygon")
+  if (!"fill" %in% names(data)) data$fill <- NA
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -322,22 +335,41 @@ geom2trace.GeomPoint <- function(data, params) {
       )
     )
   )
-  # for 'closed' shapes, marker color should inherit from line color
-  idx <- !grepl("open", shape)
+  # for 'open' shapes, marker color should inherit from line color
+  idx <- grepl("open", shape)
   L$marker$color[idx] <- L$marker$line$color[idx]
   L
 }
 
 #' @export
 geom2trace.GeomBar <- function(data, params) {
+  if (!anyDuplicated(data[c("x", "PANEL", "group")])) {
+    # assuming `layout.barmode='stack'`
+    data$y <- data$ymax - data$ymin
+  } else {
+    # if there is more than one y-value for a particular combination of
+    # x, PANEL, and group; then take the _max_ y.
+    data <- plyr::ddply(
+      data, c("x", "PANEL", "group"),
+      plyr::summarise, 
+      y = max(y)
+    )
+    # sigh
+    data <- prefix_class(data, "GeomBar") 
+  }
+  # TODO: use xmin/xmax once plotly.js allows explicit bar widths
+  # https://github.com/plotly/plotly.js/issues/80
   list(
     x = data$x,
-    y = data$count %||% data$y,
+    y = data$y,
+    text = data$text,
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
-      color = aes2plotly(data, params, "fill"),
-      opacity = aes2plotly(data, params, "alpha"),
+      color = toRGB(
+        aes2plotly(data, params, "fill"),
+        aes2plotly(data, params, "alpha")
+      ),
       line = list(
         width = aes2plotly(data, params, "size"),
         color = aes2plotly(data, params, "colour")
@@ -524,9 +556,9 @@ make_errorbar <- function(data, params, xy){
   e <- list(
     array = data[[max.name]] - data[[xy]],
     type = "data",
-    width = data$width[1] %||% 0.5 / 2,
+    width = aes2plotly(data, params, "width"),
     symmetric = TRUE,
-    color = toRGB(uniq(data$colour %||% "black"))
+    color = aes2plotly(data, params, "colour")
   )
   arrayminus <- data[[xy]] - data[[min.name]]
   if(!isTRUE(all.equal(e$array, arrayminus))){
@@ -558,10 +590,8 @@ ribbon_dat <- function(dat) {
 }
 
 aes2plotly <- function(data, params, aes = "size") {
-  # data can have multiple "geom classes" -- we want default_aes from the 
-  # very first class
-  geom <- rev(grep("^Geom", class(data), value = TRUE))[1]
-  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% 
+  geom <- class(data)[1]
+  vals <- uniq(data[[aes]]) %||% params[[aes]] %||%
     ggfun(geom)$default_aes[[aes]] %||% NA
   converter <- switch(
     aes, 
@@ -571,7 +601,8 @@ aes2plotly <- function(data, params, aes = "size") {
     fill = toRGB, 
     linetype = lty2dash,
     shape = pch2symbol,
-    alpha = function(x) { x[is.na(x)] <- 1; x }
+    alpha = function(x) { x[is.na(x)] <- 1; x },
+    width = function(x) { x / 2 }
   )
   if (is.null(converter)) {
     warning("A converter for ", aes, " wasn't found. \n", 
