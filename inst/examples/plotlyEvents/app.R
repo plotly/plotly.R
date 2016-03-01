@@ -2,6 +2,7 @@ library(shiny)
 library(plotly)
 
 ui <- fluidPage(
+  radioButtons("plotType", "Plot Type:", choices = c("ggplotly", "plotly")),
   plotlyOutput("plot"),
   verbatimTextOutput("click"),
   verbatimTextOutput("brush")
@@ -10,8 +11,13 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   output$plot <- renderPlotly({
-    plot_ly(mtcars, x = mpg, y = wt, mode = "markers") %>%
-      layout(dragmode =  "select")
+    if (identical(input$plotType, "ggplotly")) {
+      p <- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
+      ggplotly(p) %>% layout(dragmode = "select")
+    } else {
+      plot_ly(mtcars, x = mpg, y = wt, mode = "markers") %>%
+        layout(dragmode = "select")
+    }
   })
   
   output$click <- renderPrint({

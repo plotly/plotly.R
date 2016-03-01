@@ -23,7 +23,7 @@
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
-#' @param source Only relevant for \link{event_data}
+#' @param source Only relevant for \link{event_data}.
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
 #' @export
@@ -90,8 +90,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     args = argz,
     env = list2env(data),    # environment in which to evaluate arguments
     enclos = parent.frame(), # if objects aren't found in env, look here
-    inherit = inherit,
-    source = source
+    inherit = inherit
   )
   # plotly objects should always have a _list_ of trace(s)
   p <- list(
@@ -99,7 +98,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL,
     width = width,
-    height = height
+    height = height,
+    source = source
   )
   
   if (evaluate) p <- plotly_build(p)

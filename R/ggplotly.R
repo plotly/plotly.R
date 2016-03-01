@@ -4,15 +4,9 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
-#' @param filename character string describing the name of the plot in your plotly account. 
-#' Use / to specify directories. If a directory path does not exist it will be created.
-#' If this argument is not specified and the title of the plot exists,
-#' that will be used for the filename.
-#' @param fileopt character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-#' "append" data to existing plotly, or "extend" it.
-#' @param world_readable logical. If \code{TRUE}, the graph is viewable 
-#' by anyone who has the link and in the owner's plotly account.
-#' If \code{FALSE}, graph is only viewable in the owner's plotly account.
+#' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
+#' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
+#' @param source Only relevant for \link{event_data}.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @import httr jsonlite
 #' @export
@@ -32,13 +26,9 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = ggplot2::last_plot(), filename, fileopt, 
-                     world_readable = TRUE) {
-  l <- gg2list(p)
-  # tack on special keyword arguments
-  if (!missing(filename)) l$filename <- filename
-  if (!missing(fileopt)) l$fileopt <- fileopt
-  l$world_readable <- world_readable
+ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
+                     source = "A") {
+  l <- gg2list(p, width = width, height = height, source = source)
   hash_plot(p$data, l)
 }
 
@@ -116,9 +106,12 @@ guide_names <- function(p, aes = c("shape", "fill", "alpha", "area",
 #' Convert a ggplot to a list.
 #' @import ggplot2
 #' @param p ggplot2 plot.
+#' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
+#' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
+#' @param source Only relevant for \link{event_data}.
 #' @return figure object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p) {
+gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   # ggplot now applies geom_blank() (instead of erroring) when no layers exist
   if (length(p$layers) == 0) p <- p + geom_blank()
   layout <- list()
@@ -960,6 +953,8 @@ gg2list <- function(p) {
   }
   
   l <- list(data = flipped.traces, layout = flipped.layout)
-
+  l$width <- width
+  l$height <- width
+  l$source <- source
   structure(add_boxed(rm_asis(l)), class = "plotly")
 }

@@ -40,7 +40,7 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
 
-\item{source}{Only relevant for \link{event_data}}
+\item{source}{Only relevant for \link{event_data}.}
 }
 \description{
 Transform data into a plotly visualization.

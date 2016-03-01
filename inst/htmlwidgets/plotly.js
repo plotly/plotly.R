@@ -53,7 +53,7 @@ HTMLWidgets.widget({
           return obj;
         });
         Shiny.onInputChange(
-          ".clientValue-plotly_click-" + x.data[0].source, 
+          ".clientValue-plotly_click-" + x.source, 
           d
         );
       });
@@ -70,7 +70,7 @@ HTMLWidgets.widget({
             y: pts.map(function(pt) {return pt.y; })
           };
           Shiny.onInputChange(
-            ".clientValue-plotly_selected-" + x.data[0].source, 
+            ".clientValue-plotly_selected-" + x.source, 
             obj
           );
         }
