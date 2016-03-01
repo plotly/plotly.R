@@ -77,9 +77,10 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       for (k in names(trs)) {
         trs[[k]]$name <- entries[[k]]
         trs[[k]]$legendgroup <- entries[[k]]
+        trs[[k]]$showlegend <- TRUE
       }
     } else {
-      trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x})
+      trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
     }
     # finally, each trace is with respect to which axis?
     for (j in seq_along(trs)) {
@@ -560,13 +561,6 @@ aes2plotly <- function(data, params, aes = "size") {
   # data can have multiple "geom classes" -- we want default_aes from the 
   # very first class
   geom <- rev(grep("^Geom", class(data), value = TRUE))[1]
-  # modify %||% so that NA is considered NULL
-  #"%|x|%" <- function(x, y) {
-  #  if (length(x) == 1) {
-  #    if (is.na(x)) x <- NULL
-  #  }
-  #  x %||% y
-  #}
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% 
     ggfun(geom)$default_aes[[aes]] %||% NA
   converter <- switch(

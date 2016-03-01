@@ -364,10 +364,20 @@ gg2list <- function(p, width = NULL, height = NULL) {
   #   To do so, we borrow some of the body of ggplot2:::guides_build().
   # ------------------------------------------------------------------------ 
   
-  # if there are no non-positional scales or if theme(legend.position = "none")
-  # is used, don't show a legend at all.
-  if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
-    gglayout$showlegend  <- FALSE
+  # will there be a legend?
+  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) > 1
+  
+  # legend styling
+  gglayout$legend <- list(
+    bgcolor = toRGB(theme$legend.background$fill),
+    bordercolor = toRGB(theme$legend.background$colour),
+    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
+    font = text2font(theme$legend.text)
+  )
+  
+  # if theme(legend.position = "none") is used, don't show a legend _or_ guide
+  if (identical(theme$legend.position, "none")) {
+    gglayout$showlegend <- FALSE
   } else {
     # by default, guide boxes are vertically aligned
     theme$legend.box <- theme$legend.box %||% "vertical"
@@ -397,25 +407,24 @@ gg2list <- function(p, width = NULL, height = NULL) {
     gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
     
     # colourbar -> plotly.js colorbar
-    traces <- c(traces, lapply(gdefs, gdef2trace, theme, gglayout))
+    colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
+    nguides <- length(colorbar) + gglayout$showlegend
+    # If we have 2 or more guides, set x/y positions accordingly
+    if (nguides >= 2) {
+      # place legend at the bottom
+      gglayout$legend$y <- 1 / nguides
+      gglayout$legend$yanchor <- "top"
+      # adjust colorbar position(s)
+      for (i in seq_along(colorbar)) {
+        colorbar[[i]]$marker$colorbar$yanchor <- "top"
+        colorbar[[i]]$marker$colorbar$len <- 1 / nguides
+        colorbar[[i]]$marker$colorbar$y <- 1 - (i - 1) * (1 / nguides)
+      }
+    }
+    traces <- c(traces, colorbar)
   }
   
-  # legend styling
-  gglayout$legend <- list(
-    bgcolor = toRGB(theme$legend.background$fill),
-    bordercolor = toRGB(theme$legend.background$colour),
-    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
-    font = text2font(theme$legend.text)
-  )
-  
-  # TODO: legend/guide positioning
-  # If we have _both_ a legend and colorbar, set x/y positions accordingly
-  
-  # --------
-  # plot-wide hacks 
-  # ---------
-  
-  # Bar hackery:
+  # Bar/box hackery:
   # (1) coord_flip() is plot-specific, but `bar.orientiation` is trace-specific 
   # (2) position_*() is layer-specific, but `layout.barmode` is plot-specific.
   geoms <- sapply(layers, ggtype, "geom")
@@ -444,6 +453,16 @@ gg2list <- function(p, width = NULL, height = NULL) {
     }
   }
   
+  # flip x/y in traces for flipped coordinates 
+  # (we've already done appropriate flipping for axis objects)
+  if (inherits(p$coordinates, "CoordFlip")) {
+    for (i in seq_along(traces)) {
+      tr <- traces[[i]]
+      traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (tr$type %in% c("bar", "box")) traces[[i]]$orientation <- "h"
+    }
+  }
+  
   # Error bar widths in ggplot2 are on the range of the position scale,
   # but plotly wants them in pixels:
   for (xy in c("x", "y")) {
@@ -456,16 +475,6 @@ gg2list <- function(p, width = NULL, height = NULL) {
         w <- grid::unit(e$width / diff(rng), "npc")
         traces[[i]][[err]]$width <- unitConvert(w, "pixels", type)
       }
-    }
-  }
-  
-  # flip x/y in traces for flipped coordinates 
-  # (we've already done appropriate flipping for axis objects)
-  if (inherits(p$coordinates, "CoordFlip")) {
-    for (i in seq_along(traces)) {
-      tr <- traces[[i]]
-      traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% c("bar", "box")) traces[[i]]$orientation <- "h"
     }
   }
   
