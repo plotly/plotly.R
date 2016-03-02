@@ -6,47 +6,37 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   params <- lapply(layers, function(x) {
     c(x$geom_params, x$stat_params, x$aes_params, position = ggtype(x, "position"))
   })
-  # Discrete non_position_scales require multiple traces per layer
-  split_scales <- list()
-  for (sc in scales$non_position_scales()$scales) {
-    if (sc$is_discrete()) {
-      split_scales[[sc$aesthetics]] <- sc
-    }
-  }
   # Convert "high-level" geoms to their "low-level" counterpart
   # This may involve preprocessing the data, for example:
   # 1. geom_line() is really geom_path() with data sorted by x
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
   #
   # This has to be done in a loop, since some layers are really two layers, 
-  # (we need to replicate the data/params in those cases)
-  #
-  # We also extract the domain/range of discrete mapping(s) for later use
+  # (and we need to replicate the data/params in those cases)
   datz <- list()
   paramz <- list()
   keyz <- list()
   for (i in seq_along(data)) {
-    psd <- prestats_data[[i]]
-    key <- unique(psd[, names(psd) %in% names(split_scales), drop = FALSE])
-    # this order (should) determine the ordering of traces (within layer)
-    key <- key[do.call(order, key), , drop = FALSE]
-    for (j in names(key)) {
-      key[[paste0(j, "_range")]] <- scales$get_scales(j)$map_df(key)[[1]]
+    d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]])
+    if (is.data.frame(d)) d <- list(d)
+    for (j in seq_along(d)) {
+      datz <- c(datz, d[j])
+      paramz <- c(paramz, params[i])
+      # When splitting layers into multiple traces, we need the domain/range of 
+      # the scale (for trace naming & legend generation)
+      psd <- prestats_data[[i]]
+      idx <- names(psd) %in% split_on(class(d[[j]])[1])
+      key <- unique(psd[, idx, drop = FALSE])
+      # this order (should) determine the ordering of traces (within layer)
+      key <- key[do.call(order, key), , drop = FALSE]
+      browser()
+      for (k in names(key)) {
+        key[[paste0(k, "_range")]] <- scales$get_scales(k)$map_df(key)[[1]]
+      }
+      keyz <- c(keyz, list(key))
     }
-    pm <- params[[i]]
-    dat <- to_basic(data[[i]], psd, layout, pm)
-    if (inherits(dat, "list")) {
-      pm <- replicate(length(dat), pm, simplify = FALSE)
-      key <- replicate(length(dat), key, simplify = FALSE)
-    } else {
-      dat <- list(dat)
-      key <- list(key)
-      pm <- list(pm)
-    }
-    datz <- c(datz, dat)
-    paramz <- c(paramz, pm)
-    keyz <- c(keyz, key)
   }
+  
   
   # now to the actual layer -> trace conversion
   trace.list <- list()
@@ -54,12 +44,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     d <- datz[[i]]
     # if PANEL is always last, if makes it easier to construct trace names later
     d <- d[c(setdiff(names(d), "PANEL"), "PANEL")]
-    split_by <- names(split_scales)
-    # _always_ split on fill for polygon/path (plotly.js can't do two polygon/path
-    # with different fill in a single trace)
-    if (inherits(d, "GeomPolygon") || inherits(d, "GeomPath")) {
-      split_by <- c(split_by, "fill")
-    }
+    split_by <- grep("_range$", names(keyz[[i]]), value = TRUE, invert = TRUE)
     idx <- names(d) %in% c(split_by, "PANEL")
     idx <- idx & !sapply(d, anyNA)
     s <- interaction(as.list(d[idx]))
@@ -69,6 +54,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     trs <- Map(geom2trace, dl, paramz)
     # attach name/legendgroup/showlegend to this trace if appropriate
     if (length(trs) > 1 && length(split_by) > 0 && prod(dim(keyz[[i]])) > 0) {
+      browser()
       key <- keyz[[i]]
       valz <- Map(function(x, y) paste0(x, ": ", y), labels[split_by], key[split_by])
       entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
@@ -76,6 +62,12 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       key_range <- key[grepl("_range$", names(key))]
       keys <- Reduce(function(x, y) paste0(x, ".", y), key_range)
       entries <- setNames(entries, keys)
+      for (j in seq_len(nrow(layout))) {
+        idx <- grepl(paste0("\\.", j, "$"), names(trs))
+        match(names(trs[idx]), key)
+        trs[idx] <- trs[idx][]
+      }
+      
       # strip off the trailing panel info
       names(trs) <- sub("\\.[0-9]+$", "", names(trs))
       # order traces to match the ordering of the scale mapping(s)
@@ -335,9 +327,9 @@ geom2trace.GeomPoint <- function(data, params) {
       )
     )
   )
-  # for 'open' shapes, marker color should inherit from line color
-  idx <- grepl("open", shape)
-  L$marker$color[idx] <- L$marker$line$color[idx]
+  # fill is irrelevant for pch %in% 15:20
+  pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
+  L$marker$color[pch %in% 15:20] <- L$marker$line$color[pch %in% 15:20]
   L
 }
 
@@ -540,6 +532,27 @@ group2NA <- function(data) {
   }
   data
 }
+
+
+split_on <- function(geom = "GeomPoint") {
+  # NOTE: Do we also want to split on size?
+  # Legends based on sizes not implemented yet in Plotly
+  lookup <- list(
+    GeomPoint = c("colour", "fill", "shape"),
+    GeomPath = c("linetype", "size", "colour", "shape"),
+    GeomPolygon = c("colour", "fill", "linetype", "size"),
+    GeomBar = c("colour", "fill"),
+    GeomDensity = c("colour", "fill", "linetype"),
+    GeomBoxplot = c("colour", "fill", "size"),
+    GeomErrorbar = c("colour", "linetype"),
+    GeomErrorbarh = c("colour", "linetype"),
+    GeomArea = c("colour", "fill"),
+    GeomStep = c("linetype", "size", "colour"),
+    GeomText = c("colour")
+  )
+  lookup[[geom]]
+}
+
 
 # Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
 # error_x.

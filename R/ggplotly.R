@@ -250,7 +250,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
         tickwidth = unitConvert(axisTicks, "pixels", type),
         showticklabels = !is_blank(axisText),
-        tickfont = text2font(axisText, type),
+        tickfont = text2font(axisText, "height"),
         tickangle = - (axisText$angle %||% 0),
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
@@ -262,10 +262,14 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
         zeroline = FALSE,  
         anchor = anchor
       )
-      # convert dates to milliseconds (this way dates/datetimes will be in milliseconds)
+      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
+      # this way both dates/datetimes are on same scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if ("date" %in% sc$scale_name) {
-        axisObj$range <- axisObj$range * 24 * 60 * 60 * 1000
+      if (identical("date", sc$scale_name)) {
+        axisObj$range <- axisObj$range * 86400000
+        if (i == 1) {
+          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
+        }
       }
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
@@ -276,13 +280,6 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
-        # convert days to milliseconds, if necessary
-        if ("date" %in% sc$scale_name) {
-          traces <- lapply(traces, function(z) { 
-            z[[xy]] <- z[[xy]] * 24 * 60 * 60 * 1000
-            z
-          })
-        }
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(p)) {
           stripSize <- unitConvert(stripText, "pixels", type)
@@ -604,12 +601,12 @@ has_facet <- function(x) {
 bbox <- function(txt = "foo", angle = 0, size = 12) {
   # assuming the horizontal size of a character is roughly half of the vertical
   n <- nchar(txt)
-  if (sum(n) == 0) return(list(v = 0, h = 0))
+  if (sum(n) == 0) return(list(height = 0, width = 0))
   w <- size * (nchar(txt) / 2)
   angle <- abs(angle %||% 0)
   # do the sensible thing in the majority of cases
-  if (angle == 0) return(list(v = size, h = w))
-  if (angle == 90) return(list(v = w, h = size))
+  if (angle == 0) return(list(height = size, width = w))
+  if (angle == 90) return(list(height = w, width = size))
   # first, compute the hypotenus
   hyp <- sqrt(size ^ 2 + w ^ 2)
   list(
