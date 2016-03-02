@@ -8,7 +8,6 @@ HTMLWidgets.widget({
   },
   
   resize: function(el, width, height, instance) {
-    // TODO: impose fixed coordinates, if specified (see #342)
     Plotly.relayout(el.id, {width: width, height: height});
   },  
   
@@ -52,10 +51,38 @@ HTMLWidgets.widget({
           }
           return obj;
         });
-        Shiny.onInputChange(
-          ".clientValue-plotly_click-" + x.source, 
-          d
-        );
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, d);
+      });
+      
+      // clear click selection
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
+      
+      graphDiv.on('plotly_hover', function(eventData) {
+        // extract only the data we may want to access in R
+        var d = eventData.points.map(function(pt) {
+          var obj = {
+              curveNumber: pt.curveNumber, 
+              pointNumber: pt.pointNumber, 
+              x: pt.x,
+              y: pt.y
+          };
+          if (pt.data.hasOwnProperty("key")) {
+            if (typeof pt.pointNumber === "number") {
+              obj.key = pt.data.key[pt.pointNumber];
+            } else {
+              obj.key = pt.data.key[pt.pointNumber[0]][pt.pointNumber[1]];
+            } // TODO: can pointNumber be 3D?
+          }
+          return obj;
+        });
+        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, d);
+      });
+      
+      // clear hover selection
+      graphDiv.on('plotly_unhover', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
       });
       
       graphDiv.on('plotly_selected', function(eventData) {
@@ -69,14 +96,15 @@ HTMLWidgets.widget({
             x: pts.map(function(pt) {return pt.x; }),
             y: pts.map(function(pt) {return pt.y; })
           };
-          Shiny.onInputChange(
-            ".clientValue-plotly_selected-" + x.source, 
-            obj
-          );
+          Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, obj);
         }
       });
       
-      // TODO: send `null` on a double-click to clear input value!?
+      // clear select/lasso selection & click
+      graphDiv.on('plotly_deselect', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
       
     } // shinyMode
   } // renderValue

@@ -4,11 +4,12 @@
 \alias{event_data}
 \title{Access plotly user input event data in shiny}
 \usage{
-event_data(event = c("plotly_click", "plotly_selected"), source = "A")
+event_data(event = c("plotly_hover", "plotly_click", "plotly_selected"),
+  source = "A")
 }
 \arguments{
-\item{event}{The type of plotly event. Currently 'plotly_click' and 
-'plotly_selected' are supported.}
+\item{event}{The type of plotly event. Currently 'plotly_hover',
+'plotly_click', and 'plotly_selected' are supported.}
 
 \item{source}{Which plot should the listener be tied to? This 
 (character string) should match the value of \code{source} in \link{plot_ly}.}

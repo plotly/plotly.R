@@ -1,3 +1,19 @@
+2.5.0 -- 1 Mar 2015
+
+NEW FEATURES
+
+* New event_data() function provides easy access to plotly events in shiny.
+For an example, see https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyEvents
+
+* plot_ly() and ggplotly() gain a source argument to differentiate between 
+plotly events in shiny apps with multiple plots. ggplotly() also gains width 
+and height arguments.
+
+CHANGES
+
+The arguments filename, fileopt, world_readable in ggplotly() were removed as
+they should be provided to plotly_POST() instead. 
+
 2.4.4 -- 13 Feb 2015
 
 as.widget() now returns htmlwidget objects untouched. See #449.
