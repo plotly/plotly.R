@@ -189,7 +189,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       labz <- unlist(lapply(panel$ranges, "[[", "x.labels"))
       lab <- labz[which.max(nchar(labz))]
       panelMarginY <- panelMarginY + axisTicksX +
-        bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))$v
+        bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))[["height"]]
     }
     if (p$facet$free$y) {
       axisTicksY <- unitConvert(
@@ -201,7 +201,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       labz <- unlist(lapply(panel$ranges, "[[", "y.labels"))
       lab <- labz[which.max(nchar(labz))]
       panelMarginX <- panelMarginX + axisTicksY + 
-        bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))$h
+        bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))[["width"]]
     }
   }
   margins <- c(
@@ -237,12 +237,13 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       type <- if (xy == "x") "height" else "width"
       # https://plot.ly/r/reference/#layout-xaxis
       axisObj <- list(
-        # this might be changed later in re_scale()
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
         range = rng[[paste0(xy, ".range")]],
         ticktext = rng[[paste0(xy, ".labels")]],
+        # TODO: implement minor grid lines with another axis object 
+        # and _always_ hide ticks/text?
         tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
@@ -261,9 +262,17 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
         zeroline = FALSE,  
         anchor = anchor
       )
-      # TODO: implement minor grid lines with another axis object 
-      # and _always_ hide ticks/text?
-      gglayout[[axisName]] <- re_scale(axisObj, sc)
+      # convert dates to milliseconds (this way dates/datetimes will be in milliseconds)
+      # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
+      if ("date" %in% sc$scale_name) {
+        axisObj$range <- axisObj$range * 24 * 60 * 60 * 1000
+      }
+      # tickvals are currently on 0-1 scale, but we want them on data scale
+      axisObj$tickvals <- scales::rescale(
+        axisObj$tickvals, to = axisObj$range, from = c(0, 1)
+      )
+      # attach axis object to the layout
+      gglayout[[axisName]] <- axisObj
       
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
@@ -288,12 +297,11 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
         if (is_blank(axisTitle)) axisTitleText <- ""
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
         side <- if (xy == "x") "b" else "l"
-        way <- if (xy == "x") "v" else "h"
         # account for axis ticks, ticks text, and titles in plot margins
         # (apparently ggplot2 doesn't support axis.title/axis.text margins)
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
-          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[way]] +
-          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[way]]
+          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
+          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
         # draw axis titles as annotations 
         # (plotly.js axis titles aren't smart enough to dodge ticks & text)
         if (nchar(axisTitleText) > 0) {
@@ -301,8 +309,8 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
           offset <- 
             (0 - 
-               bbox(axisTickText, axisText$angle, axisTextSize)[[way]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[way]] / 2 -
+               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
+               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
                unitConvert(theme$axis.ticks.length, "npc", type))
           # npc is on a 0-1 scale of the _entire_ device, 
           # but these units _should_ be wrt to the plotting region
@@ -605,8 +613,8 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
   # first, compute the hypotenus
   hyp <- sqrt(size ^ 2 + w ^ 2)
   list(
-    v = max(hyp * cos(90 - angle), size),
-    h = max(hyp * sin(90 - angle), w)
+    height = max(hyp * cos(90 - angle), size),
+    width = max(hyp * sin(90 - angle), w)
   )
 }
 
@@ -634,24 +642,6 @@ faced <- function(txt, face = "plain") {
 }
 bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
-
-
-re_scale <- function(axisObj, scale) {
-  # hopefully scale_name doesn't go away (otherwise, we might have to determine
-  # date vs datetime from the raw data)
-  # https://github.com/hadley/ggplot2/issues/1312
-  if ("date" %in% scale$scale_name || "datetime" %in% scale$scale_name) {
-    axisObj$type <- "date"
-    # convert dates to milliseconds (so everything is a datetime)
-    if ("date" %in% scale$scale_name) {
-      axisObj$range <- axisObj$range * 24 * 60 * 60 * 1000
-    }
-  }
-  axisObj$tickvals <- scales::rescale(
-    axisObj$tickvals, to = axisObj$range, from = c(0, 1)
-  )
-  axisObj
-}
 
 # if a vector has one unique value, return that value
 uniq <- function(x) {
