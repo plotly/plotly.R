@@ -6,6 +6,13 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   params <- lapply(layers, function(x) {
     c(x$geom_params, x$stat_params, x$aes_params, position = ggtype(x, "position"))
   })
+  # we draw legends only for discrete scales
+  discreteScales <- list()
+  for (sc in scales$non_position_scales()$scales) {
+    if (sc$is_discrete()) {
+      discreteScales[[sc$aesthetics]] <- sc
+    }
+  }
   # Convert "high-level" geoms to their "low-level" counterpart
   # This may involve preprocessing the data, for example:
   # 1. geom_line() is really geom_path() with data sorted by x
@@ -25,70 +32,68 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       # When splitting layers into multiple traces, we need the domain/range of 
       # the scale (for trace naming & legend generation)
       psd <- prestats_data[[i]]
-      idx <- names(psd) %in% split_on(class(d[[j]])[1])
+      idx <- names(psd) %in% c(names(discreteScales), "PANEL")
       key <- unique(psd[, idx, drop = FALSE])
       # this order (should) determine the ordering of traces (within layer)
       key <- key[do.call(order, key), , drop = FALSE]
-      browser()
-      for (k in names(key)) {
-        key[[paste0(k, "_range")]] <- scales$get_scales(k)$map_df(key)[[1]]
+      nms <- names(key)
+      idx <- nms %in% names(discreteScales)
+      nms[idx] <- paste0(nms[idx], "_domain")
+      key <- setNames(key, nms)
+      for (k in setdiff(nms[idx], "PANEL")) {
+        scaleName <- sub("_domain", "", k)
+        key[[scaleName]] <- scales$get_scales(scaleName)$map(key[, k])
       }
       keyz <- c(keyz, list(key))
     }
   }
   
-  
   # now to the actual layer -> trace conversion
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # if PANEL is always last, if makes it easier to construct trace names later
-    d <- d[c(setdiff(names(d), "PANEL"), "PANEL")]
-    split_by <- grep("_range$", names(keyz[[i]]), value = TRUE, invert = TRUE)
+    # what aesthetics do we split on for this geom?
+    split_by <- split_on(class(d)[1])
+    # always split on PANEL
     idx <- names(d) %in% c(split_by, "PANEL")
-    idx <- idx & !sapply(d, anyNA)
-    s <- interaction(as.list(d[idx]))
-    # split layer data into a list of data frames 
-    dl <- split(d, s, drop = TRUE)
+    # if the variable is constant, don't split on it
+    idx <- idx & vapply(d, function(x) length(unique(x)) > 1, logical(1)) 
+    # create a factor to split the data on...
+    # by matching the factor levels with the order of the domain the trace 
+    # ordering should be correct
+    fac <- factor(
+      apply(d[idx], 1, paste, collapse = "."),
+      levels = apply(keyz[[i]][names(d[idx])], 1, paste, collapse = ".")
+    )
+    dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
-    trs <- Map(geom2trace, dl, paramz)
-    # attach name/legendgroup/showlegend to this trace if appropriate
-    if (length(trs) > 1 && length(split_by) > 0 && prod(dim(keyz[[i]])) > 0) {
-      browser()
-      key <- keyz[[i]]
-      valz <- Map(function(x, y) paste0(x, ": ", y), labels[split_by], key[split_by])
+    trs <- Map(geom2trace, dl, paramz[i])
+    # each trace is with respect to which axis?
+    for (j in seq_along(trs)) {
+      panel <- unique(dl[[j]]$PANEL)
+      trs[[j]]$xaxis <-  sub("axis", "", layout[panel, "xaxis"])
+      trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
+    }
+    # generate name/legendgroup/showlegend, if appropriate
+    if (length(trs) > 1 && length(discreteScales) > 0) {
+      # labels is a list of legend titles, but since we're restricted to 
+      # one (merged) legend, I think it only makes since to prefix the variable
+      # name in the legend entries
+      lab <- labels[names(discreteScales)]
+      key <- keyz[[i]][paste0(names(discreteScales), "_domain")]
+      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, key)
       entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
-      # build a dictionary for looking up the trace/entry names
-      key_range <- key[grepl("_range$", names(key))]
-      keys <- Reduce(function(x, y) paste0(x, ".", y), key_range)
-      entries <- setNames(entries, keys)
-      for (j in seq_len(nrow(layout))) {
-        idx <- grepl(paste0("\\.", j, "$"), names(trs))
-        match(names(trs[idx]), key)
-        trs[idx] <- trs[idx][]
-      }
-      
-      # strip off the trailing panel info
-      names(trs) <- sub("\\.[0-9]+$", "", names(trs))
-      # order traces to match the ordering of the scale mapping(s)
-      trs <- compact(trs[names(entries)])
       # also need to set `layout.legend.traceorder='reversed'` (YUCK!!!)
       if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
         trs <- rev(trs)
       }
-      for (k in names(trs)) {
+      for (k in seq_along(trs)) {
         trs[[k]]$name <- entries[[k]]
         trs[[k]]$legendgroup <- entries[[k]]
         trs[[k]]$showlegend <- TRUE
       }
     } else {
       trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
-    }
-    # finally, each trace is with respect to which axis?
-    for (j in seq_along(trs)) {
-      panel <- unique(dl[[j]]$PANEL)
-      trs[[j]]$xaxis <- sub("axis", "", layout[panel, "xaxis"])
-      trs[[j]]$yaxis <- sub("axis", "", layout[panel, "yaxis"])
     }
     trace.list <- c(trace.list, trs)
   }
@@ -215,7 +220,8 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
-  prefix_class(data, "GeomPolygon")
+  if (!"fill" %in% names(data)) data$fill <- NA
+  prefix_class(data, "GeomPath")
 }
 
 #' @export

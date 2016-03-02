@@ -13,13 +13,6 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
-    // map date/datetimes (both in milliseconds) to date objects
-    if (x.layout.xaxis.isDate === true) {
-      x.data[0].x = x.data[0].x.map(function(i) { return new Date(i); });
-      x.layout.xaxis.tickformat = '%Y';
-      x.layout.xaxis.hoverformat = '%Y';
-    }
-    
     var shinyMode;
     if (typeof(window) !== "undefined") {
       // make sure plots don't get created outside the network
