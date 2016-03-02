@@ -4,14 +4,17 @@
 \alias{ggplotly}
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
-ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL)
+ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
 \item{p}{a ggplot object.}
 
-\item{width}{Width in pixels (optional, defaults to automatic sizing).}
+\item{width}{Width of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{height}{Height in pixels (optional, defaults to automatic sizing).}
+\item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
+
+\item{source}{Only relevant for \link{event_data}.}
 }
 \value{
 a plotly object

@@ -4,14 +4,16 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL)
+gg2list(p, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{p}{ggplot2 plot.}
 
-\item{width}{Width in pixels (optional, defaults to automatic sizing).}
+\item{width}{Width of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{height}{Height in pixels (optional, defaults to automatic sizing).}
+\item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
+
+\item{source}{Only relevant for \link{event_data}.}
 }
 \value{
 a 'built' plotly object (list with names "data" and "layout").

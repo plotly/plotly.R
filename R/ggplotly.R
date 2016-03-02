@@ -4,8 +4,9 @@
 #' \url{https://plot.ly/ggplot2}
 #'
 #' @param p a ggplot object.
-#' @param width	Width in pixels (optional, defaults to automatic sizing).
-#' @param height Height in pixels (optional, defaults to automatic sizing).
+#' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
+#' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
+#' @param source Only relevant for \link{event_data}.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @return a plotly object
 #' @export
@@ -23,19 +24,20 @@
 #'  ggplotly(viz)
 #' }
 #' 
-ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL) {
-  l <- gg2list(p, width = width, height = height)
+ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
+                     source = "A") {
+  l <- gg2list(p, width = width, height = height, source = source)
   hash_plot(p$data, l)
 }
 
 #' Convert a ggplot to a list.
-#' @import ggplot2
 #' @param p ggplot2 plot.
-#' @param width	Width in pixels (optional, defaults to automatic sizing).
-#' @param height Height in pixels (optional, defaults to automatic sizing).
+#' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
+#' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
+#' @param source Only relevant for \link{event_data}.
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL) {
+gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -485,6 +487,7 @@ gg2list <- function(p, width = NULL, height = NULL) {
   l <- add_boxed(rm_asis(l))
   l$width <- width
   l$height <- height
+  l$source <- source
   structure(l, class = "plotly")
 }
 

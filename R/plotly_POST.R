@@ -71,7 +71,7 @@ plotly_POST <- function(x, filename, fileopt = "new",
     args = to_JSON(x$data),
     kwargs = to_JSON(x[get_kwargs()])
   )
-  base_url <- "https://plot.ly/clientresp"
+  base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
   con <- process(append_class(resp, "clientresp"))
   if (sharing[1] == "hidden") {

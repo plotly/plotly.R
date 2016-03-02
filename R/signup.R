@@ -43,7 +43,7 @@ signup <- function(username, email, save = TRUE) {
     platform = "R",
     version = as.character(packageVersion("plotly"))
   )
-  base_url <- "https://plot.ly/apimkacct"
+  base_url <- file.path(get_domain(), "apimkacct")
   resp <- httr::POST(base_url, body = bod)
   con <- process(append_class(resp, "signup"))
   if (save) {

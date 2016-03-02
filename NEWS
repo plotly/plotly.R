@@ -1,4 +1,4 @@
-2.5.0
+3.0.0
 
 FEATURES:
 
@@ -8,10 +8,33 @@ CHANGES:
 
 * Instead of (trying to) translate both major and minor grid lines, we now just translate major grid lines. This generally produces a result closer to the actual ggplot2 result since ggplot2 doesn't draw ticks on minor grid lines.
 
-* Added width/height and deprecated figure creation arguments in ggplotly() (these should be specified in plotly_POST()).
+2.5.0 -- 1 Mar 2015
 
-FIXES:
+NEW FEATURES
 
+* New event_data() function provides easy access to plotly events in shiny.
+For an example, see https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyEvents
+
+* plot_ly() and ggplotly() gain a source argument to differentiate between 
+plotly events in shiny apps with multiple plots. ggplotly() also gains width 
+and height arguments.
+
+CHANGES
+
+The arguments filename, fileopt, world_readable in ggplotly() were removed as
+they should be provided to plotly_POST() instead. 
+
+2.4.4 -- 13 Feb 2015
+
+as.widget() now returns htmlwidget objects untouched. See #449.
+
+2.4.3 -- 11 Feb 2015
+
+Ensure that we always return HTTPS links. Fixes #455
+
+2.4.2 -- 9 Feb 2015
+
+Fix for on-premise domain configuration. 
 
 2.4.1 -- 2 Feb 2015
 
