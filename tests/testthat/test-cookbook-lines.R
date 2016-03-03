@@ -98,7 +98,7 @@ bp.err <-
                      linetype = "dashed")
 
 test_that("The error bars get plotted over one another", {
-  info <- expect_traces(bp.err, 4, "bar-dodge-color-error")
+  info <- expect_traces(bp.err, 3, "bar-dodge-color-error")
 })
 
 df <- read.table(header = TRUE, text = "
@@ -113,7 +113,7 @@ bp <- ggplot(df, aes(x = cond, y = result, fill = group)) +
   geom_bar(position = position_dodge(), stat = "identity")
 
 bp.err4 <- bp +
-  geom_errorbar(aes(y = hline, ymax = hline, ymin = hline),
+  geom_errorbar(aes(y = hline, ymax = hline + 1, ymin = hline - 1),
                 linetype = "dashed", position = position_dodge())
 
 test_that("4 error bars", {

@@ -146,10 +146,10 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
   panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  panel$layout$xmin <- sapply(panel$ranges, function(z) min(z$x.range))
-  panel$layout$xmax <- sapply(panel$ranges, function(z) max(z$x.range))
-  panel$layout$ymin <- sapply(panel$ranges, function(z) min(z$y.range))
-  panel$layout$ymax <- sapply(panel$ranges, function(z) max(z$y.range))
+  panel$layout$x_min <- sapply(panel$ranges, function(z) min(z$x.range))
+  panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
+  panel$layout$y_min <- sapply(panel$ranges, function(z) min(z$y.range))
+  panel$layout$y_max <- sapply(panel$ranges, function(z) max(z$y.range))
   
   # layers -> plotly.js traces
   traces <- layers2traces(
@@ -472,16 +472,16 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     }
   }
   
-  # Error bar widths in ggplot2 are on the range of the position scale,
+  # Error bar widths in ggplot2 are on the range of the x/y scale,
   # but plotly wants them in pixels:
   for (xy in c("x", "y")) {
-    rng <- range(unlist(lapply(panel$ranges, "[[", paste0(xy, ".range"))))
     type <- if (xy == "x") "width" else "height"
     err <- if (xy == "x") "error_y" else "error_x"
     for (i in seq_along(traces)) {
       e <- traces[[i]][[err]]
       if (!is.null(e)) {
-        w <- grid::unit(e$width / diff(rng), "npc")
+        # TODO: again, "npc" is on device scale...we really want plot scale
+        w <- grid::unit(e$width, "npc")
         traces[[i]][[err]]$width <- unitConvert(w, "pixels", type)
       }
     }
@@ -521,7 +521,6 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
   } else {
     u <- convert(u, "npc")
   }
-  
   if (to[1] == "pixels") {
     if (inherits(u, "margin")) {
       uh <- mm2pixels(grid::convertHeight(uh, "mm"))

@@ -59,12 +59,22 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     # if the variable is constant, don't split on it
     idx <- idx & vapply(d, function(x) length(unique(x)) > 1, logical(1)) 
     # create a factor to split the data on...
-    # by matching the factor levels with the order of the domain the trace 
-    # ordering should be correct
-    fac <- factor(
-      apply(d[idx], 1, paste, collapse = "."),
-      levels = apply(keyz[[i]][names(d[idx])], 1, paste, collapse = ".")
-    )
+    # by matching the factor levels with the order of the domain (of _discrete_
+    # scales), the trace ordering should be correct
+    key <- keyz[[i]]
+    idx2 <- names(key) %in% names(d[idx])
+    fac <- if (sum(idx) >= 1) {
+      if (sum(idx) == sum(idx2)) {
+        factor(
+          apply(d[idx], 1, paste, collapse = "."),
+          levels = apply(key[idx2], 1, paste, collapse = ".")
+        )
+      } else {
+        d[idx]
+      }
+    } else {
+      1
+    }
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i])
@@ -75,13 +85,13 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
     }
     # generate name/legendgroup/showlegend, if appropriate
-    if (length(trs) > 1 && length(discreteScales) > 0) {
+    if (length(trs) > 1 && any(names(key) %in% names(discreteScales))) {
       # labels is a list of legend titles, but since we're restricted to 
       # one (merged) legend, I think it only makes since to prefix the variable
       # name in the legend entries
       lab <- labels[names(discreteScales)]
-      key <- keyz[[i]][paste0(names(discreteScales), "_domain")]
-      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, key)
+      vals <- key[paste0(names(discreteScales), "_domain")]
+      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, vals)
       entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
       # also need to set `layout.legend.traceorder='reversed'` (YUCK!!!)
       if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
@@ -233,7 +243,7 @@ to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "intercept", "slope", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, x, xmin:xmax)
+  lay <- tidyr::gather(layout, variable, x, x_min:x_max)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- with(data, intercept + slope * x)
   prefix_class(data, "GeomPath")
@@ -243,7 +253,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "yintercept", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, x, xmin:xmax)
+  lay <- tidyr::gather(layout, variable, x, x_min:x_max)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- data$yintercept
   prefix_class(data, "GeomPath")
@@ -253,7 +263,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "xintercept", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, y, ymin:ymax)
+  lay <- tidyr::gather(layout, variable, y, y_min:y_max)
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data$x <- data$xintercept
   prefix_class(data, "GeomPath")
@@ -266,6 +276,24 @@ to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
     params$sizemax <- max(prestats_data$globsizemax)
   }
   prefix_class(data, "GeomPoint")
+}
+
+#' @export
+to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
+  # width for ggplot2 means size of the entire bar, on the data scale 
+  # (plotly.js wants half, in pixels)
+  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data$width <- (data$xmax - data$x) /(data$x_max - data$x_min)
+  prefix_class(data, "GeomErrorbar")
+}
+
+#' @export
+to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
+  # height for ggplot2 means size of the entire bar, on the data scale 
+  # (plotly.js wants half, in pixels)
+  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data$height <- (data$ymax - data$y) / (data$x_max - data$x_min)
+  prefix_class(data, "GeomErrorbarh")
 }
 
 #' @export
@@ -472,12 +500,38 @@ geom2trace.GeomTile <- function(data, params) {
 
 #' @export
 geom2trace.GeomErrorbar <- function(data, params) {
-  make_errorbar(data, params, "y")
+  list(
+    x = data$x,
+    y = data$y,
+    type = "scatter",
+    mode = "none",
+    error_y = list(
+      array = data$ymax - data$y,
+      arrayminus = data$y - data$ymin,
+      type = "data",
+      width = data$width[1] / 2,
+      symmetric = FALSE,
+      color = aes2plotly(data, params, "colour")
+    )
+  )
 }
 
 #' @export
 geom2trace.GeomErrorbarh <- function(data, params) {
-  make_errorbar(data, params, "x")
+  list(
+    x = data$x,
+    y = data$y,
+    type = "scatter",
+    mode = "none",
+    error_x = list(
+      array = data$xmax - data$x,
+      arrayminus = data$x - data$xmin,
+      type = "data",
+      width = data$height[1] / 2,
+      symmetric = FALSE,
+      color = aes2plotly(data, params, "colour")
+    )
+  )
 }
 
 #' @export
@@ -560,34 +614,6 @@ split_on <- function(geom = "GeomPoint") {
 }
 
 
-# Make a trace for geom_errorbar -> error_y or geom_errorbarh ->
-# error_x.
-make_errorbar <- function(data, params, xy){
-  tr <- list(
-    x = data$x,
-    y = data$y,
-    type = "scatter",
-    mode = "none"
-  )
-  err.name <- paste0("error_", xy)
-  min.name <- paste0(xy, "min")
-  max.name <- paste0(xy, "max")
-  e <- list(
-    array = data[[max.name]] - data[[xy]],
-    type = "data",
-    width = aes2plotly(data, params, "width"),
-    symmetric = TRUE,
-    color = aes2plotly(data, params, "colour")
-  )
-  arrayminus <- data[[xy]] - data[[min.name]]
-  if(!isTRUE(all.equal(e$array, arrayminus))){
-    e$arrayminus <- arrayminus
-    e$symmetric <- FALSE
-  }
-  tr[[err.name]] <- e    
-  tr
-}
-
 # function to transform geom_ribbon data into format plotly likes
 # (note this function is also used for geom_smooth)
 ribbon_dat <- function(dat) {
@@ -621,7 +647,8 @@ aes2plotly <- function(data, params, aes = "size") {
     linetype = lty2dash,
     shape = pch2symbol,
     alpha = function(x) { x[is.na(x)] <- 1; x },
-    width = function(x) { x / 2 }
+    width = function(x) { x / 2},
+    height = function(x) { x / 2}
   )
   if (is.null(converter)) {
     warning("A converter for ", aes, " wasn't found. \n", 
