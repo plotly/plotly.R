@@ -426,6 +426,18 @@ subdivide_traces <- function(traces, dat, prop="group", FUN=function(trace, lvl)
   lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
   n <- length(x)
 
+  # apply boolean mask to the values of some trace property
+  apply_mask <- function(data, mask) {
+    # FIXME better check for subsettable property
+    if ((is.vector(data) || is.factor(data)) && (length(data) == length(mask))) {
+      data[mask]
+    } else if (is.list(data)) {
+      # recursion
+      lapply(data, apply_mask, mask)
+    } else {
+      data
+    }
+  }
   new_traces <- unlist(lapply(seq_along(lvls), function(lvl_ix) {
     lvl <- lvls[[lvl_ix]]
     indices <- which(x %in% lvl)
@@ -434,15 +446,8 @@ subdivide_traces <- function(traces, dat, prop="group", FUN=function(trace, lvl)
       mask <- trace$indices %in% indices
       if (!any(mask)) return(NULL) # empty trace
 
-      trace_size <- length(mask)
       # subset the properties that are subsettable
-      for (i in 1:length(trace)) {
-        # FIXME better check for subsettable property
-        tr_prop <- trace[[i]]
-        if ((is.vector(tr_prop) || is.factor(tr_prop)) && (length(tr_prop) == trace_size)) {
-          trace[[i]] <- tr_prop[mask]
-        }
-      }
+      trace <- lapply(trace, apply_mask, mask)
       if ("name" %in% names(trace)) {
         # append lvl to an existing name
         trace$name <- paste0(trace$name, '/', lvl)
