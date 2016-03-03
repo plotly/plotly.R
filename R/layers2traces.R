@@ -169,7 +169,7 @@ to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomLine <- function(data, prestats_data, layout, params, ...) {
-  data <- group2NA(data[order(data$x), ])
+  data <- data[order(data$x), ]
   prefix_class(data, "GeomPath")
 }
 

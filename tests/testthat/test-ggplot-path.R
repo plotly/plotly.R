@@ -66,11 +66,12 @@ test_that("lines & points are merged into markers+lines traces", {
   gg <- ggplot(data = df1, aes(x=time, y=total_bill, group=sex, shape=sex)) +
     geom_line() +
     geom_point()
-  # TODO: merge traces!
   info <- save_outputs(gg, "path-line-symbols")
   expect_equal(length(info$data), 2)  # 2 traces
-  expect_identical(info$data[[1]]$name, "Female")
+  expect_identical(info$data[[1]]$name, "sex: Female")
   expect_identical(info$data[[1]]$marker$symbol, "circle")
-  expect_identical(info$data[[2]]$name, "Male")
+  expect_identical(info$data[[2]]$name, "sex: Male")
   expect_identical(info$data[[2]]$marker$symbol, "triangle-up")
+  expect_identical(info$data[[1]]$mode, "markers+lines")
+  expect_identical(info$data[[2]]$mode, "markers+lines")
 })

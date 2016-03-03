@@ -488,6 +488,24 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     }
   }
   
+  # try to merge marker/line traces that have the same values for these props
+  props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name", "legendgroup", "showlegend")
+  hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
+  modes <- vapply(traces, function(x) x$mode %||% "", character(1))
+  nhashes <- length(unique(hashes))
+  if (nhashes < length(traces)) {
+    mergedTraces <- vector("list", nhashes)
+    for (i in unique(hashes)) {
+      idx <- which(hashes %in% i)
+      # for now we just merge markers and lines -- I can't imagine text being worthwhile
+      if (all(modes[idx] %in% c("lines", "markers"))) {
+        mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
+        mergedTraces[[i]]$mode <- "markers+lines"
+      }
+    }
+    traces <- mergedTraces
+  }
+  
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
