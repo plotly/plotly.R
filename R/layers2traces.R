@@ -288,6 +288,21 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomLinerange <- function(data, prestats_data, layout, params, ...) {
+  data$width <- 0
+  prefix_class(data, "GeomErrorbar")
+}
+
+#' @export
+to_basic.GeomPointrange <- function(data, prestats_data, layout, params, ...) {
+  data$width <- 0
+  list(
+    prefix_class(data, "GeomErrorbar"),
+    prefix_class(data, "GeomPoint")
+  )
+}
+
+#' @export
 to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
   # height for ggplot2 means size of the entire bar, on the data scale 
   # (plotly.js wants half, in pixels)
@@ -500,38 +515,12 @@ geom2trace.GeomTile <- function(data, params) {
 
 #' @export
 geom2trace.GeomErrorbar <- function(data, params) {
-  list(
-    x = data$x,
-    y = data$y,
-    type = "scatter",
-    mode = "none",
-    error_y = list(
-      array = data$ymax - data$y,
-      arrayminus = data$y - data$ymin,
-      type = "data",
-      width = data$width[1] / 2,
-      symmetric = FALSE,
-      color = aes2plotly(data, params, "colour")
-    )
-  )
+  make_error(data, params, "y")
 }
 
 #' @export
 geom2trace.GeomErrorbarh <- function(data, params) {
-  list(
-    x = data$x,
-    y = data$y,
-    type = "scatter",
-    mode = "none",
-    error_x = list(
-      array = data$xmax - data$x,
-      arrayminus = data$x - data$xmin,
-      type = "data",
-      width = data$height[1] / 2,
-      symmetric = FALSE,
-      color = aes2plotly(data, params, "colour")
-    )
-  )
+  make_error(data, params, "x")
 }
 
 #' @export
@@ -613,6 +602,28 @@ split_on <- function(geom = "GeomPoint") {
   lookup[[geom]]
 }
 
+# make trace with errorbars 
+make_error <- function(data, params, xy = "x") {
+  color <- aes2plotly(data, params, "colour")
+  e <- list(
+    x = data$x,
+    y = data$y,
+    type = "scatter",
+    mode = "lines",
+    opacity = 0,
+    hoverinfo = "none",
+    line = list(color = color)
+  )
+  e[[paste0("error_", xy)]] <- list(
+    array = data[[paste0(xy, "max")]] - data[[xy]],
+    arrayminus = data[[xy]] - data[[paste0(xy, "min")]],
+    type = "data",
+    width = data$width[1] / 2,
+    symmetric = FALSE,
+    color = color
+  )
+  e
+}
 
 # function to transform geom_ribbon data into format plotly likes
 # (note this function is also used for geom_smooth)
