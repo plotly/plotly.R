@@ -132,7 +132,7 @@ test_run <- function(...) {
   test_check(...)
 }
 
-test_run("plotly", filter = "bar")
+test_run("plotly")
 
 
 # now, actually build the table (if necessary)

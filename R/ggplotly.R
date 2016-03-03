@@ -334,7 +334,8 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     
     # facet strips -> plotly annotations
     # TODO: use p$facet$labeller for the actual strip text!
-    if (has_facet(p) && lay$ROW == 1 && !is_blank(theme[["strip.text.x"]])){
+    if (!is_blank(theme[["strip.text.x"]]) && 
+        (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       txt <- paste(
         lay[, as.character(p$facet[[vars]])], collapse = ", "
@@ -356,7 +357,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       lab <- make_label(
         txt, x = max(xdom), y = mean(ydom), 
         el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-        xanchor = "left", yanchor = "bottom"
+        xanchor = "left", yanchor = "middle"
       )
       gglayout$annotations <- c(gglayout$annotations, lab)
       strip <- make_strip_rect(xdom, ydom, theme, "right")
@@ -481,7 +482,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
       e <- traces[[i]][[err]]
       if (!is.null(e)) {
         # TODO: again, "npc" is on device scale...we really want plot scale
-        w <- grid::unit(e$width, "npc")
+        w <- grid::unit(e$width %||% 0, "npc")
         traces[[i]][[err]]$width <- unitConvert(w, "pixels", type)
       }
     }

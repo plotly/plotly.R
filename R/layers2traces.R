@@ -67,7 +67,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       if (sum(idx) == sum(idx2)) {
         factor(
           apply(d[idx], 1, paste, collapse = "."),
-          levels = apply(key[idx2], 1, paste, collapse = ".")
+          levels = apply(key[names(d[idx])], 1, paste, collapse = ".")
         )
       } else {
         d[idx]
@@ -163,6 +163,11 @@ to_basic.GeomArea <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
+  prefix_class(ribbon_dat(data), "GeomPolygon")
+}
+
+#' @export
 to_basic.GeomLine <- function(data, prestats_data, layout, params, ...) {
   data <- group2NA(data[order(data$x), ])
   prefix_class(data, "GeomPath")
@@ -190,7 +195,7 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
-  g$data <- with(data, {
+  data <- with(data, {
     rbind(cbind(x = xmin, y = ymin, others),
           cbind(x = xmin, y = ymax, others),
           cbind(x = xmax, y = ymax, others),
@@ -232,11 +237,6 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
-}
-
-#' @export
-to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
-  prefix_class(data, "GeomArea")
 }
 
 #' @export
@@ -307,7 +307,7 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
   # height for ggplot2 means size of the entire bar, on the data scale 
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
-  data$height <- (data$ymax - data$y) / (data$x_max - data$x_min)
+  data$width <- (data$ymax - data$y) / (data$y_max - data$y_min)
   prefix_class(data, "GeomErrorbarh")
 }
 
@@ -348,7 +348,7 @@ geom2trace.GeomPath <- function(data, params) {
       dash = aes2plotly(data, params, "linetype")
     )
   )
-  if (inherits(data, "GeomStep")) L$line$shape <- "hv"
+  if (inherits(data, "GeomStep")) L$line$shape <- params$direction %||% "hv"
   L
 }
 
@@ -376,9 +376,9 @@ geom2trace.GeomPoint <- function(data, params) {
       )
     )
   )
-  # fill is irrelevant for pch %in% 15:20
+  # fill is irrelevant for pch %in% c(1, 15:20)
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  L$marker$color[pch %in% 15:20] <- L$marker$line$color[pch %in% 15:20]
+  L$marker$color[pch %in% c(1, 15:20)] <- L$marker$line$color[pch %in% c(1, 15:20)]
   L
 }
 
@@ -486,7 +486,7 @@ geom2trace.GeomText <- function(data, params) {
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
       color = toRGB(
-        aes2plotly(data, params, "fill"),
+        aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
       )
     ),
@@ -497,16 +497,21 @@ geom2trace.GeomText <- function(data, params) {
 
 #' @export
 geom2trace.GeomTile <- function(data, params) {
+  # make sure order of value make sense before throwing z in matrix
+  data <- data[order(data$x, order(data$y, decreasing = T)), ]
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  # z should **always** be numeric (this is a heatmap!)
-  data$z <- scales::rescale(data$z)
-  which.rng <- c(which.min(data$z), which.max(data$z))
+  colorscale <- cbind(
+    c(0, 1),
+    data[c(which.min(data$z), which.max(data$z)), "fill"]
+  )
   list(
     x = x,
     y = y,
-    z = matrix(data$z, nrow = length(x), ncol = length(y)),
-    colorscale = setNames(data[which.rng, c("z", "fill")], NULL),
+    text = matrix(data$z, nrow = length(y), ncol = length(x)),
+    hoverinfo = "text",
+    z = matrix(scales::rescale(data$z), nrow = length(y), ncol = length(x)),
+    colorscale = colorscale,
     type = "heatmap",
     showscale = FALSE,
     autocolorscale = FALSE

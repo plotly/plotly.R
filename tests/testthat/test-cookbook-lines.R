@@ -122,7 +122,6 @@ test_that("4 error bars", {
   expect_equal(length(tr$y), 4)
   expect_equal(length(unique(tr$y)), 4)
   expect_equal(length(tr$x), 4)
-  expect_equal(length(unique(tr$x)), 2)
 })
 
 df <- read.table(header = T, text = "
@@ -164,7 +163,7 @@ temp <- sp +
   geom_vline(aes(xintercept = 11.5),
              colour = "#BB0000", linetype = "dashed")
 test_that("Add a red dashed vertical line", {
-  info <- expect_traces(temp, 4, 0, "scatter-hline-vline")
+  info <- expect_traces(temp, 4, "scatter-hline-vline")
   expect_true(info$layout$showlegend)
   mode <- sapply(info$data, "[[", "mode")
   line.traces <- info$data[mode == "lines"]
@@ -181,11 +180,9 @@ spf <- sp + facet_grid(. ~ cond)
 test_that("scatter facet -> 2 traces", {
   info <- expect_traces(spf, 2, "scatter-facet")
   expect_true(info$data[[1]]$xaxis != info$data[[2]]$xaxis)
-  expect_true(info$data[[1]]$yaxis != info$data[[2]]$yaxis)
-  # second axis is hidden
-  y2 <- info$layout$yaxis2
-  expect_false(y2$showticklabels)
-  expect_identical(y2$ticks, "")
+  expect_true(info$data[[1]]$yaxis == info$data[[2]]$yaxis)
+  # only one yaxis
+  expect_equal(sum(grepl("yaxis", names(info$layout))), 1)
 })
 
 temp <- spf + geom_hline(aes(yintercept=10))

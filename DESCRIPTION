@@ -34,8 +34,8 @@ Imports:
     plyr
 Suggests:
     dplyr,
-    plyr,
     maps,
+    ggthemes,
     testthat,
     knitr,
     devtools,

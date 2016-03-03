@@ -22,3 +22,13 @@ test_that("geom_point size & alpha translate to a single trace", {
   expect_equal(length(mkr$size), nrow(mtcars))
   expect_equal(length(mkr$opacity), nrow(mtcars))
 })
+
+test_that("can plot on sub-second time scale", {
+  d <- data.frame(
+    x = Sys.time() + 1e-3 * c(1:9, 5000), 
+    y = rnorm(10)
+  )
+  g <- ggplot(d, aes(x, y)) + geom_point()
+  info <- save_outputs(g, "point-size-alpha")
+  expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
+})
