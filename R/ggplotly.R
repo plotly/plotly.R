@@ -107,9 +107,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   }
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
-  # https://paynelessdesigns.com/tools/tool_fontconversions.shtml
-  gglayout$margin$t <- gglayout$margin$t +
-    unitConvert(grid::unit(12, "pt"), "pixels", "height")
+  gglayout$margin$t <- gglayout$margin$t + 16
   
   # important stuff like panel$ranges is already flipped, but 
   # p$scales/p$labels/data aren't. We flip x/y trace data at the very end 
