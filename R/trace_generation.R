@@ -345,6 +345,10 @@ toBasic <- list(
     g$data <- g$data[!is.na(g$data$y), ]
     g
   },
+  hex=function(g) {
+    g$geom <- "point"
+    g
+  },
   contour=function(g) {
     g$data <- g$prestats.data
     g
@@ -609,6 +613,8 @@ geom2trace <- list(
     if (!is.null(params$shape) && params$shape %in% c(32)) {
       L$visible <- FALSE
     }
+    # for geom/stat hex
+    if (params$stat.type == "binhex") L$marker$symbol <- "hexagon"
     L
   },
   text=function(data, params){
