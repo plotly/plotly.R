@@ -105,6 +105,11 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     gglayout$titlefont <- text2font(theme$plot.title)
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
+  # ensure there's enough space for the modebar (this is based on a height of 1em)
+  # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
+  # https://paynelessdesigns.com/tools/tool_fontconversions.shtml
+  gglayout$margin$t <- gglayout$margin$t +
+    unitConvert(grid::unit(12, "pt"), "pixels", "height")
   
   # important stuff like panel$ranges is already flipped, but 
   # p$scales/p$labels/data aren't. We flip x/y trace data at the very end 
@@ -513,7 +518,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     gglayout[[i]]$hoverformat <- ".2f"
   }
   
-  l <- list(data = compact(traces), layout = compact(gglayout))
+  l <- list(data = compact(setNames(traces, NULL)), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$width <- width
