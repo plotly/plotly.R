@@ -30,7 +30,7 @@ test_that("paths with different colors become different traces", {
   ## Categorical color.
   gg <- ggplot() +
     geom_path(aes(x, y, group = y, color = paste0("FOO", y)), data = two.paths)
-  info <- save_outputs(gg, "path-colors")
+  info <- save_outputs(gg, "path-colors2")
   expect_equal(length(info$data), 2)
   expect_identical(info$data[[1]]$x[1:2], c(1,2))
   expect_identical(info$data[[2]]$x[1:2], c(1,2))

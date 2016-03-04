@@ -29,6 +29,6 @@ test_that("can plot on sub-second time scale", {
     y = rnorm(10)
   )
   g <- ggplot(d, aes(x, y)) + geom_point()
-  info <- save_outputs(g, "point-size-alpha")
+  info <- save_outputs(g, "point-size-alpha2")
   expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
 })
