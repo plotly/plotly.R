@@ -355,6 +355,7 @@ geom2trace.GeomPath <- function(data, params) {
     text = data$text,
     type = "scatter",
     mode = "lines",
+    name = if (inherits(data, "GeomSmooth")) "fitted values",
     line = list(
       # TODO: line width array? -- https://github.com/plotly/plotly.js/issues/147
       width = aes2plotly(data, params, "size")[1],
@@ -442,12 +443,14 @@ geom2trace.GeomPolygon <- function(data, params) {
   if ("level" %in% names(data)) {
     data$level <- paste("Level:", data$level)
   }
+  browser()
   list(
     x = data$x,
     y = data$y,
     text = data$text %||% data$level,
     type = "scatter",
     mode = "lines",
+    name = if (inherits(data, "GeomSmooth")) "standard error",
     line = list(
       # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),

@@ -40,18 +40,19 @@ test_that("legend vanishes when theme(legend.position = 'none'')", {
 p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) + 
   geom_point()
 
-test_that("trace order respects scale_color_discrete()", {
-  g <- p + scale_color_discrete(breaks = c(1, 0))
-  info <- expect_traces(g, 2, "iris-default")
-  nms <- unlist(lapply(info$data, "[[", "name"))
-  expect_true(all(nms == c("factor(vs): 1", "factor(vs): 0")))
-})
-
-test_that("missing breaks translates to showlegend=FALSE", {
-  g <- p + scale_color_discrete(breaks = 1)
-  info <- expect_traces(two.legend.entries, 3, "iris-trace-showlegend-FALSE")
-  expect_equal(sum(sapply(info, "[[", "showlegend")), 1)
-})
+# TODO: better support for scale_*_discrete()
+#test_that("trace order respects scale_color_discrete()", {
+#  g <- p + scale_color_discrete(breaks = c(1, 0))
+#  info <- expect_traces(g, 2, "iris-default")
+#  nms <- unlist(lapply(info$data, "[[", "name"))
+#  expect_true(all(nms == c("factor(vs): 1", "factor(vs): 0")))
+#})
+#
+#test_that("missing breaks translates to showlegend=FALSE", {
+#  g <- p + scale_color_discrete(breaks = 1)
+#  info <- expect_traces(two.legend.entries, 3, "iris-trace-showlegend-FALSE")
+#  expect_equal(sum(sapply(info, "[[", "showlegend")), 1)
+#})
 
 # test of legend position
 test_that("very long legend items", {

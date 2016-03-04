@@ -489,7 +489,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   }
   
   # try to merge marker/line traces that have the same values for these props
-  props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name", "legendgroup", "showlegend")
+  props <- c("x", "y", "text", "type", "xaxis", "yaxis")
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
   modes <- vapply(traces, function(x) x$mode %||% "", character(1))
   nhashes <- length(unique(hashes))
@@ -506,8 +506,12 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     traces <- mergedTraces
   }
   
-  # in most cases this is a better default
+  # better layout defaults (TODO: provide a mechanism for templating defaults)
   gglayout$hovermode <- "closest"
+  ax <- grep("^[x-y]axis", names(gglayout))
+  for (i in ax) {
+    gglayout[[i]]$hoverformat <- ".2f"
+  }
   
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
