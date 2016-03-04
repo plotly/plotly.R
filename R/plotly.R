@@ -233,7 +233,7 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' @export
 plotly_build <- function(l = last_plot()) {
   # ggplot objects don't need any special type of handling
-  if (is.ggplot(l)) return(gg2list(l))
+  if (ggplot2::is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
   # assume unnamed list elements are data/traces
   nms <- names(l)

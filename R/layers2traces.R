@@ -323,7 +323,7 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.default <- function(data, prestats_data, params, ...) {
+to_basic.default <- function(data, prestats_data, layout, params, ...) {
   data
 }
 
