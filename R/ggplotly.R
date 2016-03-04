@@ -506,6 +506,9 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     traces <- mergedTraces
   }
   
+  # in most cases this is a better default
+  gglayout$hovermode <- "closest"
+  
   l <- list(data = compact(traces), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))

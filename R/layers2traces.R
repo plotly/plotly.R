@@ -90,7 +90,8 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       # one (merged) legend, I think it only makes since to prefix the variable
       # name in the legend entries
       lab <- labels[names(discreteScales)]
-      vals <- key[paste0(names(discreteScales), "_domain")]
+      idx <- names(key) %in% names(discreteScales)
+      vals <- key[paste0(names(key[idx]), "_domain")]
       valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, vals)
       entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
       # also need to set `layout.legend.traceorder='reversed'` (YUCK!!!)
@@ -110,10 +111,20 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   trace.list
 }
 
-# ---------------------------------------------------------------------------
-#' Convert a geom, which are special cases of other geoms, to "basic" geoms.
-#' --------------------------------------------------------------------------
 
+#' Convert a geom to a "basic" geom.
+#' 
+#' This function makes it possible to convert ggplot2 geoms that
+#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' this function. It exists purely to allow other package authors to write
+#' their own conversion method(s).
+#' 
+#' @param data the data returned by \code{ggplot2::ggplot_build()}.
+#' @param prestats_data the data before statistics are computed.
+#' @param layout the panel layout.
+#' @param params parameters for the geom, statistic, and 'constant' aesthetics
+#' @param ... currently ignored
+#' @export
 to_basic <- function(data, prestats_data, layout, params, ...) {
   UseMethod("to_basic")
 }
@@ -316,10 +327,16 @@ to_basic.default <- function(data, prestats_data, params, ...) {
   data
 }
 
-# ---------------------------------------------------------------------------
-#' Convert "basic" geoms to plotly.js traces.
-#' --------------------------------------------------------------------------
+#' Convert a "basic" geoms to a plotly.js trace.
 #' 
+#' This function makes it possible to convert ggplot2 geoms that
+#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' this function. It exists purely to allow other package authors to write
+#' their own conversion method(s).
+#' 
+#' @param data the data returned by \code{plotly::to_basic}.
+#' @param params parameters for the geom, statistic, and 'constant' aesthetics
+#' @export
 geom2trace <- function(data, params) {
   UseMethod("geom2trace")
 }
@@ -395,7 +412,6 @@ geom2trace.GeomBar <- function(data, params) {
       plyr::summarise, 
       y = max(y)
     )
-    # sigh
     data <- prefix_class(data, "GeomBar") 
   }
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths

@@ -2,13 +2,19 @@
 % Please edit documentation in R/layers2traces.R
 \name{geom2trace}
 \alias{geom2trace}
-\title{Convert "basic" geoms to plotly.js traces.
---------------------------------------------------------------------------}
+\title{Convert a "basic" geoms to a plotly.js trace.}
 \usage{
 geom2trace(data, params)
 }
+\arguments{
+\item{data}{the data returned by \code{plotly::to_basic}.}
+
+\item{params}{parameters for the geom, statistic, and 'constant' aesthetics}
+}
 \description{
-Convert "basic" geoms to plotly.js traces.
---------------------------------------------------------------------------
+This function makes it possible to convert ggplot2 geoms that
+are not included with ggplot2 itself. Users shouldn't need to use 
+this function. It exists purely to allow other package authors to write
+their own conversion method(s).
 }
 
