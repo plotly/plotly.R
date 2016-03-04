@@ -443,7 +443,6 @@ geom2trace.GeomPolygon <- function(data, params) {
   if ("level" %in% names(data)) {
     data$level <- paste("Level:", data$level)
   }
-  browser()
   list(
     x = data$x,
     y = data$y,
