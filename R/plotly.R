@@ -232,6 +232,7 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' @param l a ggplot object, or a plotly object, or a list.
 #' @export
 plotly_build <- function(l = last_plot()) {
+  #if (inherits(l, "ggmatrix"))
   # ggplot objects don't need any special type of handling
   if (ggplot2::is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)

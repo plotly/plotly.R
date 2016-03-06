@@ -30,19 +30,21 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       datz <- c(datz, d[j])
       paramz <- c(paramz, params[i])
       # When splitting layers into multiple traces, we need the domain/range of 
-      # the scale (for trace naming & legend generation)
+      # the scale (for trace naming & legend generation). 
+      # if the splitting variables are constant in the data, we don't want to 
+      # split on them
+      idx <- vapply(d[[j]], function(x) length(unique(x)) > 1, logical(1))
+      # always split on PANEL, discrete scales, and other geom specific aes that 
+      # don't translate to a single trace
+      split_by <- c("PANEL", names(discreteScales)[names(discreteScales) %in% names(idx)[idx]])
       psd <- prestats_data[[i]]
-      idx <- names(psd) %in% c(names(discreteScales), "PANEL")
-      key <- unique(psd[, idx, drop = FALSE])
+      key <- unique(psd[names(psd) %in% split_by])
       # this order (should) determine the ordering of traces (within layer)
       key <- key[do.call(order, key), , drop = FALSE]
-      nms <- names(key)
-      idx <- nms %in% names(discreteScales)
-      nms[idx] <- paste0(nms[idx], "_domain")
-      key <- setNames(key, nms)
-      for (k in setdiff(nms[idx], "PANEL")) {
-        scaleName <- sub("_domain", "", k)
-        key[[scaleName]] <- scales$get_scales(scaleName)$map(key[, k])
+      split_vars <- setdiff(names(key), "PANEL")
+      for (k in split_vars) {
+        key[[paste0(k, "_domain")]] <- key[, k]
+        key[[k]] <- scales$get_scales(k)$map(key[, k])
       }
       keyz <- c(keyz, list(key))
     }
@@ -52,62 +54,65 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # what aesthetics do we split on for this geom?
-    split_by <- split_on(class(d)[1])
-    # always split on PANEL
-    idx <- names(d) %in% c(split_by, "PANEL")
-    # if the variable is constant, don't split on it
-    idx <- idx & vapply(d, function(x) length(unique(x)) > 1, logical(1)) 
     # create a factor to split the data on...
     # by matching the factor levels with the order of the domain (of _discrete_
     # scales), the trace ordering should be correct
     key <- keyz[[i]]
-    idx2 <- names(key) %in% names(d[idx])
-    fac <- if (sum(idx) >= 1) {
-      if (sum(idx) == sum(idx2)) {
-        factor(
-          apply(d[idx], 1, paste, collapse = "."),
-          levels = apply(key[names(d[idx])], 1, paste, collapse = ".")
-        )
-      } else {
-        d[idx]
-      }
-    } else {
-      1
+    split_by <- names(key)[!grepl("_domain$", names(key))]
+    fac <- factor(
+      apply(d[split_by], 1, paste, collapse = "."),
+      levels = apply(key[split_by], 1, paste, collapse = ".")
+    )
+    # if we split on a variable not in the key, we have no chance
+    # of generating an appropriate legend
+    splitContinuous <- length(setdiff(split_on(d), split_by)) > 0
+    if (splitContinuous) {
+      split_by <- c(split_by, split_on(d))
+      splitDat <- d[names(d) %in% split_by]
+      fac <- factor(
+        apply(splitDat, 1, paste, collapse = "."),
+        levels = apply(unique(splitDat), 1, paste, collapse = ".")
+      )
     }
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i])
+    # set name/legendgroup/showlegend, if appropriate
+    legendVars <- setdiff(split_by, "PANEL")
+    if (!splitContinuous && length(legendVars) > 0 && length(trs) > 1) {
+      # labels is a list of legend titles, but since we're restricted to 
+      # one (merged) legend, I think it only makes since to prefix the variable
+      # name in the legend entries
+      lab <- labels[legendVars]
+      vals <- key[paste0(legendVars, "_domain")]
+      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, vals)
+      entries <- Reduce(function(x, y) {
+        if (identical(x, y)) x else paste0(x, "<br>", y)
+      }, valz)
+      for (k in seq_along(trs)) {
+        trs[[k]]$name <- entries[[k]]
+        trs[[k]]$legendgroup <- entries[[k]]
+        # depending on the geom (e.g. smooth) this may be FALSE already 
+        if (is.null(trs[[k]]$showlegend)) trs[[k]]$showlegend <- TRUE
+      }
+    } else {
+      trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
+    }
+    
     # each trace is with respect to which axis?
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
       trs[[j]]$xaxis <-  sub("axis", "", layout[panel, "xaxis"])
       trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
     }
-    # generate name/legendgroup/showlegend, if appropriate
-    if (length(trs) > 1 && any(names(key) %in% names(discreteScales))) {
-      # labels is a list of legend titles, but since we're restricted to 
-      # one (merged) legend, I think it only makes since to prefix the variable
-      # name in the legend entries
-      lab <- labels[names(discreteScales)]
-      idx <- names(key) %in% names(discreteScales)
-      vals <- key[paste0(names(key[idx]), "_domain")]
-      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, vals)
-      entries <- Reduce(function(x, y) paste0(x, "<br>", y), valz)
-      # also need to set `layout.legend.traceorder='reversed'` (YUCK!!!)
-      if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
-        trs <- rev(trs)
-      }
-      for (k in seq_along(trs)) {
-        trs[[k]]$name <- entries[[k]]
-        trs[[k]]$legendgroup <- entries[[k]]
-        trs[[k]]$showlegend <- TRUE
-      }
-    } else {
-      trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
+    # also need to set `layout.legend.traceorder='reversed'`
+    if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
+      trs <- rev(trs)
     }
+    
     trace.list <- c(trace.list, trs)
   }
+  
   trace.list
 }
 
@@ -156,7 +161,7 @@ to_basic.GeomSmooth <- function(data, prestats_data, layout, params, ...) {
   dat <- prefix_class(data, "GeomPath")
   dat$alpha <- NULL
   if (!identical(params$se, FALSE)) {
-    dat2 <- prefix_class(ribbon_dat(data), "GeomPolygon")
+    dat2 <- prefix_class(ribbon_dat(data), c("GeomPolygon", "GeomSmooth"))
     dat2$colour <- NULL
     dat <- list(dat, dat2)
   }
@@ -282,10 +287,6 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
-  if ("size" %in% names(data)) {
-    params$sizemin <- min(prestats_data$globsizemin)
-    params$sizemax <- max(prestats_data$globsizemax)
-  }
   prefix_class(data, "GeomPoint")
 }
 
@@ -295,7 +296,18 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
   data$width <- (data$xmax - data$x) /(data$x_max - data$x_min)
+  data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
+}
+
+#' @export
+to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
+  # height for ggplot2 means size of the entire bar, on the data scale 
+  # (plotly.js wants half, in pixels)
+  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data$width <- (data$ymax - data$y) / (data$y_max - data$y_min)
+  data$fill <- NULL
+  prefix_class(data, "GeomErrorbarh")
 }
 
 #' @export
@@ -311,15 +323,6 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, ...) {
     prefix_class(data, "GeomErrorbar"),
     prefix_class(data, "GeomPoint")
   )
-}
-
-#' @export
-to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
-  # height for ggplot2 means size of the entire bar, on the data scale 
-  # (plotly.js wants half, in pixels)
-  data <- merge(data, layout, by = "PANEL", sort = FALSE)
-  data$width <- (data$ymax - data$y) / (data$y_max - data$y_min)
-  prefix_class(data, "GeomErrorbarh")
 }
 
 #' @export
@@ -396,7 +399,9 @@ geom2trace.GeomPoint <- function(data, params) {
   )
   # fill is irrelevant for pch %in% c(1, 15:20)
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  L$marker$color[pch %in% c(1, 15:20)] <- L$marker$line$color[pch %in% c(1, 15:20)]
+  if (any(pch %in% c(1, 15:20))) {
+    L$marker$color <- L$marker$line$color
+  }
   L
 }
 
@@ -443,13 +448,12 @@ geom2trace.GeomPolygon <- function(data, params) {
   if ("level" %in% names(data)) {
     data$level <- paste("Level:", data$level)
   }
-  list(
+  L <- list(
     x = data$x,
     y = data$y,
     text = data$text %||% data$level,
     type = "scatter",
     mode = "lines",
-    name = if (inherits(data, "GeomSmooth")) "standard error",
     line = list(
       # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),
@@ -462,6 +466,11 @@ geom2trace.GeomPolygon <- function(data, params) {
       aes2plotly(data, params, "alpha")
     )
   )
+  if (inherits(data, "GeomSmooth")) {
+    L$name <- "standard error"
+    L$showlegend <- FALSE
+  }
+  L
   
 }
 
@@ -554,7 +563,7 @@ geom2trace.default <- function(data, params) {
     "  Please open an issue with your example code at\n",
     "  https://github.com/ropensci/plotly/issues"
   )
-  NULL
+  list()
 }
 
 # ---------------------------------------------------------------------------
@@ -605,24 +614,30 @@ group2NA <- function(data) {
   data
 }
 
-
-split_on <- function(geom = "GeomPoint") {
-  # NOTE: Do we also want to split on size?
-  # Legends based on sizes not implemented yet in Plotly
+# given a geom, should we split on any continuous variables?
+# this is necessary for some geoms, for example, polygons
+# since plotly.js can't draw two polygons with different fill in a single trace
+split_on <- function(dat) {
+  geom <- class(dat)[1]
   lookup <- list(
-    GeomPoint = c("colour", "fill", "shape"),
-    GeomPath = c("linetype", "size", "colour", "shape"),
-    GeomPolygon = c("colour", "fill", "linetype", "size"),
-    GeomBar = c("colour", "fill"),
-    GeomDensity = c("colour", "fill", "linetype"),
+    GeomPath = c("fill", "colour", "size"),
+    GeomPolygon = c("fill", "colour", "size"),
+    GeomBar = "fill",
     GeomBoxplot = c("colour", "fill", "size"),
-    GeomErrorbar = c("colour", "linetype"),
-    GeomErrorbarh = c("colour", "linetype"),
-    GeomArea = c("colour", "fill"),
-    GeomStep = c("linetype", "size", "colour"),
-    GeomText = c("colour")
+    GeomErrorbar = "colour",
+    GeomErrorbarh = "colour",
+    GeomText = "colour"
   )
-  lookup[[geom]]
+  splits <- lookup[[geom]]
+  # make sure the variable is in the data, and is non-constant
+  splits <- splits[splits %in% names(dat)]
+  # is there more than one unique value for this aes split in the data?
+  for (i in splits) {
+    if (length(unique(dat[, i])) < 2) {
+      splits <- setdiff(splits, i)
+    }
+  }
+  splits
 }
 
 # make trace with errorbars 

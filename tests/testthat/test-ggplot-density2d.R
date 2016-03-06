@@ -34,8 +34,8 @@ test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
   )
   # the other traces should be the colorbar and polygons
   notPoints <- L$data[!legends]
-  polygons <- notPoints[grepl("^#", names(notPoints))]
-  colorbar <- notPoints[!grepl("^#", names(notPoints))][[1]]
+  polygons <- notPoints[-length(notPoints)]
+  colorbar <- notPoints[[length(notPoints)]]
   expect_identical(
     unique(unlist(lapply(polygons, "[[", "type"))), "scatter"
   )

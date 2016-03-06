@@ -40,9 +40,9 @@ test_that("with non-numeric data, we can have more than one segment", {
   
   fig <- save_outputs(gg, "segment-multiple-non-numeric")
   # one trace is for the colorbar
-  expect_equal(length(fig$data), 5)
-  expect_equal(fig$data[[3]]$x[1], seg1$x)
-  expect_equal(fig$data[[3]]$x[2], seg1$xend)
-  expect_equal(fig$data[[4]]$x[1], seg2$x)
-  expect_equal(fig$data[[4]]$x[2], seg2$xend)
+  expect_equal(length(fig$data), 4)
+  expect_equal(fig$data[[2]]$x[1], seg1$x)
+  expect_equal(fig$data[[2]]$x[2], seg1$xend)
+  expect_equal(fig$data[[3]]$x[1], seg2$x)
+  expect_equal(fig$data[[3]]$x[2], seg2$xend)
 })

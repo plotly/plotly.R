@@ -52,7 +52,7 @@ test_that("geom_smooth() respects colour aesthetic", {
 p7 <- qplot(carat, price, data = d) + geom_smooth(aes(fill = cut))
 
 test_that("geom_smooth() respects fill aesthetic", {
-  info <- expect_traces(p7, 7, "fill2")
+  info <- expect_traces(p7, 11, "fill2")
 })
 
 # ensure legend is drawn when needed

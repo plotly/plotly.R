@@ -411,7 +411,6 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
     
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
-    
     # scales -> data for guides
     gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
     if (length(gdefs) > 0) {
@@ -492,7 +491,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   }
   
   # try to merge marker/line traces that have the same values for these props
-  props <- c("x", "y", "text", "type", "xaxis", "yaxis")
+  props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name")
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
   modes <- vapply(traces, function(x) x$mode %||% "", character(1))
   nhashes <- length(unique(hashes))
@@ -515,8 +514,10 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
   for (i in ax) {
     gglayout[[i]]$hoverformat <- ".2f"
   }
+  # If a trace isn't named, it shouldn't have additional hoverinfo
+  traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
   
-  l <- list(data = compact(setNames(traces, NULL)), layout = compact(gglayout))
+  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$width <- width
@@ -739,8 +740,10 @@ gdef2trace <- function(gdef, theme, gglayout) {
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
     list(
-      x = gglayout$xaxis$tickvals,
-      y = gglayout$yaxis$tickvals,
+      x = gglayout$xaxis$range,
+      y = gglayout$yaxis$range,
+      # esentially to prevent this getting merged at a later point
+      name = gdef$hash,
       type = "scatter",
       mode = "markers",
       opacity = 0,

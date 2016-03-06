@@ -189,9 +189,8 @@ temp <- spf + geom_hline(aes(yintercept=10))
 test_that("geom_hline -> 2 more traces", {
   info <- expect_traces(temp, 4, "scatter-facet-hline")
   expect_true(info$layout$showlegend)
-  has.name <- sapply(info$data, function(tr)is.character(tr$name))
-  named.traces <- info$data[has.name]
-  expect_equal(length(named.traces), 2)
+  has.name <- sapply(info$data, function(tr) nchar(tr$name) > 0)
+  expect_equal(sum(has.name), 2)
 })
 
 df.vlines <- data.frame(cond = levels(df$cond), xval = c(10,11.5))
