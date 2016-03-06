@@ -73,8 +73,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   key <- with(p_info, paste0(geo, xaxis, yaxis, plot))
   p_info$key <- match(key, unique(key)) 
   # bump x/y axis anchors appropriately
-  p_info$xaxis <- sub("x1", "x", paste0("x", p_info$key))
-  p_info$yaxis <- sub("y1", "y", paste0("y", p_info$key))
+  p_info$xaxis <- sub("^x1$", "x", paste0("x", p_info$key))
+  p_info$yaxis <- sub("^y1$", "y", paste0("y", p_info$key))
   # Only do domain computations if they are _completely_ missing
   # (I don't think it makes sense to support partial specification of domains)
   if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {

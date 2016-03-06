@@ -36,6 +36,7 @@ Suggests:
     dplyr,
     maps,
     ggthemes,
+    GGally,
     testthat,
     knitr,
     devtools,
