@@ -85,7 +85,9 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       # name in the legend entries
       lab <- labels[legendVars]
       vals <- key[paste0(legendVars, "_domain")]
-      valz <- Map(function(x, y) { paste0(x, ": ", y) }, lab, vals)
+      valz <- Map(function(x, y) { 
+        if (nchar(x) > 0) paste0(x, ": ", y) else y
+      }, lab, vals)
       entries <- Reduce(function(x, y) {
         if (identical(x, y)) x else paste0(x, "<br>", y)
       }, valz)
