@@ -385,6 +385,7 @@ geom2trace.GeomPoint <- function(data, params) {
     x = data$x,
     y = data$y,
     text = data$text,
+    key = data$key,
     type = "scatter",
     mode = "markers",
     marker = list(

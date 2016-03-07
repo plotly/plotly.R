@@ -21,7 +21,6 @@
 #' }
 
 
-## TODO: throw warning if geo and non-geo coordinates are used!!!
 subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   # note that dots is a _list of plotlys_
   dots <- lapply(list(...), plotly_build)
