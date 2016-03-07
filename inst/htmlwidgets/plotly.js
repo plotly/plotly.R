@@ -31,82 +31,57 @@ HTMLWidgets.widget({
       Plotly.newPlot(graphDiv, x.data, x.layout);
     }
     
+    sendEventData = function(eventType) {
+      return function(eventData) {
+        if (eventData === undefined || !eventData.hasOwnProperty("points")) {
+          return null;
+        }
+        var d = eventData.points.map(function(pt) {
+          var obj = {
+                curveNumber: pt.curveNumber, 
+                pointNumber: pt.pointNumber, 
+                x: pt.x,
+                y: pt.y
+          };
+          // grab the trace corresponding to this point
+          var tr = x.data[pt.curveNumber];
+          // add on additional trace info, if it exists
+          attachKey = function(keyName) {
+            if (tr.hasOwnProperty(keyName)) {
+              if (typeof pt.pointNumber === "number") {
+                obj[keyName] = tr[keyName][pt.pointNumber];
+              } else {
+                obj[keyName] = tr[keyName][pt.pointNumber[0]][pt.pointNumber[1]];
+              }// TODO: can pointNumber be 3D?
+            }
+          };
+          attachKey("z");
+          attachKey("key");
+          return obj; 
+        });
+        console.log(d);
+        Shiny.onInputChange(".clientValue-" + eventType + "-" + x.source, d);
+      };
+    };
+    
     // send user input event data to shiny
     if (shinyMode) {
-      graphDiv.on('plotly_click', function(eventData) {
-        // extract only the data we may want to access in R
-        var d = eventData.points.map(function(pt) {
-          var obj = {
-              curveNumber: pt.curveNumber, 
-              pointNumber: pt.pointNumber, 
-              x: pt.x,
-              y: pt.y
-          };
-          if (pt.data.hasOwnProperty("key")) {
-            if (typeof pt.pointNumber === "number") {
-              obj.key = pt.data.key[pt.pointNumber];
-            } else {
-              obj.key = pt.data.key[pt.pointNumber[0]][pt.pointNumber[1]];
-            } // TODO: can pointNumber be 3D?
-          }
-          return obj;
-        });
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, d);
-      });
-      
-      // clear click selection
-      graphDiv.on('plotly_doubleclick', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
-      });
-      
-      graphDiv.on('plotly_hover', function(eventData) {
-        // extract only the data we may want to access in R
-        var d = eventData.points.map(function(pt) {
-          var obj = {
-              curveNumber: pt.curveNumber, 
-              pointNumber: pt.pointNumber, 
-              x: pt.x,
-              y: pt.y
-          };
-          if (pt.data.hasOwnProperty("key")) {
-            if (typeof pt.pointNumber === "number") {
-              obj.key = pt.data.key[pt.pointNumber];
-            } else {
-              obj.key = pt.data.key[pt.pointNumber[0]][pt.pointNumber[1]];
-            } // TODO: can pointNumber be 3D?
-          }
-          return obj;
-        });
-        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, d);
-      });
-      
-      // clear hover selection
+      graphDiv.on('plotly_hover', sendEventData('plotly_hover'));
+      graphDiv.on('plotly_click', sendEventData('plotly_click'));
+      graphDiv.on('plotly_selected', sendEventData('plotly_selected'));
       graphDiv.on('plotly_unhover', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
       });
-      
-      graphDiv.on('plotly_selected', function(eventData) {
-        if (eventData !== undefined) {
-          // convert the array of objects to object of arrays so this converts
-          // to data frame in R as opposed to a vector
-          var pts = eventData.points;
-          var obj = {
-            curveNumber: pts.map(function(pt) {return pt.curveNumber; }),
-            pointNumber: pts.map(function(pt) {return pt.pointNumber; }), 
-            x: pts.map(function(pt) {return pt.x; }),
-            y: pts.map(function(pt) {return pt.y; })
-          };
-          Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, obj);
-        }
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
       });
-      
-      // clear select/lasso selection & click
+      // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
       });
-      
-    } // shinyMode
-  } // renderValue
+    } 
+    
+  } 
   
 });
