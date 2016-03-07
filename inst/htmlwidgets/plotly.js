@@ -59,7 +59,6 @@ HTMLWidgets.widget({
           attachKey("key");
           return obj; 
         });
-        console.log(d);
         Shiny.onInputChange(".clientValue-" + eventType + "-" + x.source, d);
       };
     };
