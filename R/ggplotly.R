@@ -315,7 +315,7 @@ gg2list <- function(p, width = NULL, height = NULL, source = "A") {
           # npc is on a 0-1 scale of the _entire_ device, 
           # but these units _should_ be wrt to the plotting region
           # multiplying the offset by 2 seems to work, but this is a terrible hack
-          offset <- 2 * offset
+          offset <- 1.75 * offset
           x <- if (xy == "x") 0.5 else offset
           y <- if (xy == "x") offset else 0.5
           gglayout$annotations <- c(
