@@ -261,7 +261,7 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "intercept", "slope", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, x, x_min:x_max)
+  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- with(data, intercept + slope * x)
   prefix_class(data, "GeomPath")
@@ -271,7 +271,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "yintercept", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, x, x_min:x_max)
+  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- data$yintercept
   prefix_class(data, "GeomPath")
@@ -281,7 +281,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
   data <- unique(data[c("PANEL", "xintercept", "group")])
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::gather(layout, variable, y, y_min:y_max)
+  lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data$x <- data$xintercept
   prefix_class(data, "GeomPath")
@@ -558,13 +558,12 @@ geom2trace.default <- function(data, params) {
 }
 
 # ---------------------------------------------------------------------------
-#' Utility functions
-#' --------------------------------------------------------------------------
-#' 
+# Utility functions
+# --------------------------------------------------------------------------
 
-#' Drawing ggplot2 geoms with a group aesthetic is most efficient in
-#' plotly when we convert groups of things that look the same to
-#' vectors with NA.
+# Drawing ggplot2 geoms with a group aesthetic is most efficient in
+# plotly when we convert groups of things that look the same to
+# vectors with NA.
 group2NA <- function(data) {
   if (!"group" %in% names(data)) return(data)
   poly.list <- split(data, data$group, drop = TRUE)
