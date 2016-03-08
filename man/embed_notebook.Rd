@@ -18,8 +18,6 @@ embed_notebook(x, width = NULL, height = NULL,
 
 \item{file}{a filename for saving the standalone HTML 
 (only used if x is a non-figure object)}
-
-\item{dir}{a directory for placing}
 }
 \description{
 Embed a plotly figure as an iframe into a IPython Notebook

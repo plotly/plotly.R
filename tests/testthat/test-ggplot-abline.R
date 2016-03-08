@@ -41,8 +41,8 @@ test_that("abline aesthetics", {
     geom_abline(aes(intercept = b, slope = m))
   
   L <- expect_traces(p, 1, "multiple-abline")
-  expect_identical(L$layout$xaxis$range, c(-5, 5))
-  expect_identical(L$layout$yaxis$range, c(-5, 5))
+  expect_identical(range(L$layout$xaxis$tickvals), c(-5, 5))
+  expect_identical(range(L$layout$yaxis$tickvals), c(-5, 5))
   expect_identical(L$data[[1]]$y[1:2], df$m[1] * L$data[[1]]$x[1:2] + df$b[1])
 })
 

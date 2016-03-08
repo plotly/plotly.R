@@ -230,11 +230,11 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' list.
 #' 
 #' @param l a ggplot object, or a plotly object, or a list.
-#' @importFrom viridis viridis
 #' @export
 plotly_build <- function(l = last_plot()) {
+  #if (inherits(l, "ggmatrix"))
   # ggplot objects don't need any special type of handling
-  if (is.ggplot(l)) return(gg2list(l))
+  if (ggplot2::is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
   # assume unnamed list elements are data/traces
   nms <- names(l)

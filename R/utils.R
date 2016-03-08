@@ -1,18 +1,26 @@
-#' @importFrom grDevices col2rgb
-#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
-#' @importFrom stats setNames
-
 is.plotly <- function(x) inherits(x, "plotly")
 
 "%||%" <- function(x, y) {
-  if (length(x) > 0) x else y
+  if (length(x) > 0 || is_blank(x)) x else y
+}
+
+# modify %||% so that NA is considered NULL
+"%|x|%" <- function(x, y) {
+  if (length(x) == 1) {
+    if (is.na(x)) x <- NULL
+  }
+  x %||% y
+}
+
+compact <- function(x) {
+  Filter(Negate(is.null), x)
 }
 
 is.discrete <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
 
-# special enviroment that tracks trace/layout information
+# special enviroment that enables NSE
 plotlyEnv <- new.env(parent = emptyenv())
 
 # hash plot info, assign it to the special plotly environment, & attach it to data
@@ -166,6 +174,7 @@ rm_asis <- function(x) {
   # jsonlite converts NULL to {} and NA to null (plotly prefers null to {})
   # https://github.com/jeroenooms/jsonlite/issues/29
   if (is.null(x)) return(NA)
+  if (is.data.frame(x)) return(x)
   if (is.list(x)) lapply(x, rm_asis) 
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red"))) 
@@ -178,9 +187,16 @@ rm_asis <- function(x) {
 
 # add a class to an object only if it is new, and keep any existing classes of 
 # that object
-struct <- function(x, y, ...) {
-  structure(x, class = unique(c(class(x), y)), ...)
-} 
+append_class <- function(x, y) {
+  structure(x, class = unique(c(class(x), y)))
+}
+prefix_class <- function(x, y) {
+  structure(x, class = unique(c(y, class(x))))
+}
+replace_class <- function(x, new, old) {
+  class(x) <- sub(old, new, class(x))
+  x
+}
 
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "") {

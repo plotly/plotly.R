@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via Plotly's JavaScript Graphing Library
-Version: 2.5.0
+Version: 3.0.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -20,7 +20,7 @@ Description: Easily translate ggplot2 graphs to an interactive web-based version
 URL: https://plot.ly/r, https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
-    ggplot2 (>= 2.0.0)
+    ggplot2 (>= 2.1.0)
 Imports:
     scales,
     httr,
@@ -30,10 +30,13 @@ Imports:
     viridis,
     base64enc,
     htmlwidgets,
+    tidyr,
     plyr
 Suggests:
     dplyr,
     maps,
+    ggthemes,
+    GGally,
     testthat,
     knitr,
     devtools,

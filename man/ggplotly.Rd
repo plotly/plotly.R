@@ -16,6 +16,9 @@ ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
 
 \item{source}{Only relevant for \link{event_data}.}
 }
+\value{
+a plotly object
+}
 \description{
 See up-to-date documentation and examples at
 \url{https://plot.ly/ggplot2}
@@ -26,13 +29,11 @@ See up-to-date documentation and examples at
 ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
 ggplotly(ggiris)
 
-# maps!!
 data(canada.cities, package = "maps")
 viz <- ggplot(canada.cities, aes(long, lat)) +
-  borders(regions = "canada", name = "borders") +
+  borders(regions = "canada") +
   coord_equal() +
-  geom_point(aes(text = name, size = pop), colour = "red",
-               alpha = 1/2, name = "cities")
+  geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
  ggplotly(viz)
 }
 

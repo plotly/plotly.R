@@ -16,7 +16,7 @@ gg2list(p, width = NULL, height = NULL, source = "A")
 \item{source}{Only relevant for \link{event_data}.}
 }
 \value{
-figure object (list with names "data" and "layout").
+a 'built' plotly object (list with names "data" and "layout").
 }
 \description{
 Convert a ggplot to a list.

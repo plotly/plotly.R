@@ -12,11 +12,14 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   output$plot <- renderPlotly({
+    # use the key aesthetic/argument to help uniquely identify selected observations
+    key <- row.names(mtcars)
     if (identical(input$plotType, "ggplotly")) {
-      p <- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
+      p <- ggplot(mtcars, aes(x = mpg, y = wt, colour = factor(vs), key = key)) + 
+        geom_point()
       ggplotly(p) %>% layout(dragmode = "select")
     } else {
-      plot_ly(mtcars, x = mpg, y = wt, mode = "markers") %>%
+      plot_ly(mtcars, x = mpg, y = wt, key = key, mode = "markers") %>%
         layout(dragmode = "select")
     }
   })

@@ -53,9 +53,5 @@ event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selecte
          "from within a reactive shiny context.")
   }
   val <- session$input[[sprintf(".clientValue-%s-%s", event[1], source)]]
-  if (event[1] == "plotly_selected" && !is.null(val)) {
-    data.frame(lapply(val, as.numeric))
-  } else  {
-    val
-  }
+  if (is.null(val)) val else jsonlite::fromJSON(val)
 }
