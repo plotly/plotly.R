@@ -410,19 +410,7 @@ geom2trace.GeomPoint <- function(data, params) {
 
 #' @export
 geom2trace.GeomBar <- function(data, params) {
-  if (!anyDuplicated(data[c("x", "PANEL", "group")])) {
-    # assuming `layout.barmode='stack'`
-    data$y <- data$ymax - data$ymin
-  } else {
-    # if there is more than one y-value for a particular combination of
-    # x, PANEL, and group; then take the _max_ y.
-    data <- plyr::ddply(
-      data, c("x", "PANEL", "group"),
-      plyr::summarise, 
-      y = max(y)
-    )
-    data <- prefix_class(data, "GeomBar") 
-  }
+  data$y <- data$ymax - data$ymin
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths
   # https://github.com/plotly/plotly.js/issues/80
   list(

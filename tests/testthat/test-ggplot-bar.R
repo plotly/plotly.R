@@ -138,13 +138,8 @@ test_that("geom_bar(position = 'fill') stacks proportions", {
 d <- head(diamonds, 50)
 gbar <- ggplot(d, aes(cut, price)) + geom_bar(stat = "identity")
 
-test_that("For a given x value, if multiple y exist, sum them. ", {
+test_that("Using identity with multiple y for a given x works ", {
   info <- expect_traces(gbar, 1, "category-names")
-  expect_identical(info$data[[1]]$type, "bar")
-  y <- with(d, tapply(price, cut, sum))
-  # make sure order of counts match
-  y <- y[info$data[[1]]$x]
-  expect_equal(info$data[[1]]$y, as.numeric(y))
 })
 
 p <- ggplot(mtcars, aes(factor(cyl))) + geom_bar() + coord_flip()
