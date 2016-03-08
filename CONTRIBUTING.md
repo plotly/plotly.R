@@ -26,7 +26,7 @@ devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 You can also build a ggplot2/plotly comparison table:
 
 ```r
-Sys.setenv('PLOTLY_TEST' = 'TRUE')
+Sys.setenv('PLOTLY_TABLE' = 'TRUE')
 devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 ```
 
