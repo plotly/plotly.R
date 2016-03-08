@@ -1,12 +1,16 @@
 3.0.0
 
-FEATURES:
+NEW FEATURES:
 
-* The following theme elements are now supported
+* ggplotly() is now about 20x faster (it avoids calling ggplot_build() 20+ times). In some cases, it might be even faster since a lot of other redundant computation is avoided.
 
 CHANGES:
 
-* Instead of (trying to) translate both major and minor grid lines, we now just translate major grid lines. This generally produces a result closer to the actual ggplot2 result since ggplot2 doesn't draw ticks on minor grid lines.
+* Instead of (trying to) translate both major and minor grid lines, we now translate only major grid lines. This generally produces a result closer to the actual ggplot2 result since ggplot2 doesn't draw ticks on minor grid lines.
+
+BUG FIXES:
+
+* ggplotly() now supports most of scale_*()/theme()/guides(). As a result, this fixes a lot of issues (#482, #481, #479, #476, #473, #460, #456, #454, #453, #447, #443, #434, #422, #421, #399, #379, #378, #357, #318, #316, #242, #232, #211, #203, #185, #184, #161). In order to support all of scale_x_*() an scale_y_*(), we always use linear axis types, and supply ticktext/tickvals to plotly.js. This has some unfortunate consequences on hoverformatting, which may be addressed in future releases of plotly.js -- https://github.com/plotly/plotly.js/issues/320
 
 2.5.0 -- 1 Mar 2015
 
