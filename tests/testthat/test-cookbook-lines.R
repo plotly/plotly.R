@@ -98,7 +98,7 @@ bp.err <-
                      linetype = "dashed")
 
 test_that("The error bars get plotted over one another", {
-  info <- expect_traces(bp.err, 3, "bar-dodge-color-error")
+  info <- expect_traces(bp.err, 4, "bar-dodge-color-error")
 })
 
 df <- read.table(header = TRUE, text = "
@@ -117,11 +117,7 @@ bp.err4 <- bp +
                 linetype = "dashed", position = position_dodge())
 
 test_that("4 error bars", {
-  info <- expect_traces(bp.err4, 3, "bar-dodge-color-err4")
-  tr <- info$data[[3]]
-  expect_equal(length(tr$y), 4)
-  expect_equal(length(unique(tr$y)), 4)
-  expect_equal(length(tr$x), 4)
+  info <- expect_traces(bp.err4, 4, "bar-dodge-color-err4")
 })
 
 df <- read.table(header = T, text = "

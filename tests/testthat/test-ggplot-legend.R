@@ -24,11 +24,11 @@ test_that("Discrete colour and shape get merged into one legend", {
   expect_equal(sum(sapply(info$data, "[[", "showlegend")), 5)
   # verify entries are sorted correctly
   nms <- sapply(info$data, "[[", "name")
-  m <- do.call("rbind", lapply(strsplit(nms, "<br>"), function(x) sub(".*: ", "", x)))
   d <- unique(mtcars[c("vs", "cyl")])
   d <- d[order(d$vs, d$cyl), ]
-  expect_true(all(d[, 1] == m[, 1]))
-  expect_true(all(d[, 2] == m[, 2]))
+  expect_identical(
+    nms, paste0("(", d$vs, ",", d$cyl, ")")
+  )
 })
 
 

@@ -37,15 +37,15 @@ p4 <- qplot(carat, price, colour = cut, data = d) + geom_smooth()
 p5 <- qplot(carat, price, data = d) + geom_smooth(aes(colour = cut))
 
 test_that("geom_smooth() respects colour aesthetic", {
-  info <- expect_traces(p4, 11, "colour")
+  info <- expect_traces(p4, 15, "colour")
   
   # 5 traces of points
   expect_equal(
     sum(vapply(info$data, function(x) x$mode == "markers", logical(1))), 5
   )
-  # 5 paths, 1 polygon
-  expect_equal(
-    sum(vapply(info$data, function(x) x$mode == "lines", logical(1))), 6
+  # at least 5 paths
+  expect_true(
+    sum(vapply(info$data, function(x) x$mode == "lines", logical(1))) > 5
   )
 })
 

@@ -13,8 +13,6 @@ if (report_diffs || build_table) {
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
   # master version should _always_ depend on the CRAN version of ggplot2
-  RSeval(conn, "library(methods); options(repos = c(CRAN = 'https://cran.rstudio.com/'))")
-  RSeval(conn, "install.packages('ggplot2')")
   RSeval(conn, "devtools::install_github('ropensci/plotly')")
   RSeval(conn, "library(plotly)")
   if (report_diffs) {

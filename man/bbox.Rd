@@ -9,7 +9,7 @@ bbox(txt = "foo", angle = 0, size = 12)
 \arguments{
 \item{txt}{a character string of length 1}
 
-\item{angle}{sets the angle of the tick labels with respect to the 
+\item{angle}{sets the angle of the tick labels with respect to the
 horizontal (e.g., `tickangle` of -90 draws the tick labels vertically)}
 
 \item{size}{vertical size of a character}

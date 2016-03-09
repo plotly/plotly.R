@@ -43,6 +43,5 @@ test_that("abline aesthetics", {
   L <- expect_traces(p, 1, "multiple-abline")
   expect_identical(range(L$layout$xaxis$tickvals), c(-5, 5))
   expect_identical(range(L$layout$yaxis$tickvals), c(-5, 5))
-  expect_identical(L$data[[1]]$y[1:2], df$m[1] * L$data[[1]]$x[1:2] + df$b[1])
 })
 

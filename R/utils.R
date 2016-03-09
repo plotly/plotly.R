@@ -12,6 +12,10 @@ is.plotly <- function(x) inherits(x, "plotly")
   x %||% y
 }
 
+strextract <- function(str, pattern) {
+  regmatches(str, regexpr(pattern, str))
+}
+
 compact <- function(x) {
   Filter(Negate(is.null), x)
 }
