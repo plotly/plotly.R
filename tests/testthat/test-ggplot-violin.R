@@ -17,7 +17,7 @@ test_that("basic geom_violin works", {
 gg2 <- ggplot(mtcars, aes(factor(cyl), mpg, fill = factor(cyl))) + geom_violin()
 
 test_that("geom_violin with fill aes works", {
-  L <- save_outputs(gg2, "violin")
+  L <- save_outputs(gg2, "violin-aes")
   expect_equal(length(L$data), 3)
   expect_true(L$layout$showlegend)
   expect_equal(sum(unlist(lapply(L$data, "[[", "showlegend"))), 3)
