@@ -215,10 +215,11 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
       forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
       if (aesName %in% c("x", "y")) {
         scaleName <- scales$get_scales(aesName)$scale_name
-        # convert "milliseconds from the UNIX epoch" back to a date/datetime
+        # convert "milliseconds from the UNIX epoch" to a date/datetime
         # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x / 1000, origin = "1970-01-01"))
         if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x / 1000, origin = "1970-01-01")
+        # convert "days from the UNIX epoch" to a date/datetime
+        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
       } else {
         if (aesName != "text") aesName <- paste0(aesName, "_plotlyDomain")
       }

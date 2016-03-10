@@ -1,4 +1,10 @@
-3.2.0 -- 8 Mar 2015
+3.2.1 -- 10 Mar 2015
+
+BUGFIX:
+
+* Proper formatting for date tooltips.
+
+3.2.0 -- 10 Mar 2015
 
 CHANGES:
 
