@@ -175,9 +175,7 @@ to_basic.GeomStep <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
-  # Every row is one segment, we convert to a line with several
-  # groups which can be efficiently drawn by adding NA rows.
+to_basic.GeomSpoke <- function(data, prestats_data, layout, params, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("x", "y", "xend", "yend")]
   data <- with(data, {
@@ -185,6 +183,52 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
           cbind(x = xend, y = yend, others))
   })
   prefix_class(data, "GeomPath")
+}
+
+#' @export
+to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
+  if (grid::is.unit(params$arrow$length)) {
+    # arrows are an extension of the line segment, and we know the arrow length
+    # (think r in polar coordinates), so we find the angle of the segment 
+    # wrt to x-axis (i.e., theta in polar)
+    thetas <- atan2(abs(data$y - data$yend), abs(data$x - data$xend))
+    arrowLength <- unitConvert(params$arrow$length, "npc", "width")
+    lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
+    # arrow length on the data scale
+    r <- arrowLength * diff(lay$x) * 10
+    # do everything in radians
+    arrowAngle <- (params$arrow$angle / 2) * (pi / 180)
+    data$x1 <- data$xend + sign(data$x - data$xend) * r * cos(thetas + arrowAngle)
+    data$x2 <- data$xend + sign(data$x - data$xend) * r * cos(thetas - arrowAngle)
+    data$y1 <- data$yend + sign(data$y - data$yend) * r * sin(thetas + arrowAngle)
+    data$y2 <- data$yend + sign(data$y - data$yend) * r * sin(thetas - arrowAngle)
+    # probably wrong
+    #R <- r / cos(arrowAngle / 2)
+    #data$xside1 <- data$xArrowBase + R * cos(arrowAngle / 2)
+    #data$yside1 <- data$yArrowBase + R * sin(arrowAngle / 2)
+    #data$xside2 <- data$xArrowBase + R * cos(-arrowAngle / 2)
+    #data$yside2 <- data$yArrowBase + R * sin(-arrowAngle / 2)
+    ## TODO: group by PANEL at least!
+    data$group <- seq_len(nrow(data))
+    data$x <- NULL
+    data$y <- NULL
+    d <- tidyr::gather_(data, "variable", "x", c("x1", "x2", "xend"))
+    d$y <- tidyr::gather_(data, "variable", "y", c("y1", "y2", "yend"))$y
+    d <- d[order(d$group), ]
+    prefix_class(d, "GeomPolygon")
+  }
+  
+  # Every row is one segment, we convert to a line with several
+  # groups which can be efficiently drawn by adding NA rows.
+  #browser()
+  #data$group <- seq_len(nrow(data))
+  #others <- data[!names(data) %in% c("x", "y", "xend", "yend")]
+  #data <- with(data, {
+  #  rbind(cbind(x, y, others),
+  #        cbind(x = xend, y = yend, others))
+  #})
+  #
+  #prefix_class(data, "GeomPath")
 }
 
 #' @export
