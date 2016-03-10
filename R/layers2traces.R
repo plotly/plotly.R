@@ -17,36 +17,16 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   # This may involve preprocessing the data, for example:
   # 1. geom_line() is really geom_path() with data sorted by x
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
-  #
-  # This has to be done in a loop, since some layers are really two layers, 
-  # (and we need to replicate the data/params in those cases)
   datz <- list()
   paramz <- list()
-  keyz <- list()
   for (i in seq_along(data)) {
+    # This has to be done in a loop, since some layers are really two layers, 
+    # (and we need to replicate the data/params in those cases)
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]])
     if (is.data.frame(d)) d <- list(d)
     for (j in seq_along(d)) {
       datz <- c(datz, d[j])
-      paramz <- c(paramz, params[i])
-      # When splitting layers into multiple traces, we need the domain/range of 
-      # the scale (for trace naming & legend generation). 
-      # if the splitting variables are constant in the data, we don't want to 
-      # split on them
-      idx <- vapply(d[[j]], function(x) length(unique(x)) > 1, logical(1))
-      # always split on PANEL, discrete scales, and other geom specific aes that 
-      # don't translate to a single trace
-      split_by <- c("PANEL", names(discreteScales)[names(discreteScales) %in% names(idx)[idx]])
-      psd <- prestats_data[[i]]
-      key <- unique(psd[names(psd) %in% split_by])
-      # this order (should) determine the ordering of traces (within layer)
-      key <- key[do.call(order, key), , drop = FALSE]
-      split_vars <- setdiff(names(key), "PANEL")
-      for (k in split_vars) {
-        key[[paste0(k, "_domain")]] <- key[, k]
-        key[[k]] <- scales$get_scales(k)$map(key[, k])
-      }
-      keyz <- c(keyz, list(key))
+      paramz <- c(paramz, params[j])
     }
   }
   
@@ -54,49 +34,44 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # create a factor to split the data on...
-    # by matching the factor levels with the order of the domain (of _discrete_
-    # scales), the trace ordering should be correct
-    key <- keyz[[i]]
-    split_by <- names(key)[!grepl("_domain$", names(key))]
+    # always split on discrete scales, and other geom specific aesthetics that
+    # can't translate to a single trace
+    split_by <- c(split_on(d), names(discreteScales))
+    # always split on PANEL and domain values (for trace ordering)
+    split_by <- c("PANEL", paste0(split_by, "_plotlyDomain"))
+    # split "this layers" data into a list of data frames
+    idx <- names(d) %in% split_by
+    # ensure the factor level orders (which determies traces order)
+    # matches the order of the domain values
+    lvls <- unique(d[idx])
+    lvls <- lvls[do.call(order, lvls), , drop = FALSE]
     fac <- factor(
-      apply(d[split_by], 1, paste, collapse = "."),
-      levels = apply(key[split_by], 1, paste, collapse = ".")
+      apply(d[idx], 1, paste, collapse = "@%&"),
+      levels = apply(lvls, 1, paste, collapse = "@%&")
     )
-    # if we split on a variable not in the key, we have no chance
-    # of generating an appropriate legend
-    splitContinuous <- length(setdiff(split_on(d), split_by)) > 0
-    if (splitContinuous) {
-      split_by <- c(split_by, split_on(d))
-      splitDat <- d[names(d) %in% split_by]
-      fac <- factor(
-        apply(splitDat, 1, paste, collapse = "."),
-        levels = apply(unique(splitDat), 1, paste, collapse = ".")
-      )
-    }
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i])
-    # set name/legendgroup/showlegend, if appropriate
-    legendVars <- setdiff(split_by, "PANEL")
-    if (!splitContinuous && length(legendVars) > 0 && length(trs) > 1) {
-      # labels is a list of legend titles, but since we're restricted to 
-      # one (merged) legend, I think it only makes since to prefix the variable
-      # name in the legend entries
-      lab <- labels[legendVars]
-      vals <- key[paste0(legendVars, "_domain")]
-      valz <- Map(function(x, y) { 
-        if (nchar(x) > 0) paste0(x, ": ", y) else y
-      }, lab, vals)
-      entries <- Reduce(function(x, y) {
-        if (identical(x, y)) x else paste0(x, "<br>", y)
-      }, valz)
-      for (k in seq_along(trs)) {
-        trs[[k]]$name <- entries[[k]]
-        trs[[k]]$legendgroup <- entries[[k]]
-        # depending on the geom (e.g. smooth) this may be FALSE already 
-        if (is.null(trs[[k]]$showlegend)) trs[[k]]$showlegend <- TRUE
+    # are we splitting by a discrete scale on this layer?
+    # if so, set name/legendgroup/showlegend
+    isDiscrete <- names(d) %in% paste0(names(discreteScales), "_plotlyDomain")
+    if (length(trs) > 1 && sum(isDiscrete) >= 1) {
+      nms <- names(trs)
+      # ignore "non-discrete" scales that we've split on
+      for (w in seq_len(sum(names(d) %in% c("PANEL", split_on(d))))) {
+        nms <- sub("^[^@%&]@%&", "", nms)
       }
+      nms <- strsplit(nms, "@%&")
+      nms <- vapply(nms, function(x) {
+        if (length(x) > 1) paste0("(", paste0(x, collapse = ","), ")") else x
+      }, character(1))
+      trs <- Map(function(x, y) {
+        x$name <- y
+        x$legendgroup <- y
+        # depending on the geom (e.g. smooth) this may be FALSE already 
+        x$showlegend <- x$showlegend %||% TRUE
+        x
+      }, trs, nms)
     } else {
       trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
     }
@@ -111,10 +86,8 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
       trs <- rev(trs)
     }
-    
     trace.list <- c(trace.list, trs)
   }
-  
   trace.list
 }
 
@@ -138,24 +111,29 @@ to_basic <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomViolin <- function(data, prestats_data, layout, params, ...) {
-  # TODO: it should be possible to implement this via GeomPolygon
-  # just need preprocess the data, then:
-  # replace_class(data, "GeomPolygon",  "GeomViolin")
-  warning(
-    "plotly.js does not yet support violin plots. \n",
-    "Converting to boxplot instead.",
-    call. = FALSE
+  n <- nrow(data)
+  revData <- data[order(data$y, decreasing = TRUE), ]
+  idx <- !names(data) %in% c("x", "xmin", "xmax")
+  data <- rbind(
+    cbind(x = data$x - data$violinwidth / 2, data[, idx]),
+    cbind(x = revData$x + revData$violinwidth / 2, revData[, idx])
   )
-  to_basic.GeomBoxplot(data, prestats_data)
+  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, "<br>")
+  data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
+  prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, ...) {
-  # 'trained' aesthetics that we're interested in mapping from data to prestats
-  aez <- c("fill", "colour", "size", "alpha", "linetype", "shape", "x")
-  dat <- data[names(data) %in% c(aez, "group")]
-  pre <- prestats_data[!names(prestats_data) %in% aez]
-  prefix_class(merge(pre, dat, by = "group", sort = FALSE), "GeomBoxplot")
+  aez <- names(GeomBoxplot$default_aes)
+  for (i in aez) {
+    prestats_data[[i]] <- NULL
+  }
+  vars <- c("PANEL", "group", aez, grep("_plotlyDomain$", names(data), value = T))
+  prefix_class(
+    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE), 
+    "GeomBoxplot"
+  )
 }
 
 #' @export
@@ -224,20 +202,16 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
-  # TODO: what if nrow(data) != nrow(prestats_data)?
-  data$z <- prestats_data$fill
-  if (is.discrete(prestats_data$fill)) {
-    data <- prefix_class(data, "GeomRect")
-    to_basic(data, prestats_data, layout, params)
-  } else {
-    prefix_class(data, "GeomTile")
-  }
+  data <- prefix_class(data, "GeomTile")
+  to_basic(data, prestats_data, layout, params)
 }
 
 #' @export
 to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
-  data$z <- prestats_data$fill
-  if (is.discrete(prestats_data$fill)) {
+  # geom2trace.GeomTile is a heatmap, which requires continuous fill and 
+  # a complete grid
+  g <- expand.grid(unique(data$x), unique(data$y))
+  if (nrow(g) != nrow(data) || is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
     to_basic(data, prestats_data, layout, params)
   } else {
@@ -259,8 +233,10 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
-  data <- unique(data[c("PANEL", "intercept", "slope", "group")])
-  data$group <- seq_len(nrow(data))
+  # ugh, we can't trust the group here
+  data$group <- interaction(
+    data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
+  )
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- with(data, intercept + slope * x)
@@ -269,8 +245,10 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
-  data <- unique(data[c("PANEL", "yintercept", "group")])
-  data$group <- seq_len(nrow(data))
+  # ugh, we can't trust the group here
+  data$group <- interaction(
+    data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
+  )
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data$y <- data$yintercept
@@ -279,8 +257,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
-  data <- unique(data[c("PANEL", "xintercept", "group")])
-  data$group <- seq_len(nrow(data))
+  # ugh, we can't trust the group here
+  data$group <- interaction(
+    data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
+  )
   lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data$x <- data$xintercept
@@ -357,7 +337,8 @@ geom2trace.GeomPath <- function(data, params) {
   L <- list(
     x = data$x,
     y = data$y,
-    text = data$text,
+    text = data$hovertext,
+    hoverinfo = "text",
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -378,13 +359,10 @@ geom2trace.GeomPath <- function(data, params) {
 #' @export
 geom2trace.GeomPoint <- function(data, params) {
   shape <- aes2plotly(data, params, "shape")
-  if (length(unique(data$size)) > 1 && is.null(data$text)) {
-    data$text <- paste("size:", data$size)
-  }
   L <- list(
     x = data$x,
     y = data$y,
-    text = data$text,
+    text = data$hovertext,
     key = data$key,
     type = "scatter",
     mode = "markers",
@@ -416,7 +394,7 @@ geom2trace.GeomBar <- function(data, params) {
   list(
     x = data$x,
     y = data$y,
-    text = data$text,
+    text = data$hovertext,
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -435,14 +413,10 @@ geom2trace.GeomBar <- function(data, params) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params) {
   data <- group2NA(data)
-  # TODO: do this for more density-like measures??
-  if ("level" %in% names(data)) {
-    data$level <- paste("Level:", data$level)
-  }
   L <- list(
     x = data$x,
     y = data$y,
-    text = data$text %||% data$level,
+    text = data$hovertext,
     type = "scatter",
     mode = "lines",
     line = list(
@@ -471,6 +445,7 @@ geom2trace.GeomBoxplot <- function(data, params) {
     x = data$x,
     y = data$y,
     type = "box",
+    hoverinfo = "y",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
@@ -519,16 +494,24 @@ geom2trace.GeomTile <- function(data, params) {
   data <- data[order(data$x, order(data$y, decreasing = T)), ]
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
+  fill <- data$fill_plotlyDomain
   colorscale <- cbind(
     c(0, 1),
-    data[c(which.min(data$z), which.max(data$z)), "fill"]
+    data[c(which.min(fill), which.max(fill)), "fill"]
   )
   list(
     x = x,
     y = y,
-    text = matrix(data$z, nrow = length(y), ncol = length(x)),
-    hoverinfo = "text",
-    z = matrix(scales::rescale(data$z), nrow = length(y), ncol = length(x)),
+    z = matrix(
+      scales::rescale(fill), 
+      nrow = length(y), 
+      ncol = length(x)
+    ),
+    text = matrix(
+      data$hovertext, 
+      nrow = length(y), 
+      ncol = length(x)
+    ),
     colorscale = colorscale,
     type = "heatmap",
     showscale = FALSE,
