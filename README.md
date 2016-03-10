@@ -20,21 +20,19 @@ devtools::install_github("ropensci/plotly")
 
 ## Introduction
 
-If you use [ggplot2](http://cran.r-project.org/package=ggplot2), use `ggplotly()` to convert your ggplot to an interactive, web-based version!
+If you use [ggplot2](http://cran.r-project.org/package=ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provide sensible tooltips that make it easier to decode values encoded as visual properties in the plot. 
 
 ```r
 library(plotly)
-set.seed(100)
-d <- diamonds[sample(nrow(diamonds), 1000), ]
-p <- ggplot(data = d, aes(x = carat, y = price)) + 
-  geom_point(aes(text = paste("Clarity:", clarity))) +
-  geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
-(gg <- ggplotly(p))
+g <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon") + 
+  xlim(1, 6) + ylim(40, 100)
+ggplotly(g)
 ```
 
-![https://plot.ly/~agvd/1153](http://i.imgur.com/tbKybEb.png)
+![https://plot.ly/~cpsievert/9836](http://imgur.com/6G4zv7b)
 
-[Click here](https://plot.ly/~agvd/1153) to interact with the resulting graph (notice the custom hover text!)
+TODO: mention event stuff
 
 __plotly__ also supports certain chart types that ggplot2 doesn't support (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can easily create these (or any other plotly) charts using the high-level interface. 
 
