@@ -185,7 +185,7 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
       # layer level mappings
       as.character(x$mapping), 
       # stat specific mappings
-      as.character(x$stat$default_aes)
+      grep("^\\.\\.", as.character(x$stat$default_aes), value = TRUE)
     )
     # remove leading/trailing dots in "hidden" stat aes
     map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
@@ -206,6 +206,7 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
   # attach a new column (hovertext) to each layer of data that should get mapped
   # to the text trace property
   data <- Map(function(x, y) {
+    # make sure the relevant aes exists in the data
     for (i in seq_along(y)) {
       aesName <- names(y)[[i]]
       # TODO: should we be getting the name from scale_*(name) first?
