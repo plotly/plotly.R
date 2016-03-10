@@ -173,43 +173,61 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
   panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
   panel$layout$y_min <- sapply(panel$ranges, function(z) min(z$y.range))
   panel$layout$y_max <- sapply(panel$ranges, function(z) max(z$y.range))
-
-  # use aes mappings for the tooltip default
-  aesMap <- as.character(p$mapping)
-  if (!identical(mapping, "all")) {
-    aesMap <- aesMap[names(aesMap) %in% mapping]
-    aesMap <- aesMap[mapping]
-  }
-  # tooltips for discrete positional scales are misleading
-  for (xy in c("x", "y")) {
-    if (scales$get_scales(xy)$is_discrete()) {
-      aesMap <- aesMap[names(aesMap) != xy]
-    }
-  }
   
-  for (i in seq_along(aesMap)) {
-    aesName <- names(aesMap)[[i]]
-    # TODO: should we be getting the name from scale_*(name) first?
-    varName <- aesMap[[i]]
-    # by default assume the values don't need any formatting
-    forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-    if (aesName %in% c("x", "y")) {
-      scaleName <- scales$get_scales(aesName)$scale_name
-      # convert "milliseconds from the UNIX epoch" back to a date/datetime
-      # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-      if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x / 1000, origin = "1970-01-01"))
-      if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x / 1000, origin = "1970-01-01")
-    } else {
-      if (aesName != "text") aesName <- paste0(aesName, "_plotlyDomain")
+  # --------------------------------------------------------------------
+  # Use aes mappings for sensible tooltips
+  # --------------------------------------------------------------------
+  
+  aesMap <- lapply(p$layers, function(x) { 
+    map <- c(
+      # plot level aes mappings
+      as.character(p$mapping), 
+      # layer level mappings
+      as.character(x$mapping), 
+      # stat specific mappings
+      as.character(x$stat$default_aes)
+    )
+    # remove leading/trailing dots in "hidden" stat aes
+    map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
+    # TODO: allow users to specify a _list_ of mappings?
+    if (!identical(mapping, "all")) {
+      map <- map[names(map) %in% mapping]
     }
-    
-    data <- lapply(data, function(d) {
-      if (!is.null(d$hovertext)) d$hovertext <- paste0(d$hovertext, "<br>")
-      d$hovertext <- paste0(d$hovertext, varName, ": ", forMat(d[[aesName]]))
-      d
-    })
-  }
-
+    # tooltips for discrete positional scales are misleading
+    if (scales$get_scales("x")$is_discrete()) {
+      map <- map[!names(map) %in% "x"]
+    }
+    if (scales$get_scales("y")$is_discrete()) {
+      map <- map[!names(map) %in% "y"]
+    }
+    map
+  })
+  
+  # attach a new column (hovertext) to each layer of data that should get mapped
+  # to the text trace property
+  data <- Map(function(x, y) {
+    for (i in seq_along(y)) {
+      aesName <- names(y)[[i]]
+      # TODO: should we be getting the name from scale_*(name) first?
+      varName <- y[[i]]
+      # by default assume the values don't need any formatting
+      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
+      if (aesName %in% c("x", "y")) {
+        scaleName <- scales$get_scales(aesName)$scale_name
+        # convert "milliseconds from the UNIX epoch" back to a date/datetime
+        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
+        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x / 1000, origin = "1970-01-01"))
+        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x / 1000, origin = "1970-01-01")
+      } else {
+        if (aesName != "text") aesName <- paste0(aesName, "_plotlyDomain")
+      }
+      # add a line break if hovertext already exists
+      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
+      x$hovertext <- paste0(x$hovertext, varName, ": ", forMat(x[[aesName]]))
+    }
+    x
+  }, data, aesMap)
+  
   # layers -> plotly.js traces
   traces <- layers2traces(
     data, prestats_data, layers, panel$layout, scales, p$labels

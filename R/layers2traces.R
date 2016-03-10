@@ -202,19 +202,16 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
-  data$z <- prestats_data$fill
-  if (is.discrete(prestats_data$fill)) {
-    data <- prefix_class(data, "GeomRect")
-    to_basic(data, prestats_data, layout, params)
-  } else {
-    prefix_class(data, "GeomTile")
-  }
+  data <- prefix_class(data, "GeomTile")
+  to_basic(data, prestats_data, layout, params)
 }
 
 #' @export
 to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
-  data$z <- prestats_data$fill
-  if (is.discrete(prestats_data$fill)) {
+  # geom2trace.GeomTile is a heatmap, which requires continuous fill and 
+  # a complete grid
+  g <- expand.grid(unique(data$x), unique(data$y))
+  if (nrow(g) != nrow(data) || is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
     to_basic(data, prestats_data, layout, params)
   } else {
@@ -416,14 +413,10 @@ geom2trace.GeomBar <- function(data, params) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params) {
   data <- group2NA(data)
-  # TODO: do this for more density-like measures??
-  if ("level" %in% names(data)) {
-    data$level <- paste("Level:", data$level)
-  }
   L <- list(
     x = data$x,
     y = data$y,
-    text = data$hovertext %||% data$level,
+    text = data$hovertext,
     type = "scatter",
     mode = "lines",
     line = list(
@@ -501,16 +494,24 @@ geom2trace.GeomTile <- function(data, params) {
   data <- data[order(data$x, order(data$y, decreasing = T)), ]
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
+  fill <- data$fill_plotlyDomain
   colorscale <- cbind(
     c(0, 1),
-    data[c(which.min(data$z), which.max(data$z)), "fill"]
+    data[c(which.min(fill), which.max(fill)), "fill"]
   )
   list(
     x = x,
     y = y,
-    text = matrix(data$z, nrow = length(y), ncol = length(x)),
-    hoverinfo = "text",
-    z = matrix(scales::rescale(data$z), nrow = length(y), ncol = length(x)),
+    z = matrix(
+      scales::rescale(fill), 
+      nrow = length(y), 
+      ncol = length(x)
+    ),
+    text = matrix(
+      data$hovertext, 
+      nrow = length(y), 
+      ncol = length(x)
+    ),
     colorscale = colorscale,
     type = "heatmap",
     showscale = FALSE,

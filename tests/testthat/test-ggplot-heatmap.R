@@ -20,4 +20,11 @@ test_that("geom_tile is translated to type=heatmap", {
   expect_identical(L$data[[1]]$type, "heatmap")
   expect_identical(L$layout$xaxis$ticktext, wdays)
   expect_identical(L$layout$yaxis$ticktext, dtimes)
+  # show bin value on hover (but without x/y since they are discrete)
+  expect_true(
+    L$data[[1]]$hoverinfo == "text"
+  )
+  expect_true(
+    all(grepl("^value: [-]?[0-9]+$", c(L$data[[1]]$text)))
+  )
 })

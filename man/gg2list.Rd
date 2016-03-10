@@ -4,7 +4,7 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL, mapping = mapping, source = "A")
+gg2list(p, width = NULL, height = NULL, mapping = "all", source = "A")
 }
 \arguments{
 \item{p}{ggplot2 plot.}
