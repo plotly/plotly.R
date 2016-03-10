@@ -56,6 +56,7 @@ For a more detailed overview of this interface, see [here](https://cran.r-projec
 2. [Linked Clicks](http://104.131.111.111:3838/plotlyLinkedClick/) ([source](https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyLinkedClick))
 3. [Linked Brush](http://104.131.111.111:3838/plotlyLinkedBrush/) ([source](https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyLinkedBrush))
 
+![http://104.131.111.111:3838/plotlyLinkedBrush/](http://i.imgur.com/eVqsZma.gifv)
 
 You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder, if not impossible, to coordinate views between htmlwidgets.
 
