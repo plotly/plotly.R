@@ -2,7 +2,7 @@
 
 # plotly
 
-An R package for creating interactive web-based graphs via [plotly](https://plot.ly/)'s JavaScript graphing library. 
+An R package for creating interactive web graphics via [plotly.js](https://github.com/plotly/plotly.js).
 
 ## Installation
 
@@ -20,9 +20,9 @@ devtools::install_github("ropensci/plotly")
 
 ## Getting Started
 
-### ggplot2 converter
+### Web-based ggplot2 graphics
 
-If you use [ggplot2](http://cran.r-project.org/package=ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provides sensible tooltips, which can help us decode values encoded as visual properties in the plot. 
+If you use [ggplot2](http://cran.r-project.org/package=ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provides sensible tooltips, which assists decoding of values encoded as visual properties in the plot.
 
 ```r
 library(plotly)
@@ -34,11 +34,11 @@ ggplotly(g)
 
 ![https://plot.ly/~cpsievert/9836](http://i.imgur.com/6G4zv7b.png)
 
-If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/) of the [official ggplot2 documentation](http://docs.ggplot2.org).
+If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/) of the [official ggplot2 documentation](http://docs.ggplot2.org). We also have some of our own examples [here](https://plot.ly/ggplot2/).
 
 ### plotly's custom R interface
 
-__plotly__ supports some chart types that ggplot2 doesn't (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can create these (or any other plotly) charts using the high-level interface. 
+__plotly__ supports some chart types that ggplot2 doesn't (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can create these (or any other plotly) charts using `plot_ly()`. 
 
 ```r
 plot_ly(z = volcano, type = "surface")
@@ -46,7 +46,7 @@ plot_ly(z = volcano, type = "surface")
 
 ![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
 
-For a more detailed overview of this interface, see [here](https://cran.r-project.org/web/packages/plotly/vignettes/intro.html)
+For a more concise overview of the `plot_ly()` interface, see [here](https://cran.r-project.org/web/packages/plotly/vignettes/intro.html). You might also find our [examples](https://plot.ly/r/#basic-charts) and the [figure reference](https://plot.ly/r/reference/) to be helpful.
 
 ### Hooking onto plotly events
 
@@ -59,11 +59,6 @@ For a more detailed overview of this interface, see [here](https://cran.r-projec
 ![http://104.131.111.111:3838/plotlyLinkedBrush/](http://i.imgur.com/eVqsZma.gif)
 
 You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder, if not impossible, to coordinate views between htmlwidgets.
-
-## Documentation
-
-* Examples and vignettes on plotly's R homepage - <https://plot.ly/r>
-* The complete figure reference guide - <https://plot.ly/r/reference>
 
 ## Contributing
 
