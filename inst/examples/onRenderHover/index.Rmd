@@ -1,0 +1,34 @@
+---
+title: "Using plotly with onRender"
+author: "Carson Sievert"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(plotly)
+library(htmlwidgets)
+plot_ly(x = 1:10, y = rnorm(10), marker = list(color = rep("black", 10))) %>% 
+  as.widget() %>% 
+  onRender('
+  function(el, x) { 
+    var graphDiv = document.getElementById(el.id);
+    // color this point red on hover
+    el.on("plotly_hover", function(data) { 
+      var trace = data.points[0].curveNumber;
+      var pt = data.points[0].pointNumber;
+      var marker = x.data[trace].marker;
+      marker.color[pt] = "red";
+      Plotly.restyle(graphDiv, marker, trace)
+    })
+   // color this point black on unhover
+   el.on("plotly_unhover", function(data) { 
+      var trace = data.points[0].curveNumber;
+      var pt = data.points[0].pointNumber;
+      var marker = x.data[trace].marker;
+      marker.color[pt] = "black";
+      Plotly.restyle(graphDiv, marker, trace)
+    })
+  }
+')
+```
