@@ -1,3 +1,16 @@
+3.2.0 -- 8 Mar 2015
+
+CHANGES:
+
+* Legend titles no longer appear in legend entries.
+* Tooltips now reflect aesthetic mappings. This makes it easier to decode 
+data values from a given visual marking.
+
+NEW FEATURES:
+
+* geom_violin() is now supported.
+* ggplotly() gains a mapping argument to control the set of aesthetics to appears in the tooltip as well as their order.
+
 3.1.0 -- 8 Mar 2015
 
 CHANGES:
