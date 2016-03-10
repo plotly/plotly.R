@@ -32,7 +32,7 @@ g <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
 ggplotly(g)
 ```
 
-![https://plot.ly/~cpsievert/9836](http://imgur.com/6G4zv7b)
+![https://plot.ly/~cpsievert/9836](http://i.imgur.com/6G4zv7b.png)
 
 If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/) of the [official ggplot2 documentation](http://docs.ggplot2.org).
 
