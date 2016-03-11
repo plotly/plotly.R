@@ -242,7 +242,10 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
   })
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
-  traces <- Map(function(x, y) { x$showlegend <- y; x}, traces, !duplicated(grps))
+  traces <- Map(function(x, y) { 
+    x$showlegend <- isTRUE(x$showlegend) && y 
+    x
+  }, traces, !duplicated(grps))
 
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
