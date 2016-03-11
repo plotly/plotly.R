@@ -585,6 +585,7 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
   modes <- vapply(traces, function(x) x$mode %||% "", character(1))
   nhashes <- length(unique(hashes))
+  browser()
   if (nhashes < length(traces)) {
     mergedTraces <- vector("list", nhashes)
     for (i in unique(hashes)) {
@@ -593,6 +594,9 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
       if (all(modes[idx] %in% c("lines", "markers"))) {
         mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
         mergedTraces[[i]]$mode <- "markers+lines"
+        if (any(sapply(traces[idx], "[[", "showlegend"))) {
+          mergedTraces[[i]]$showlegend <- TRUE
+        }
       }
     }
     traces <- mergedTraces
