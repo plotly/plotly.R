@@ -8,12 +8,12 @@ test_that("6 facets becomes 6 panels", {
     theme(panel.margin = grid::unit(0, "cm"))
   info <- save_outputs(gg, "barley")
   # two legend entries, but two groups
-  expect_equal(sum(sapply(l$data, "[[", "showlegend")), 2)
+  expect_equal(sum(sapply(info$data, "[[", "showlegend")), 2)
   expect_identical(
-    sort(unique(sapply(l$data, "[[", "legendgroup"))), c("1931", "1932")
+    sort(unique(sapply(info$data, "[[", "legendgroup"))), c("1931", "1932")
   )
   expect_identical(
-    sort(unique(sapply(l$data, "[[", "name"))), c("1931", "1932")
+    sort(unique(sapply(info$data, "[[", "name"))), c("1931", "1932")
   )
 })
 
