@@ -6,11 +6,11 @@
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
 #' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
-#' @param mapping a character vector specifying which aesthetic mappings to show
+#' @param tooltip a character vector specifying which aesthetic mappings to show
 #' in the tooltip. The default, "all", means show all the aesthetic mappings
 #' (including the unofficial "text" aesthetic). The order of variables here will
 #' also control the order they appear. For example, use
-#' \code{mapping = c("y", "x", "colour")} if you want y first, x second, and
+#' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
 #' @param source Only relevant for \link{event_data}.
 #' @seealso \link{signup}, \link{plot_ly}
@@ -31,8 +31,8 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     mapping = "all", source = "A") {
-  l <- gg2list(p, width = width, height = height, mapping = mapping, source = source)
+                     tooltip = "all", source = "A") {
+  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
   hash_plot(p$data, l)
 }
 
@@ -40,13 +40,13 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
 #' @param p ggplot2 plot.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
 #' @param height Height of the plot in pixels (optional, defaults to automatic sizing).
-#' @param mapping a character vector specifying which aesthetic mappings to show in the
-#' tooltip. The default, "all", means show all the aesthetic mappings
+#' @param tooltip a character vector specifying which aesthetic tooltips to show in the
+#' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
 #' @param source Only relevant for \link{event_data}.
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A") {
+gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A") {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -190,8 +190,8 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
     # remove leading/trailing dots in "hidden" stat aes
     map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
     # TODO: allow users to specify a _list_ of mappings?
-    if (!identical(mapping, "all")) {
-      map <- map[names(map) %in% mapping]
+    if (!identical(tooltip, "all")) {
+      map <- map[names(map) %in% tooltip]
     }
     # tooltips for discrete positional scales are misleading
     if (scales$get_scales("x")$is_discrete()) {
@@ -240,6 +240,12 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
     tr$hoverinfo <- tr$hoverinfo %||%"text" 
     tr 
   })
+  # show only one legend entry per legendgroup
+  grps <- sapply(traces, "[[", "legendgroup")
+  traces <- Map(function(x, y) { 
+    x$showlegend <- isTRUE(x$showlegend) && y 
+    x
+  }, traces, !duplicated(grps))
 
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
@@ -587,6 +593,9 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
       if (all(modes[idx] %in% c("lines", "markers"))) {
         mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
         mergedTraces[[i]]$mode <- "markers+lines"
+        if (any(sapply(traces[idx], "[[", "showlegend"))) {
+          mergedTraces[[i]]$showlegend <- TRUE
+        }
       }
     }
     traces <- mergedTraces

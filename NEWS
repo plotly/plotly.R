@@ -1,3 +1,13 @@
+3.3.1 -- 10 Mar 2015
+
+CHANGES:
+
+* Changed the mapping argument name to tooltip (which seems like a better name).
+
+BUGFIX:
+
+* Redundant legend entries are no longer shown.
+
 3.2.1 -- 10 Mar 2015
 
 BUGFIX:

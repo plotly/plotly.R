@@ -24,7 +24,7 @@ test_that("geom_violin with fill aes works", {
 })
 
 test_that("can hide x values in tooltip", {
-  p <- ggplotly(gg2, mapping = "y")
+  p <- ggplotly(gg2, tooltip = "y")
   l <- plotly_build(p)
   expect_equal(sum(grepl("cyl", l$data[[1]]$text)), 0)
 })
