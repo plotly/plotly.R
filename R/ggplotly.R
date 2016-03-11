@@ -240,6 +240,9 @@ gg2list <- function(p, width = NULL, height = NULL, mapping = "all", source = "A
     tr$hoverinfo <- tr$hoverinfo %||%"text" 
     tr 
   })
+  # show only one legend entry per legendgroup
+  grps <- sapply(traces, "[[", "legendgroup")
+  traces <- Map(function(x, y) { x$showlegend <- y; x}, traces, !duplicated(grps))
 
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
