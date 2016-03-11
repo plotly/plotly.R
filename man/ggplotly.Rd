@@ -14,8 +14,8 @@ ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
 
 \item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{tooltip}{a character vector specifying which aesthetic tooltips to show
-in the tooltip. The default, "all", means show all the aesthetic tooltips
+\item{tooltip}{a character vector specifying which aesthetic mappings to show
+in the tooltip. The default, "all", means show all the aesthetic mappings
 (including the unofficial "text" aesthetic). The order of variables here will
 also control the order they appear. For example, use
 \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
