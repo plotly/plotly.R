@@ -94,28 +94,20 @@ how to create your own.</p>
 ggplot(diamonds, aes(log10(carat), log10(price))) +
   geom_point()
 </div>
-<strong class='warning'>Warning message:
-Estimated Draw Time Slow</strong>
-<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8017</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8017" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='error'>Error: pandoc document conversion failed with error 137</strong>
 <div class='input'>#  * by transforming the scales
 ggplot(diamonds, aes(carat, price)) +
   geom_point() +
   scale_x_log10() +
   scale_y_log10()
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong>
+<strong class='error'>Error: pandoc document conversion failed with error 137</strong>
 <div class='input'>#  * by transforming the coordinate system:
 ggplot(diamonds, aes(carat, price)) +
   geom_point() +
   coord_trans(x = &quot;log10&quot;, y = &quot;log10&quot;)
 </div>
-<strong class='warning'>Warning message:
-Estimated Draw Time Slow</strong>
-<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8020</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8020" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9491fd1e8.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # The difference between transforming the scales and
 # transforming the coordinate system is that scale
@@ -131,18 +123,14 @@ ggplot(d, aes(carat, price)) +
   scale_x_log10() +
   scale_y_log10()
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong>
+<div class='output'><iframe src="file30a917f3ecb3.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 ggplot(d, aes(carat, price)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;) +
   coord_trans(x = &quot;log10&quot;, y = &quot;log10&quot;)
 </div>
-<strong class='warning'>Warning message:
-Estimated Draw Time Slow</strong>
-<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8023</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8023" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a93fffc8b9.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Here I used a subset of diamonds so that the smoothed line didn&#39;t
 # drop below zero, which obviously causes problems on the log-transformed
@@ -157,18 +145,14 @@ ggplot(diamonds, aes(carat, price)) +
   scale_y_log10() +
   coord_trans(x = scales::exp_trans(10), y = scales::exp_trans(10))
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong>
+<strong class='error'>Error: pandoc document conversion failed with error 137</strong>
 <div class='input'>
 # cf.
 ggplot(diamonds, aes(carat, price)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;)
 </div>
-<strong class='warning'>Warning message:
-Estimated Draw Time Slow</strong>
-<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8026</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8026" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9313e47a2.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Also works with discrete scales
 df &lt;- data.frame(a = abs(rnorm(26)),letters)
@@ -176,12 +160,10 @@ plot &lt;- ggplot(df,aes(a,letters)) + geom_point()
 
 plot + coord_trans(x = &quot;log10&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8028</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8028" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91bf51d37.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>plot + coord_trans(x = &quot;sqrt&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8030</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8030" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92355df71.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

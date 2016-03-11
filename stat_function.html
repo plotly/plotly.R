@@ -143,17 +143,11 @@ base &lt;- ggplot(df, aes(x)) + geom_density()
 base + stat_function(fun = dnorm, colour = &quot;red&quot;)
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9047</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9047" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>base + stat_function(fun = dnorm, colour = &quot;red&quot;, arg = list(mean = 3))
 </div>
-<strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9049</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9049" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='error'>Error: Unknown parameters: arg</strong>
 <div class='input'>
 # Plot functions without data
 # Examples adapted from Kohske Takahashi
@@ -163,29 +157,23 @@ ggplot(data.frame(x = c(0, 2)), aes(x)) +
   stat_function(fun = exp, geom = &quot;line&quot;)
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9051</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9051" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Plot a normal curve
 ggplot(data.frame(x = c(-5, 5)), aes(x)) + stat_function(fun = dnorm)
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9053</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9053" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # To specify a different mean or sd, use the args parameter to supply new values
 ggplot(data.frame(x = c(-5, 5)), aes(x)) +
   stat_function(fun = dnorm, args = list(mean = 2, sd = .5))
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9055</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9055" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Two functions on the same plot
 f &lt;- ggplot(data.frame(x = c(0, 10)), aes(x))
@@ -193,23 +181,16 @@ f + stat_function(fun = sin, colour = &quot;red&quot;) +
   stat_function(fun = cos, colour = &quot;blue&quot;)
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9057</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9057" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Using a custom function
 test &lt;- function(x) {x ^ 2 + x + 20}
 f + stat_function(fun = test)
 </div>
 <strong class='warning'>Warning message:
-Computation failed in `stat_function()`:
-attempt to apply non-function</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9059</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9059" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

@@ -79,27 +79,31 @@
     <h2 id="examples">Examples</h2>
     <pre class="examples"><div class='input'>ggplot(mtcars, aes(am, vs)) + geom_point()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8795</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8795" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Default amount of jittering will generally be too much for
 # small datasets:
 ggplot(mtcars, aes(am, vs)) + geom_jitter()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8797</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8797" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Two ways to override
 ggplot(mtcars, aes(am, vs)) +
   geom_jitter(width = 0.1, height = 0.1)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8799</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8799" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>ggplot(mtcars, aes(am, vs)) +
   geom_jitter(position = position_jitter(width = 0.1, height = 0.1))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8801</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8801" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # The default works better for large datasets, where it will
 # take up as much space as a boxplot or a bar
@@ -107,8 +111,9 @@ ggplot(mpg, aes(class, hwy)) +
   geom_jitter() +
   geom_boxplot()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8803</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8803" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

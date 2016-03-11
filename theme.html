@@ -340,16 +340,19 @@ p &lt;- ggplot(mtcars, aes(mpg, wt)) +
   geom_point()
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9104</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9104" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>p + theme(panel.background = element_rect(colour = &quot;pink&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9106</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9106" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>p + theme_bw()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9108</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9108" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Scatter plot of gas mileage by vehicle weight
 p &lt;- ggplot(mtcars, aes(wt, mpg)) +
@@ -362,8 +365,9 @@ coef(lm(mpg ~ wt, data = mtcars))
 </div>
 <div class='input'>p + geom_abline(intercept = 37, slope = -5)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9110</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9110" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Calculate correlation coefficient
 with(mtcars, cor(wt, mpg, use = &quot;everything&quot;, method = &quot;pearson&quot;))
 </div>
@@ -373,36 +377,42 @@ with(mtcars, cor(wt, mpg, use = &quot;everything&quot;, method = &quot;pearson&q
 p + geom_abline(intercept = 37, slope = -5) +
 geom_text(data = data.frame(), aes(4.5, 30, label = &quot;Pearson-R = -.87&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9112</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9112" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Change the axis labels
 # Original plot
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9114</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9114" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>p + labs(x = &quot;Vehicle Weight&quot;, y = &quot;Miles per Gallon&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9116</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9116" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Or
 p + labs(x = &quot;Vehicle Weight&quot;, y = &quot;Miles per Gallon&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9118</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9118" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Change title appearance
 p &lt;- p + labs(title = &quot;Vehicle Weight-Gas Mileage Relationship&quot;)
 # Set title to twice the base font size
 p + theme(plot.title = element_text(size = rel(2)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9120</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9120" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>p + theme(plot.title = element_text(size = rel(2), colour = &quot;blue&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9122</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9122" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Changing plot look with themes
 DF &lt;- data.frame(x = rnorm(400))
@@ -412,265 +422,186 @@ m &lt;- ggplot(DF, aes(x = x)) +
 m
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9124</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9124" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Compare with
 m + theme_bw()
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9126</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9126" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Manipulate Axis Attributes
 m + theme(axis.line = element_line(size = 3, colour = &quot;red&quot;, linetype = &quot;dotted&quot;))
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9128</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9128" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.text = element_text(colour = &quot;blue&quot;))
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9130</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9130" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.text.y = element_blank())
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9132</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9132" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.ticks = element_line(size = 2))
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9134</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9134" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.title.y = element_text(size = rel(1.5), angle = 90))
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9136</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9136" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.title.x = element_blank())
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9138</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9138" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>m + theme(axis.ticks.length = unit(.85, &quot;cm&quot;))
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9140</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9140" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Legend Attributes
 z &lt;- ggplot(mtcars, aes(wt, mpg)) +
   geom_point(aes(colour = factor(cyl)))
 z
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9142</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9142" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.position = &quot;none&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9144</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9144" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.position = &quot;bottom&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9146</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9146" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Or use relative coordinates between 0 and 1
 z + theme(legend.position = c(.5, .5))
 </div>
 <strong class='warning'>Warning message:
-the condition has length &gt; 1 and only the first element will be used</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9148</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9148" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Add a border to the whole legend
 z + theme(legend.background = element_rect(colour = &quot;black&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9150</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9150" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Legend margin controls extra space around outside of legend:
 z + theme(legend.background = element_rect(),
           legend.margin = unit(1, &quot;cm&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9152</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9152" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.background = element_rect(),
           legend.margin = unit(0, &quot;cm&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9154</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9154" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Or to just the keys
 z + theme(legend.key = element_rect(colour = &quot;black&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9156</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9156" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.key = element_rect(fill = &quot;yellow&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9158</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9158" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.key.size = unit(2.5, &quot;cm&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9160</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9160" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.text = element_text(size = 20, colour = &quot;red&quot;, angle = 45))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9162</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9162" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(legend.title = element_text(face = &quot;italic&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9164</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9164" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # To change the title of the legend use the name argument
 # in one of the scale options
 z + scale_colour_brewer(name = &quot;My Legend&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9166</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9166" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + scale_colour_grey(name = &quot;Number of \nCylinders&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9168</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9168" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Panel and Plot Attributes
 z + theme(panel.background = element_rect(fill = &quot;black&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9170</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9170" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(panel.border = element_rect(linetype = &quot;dashed&quot;, colour = &quot;black&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9172</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9172" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(panel.grid.major = element_line(colour = &quot;blue&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9174</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9174" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(panel.grid.minor = element_line(colour = &quot;red&quot;, linetype = &quot;dotted&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9176</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9176" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(panel.grid.major = element_line(size = 2))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9178</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9178" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(panel.grid.major.y = element_blank(),
           panel.grid.minor.y = element_blank())
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9180</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9180" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(plot.background = element_rect())
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9182</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9182" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>z + theme(plot.background = element_rect(fill = &quot;green&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9184</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9184" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Faceting Attributes
 set.seed(4940)
@@ -681,21 +612,65 @@ k &lt;- ggplot(dsmall, aes(carat, ..density..)) +
 k + theme(strip.background = element_rect(colour = &quot;purple&quot;, fill = &quot;pink&quot;,
                                           size = 3, linetype = &quot;dashed&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9186</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9186" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>k + theme(strip.text.x = element_text(colour = &quot;red&quot;, angle = 45, size = 10,
                                       hjust = 0.5, vjust = 0.5))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9188</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9188" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>k + theme(panel.margin = unit(5, &quot;lines&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9190</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9190" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>k + theme(panel.margin.y = unit(0, &quot;lines&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9192</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9192" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Put gridlines on top
 meanprice &lt;- tapply(diamonds$price, diamonds$cut, mean)
@@ -709,15 +684,17 @@ g + geom_bar(stat = &quot;identity&quot;) +
           panel.grid.minor.y = element_blank(),
           panel.ontop = TRUE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9194</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9194" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Modify a theme and save it
 mytheme &lt;- theme_grey() + theme(plot.title = element_text(colour = &quot;red&quot;))
 p + mytheme
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9196</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9196" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 
 

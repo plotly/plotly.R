@@ -119,14 +119,18 @@ include aesthetics whose values you want to set, not map. See
 df &lt;- data.frame(x = rnorm(1000))
 ggplot(df, aes(x)) + stat_ecdf(geom = &quot;step&quot;)
 </div>
-<strong class='error'>Error in paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes): no ggplot default for direction</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 df &lt;- data.frame(x = c(rnorm(100, 0, 3), rnorm(100, 0, 10)),
                  g = gl(2, 100))
 
 ggplot(df, aes(x, colour = g)) + stat_ecdf()
 </div>
-<strong class='error'>Error in paramORdefault(params, aes2step, ggplot2::GeomPath$default_aes): no ggplot default for direction</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

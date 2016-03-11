@@ -191,59 +191,50 @@ g &lt;- ggplot(mpg, aes(class))
 # Number of cars in each class:
 g + geom_bar()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8188</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8188" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a974ec6e5b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># Total engine displacement of each class
 g + geom_bar(aes(weight = displ))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8190</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8190" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91a7e1990.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # To show (e.g.) means, you need stat = &quot;identity&quot;
 df &lt;- data.frame(trt = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;), outcome = c(2.3, 1.9, 3.2))
 ggplot(df, aes(trt, outcome)) +
   geom_bar(stat = &quot;identity&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8192</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8192" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a976709642.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># But geom_point() display exactly the same information and doesn&#39;t
 # require the y-axis to touch zero.
 ggplot(df, aes(trt, outcome)) +
   geom_point()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8194</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8194" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91714a026.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You can also use geom_bar() with continuous data, in which case
 # it will show counts at unique locations
 df &lt;- data.frame(x = rep(c(2.9, 3.1, 4.5), c(5, 10, 4)))
 ggplot(df, aes(x)) + geom_bar()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8196</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8196" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a95b8f5da5.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># cf. a histogram of the same data
 ggplot(df, aes(x)) + geom_histogram(binwidth = 0.5)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8198</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8198" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a916bb5bb2.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 
 # Bar charts are automatically stacked when multiple bars are placed
 # at the same location
 g + geom_bar(aes(fill = drv))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8200</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8200" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a918106d5e.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You can instead dodge, or fill them
 g + geom_bar(aes(fill = drv), position = &quot;dodge&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8202</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8202" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a96730c4b9.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>g + geom_bar(aes(fill = drv), position = &quot;fill&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8204</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8204" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a939534773.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # To change plot order of bars, change levels in underlying factor
 reorder_size &lt;- function(x) {
@@ -251,8 +242,7 @@ reorder_size &lt;- function(x) {
 }
 ggplot(mpg, aes(reorder_size(class))) + geom_bar()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8206</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8206" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9792bca3e.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

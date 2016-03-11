@@ -81,18 +81,21 @@ to control name, limits, breaks, labels and so forth.</dd>
     <pre class="examples"><div class='input'>p &lt;- ggplot(mtcars, aes(mpg, wt)) + geom_point(aes(colour = factor(cyl)))
 p + scale_colour_grey()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8929</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8929" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>p + scale_colour_grey(end = 0)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8931</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8931" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # You may want to turn off the pale grey background with this scale
 p + scale_colour_grey() + theme_bw()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8933</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8933" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Colour of missing values is controlled with na.value:
 miss &lt;- factor(sample(c(NA, 1:5), nrow(mtcars), replace = TRUE))
@@ -100,14 +103,16 @@ ggplot(mtcars, aes(mpg, wt)) +
   geom_point(aes(colour = miss)) +
   scale_colour_grey()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8935</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8935" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>ggplot(mtcars, aes(mpg, wt)) +
   geom_point(aes(colour = miss)) +
   scale_colour_grey(na.value = &quot;green&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8937</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8937" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

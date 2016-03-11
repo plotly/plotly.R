@@ -125,26 +125,21 @@ p &lt;- ggplot(mtcars, aes(mpg, wt)) + geom_point()
 # With one variable
 p + facet_grid(. ~ cyl)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8042</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8042" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94b1974e3.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + facet_grid(cyl ~ .)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8044</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8044" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9214f835.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # With two variables
 p + facet_grid(vs ~ am)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8046</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8046" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a971f3791d.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + facet_grid(am ~ vs)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8048</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8048" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91e1b5206.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + facet_grid(vs ~ am, margins=TRUE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8050</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8050" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9564a2fa8.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # To change plot order of facet grid,
 # change the order of variable levels with factor()
@@ -159,27 +154,43 @@ p &lt;- ggplot(diamonds, aes(carat, ..density..)) +
         geom_histogram(binwidth = 1)
 p + facet_grid(. ~ cut)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8052</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8052" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<div class='output'><iframe src="file30a950497586.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 g &lt;- ggplot(mtcars, aes(mpg, wt)) +
   geom_point()
 g + facet_grid(. ~ vs + am)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8054</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8054" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94f48d222.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>g + facet_grid(vs + am ~ .)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8056</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8056" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9392741e2.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You can also use strings, which makes it a little easier
 # when writing functions that generate faceting specifications
 
 p + facet_grid(&quot;cut ~ .&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8058</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8058" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+is.na() applied to non-(list or vector) of type &#39;NULL&#39;</strong>
+<div class='output'><iframe src="file30a9528db7d9.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # see also ?plotmatrix for the scatterplot matrix
 
@@ -188,8 +199,7 @@ p + facet_grid(&quot;cut ~ .&quot;)
 
 g + facet_grid(cyl ~ vs)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8060</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8060" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94d362e4b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # If you combine a facetted dataset with a dataset that lacks those
 # facetting variables, the data will be repeated across the missing
@@ -197,29 +207,25 @@ g + facet_grid(cyl ~ vs)
 
 g + facet_grid(vs ~ cyl)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8062</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8062" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a915fef71a.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 df &lt;- data.frame(mpg = 22, wt = 3)
 g + facet_grid(vs ~ cyl) +
   geom_point(data = df, colour = &quot;red&quot;, size = 2)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8064</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8064" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91d54df7b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 df2 &lt;- data.frame(mpg = c(19, 22), wt = c(2,4), vs = c(0, 1))
 g + facet_grid(vs ~ cyl) +
   geom_point(data = df2, colour = &quot;red&quot;, size = 2)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8066</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8066" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91e633684.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 df3 &lt;- data.frame(mpg = c(19, 22), wt = c(2,4), vs = c(1, 1))
 g + facet_grid(vs ~ cyl) +
   geom_point(data = df3, colour = &quot;red&quot;, size = 2)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8068</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8068" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9441fe184.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 
 # You can also choose whether the scales should be constant
@@ -230,140 +236,114 @@ mt &lt;- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) +
 
 mt + facet_grid(. ~ cyl, scales = &quot;free&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8070</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8070" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92422bdeb.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># If scales and space are free, then the mapping between position
 # and values in the data will be the same across all panels
 mt + facet_grid(. ~ cyl, scales = &quot;free&quot;, space = &quot;free&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8072</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8072" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a95ec6fe1e.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 mt + facet_grid(vs ~ am, scales = &quot;free&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8074</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8074" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a949b57914.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mt + facet_grid(vs ~ am, scales = &quot;free_x&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8076</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8076" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a953595d3.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mt + facet_grid(vs ~ am, scales = &quot;free_y&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8078</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8078" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a912042fec.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mt + facet_grid(vs ~ am, scales = &quot;free&quot;, space = &quot;free&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8080</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8080" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a931e9c313.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mt + facet_grid(vs ~ am, scales = &quot;free&quot;, space = &quot;free_x&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8082</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8082" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a952dddc87.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mt + facet_grid(vs ~ am, scales = &quot;free&quot;, space = &quot;free_y&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8084</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8084" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94367f779.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You may need to set your own breaks for consistent display:
 mt + facet_grid(. ~ cyl, scales = &quot;free_x&quot;, space = &quot;free&quot;) +
   scale_x_continuous(breaks = seq(10, 36, by = 2))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8086</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8086" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a956d60364.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># Adding scale limits override free scales:
 last_plot() + xlim(10, 15)
 </div>
-<strong class='message'>Scale for &#39;x&#39; is already present. Adding another scale for &#39;x&#39;, which will
-replace the existing scale.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8088</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8088" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='error'>Error in last_plot() + xlim(10, 15): non-numeric argument to binary operator</strong>
 <div class='input'>
 # Free scales are particularly useful for categorical variables
 ggplot(mpg, aes(cty, model)) +
   geom_point() +
   facet_grid(manufacturer ~ ., scales = &quot;free&quot;, space = &quot;free&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8090</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8090" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94bf9ee46.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># particularly when you reorder factor levels
 mpg$model &lt;- reorder(mpg$model, mpg$cty)
 manufacturer &lt;- reorder(mpg$manufacturer, mpg$cty)
 last_plot() %+% mpg + theme(strip.text.y = element_text())
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8092</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8092" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'>NULL
+</div>
 <div class='input'>
 # Use as.table to to control direction of horizontal facets, TRUE by default
 h &lt;- ggplot(mtcars, aes(x = mpg, y = wt)) +
   geom_point()
 h + facet_grid(cyl ~ vs)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8094</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8094" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a96290cf80.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>h + facet_grid(cyl ~ vs, as.table = FALSE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8096</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8096" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92c27e08b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Use labeller to control facet labels, label_value is default
 h + facet_grid(cyl ~ vs, labeller = label_both)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8098</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8098" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a923034b5c.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># Using label_parsed, see ?plotmath for more options
 mtcars$cyl2 &lt;- factor(mtcars$cyl, labels = c(&quot;alpha&quot;, &quot;beta&quot;, &quot;sqrt(x, y)&quot;))
 k &lt;- ggplot(mtcars, aes(wt, mpg)) +
   geom_point()
 k + facet_grid(. ~ cyl2)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8100</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8100" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92e0b2f2a.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>k + facet_grid(. ~ cyl2, labeller = label_parsed)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8102</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8102" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9710d9df.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># For label_bquote the label value is x.
 p &lt;- ggplot(mtcars, aes(wt, mpg)) +
   geom_point()
 p + facet_grid(. ~ vs, labeller = label_bquote(alpha ^ .(x)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8104</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8104" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a911fa9c77.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + facet_grid(. ~ vs, labeller = label_bquote(.(x) ^ .(x)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8106</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8106" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a95e826236.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Margins can be specified by logically (all yes or all no) or by specific
 # variables as (character) variable names
 mg &lt;- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
 mg + facet_grid(vs + am ~ gear)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8108</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8108" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92820e5c1.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mg + facet_grid(vs + am ~ gear, margins = TRUE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8110</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8110" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a97a74718d.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mg + facet_grid(vs + am ~ gear, margins = &quot;am&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8112</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8112" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94b928cad.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># when margins are made over &quot;vs&quot;, since the facets for &quot;am&quot; vary
 # within the values of &quot;vs&quot;, the marginal facet for &quot;vs&quot; is also
 # a margin over &quot;am&quot;.
 mg + facet_grid(vs + am ~ gear, margins = &quot;vs&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8114</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8114" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9465485f3.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mg + facet_grid(vs + am ~ gear, margins = &quot;gear&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8116</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8116" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a969249e00.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>mg + facet_grid(vs + am ~ gear, margins = c(&quot;gear&quot;, &quot;am&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8118</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8118" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a93b11eaee.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # The facet strips can be displayed near the axes with switch
 data &lt;- transform(mtcars,
@@ -373,20 +353,17 @@ data &lt;- transform(mtcars,
 p &lt;- ggplot(data, aes(mpg, disp)) + geom_point()
 p + facet_grid(am ~ gear, switch = &quot;both&quot;) + theme_light()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8120</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8120" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a95c5673eb.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # It may be more aesthetic to use a theme without boxes around
 # around the strips.
 p + facet_grid(am ~ gear + vs, switch = &quot;y&quot;) + theme_minimal()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8122</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8122" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9579f2da8.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + facet_grid(am ~ ., switch = &quot;y&quot;) +
   theme_gray() %+replace% theme(strip.background  = element_blank())
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8124</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8124" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9554985b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

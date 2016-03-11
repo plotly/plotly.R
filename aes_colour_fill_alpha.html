@@ -70,71 +70,54 @@ c &lt;- ggplot(mtcars, aes(factor(cyl)))
 # Default plotting
 c + geom_bar()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7831</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7831" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a96811e783.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># To change the interior colouring use fill aesthetic
 c + geom_bar(fill = &quot;red&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7833</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7833" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a961185803.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># Compare with the colour aesthetic which changes just the bar outline
 c + geom_bar(colour = &quot;red&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7835</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7835" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9749d9a0c.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'># Combining both, you can see the changes more clearly
 c + geom_bar(fill = &quot;white&quot;, colour = &quot;red&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7837</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7837" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92f6fce80.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # The aesthetic fill also takes different colouring scales
 # setting fill equal to a factor variable uses a discrete colour scale
 k &lt;- ggplot(mtcars, aes(factor(cyl), fill = factor(vs)))
 k + geom_bar()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7839</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7839" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a963a57707.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Fill aesthetic can also be used with a continuous variable
 m &lt;- ggplot(faithfuld, aes(waiting, eruptions))
 m + geom_raster()
 </div>
 <strong class='warning'>Warning message:
-geom_raster has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7841</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7841" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<div class='output'><iframe src="file30a94dda008c.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>m + geom_raster(aes(fill = density))
 </div>
-<strong class='warning'>Warning message:
-geom_raster has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7843</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7843" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a93a3a7c93.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Some geoms don&#39;t use both aesthetics (i.e. geom_point or geom_line)
 b &lt;- ggplot(economics, aes(x = date, y = unemploy))
 b + geom_line()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7845</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7845" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a92f7840ad.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>b + geom_line(colour = &quot;green&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7847</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7847" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a914c290ca.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>b + geom_point()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7849</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7849" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a94fd51d8.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>b + geom_point(colour = &quot;red&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7851</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7851" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a933d02812.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # For large datasets with overplotting the alpha
 # aesthetic will make the points more transparent
@@ -142,32 +125,28 @@ df &lt;- data.frame(x = rnorm(5000), y = rnorm(5000))
 h  &lt;- ggplot(df, aes(x,y))
 h + geom_point()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7853</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7853" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a939eeb69f.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>h + geom_point(alpha = 0.5)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7855</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7855" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a926568dc8.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>h + geom_point(alpha = 1/10)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7857</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7857" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a91169f2ed.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Alpha can also be used to add shading
 j &lt;- b + geom_line()
 j
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7859</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7859" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a944696200.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>yrng &lt;- range(economics$unemploy)
 j &lt;- j + geom_rect(aes(NULL, NULL, xmin = start, xmax = end, fill = party),
 ymin = yrng[1], ymax = yrng[2], data = presidential)
 j
 </div>
-<strong class='error'>Error in inherits(data.vec, &quot;POSIXt&quot;): object &#39;data.vec&#39; not found</strong>
+<div class='output'><iframe src="file30a93e69811f.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>j + scale_fill_manual(values = alpha(c(&quot;blue&quot;, &quot;red&quot;), .3))
 </div>
-<strong class='error'>Error in inherits(data.vec, &quot;POSIXt&quot;): object &#39;data.vec&#39; not found</strong>
+<div class='output'><iframe src="file30a96f074102.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

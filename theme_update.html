@@ -79,28 +79,32 @@ theme or use <code>theme_set</code> to completely override it.</p>
   geom_point()
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9198</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9198" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>old &lt;- theme_set(theme_bw())
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9200</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9200" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>theme_set(old)
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9202</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9202" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 old &lt;- theme_update(panel.background = element_rect(colour = &quot;pink&quot;))
 p
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9204</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9204" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>theme_set(old)
 theme_get()
 </div>
-<div class='output'>List of 42
+<div class='output'>List of 44
  $ line                 :List of 4
   ..$ colour  : chr &quot;black&quot;
   ..$ size    : num 0.5
@@ -127,7 +131,15 @@ theme_get()
   .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
   ..$ debug     : logi FALSE
   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
- $ axis.line            : list()
+ $ axis.line            :List of 4
+  ..$ colour  : NULL
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..$ lineend : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ axis.line.x          : list()
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_blank&quot; &quot;element&quot;
+ $ axis.line.y          : list()
   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_blank&quot; &quot;element&quot;
  $ axis.text            :List of 10
   ..$ family    : NULL
@@ -368,16 +380,13 @@ ggplot(mtcars, aes(mpg, wt)) +
         legend.justification = c(1, 1))
 </div>
 <strong class='warning'>Warning message:
-the condition has length &gt; 1 and only the first element will be used</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9206</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9206" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>last_plot() +
  theme(legend.background = element_rect(fill = &quot;white&quot;, colour = &quot;white&quot;, size = 3))
 </div>
-<strong class='warning'>Warning message:
-the condition has length &gt; 1 and only the first element will be used</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9208</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9208" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<div class='output'>NULL
+</div></pre>
   </div>
   <div class="span4">
     <!-- <ul>

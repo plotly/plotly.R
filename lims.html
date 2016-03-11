@@ -144,20 +144,26 @@ ggplot(mtcars, aes(mpg, wt)) +
   geom_point() +
   xlim(15, 20)
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># with automatic lower limit
 ggplot(mtcars, aes(mpg, wt)) +
   geom_point() +
   xlim(NA, 20)
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Change both xlim and ylim
 ggplot(mtcars, aes(mpg, wt)) +
   geom_point() +
   lims(x = c(10, 20), y = c(3, 5))
 </div>
-<strong class='error'>Error: Uh oh, an error occurred on the server. </strong></pre>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

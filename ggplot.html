@@ -134,8 +134,9 @@ ggplot(df, aes(x = gp, y = y)) +
    geom_point(data = ds, aes(y = mean),
               colour = &#39;red&#39;, size = 3)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8612</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8612" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Same plot as above, declaring only the data frame in ggplot().
 # Note how the x and y aesthetics must now be declared in
 # each geom_point() layer.
@@ -144,8 +145,9 @@ ggplot(df) +
    geom_point(data = ds, aes(x = gp, y = mean),
                  colour = &#39;red&#39;, size = 3)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8614</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8614" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># Set up a skeleton ggplot object and add layers:
 ggplot() +
   geom_point(data = df, aes(x = gp, y = y)) +
@@ -155,8 +157,9 @@ ggplot() +
                     ymin = mean - sd, ymax = mean + sd),
                     colour = &#39;red&#39;, width = 0.4)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8616</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8616" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

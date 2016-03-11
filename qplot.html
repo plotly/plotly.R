@@ -100,35 +100,42 @@ using a consistent calling scheme.</p>
     <pre class="examples"><div class='input'># Use data from data.frame
 qplot(mpg, wt, data = mtcars)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8825</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8825" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(mpg, wt, data = mtcars, colour = cyl)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8827</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8827" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(mpg, wt, data = mtcars, size = cyl)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8829</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8829" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(mpg, wt, data = mtcars, facets = vs ~ am)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8831</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8831" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 
 qplot(1:10, rnorm(10), colour = runif(10))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8833</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8833" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(1:10, letters[1:10])
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8835</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8835" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>mod &lt;- lm(mpg ~ wt, data=mtcars)
 qplot(resid(mod), fitted(mod))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8837</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8837" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 f &lt;- function() {
    a &lt;- 1:10
@@ -137,76 +144,55 @@ f &lt;- function() {
 }
 f()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8839</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8839" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # To set aesthetics, wrap in I()
 qplot(mpg, wt, data = mtcars, colour = I(&quot;red&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8841</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8841" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # qplot will attempt to guess what geom you want depending on the input
 # both x and y supplied = scatterplot
 qplot(mpg, wt, data = mtcars)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8843</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8843" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># just x supplied = histogram
 qplot(mpg, data = mtcars)
 </div>
 <strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8845</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8845" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'># just y supplied = scatterplot, with x = seq_along(y)
 qplot(y = mpg, data = mtcars)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8847</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8847" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Use different geoms
 qplot(mpg, wt, data = mtcars, geom = &quot;path&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8849</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8849" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(factor(cyl), wt, data = mtcars, geom = c(&quot;boxplot&quot;, &quot;jitter&quot;))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8851</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8851" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>qplot(mpg, data = mtcars, geom = &quot;dotplot&quot;)
 </div>
 <strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
-<strong class='message'>`stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.</strong>
 <strong class='warning'>Warning message:
-geom_dotplot has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8853</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8853" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

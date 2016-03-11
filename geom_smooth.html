@@ -205,8 +205,9 @@ scale, and then back-transformed to the response scale.</p>
   geom_point() +
   geom_smooth()
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8494</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8494" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Use span to control the &quot;wiggliness&quot; of the default loess smoother
 # The span is the fraction of points used to fit each local regression:
@@ -215,23 +216,26 @@ ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(span = 0.3)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8496</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8496" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Instead of a loess smooth, you can use any other modelling function:
 ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, se = FALSE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8498</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8498" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, formula = y ~ splines::bs(x, 3), se = FALSE)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8500</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8500" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Smoothes are automatically fit to each group (defined by categorical
 # aesthetics or the group aesthetic) and for each facet
@@ -240,15 +244,17 @@ ggplot(mpg, aes(displ, hwy, colour = class)) +
   geom_point() +
   geom_smooth(se = FALSE, method = &quot;lm&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8502</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8502" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(span = 0.8) +
   facet_wrap(~drv)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8504</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8504" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 ## Not run: 
 # # To fit a logistic regression, you need to coerce the values to

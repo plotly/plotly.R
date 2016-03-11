@@ -75,21 +75,21 @@ Broken down into construct, build, render and draw times.</p>
     <pre class="examples"><div class='input'>benchplot(ggplot(mtcars, aes(mpg, wt)) + geom_point())
 </div>
 <div class='output'>       step user.self sys.self elapsed
-1 construct     0.004        0   0.003
-2     build     0.030        0   0.030
-3    render     0.037        0   0.038
-4      draw     0.045        0   0.045
-5     TOTAL     0.116        0   0.116
+1 construct     0.004    0.000   0.003
+2     build     0.023    0.000   0.022
+3    render     0.047    0.001   0.047
+4      draw     0.110    0.015  45.300
+5     TOTAL     0.184    0.016  45.372
 </div>
 <div class='input'>benchplot(ggplot(mtcars, aes(mpg, wt)) + geom_point() + facet_grid(. ~ cyl))
 </div>
 <p><img src='benchplot-4.png' alt='' width='540' height='400' /></p>
 <div class='output'>       step user.self sys.self elapsed
-1 construct     0.003        0   0.004
-2     build     0.039        0   0.039
-3    render     0.114        0   0.114
-4      draw     0.087        0   0.087
-5     TOTAL     0.243        0   0.244
+1 construct     0.004    0.000   0.003
+2     build     0.045    0.000   0.045
+3    render     0.145    0.000   0.146
+4      draw     0.164    0.032  91.682
+5     TOTAL     0.358    0.032  91.876
 </div></pre>
   </div>
   <div class="span4">

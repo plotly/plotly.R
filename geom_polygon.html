@@ -163,8 +163,9 @@ datapoly &lt;- merge(values, positions, by=c(&quot;id&quot;))
 
 (p &lt;- ggplot(datapoly, aes(x=x, y=y)) + geom_polygon(aes(fill=value, group=id)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8450</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8450" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Which seems like a lot of work, but then it&#39;s easy to add on
 # other features in this coordinate system, e.g.:
@@ -176,8 +177,9 @@ stream &lt;- data.frame(
 
 p + geom_line(data = stream, colour=&quot;grey30&quot;, size = 5)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8452</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8452" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # And if the positions are in longitude and latitude, you can use
 # coord_map to produce different map projections.

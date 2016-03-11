@@ -73,51 +73,40 @@ se &lt;- ggplot(cuts, aes(x = cut, y = fit, ymin = fit - se.fit,
 ymax = fit + se.fit, colour = cut))
 se + geom_pointrange()
 </div>
-<strong class='warning'>Warning message:
-geom_pointrange has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7921</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7921" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9151b71c4.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Using annotate
 p &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
 p + annotate(&quot;rect&quot;, xmin = 2, xmax = 3.5, ymin = 2, ymax = 25,
   fill = &quot;dark grey&quot;, alpha = .5)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7923</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7923" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a93211a3a5.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # Geom_segment examples
 p + geom_segment(aes(x = 2, y = 15, xend = 2, yend = 25),
   arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7925</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7925" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a9255f2c92.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + geom_segment(aes(x = 2, y = 15, xend = 3, yend = 15),
   arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7927</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7927" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a953ca348.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>p + geom_segment(aes(x = 5, y = 30, xend = 3.5, yend = 25),
   arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7929</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7929" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<div class='output'><iframe src="file30a961ce54fa.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
 <div class='input'>
 # You can also use geom_segment to recreate plot(type = &quot;h&quot;) :
 counts &lt;- as.data.frame(table(x = rpois(100, 5)))
 counts$x &lt;- as.numeric(as.character(counts$x))
 with(counts, plot(x, Freq, type = &quot;h&quot;, lwd = 10))
 </div>
-<p><img src='aes_position-18.png' alt='' width='540' height='400' /></p>
+<p><img src='aes_position-12.png' alt='' width='540' height='400' /></p>
 <div class='input'>
 ggplot(counts, aes(x, Freq)) +
   geom_segment(aes(yend = 0, xend = x), size = 10)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/7931</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/7931" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<div class='output'><iframe src="file30a9493255b.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
   </div>
   <div class="span4">
     <!-- <ul>

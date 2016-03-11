@@ -134,30 +134,34 @@ are summarised with <code>fun</code>.</p>
     <pre class="examples"><div class='input'>d &lt;- ggplot(diamonds, aes(carat, depth, z = price))
 d + stat_summary_2d()
 </div>
-<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # Specifying function
 d + stat_summary_2d(fun = function(x) sum(x^2))
 </div>
-<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>d + stat_summary_2d(fun = var)
 </div>
-<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>d + stat_summary_2d(fun = &quot;quantile&quot;, fun.args = list(probs = 0.1))
 </div>
-<strong class='error'>Error in matrix(data$fill.name, nrow = length(unique(data$x)), ncol = length(unique(data$y))): &#39;data&#39; must be of a vector type, was &#39;NULL&#39;</strong>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 if (requireNamespace(&quot;hexbin&quot;)) {
 d + stat_summary_hex()
 }
 </div>
 <strong class='warning'>Warning message:
-geom_hex has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/9073</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/9073" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

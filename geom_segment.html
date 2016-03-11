@@ -168,31 +168,19 @@ b +
  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, colour = &quot;segment&quot;), data = df)
 </div>
 <strong class='warning'>Warning message:
-geom_curve has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8482</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8482" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 b + geom_curve(aes(x = x1, y = y1, xend = x2, yend = y2), data = df, curvature = -0.2)
 </div>
 <strong class='warning'>Warning message:
-geom_curve has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8484</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8484" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>b + geom_curve(aes(x = x1, y = y1, xend = x2, yend = y2), data = df, curvature = 1)
 </div>
 <strong class='warning'>Warning message:
-geom_curve has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8486</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8486" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>b + geom_curve(
   aes(x = x1, y = y1, xend = x2, yend = y2),
   data = df,
@@ -200,33 +188,33 @@ geom_curve has yet to be implemented in plotly.
 )
 </div>
 <strong class='warning'>Warning message:
-geom_curve has yet to be implemented in plotly.
-  If you&#39;d like to see this geom implemented,
-  Please open an issue with your example code at
-  https://github.com/ropensci/plotly/issues</strong>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8488</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8488" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 ggplot(seals, aes(long, lat)) +
   geom_segment(aes(xend = long + delta_long, yend = lat + delta_lat),
     arrow = arrow(length = unit(0.1,&quot;cm&quot;))) +
   borders(&quot;state&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8490</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8490" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 # You can also use geom_segment to recreate plot(type = &quot;h&quot;) :
 counts &lt;- as.data.frame(table(x = rpois(100,5)))
 counts$x &lt;- as.numeric(as.character(counts$x))
 with(counts, plot(x, Freq, type = &quot;h&quot;, lwd = 10))
 </div>
-<p><img src='geom_segment-21.png' alt='' width='540' height='400' /></p>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong>
 <div class='input'>
 ggplot(counts, aes(x, Freq)) +
   geom_segment(aes(xend = x, yend = 0), size = 10, lineend = &quot;butt&quot;)
 </div>
-<strong class='message'>Success! Created a new plotly here -&gt; https://plot.ly/~cpsievert/8492</strong>
-<div class='output'><iframe src="https://plot.ly/~cpsievert/8492" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe></div></pre>
+<strong class='warning'>Warning message:
+unable to open connection to X11 display &#39;&#39;</strong>
+<strong class='error'>Error in .External2(C_X11, d$display, d$width, d$height, d$pointsize,     d$gamma, d$colortype, d$maxcubesize, d$bg, d$canvas, d$fonts,     NA_integer_, d$xpos, d$ypos, d$title, type, antialias, d$family): unable to start device X11cairo</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>
