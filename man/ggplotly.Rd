@@ -5,7 +5,7 @@
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  mapping = "all", source = "A")
+  tooltip = "all", source = "A")
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -14,11 +14,11 @@ ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
 
 \item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{mapping}{a character vector specifying which aesthetic mappings to show
-in the tooltip. The default, "all", means show all the aesthetic mappings
+\item{tooltip}{a character vector specifying which aesthetic tooltips to show
+in the tooltip. The default, "all", means show all the aesthetic tooltips
 (including the unofficial "text" aesthetic). The order of variables here will
 also control the order they appear. For example, use
-\code{mapping = c("y", "x", "colour")} if you want y first, x second, and
+\code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 colour last.}
 
 \item{source}{Only relevant for \link{event_data}.}
