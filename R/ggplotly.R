@@ -191,7 +191,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
     # TODO: allow users to specify a _list_ of mappings?
     if (!identical(tooltip, "all")) {
-      map <- map[names(map) %in% tooltip]
+      map <- map[tooltip]
     }
     # tooltips for discrete positional scales are misleading
     if (scales$get_scales("x")$is_discrete()) {
@@ -220,12 +220,14 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x / 1000, origin = "1970-01-01")
         # convert "days from the UNIX epoch" to a date/datetime
         if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
-      } else {
-        if (aesName != "text") aesName <- paste0(aesName, "_plotlyDomain")
       }
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
-      x$hovertext <- paste0(x$hovertext, varName, ": ", forMat(x[[aesName]]))
+      x$hovertext <- paste0(
+        x$hovertext, 
+        varName, ": ", 
+        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]])
+      )
     }
     x
   }, data, aesMap)

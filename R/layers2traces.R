@@ -380,7 +380,8 @@ geom2trace.GeomPoint <- function(data, params) {
   )
   # fill is irrelevant for pch %in% c(1, 15:20)
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(pch %in% c(1, 15:20))) {
+  if (any(pch %in% c(1, 15:20)) ||
+      all(grepl("open$", shape)) && all(L$marker$color %in% "transparent")) {
     L$marker$color <- L$marker$line$color
   }
   L
@@ -491,27 +492,23 @@ geom2trace.GeomText <- function(data, params) {
 #' @export
 geom2trace.GeomTile <- function(data, params) {
   # make sure order of value make sense before throwing z in matrix
-  data <- data[order(data$x, order(data$y, decreasing = T)), ]
+  data <- data[order(order(data$x), data$y), ]
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  fill <- data$fill_plotlyDomain
-  colorscale <- cbind(
-    c(0, 1),
-    data[c(which.min(fill), which.max(fill)), "fill"]
-  )
+  fill <- scales::rescale(data$fill_plotlyDomain)
+  txt <- data$hovertext
+  # create the colorscale, which should ignore NAs
+  data <- data[!is.na(fill), ]
+  o <- data[order(data$fill_plotlyDomain), "fill"]
+  n <- length(o)
+  qs <- seq(0, 1, length.out = min(n, 100))
+  idx <- o[pmax(1, round(n * qs))]
+  colorscale <- cbind(qs, idx)
   list(
     x = x,
     y = y,
-    z = matrix(
-      scales::rescale(fill), 
-      nrow = length(y), 
-      ncol = length(x)
-    ),
-    text = matrix(
-      data$hovertext, 
-      nrow = length(y), 
-      ncol = length(x)
-    ),
+    z = matrix(fill, nrow = length(y), ncol = length(x)),
+    text = matrix(txt, nrow = length(y), ncol = length(x)),
     colorscale = colorscale,
     type = "heatmap",
     showscale = FALSE,
@@ -619,10 +616,10 @@ make_error <- function(data, params, xy = "x") {
   e <- list(
     x = data$x,
     y = data$y,
+    text = data$hovertext,
     type = "scatter",
     mode = "lines",
     opacity = 0,
-    hoverinfo = "none",
     line = list(color = color)
   )
   e[[paste0("error_", xy)]] <- list(
