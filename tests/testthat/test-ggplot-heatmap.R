@@ -28,3 +28,18 @@ test_that("geom_tile is translated to type=heatmap", {
     all(grepl("^value: [-]?[0-9]+$", c(L$data[[1]]$text)))
   )
 })
+
+d <- expand.grid(
+  x = seq(0, 1, .005), 
+  y = seq(0, 1, .005)
+)
+d$z <- with(d, (1 - y) * x / ((1 - y) * x + y * (1 - x)))
+p <- ggplot(data = d, aes(x, y)) + 
+  geom_tile(aes(fill = z)) + 
+  scale_fill_gradient2(low = '#67001f', mid = 'white', high = '#053061', midpoint = .5)
+
+test_that("geom_tile() scale_fill_gradient2()", {
+  L <- save_outputs(p, "heatmap-midpoint")
+  # one trace is for the colorbar
+  expect_equal(length(L$data), 2)
+})
