@@ -235,6 +235,23 @@ to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomHex <- function(data, prestats_data, layout, params, ...) {
+  # see ggplot2:::hexGrob
+  dx <- resolution(data$x, FALSE)
+  dy <- resolution(data$y, FALSE)/sqrt(3)/2 * 1.15
+  hexC <- hexbin::hexcoords(dx, dy, n = 1)
+  n <- nrow(data)
+  data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 2)
+  x <- rep.int(hexC$x, n) * rep(data$size, each = 6) + rep(data$x, each = 6)
+  y <- rep.int(hexC$y, n) * rep(data$size, each = 6) + rep(data$y, each = 6)
+  data <- data[rep(seq_len(n), each = 6), ]
+  data$x <- x
+  data$y <- y
+  data$group <- rep(seq_len(n), each = 6)
+  prefix_class(data, c("GeomPolygon", "GeomHex"))
+}
+
+#' @export
 to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
@@ -290,6 +307,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomPoint")
 }
+
 
 #' @export
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
