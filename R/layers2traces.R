@@ -343,7 +343,6 @@ geom2trace.GeomPath <- function(data, params) {
     x = data$x,
     y = data$y,
     text = data$hovertext,
-    hoverinfo = "text",
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -438,8 +437,7 @@ geom2trace.GeomPolygon <- function(data, params) {
     )
   )
   if (inherits(data, "GeomSmooth")) {
-    L$name <- "standard error"
-    L$showlegend <- FALSE
+    L$hoverinfo <- "x+y"
   }
   L
   
