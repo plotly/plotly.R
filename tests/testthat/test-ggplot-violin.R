@@ -23,10 +23,4 @@ test_that("geom_violin with fill aes works", {
   expect_equal(sum(unlist(lapply(L$data, "[[", "showlegend"))), 3)
 })
 
-test_that("can hide x values in tooltip", {
-  p <- ggplotly(gg2, tooltip = "y")
-  l <- plotly_build(p)
-  expect_equal(sum(grepl("cyl", l$data[[1]]$text)), 0)
-})
-
 

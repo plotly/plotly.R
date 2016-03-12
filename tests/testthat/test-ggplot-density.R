@@ -72,12 +72,3 @@ test_that("traces are ordered correctly in geom_density", {
   expect_identical(nms, c("4", "6", "8"))
 })
 
-test_that("tooltip argument respects ordering", {
-  p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
-  p <- ggplotly(p, tooltip = c("y", "x"))
-  info <- expect_traces(p, 3, "tooltip-order")
-  txt <- strsplit(info$data[[1]]$text, "<br>")
-  expect_true(all(grepl("^density", sapply(txt, "[[", 1))))
-  expect_true(all(grepl("^mpg", sapply(txt, "[[", 2))))
-})
-

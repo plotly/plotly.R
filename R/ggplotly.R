@@ -225,7 +225,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
-      suffix <- forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]])
+      suffix <- tryCatch(
+        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
+        error = function(e) ""
+      )
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
     x
