@@ -202,6 +202,20 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomMap <- function(data, prestats_data, layout, params, ...) {
+  common <- intersect(data$map_id, params$map$id)
+  data <- data[data$map_id %in% common, , drop = FALSE]
+  map <- params$map[params$map$id %in% common, , drop = FALSE]
+  # TODO: do we need coord_munch() as in GeomMap$draw_panel()
+  data$id <- data$map_id
+  data$map_id <- NULL
+  data$group <- NULL
+  data <- merge(data, map, by = "id", sort = FALSE)
+  data$group <- interaction(data[names(data) %in% c("PANEL", "group", "id")])
+  prefix_class(data, c("GeomPolygon", "GeomMap"))
+}
+
+#' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
   data <- prefix_class(data, "GeomTile")
   to_basic(data, prestats_data, layout, params)
