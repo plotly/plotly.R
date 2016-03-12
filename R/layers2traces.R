@@ -49,6 +49,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       apply(d[idx], 1, paste, collapse = "@%&"),
       levels = apply(lvls, 1, paste, collapse = "@%&")
     )
+    if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i])
@@ -227,6 +228,10 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
+  if ("hovertext" %in% names(data)) {
+    data$hovertext <- paste0(data$hovertext, "<br>")
+  }
+  data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
