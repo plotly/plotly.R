@@ -189,9 +189,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     )
     # remove leading/trailing dots in "hidden" stat aes
     map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
-    # TODO: allow users to specify a _list_ of mappings?
     if (!identical(tooltip, "all")) {
-      map <- map[names(map) %in% tooltip]
+      map <- map[tooltip]
     }
     # tooltips for discrete positional scales are misleading
     if (scales$get_scales("x")$is_discrete()) {
@@ -217,15 +216,20 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         scaleName <- scales$get_scales(aesName)$scale_name
         # convert "milliseconds from the UNIX epoch" to a date/datetime
         # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x / 1000, origin = "1970-01-01")
+        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01")
         # convert "days from the UNIX epoch" to a date/datetime
         if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
-      } else {
-        if (aesName != "text") aesName <- paste0(aesName, "_plotlyDomain")
       }
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
-      x$hovertext <- paste0(x$hovertext, varName, ": ", forMat(x[[aesName]]))
+      # text aestheic should be taken verbatim (for custom tooltips)
+      prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
+      # look for the domain, if that's not found, provide the range (useful for identity scales)
+      suffix <- tryCatch(
+        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
+        error = function(e) ""
+      )
+      x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
     x
   }, data, aesMap)

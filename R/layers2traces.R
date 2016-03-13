@@ -49,6 +49,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
       apply(d[idx], 1, paste, collapse = "@%&"),
       levels = apply(lvls, 1, paste, collapse = "@%&")
     )
+    if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i])
@@ -201,6 +202,20 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomMap <- function(data, prestats_data, layout, params, ...) {
+  common <- intersect(data$map_id, params$map$id)
+  data <- data[data$map_id %in% common, , drop = FALSE]
+  map <- params$map[params$map$id %in% common, , drop = FALSE]
+  # TODO: do we need coord_munch() as in GeomMap$draw_panel()
+  data$id <- data$map_id
+  data$map_id <- NULL
+  data$group <- NULL
+  data <- merge(data, map, by = "id", sort = FALSE)
+  data$group <- interaction(data[names(data) %in% c("PANEL", "group", "id")])
+  prefix_class(data, c("GeomPolygon", "GeomMap"))
+}
+
+#' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
   data <- prefix_class(data, "GeomTile")
   to_basic(data, prestats_data, layout, params)
@@ -220,6 +235,23 @@ to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
+to_basic.GeomHex <- function(data, prestats_data, layout, params, ...) {
+  # see ggplot2:::hexGrob
+  dx <- resolution(data$x, FALSE)
+  dy <- resolution(data$y, FALSE)/sqrt(3)/2 * 1.15
+  hexC <- hexbin::hexcoords(dx, dy, n = 1)
+  n <- nrow(data)
+  data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 6)
+  x <- rep.int(hexC$x, n) * rep(data$size, each = 6) + rep(data$x, each = 6)
+  y <- rep.int(hexC$y, n) * rep(data$size, each = 6) + rep(data$y, each = 6)
+  data <- data[rep(seq_len(n), each = 6), ]
+  data$x <- x
+  data$y <- y
+  data$group <- rep(seq_len(n), each = 6)
+  prefix_class(data, c("GeomPolygon", "GeomHex"))
+}
+
+#' @export
 to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
@@ -227,6 +259,10 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
 
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
+  if ("hovertext" %in% names(data)) {
+    data$hovertext <- paste0(data$hovertext, "<br>")
+  }
+  data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
@@ -271,6 +307,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
 to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
   prefix_class(data, "GeomPoint")
 }
+
 
 #' @export
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
@@ -338,7 +375,6 @@ geom2trace.GeomPath <- function(data, params) {
     x = data$x,
     y = data$y,
     text = data$hovertext,
-    hoverinfo = "text",
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -380,7 +416,8 @@ geom2trace.GeomPoint <- function(data, params) {
   )
   # fill is irrelevant for pch %in% c(1, 15:20)
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(pch %in% c(1, 15:20))) {
+  if (any(pch %in% c(1, 15:20)) ||
+      all(grepl("open$", shape)) && all(L$marker$color %in% "transparent")) {
     L$marker$color <- L$marker$line$color
   }
   L
@@ -432,8 +469,7 @@ geom2trace.GeomPolygon <- function(data, params) {
     )
   )
   if (inherits(data, "GeomSmooth")) {
-    L$name <- "standard error"
-    L$showlegend <- FALSE
+    L$hoverinfo <- "x+y"
   }
   L
   
@@ -491,27 +527,23 @@ geom2trace.GeomText <- function(data, params) {
 #' @export
 geom2trace.GeomTile <- function(data, params) {
   # make sure order of value make sense before throwing z in matrix
-  data <- data[order(data$x, order(data$y, decreasing = T)), ]
+  data <- data[order(order(data$x), data$y), ]
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  fill <- data$fill_plotlyDomain
-  colorscale <- cbind(
-    c(0, 1),
-    data[c(which.min(fill), which.max(fill)), "fill"]
-  )
+  fill <- scales::rescale(data$fill_plotlyDomain)
+  txt <- data$hovertext
+  # create the colorscale, which should ignore NAs
+  data <- data[!is.na(fill), ]
+  o <- data[order(data$fill_plotlyDomain), "fill"]
+  n <- length(o)
+  qs <- seq(0, 1, length.out = min(n, 100))
+  idx <- o[pmax(1, round(n * qs))]
+  colorscale <- cbind(qs, idx)
   list(
     x = x,
     y = y,
-    z = matrix(
-      scales::rescale(fill), 
-      nrow = length(y), 
-      ncol = length(x)
-    ),
-    text = matrix(
-      data$hovertext, 
-      nrow = length(y), 
-      ncol = length(x)
-    ),
+    z = matrix(fill, nrow = length(y), ncol = length(x)),
+    text = matrix(txt, nrow = length(y), ncol = length(x)),
     colorscale = colorscale,
     type = "heatmap",
     showscale = FALSE,
@@ -619,10 +651,10 @@ make_error <- function(data, params, xy = "x") {
   e <- list(
     x = data$x,
     y = data$y,
+    text = data$hovertext,
     type = "scatter",
     mode = "lines",
     opacity = 0,
-    hoverinfo = "none",
     line = list(color = color)
   )
   e[[paste0("error_", xy)]] <- list(

@@ -1,4 +1,18 @@
-3.3.1 -- 10 Mar 2015
+3.4.0 -- 12 Mar 2016
+
+NEW FEATURES:
+
+* geom_map() and geom_hex() are now supported.
+
+CHANGES:
+
+* The default value of the fileopt argument was changed from "new" to "overwrite".
+
+BUGFIX:
+
+* Made a number of bugfixes/improvements to hoverinfo & conversion of geom_tile()/geom_point().
+
+3.3.1 -- 10 Mar 2016
 
 CHANGES:
 
@@ -8,13 +22,13 @@ BUGFIX:
 
 * Redundant legend entries are no longer shown.
 
-3.2.1 -- 10 Mar 2015
+3.2.1 -- 10 Mar 2016
 
 BUGFIX:
 
 * Proper formatting for date tooltips.
 
-3.2.0 -- 10 Mar 2015
+3.2.0 -- 10 Mar 2016
 
 CHANGES:
 
@@ -27,14 +41,14 @@ NEW FEATURES:
 * geom_violin() is now supported.
 * ggplotly() gains a mapping argument to control the set of aesthetics to appears in the tooltip as well as their order.
 
-3.1.0 -- 8 Mar 2015
+3.1.0 -- 8 Mar 2016
 
 CHANGES:
 
 * The "hidden" sharing option in plotly_POST() was renamed to "secret".
 * The default value in the scale argument in plotly_IMAGE() is now 1.
 
-3.0.0 -- 8 Mar 2015
+3.0.0 -- 8 Mar 2016
 
 NEW FEATURES:
 
@@ -48,7 +62,7 @@ BUG FIXES:
 
 * ggplotly() now supports most of scale_*()/theme()/guides(). As a result, this fixes a lot of issues (#482, #481, #479, #476, #473, #460, #456, #454, #453, #447, #443, #434, #422, #421, #399, #379, #378, #357, #318, #316, #242, #232, #211, #203, #185, #184, #161). In order to support all of scale_x_*() an scale_y_*(), we always use linear axis types, and supply ticktext/tickvals to plotly.js. This has some unfortunate consequences on hoverformatting, which may be addressed in future releases of plotly.js -- https://github.com/plotly/plotly.js/issues/320
 
-2.5.0 -- 1 Mar 2015
+2.5.0 -- 1 Mar 2016
 
 NEW FEATURES
 
@@ -64,76 +78,76 @@ CHANGES
 The arguments filename, fileopt, world_readable in ggplotly() were removed as
 they should be provided to plotly_POST() instead. 
 
-2.4.4 -- 13 Feb 2015
+2.4.4 -- 13 Feb 2016
 
 as.widget() now returns htmlwidget objects untouched. See #449.
 
-2.4.3 -- 11 Feb 2015
+2.4.3 -- 11 Feb 2016
 
 Ensure that we always return HTTPS links. Fixes #455
 
-2.4.2 -- 9 Feb 2015
+2.4.2 -- 9 Feb 2016
 
 Fix for on-premise domain configuration. 
 
-2.4.1 -- 2 Feb 2015
+2.4.1 -- 2 Feb 2016
 
 Attach base_url in as.widget() so it works in multiple contexts
 
-2.4.0 -- 1 Feb 2015
+2.4.0 -- 1 Feb 2016
 
 * Pass plot configuration using ... to avoid conflicts in defaults/documentation
 * Upgrade to plotly.js 1.5.1
 
-2.3.4 -- 1 Feb 2015
+2.3.4 -- 1 Feb 2016
 
 Added a plotly_api_domain environment variable for configuring the API domain. Fixes #441
 
-2.3.3 -- 27 Jan 2015
+2.3.3 -- 27 Jan 2016
 
 Bump axis number for each trace matching a panel number. fixes #318
 
-2.3.2 -- 25 Jan 2015
+2.3.2 -- 25 Jan 2016
 
 More accurate list of data_array properties. Fixes #415
 
-2.3.1 -- 25 Jan 2015
+2.3.1 -- 25 Jan 2016
 
 More accurate conversion of path width. Fixes #373.
 
-2.3.0 -- 19 Jan 2015
+2.3.0 -- 19 Jan 2016
 
 Add sharing argument and deprecate world_readable. Fixes #332
 
-2.2.4 -- 18 Jan 2015
+2.2.4 -- 18 Jan 2016
 
 Fix for error in embed_notebook(). See #409.
 
-2.2.3 -- 18 Jan 2015
+2.2.3 -- 18 Jan 2016
 
 Fix for geom_vline(). See #402.
 
-2.2.2 -- 18 Jan 2015
+2.2.2 -- 18 Jan 2016
 
 Fix bar orientation when we detect geom_bar() + coord_flip() in ggplotly(). Fixes #390.
 
-2.2.1 -- 18 Jan 2015
+2.2.1 -- 18 Jan 2016
 
 Search for axis title in scene object. fixes #393.
 
-2.2.0 -- 13 Jan 2015
+2.2.0 -- 13 Jan 2016
 
 The default for layout.hovermode is now 'closest' for non-line scatter traces
 
-2.1.3 -- 12 Jan 2015
+2.1.3 -- 12 Jan 2016
 
 Fix size and alpha translation for geom_point. Fixes #386
 
-2.1.2 -- 11 Jan 2015
+2.1.2 -- 11 Jan 2016
 
 Upgraded to plotlyjs 1.4.1. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.1
 
-2.1.1 -- 11 Jan 2015
+2.1.1 -- 11 Jan 2016
 
 Upgraded to plotlyjs 1.4. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.0
 

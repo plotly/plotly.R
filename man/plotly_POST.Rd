@@ -4,8 +4,8 @@
 \alias{plotly_POST}
 \title{Create/Modify plotly graphs}
 \usage{
-plotly_POST(x, filename, fileopt = "new", sharing = c("public", "private",
-  "secret"))
+plotly_POST(x, filename = NULL, fileopt = "overwrite",
+  sharing = c("public", "private", "secret"))
 }
 \arguments{
 \item{x}{either a ggplot object, a plotly object, or a list.}

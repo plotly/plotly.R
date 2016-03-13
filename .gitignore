@@ -4,3 +4,6 @@ Rapp.history
 *.RData
 *.Rproj.user
 .Rproj.user
+build_site.R
+inst/examples/*/*.html
+inst/examples/*/rsconnect/*
