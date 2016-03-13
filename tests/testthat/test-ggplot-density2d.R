@@ -51,7 +51,7 @@ test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
     length(unique(unlist(lapply(polygons, "[[", "fillcolor")))) > 1
   )
   # ensure the legend/guide are placed correctly
-  expect_true(L$layout$legend$y == 0.5)
+  expect_true(L$layout$legend$y < 0.5)
   expect_true(L$layout$legend$yanchor == "top")
   expect_true(colorbar$marker$colorbar$y == 1)
   expect_true(colorbar$marker$colorbar$yanchor == "top")
