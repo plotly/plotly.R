@@ -1,8 +1,12 @@
-3.3.2 -- 12 Mar 2016
+3.4.0 -- 12 Mar 2016
 
 NEW FEATURES:
 
 * geom_map() and geom_hex() are now supported.
+
+CHANGES:
+
+* The default value of the fileopt argument was changed from "new" to "overwrite".
 
 BUGFIX:
 

@@ -35,17 +35,13 @@
 #' plotly_POST(p, filename = "mtcars-bar-plot")
 #' }
 
-plotly_POST <- function(x, filename, fileopt = "new", 
+plotly_POST <- function(x, filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret")) {
   x <- plotly_build(x)
-  x$filename <- if (!missing(filename)) { 
-    filename
-  } else {
-    # try our damndest to assign a sensible filename
-    x$filename %||% as.character(x$layout$title) %||% 
+  # try our damndest to assign a sensible filename
+  x$filename <- x$filename %||% as.character(x$layout$title) %||% 
       paste(c(x$layout$xaxis$title, x$layout$yaxis$title, x$layout$zaxis$title), 
-            collapse = " vs. ") %||% "plot from api" 
-  }
+            collapse = " vs. ") %||% paste("Created at", Sys.time())
   if (!is.null(x$fileopt)) {
     warning("fileopt was specified in the wrong place.",
             "Please specify in plotly_POST()")
@@ -68,8 +64,8 @@ plotly_POST <- function(x, filename, fileopt = "new",
     origin = "plot",
     platform = "R",
     version = as.character(packageVersion("plotly")),
-    args = to_JSON(x$data),
-    kwargs = to_JSON(x[get_kwargs()])
+    args = to_JSON(compact(x$data)),
+    kwargs = to_JSON(compact(x[get_kwargs()]))
   )
   base_url <- file.path(get_domain(), "clientresp")
   resp <- httr::POST(base_url, body = bod)
