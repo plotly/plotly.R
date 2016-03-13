@@ -189,26 +189,26 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, ...) {
 #' @export
 to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
   if (grid::is.unit(params$arrow$length)) {
-    # arrows are an extension of the line segment, and we know the arrow length
-    # (think r in polar coordinates), so we find the angle of the segment 
-    # wrt to x-axis (i.e., theta in polar)
-    thetas <- atan2(abs(data$y - data$yend), abs(data$x - data$xend))
-    arrowLength <- unitConvert(params$arrow$length, "npc", "width")
-    lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
-    # arrow length on the data scale
-    r <- arrowLength * diff(lay$x) * 10
-    # do everything in radians
-    arrowAngle <- (params$arrow$angle / 2) * (pi / 180)
-    data$x1 <- data$xend + sign(data$x - data$xend) * r * cos(thetas + arrowAngle)
-    data$x2 <- data$xend + sign(data$x - data$xend) * r * cos(thetas - arrowAngle)
-    data$y1 <- data$yend + sign(data$y - data$yend) * r * sin(thetas + arrowAngle)
-    data$y2 <- data$yend + sign(data$y - data$yend) * r * sin(thetas - arrowAngle)
-    # probably wrong
-    #R <- r / cos(arrowAngle / 2)
-    #data$xside1 <- data$xArrowBase + R * cos(arrowAngle / 2)
-    #data$yside1 <- data$yArrowBase + R * sin(arrowAngle / 2)
-    #data$xside2 <- data$xArrowBase + R * cos(-arrowAngle / 2)
-    #data$yside2 <- data$yArrowBase + R * sin(-arrowAngle / 2)
+    # first, we need to find the length of the arrow sides
+    # see equation (10) - http://mathworld.wolfram.com/IsoscelesTriangle.html
+    arrowAngle <- (params$arrow$angle) * (pi / 180)
+    h <- unitConvert(params$arrow$length, "npc", "width")
+    # length from arrow tip to the base (on the data scale)
+    # TODO: generalize to multiple panels
+    h <- h * with(layout, sqrt((x_max - x_min)^2 + (y_max - y_min)^2))
+    R <- h / cos(0.5 * arrowAngle)
+    
+    # the arrow tip is located at (xend, yend)
+    # think of this location as the origin in polar coordinates, since 
+    # we know the distance from the arrow tip to corners
+    theta <- atan2(abs(data$y - data$yend), abs(data$x - data$xend))
+    data$x1 <- data$xend + sign(data$x - data$xend) * R * cos(theta + arrowAngle)
+    data$x2 <- data$xend + sign(data$x - data$xend) * R * cos(theta - arrowAngle)
+    data$y1 <- data$yend + sign(data$y - data$yend) * R * sin(theta + arrowAngle)
+    data$y2 <- data$yend + sign(data$y - data$yend) * R * sin(theta - arrowAngle)
+    
+    # the range for theta is (0, pi), we want (0, pi / 2)
+    
     ## TODO: group by PANEL at least!
     data$group <- seq_len(nrow(data))
     data$x <- NULL
