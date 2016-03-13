@@ -47,7 +47,8 @@ Suggests:
     RColorBrewer,
     Rserve,
     RSclient,
-    broom
+    broom,
+    hexbin
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
