@@ -241,7 +241,7 @@ to_basic.GeomHex <- function(data, prestats_data, layout, params, ...) {
   dy <- resolution(data$y, FALSE)/sqrt(3)/2 * 1.15
   hexC <- hexbin::hexcoords(dx, dy, n = 1)
   n <- nrow(data)
-  data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 2)
+  data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 6)
   x <- rep.int(hexC$x, n) * rep(data$size, each = 6) + rep(data$x, each = 6)
   y <- rep.int(hexC$y, n) * rep(data$size, each = 6) + rep(data$y, each = 6)
   data <- data[rep(seq_len(n), each = 6), ]
