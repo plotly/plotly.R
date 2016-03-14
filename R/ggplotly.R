@@ -303,6 +303,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginX, 2),
     rep(panelMarginY, 2)
   )
+  
   doms <- get_domains(nPanels, nRows, margins)
 
   for (i in seq_len(nPanels)) {
@@ -428,12 +429,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     gglayout$shapes <- c(gglayout$shapes, border)
 
     # facet strips -> plotly annotations
-    # TODO: use p$facet$labeller for the actual strip text!
     if (!is_blank(theme[["strip.text.x"]]) &&
         (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       txt <- paste(
-        lay[, as.character(p$facet[[vars]])], collapse = ", "
+        p$facet$labeller(lay[names(p$facet[[vars]])]), collapse = ", "
       )
       lab <- make_label(
         txt, x = mean(xdom), y = max(ydom),
@@ -447,7 +447,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     if (inherits(p$facet, "grid") && lay$COL == nCols && nRows > 1 &&
         !is_blank(theme[["strip.text.y"]])) {
       txt <- paste(
-        lay[, as.character(p$facet$rows)], collapse = ", "
+        p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
       )
       lab <- make_label(
         txt, x = max(xdom), y = mean(ydom),

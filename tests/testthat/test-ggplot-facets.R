@@ -97,3 +97,27 @@ test_that("facet_wrap() doesn't create interior scales", {
   info <- save_outputs(g, "facet_wrap")
   expect_equal(unique(unlist(lapply(info$data, "[[", "yaxis"))), "y")
 })
+
+
+g <- ggplot(mtcars, aes(mpg, wt)) + 
+  geom_point() +
+  facet_wrap( ~ am, labeller = label_both)
+
+test_that("facet_wrap translates simple labeller function", {
+  info <- save_outputs(g, "facet_wrap-labeller")
+  txt <- sapply(info$layout$annotations, "[[", "text")
+  expect_true(all(c("am: 0", "am: 1") %in% txt))
+})
+
+g <- ggplot(mtcars, aes(mpg, wt)) + 
+  geom_point() +
+  facet_grid(vs ~ am, labeller = label_both)
+
+test_that("facet_grid translates simple labeller function", {
+  info <- save_outputs(g, "facet_grid-labeller")
+  txt <- sapply(info$layout$annotations, "[[", "text")
+  expect_true(
+    all(c("am: 0", "am: 1", "vs: 0", "vs: 1") %in% txt)
+  )
+})
+
