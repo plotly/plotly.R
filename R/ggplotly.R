@@ -304,7 +304,16 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginY, 2)
   )
   
-  doms <- get_domains(nPanels, nRows, margins)
+  # if fixed coordinates, add to the plot margin
+  if (inherits(p$coordinates, "CoordFixed") &&
+      !isTRUE(Reduce(`&&`, p$facet$free))) {
+    rng <- panel$ranges[[1]]
+    aspect_ratio <- diff(rng$y.range)/diff(rng$x.range) * p$coordinates$ratio
+  } else {
+    aspect_ratio <- 1
+  }
+  
+  doms <- get_domains(nPanels, nRows, margins, aspect_ratio)
 
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
