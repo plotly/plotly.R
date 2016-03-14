@@ -1,9 +1,14 @@
+3.4.3 -- 14 Mar 2016
+
+BUGFIX:
+
+Custom facet labeller functions will now translate correctly. See #507.
+
 3.4.2 -- 14 Mar 2016
 
 BUGFIX:
 
 Automatic resizing will now occur only when layout.autosize is true (the default). See #403.
-
 
 3.4.1 -- 13 Mar 2016
 
