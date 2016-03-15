@@ -571,14 +571,14 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       axisTitle <- theme$axis.title %||% theme$axis.title.x
       y <- y - 
         unitConvert(axisTitle, "npc", "height") - 
-        (tickSize) / (graphSize$height)
+        # the multiplier is for a little cushion
+        1.5 * (tickSize) / (graphSize$height)
     }
     if (ax == "yaxis") {
       axisTitle <- theme$axis.title %||% theme$axis.title.y
       x <- x - 
         unitConvert(axisTitle, "npc", "width") -
-        # TODO: why do I need the multiplier here?
-        1.75 * (tickSize) / (graphSize$width)
+        1.6 * (tickSize) / (graphSize$width)
     }
     gglayout$annotations <- c(
       gglayout$annotations,
