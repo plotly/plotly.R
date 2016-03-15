@@ -31,7 +31,8 @@ Imports:
     base64enc,
     htmlwidgets,
     tidyr,
-    plyr
+    plyr,
+    hexbin
 Suggests:
     dplyr,
     maps,
@@ -47,8 +48,7 @@ Suggests:
     RColorBrewer,
     Rserve,
     RSclient,
-    broom,
-    hexbin
+    broom
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
