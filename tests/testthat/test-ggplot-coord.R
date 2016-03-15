@@ -46,5 +46,5 @@ p <- qplot(1:10, rep(1:2, 5), colour = factor(1:10)) +
   coord_fixed() + scale_color_discrete("aslkdsadklnasn\nsa;mkdas;dm")
 
 test_that("fixed coordinates with long legend title", {
-  l <- save_outputs(p, "coord-fixed-long-entries")
+  l <- save_outputs(p, "coord-fixed-long-title")
 })
