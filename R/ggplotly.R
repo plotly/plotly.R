@@ -105,6 +105,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
+  
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(p)
   elements <- names(which(sapply(theme, inherits, "element")))
@@ -119,21 +120,78 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     paper_bgcolor = toRGB(theme$plot.background$fill),
     font = text2font(theme$text)
   )
+  # ensure there's enough space for the modebar (this is based on a height of 1em)
+  # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
+  gglayout$margin$t <- gglayout$margin$t + 16
   # main plot title
+  # TODO: implement subtitle? https://github.com/hadley/ggplot2/pull/1582
   if (nchar(p$labels$title %||% "") > 0) {
     gglayout$title <- faced(p$labels$title, theme$plot.title$face)
     gglayout$titlefont <- text2font(theme$plot.title)
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
-  # ensure there's enough space for the modebar (this is based on a height of 1em)
-  # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
-  gglayout$margin$t <- gglayout$margin$t + 16
-
-  # important stuff like panel$ranges is already flipped, but
-  # p$scales/p$labels/data aren't. We flip x/y trace data at the very end
-  # and scales in the axis loop below.
-  if (inherits(p$coordinates, "CoordFlip")) {
-    p$labels[c("x", "y")] <- p$labels[c("y", "x")]
+  
+  # account for exterior facet strips in `layout.margin`
+  if (has_facet(p)) {
+    stripTextX <- theme$strip.text.x %||% theme$strip.text
+    gglayout$margin$t <- gglayout$margin$t + 
+      unitConvert(stripTextX, "pixels", "height")
+    if (inherits(p$facet, "grid")) {
+      stripTextY <- theme$strip.text.y %||% theme$strip.text
+      gglayout$margin$r <- gglayout$margin$r +
+        unitConvert(stripTextY, "pixels", "width")
+    }
+  }
+  
+  # create xaxis/yaxis "templates"
+  # here we also account for ticks, tick text, and axis titles in `layout.margin`
+  # (the _entire_ plot margin must be known before we compute axis domains)
+  for (xy in c("x", "y")) {
+    # find axis specific theme elements that inherit from their parent
+    theme_el <- function(el) {
+      theme[[paste0(el, ".", xy)]] %||% theme[[el]]
+    }
+    axisTicks <- theme_el("axis.ticks")
+    axisText <- theme_el("axis.text")
+    axisTitle <- theme_el("axis.title")
+    axisLine <- theme_el("axis.line")
+    panelGrid <- theme_el("panel.grid.major")
+    stripText <- theme_el("strip.text")
+    # panel$ranges are flipped, but p$labels/p$scales aren't
+    if (inherits(p$coordinates, "CoordFlip")) xy <- setdiff(c("x", "y"), xy)
+    axisTitleText <- scales$get_scales(xy)$name %||% p$labels[[xy]] %||% ""
+    # type of unit conversion
+    type <- if (xy == "x") "height" else "width"
+    # all these axis properties are "global"
+    gglayout[[paste0(xy, "axis")]] <- axisObj <- list(
+      # titles are really drawn as annotations, but we'll need this later
+      title = if (is_blank(axisTitle)) "" else axisTitleText,
+      type = "linear",
+      autorange = FALSE,
+      tickmode = "array",
+      ticks = if (is_blank(axisTicks)) "" else "outside",
+      tickcolor = toRGB(axisTicks$colour),
+      ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
+      tickwidth = unitConvert(axisTicks, "pixels", type),
+      showticklabels = !is_blank(axisText),
+      tickfont = text2font(axisText, "height"),
+      tickangle = -(axisText$angle %||% 0),
+      showline = !is_blank(axisLine),
+      linecolor = toRGB(axisLine$colour),
+      linewidth = unitConvert(axisLine, "pixels", type),
+      showgrid = !is_blank(panelGrid),
+      gridcolor = toRGB(panelGrid$colour),
+      gridwidth = unitConvert(panelGrid, "pixels", type),
+      zeroline = FALSE
+    )
+    # account for the _maximum_ tick text length
+    axisTickText <- unlist(lapply(panel$ranges, "[[", paste0(xy, ".labels")))
+    axisTickText <- axisTickText[which.max(nchar(axisTickText))]
+    # (apparently ggplot2 doesn't support axis.title/axis.text margins)
+    side <- if (xy == "x") "b" else "l"
+    gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
+      bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
+      bbox(axisObj$title, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
   }
 
   # important panel summary stats
@@ -244,19 +302,146 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     tr$hoverinfo <- tr$hoverinfo %||%"text" 
     tr 
   })
-  # show only one legend entry per legendgroup
+  # only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
   traces <- Map(function(x, y) { 
     x$showlegend <- isTRUE(x$showlegend) && y 
     x
   }, traces, !duplicated(grps))
-
+  
+  # If a trace isn't named, it shouldn't have additional hoverinfo (i.e., trace0)
+  traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
+  
   # ------------------------------------------------------------------------
-  # axis/facet/margin conversion
+  # guide conversion
+  #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
+  #   To do so, we borrow some of the body of ggplot2:::guides_build().
   # ------------------------------------------------------------------------
+  
+  # is there be a legend?
+  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) > 1
+  # legend styling
+  gglayout$legend <- list(
+    bgcolor = toRGB(theme$legend.background$fill),
+    bordercolor = toRGB(theme$legend.background$colour),
+    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
+    font = text2font(theme$legend.text)
+  )
+  # if theme(legend.position = "none") is used, don't show a legend _or_ guide
+  if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
+    gglayout$showlegend <- FALSE
+  } else {
+    # by default, guide boxes are vertically aligned
+    theme$legend.box <- theme$legend.box %||% "vertical"
+    
+    # size of key (also used for bar in colorbar guide)
+    theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
+    theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
+    
+    # legend direction must be vertical
+    theme$legend.direction <- theme$legend.direction %||% "vertical"
+    if (!identical(theme$legend.direction, "vertical")) {
+      warning(
+        "plotly.js does not (yet) support horizontal legend items \n",
+        "You can track progress here: \n",
+        "https://github.com/plotly/plotly.js/issues/53 \n",
+        call. = FALSE
+      )
+      theme$legend.direction <- "vertical"
+    }
+    
+    # justification of legend boxes
+    theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
+    # scales -> data for guides
+    gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
+    if (length(gdefs) > 0) {
+      gdefs <- ggfun("guides_merge")(gdefs)
+      gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
+    }
+    
+    # colourbar -> plotly.js colorbar
+    colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
+    nguides <- length(colorbar) + gglayout$showlegend
+    # If we have 2 or more guides, set x/y positions accordingly
+    if (nguides >= 2) {
+      # place legend at the bottom
+      gglayout$legend$y <- 1 / nguides
+      gglayout$legend$yanchor <- "top"
+      # adjust colorbar position(s)
+      for (i in seq_along(colorbar)) {
+        colorbar[[i]]$marker$colorbar$yanchor <- "top"
+        colorbar[[i]]$marker$colorbar$len <- 1 / nguides
+        colorbar[[i]]$marker$colorbar$y <- 1 - (i - 1) * (1 / nguides)
+      }
+    }
+    traces <- c(traces, colorbar)
+    
+    # legend title annotation - https://github.com/plotly/plotly.js/issues/276
+    legendTitles <- unlist(lapply(gdefs, function(g) {
+      if (inherits(g, "legend")) strsplit(g$title, "\\\n") else NULL
+    }))
+    legendTitle <- paste(legendTitles, collapse = "<br>")
+    titleAnnotation <- make_label(
+      legendTitle, 
+      x = gglayout$legend$x %||% 1.02,
+      y = gglayout$legend$y %||% 1, 
+      theme$legend.title,
+      xanchor = "left",
+      yanchor = "top",
+      align = "left"
+    )
+    gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
+    # adjust the height of the legend to accomodate for the title
+    # this assumes the legend always appears below colorbars
+    gglayout$legend$y <- (gglayout$legend$y %||% 1) - 
+      length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+  }
+  
+  # legend width is required to estimate the graphing area 
+  # (which is required to do fixed coordinates, among other things)
+  showLegend <- sapply(traces, "[[", "showlegend")
+  legendWidth <- if (gglayout$showlegend) {
+    # plotly.js accomodates for long legend entry names
+    # so if we have a long legend title, but short entry names, add whitespace!
+    nCharTitle <- max(nchar(legendTitles))
+    legendEntries <- sapply(traces, "[[", "name")[showLegend]
+    nCharEntry <- max(nchar(legendEntries))
+    # trace with the longest _shown_ name
+    idx <- which(showLegend)[which.max(nchar(legendEntries))]
+    m <- gglayout$legend$font$size / 
+      gglayout$annotations[[length(gglayout$annotations)]]$font$size
+    if (nCharTitle * m > nCharEntry) {
+      leftOver <- round(nCharTitle * m) - nCharEntry
+      buffer <- paste(rep(" ", leftOver), collapse = "")
+      traces[[idx]]$name <- paste0(traces[[idx]]$name, buffer)
+    }
+    bbox(traces[[idx]]$name, 0, gglayout$legend$font$size)[["width"]]
+  } else {
+    0
+  }
+  
+  # plotting/graphing area in pixels (if user doesn't supply height/width, we
+  # approximate them using the graphics device)
+  plotSize <- list(
+    height = height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height"),
+    width = width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  )
+  graphSize <- list(
+    height = plotSize$height - (gglayout$margin$t + gglayout$margin$b),
+    width = plotSize$width - (gglayout$margin$l + gglayout$margin$r) - legendWidth
+  )
+  
+  # obtain ratio for fixed coordinates
+  ratio <- if (inherits(p$coordinates, "CoordFixed") &&
+               !isTRUE(Reduce(`&&`, p$facet$free))) {
+    rng <- panel$ranges[[1]]
+    aspectRatio <- diff(rng$y.range)/diff(rng$x.range) * p$coordinates$ratio
+    aspectRatio * with(graphSize, width / height)
+  } else {
+    NULL
+  }
 
-  # panel margins must be computed before panel/axis loops
-  # (in order to use get_domains())
+  # spacing between panels
   panelMarginX <- unitConvert(
     theme[["panel.margin.x"]] %||% theme[["panel.margin"]],
     "npc", "width"
@@ -304,139 +489,33 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginY, 2)
   )
   
-  # if fixed coordinates, add to the plot margin
-  if (inherits(p$coordinates, "CoordFixed") &&
-      !isTRUE(Reduce(`&&`, p$facet$free))) {
-    rng <- panel$ranges[[1]]
-    aspect_ratio <- diff(rng$y.range)/diff(rng$x.range) * p$coordinates$ratio
-  } else {
-    aspect_ratio <- 1
-  }
-  
-  doms <- get_domains(nPanels, nRows, margins, aspect_ratio)
+  doms <- get_domains(nPanels, nRows, margins, ratio)
 
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
-      # find axis specific theme elements that inherit from their parent
-      theme_el <- function(el) {
-        theme[[paste0(el, ".", xy)]] %||% theme[[el]]
-      }
-      axisTicks <- theme_el("axis.ticks")
-      axisText <- theme_el("axis.text")
-      axisTitle <- theme_el("axis.title")
-      axisLine <- theme_el("axis.line")
-      panelGrid <- theme_el("panel.grid.major")
-      stripText <- theme_el("strip.text")
-
       axisName <- lay[, paste0(xy, "axis")]
-      anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
-      # stuff like panel$ranges is already flipped, but scales aren't
-      sc <- if (inherits(p$coordinates, "CoordFlip")) {
-        scales$get_scales(setdiff(c("x", "y"), xy))
-      } else {
-        scales$get_scales(xy)
-      }
-      # type of unit conversion
-      type <- if (xy == "x") "height" else "width"
-      # https://plot.ly/r/reference/#layout-xaxis
-      axisObj <- list(
-        type = "linear",
-        autorange = FALSE,
-        tickmode = "array",
-        range = rng[[paste0(xy, ".range")]],
-        ticktext = rng[[paste0(xy, ".labels")]],
-        # TODO: implement minor grid lines with another axis object
-        # and _always_ hide ticks/text?
-        tickvals = rng[[paste0(xy, ".major")]],
-        ticks = if (is_blank(axisTicks)) "" else "outside",
-        tickcolor = toRGB(axisTicks$colour),
-        ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
-        tickwidth = unitConvert(axisTicks, "pixels", type),
-        showticklabels = !is_blank(axisText),
-        tickfont = text2font(axisText, "height"),
-        tickangle = - (axisText$angle %||% 0),
-        showline = !is_blank(axisLine),
-        linecolor = toRGB(axisLine$colour),
-        linewidth = unitConvert(axisLine, "pixels", type),
-        showgrid = !is_blank(panelGrid),
-        domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
-        gridcolor = toRGB(panelGrid$colour),
-        gridwidth = unitConvert(panelGrid, "pixels", type),
-        zeroline = FALSE,
-        anchor = anchor
+      gglayout[[axisName]] <- modifyList(
+        gglayout[[paste0(xy, "axis")]],
+        list(
+          anchor = lay[, paste0(xy, "anchor")],
+          range = rng[[paste0(xy, ".range")]],
+          ticktext = rng[[paste0(xy, ".labels")]],
+          # tickvals come on 0-1 scale, but we want them on data scale
+          tickvals = scales::rescale(
+            rng[[paste0(xy, ".major")]], rng[[paste0(xy, ".range")]], from = c(0, 1)
+          ),
+          domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))]))
+        )
       )
-      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
-      # this way both dates/datetimes are on same scale
-      # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (identical("date", sc$scale_name)) {
-        axisObj$range <- axisObj$range * 86400000
-        if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
-        }
-      }
-      # tickvals are currently on 0-1 scale, but we want them on data scale
-      axisObj$tickvals <- scales::rescale(
-        axisObj$tickvals, to = axisObj$range, from = c(0, 1)
-      )
-      # attach axis object to the layout
-      gglayout[[axisName]] <- axisObj
-
-      # do some stuff that should be done once for the entire plot
-      if (i == 1) {
-        # add space for exterior facet strips in `layout.margin`
-        if (has_facet(p)) {
-          stripSize <- unitConvert(stripText, "pixels", type)
-          if (xy == "x") {
-            gglayout$margin$t <- gglayout$margin$t + stripSize
-          }
-          if (xy == "y" && inherits(p$facet, "grid")) {
-            gglayout$margin$r <- gglayout$margin$r + stripSize
-          }
-        }
-        axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
-        if (is_blank(axisTitle)) axisTitleText <- ""
-        axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
-        side <- if (xy == "x") "b" else "l"
-        # account for axis ticks, ticks text, and titles in plot margins
-        # (apparently ggplot2 doesn't support axis.title/axis.text margins)
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
-          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
-          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
-        # draw axis titles as annotations
-        # (plotly.js axis titles aren't smart enough to dodge ticks & text)
-        if (nchar(axisTitleText) > 0) {
-          axisTextSize <- unitConvert(axisText, "npc", type)
-          axisTitleSize <- unitConvert(axisTitle, "npc", type)
-          offset <-
-            (0 -
-               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
-               unitConvert(theme$axis.ticks.length, "npc", type))
-          # npc is on a 0-1 scale of the _entire_ device,
-          # but these units _should_ be wrt to the plotting region
-          # multiplying the offset by 2 seems to work, but this is a terrible hack
-          offset <- 1.75 * offset
-          x <- if (xy == "x") 0.5 else offset
-          y <- if (xy == "x") offset else 0.5
-          gglayout$annotations <- c(
-            gglayout$annotations,
-            make_label(
-              faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-              xanchor = "center", yanchor = "middle"
-            )
-          )
-        }
-      }
-
     } # end of axis loop
-
+    # panel border is a element_rect()
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-
+    
     # facet strips -> plotly annotations
     if (!is_blank(theme[["strip.text.x"]]) &&
         (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
@@ -467,91 +546,56 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       strip <- make_strip_rect(xdom, ydom, theme, "right")
       gglayout$shapes <- c(gglayout$shapes, strip)
     }
-
   } # end of panel loop
-
-  # ------------------------------------------------------------------------
-  # guide conversion
-  #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
-  #   To do so, we borrow some of the body of ggplot2:::guides_build().
-  # ------------------------------------------------------------------------
-  # will there be a legend?
-  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) > 1
-
-  # legend styling
-  gglayout$legend <- list(
-    bgcolor = toRGB(theme$legend.background$fill),
-    bordercolor = toRGB(theme$legend.background$colour),
-    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
-    font = text2font(theme$legend.text)
-  )
-
-  # if theme(legend.position = "none") is used, don't show a legend _or_ guide
-  if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
-    gglayout$showlegend <- FALSE
-  } else {
-    # by default, guide boxes are vertically aligned
-    theme$legend.box <- theme$legend.box %||% "vertical"
-
-    # size of key (also used for bar in colorbar guide)
-    theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
-    theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
-
-    # legend direction must be vertical
-    theme$legend.direction <- theme$legend.direction %||% "vertical"
-    if (!identical(theme$legend.direction, "vertical")) {
-      warning(
-        "plotly.js does not (yet) support horizontal legend items \n",
-        "You can track progress here: \n",
-        "https://github.com/plotly/plotly.js/issues/53 \n",
-        call. = FALSE
+  
+  # draw axis titles as annotations
+  # (plotly.js axis titles aren't smart enough to dodge ticks & text)
+  xAxes <- gglayout[grep("^xaxis", names(gglayout))]
+  yAxes <- gglayout[grep("^yaxis", names(gglayout))]
+  xDomain <- range(unlist(lapply(xAxes, "[[", "domain")))
+  yDomain <- range(unlist(lapply(yAxes, "[[", "domain")))
+  
+  for (ax in c("xaxis", "yaxis")) {
+    if (nchar(gglayout[[ax]]$title %||% "") == 0) next
+    x <- if (ax == "xaxis") mean(xDomain) else min(xDomain)
+    y <- if (ax == "xaxis") min(yDomain) else mean(yDomain)
+    tickText <- gglayout[[ax]]$ticktext
+    tickText <- tickText[which.max(nchar(tickText))]
+    type <- if (ax == "xaxis") "height" else "width"
+    # scale tickfont size to graphing region
+    fontSize <- unitConvert(grid::unit(1, "npc"), "pixels", type) / graphSize[[type]] * gglayout[[ax]]$tickfont$size
+    tickSize <- gglayout[[ax]]$ticklen + 
+      bbox(tickText, gglayout[[ax]]$tickangle, fontSize)[[type]]
+    # estimate the offset required to dodge ticks/ticktext
+    if (ax == "xaxis") {
+      axisTitle <- theme$axis.title %||% theme$axis.title.x
+      y <- y - 
+        unitConvert(axisTitle, "npc", "height") - 
+        (tickSize) / (graphSize$height)
+    }
+    if (ax == "yaxis") {
+      axisTitle <- theme$axis.title %||% theme$axis.title.y
+      x <- x - 
+        unitConvert(axisTitle, "npc", "width") -
+        # TODO: why do I need the multiplier here?
+        1.75 * (tickSize) / (graphSize$width)
+    }
+    gglayout$annotations <- c(
+      gglayout$annotations,
+      make_label(
+        txt = faced(gglayout[[ax]]$title, gglayout[[ax]]$face),
+        x = x, y = y, el = axisTitle,
+        xanchor = "center", yanchor = "middle"
       )
-      theme$legend.direction <- "vertical"
-    }
-
-    # justification of legend boxes
-    theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
-    # scales -> data for guides
-    gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
-    if (length(gdefs) > 0) {
-      gdefs <- ggfun("guides_merge")(gdefs)
-      gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
-    }
-
-    # colourbar -> plotly.js colorbar
-    colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
-    nguides <- length(colorbar) + gglayout$showlegend
-    # If we have 2 or more guides, set x/y positions accordingly
-    if (nguides >= 2) {
-      # place legend at the bottom
-      gglayout$legend$y <- 1 / nguides
-      gglayout$legend$yanchor <- "top"
-      # adjust colorbar position(s)
-      for (i in seq_along(colorbar)) {
-        colorbar[[i]]$marker$colorbar$yanchor <- "top"
-        colorbar[[i]]$marker$colorbar$len <- 1 / nguides
-        colorbar[[i]]$marker$colorbar$y <- 1 - (i - 1) * (1 / nguides)
-      }
-    }
-    traces <- c(traces, colorbar)
-    
-    # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-    legendTitle <- paste(legendTitles, collapse = "<br>")
-    titleAnnotation <- make_label(
-      legendTitle, 
-      x = gglayout$legend$x %||% 1.02,
-      y = gglayout$legend$y %||% 1, 
-      theme$legend.title,
-      xanchor = "left",
-      yanchor = "top"
     )
-    gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-    # adjust the height of the legend to accomodate for the title
-    # this assumes the legend always appears below colorbars
-    gglayout$legend$y <- (gglayout$legend$y %||% 1) - 
-      length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
   }
+  
+  idx <- grepl("^xaxis", names(gglayout))
+  gglayout[idx] <- lapply(gglayout[idx], function(x) {x$title <- NULL; x})
+  idy <- grepl("^yaxis", names(gglayout))
+  gglayout[idy] <- lapply(gglayout[idy], function(x) {x$title <- NULL; x})
+
+
 
   # geom_bar() hacks
   geoms <- sapply(layers, ggtype, "geom")
@@ -637,10 +681,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   for (i in ax) {
     gglayout[[i]]$hoverformat <- ".2f"
   }
-  # If a trace isn't named, it shouldn't have additional hoverinfo
-  traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
 
-  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
+  l <- list(data = setNames(compact(traces), NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$width <- width
@@ -698,15 +740,16 @@ mm2pixels <- function(u) {
 }
 
 verifyUnit <- function(u) {
-  # the default unit in ggplot2 is millimeters (unless it's element_text())
-  if (is.null(attr(u, "unit"))) {
-    u <- if (inherits(u, "element")) {
-      grid::unit(u$size %||% 0, "points")
-    } else {
-      grid::unit(u %||% 0, "mm")
-    }
-  }
-  u
+  # in ggplot2, data size is commonly in mm, while elements are in points
+  if (inherits(u, "unit")) return(u)
+  if (inherits(u, "element")) return(grid::unit(u$size %||% 0, "points"))
+  grid::unit(u %||% 0, "mm")
+}
+
+# approximate the height/width ratio of the device
+device_ratio <- function() {
+  unitConvert(grid::unit(1, "npc"), "pixels", "height") / 
+    unitConvert(grid::unit(1, "npc"), "pixels", "width")
 }
 
 # detect a blank theme element
@@ -863,8 +906,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
     list(
-      x = gglayout$xaxis$range,
-      y = gglayout$yaxis$range,
+      x = NA,
+      y = NA,
       # esentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",
@@ -902,3 +945,5 @@ gdef2trace <- function(gdef, theme, gglayout) {
     NULL
   }
 }
+
+

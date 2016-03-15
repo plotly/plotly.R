@@ -60,13 +60,5 @@ test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
   #test some properties that shouldn't be sensitive to ggplot2 defaults
   expect_true(colorbar$marker$colorbar$title == "level")
   
-  # are the hidden colorbar markers on the correct range?
-  for (xy in c("x", "y")) {
-    rng <- L$layout[[paste0(xy, "axis")]]$range
-    expect_true(
-      all(min(rng) <= colorbar[[xy]] & colorbar[[xy]] <= max(rng))
-    )
-  }
-  
 })
 

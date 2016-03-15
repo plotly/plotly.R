@@ -147,10 +147,10 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01, aspect = NULL) {
   
   cushion <- list(x = 0, y = 0)
   if (!is.null(aspect) && aspect < 1) {
-    cushion <- list(x = 0, y = (1 - nrows * aspect) / nrows)
+    cushion <- list(x = 0, y = (1 - aspect) / 2)
   }
   if (!is.null(aspect) && aspect >= 1) {
-    cushion <- list(x = (1 - ncols * 1 / aspect) / ncols, y = 0)
+    cushion <- list(x = (1 - 1 / aspect) / 2, y = 0)
   }
 
   xs <- vector("list", ncols)
