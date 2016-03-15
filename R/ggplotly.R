@@ -403,13 +403,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   legendWidth <- if (gglayout$showlegend) {
     # plotly.js accomodates for long legend entry names
     # so if we have a long legend title, but short entry names, add whitespace!
-    nCharTitle <- max(nchar(legendTitles))
+    titleAnnotation <- gglayout$annotations[[length(gglayout$annotations)]]
+    nCharTitle <- if (nchar(titleAnnotation$text %||% "") > 0) max(nchar(legendTitles)) else 0
     legendEntries <- sapply(traces, "[[", "name")[showLegend]
     nCharEntry <- max(nchar(legendEntries))
     # trace with the longest _shown_ name
     idx <- which(showLegend)[which.max(nchar(legendEntries))]
-    m <- gglayout$legend$font$size / 
-      gglayout$annotations[[length(gglayout$annotations)]]$font$size
+    m <- gglayout$legend$font$size / (titleAnnotation$font$size %||% gglayout$legend$font$size)
     if (nCharTitle * m > nCharEntry) {
       leftOver <- round(nCharTitle * m) - nCharEntry
       buffer <- paste(rep(" ", leftOver), collapse = "")
