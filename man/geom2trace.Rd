@@ -4,12 +4,14 @@
 \alias{geom2trace}
 \title{Convert a "basic" geoms to a plotly.js trace.}
 \usage{
-geom2trace(data, params)
+geom2trace(data, params, p)
 }
 \arguments{
 \item{data}{the data returned by \code{plotly::to_basic}.}
 
 \item{params}{parameters for the geom, statistic, and 'constant' aesthetics}
+
+\item{p}{a ggplot2 object (the conversion may depend on scales, for instance).}
 }
 \description{
 This function makes it possible to convert ggplot2 geoms that

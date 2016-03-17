@@ -73,6 +73,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   scale_x <- function() scales$get_scales("x")
   scale_y <- function() scales$get_scales("y")
   panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
+  # Before mapping x/y position, save the domain (for discrete scales)
+  # to display in tooltip. 
+  data <- lapply(data, function(d) {
+    if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
+    if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
+    d
+  })
   data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
   # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
   prestats_data <- data
@@ -187,20 +194,17 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       # stat specific mappings
       grep("^\\.\\.", as.character(x$stat$default_aes), value = TRUE)
     )
-    # remove leading/trailing dots in "hidden" stat aes
-    map <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
+    # "hidden" names should be taken verbatim
+    idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
+    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
+    map[idx] <- hiddenMap[idx]
+    names(map)[idx] <- hiddenMap[idx]
     if (!identical(tooltip, "all")) {
       map <- map[tooltip]
     }
-    # tooltips for discrete positional scales are misleading
-    if (scales$get_scales("x")$is_discrete()) {
-      map <- map[!names(map) %in% "x"]
-    }
-    if (scales$get_scales("y")$is_discrete()) {
-      map <- map[!names(map) %in% "y"]
-    }
     map
   })
+  
   
   # attach a new column (hovertext) to each layer of data that should get mapped
   # to the text trace property
@@ -234,10 +238,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     x
   }, data, aesMap)
   
+  
+  
   # layers -> plotly.js traces
-  traces <- layers2traces(
-    data, prestats_data, layers, panel$layout, scales, p$labels
-  )
+  traces <- layers2traces(data, prestats_data, panel$layout, p)
+  
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
   traces <- lapply(traces, function(tr) { 

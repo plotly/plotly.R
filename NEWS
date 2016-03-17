@@ -1,3 +1,9 @@
+3.4.4 -- 17 Mar 2016
+
+BUGFIX:
+
+Show discrete positional values in tooltip (see #515); better GeomTile conversion; pass plot object into layers2traces.
+
 3.4.3 -- 14 Mar 2016
 
 BUGFIX:
