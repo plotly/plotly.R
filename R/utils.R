@@ -138,6 +138,11 @@ add_boxed <- function(x) {
     x$data[[i]]$error_x$arrayminus <- i(d$error_x$arrayminus)
     x$data[[i]]$error_y$arrayminus <- i(d$error_y$arrayminus)
   }
+  axes <- grep("^[x-y]axis", names(x$layout))
+  for (ax in axes) {
+    x$layout[[ax]]$ticktext <- i(x$layout[[ax]]$ticktext)
+    x$layout[[ax]]$tickvals <- i(x$layout[[ax]]$tickvals)
+  }
   x
 }
 
