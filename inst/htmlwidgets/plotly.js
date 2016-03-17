@@ -71,6 +71,13 @@ HTMLWidgets.widget({
     
     // send user input event data to shiny
     if (shinyMode) {
+      // https://plot.ly/javascript/zoom-events/
+      graphDiv.on('plotly_relayout', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-" + "plotly_relayout" + "-" + x.source, 
+          JSON.stringify(d)
+        );
+      });
       graphDiv.on('plotly_hover', sendEventData('plotly_hover'));
       graphDiv.on('plotly_click', sendEventData('plotly_click'));
       graphDiv.on('plotly_selected', sendEventData('plotly_selected'));

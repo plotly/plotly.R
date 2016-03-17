@@ -49,6 +49,6 @@ test_that("tickvals/ticktext are appropriately boxed", {
   d <- data.frame(x = factor(75), y = 10)
   p <- qplot(x, y, data = d) 
   info <- save_outputs(p, "point-box")
-  expect_true(plotly::to_JSON(info$layout$xaxis$tickvals) == '[1]')
-  expect_true(plotly::to_JSON(info$layout$xaxis$ticktext) == '["75"]')
+  expect_true(plotly:::to_JSON(info$layout$xaxis$tickvals) == '[1]')
+  expect_true(plotly:::to_JSON(info$layout$xaxis$ticktext) == '["75"]')
 })

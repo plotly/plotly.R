@@ -6,7 +6,8 @@ ui <- fluidPage(
   plotlyOutput("plot"),
   verbatimTextOutput("hover"),
   verbatimTextOutput("click"),
-  verbatimTextOutput("brush")
+  verbatimTextOutput("brush"),
+  verbatimTextOutput("zoom")
 )
 
 server <- function(input, output, session) {
@@ -37,6 +38,11 @@ server <- function(input, output, session) {
   output$brush <- renderPrint({
     d <- event_data("plotly_selected")
     if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else d
+  })
+  
+  output$zoom <- renderPrint({
+    d <- event_data("plotly_relayout")
+    if (is.null(d)) "Relayout (i.e., zoom) events appear here" else d
   })
   
 }
