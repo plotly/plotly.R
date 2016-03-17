@@ -1,3 +1,11 @@
+3.4.6 -- 17 Mar 2016
+
+NEW FEATURES:
+
+The 'plotly_relayout' event is now accessible via the event_data() function.
+
+Fixed #514.
+
 3.4.5 -- 17 Mar 2016
 
 BUGFIX:
