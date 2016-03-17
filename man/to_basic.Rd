@@ -4,7 +4,7 @@
 \alias{to_basic}
 \title{Convert a geom to a "basic" geom.}
 \usage{
-to_basic(data, prestats_data, layout, params, ...)
+to_basic(data, prestats_data, layout, params, p, ...)
 }
 \arguments{
 \item{data}{the data returned by \code{ggplot2::ggplot_build()}.}
@@ -14,6 +14,8 @@ to_basic(data, prestats_data, layout, params, ...)
 \item{layout}{the panel layout.}
 
 \item{params}{parameters for the geom, statistic, and 'constant' aesthetics}
+
+\item{p}{a ggplot2 object (the conversion may depend on scales, for instance).}
 
 \item{...}{currently ignored}
 }

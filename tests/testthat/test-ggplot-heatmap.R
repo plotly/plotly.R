@@ -25,7 +25,7 @@ test_that("geom_tile is translated to type=heatmap", {
     L$data[[1]]$hoverinfo == "text"
   )
   expect_true(
-    all(grepl("^value: [-]?[0-9]+$", c(L$data[[1]]$text)))
+    all(grepl("value: [-]?[0-9]+$", c(L$data[[1]]$text)))
   )
 })
 
@@ -42,4 +42,21 @@ test_that("geom_tile() scale_fill_gradient2()", {
   L <- save_outputs(p, "heatmap-midpoint")
   # one trace is for the colorbar
   expect_equal(length(L$data), 2)
+  expect_equal(L$data[[1]]$type, "heatmap")
 })
+
+tidy_cor <- function(x) {
+  co <- as.data.frame(cor(x))
+  co$var1 <- row.names(co)
+  tidyr::gather(co, var2, cor, -var1)
+}
+d <- tidy_cor(mtcars)
+p <- ggplot(d, aes(var1, var2, fill = cor)) + geom_tile()
+
+test_that("geom_tile() with discrete x/y", {
+  L <- save_outputs(p, "heatmap-discrete")
+  # one trace is for the colorbar
+  expect_equal(length(L$data), 2)
+  expect_equal(L$data[[1]]$type, "heatmap")
+})
+
