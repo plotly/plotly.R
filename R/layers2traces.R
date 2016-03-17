@@ -1,14 +1,14 @@
 # layer -> trace conversion
-layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
+layers2traces <- function(data, prestats_data, layout, p) {
   # Attach a "geom class" to each layer of data for method dispatch 
-  data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, layers)
+  data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
   # Extract parameters for each layer
-  params <- lapply(layers, function(x) {
+  params <- lapply(p$layers, function(x) {
     c(x$geom_params, x$stat_params, x$aes_params, position = ggtype(x, "position"))
   })
   # we draw legends only for discrete scales
   discreteScales <- list()
-  for (sc in scales$non_position_scales()$scales) {
+  for (sc in p$scales$non_position_scales()$scales) {
     if (sc$is_discrete()) {
       discreteScales[[sc$aesthetics]] <- sc
     }
@@ -22,7 +22,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers, 
     # (and we need to replicate the data/params in those cases)
-    d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]])
+    d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
     if (is.data.frame(d)) d <- list(d)
     for (j in seq_along(d)) {
       datz <- c(datz, d[j])
@@ -52,7 +52,7 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
     if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
-    trs <- Map(geom2trace, dl, paramz[i])
+    trs <- Map(geom2trace, dl, paramz[i], list(p))
     # are we splitting by a discrete scale on this layer?
     # if so, set name/legendgroup/showlegend
     isDiscrete <- names(d) %in% paste0(names(discreteScales), "_plotlyDomain")
@@ -104,14 +104,15 @@ layers2traces <- function(data, prestats_data, layers, layout, scales, labels) {
 #' @param prestats_data the data before statistics are computed.
 #' @param layout the panel layout.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
+#' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @param ... currently ignored
 #' @export
-to_basic <- function(data, prestats_data, layout, params, ...) {
+to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
 }
 
 #' @export
-to_basic.GeomViolin <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
   n <- nrow(data)
   revData <- data[order(data$y, decreasing = TRUE), ]
   idx <- !names(data) %in% c("x", "xmin", "xmax")
@@ -125,7 +126,7 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
   aez <- names(GeomBoxplot$default_aes)
   for (i in aez) {
     prestats_data[[i]] <- NULL
@@ -138,7 +139,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomSmooth <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
   dat <- prefix_class(data, "GeomPath")
   dat$alpha <- NULL
   if (!identical(params$se, FALSE)) {
@@ -150,33 +151,33 @@ to_basic.GeomSmooth <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomRibbon <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomRibbon <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomArea <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomArea <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomDensity <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomDensity <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(ribbon_dat(data), "GeomPolygon")
 }
 
 #' @export
-to_basic.GeomLine <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomLine <- function(data, prestats_data, layout, params, p, ...) {
   data <- data[order(data$x), ]
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomStep <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomStep <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
   # Every row is one segment, we convert to a line with several
   # groups which can be efficiently drawn by adding NA rows.
   data$group <- seq_len(nrow(data))
@@ -189,7 +190,7 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
   data <- with(data, {
@@ -202,7 +203,7 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomMap <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
   common <- intersect(data$map_id, params$map$id)
   data <- data[data$map_id %in% common, , drop = FALSE]
   map <- params$map[params$map$id %in% common, , drop = FALSE]
@@ -216,26 +217,24 @@ to_basic.GeomMap <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomRaster <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomRaster <- function(data, prestats_data, layout, params, p, ...) {
   data <- prefix_class(data, "GeomTile")
   to_basic(data, prestats_data, layout, params)
 }
 
 #' @export
-to_basic.GeomTile <- function(data, prestats_data, layout, params, ...) {
-  # geom2trace.GeomTile is a heatmap, which requires continuous fill and 
-  # a complete grid
-  g <- expand.grid(unique(data$x), unique(data$y))
-  if (nrow(g) != nrow(data) || is.discrete(prestats_data$fill)) {
+to_basic.GeomTile <- function(data, prestats_data, layout, params, p, ...) {
+  # geom2trace.GeomTile is a heatmap, which requires continuous fill
+  if (is.discrete(prestats_data$fill)) {
     data <- prefix_class(data, "GeomRect")
-    to_basic(data, prestats_data, layout, params)
+    to_basic(data, prestats_data, layout, params, p)
   } else {
     data
   }
 }
 
 #' @export
-to_basic.GeomHex <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomHex <- function(data, prestats_data, layout, params, p, ...) {
   # see ggplot2:::hexGrob
   dx <- resolution(data$x, FALSE)
   dy <- resolution(data$y, FALSE)/sqrt(3)/2 * 1.15
@@ -252,13 +251,13 @@ to_basic.GeomHex <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomContour <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomContour <- function(data, prestats_data, layout, params, p, ...) {
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
 
 #' @export
-to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) {
   if ("hovertext" %in% names(data)) {
     data$hovertext <- paste0(data$hovertext, "<br>")
   }
@@ -268,7 +267,7 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
@@ -280,7 +279,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
@@ -292,7 +291,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
@@ -304,13 +303,13 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomJitter <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomJitter <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(data, "GeomPoint")
 }
 
 
 #' @export
-to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
   # width for ggplot2 means size of the entire bar, on the data scale 
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
@@ -320,7 +319,7 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) {
   # height for ggplot2 means size of the entire bar, on the data scale 
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
@@ -330,13 +329,13 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.GeomLinerange <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) {
   data$width <- 0
   prefix_class(data, "GeomErrorbar")
 }
 
 #' @export
-to_basic.GeomPointrange <- function(data, prestats_data, layout, params, ...) {
+to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...) {
   data$width <- 0
   list(
     prefix_class(data, "GeomErrorbar"),
@@ -345,7 +344,7 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, ...) {
 }
 
 #' @export
-to_basic.default <- function(data, prestats_data, layout, params, ...) {
+to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
 
@@ -358,18 +357,19 @@ to_basic.default <- function(data, prestats_data, layout, params, ...) {
 #' 
 #' @param data the data returned by \code{plotly::to_basic}.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
+#' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @export
-geom2trace <- function(data, params) {
+geom2trace <- function(data, params, p) {
   UseMethod("geom2trace")
 }
 
 #' @export
-geom2trace.GeomBlank <- function(data, params) {
+geom2trace.GeomBlank <- function(data, params, p) {
   list()
 }
 
 #' @export
-geom2trace.GeomPath <- function(data, params) {
+geom2trace.GeomPath <- function(data, params, p) {
   data <- group2NA(data)
   L <- list(
     x = data$x,
@@ -393,7 +393,7 @@ geom2trace.GeomPath <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomPoint <- function(data, params) {
+geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
   L <- list(
     x = data$x,
@@ -424,7 +424,7 @@ geom2trace.GeomPoint <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomBar <- function(data, params) {
+geom2trace.GeomBar <- function(data, params, p) {
   data$y <- data$ymax - data$ymin
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths
   # https://github.com/plotly/plotly.js/issues/80
@@ -448,7 +448,7 @@ geom2trace.GeomBar <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomPolygon <- function(data, params) {
+geom2trace.GeomPolygon <- function(data, params, p) {
   data <- group2NA(data)
   L <- list(
     x = data$x,
@@ -476,7 +476,7 @@ geom2trace.GeomPolygon <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomBoxplot <- function(data, params) {
+geom2trace.GeomBoxplot <- function(data, params, p) {
   list(
     x = data$x,
     y = data$y,
@@ -506,7 +506,7 @@ geom2trace.GeomBoxplot <- function(data, params) {
 
 
 #' @export
-geom2trace.GeomText <- function(data, params) {
+geom2trace.GeomText <- function(data, params, p) {
   list(
     x = data$x,
     y = data$y,
@@ -525,26 +525,27 @@ geom2trace.GeomText <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomTile <- function(data, params) {
-  # make sure order of value make sense before throwing z in matrix
-  data <- data[order(order(data$x), data$y), ]
+geom2trace.GeomTile <- function(data, params, p) {
   x <- sort(unique(data$x))
   y <- sort(unique(data$y))
-  fill <- scales::rescale(data$fill_plotlyDomain)
-  txt <- data$hovertext
-  # create the colorscale, which should ignore NAs
-  data <- data[!is.na(fill), ]
-  o <- data[order(data$fill_plotlyDomain), "fill"]
-  n <- length(o)
-  qs <- seq(0, 1, length.out = min(n, 100))
-  idx <- o[pmax(1, round(n * qs))]
-  colorscale <- cbind(qs, idx)
+  # make sure we're dealing with a complete grid
+  g <- expand.grid(x = x, y = y)
+  g$order <- seq_len(nrow(g))
+  g <- merge(g, data, by = c("x", "y"), all.x = TRUE)
+  g <- g[order(g$order), ]
+  # put fill domain on 0-1 scale for colorscale purposes
+  g$fill_plotlyDomain <- scales::rescale(g$fill_plotlyDomain)
+  # create the colorscale 
+  colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
+  # colorscale goes crazy if there are NAs
+  colScale <- colScale[complete.cases(colScale), ]
+  colScale <- colScale[order(colScale$fill_plotlyDomain), ]
   list(
     x = x,
     y = y,
-    z = matrix(fill, nrow = length(y), ncol = length(x)),
-    text = matrix(txt, nrow = length(y), ncol = length(x)),
-    colorscale = colorscale,
+    z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
+    text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
+    colorscale = setNames(colScale, NULL),
     type = "heatmap",
     showscale = FALSE,
     autocolorscale = FALSE
@@ -552,17 +553,17 @@ geom2trace.GeomTile <- function(data, params) {
 }
 
 #' @export
-geom2trace.GeomErrorbar <- function(data, params) {
+geom2trace.GeomErrorbar <- function(data, params, p) {
   make_error(data, params, "y")
 }
 
 #' @export
-geom2trace.GeomErrorbarh <- function(data, params) {
+geom2trace.GeomErrorbarh <- function(data, params, p) {
   make_error(data, params, "x")
 }
 
 #' @export
-geom2trace.default <- function(data, params) {
+geom2trace.default <- function(data, params, p) {
   warning(
     "geom_", class(data)[1], "() has yet to be implemented in plotly.\n",
     "  If you'd like to see this geom implemented,\n",
