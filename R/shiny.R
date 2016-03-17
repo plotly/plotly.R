@@ -36,7 +36,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' This function must be called within a reactive shiny context.
 #' 
 #' @param event The type of plotly event. Currently 'plotly_hover',
-#' 'plotly_click', and 'plotly_selected' are supported.
+#' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
 #' @param source Which plot should the listener be tied to? This 
 #' (character string) should match the value of \code{source} in \link{plot_ly}.
 #' @export
@@ -45,8 +45,8 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' shiny::runApp(system.file("examples", "events", package = "plotly"))
 #' }
 
-event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected"), 
-                       source = "A") {
+event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
+                                 "plotly_relayout"), source = "A") {
   session <- shiny::getDefaultReactiveDomain()
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
