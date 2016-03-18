@@ -3,3 +3,4 @@ dependencies:
     version: 1.6.1
     src: "htmlwidgets/lib/plotlyjs"
     script: plotly-latest.min.js
+    stylesheet: plotly-htmlwidgets.css
