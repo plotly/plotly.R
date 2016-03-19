@@ -1,3 +1,9 @@
+3.4.7 -- 19 Mar 2016
+
+BUGFIX:
+
+* Added custom CSS which allows plotly to work nicely in ioslides.
+
 3.4.6 -- 17 Mar 2016
 
 NEW FEATURES:
