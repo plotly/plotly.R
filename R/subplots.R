@@ -20,122 +20,93 @@
 #' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
-
 subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
-  # note that dots is a _list of plotlys_
-  dots <- lapply(list(...), plotly_build)
-  # put existing plot anchors and domain information into a tidy format
-  # (geo, xaxis, or yaxis can be used to anchor traces on different plots)
-  p_info <- list()
-  ctr <- 1
-  for (i in seq_along(dots)) {
-    dat <- dots[[i]]$data
-    layout <- dots[[i]]$layout
-    for (j in seq_along(dat)) {
-      tr <- dat[[j]]
-      idx <- if (j == 1) "" else j
-      geo <- unique(tr$geo) %||% ""
-      # if a valid geo property exists, use that and ignore x/y axis properties
-      info <- if (grepl("^geo[0-9]+$", geo)) {
-        d <- layout[[paste0("geo", idx)]][["domain"]] %||% list(x = NA, y = NA)
-        c(
-          geo = sub("^geo1$", "geo", geo),
-          xaxis = "",
-          xstart = d$x[1],
-          xend = d$x[2],
-          yaxis = "",
-          ystart = d$y[1],
-          yend = d$y[2]
-        )
-      } else {
-        dx <- layout[[paste0("xaxis", idx)]][["domain"]] %||% NA
-        dy <- layout[[paste0("yaxis", idx)]][["domain"]] %||% NA
-        c(
-          geo = "",
-          xaxis = unique(tr$xaxis) %||% "",
-          xstart = dx[1],
-          xend = dx[2],
-          yaxis = unique(tr$yaxis) %||% "",
-          ystart = dy[1],
-          yend = dy[2]
-        )
-      }
-      p_info[[ctr]] <- c(info, plot = i, trace = j)
-      ctr <- ctr + 1
-    }
-  }
-  # put p_info into a data.frame()
-  p_info <- Reduce(rbind, p_info)
-  row.names(p_info) <- NULL
-  p_info <- data.frame(p_info, stringsAsFactors = FALSE)
-  # obtain the _actual_ plot id
-  key <- with(p_info, paste0(geo, xaxis, yaxis, plot))
-  p_info$key <- match(key, unique(key)) 
-  # bump x/y axis anchors appropriately
-  p_info$xaxis <- sub("^x1$", "x", paste0("x", p_info$key))
-  p_info$yaxis <- sub("^y1$", "y", paste0("y", p_info$key))
-  # Only do domain computations if they are _completely_ missing
-  # (I don't think it makes sense to support partial specification of domains)
-  if (all(is.na(with(p_info, c(xstart, xend, ystart, yend))))) {
-    doms <- get_domains(max(p_info$key), nrows, margin)
-    doms$key <- as.character(seq_len(nrow(doms)))
-    p_info <- p_info[!names(p_info) %in% c("xstart", "xend", "ystart", "yend")]
-    p_info <- merge(p_info, doms, by = "key", sort = FALSE)
-  }
-  # empty plot container that we'll fill up with new info
-  p <- list(
-    data = vector("list", nrow(p_info))
+  # build each plot
+  plots <- lapply(list(...), plotly_build)
+  # rename axes, respecting the fact that each plot could be a subplot itself
+  layouts <- lapply(plots, "[[", "layout")
+  traces <- lapply(plots, "[[", "data")
+  xAxes <- lapply(layouts, function(x) {
+    x[grepl("^xaxis", names(x))] %||% 
+      list(xaxis = list(domain = c(0, 1), anchor = "y"))
+  })
+  yAxes <- lapply(layouts, function(x) {
+    x[grepl("^yaxis", names(x))] %||% 
+      list(yaxis = list(domain = c(0, 1), anchor = "x"))
+  })
+  # number of x/y axes per plot
+  xAxisN <- vapply(xAxes, length, numeric(1))
+  yAxisN <- vapply(yAxes, length, numeric(1))
+  # old -> new axis name dictionary
+  xAxisMap <- setNames(
+    unlist(lapply(xAxes, names)),
+    paste0("xaxis", sub("^1$", "", seq_len(sum(xAxisN))))
   )
-  # merge layouts of the subplots
-  ls <- if (which_layout == "merge") {
-    lapply(dots, "[[", "layout")
-  } else {
+  yAxisMap <- setNames(
+    unlist(lapply(yAxes, names)),
+    paste0("yaxis", sub("^1$", "", seq_len(sum(yAxisN))))
+  )
+  # split the map by plot ID
+  xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
+  yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
+  # get the domain of each "viewport"
+  # TODO: allow control of column width and row height!
+  domainInfo <- get_domains(length(plots), nrows, margin)
+  for (i in seq_along(plots)) {
+    xMap <- xAxisMap[[i]]
+    yMap <- yAxisMap[[i]]
+    for (j in seq_along(xAxes[[i]])) {
+      # before bumping axis anchor, bump trace info, where appropriate
+      traces[[i]] <- lapply(traces[[i]], function(tr) {
+        tr$xaxis[tr$xaxis %in% sub("axis", "", xMap[[j]])] <- sub("axis", "", names(xMap[j]))
+        tr
+      })
+      # bump anchors
+      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor)]
+      xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      xAxes[[i]][[j]]$domain <- sort(scales::rescale(
+        xAxes[[i]][[j]]$domain,
+        as.numeric(domainInfo[i, c("xstart", "xend")]),
+        from = c(0, 1)
+      ))
+    }
+    for (j in seq_along(yAxes[[i]])) {
+      traces[[i]] <- lapply(traces[[i]], function(tr) {
+        tr$yaxis[tr$yaxis == sub("axis", "", yMap[[j]])] <- sub("axis", "", names(yMap[j]))
+        tr
+      })
+      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor)]
+      yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      yAxes[[i]][[j]]$domain <- sort(scales::rescale(
+        yAxes[[i]][[j]]$domain,
+        as.numeric(domainInfo[i, c("yend", "ystart")]),
+        from = c(0, 1)
+      ))
+    }
+    xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
+    yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
+  }
+  
+  # start merging the plots into a single subplot
+  p <- list(
+    data = Reduce(c, traces),
+    layout = Reduce(c, c(xAxes, yAxes))
+  )
+  # TODO: scale shape/annotation coordinates and incorporate them! 
+  # Should we throw warning if [x-y]ref != "paper"?
+  
+  # merge non-axis layout stuff
+  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis", names(x))])
+  if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
-    if (!all(idx <- which_layout %in% seq_along(dots))) {
+    if (!all(idx <- which_layout %in% seq_along(plots))) {
       warning("which_layout is referencing non-existant layouts")
       which_layout <- which_layout[idx]
     }
-    lapply(dots[which_layout], "[[", "layout")
+    layouts <- layouts[which_layout]
   }
-  ls <- ls[!vapply(ls, is.null, logical(1))]
-  p[["layout"]] <- Reduce(modifyList, ls)
+  p$layout <- c(p$layout, Reduce(modifyList, layouts))
   
-  # tack on trace, domain, and anchor information
-  p_info$plot <- as.numeric(p_info$plot)
-  p_info$trace <- as.numeric(p_info$trace)
-  for (i in seq_along(p$data)) {
-    info <- p_info[i, ]
-    xdom <- sort(c(info$xstart, info$xend))
-    ydom <- sort(c(info$ystart, info$yend))
-    p$data[[i]] <- dots[[info$plot]]$data[[info$trace]]
-    if (grepl("^geo", info$geo)) {
-      # carry over first geo object if this one is missing
-      p$layout[[info$geo]] <- p$layout[[info$geo]] %||% p$layout[["geo"]]
-      # add domains to the layout
-      p$layout[[info$geo]] <- modifyList(
-        p$layout[[info$geo]] %||% list(),
-        list(domain = list(x = xdom, y = ydom))
-      )
-      # ensure the geo anchor is a single value
-      p$data[[i]]$geo <- info$geo
-    } else {
-      xaxis <- sub("x", "xaxis", info$xaxis)
-      yaxis <- sub("y", "yaxis", info$yaxis)
-      # does this plot contain x/y axis styling? If so, use it 
-      # (but overwrite domain/anchor info)
-      l <- dots[[info$plot]]$layout
-      p$layout[[xaxis]] <- modifyList(
-        if (any(idx <- names(l) %in% "xaxis")) l[idx][[1]] else list(),
-        list(domain = xdom, anchor = info$yaxis)
-      )
-      p$layout[[yaxis]] <- modifyList(
-        if (any(idx <- names(l) %in% "yaxis")) l[idx][[1]] else list(),
-        list(domain = ydom, anchor = info$xaxis)
-      )
-      p$data[[i]]$xaxis <- info$xaxis
-      p$data[[i]]$yaxis <- info$yaxis
-    }
-  }
   hash_plot(data.frame(), p)
 }
 
