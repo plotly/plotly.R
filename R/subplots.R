@@ -24,8 +24,11 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   # build each plot
   plots <- lapply(list(...), plotly_build)
   # rename axes, respecting the fact that each plot could be a subplot itself
-  layouts <- lapply(plots, "[[", "layout")
   traces <- lapply(plots, "[[", "data")
+  layouts <- lapply(plots, "[[", "layout")
+  
+  annotations <- compact(lapply(layouts, "[[", "annotations"))
+  shapes <- compact(lapply(layouts, "[[", "shapes"))
   xAxes <- lapply(layouts, function(x) {
     x[grepl("^xaxis", names(x))] %||% 
       list(xaxis = list(domain = c(0, 1), anchor = "y"))
@@ -55,6 +58,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   for (i in seq_along(plots)) {
     xMap <- xAxisMap[[i]]
     yMap <- yAxisMap[[i]]
+    xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
+    yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
     for (j in seq_along(xAxes[[i]])) {
       # before bumping axis anchor, bump trace info, where appropriate
       traces[[i]] <- lapply(traces[[i]], function(tr) {
@@ -64,10 +69,9 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
       # bump anchors
       map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor)]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      browser()
       xAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        xAxes[[i]][[j]]$domain,
-        as.numeric(domainInfo[i, c("xstart", "xend")]),
-        from = c(0, 1)
+        xAxes[[i]][[j]]$domain, xDom, from = c(0, 1)
       ))
     }
     for (j in seq_along(yAxes[[i]])) {
@@ -78,9 +82,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor)]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
       yAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        yAxes[[i]][[j]]$domain,
-        as.numeric(domainInfo[i, c("yend", "ystart")]),
-        from = c(0, 1)
+        yAxes[[i]][[j]]$domain, yDom, from = c(0, 1)
       ))
     }
     xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
