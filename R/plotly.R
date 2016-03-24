@@ -232,9 +232,10 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' @param l a ggplot object, or a plotly object, or a list.
 #' @export
 plotly_build <- function(l = last_plot()) {
-  #if (inherits(l, "ggmatrix"))
-  # ggplot objects don't need any special type of handling
-  if (ggplot2::is.ggplot(l)) return(gg2list(l))
+  # ggplot objects (including ggmatrix) don't need any special type of handling
+  if (inherits(l, "gg")) {
+    return(structure(get_plot(ggplotly(l)), class = "plotly"))
+  }
   l <- get_plot(l)
   # assume unnamed list elements are data/traces
   nms <- names(l)

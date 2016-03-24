@@ -31,19 +31,16 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
-  # collect axis objects, and remove their titles
+  # collect axis objects
   xAxes <- lapply(layouts, function(x) {
-    xaxis <- x[grepl("^xaxis", names(x))] %||% 
-      list(xaxis = list(domain = c(0, 1), anchor = "y"))
-    xaxis$title <- NULL
-    xaxis
+    x[grepl("^xaxis", names(x))] %||% list(xaxis = list(domain = c(0, 1), anchor = "y"))
   })
   yAxes <- lapply(layouts, function(x) {
-    yaxis <- x[grepl("^yaxis", names(x))] %||%  
-      list(yaxis = list(domain = c(0, 1), anchor = "x"))
-    yaxis$title <- NULL
-    yaxis
+    x[grepl("^yaxis", names(x))] %||% list(yaxis = list(domain = c(0, 1), anchor = "x"))
   })
+  # remove their titles
+  xAxes <- lapply(xAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
+  yAxes <- lapply(yAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
   # number of x/y axes per plot
   xAxisN <- vapply(xAxes, length, numeric(1))
   yAxisN <- vapply(yAxes, length, numeric(1))
@@ -74,25 +71,27 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     for (j in seq_along(xAxes[[i]])) {
       # before bumping axis anchor, bump trace info, where appropriate
       traces[[i]] <- lapply(traces[[i]], function(tr) {
+        tr$xaxis <- tr$xaxis %||% "x"
         tr$xaxis[sub("axis", "", xMap[[j]]) %in% tr$xaxis] <- sub("axis", "", names(xMap[j]))
         tr
       })
       # bump anchors
-      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor)]
+      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
       xAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        xAxes[[i]][[j]]$domain, xDom, from = c(0, 1)
+        xAxes[[i]][[j]]$domain %||% c(0, 1), xDom, from = c(0, 1)
       ))
     }
     for (j in seq_along(yAxes[[i]])) {
       traces[[i]] <- lapply(traces[[i]], function(tr) {
+        tr$yaxis <- tr$yaxis %||% "y"
         tr$yaxis[sub("axis", "", yMap[[j]]) %in% tr$yaxis] <- sub("axis", "", names(yMap[j]))
         tr
       })
-      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor)]
+      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
       yAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        yAxes[[i]][[j]]$domain, yDom, from = c(0, 1)
+        yAxes[[i]][[j]]$domain %||% c(0, 1), yDom, from = c(0, 1)
       ))
     }
     xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))

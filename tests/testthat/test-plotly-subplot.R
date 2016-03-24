@@ -44,6 +44,3 @@ test_that("group + [x/y]axis works", {
   expect_true(all(2/3 > xdom[[2]] & xdom[[2]] > 1/3))
   expect_true(all(1 >= xdom[[3]] & xdom[[3]] > 2/3))
 })
-
-
-

@@ -32,6 +32,25 @@
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
                      tooltip = "all", source = "A") {
+  UseMethod("ggplotly")
+}
+
+#' @export
+ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
+                              height = NULL, tooltip = "all", source = "A") {
+  plotList <- list()
+  for (i in seq_len(p$nrow)) {
+    for (j in seq_len(p$ncol)) {
+      plotList <- c(plotList, list(pm[i, j]))
+    }
+  }
+  # TODO: how to show x/y titles? Should these be arguments in subplot?
+  do.call(subplot, c(plotList, list(nrows = p$nrow)))
+}
+  
+#' @export
+ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
+                            height = NULL, tooltip = "all", source = "A") {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
   hash_plot(p$data, l)
 }
@@ -428,10 +447,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
 
     } # end of axis loop
 
+    # theme(panel.border = ) -> plotly rect shape
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
+    
     # facet strips -> plotly annotations
     if (has_facet(p)) {
       col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
@@ -461,25 +482,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         strip <- make_strip_rect(xdom, ydom, theme, "right")
         gglayout$shapes <- c(gglayout$shapes, strip)
       }
-      
-      
-      
     }
-
-
-    if (!is_blank(theme[["strip.text.x"]]) &&
-        (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
-      vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
-      
-      
-      
-    }
-    if (inherits(p$facet, "grid") && lay$COL == nCols && nRows > 1 &&
-        !is_blank(theme[["strip.text.y"]])) {
-      
-      
-    }
-
   } # end of panel loop
 
   # ------------------------------------------------------------------------
