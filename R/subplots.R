@@ -21,21 +21,28 @@
 #' }
 
 subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
-  # build each plot
+  # build each plot and collect relevant info 
   plots <- lapply(list(...), plotly_build)
-  # rename axes, respecting the fact that each plot could be a subplot itself
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
-  
-  annotations <- compact(lapply(layouts, "[[", "annotations"))
-  shapes <- compact(lapply(layouts, "[[", "shapes"))
+  shapes <- lapply(layouts, "[[", "shapes")
+  # keep non axis title annotations
+  annotations <- lapply(layouts, function(x) {
+    axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
+    x$annotations[!axes]
+  })
+  # collect axis objects, and remove their titles
   xAxes <- lapply(layouts, function(x) {
-    x[grepl("^xaxis", names(x))] %||% 
+    xaxis <- x[grepl("^xaxis", names(x))] %||% 
       list(xaxis = list(domain = c(0, 1), anchor = "y"))
+    xaxis$title <- NULL
+    xaxis
   })
   yAxes <- lapply(layouts, function(x) {
-    x[grepl("^yaxis", names(x))] %||% 
+    yaxis <- x[grepl("^yaxis", names(x))] %||%  
       list(yaxis = list(domain = c(0, 1), anchor = "x"))
+    yaxis$title <- NULL
+    yaxis
   })
   # number of x/y axes per plot
   xAxisN <- vapply(xAxes, length, numeric(1))
@@ -52,9 +59,13 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   # split the map by plot ID
   xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
   yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
-  # get the domain of each "viewport"
+  # domains of each subplot
   # TODO: allow control of column width and row height!
   domainInfo <- get_domains(length(plots), nrows, margin)
+  # reposition shapes and annotations
+  annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
+  shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
+  # rename axis objects, anchors, and scale their domains
   for (i in seq_along(plots)) {
     xMap <- xAxisMap[[i]]
     yMap <- yAxisMap[[i]]
@@ -69,7 +80,6 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
       # bump anchors
       map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor)]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-      browser()
       xAxes[[i]][[j]]$domain <- sort(scales::rescale(
         xAxes[[i]][[j]]$domain, xDom, from = c(0, 1)
       ))
@@ -94,8 +104,8 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     data = Reduce(c, traces),
     layout = Reduce(c, c(xAxes, yAxes))
   )
-  # TODO: scale shape/annotation coordinates and incorporate them! 
-  # Should we throw warning if [x-y]ref != "paper"?
+  p$layout$annotations <- Reduce(c, annotations)
+  p$layout$shapes <- Reduce(c, shapes)
   
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis", names(x))])
@@ -144,4 +154,30 @@ list2df <- function(x, nms) {
   row.names(m) <- NULL
   df <- data.frame(m)
   if (!missing(nms)) setNames(df, nms) else df
+}
+
+# translate x/y positions according to domain objects 
+# (useful mostly for repositioning annotations/shapes in subplots)
+reposition <- function(obj, domains) {
+  # we need x and y in order to rescale them!
+  for (i in seq_along(obj)) {
+    o <- obj[[i]]
+    # TODO: this implementation currently assumes xref/yref == "paper"
+    # should we support references to axis objects as well?
+    for (j in c("x", "x0", "x1")) {
+      if (is.numeric(o[[j]])) {
+        obj[[i]][[j]] <- scales::rescale(
+          o[[j]], as.numeric(domains[c("xstart", "xend")]), from = c(0, 1)
+        )
+      }
+    }
+    for (j in c("y", "y0", "y1")) {
+      if (is.numeric(o[[j]])) {
+        obj[[i]][[j]] <- scales::rescale(
+          o[[j]], as.numeric(domains[c("yend", "ystart")]), from = c(0, 1)
+        )
+      }
+    }
+  }
+  obj
 }
