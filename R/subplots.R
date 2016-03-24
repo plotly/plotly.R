@@ -74,7 +74,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     for (j in seq_along(xAxes[[i]])) {
       # before bumping axis anchor, bump trace info, where appropriate
       traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr$xaxis[tr$xaxis %in% sub("axis", "", xMap[[j]])] <- sub("axis", "", names(xMap[j]))
+        tr$xaxis[sub("axis", "", xMap[[j]]) %in% tr$xaxis] <- sub("axis", "", names(xMap[j]))
         tr
       })
       # bump anchors
@@ -86,7 +86,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
     }
     for (j in seq_along(yAxes[[i]])) {
       traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr$yaxis[tr$yaxis == sub("axis", "", yMap[[j]])] <- sub("axis", "", names(yMap[j]))
+        tr$yaxis[sub("axis", "", yMap[[j]]) %in% tr$yaxis] <- sub("axis", "", names(yMap[j]))
         tr
       })
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor)]
@@ -108,7 +108,7 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   p$layout$shapes <- Reduce(c, shapes)
   
   # merge non-axis layout stuff
-  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis", names(x))])
+  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis", names(x))] %||% list())
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
     if (!all(idx <- which_layout %in% seq_along(plots))) {
