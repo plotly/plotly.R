@@ -420,7 +420,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
             gglayout$annotations,
             make_label(
               faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-              xanchor = "center", yanchor = "middle"
+              xanchor = "center", yanchor = "middle", annotationType = "axis"
             )
           )
         }
@@ -432,36 +432,52 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-
     # facet strips -> plotly annotations
+    if (has_facet(p)) {
+      col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
+      col_txt <- paste(
+        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = ", "
+      )
+      if (nchar(col_txt) > 0) {
+        col_lab <- make_label(
+          col_txt, x = mean(xdom), y = max(ydom),
+          el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
+          xanchor = "center", yanchor = "bottom"
+        )
+        gglayout$annotations <- c(gglayout$annotations, col_lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "top")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
+      row_txt <- paste(
+        p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
+      )
+      if (nchar(row_txt) > 0) {
+        row_lab <- make_label(
+          row_txt, x = max(xdom), y = mean(ydom),
+          el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
+          xanchor = "left", yanchor = "middle"
+        )
+        gglayout$annotations <- c(gglayout$annotations, row_lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "right")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
+      
+      
+      
+    }
+
+
     if (!is_blank(theme[["strip.text.x"]]) &&
         (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
       vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
-      txt <- paste(
-        p$facet$labeller(lay[names(p$facet[[vars]])]), collapse = ", "
-      )
-      lab <- make_label(
-        txt, x = mean(xdom), y = max(ydom),
-        el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
-        xanchor = "center", yanchor = "bottom"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      strip <- make_strip_rect(xdom, ydom, theme, "top")
-      gglayout$shapes <- c(gglayout$shapes, strip)
+      
+      
+      
     }
     if (inherits(p$facet, "grid") && lay$COL == nCols && nRows > 1 &&
         !is_blank(theme[["strip.text.y"]])) {
-      txt <- paste(
-        p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
-      )
-      lab <- make_label(
-        txt, x = max(xdom), y = mean(ydom),
-        el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-        xanchor = "left", yanchor = "middle"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      strip <- make_strip_rect(xdom, ydom, theme, "right")
-      gglayout$shapes <- c(gglayout$shapes, strip)
+      
+      
     }
 
   } # end of panel loop
