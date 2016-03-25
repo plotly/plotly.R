@@ -1,3 +1,16 @@
+3.4.9 -- 25 Mar 2016
+
+BUGFIX:
+
+Upgrade to plotlyjs 1.7.0. Fixes #513
+
+
+3.4.8 -- 23 Mar 2016
+
+BUGFIX:
+
+* Safeguard against null fields in selections. See #530.
+
 3.4.7 -- 19 Mar 2016
 
 BUGFIX:
