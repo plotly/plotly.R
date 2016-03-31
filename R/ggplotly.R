@@ -41,11 +41,13 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   plotList <- list()
   for (i in seq_len(p$nrow)) {
     for (j in seq_len(p$ncol)) {
-      plotList <- c(plotList, list(pm[i, j]))
+      plotList <- c(plotList, list(p[i, j]))
     }
   }
   # TODO: how to show x/y titles? Should these be arguments in subplot?
-  do.call(subplot, c(plotList, list(nrows = p$nrow)))
+  l <- get_plot(do.call(subplot, c(plotList, list(nrows = p$nrow))))
+  l$layout$title <- p$title
+  hash_plot(p$data, l)
 }
   
 #' @export
