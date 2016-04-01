@@ -116,7 +116,7 @@ save_outputs <- function(gg, name) {
       dir.create(test_dir, recursive = T)
       # copy over diffing template
       file.copy(
-        dir(file.path(table_dir, "template"), full.names = TRUE), test_dir
+        dir(file.path(table_dir, "template", "template"), full.names = TRUE), test_dir
       )
       # overwrite the default JSON
       writeLines(
