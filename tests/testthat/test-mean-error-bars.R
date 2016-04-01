@@ -36,3 +36,21 @@ test_that("different colors for error bars, points, and lines", {
     geom_point(color = "blue", size = 14)
   L <- save_outputs(one.line.gg, "error-simple-line-point-crazy")
 })
+
+# example from https://github.com/ropensci/plotly/issues/513
+
+d <- data.frame(
+  x = 1:5, 
+  y = 1:5, 
+  label = letters[1:5], 
+  group = factor(c('one', 'one', 'two', 'two', 'one'))
+)
+fig1 <- ggplot(d, aes(x = x, y = y, text = label, colour = group)) + 
+  geom_rect(fill = 'lightgrey', colour = 'lightgrey', 
+            xmin = 3, xmax = 4, ymin = -4, ymax = 7) +
+  geom_point() + geom_errorbarh(aes(xmin = x - 1, xmax = x + 2), alpha  =  0.5) + 
+  theme_bw()
+
+test_that("error bars respect trace ordering", {
+  L <- save_outputs(fig1, "error-rect-alpha")
+})
