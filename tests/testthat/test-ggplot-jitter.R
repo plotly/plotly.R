@@ -15,7 +15,6 @@ expect_traces <- function(gg, n_traces, name) {
   list(traces = has_data, layout = L$layout)
 }
 
-set.seed(1001)
 p <- ggplot(mpg, aes(cyl, hwy)) + geom_jitter()
 
 test_that("geom_jitter is working", {
