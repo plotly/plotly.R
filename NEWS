@@ -1,9 +1,14 @@
+3.4.10 -- 1 Apr 2016
+
+BUGFIX:
+
+Fix a geom_errorbar bug introduced in 3.4.9. See #513.
+
 3.4.9 -- 25 Mar 2016
 
 BUGFIX:
 
 Upgrade to plotlyjs 1.7.0. Fixes #513
-
 
 3.4.8 -- 23 Mar 2016
 
