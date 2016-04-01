@@ -40,10 +40,8 @@ as.widget <- function(x, ...) {
     list(b = 40, l = 60, t = 25, r = 10),
     p$layout$margin %||% list()
   )
-  p$config$modeBarButtonsToRemove <- modifyList(
-     list("sendDataToCloud"),
-     p$config$modeBarButtonsToRemove %||% list()
-  )
+  p$config$modeBarButtonsToRemove <- 
+    i(p$config$modeBarButtonsToRemove %||% "sendDataToCloud")
   p$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
   attr(p, 'TOJSON_FUNC') <- to_JSON
