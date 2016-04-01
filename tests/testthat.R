@@ -12,6 +12,9 @@ if (report_diffs || build_table) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
+  # ensure the seed is the same for randomized tests
+  set.seed(1)
+  RSeval(conn, "set.seed(1)")
   # we don't make assumptions about ggplot2 versioning,
   # but it is _strongly_ recommended to use the CRAN version (of ggplot2)
   RSeval(conn, "devtools::install_github('ropensci/plotly')")
