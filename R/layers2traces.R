@@ -655,8 +655,8 @@ make_error <- function(data, params, xy = "x") {
     text = data$hovertext,
     type = "scatter",
     mode = "lines",
-    opacity = 0,
-    line = list(color = color)
+    opacity = aes2plotly(data, params, "alpha"),
+    line = list(color = "transparent")
   )
   e[[paste0("error_", xy)]] <- list(
     array = data[[paste0(xy, "max")]] - data[[xy]],

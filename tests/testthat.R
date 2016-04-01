@@ -12,7 +12,11 @@ if (report_diffs || build_table) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
-  # master version should _always_ depend on the CRAN version of ggplot2
+  # ensure the seed is the same for randomized tests
+  set.seed(1)
+  RSeval(conn, "set.seed(1)")
+  # we don't make assumptions about ggplot2 versioning,
+  # but it is _strongly_ recommended to use the CRAN version (of ggplot2)
   RSeval(conn, "devtools::install_github('ropensci/plotly')")
   RSeval(conn, "library(plotly)")
   if (report_diffs) {
@@ -23,6 +27,19 @@ if (report_diffs || build_table) {
     master_hash <- substr(master_hash, 1, 7)
     # plotly-test-table repo hosts the diff pages & keeps track of previous versions
     table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
+    # Make sure we have appropriate versions of plotlyjs
+    # (see plotly-test-table/template/template/index.html)
+    file.copy(
+      file.path("..", "inst", "htmlwidgets", "lib", "plotlyjs", "plotly-latest.min.js"),
+      file.path(table_dir, "template", "New.min.js"),
+      overwrite = TRUE
+    )
+    download.file(
+      "https://raw.githubusercontent.com/ropensci/plotly/master/inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", 
+      file.path(table_dir, "template", "Old.min.js"),
+      method = "curl"
+    )
+    # directory for placing test differences
     this_dir <- file.path(table_dir, this_hash)
     if (dir.exists(this_dir)) {
       message("Tests were already run on this commit. Nuking the old results...")
@@ -102,9 +119,7 @@ save_outputs <- function(gg, name) {
       dir.create(test_dir, recursive = T)
       # copy over diffing template
       file.copy(
-        file.path(table_dir, "template", "template", "index.html"), 
-        test_dir, 
-        recursive = T
+        dir(file.path(table_dir, "template", "template"), full.names = TRUE), test_dir
       )
       # overwrite the default JSON
       writeLines(
