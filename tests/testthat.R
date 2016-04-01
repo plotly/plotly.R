@@ -33,7 +33,8 @@ if (report_diffs || build_table) {
     )
     download.file(
       "https://raw.githubusercontent.com/ropensci/plotly/master/inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", 
-      file.path(table_dir, "template", "Old.min.js")
+      file.path(table_dir, "template", "Old.min.js"),
+      method = "curl"
     )
     # directory for placing test differences
     this_dir <- file.path(table_dir, this_hash)
