@@ -84,7 +84,7 @@ s <- subplot(
 )
 
 test_that("Row/column height/width", {
-  l <- expect_traces(s, 3, "width-height")
+  l <- expect_traces(s, 4, "width-height")
   expect_equal(diff(l$layout$xaxis$domain), 0.8 - 0.005)
   expect_equal(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
   expect_equal(diff(l$layout$yaxis$domain), 0.2 - 0.005)
