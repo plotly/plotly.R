@@ -44,7 +44,9 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
       plotList <- c(plotList, list(p[i, j]))
     }
   }
-  # TODO: how to show x/y titles? Should these be arguments in subplot?
+  # TODO: 
+  # (1) how to show x/y titles? Should these be arguments in subplot?
+  # (2) it only makes since to share axes on the lower diagonal
   l <- get_plot(do.call(subplot, c(plotList, list(nrows = p$nrow))))
   l$layout$title <- p$title
   hash_plot(p$data, l)

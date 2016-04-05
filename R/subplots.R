@@ -7,15 +7,16 @@
 #' columns have an equal relative width.
 #' @param heights relative height of each row on a 0-1 scale. By default all
 #' rows have an equal relative height.
-#' @param share determines whether x/y/both axes are shared. 
-#' @param which_layout adopt the layout of which plot? If the default value of 
-#' "merge" is used, all plot level layout options will be included in the final 
-#' layout. This argument also accepts a numeric vector which will restric
+#' @param shareX should the x-axis be shared amongst the subplots?
+#' @param shareY should the y-axis be shared amongst the subplots?
 #' @param margin either a single value or four values (all between 0 and 1).
 #' If four values are provided, the first is used as the left margin, the second
 #' is used as the right margin, the third is used as the top margin, and the
 #' fourth is used as the bottom margin.
 #' If a single value is provided, it will be used as all four margins. 
+#' @param which_layout adopt the layout of which plot? If the default value of 
+#' "merge" is used, all plot level layout options will be included in the final 
+#' layout. This argument also accepts a numeric vector specifying 
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
@@ -25,8 +26,8 @@
 #' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
-subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, share = NULL, 
-                    which_layout = "merge", margin = 0.02) {
+subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE, 
+                    shareY = FALSE, margin = 0.02, which_layout = "merge") {
   # build each plot and collect relevant info 
   plots <- lapply(list(...), plotly_build)
   traces <- lapply(plots, "[[", "data")
@@ -51,13 +52,24 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, share = NULL,
   xAxisN <- vapply(xAxes, length, numeric(1))
   yAxisN <- vapply(yAxes, length, numeric(1))
   # old -> new axis name dictionary
+  ncols <- ceiling(length(plots) / nrows)
+  xAxisID <- if (shareX) {
+    rep(rep(1:ncols, length.out = length(plots)), xAxisN)
+  } else {
+    seq_len(sum(xAxisN))
+  }
+  yAxisID <- if (shareY) {
+    rep(rep(1:nrows, each = ncols, length.out = length(plots)), yAxisN)
+  } else {
+    seq_len(sum(yAxisN))
+  }
   xAxisMap <- setNames(
     unlist(lapply(xAxes, names)),
-    paste0("xaxis", sub("^1$", "", seq_len(sum(xAxisN))))
+    paste0("xaxis", sub("^1$", "", xAxisID))
   )
   yAxisMap <- setNames(
     unlist(lapply(yAxes, names)),
-    paste0("yaxis", sub("^1$", "", seq_len(sum(yAxisN))))
+    paste0("yaxis", sub("^1$", "", yAxisID))
   )
   # split the map by plot ID
   xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
@@ -109,7 +121,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, share = NULL,
   # start merging the plots into a single subplot
   p <- list(
     data = Reduce(c, traces),
-    layout = Reduce(c, c(xAxes, yAxes))
+    layout = Reduce(modifyList, c(xAxes, rev(yAxes)))
   )
   p$layout$annotations <- Reduce(c, annotations)
   p$layout$shapes <- Reduce(c, shapes)

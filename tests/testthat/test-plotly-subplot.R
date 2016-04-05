@@ -44,3 +44,50 @@ test_that("group + [x/y]axis works", {
   expect_true(all(2/3 > xdom[[2]] & xdom[[2]] > 1/3))
   expect_true(all(1 >= xdom[[3]] & xdom[[3]] > 2/3))
 })
+
+test_that("shareX produces one x-axis", {
+  s <- subplot(plot_ly(x = 1), plot_ly(x = 1), nrows = 2, shareX = TRUE)
+  l <- expect_traces(s, 2, "shareX")
+  expect_true(sum(grepl("^xaxis", names(l$layout))) == 1)
+})
+
+test_that("shareY produces one y-axis", {
+  s <- subplot(plot_ly(x = 1), plot_ly(x = 1), shareY = TRUE)
+  l <- expect_traces(s, 2, "shareY")
+  expect_true(sum(grepl("^yaxis", names(l$layout))) == 1)
+})
+
+test_that("share both axes", {
+  s <- subplot(
+    plot_ly(x = 1), plot_ly(x = 1), plot_ly(x = 1), plot_ly(x = 1), 
+    nrows = 2, shareX = TRUE, shareY = TRUE
+  )
+  l <- expect_traces(s, 4, "shareBoth")
+  expect_true(sum(grepl("^yaxis", names(l$layout))) == 2)
+  expect_true(sum(grepl("^xaxis", names(l$layout))) == 2)
+})
+
+# https://github.com/ropensci/plotly/issues/376
+library(plotly)
+d <- data.frame(
+  x = rnorm(100),
+  y = rnorm(100)
+)
+hist_top <- ggplot(d) + geom_histogram(aes(x = x))
+empty <- ggplot() + geom_blank()
+scatter <- ggplot(d) + geom_point(aes(x = x, y = y))
+hist_right <- ggplot(d) + geom_histogram(aes(x = y)) + coord_flip()
+s <- subplot(
+  hist_top, empty, scatter, hist_right, 
+  nrows = 2, widths = c(0.8, 0.2), heights = c(0.2, 0.8),
+  margin = 0.005, shareX = TRUE, shareY = TRUE
+)
+
+test_that("Row/column height/width", {
+  l <- expect_traces(s, 3, "width-height")
+  expect_equal(diff(l$layout$xaxis$domain), 0.8 - 0.005)
+  expect_equal(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
+  expect_equal(diff(l$layout$yaxis$domain), 0.2 - 0.005)
+  expect_equal(diff(l$layout$yaxis2$domain), 0.8 - 0.005)
+})
+

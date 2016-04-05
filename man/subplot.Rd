@@ -4,7 +4,8 @@
 \alias{subplot}
 \title{View multiple plots in a single view}
 \usage{
-subplot(..., nrows = 1, which_layout = "merge", margin = 0.02)
+subplot(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE,
+  shareY = FALSE, margin = 0.02, which_layout = "merge")
 }
 \arguments{
 \item{...}{any number of plotly objects}
@@ -12,15 +13,25 @@ subplot(..., nrows = 1, which_layout = "merge", margin = 0.02)
 \item{nrows}{number of rows for laying out plots in a grid-like structure.
 Only used if no domain is already specified.}
 
-\item{which_layout}{adopt the layout of which plot? If the default value of 
-"merge" is used, all plot level layout options will be included in the final 
-layout. This argument also accepts a numeric vector which will restric}
+\item{widths}{relative width of each column on a 0-1 scale. By default all
+columns have an equal relative width.}
+
+\item{heights}{relative height of each row on a 0-1 scale. By default all
+rows have an equal relative height.}
+
+\item{shareX}{should the x-axis be shared amongst the subplots?}
+
+\item{shareY}{should the y-axis be shared amongst the subplots?}
 
 \item{margin}{either a single value or four values (all between 0 and 1).
 If four values are provided, the first is used as the left margin, the second
 is used as the right margin, the third is used as the top margin, and the
 fourth is used as the bottom margin.
 If a single value is provided, it will be used as all four margins.}
+
+\item{which_layout}{adopt the layout of which plot? If the default value of 
+"merge" is used, all plot level layout options will be included in the final 
+layout. This argument also accepts a numeric vector specifying}
 }
 \value{
 A plotly object
