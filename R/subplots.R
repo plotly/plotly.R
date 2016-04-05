@@ -3,6 +3,11 @@
 #' @param ... any number of plotly objects
 #' @param nrows number of rows for laying out plots in a grid-like structure.
 #' Only used if no domain is already specified.
+#' @param widths relative width of each column on a 0-1 scale. By default all
+#' columns have an equal relative width.
+#' @param heights relative height of each row on a 0-1 scale. By default all
+#' rows have an equal relative height.
+#' @param share determines whether x/y/both axes are shared. 
 #' @param which_layout adopt the layout of which plot? If the default value of 
 #' "merge" is used, all plot level layout options will be included in the final 
 #' layout. This argument also accepts a numeric vector which will restric
@@ -20,7 +25,8 @@
 #' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
-subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
+subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, share = NULL, 
+                    which_layout = "merge", margin = 0.02) {
   # build each plot and collect relevant info 
   plots <- lapply(list(...), plotly_build)
   traces <- lapply(plots, "[[", "data")
@@ -58,7 +64,9 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
   # domains of each subplot
   # TODO: allow control of column width and row height!
-  domainInfo <- get_domains(length(plots), nrows, margin)
+  domainInfo <- get_domains(
+    length(plots), nrows, margin, widths = widths, heights = heights
+  )
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
@@ -122,16 +130,40 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
 }
 
 
-get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
+get_domains <- function(nplots = 1, nrows = 1, margins = 0.01, 
+                        widths = NULL, heights = NULL) {
   if (length(margins) == 1) margins <- rep(margins, 4)
   if (length(margins) != 4) stop("margins must be length 1 or 4", call. = FALSE)
   ncols <- ceiling(nplots / nrows)
+  widths <- widths %||% rep(1 / ncols, ncols)
+  heights <- heights %||% rep(1 / nrows, nrows)
+  if (length(widths) != ncols) {
+    stop("The length of the widths argument must be equal ",
+         "to the number of columns", call. = FALSE)
+  }
+  if (length(heights) != nrows) {
+    stop("The length of the heights argument must be equal ",
+         "to the number of rows", call. = FALSE)
+  }
+  if (any(widths < 0 | heights < 0)) {
+    stop("The widths and heights arguments must contain positive values")
+  }
+  if (sum(widths) > 1 | sum(heights) > 1) {
+    stop("The sum of the widths and heights arguments must be less than 1")
+  }
+  
+  widths <- cumsum(c(0, widths))
+  heights <- cumsum(c(0, heights))
+  # 'center' these values if there is still room left 
+  widths <- widths + (1 - max(widths)) / 2
+  heights <- heights + (1 - max(heights)) / 2
+  
   
   xs <- vector("list", ncols)
   for (i in seq_len(ncols)) {
     xs[[i]] <- c(
-      xstart = ((i - 1) / ncols) + ifelse(i == 1, 0, margins[1]),
-      xend = (i / ncols) - ifelse(i == ncols, 0, margins[2])
+      xstart = widths[i] + if (i == 1) 0 else margins[1],
+      xend = widths[i + 1] - if (i == ncols) 0 else margins[2]
     )
   }
   xz <- rep_len(xs, nplots)
@@ -140,8 +172,8 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
   for (i in seq_len(nplots)) {
     j <- ceiling(i / ncols)
     ys[[i]] <- c(
-      ystart = 1 - ((j - 1) / nrows) - ifelse(j == 1, 0, margins[3]),
-      yend = 1 - (j / nrows) + ifelse(j == nrows, 0, margins[4])
+      ystart = 1 - (heights[j]) - if (j == 1) 0 else margins[3],
+      yend = 1 - (heights[j + 1]) + if (j == nrows) 0 else margins[4]
     )
   }
   list2df(Map(c, xz, ys))
