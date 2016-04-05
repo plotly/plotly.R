@@ -67,15 +67,13 @@ Although these functions output special "plotly data frames", `plot_ly()` doesn'
 s <- plot_ly(z = volcano, type = "surface")
 ```
 
-If you have [a free plotly account](https://plot.ly/r/getting-started/), `plotly_POST()` makes it easy to host/share any plotly figure.
+If you have [a free plotly account](https://plot.ly/r/getting-started/), `plotly_POST()` makes it easy to host/share any plotly figure (click on the image below to see the interactive version).
 
 ```{r, eval = FALSE}
 plotly_POST(s)
 ```
 
-```{r, results = 'asis', echo = FALSE}
-cat(plotly:::plotly_iframe("https://plot.ly/~agvd/1794/", 600, 600))
-```
+![https://plot.ly/~agvd/1794](https://plot.ly/~agvd/1794.png)
 
 
 ## Special arguments

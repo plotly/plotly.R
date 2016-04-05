@@ -15,7 +15,7 @@ test_that("direction hv is translated to shape=hv", {
 })
 
 test_that("direction vh is translated to shape=vh", {
-  gg.vh <- gg + geom_step(direction="vh")
+  gg.vh <- gg + geom_step(direction = "vh")
   L <- save_outputs(gg.vh, "step-gg.vh")
   expect_equal(length(L$data), 2)
   expect_identical(L$data[[1]]$line$shape, "vh")

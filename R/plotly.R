@@ -23,6 +23,7 @@
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
+#' @param source Only relevant for \link{event_data}.
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
 #' @export
@@ -66,7 +67,7 @@
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
                     width = NULL, height = NULL, inherit = FALSE, 
-                    evaluate = FALSE) {
+                    evaluate = FALSE, source = "A") {
   # "native" plotly arguments
   argz <- substitute(list(...))
   # old arguments to this function that are no longer supported
@@ -97,7 +98,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL,
     width = width,
-    height = height
+    height = height,
+    source = source
   )
   
   if (evaluate) p <- plotly_build(p)
@@ -228,11 +230,11 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
 #' list.
 #' 
 #' @param l a ggplot object, or a plotly object, or a list.
-#' @importFrom viridis viridis
 #' @export
 plotly_build <- function(l = last_plot()) {
+  #if (inherits(l, "ggmatrix"))
   # ggplot objects don't need any special type of handling
-  if (is.ggplot(l)) return(gg2list(l))
+  if (ggplot2::is.ggplot(l)) return(gg2list(l))
   l <- get_plot(l)
   # assume unnamed list elements are data/traces
   nms <- names(l)

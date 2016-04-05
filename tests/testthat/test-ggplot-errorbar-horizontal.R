@@ -14,12 +14,10 @@ test_that("geom_errorbarh gives horizontal errorbars", {
 
   L <- save_outputs(g, "errorbar-horizontal")
 
-  # Expect 2 traces
-  expect_equal(length(L$data), 2)
   # Expect scatter plot and its error bars to have the same color
-  expect_identical(L$data[[1]]$marker$color, L$data[[1]]$error_x$color)
-  expect_identical(L$data[[2]]$marker$color, L$data[[2]]$error_x$color)
+  expect_identical(L$data[[1]]$marker$color, L$data[[3]]$error_x$color)
+  expect_identical(L$data[[2]]$marker$color, L$data[[4]]$error_x$color)
   # Expect given errorbar values
-  expect_equal(L$data[[1]]$error_x$array, c(0.1, 0.3))
-  expect_true(L$data[[1]]$error_x$symmetric)
+  expect_equal(L$data[[3]]$error_x$array, c(0.1, 0.3))
+  expect_equal(L$data[[4]]$error_x$array, c(0.3, 0.4))
 })

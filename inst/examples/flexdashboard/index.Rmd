@@ -1,0 +1,88 @@
+---
+title: "Flex Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+
+```{r setup, include=FALSE}
+library(plotly)
+library(maps)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+Rows {data-height:600}
+------------------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+# This example modifies code from Hadley Wickham -- https://gist.github.com/hadley/233134
+# It also uses data from Nathan Yau's flowingdata site -- http://flowingdata.com/
+unemp <- read.csv("http://datasets.flowingdata.com/unemployment09.csv")
+names(unemp) <- c("id", "state_fips", "county_fips", "name", "year", 
+                  "?", "?", "?", "rate")
+unemp$county <- tolower(gsub(" County, [A-Z]{2}", "", unemp$name))
+unemp$state <- gsub("^.*([A-Z]{2}).*$", "\\1", unemp$name)
+county_df <- map_data("county")
+names(county_df) <- c("long", "lat", "group", "order", "state_name", "county")
+county_df$state <- state.abb[match(county_df$state_name, tolower(state.name))]
+county_df$state_name <- NULL
+state_df <- map_data("state")
+choropleth <- merge(county_df, unemp, by = c("state", "county"))
+choropleth <- choropleth[order(choropleth$order), ]
+choropleth$rate_d <- cut(choropleth$rate, breaks = c(seq(0, 10, by = 2), 35))
+
+# provide a custom tooltip to plotly with the county name and actual rate
+choropleth$text <- with(choropleth, paste0("County: ", name, "<br>Rate: ", rate))
+p <- ggplot(choropleth, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = rate_d, text = text), 
+               colour = alpha("white", 1/2), size = 0.2) + 
+  geom_polygon(data = state_df, colour = "white", fill = NA) +
+  scale_fill_brewer(palette = "PuRd") + theme_void()
+# just show the text aesthetic in the tooltip
+ggplotly(p, tooltip = "text")
+```
+
+### Chart B
+
+```{r}
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+crimesm <- tidyr::gather(crimes, variable, value, -state)
+states_map <- map_data("state")
+g <- ggplot(crimesm, aes(map_id = state)) +
+  geom_map(aes(fill = value), map = states_map) +
+  expand_limits(x = states_map$long, y = states_map$lat) +
+  facet_wrap( ~ variable) + theme_void()
+ggplotly(g)
+```
+
+Rows {data-height:400}
+------------------------------------------------------------------------------
+
+
+### Chart C
+
+```{r}
+m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+  stat_density_2d() + xlim(0.5, 6) + ylim(40, 110)
+ggplotly(m)
+```
+
+### Chart D
+
+```{r}
+m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon") + 
+  xlim(0.5, 6) + ylim(40, 110)
+ggplotly(m)
+```
+
+
+### Chart E
+
+```{r}
+m <- ggplot(faithful, aes(x = eruptions, y = waiting)) + geom_hex() 
+ggplotly(m)
+```

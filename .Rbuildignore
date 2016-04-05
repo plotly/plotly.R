@@ -4,3 +4,5 @@
 ^data-raw$
 CONDUCT.md
 CONTRIBUTING.md
+build_site.R
+inst/examples/flexdashboard

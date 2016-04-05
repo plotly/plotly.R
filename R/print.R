@@ -40,6 +40,8 @@ as.widget <- function(x, ...) {
     list(b = 40, l = 60, t = 25, r = 10),
     p$layout$margin %||% list()
   )
+  p$config$modeBarButtonsToRemove <- 
+    i(p$config$modeBarButtonsToRemove %||% "sendDataToCloud")
   p$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
   attr(p, 'TOJSON_FUNC') <- to_JSON
@@ -92,7 +94,6 @@ knit_print.figure <- function(x, options, ...) {
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
 #' @param height attribute of the iframe. If \code{NULL}, the height in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
-#' @param dir a directory for placing 
 #' @param file a filename for saving the standalone HTML 
 #' (only used if x is a non-figure object)
 #' @export

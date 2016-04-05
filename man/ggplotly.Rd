@@ -4,22 +4,27 @@
 \alias{ggplotly}
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
-ggplotly(p = ggplot2::last_plot(), filename, fileopt, world_readable = TRUE)
+ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
+  tooltip = "all", source = "A")
 }
 \arguments{
 \item{p}{a ggplot object.}
 
-\item{filename}{character string describing the name of the plot in your plotly account. 
-Use / to specify directories. If a directory path does not exist it will be created.
-If this argument is not specified and the title of the plot exists,
-that will be used for the filename.}
+\item{width}{Width of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-"append" data to existing plotly, or "extend" it.}
+\item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{world_readable}{logical. If \code{TRUE}, the graph is viewable 
-by anyone who has the link and in the owner's plotly account.
-If \code{FALSE}, graph is only viewable in the owner's plotly account.}
+\item{tooltip}{a character vector specifying which aesthetic mappings to show
+in the tooltip. The default, "all", means show all the aesthetic mappings
+(including the unofficial "text" aesthetic). The order of variables here will
+also control the order they appear. For example, use
+\code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
+colour last.}
+
+\item{source}{Only relevant for \link{event_data}.}
+}
+\value{
+a plotly object
 }
 \description{
 See up-to-date documentation and examples at
@@ -31,13 +36,11 @@ See up-to-date documentation and examples at
 ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
 ggplotly(ggiris)
 
-# maps!!
 data(canada.cities, package = "maps")
 viz <- ggplot(canada.cities, aes(long, lat)) +
-  borders(regions = "canada", name = "borders") +
+  borders(regions = "canada") +
   coord_equal() +
-  geom_point(aes(text = name, size = pop), colour = "red",
-               alpha = 1/2, name = "cities")
+  geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
  ggplotly(viz)
 }
 
