@@ -395,6 +395,7 @@ geom2trace.GeomPath <- function(data, params, p) {
 #' @export
 geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
+  color <- aes2plotly(data, params, "colour")
   L <- list(
     x = data$x,
     y = data$y,
@@ -404,21 +405,20 @@ geom2trace.GeomPoint <- function(data, params, p) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = aes2plotly(data, params, "fill"),
+      color = color,
       opacity = aes2plotly(data, params, "alpha"),
       size = aes2plotly(data, params, "size"),
       symbol = shape,
       line = list(
         width = aes2plotly(data, params, "stroke"),
-        color = aes2plotly(data, params, "colour")
+        color = color
       )
     )
   )
-  # fill is irrelevant for pch %in% c(1, 15:20)
+  # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(pch %in% c(1, 15:20)) ||
-      all(grepl("open$", shape)) && all(L$marker$color %in% "transparent")) {
-    L$marker$color <- L$marker$line$color
+  if (any(idx <- pch %in% 21:25)) {
+    L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
   }
   L
 }
