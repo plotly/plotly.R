@@ -41,11 +41,11 @@ test_that("marker color inherits from fill, when appropriate", {
     facet_wrap(~shape) +
     scale_shape_manual(values = df_shapes$shape, guide = "none")
   l <- save_outputs(p, "all-shapes")
-  expect_equal(length(l$data), 24)
+  expect_equal(length(l$data), 25)
   markerColors <- sapply(l$data, function(x) x$marker$color)
   lineColors <- sapply(l$data, function(x) x$marker$line$color)
   expect_true(all(markerColors[1:20] == lineColors[1:20]))
-  expect_true(all(markerColors[21:24] != lineColors[21:24]))
+  expect_true(all(markerColors[21:25] != lineColors[21:25]))
 })
 
 
