@@ -6,6 +6,25 @@ BUGFIX:
 
 Long legend titles will no longer run off the screen, and legend titles with line breaks (\n) are now translated correctly.
 
+3.4.13 -- 6 Apr 2016
+
+BUGFIX:
+
+In some cases, marker color was inheriting from the marker line color when
+it shouldn't have. See ##537.
+
+3.4.12 -- 5 Apr 2016
+
+CHANGES:
+
+Upgrade to plotlyjs v1.8.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.8.0
+
+3.4.11 -- 2 Apr 2016
+
+BUGFIX:
+
+Fix bug when altering modebar button defaults
+
 3.4.10 -- 1 Apr 2016
 
 BUGFIX:
