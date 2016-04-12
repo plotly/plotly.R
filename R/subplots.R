@@ -139,17 +139,25 @@ subplot <- function(..., nrows = 1, which_layout = "merge", margin = 0.02) {
   hash_plot(data.frame(), p)
 }
 
-
-get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
+# aspect ratio (y / x)
+get_domains <- function(nplots = 1, nrows = 1, margins = 0.01, aspect = NULL) {
   if (length(margins) == 1) margins <- rep(margins, 4)
   if (length(margins) != 4) stop("margins must be length 1 or 4", call. = FALSE)
   ncols <- ceiling(nplots / nrows)
   
+  cushion <- list(x = 0, y = 0)
+  if (!is.null(aspect) && aspect < 1) {
+    cushion <- list(x = 0, y = (1 - aspect) / 2)
+  }
+  if (!is.null(aspect) && aspect >= 1) {
+    cushion <- list(x = (1 - 1 / aspect) / 2, y = 0)
+  }
+
   xs <- vector("list", ncols)
   for (i in seq_len(ncols)) {
     xs[[i]] <- c(
-      xstart = ((i - 1) / ncols) + ifelse(i == 1, 0, margins[1]),
-      xend = (i / ncols) - ifelse(i == ncols, 0, margins[2])
+      xstart = ((i - 1) / ncols) + ifelse(i == 1, 0 + cushion$x, margins[1]),
+      xend = (i / ncols) - ifelse(i == ncols, 0 + cushion$x, margins[2])
     )
   }
   xz <- rep_len(xs, nplots)
@@ -158,8 +166,8 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01) {
   for (i in seq_len(nplots)) {
     j <- ceiling(i / ncols)
     ys[[i]] <- c(
-      ystart = 1 - ((j - 1) / nrows) - ifelse(j == 1, 0, margins[3]),
-      yend = 1 - (j / nrows) + ifelse(j == nrows, 0, margins[4])
+      ystart = 1 - ((j - 1) / nrows) - ifelse(j == 1, 0 + cushion$y, margins[3]),
+      yend = 1 - (j / nrows) + ifelse(j == nrows, 0 + cushion$y, margins[4])
     )
   }
   list2df(Map(c, xz, ys))

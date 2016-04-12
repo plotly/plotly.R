@@ -48,7 +48,7 @@ test_that("dates work well with bar charts", {
   info <- expect_traces(gd, 2, "dates")
   trs <- info$data
   # plotly likes time in milliseconds
-  t <- as.numeric(unique(researchers$month)) * 24 * 60 * 60 * 1000
+  t <- as.numeric(unique(researchers$month))
   expect_equal(trs[[1]]$x, t)
 })
 

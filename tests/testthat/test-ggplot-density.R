@@ -68,7 +68,7 @@ p <- ggplot(data = mtcars, aes(x = mpg, fill = factor(cyl))) +
 
 test_that("traces are ordered correctly in geom_density", {
   info <- expect_traces(p, 3, "traces_order")
-  nms <- as.character(sapply(info$data, "[[", "name"))
+  nms <- sub("\\s+$", "", as.character(sapply(info$data, "[[", "name")))
   expect_identical(nms, c("4", "6", "8"))
 })
 

@@ -1,3 +1,11 @@
+NEW FEATURE:
+
+Fixed coordinates (i.e., coord_fixed()/coord_equal()) are now supported.
+
+BUGFIX:
+
+Long legend titles will no longer run off the screen, and legend titles with line breaks (\n) are now translated correctly.
+
 3.4.13 -- 6 Apr 2016
 
 BUGFIX:
