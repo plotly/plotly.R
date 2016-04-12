@@ -538,7 +538,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   # create the colorscale 
   colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
   # colorscale goes crazy if there are NAs
-  colScale <- colScale[complete.cases(colScale), ]
+  colScale <- colScale[stats::complete.cases(colScale), ]
   colScale <- colScale[order(colScale$fill_plotlyDomain), ]
   list(
     x = x,
