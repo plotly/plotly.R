@@ -37,8 +37,11 @@ HTMLWidgets.widget({
           //x.data[i].type || "scatter" === "scatter";
           x.data[i].mode === "markers";
       }
-      // if transitioning x/y, construct scales from graphDiv
-      if (doTransition) {
+      
+      if (!doTransition) {
+        Plotly.newPlot(graphDiv, x.data, x.layout);
+      } else {
+        // construct x/y scales from graphDiv
         var lay = graphDiv._fullLayout;
         var xDom = lay.xaxis.range;
         var yDom = lay.yaxis.range;
@@ -62,36 +65,29 @@ HTMLWidgets.widget({
           x.data[i].x = graphDiv._fullData[i].x;
           x.data[i].y = graphDiv._fullData[i].y;
         }
-      }
-      
-      /* create a new plot with old x/y locations first 
-         (this seems too slow  to be useful)
-      setTimeout(function() {
-        Plotly.newPlot(graphDiv, x.data, x.layout);
-      }, 16);
-      */
-      
-      // attempt to transition when appropriate
-      window.requestAnimationFrame(function() {
-        var pts = Plotly.d3.selectAll('.scatterlayer .point');
-        if (doTransition && pts[0].length > 0) {
-          // Transition the transform -- https://gist.github.com/mbostock/1642874
-          pts
-            .data(x.transitionDat)
-          .transition()
-          // TODO: how to provide arguments to these options?
-            .duration(0)
-            .ease('linear')
-            .attr('transform', function(d) { 
-              return 'translate(' + xaxis(d.x) + ',' + yaxis(d.y) + ')';
-            });
-          // update the graphDiv data
-          for (i = 0; i < x.data.length; i++) {
-            graphDiv._fullData[i].x = x.data[i].xNew;
-            graphDiv._fullData[i].y = x.data[i].yNew;
+        // attempt to transition when appropriate
+        window.requestAnimationFrame(function() {
+          var pts = Plotly.d3.selectAll('.scatterlayer .point');
+          if (doTransition && pts[0].length > 0) {
+            // Transition the transform -- 
+            // https://gist.github.com/mbostock/1642874
+            pts
+              .data(x.transitionDat)
+            .transition()
+            // TODO: how to provide arguments to these options?
+              .duration(0)
+              .ease('linear')
+              .attr('transform', function(d) { 
+                return 'translate(' + xaxis(d.x) + ',' + yaxis(d.y) + ')';
+              });
+            // update the graphDiv data
+            for (i = 0; i < x.data.length; i++) {
+              graphDiv._fullData[i].x = x.data[i].xNew;
+              graphDiv._fullData[i].y = x.data[i].yNew;
+            }
           }
-        }
-      });
+        });
+      }
       
     }
     
