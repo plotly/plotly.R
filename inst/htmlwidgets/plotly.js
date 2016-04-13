@@ -80,7 +80,7 @@ HTMLWidgets.widget({
             .data(x.transitionDat)
           .transition()
           // TODO: how to provide arguments to these options?
-            .duration(1000)
+            .duration(0)
             .ease('linear')
             .attr('transform', function(d) { 
               return 'translate(' + xaxis(d.x) + ',' + yaxis(d.y) + ')';
