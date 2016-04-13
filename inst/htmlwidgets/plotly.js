@@ -31,13 +31,12 @@ HTMLWidgets.widget({
       // Can we do smooth transitions of x/y locations of points?
       var doTransition = x.data.length === graphDiv._fullData.length;
       for (i = 0; i < x.data.length; i++) {
+        var type = x.data[i].type || "scatter";
         doTransition = doTransition && 
           x.data[i].x.length === graphDiv._fullData[i].x.length &&
           x.data[i].y.length === graphDiv._fullData[i].y.length &&
-          //x.data[i].type || "scatter" === "scatter";
-          x.data[i].mode === "markers";
+          type === "scatter" && x.data[i].mode === "markers";
       }
-      
       if (!doTransition) {
         Plotly.newPlot(graphDiv, x.data, x.layout);
       } else {
@@ -65,22 +64,23 @@ HTMLWidgets.widget({
           x.data[i].x = graphDiv._fullData[i].x;
           x.data[i].y = graphDiv._fullData[i].y;
         }
+        Plotly.newPlot(graphDiv, x.data, x.layout);
         // attempt to transition when appropriate
         window.requestAnimationFrame(function() {
           var pts = Plotly.d3.selectAll('.scatterlayer .point');
-          if (doTransition && pts[0].length > 0) {
+          if (pts[0].length > 0) {
             // Transition the transform -- 
             // https://gist.github.com/mbostock/1642874
             pts
               .data(x.transitionDat)
             .transition()
-            // TODO: how to provide arguments to these options?
+            // TODO: provide arguments to these options!!
               .duration(0)
               .ease('linear')
               .attr('transform', function(d) { 
                 return 'translate(' + xaxis(d.x) + ',' + yaxis(d.y) + ')';
               });
-            // update the graphDiv data
+            // update graphDiv data
             for (i = 0; i < x.data.length; i++) {
               graphDiv._fullData[i].x = x.data[i].xNew;
               graphDiv._fullData[i].y = x.data[i].yNew;
