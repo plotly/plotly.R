@@ -1,3 +1,13 @@
+3.5.0 -- 19 Apr 2016
+
+NEW FEATURES:
+
+The toRGB() function will now respect alpha channels in hex color codes and can recursively apply alpha. 
+
+CHANGES:
+
+The toRGB() function will always output color codes with an alpha channel (e.g. toRGB('black') is now 'rgba(0,0,0,1)' instead of 'rgb(0,0,0)')
+
 3.4.15 -- 18 Apr 2016
 
 BUGFIX:
