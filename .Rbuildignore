@@ -5,4 +5,5 @@
 CONDUCT.md
 CONTRIBUTING.md
 build_site.R
+todo.R
 inst/examples/flexdashboard

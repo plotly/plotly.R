@@ -232,6 +232,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # attach a new column (hovertext) to each layer of data that should get mapped
   # to the text trace property
   data <- Map(function(x, y) {
+    if (nrow(x) == 0) return(x)
     # make sure the relevant aes exists in the data
     for (i in seq_along(y)) {
       aesName <- names(y)[[i]]

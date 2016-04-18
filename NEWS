@@ -1,3 +1,22 @@
+3.4.15 -- 18 Apr 2016
+
+BUGFIX:
+
+The alpha in geom_smooth was incorrectly inheriting from other layers. See #551.
+
+3.4.14 -- 15 Apr 2016
+
+CHANGES:
+
+Upgrade to plotlyjs v1.9.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.9.0
+
+3.4.13 -- 6 Apr 2016
+
+BUGFIX:
+
+In some cases, marker color was inheriting from the marker line color when
+it shouldn't have. See ##537.
+
 3.4.12 -- 5 Apr 2016
 
 CHANGES:

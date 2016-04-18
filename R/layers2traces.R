@@ -141,7 +141,8 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
   dat <- prefix_class(data, "GeomPath")
-  dat$alpha <- NULL
+  # alpha for the path is always 1 (see GeomSmooth$draw_key)
+  dat$alpha <- 1
   if (!identical(params$se, FALSE)) {
     dat2 <- prefix_class(ribbon_dat(data), c("GeomPolygon", "GeomSmooth"))
     dat2$colour <- NULL
@@ -395,6 +396,7 @@ geom2trace.GeomPath <- function(data, params, p) {
 #' @export
 geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
+  color <- aes2plotly(data, params, "colour")
   L <- list(
     x = data$x,
     y = data$y,
@@ -404,21 +406,20 @@ geom2trace.GeomPoint <- function(data, params, p) {
     mode = "markers",
     marker = list(
       autocolorscale = FALSE,
-      color = aes2plotly(data, params, "fill"),
+      color = color,
       opacity = aes2plotly(data, params, "alpha"),
       size = aes2plotly(data, params, "size"),
       symbol = shape,
       line = list(
         width = aes2plotly(data, params, "stroke"),
-        color = aes2plotly(data, params, "colour")
+        color = color
       )
     )
   )
-  # fill is irrelevant for pch %in% c(1, 15:20)
+  # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(pch %in% c(1, 15:20)) ||
-      all(grepl("open$", shape)) && all(L$marker$color %in% "transparent")) {
-    L$marker$color <- L$marker$line$color
+  if (any(idx <- pch %in% 21:25)) {
+    L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
   }
   L
 }
@@ -538,7 +539,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   # create the colorscale 
   colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
   # colorscale goes crazy if there are NAs
-  colScale <- colScale[complete.cases(colScale), ]
+  colScale <- colScale[stats::complete.cases(colScale), ]
   colScale <- colScale[order(colScale$fill_plotlyDomain), ]
   list(
     x = x,
