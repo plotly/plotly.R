@@ -141,7 +141,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
   dat <- prefix_class(data, "GeomPath")
-  dat$alpha <- NULL
+  dat$alpha <- dat$alpha %||% params$alpha %||% 1
   if (!identical(params$se, FALSE)) {
     dat2 <- prefix_class(ribbon_dat(data), c("GeomPolygon", "GeomSmooth"))
     dat2$colour <- NULL
