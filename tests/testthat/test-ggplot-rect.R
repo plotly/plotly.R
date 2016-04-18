@@ -145,3 +145,14 @@ test_that('rect aes(fill) with constant color', {
   expect_false(traces.by.name[[1]]$fillcolor ==
                traces.by.name[[2]]$fillcolor)
 })
+
+
+p <- ggplot(data = data.frame(x1 = 1, x2 = 2, y1 = 1, y2 = 2)) + 
+  geom_rect(aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2), 
+            fill = "#00000011", color = "black")
+
+test_that('Specifying alpha in hex color code works', {
+  info <- expect_traces(p, 1, "fill-hex-alpha")
+  expect_match(l$data[[1]]$fillcolor, "rgba\\(0,0,0,0\\.0[6]+")
+})
+
