@@ -141,7 +141,8 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
   dat <- prefix_class(data, "GeomPath")
-  dat$alpha <- NULL
+  # alpha for the path is always 1 (see GeomSmooth$draw_key)
+  dat$alpha <- 1
   if (!identical(params$se, FALSE)) {
     dat2 <- prefix_class(ribbon_dat(data), c("GeomPolygon", "GeomSmooth"))
     dat2$colour <- NULL
@@ -538,7 +539,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   # create the colorscale 
   colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
   # colorscale goes crazy if there are NAs
-  colScale <- colScale[complete.cases(colScale), ]
+  colScale <- colScale[stats::complete.cases(colScale), ]
   colScale <- colScale[order(colScale$fill_plotlyDomain), ]
   list(
     x = x,

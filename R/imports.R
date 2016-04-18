@@ -1,7 +1,7 @@
 #' @import ggplot2
 #' @importFrom grDevices col2rgb
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
-#' @importFrom stats setNames
+#' @importFrom stats setNames complete.cases
 #' @importFrom tidyr gather
 #' @importFrom plyr ddply summarise
 #' @importFrom viridis viridis
