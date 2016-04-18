@@ -1,5 +1,5 @@
 #' Print a plotly object
-#' 
+#'
 #' @param x a plotly object
 #' @param ... additional arguments
 #' @export
@@ -11,7 +11,7 @@ print.plotly <- function(x, ...) {
 }
 
 #' Print a plotly object in a knitr doc
-#' 
+#'
 #' @param x a plotly object
 #' @param options knitr options.
 #' @param ... additional arguments
@@ -22,7 +22,7 @@ knit_print.plotly <- function(x, options, ...) {
 }
 
 #' Convert a plotly object to an htmlwidget object
-#' 
+#'
 #' @param x a plotly object.
 #' @param ... other options passed onto \code{htmlwidgets::createWidget}
 #' @export
@@ -30,7 +30,7 @@ knit_print.plotly <- function(x, options, ...) {
 #' p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
 #' htmlwidgets::saveWidget(as.widget(p), "index.html")
 #' }
-#' 
+#'
 
 as.widget <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)
@@ -40,7 +40,7 @@ as.widget <- function(x, ...) {
     list(b = 40, l = 60, t = 25, r = 10),
     p$layout$margin %||% list()
   )
-  p$config$modeBarButtonsToRemove <- 
+  p$config$modeBarButtonsToRemove <-
     i(p$config$modeBarButtonsToRemove %||% "sendDataToCloud")
   p$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
@@ -51,9 +51,10 @@ as.widget <- function(x, ...) {
     width = p$width,
     height = p$height,
     sizingPolicy = htmlwidgets::sizingPolicy(
-      padding = 5, 
+      padding = 5,
       browser.fill = TRUE
     ),
+    dependencies = crosstalk::dependencies(),
     ...
   )
 }
@@ -62,7 +63,7 @@ as.widget <- function(x, ...) {
 toWidget <- as.widget
 
 #' Print a plotly figure object
-#' 
+#'
 #' @param x a plotly figure object
 #' @param ... additional arguments (currently ignored)
 #' @export
@@ -71,7 +72,7 @@ print.figure <- function(x, ...) {
 }
 
 #' Embed a plotly figure as an iframe in a knitr doc
-#' 
+#'
 #' @param x a plotly figure object
 #' @param options knitr options.
 #' @param ... placeholder.
@@ -94,10 +95,10 @@ knit_print.figure <- function(x, options, ...) {
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
 #' @param height attribute of the iframe. If \code{NULL}, the height in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
-#' @param file a filename for saving the standalone HTML 
+#' @param file a filename for saving the standalone HTML
 #' (only used if x is a non-figure object)
 #' @export
-embed_notebook <- function(x, width = NULL, height = NULL, 
+embed_notebook <- function(x, width = NULL, height = NULL,
                            file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html")) {
   if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
@@ -121,7 +122,7 @@ embed_notebook <- function(x, width = NULL, height = NULL,
 
 plotly_iframe <- function(url = "", width = NULL, height = NULL) {
   sprintf(
-    '<iframe src="%s" width="%s" height="%s" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>', 
+    '<iframe src="%s" width="%s" height="%s" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>',
     url, width %||% "100%", height %||% "400"
   )
 }

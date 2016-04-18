@@ -32,7 +32,8 @@ Imports:
     htmlwidgets,
     tidyr,
     plyr,
-    hexbin
+    hexbin,
+    crosstalk
 Suggests:
     dplyr,
     maps,
