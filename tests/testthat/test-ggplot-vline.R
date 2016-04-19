@@ -16,7 +16,7 @@ test_that("second trace be the vline", {
   expect_true(l$y[1] <= 0)
   expect_true(l$y[2] >= 3.325)
   expect_true(l$mode == "lines")
-  expect_true(l$line$color == "rgb(0,255,0)")
+  expect_true(l$line$color == "rgba(0,255,0,1)")
 })
 
 test_that("vector xintercept results in multiple vertical lines", {
@@ -31,5 +31,5 @@ test_that("vector xintercept results in multiple vertical lines", {
   expect_true(min(ys, na.rm = TRUE) <= min(y))
   expect_true(max(ys, na.rm = TRUE) >= max(y))
   expect_true(l$mode == "lines")
-  expect_true(l$line$color == "rgb(0,0,255)")
+  expect_true(l$line$color == "rgba(0,0,255,1)")
 })

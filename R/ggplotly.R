@@ -277,8 +277,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       theme[["strip.text.x"]] %||% theme[["strip.text"]],
       "npc", "height"
     )
-    # TODO: why does stripSize need to be inflated here?
-    panelMarginY <- panelMarginY + 1.5 * stripSize
     # space for ticks/text in free scales
     if (p$facet$free$x) {
       axisTicksX <- unitConvert(
