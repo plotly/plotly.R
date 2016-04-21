@@ -157,7 +157,7 @@ HTMLWidgets.widget({
       graphDiv.on("plotly_selected", function plotly_selecting(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
-          grp.var("selection").set(selectedKeys);
+          grp.var("selection").set(selectedKeys, {sender: el});
         }
       });
       // When plotly selection is cleared, update crosstalk
@@ -168,6 +168,17 @@ HTMLWidgets.widget({
       // When crosstalk selection changes, update plotly style
       grp.var("selection").on("change", function crosstalk_sel_change(e) {
         // e.value is either null, or an array of newly selected values
+        
+        if (e.sender !== el) {
+          // If we're not the originator of this selection, and we have an
+          // active selection outline box, we need to remove it. Otherwise
+          // it could appear like there are two active brushes in one plot
+          // group.
+          var outlines = el.querySelectorAll(".select-outline");
+          for (var i = 0; i < outlines.length; i++) {
+            outlines[i].remove();
+          }
+        }
         
         // Restyle each relevant trace
         var selectedPoints = keysToPoints(e.value || []);
