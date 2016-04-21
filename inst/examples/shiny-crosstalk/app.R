@@ -25,12 +25,14 @@ server <- function(input, output, session) {
   
   output$p1 <- renderPlotly({
     plot_ly(mtcars, x = wt, y = mpg, color = cyl, mode = "markers", 
-      key = mtcars$rowname, set = "A", height = "100%")
+      key = mtcars$rowname, set = "A", height = "100%") %>%
+      layout(dragmode = "select")
   })
   
   output$p2 <- renderPlotly({
     plot_ly(mtcars, x = wt, y = disp, color = cyl, mode = "markers", 
-      key = mtcars$rowname, set = "A", height = "100%")
+      key = mtcars$rowname, set = "A", height = "100%") %>%
+      layout(dragmode = "select")
   })
   
   output$plot1 <- renderPlot({
