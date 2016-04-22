@@ -87,14 +87,15 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
+  if (!missing(key)) argz$key <- substitute(key)
+  if (!missing(set)) argz$set <- substitute(set)
   # trace information
   tr <- list(
     type = type,
     args = argz,
     env = list2env(data),    # environment in which to evaluate arguments
     enclos = parent.frame(), # if objects aren't found in env, look here
-    inherit = inherit,
-    key = key
+    inherit = inherit
   )
   # plotly objects should always have a _list_ of trace(s)
   p <- list(
@@ -103,7 +104,6 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     url = NULL,
     width = width,
     height = height,
-    set = set,
     source = source
   )
 
@@ -134,7 +134,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @author Carson Sievert
 #' @export
 add_trace <- function(p = last_plot(), ...,
-                      group, color, colors, symbol, symbols, size,
+                      group, color, colors, symbol, symbols, size, key, set,
                       data = NULL, evaluate = FALSE) {
   # "native" plotly arguments
   argz <- substitute(list(...))
@@ -145,6 +145,8 @@ add_trace <- function(p = last_plot(), ...,
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
+  if (!missing(key)) argz$key <- substitute(key)
+  if (!missing(set)) argz$set <- substitute(set)
   data <- data %||% if (is.data.frame(p)) p else list()
   tr <- list(
     args = argz,

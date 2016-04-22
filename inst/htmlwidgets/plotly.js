@@ -93,31 +93,43 @@ HTMLWidgets.widget({
     // The pointsToKeys and keysToPoints functions let you convert
     // between the two schemes.
     
-    // To allow translation from keys to points in O(1) time, we
+    // Combine the name of a set and key into a single string, suitable for
+    // using as a keyCache key.
+    function joinSetAndKey(set, key) {
+      return set + "\n" + key;
+    }
+    
+    // To allow translation from sets+keys to points in O(1) time, we
     // make a cache that lets us map keys to objects with
     // {curveNumber, pointNumber} properties.
     var keyCache = {};
     for (var curve = 0; curve < x.data.length; curve++) {
-      if (!x.data[curve].key) {
+      var curveObj = x.data[curve];
+      if (!curveObj.key || !curveObj.set) {
         continue;
       }
-      for (var pointIdx = 0; pointIdx < x.data[curve].key.length; pointIdx++) {
-        keyCache[x.data[curve].key[pointIdx]] = {curveNumber: curve, pointNumber: pointIdx};
+      for (var pointIdx = 0; pointIdx < curveObj.key.length; pointIdx++) {
+        keyCache[joinSetAndKey(curveObj.set, curveObj.key[pointIdx])] =
+          {curveNumber: curve, pointNumber: pointIdx};
       }
     }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
-    // return an array of key strings.
-    // TODO: Throw proper error if any point is invalid or doesn't
-    // have a key?
+    // return a hash of {[set1]: [key1, key2, ...], [set2]: [key3, key4, ...]}
     function pointsToKeys(points) {
-      var keys = [];
+      var keysBySet = {};
       for (var i = 0; i < points.length; i++) {
+        var curveObj = graphDiv.data[points[i].curveNumber];
+        if (!curveObj.key || !curveObj.set) {
+          // If this curve isn't mapped to a set, ignore this point.
+          continue;
+        }
         // Look up the keys
-        var key = graphDiv.data[points[i].curveNumber].key[points[i].pointNumber];
-        keys.push(key);
+        var key = curveObj.key[points[i].pointNumber];
+        keysBySet[curveObj.set] = keysBySet[curveObj.set] || [];
+        keysBySet[curveObj.set].push(key);
       }
-      return keys;
+      return keysBySet;
     }
     
     // Given an array of strings, return an object that hierarchically
@@ -136,10 +148,10 @@ HTMLWidgets.widget({
     //   "0": [1, 2],
     //   "2": [1]
     // }
-    function keysToPoints(keys) {
+    function keysToPoints(set, keys) {
       var curves = {};
       for (var i = 0; i < keys.length; i++) {
-        var pt = keyCache[keys[i]];
+        var pt = keyCache[joinSetAndKey(set, keys[i])];
         if (!pt) {
           throw new Error("Unknown key " + keys[i]);
         }
@@ -148,84 +160,115 @@ HTMLWidgets.widget({
       }
       return curves;
     }
+    
+    // Gather all sets.
+    var crosstalkGroups = {};
+    var allSets = [];
+    for (var curveIdx = 0; curveIdx < x.data.length; curveIdx++) {
+      if (x.data[curveIdx].set) {
+        if (!crosstalkGroups[x.data[curveIdx].set]) {
+          allSets.push(x.data[curveIdx].set);
+          crosstalkGroups[x.data[curveIdx].set] = [];
+        }
+        crosstalkGroups[x.data[curveIdx].set].push(curveIdx);
+      }
+    }
 
-    // Grab the specified crosstalk group.
-    if (x.set) {
-      var grp = crosstalk.group(x.set);
-      
+    if (allSets.length > 0) {
       // When plotly selection changes, update crosstalk
       graphDiv.on("plotly_selected", function plotly_selecting(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
-          grp.var("selection").set(selectedKeys, {sender: el});
+          // Keys are group names, values are array of selected keys from group.
+          for (var set in selectedKeys) {
+            if (selectedKeys.hasOwnProperty(set))
+              crosstalk.group(set).var("selection").set(selectedKeys[set], {sender: el});
+          }
+          // Any groups that weren't represented in the selection, should be
+          // treated as if zero points were selected.
+          for (var i = 0; i < allSets.length; i++) {
+            if (!selectedKeys[allSets[i]]) {
+              crosstalk.group(allSets[i]).var("selection").set([], {sender: el});
+            }
+          }
         }
       });
       // When plotly selection is cleared, update crosstalk
       graphDiv.on("plotly_deselect", function plotly_deselect(e) {
-        grp.var("selection").set(null);
-      });
-      
-      // When crosstalk selection changes, update plotly style
-      grp.var("selection").on("change", function crosstalk_sel_change(e) {
-        // e.value is either null, or an array of newly selected values
-        
-        if (e.sender !== el) {
-          // If we're not the originator of this selection, and we have an
-          // active selection outline box, we need to remove it. Otherwise
-          // it could appear like there are two active brushes in one plot
-          // group.
-          var outlines = el.querySelectorAll(".select-outline");
-          for (var i = 0; i < outlines.length; i++) {
-            outlines[i].remove();
-          }
+        for (var i = 0; i < allSets.length; i++) {
+          crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
-        
-        // Restyle each relevant trace
-        var selectedPoints = keysToPoints(e.value || []);
-        
-        var opacityTraces = [];
-        var traceIndices = [];
-        
-        for (var i = 0; i < x.data.length; i++) {
-          if (!x.data[i].key) {
-            // Not a brushable trace apparently. Don't restyle.
-            continue;
-          }
-          
-          // Make an opacity array, one element for each data point
-          // in this trace.
-          var opacity = new Array(x.data[i].x.length);
-          
-          if (typeof(e.value) === "undefined" || e.value === null) {
-            // The Crosstalk selection has been cleared. Full opacity
-            for (var k = 0; k < opacity.length; k++) {
-              opacity[k] = 1;
-            }
-          } else {
-            // Array of pointNumber numbers that should be highlighted
-            var theseSelectedPoints = selectedPoints[i] || [];
+      });
+
+      for (var i = 0; i < allSets.length; i++) {
+        (function() {
+          var set = allSets[i];
+          var grp = crosstalk.group(set);
+  
+          // When crosstalk selection changes, update plotly style
+          grp.var("selection").on("change", function crosstalk_sel_change(e) {
+            // e.value is either null, or an array of newly selected values
             
-            for (var j = 0; j < opacity.length; j++) {
-              if (theseSelectedPoints.indexOf(j) >= 0) {
-                opacity[j] = 1;
-              } else {
-                opacity[j] = 0.2;
+            if (e.sender !== el) {
+              // If we're not the originator of this selection, and we have an
+              // active selection outline box, we need to remove it. Otherwise
+              // it could appear like there are two active brushes in one plot
+              // group.
+              var outlines = el.querySelectorAll(".select-outline");
+              for (var i = 0; i < outlines.length; i++) {
+                outlines[i].remove();
               }
             }
-          }
-          
-          opacityTraces.push(opacity);
-          traceIndices.push(i);
-        }
-        // Restyle the current trace
-        Plotly.restyle(graphDiv, {"marker.opacity": opacityTraces}, traceIndices);
-      });
+            
+            // Restyle each relevant trace
+            var selectedPoints = keysToPoints(set, e.value || []);
+            
+            var opacityTraces = [];
+            var relevantTraces = crosstalkGroups[set];
+
+            for (var i = 0; i < relevantTraces.length; i++) {
+              var trace = x.data[relevantTraces[i]];
+
+              // Make an opacity array, one element for each data point
+              // in this trace.
+              var opacity = new Array(trace.x.length);
+              
+              if (typeof(e.value) === "undefined" || e.value === null) {
+                // The Crosstalk selection has been cleared. Full opacity
+                for (var k = 0; k < opacity.length; k++) {
+                  opacity[k] = 1;
+                }
+              } else {
+                // Array of pointNumber numbers that should be highlighted
+                var theseSelectedPoints = selectedPoints[relevantTraces[i]] || [];
+                
+                for (var j = 0; j < opacity.length; j++) {
+                  if (theseSelectedPoints.indexOf(j) >= 0) {
+                    opacity[j] = 1;
+                  } else {
+                    opacity[j] = 0.2;
+                  }
+                }
+              }
+              
+              opacityTraces.push(opacity);
+            }
+            console.log(graphDiv.id, relevantTraces, opacityTraces)
+            // Restyle the current trace
+            Plotly.restyle(graphDiv, {"marker.opacity": opacityTraces}, relevantTraces);
+          });
+  
+          // Remove event listeners in the future
+          instance.onNextRender.push(function() {
+            grp.removeListener("selection", crosstalk_sel_change);
+          });
+        })();
+      }
       
       // Remove event listeners in the future
       instance.onNextRender.push(function() {
         graphDiv.removeListener("plotly_selecting", plotly_selecting);
         graphDiv.removeListener("plotly_deselect", plotly_deselect);
-        grp.removeListener("selection", crosstalk_sel_change);
       });
     }
     
