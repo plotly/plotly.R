@@ -5,9 +5,9 @@
 #' @export
 #' @importFrom htmlwidgets createWidget
 #' @importFrom htmlwidgets sizingPolicy
-print.plotly <- function(x, ...) {
-  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
-  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, ...)
+print.plotly_hash <- function(x, ...) {
+  x <- as.widget(x)
+  print(x, ...)
 }
 
 #' Print a plotly object in a knitr doc
@@ -16,9 +16,9 @@ print.plotly <- function(x, ...) {
 #' @param options knitr options.
 #' @param ... additional arguments
 #' @export
-knit_print.plotly <- function(x, options, ...) {
-  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, options = options, ...)
+knit_print.plotly_hash <- function(x, options, ...) {
+  x <- as.widget(x)
+  knitr::knit_print(x, options, ...)
 }
 
 #' Convert a plotly object to an htmlwidget object
