@@ -3,8 +3,6 @@
 #' @param x a plotly object
 #' @param ... additional arguments
 #' @export
-#' @importFrom htmlwidgets createWidget
-#' @importFrom htmlwidgets sizingPolicy
 print.plotly_hash <- function(x, ...) {
   x <- as.widget(x)
   print(x, ...)
