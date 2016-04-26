@@ -1,3 +1,12 @@
+3.6.0 -- 26 Apr 2016
+
+CHANGES:
+
+Upgrade to plotlyjs v1.10.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.9.0
+
+Distinguish between "built" (plotly_built) and "non-built" (plotly_hash) plotly objects. See #562
+
+
 3.5.0 -- 19 Apr 2016
 
 NEW FEATURES:
