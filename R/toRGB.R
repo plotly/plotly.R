@@ -5,27 +5,36 @@
 #' @export
 toRGB <- function(x, alpha = 1) {
   if (is.null(x)) return(x)
-  # as of ggplot2 version 1.1, an NA alpha is treated as though it's 1
-  alpha[is.na(alpha)] <- 1
-  # if we've already made the proper conversion, return the input
-  if (inherits(x, "plotly_rgba")) return(x)
-  if (inherits(x, "plotly_rgb")) {
-    if (all(alpha == 1)) return(x)
-    # all alpha channel
-    x <- sub("^rgb", "rgba", sub("\\)", paste0(",", alpha, ")"), x))
-    return(prefix_class(x, "plotly_rgba"))
+  if (any(x %in% "transparent")) return(x)
+  # add alpha to already converted "rgb(x,y,z)" codes
+  idx <- grepl("^rgba\\(", x) & alpha <= 1 & 0 <= alpha
+  if (any(idx)) {
+    x[idx] <- rgb2hex(x[idx])
   }
   # for some reason ggplot2 has "NA" in some place (instead of NA)
   if (is.character(x)) {
     x[x == "NA"] <- NA
   }
-  has_alpha <- all(0 <= alpha & alpha < 1)
-  rgb_matrix <- col2rgb(x, alpha = has_alpha)
-  # rescale alpha 
-  # TODO: what if x already has an alpha channel???
-  if (has_alpha) rgb_matrix["alpha", ] <- alpha
-  container <- if (has_alpha) "rgba(%s)" else "rgb(%s)"
-  rgb_a <- sprintf(container, apply(rgb_matrix, 2, paste, collapse = ","))
-  rgb_a[is.na(x)] <- "transparent"
-  structure(rgb_a, class = if (has_alpha) "plotly_rgba" else "plotly_rgb")
+  # as of ggplot2 version 1.1, an NA alpha is treated as though it's 1
+  alpha[is.na(alpha)] <- 1
+  rgb_matrix <- grDevices::col2rgb(x, alpha = TRUE)
+  # multiply the existing alpha with specified alpha (both on 0-1 scale)
+  rgb_matrix["alpha", ] <- alpha * scales::rescale(
+    rgb_matrix["alpha", ], from = c(0, 255)
+  )
+  rgb_matrix["alpha", ] <- round(rgb_matrix["alpha", ], 4)
+  rgba <- sprintf("rgba(%s)", apply(rgb_matrix, 2, paste, collapse = ","))
+  rgba[is.na(x)] <- "transparent"
+  rgba
+}
+
+# take a 'plotly color' and produce a hex code
+rgb2hex <- function(string = "rgba(255,255,255,1)") {
+  vals <- sub("rgba\\(", "", sub("\\)", "", string))
+  valz <- strsplit(vals, ",")
+  sapply(valz, function(x) {
+    x <- setNames(as.numeric(x), c("red", "green", "blue", "alpha"))
+    x[["alpha"]] <- x[["alpha"]] * 255
+    do.call(grDevices::rgb, c(x, list(maxColorValue = 255)))
+  })
 }

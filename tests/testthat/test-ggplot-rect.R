@@ -10,7 +10,7 @@ expect_traces <- function(gg, n.traces, name) {
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data=has.data, layout=L$layout)
 }
 
 df <- data.frame(
@@ -23,7 +23,7 @@ gg <- ggplot(df, aes(xmin = x, xmax = x + 1, ymin = y, ymax = y + 2)) +
 
 test_that('geom_rect becomes 1 trace with mode="lines" fill="tozerox"', {
   info <- expect_traces(gg, 1, "black")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_identical(tr$fill, "tozerox")
   expect_identical(tr$type, "scatter")
   expect_identical(tr$mode, "lines")
@@ -42,7 +42,7 @@ gg4 <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
 
 test_that('trace contains NA back to 1st rect', {
   info <- expect_traces(gg4, 1, "black4")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_identical(tr$fill, "tozerox")
   expect_identical(tr$type, "scatter")
   expect_identical(tr$mode, "lines")
@@ -70,7 +70,7 @@ rect.color <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
 test_that('rect color', {
   info <- expect_traces(rect.color, 2, "color")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(tr$fillcolor == toRGB("grey"))
     expect_true(tr$fill == "tozerox")
     expect_equal(tr$y,
@@ -97,7 +97,7 @@ rect.fill <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
 test_that('rect color', {
   info <- expect_traces(rect.fill, 2, "fill")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(tr$line$color == "transparent")
     expect_true(tr$fill == "tozerox")
     expect_equal(tr$y,
@@ -125,7 +125,7 @@ rect.fill.color <-
 test_that('rect aes(fill) with constant color', {
   info <- expect_traces(rect.fill.color, 2, "fill-color")
   traces.by.name <- list()
-  for(tr in info$traces){
+  for(tr in info$data){
     expect_true(tr$line$color == toRGB("black"))
     expect_true(tr$fill == "tozerox")
     expect_equal(tr$y,
@@ -145,3 +145,14 @@ test_that('rect aes(fill) with constant color', {
   expect_false(traces.by.name[[1]]$fillcolor ==
                traces.by.name[[2]]$fillcolor)
 })
+
+
+p <- ggplot(data = data.frame(x1 = 1, x2 = 2, y1 = 1, y2 = 2)) + 
+  geom_rect(aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2), 
+            fill = "#00000011", color = "black")
+
+test_that('Specifying alpha in hex color code works', {
+  info <- expect_traces(p, 1, "fill-hex-alpha")
+  expect_match(info$data[[1]]$fillcolor, "rgba\\(0,0,0,0\\.0[6]+")
+})
+

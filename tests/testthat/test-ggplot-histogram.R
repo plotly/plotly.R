@@ -51,8 +51,8 @@ test_that("Histogram with fixed colour/fill works", {
   gg <- base + geom_histogram(colour = "darkgreen", fill = "white")
   info <- expect_traces(gg, 1, "fixed-fill-color")
   tr <- info$data[[1]]
-  expect_true(tr$marker$color == "rgb(255,255,255)")
-  expect_true(tr$marker$line$color == "rgb(0,100,0)")
+  expect_true(tr$marker$color == "rgba(255,255,255,1)")
+  expect_true(tr$marker$line$color == "rgba(0,100,0,1)")
 })
 
 test_that("Specify histogram binwidth", {

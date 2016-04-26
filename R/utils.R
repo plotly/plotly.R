@@ -36,7 +36,7 @@ hash_plot <- function(df, p) {
   assign(hash, p, envir = plotlyEnv)
   attr(df, "plotly_hash") <- hash
   # add plotly class mainly for printing method
-  class(df) <- unique(c("plotly", class(df)))
+  class(df) <- unique(c("plotly_hash", class(df)))
   # return a data frame to be compatible with things like dplyr
   df
 }

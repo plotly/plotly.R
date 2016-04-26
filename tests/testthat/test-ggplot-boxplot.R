@@ -56,16 +56,6 @@ test_that("legends for boxplot", {
   for (i in 1:3) {
     expect_identical(tr[[i]]$showlegend, TRUE)
   }
-  # check the fill colors are correct
-  g <- ggplot_build(p)
-  fill.colors <- unique(g$data[[1]]["fill"])[,1]
-  for (i in 1:3) {
-    plotly.color <- as.integer(strsplit(gsub("[\\(\\)]|rgb", "", 
-                tr[[i]]$fillcolor), split = ",")[[1]])
-    names(plotly.color) <- c("red", "green", "blue")
-    expect_equal(plotly.color, col2rgb(fill.colors[i])[,1], 
-                 tolerance = 1)
-  }
 })
 
 dat <- data.frame(
