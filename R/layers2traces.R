@@ -460,7 +460,10 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     line = list(
       # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),
-      color = aes2plotly(data, params, "colour"),
+      color = toRGB(
+        aes2plotly(data, params, "colour"),
+        aes2plotly(data, params, "alpha")
+      ),
       dash = aes2plotly(data, params, "linetype")
     ),
     fill = "tozerox",

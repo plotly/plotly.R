@@ -338,7 +338,7 @@ plotly_build <- function(l = last_plot()) {
       x$layout$hovermode <- x$layout$hovermode %||% "closest"
   }
   # add plotly class mainly for printing method
-  structure(x, class = unique("plotly", class(x)))
+  structure(x, class = unique("plotly_built", class(x)))
 }
 
 # returns a _list of traces_.

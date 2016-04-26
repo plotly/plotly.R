@@ -23,7 +23,13 @@ Sys.setenv('TRAVIS_COMMIT' = substr(system('git rev-parse HEAD', intern = T), 1,
 devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 ```
 
-You can also build a ggplot2/plotly comparison table:
+You can also build a ggplot2/plotly comparison table. To do so, you'll first need to clone the [plotly-test-table](https://github.com/cpsievert/plotly-test-table) repo.
+
+```shell
+$ git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
+```
+
+Then, from R:
 
 ```r
 Sys.setenv('PLOTLY_TABLE' = 'TRUE')

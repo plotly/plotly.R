@@ -3,12 +3,17 @@
 #' @param x a plotly object
 #' @param ... additional arguments
 #' @export
-#' @importFrom htmlwidgets createWidget
-#' @importFrom htmlwidgets sizingPolicy
-print.plotly <- function(x, ...) {
-  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
-  get("print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, ...)
+print.plotly_hash <- function(x, ...) {
+  x <- as.widget(x)
+  print(x, ...)
 }
+
+#' Print a 'built' plotly object
+#' 
+#' @param x a plotly object
+#' @param ... additional arguments
+#' @export
+print.plotly_built <- print.plotly_hash
 
 #' Print a plotly object in a knitr doc
 #'
@@ -16,10 +21,17 @@ print.plotly <- function(x, ...) {
 #' @param options knitr options.
 #' @param ... additional arguments
 #' @export
-knit_print.plotly <- function(x, options, ...) {
-  if (!inherits(x, "htmlwidget")) x <- as.widget(x)
-  get("knit_print.htmlwidget", envir = asNamespace("htmlwidgets"))(x, options = options, ...)
+knit_print.plotly_hash <- function(x, options, ...) {
+  x <- as.widget(x)
+  knitr::knit_print(x, options, ...)
 }
+
+#' Print a 'built' plotly object in a knitr doc
+#' 
+#' @param x a plotly object
+#' @param ... additional arguments
+#' @export
+knit_print.plotly_built <- knit_print.plotly_hash
 
 #' Convert a plotly object to an htmlwidget object
 #'
@@ -34,22 +46,22 @@ knit_print.plotly <- function(x, options, ...) {
 
 as.widget <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)
-  p <- plotly_build(x)
+  if (!inherits(x, "plotly_built")) x <- plotly_build(x)
   # set some margin defaults if none are provided
-  p$layout$margin <- modifyList(
+  x$layout$margin <- modifyList(
     list(b = 40, l = 60, t = 25, r = 10),
-    p$layout$margin %||% list()
+    x$layout$margin %||% list()
   )
-  p$config$modeBarButtonsToRemove <-
-    i(p$config$modeBarButtonsToRemove %||% "sendDataToCloud")
-  p$base_url <- get_domain()
+  x$config$modeBarButtonsToRemove <- 
+    i(x$config$modeBarButtonsToRemove %||% "sendDataToCloud")
+  x$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
-  attr(p, 'TOJSON_FUNC') <- to_JSON
+  attr(x, 'TOJSON_FUNC') <- to_JSON
   htmlwidgets::createWidget(
     name = "plotly",
-    x = p,
-    width = p$width,
-    height = p$height,
+    x = x,
+    width = x$width,
+    height = x$height,
     sizingPolicy = htmlwidgets::sizingPolicy(
       padding = 5,
       browser.fill = TRUE
