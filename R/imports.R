@@ -7,4 +7,5 @@
 #' @importFrom viridis viridis
 #' @importFrom jsonlite toJSON fromJSON
 #' @importFrom httr GET POST PATCH content config add_headers stop_for_status
+#' @importFrom htmlwidgets createWidget sizingPolicy
 NULL
