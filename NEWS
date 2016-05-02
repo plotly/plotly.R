@@ -1,4 +1,10 @@
-3.6.0 -- 26 Apr 2016
+3.5.2 -- 2 May 2016
+
+BUG FIX:
+
+Added missing key properties in ggplotly() converter so selections can be accessible via event_data().
+
+3.5.1 -- 26 Apr 2016
 
 CHANGES:
 
