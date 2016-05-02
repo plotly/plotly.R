@@ -1,3 +1,9 @@
+3.5.3 -- 3 May 2016
+
+CHANGES:
+
+Upgrade to plotlyjs v1.10.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.10.1
+
 3.5.2 -- 2 May 2016
 
 BUG FIX:
@@ -8,7 +14,7 @@ Added missing key properties in ggplotly() converter so selections can be access
 
 CHANGES:
 
-Upgrade to plotlyjs v1.10.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.9.0
+Upgrade to plotlyjs v1.10.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.10.0
 
 Distinguish between "built" (plotly_built) and "non-built" (plotly_hash) plotly objects. See #562
 
