@@ -107,7 +107,7 @@ no.x.title <- bp +
 
 test_that("coord_fixed(ratio)", {
   info <- expect_traces(no.x.title, 1, "no-x-title")
-  expect_true(length(info$layout$annotations) == 1)
+  expect_identical(info$xaxis$title, "")
 })
 
 # Also possible to set the axis label with the scale
