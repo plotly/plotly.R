@@ -376,6 +376,7 @@ geom2trace.GeomPath <- function(data, params, p) {
     x = data$x,
     y = data$y,
     text = data$hovertext,
+    key = data$key,
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -433,6 +434,7 @@ geom2trace.GeomBar <- function(data, params, p) {
     x = data$x,
     y = data$y,
     text = data$hovertext,
+    key = data$key,
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -455,6 +457,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     x = data$x,
     y = data$y,
     text = data$hovertext,
+    key = data$key,
     type = "scatter",
     mode = "lines",
     line = list(
@@ -515,6 +518,7 @@ geom2trace.GeomText <- function(data, params, p) {
     x = data$x,
     y = data$y,
     text = data$label,
+    key = data$key,
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),

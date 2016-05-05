@@ -73,7 +73,7 @@ last_plot <- function(data = NULL) {
   if (inherits(p, "try-error")) stop("The last plot doesn't exist")
   structure(
     p, 
-    class = unique(c("plotly", class(p)))
+    class = unique(c("plotly_hash", class(p)))
   )
 }
 
