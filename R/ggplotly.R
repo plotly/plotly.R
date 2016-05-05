@@ -277,6 +277,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       theme[["strip.text.x"]] %||% theme[["strip.text"]],
       "npc", "height"
     )
+    panelMarginY <- panelMarginY + stripSize
     # space for ticks/text in free scales
     if (p$facet$free$x) {
       axisTicksX <- unitConvert(
@@ -307,7 +308,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginX, 2),
     rep(panelMarginY, 2)
   )
-  
   doms <- get_domains(nPanels, nRows, margins)
 
   for (i in seq_len(nPanels)) {
@@ -335,6 +335,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
+      # get axis title
+      axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
+      if (is_blank(axisTitle)) axisTitleText <- ""
       # https://plot.ly/r/reference/#layout-xaxis
       axisObj <- list(
         type = "linear",
@@ -350,7 +353,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
         tickwidth = unitConvert(axisTicks, "pixels", type),
         showticklabels = !is_blank(axisText),
-        tickfont = text2font(axisText, "height"),
+        tickfont = text2font(axisText, type),
         tickangle = - (axisText$angle %||% 0),
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
@@ -360,7 +363,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gridcolor = toRGB(panelGrid$colour),
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
-        anchor = anchor
+        anchor = anchor,
+        title = axisTitleText,
+        titlefont = text2font(axisTitle)
       )
       # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
       # this way both dates/datetimes are on same scale
@@ -380,6 +385,24 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
 
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
+        axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
+        side <- if (xy == "x") "b" else "l"
+        # account for axis ticks, ticks text, and titles in plot margins
+        # (apparently ggplot2 doesn't support axis.title/axis.text margins)
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
+          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
+          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
+        
+        if (nchar(axisTitleText) > 0) {
+          axisTextSize <- unitConvert(axisText, "npc", type)
+          axisTitleSize <- unitConvert(axisTitle, "npc", type)
+          offset <-
+            (0 -
+               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
+               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
+               unitConvert(theme$axis.ticks.length, "npc", type))
+        }
+        
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(p)) {
           stripSize <- unitConvert(stripText, "pixels", type)
@@ -389,42 +412,30 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
           if (xy == "y" && inherits(p$facet, "grid")) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
-        }
-        axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
-        if (is_blank(axisTitle)) axisTitleText <- ""
-        axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
-        side <- if (xy == "x") "b" else "l"
-        # account for axis ticks, ticks text, and titles in plot margins
-        # (apparently ggplot2 doesn't support axis.title/axis.text margins)
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
-          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
-          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
-        # draw axis titles as annotations
-        # (plotly.js axis titles aren't smart enough to dodge ticks & text)
-        if (nchar(axisTitleText) > 0) {
-          axisTextSize <- unitConvert(axisText, "npc", type)
-          axisTitleSize <- unitConvert(axisTitle, "npc", type)
-          offset <-
-            (0 -
-               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
-               unitConvert(theme$axis.ticks.length, "npc", type))
-          # npc is on a 0-1 scale of the _entire_ device,
-          # but these units _should_ be wrt to the plotting region
-          # multiplying the offset by 2 seems to work, but this is a terrible hack
-          offset <- 1.75 * offset
-          x <- if (xy == "x") 0.5 else offset
-          y <- if (xy == "x") offset else 0.5
-          gglayout$annotations <- c(
-            gglayout$annotations,
-            make_label(
-              faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-              xanchor = "center", yanchor = "middle"
+          # facets have multiple axis objects, but only one title for the plot,
+          # so we empty the titles and try to draw the title as an annotation
+          if (nchar(axisTitleText) > 0) {
+            # npc is on a 0-1 scale of the _entire_ device,
+            # but these units _should_ be wrt to the plotting region
+            # multiplying the offset by 2 seems to work, but this is a terrible hack
+            offset <- 1.75 * offset
+            x <- if (xy == "x") 0.5 else offset
+            y <- if (xy == "x") offset else 0.5
+            gglayout$annotations <- c(
+              gglayout$annotations,
+              make_label(
+                faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
+                xanchor = "center", yanchor = "middle"
+              )
             )
-          )
+          }
         }
       }
-
+      
+      if (has_facet(p)) {
+        gglayout[[axisName]]$title <- ""
+      }
+      
     } # end of axis loop
 
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
