@@ -1,3 +1,10 @@
+3.5.4 -- 5 May 2016
+
+BUG FIX:
+
+gg2list() now returns an object of class "plotly_built" instead of "plotly"
+to ensure a sensible print method is invoked.
+
 3.5.3 -- 3 May 2016
 
 CHANGES:
