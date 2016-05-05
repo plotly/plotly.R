@@ -2,18 +2,33 @@
 % Please edit documentation in R/plotly.R
 \name{plotly_build}
 \alias{plotly_build}
-\title{Build a plotly object before viewing it}
+\title{Create a 'plotly_built' object}
 \usage{
 plotly_build(l = last_plot())
 }
 \arguments{
-\item{l}{a ggplot object, or a plotly object, or a list.}
+\item{l}{a ggplot object, or a plotly_hash object, or a list.}
 }
 \description{
-For convenience and efficiency purposes, plotly objects are subject to lazy 
-evaluation. That is, the actual content behind a plotly object is not 
-created until it is absolutely necessary. In some instances, you may want 
-to perform this evaluation yourself, and work directly with the resulting 
-list.
+This generic function creates the list object sent to plotly.js
+for rendering. Using this function can be useful for overriding defaults
+provided by \code{ggplotly}/\code{plot_ly} or for debugging rendering
+errors.
+}
+\examples{
+
+p <- plot_ly()
+# data frame
+str(p)
+# the actual list of options sent to plotly.js
+str(plotly_build(p))
+
+p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
+l <- plotly_build(p)
+# turn off hoverinfo for the smooth (but keep it for the points)
+l$data[[2]]$hoverinfo <- "none"
+l$data[[3]]$hoverinfo <- "none"
+l
+
 }
 

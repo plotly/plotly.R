@@ -448,7 +448,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
               gglayout$annotations,
               make_label(
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = "center", yanchor = "middle"
+                xanchor = "center", yanchor = "middle", annotationType = "axis"
               )
             )
           }
