@@ -1,3 +1,15 @@
+3.5.5 -- 5 May 2016
+
+CHANGES:
+
+ggplotly() will now use plotly's layout.axisid.title (instead of 
+layout.annotations) for axis titles on non-faceted plots. 
+This will make for a better title placement experience (see #510).
+
+BUG FIX:
+
+Space for interior facet_wrap() strips are now accounted for.
+
 3.5.4 -- 5 May 2016
 
 BUG FIX:
