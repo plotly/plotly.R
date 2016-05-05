@@ -13,8 +13,8 @@ test_that("ylab is translated correctly", {
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ylab("sepal width")
   info <- save_outputs(ggiris, "labels-ylab")
-  labs <- unlist(lapply(info$layout$annotations, "[[", "text"))
-  expect_identical(sort(labs), c("Petal.Width", "sepal width"))
+  labs <- c(info$layout$xaxis$title, info$layout$yaxis$title)
+  expect_identical(labs, c("Petal.Width", "sepal width"))
 })
 
 # TODO: why is this failing on R-devel???

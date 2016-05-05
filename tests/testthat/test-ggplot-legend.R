@@ -30,9 +30,9 @@ test_that("Discrete colour and shape get merged into one legend", {
     nms, paste0("(", d$vs, ",", d$cyl, ")")
   )
   a <- info$layout$annotations
-  expect_match(a[[3]]$text, "^factor\\(vs\\)")
-  expect_match(a[[3]]$text, "factor\\(cyl\\)$")
-  expect_true(a[[3]]$y > info$layout$legend$y)
+  expect_match(a[[1]]$text, "^factor\\(vs\\)")
+  expect_match(a[[1]]$text, "factor\\(cyl\\)$")
+  expect_true(a[[1]]$y > info$layout$legend$y)
 })
 
 
