@@ -353,7 +353,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
         tickwidth = unitConvert(axisTicks, "pixels", type),
         showticklabels = !is_blank(axisText),
-        tickfont = text2font(axisText, "height"),
+        tickfont = text2font(axisText, type),
         tickangle = - (axisText$angle %||% 0),
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
@@ -364,9 +364,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        #  if not facets then use Plotly axis titling mechanism
-        #   see https://github.com/ropensci/plotly/issues/510
-        title = axisTitleText
+        title = axisTitleText,
+        titlefont = text2font(axisTitle)
       )
       # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
       # this way both dates/datetimes are on same scale
@@ -413,8 +412,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
           if (xy == "y" && inherits(p$facet, "grid")) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
-          # draw axis titles as annotations
-          # (plotly.js axis titles aren't smart enough to dodge ticks & text)
+          # facets have multiple axis objects, but only one title for the plot,
+          # so we empty the titles and try to draw the title as an annotation
+          gglayout[[axisName]]$title <- ""
           if (nchar(axisTitleText) > 0) {
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
@@ -432,13 +432,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
           }
         }
       }
-      
-      if (has_facet(p)) {
-        # turn off plotly axis titles
-        #  since we need special treatment for facets
-        gglayout[[axisName]]$title <- ""
-      }
-
     } # end of axis loop
 
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
