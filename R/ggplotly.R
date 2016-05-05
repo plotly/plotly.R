@@ -641,7 +641,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   l$width <- width
   l$height <- height
   l$source <- source
-  structure(l, class = "plotly")
+  structure(l, class = "plotly_built")
 }
 
 
