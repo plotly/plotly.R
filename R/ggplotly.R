@@ -277,6 +277,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       theme[["strip.text.x"]] %||% theme[["strip.text"]],
       "npc", "height"
     )
+    panelMarginY <- panelMarginY + stripSize
     # space for ticks/text in free scales
     if (p$facet$free$x) {
       axisTicksX <- unitConvert(
@@ -307,7 +308,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginX, 2),
     rep(panelMarginY, 2)
   )
-  
   doms <- get_domains(nPanels, nRows, margins)
 
   for (i in seq_len(nPanels)) {
@@ -414,7 +414,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
-          gglayout[[axisName]]$title <- ""
           if (nchar(axisTitleText) > 0) {
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
@@ -432,6 +431,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
           }
         }
       }
+      
+      if (has_facet(p)) {
+        gglayout[[axisName]]$title <- ""
+      }
+      
     } # end of axis loop
 
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
