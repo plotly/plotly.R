@@ -14,9 +14,11 @@
 #' is used as the right margin, the third is used as the top margin, and the
 #' fourth is used as the bottom margin.
 #' If a single value is provided, it will be used as all four margins. 
+#' @param keep_titles should axis titles be retained?
 #' @param which_layout adopt the layout of which plot? If the default value of 
-#' "merge" is used, all plot level layout options will be included in the final 
-#' layout. This argument also accepts a numeric vector specifying 
+#' "merge" is used, layout options found later in the sequence of plots will 
+#' override options found earlier in the sequence. This argument also accepts a 
+#' numeric vector specifying which plots to consider when merging.
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
@@ -27,7 +29,8 @@
 #' }
 
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE, 
-                    shareY = FALSE, margin = 0.02, which_layout = "merge") {
+                    shareY = FALSE, margin = 0.02, which_layout = "merge", 
+                    keep_titles = FALSE) {
   # build each plot and collect relevant info 
   plots <- lapply(list(...), plotly_build)
   traces <- lapply(plots, "[[", "data")
@@ -46,8 +49,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
     x[grepl("^yaxis", names(x))] %||% list(yaxis = list(domain = c(0, 1), anchor = "x"))
   })
   # remove their titles
-  xAxes <- lapply(xAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
-  yAxes <- lapply(yAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
+  if (!keep_titles) {
+    xAxes <- lapply(xAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
+    yAxes <- lapply(yAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
+  }
   # number of x/y axes per plot
   xAxisN <- vapply(xAxes, length, numeric(1))
   yAxisN <- vapply(yAxes, length, numeric(1))
@@ -75,7 +80,6 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
   xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
   yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
   # domains of each subplot
-  # TODO: allow control of column width and row height!
   domainInfo <- get_domains(
     length(plots), nrows, margin, widths = widths, heights = heights
   )
@@ -137,7 +141,6 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modifyList, layouts))
-  
   hash_plot(data.frame(), p)
 }
 
