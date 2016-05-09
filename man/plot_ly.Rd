@@ -9,7 +9,7 @@ plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
   evaluate = FALSE, source = "A")
 }
 \arguments{
-\item{data}{A data frame (optional).}
+\item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
 
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}

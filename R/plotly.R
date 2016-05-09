@@ -5,7 +5,7 @@
 #' There are a number of "visual properties" that aren't included in the officical
 #' Reference section (see below).
 #'
-#' @param data A data frame (optional).
+#' @param data A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
 #' @param type A character string describing the type of trace.
@@ -24,8 +24,6 @@
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @param source Only relevant for \link{event_data}.
-#' @param key Character vector indicating selection variable to use for linked views.
-#' @param set Indicates the group ID that this plot belongs to for linking purposes.
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
 #' @export
@@ -69,8 +67,17 @@
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
                     width = NULL, height = NULL, inherit = FALSE,
-                    evaluate = FALSE, key = rownames(data),
-                    set = NULL, source = "A") {
+                    evaluate = FALSE, source = "A") {
+  
+  if (crosstalk::is.SharedData(data)) {
+    key <- data$key()
+    set <- data$groupName()
+    data <- data$origData()
+  } else {
+    key <- NULL
+    set <- NULL
+  }
+  
   # "native" plotly arguments
   argz <- substitute(list(...))
   # old arguments to this function that are no longer supported
@@ -87,8 +94,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
-  if (!missing(key)) argz$key <- substitute(key)
-  if (!missing(set)) argz$set <- substitute(set)
+  if (!is.null(key)) argz$key <- key
+  if (!is.null(set)) argz$set <- set
   # trace information
   tr <- list(
     type = type,
@@ -134,8 +141,18 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @author Carson Sievert
 #' @export
 add_trace <- function(p = last_plot(), ...,
-                      group, color, colors, symbol, symbols, size, key, set,
+                      group, color, colors, symbol, symbols, size,
                       data = NULL, evaluate = FALSE) {
+  
+  if (crosstalk::is.SharedData(data)) {
+    key <- data$key()
+    set <- data$groupName()
+    data <- data$origData()
+  } else {
+    key <- NULL
+    set <- NULL
+  }
+  
   # "native" plotly arguments
   argz <- substitute(list(...))
   # tack on "special" arguments
@@ -145,8 +162,8 @@ add_trace <- function(p = last_plot(), ...,
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
-  if (!missing(key)) argz$key <- substitute(key)
-  if (!missing(set)) argz$set <- substitute(set)
+  if (!is.null(key)) argz$key <- key
+  if (!is.null(set)) argz$set <- set
   data <- data %||% if (is.data.frame(p)) p else list()
   tr <- list(
     args = argz,
