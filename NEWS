@@ -1,3 +1,9 @@
+3.5.6 -- 12 May 2016
+
+BUG FIX:
+
+Use .embed suffix in iframe src attribute. Fixes #581.
+
 3.5.5 -- 5 May 2016
 
 CHANGES:
