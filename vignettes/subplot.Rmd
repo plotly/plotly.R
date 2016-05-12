@@ -1,0 +1,82 @@
+---
+title: "The `subplot()` function"
+author: "Carson Sievert"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{subplot}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 4, 
+  fig.height = 2
+)
+```
+
+The `subplot()` function provides a flexible interface for arranging multiple plots in a single view. There are a few different ways to use `subplot()`, but the simplest way to pass plotly visualization objects directly to `subplot()`.
+
+```{r, fig.width = 2}
+library(plotly)
+p1 <- plot_ly(economics, x = date, y = unemploy)
+p2 <- plot_ly(economics, x = date, y = uempmed)
+subplot(p1, p2)
+```
+
+This particular subplot could be improved if we share the x-axis so that zooming and panning events are synchronized. It also makes sense to keep x/y titles and remove the redundant legend (since `subplot()` returns a plotly visualization object, any [layout attribute](https://plot.ly/r/reference/#layout) can be altered via `layout()`).
+
+```{r}
+s <- subplot(p1, p2, nrows = 2, shareX = TRUE, keep_titles = TRUE)
+layout(s, showlegend = FALSE)
+```
+
+By default, every subplot is allocated equal spacing, and the margins between them are set somewhat arbitrarily, but that can easily be altered:
+
+```{r}
+map <- plot_ly(
+  z = state.area, text = state.name, locations = state.abb,
+  type = 'choropleth', locationmode = 'USA-states', geo = "geo"
+)
+# specify some map projection/options
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  lakecolor = toRGB('white')
+)
+map <- layout(map, geo = g)
+subplot(
+  plot_ly(x = state.name, y = state.area, type = "bar"), map,
+  nrows = 2, margin = c(0, 0, 0.25, 0), heights = c(0.2, 0.8)
+)
+```
+
+In addition to a `heights` argument for controlling the proportional height of each row, there is also a `widths` argument for controlling the proportional width of each column:
+
+```{r}
+x <- rnorm(100)
+y <- rnorm(100)
+m <- list(color = "black")
+subplot(
+  plot_ly(x = x, type = "histogram", marker = m), 
+  plotly_empty(), 
+  plot_ly(x = x, y = y, mode = "markers",  marker = m), 
+  plot_ly(y = y, type = "histogram", marker = m),
+  nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), 
+  shareX = TRUE, shareY = TRUE
+) %>% layout(showlegend = FALSE)
+```
+
+The `subplot()` function also understands ggplot2 objects and converts them via `ggplotly()`.
+
+```{r}
+e <- tidyr::gather(economics, variable, value, -date)
+gg1 <- ggplot(e, aes(date, value)) + geom_line() +
+  facet_wrap(~variable, scales = "free_y", ncol = 1)
+gg2 <- ggplot(e, aes(factor(1), value)) + geom_violin() +
+  facet_wrap(~variable, scales = "free_y", ncol = 1) + 
+  theme(axis.text.x = element_blank())
+subplot(gg1, gg2)
+```
+

@@ -36,7 +36,7 @@ You can manually add a trace to an existing plot with `add_trace()`. In that cas
 ```{r}
 m <- loess(unemploy / pop ~ as.numeric(date), data = economics)
 p <- plot_ly(economics, x = date, y = unemploy / pop, name = "raw") 
-add_trace(p, y = fitted(m), name = "loess")
+add_trace(p, x = date, y = fitted(m), name = "loess")
 ```
 
 __plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to create a visualization pipeline:
@@ -44,7 +44,7 @@ __plotly__ was designed with a [pure, predictable, and pipeable interface](https
 ```{r}
 economics %>%
   plot_ly(x = date, y = unemploy / pop) %>% 
-  add_trace(y = fitted(m)) %>%
+  add_trace(x = date, y = fitted(m)) %>%
   layout(showlegend = F)
 ```
 

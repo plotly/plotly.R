@@ -57,7 +57,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
   plots <- list()
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]
-    layoutAttrs <- names(p$layout)
+    layoutAttrs <- c(names(p$layout), c("geo", "xaxis", "yaxis"))
     xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["xaxis"]]))
     yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["yaxis"]]))
     missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
@@ -92,8 +92,12 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
     x$annotations[!axes]
   })
   # collect axis objects
-  xAxes <- lapply(layouts, function(lay) lay[grepl("^xaxis|^geo", names(lay))])
-  yAxes <- lapply(layouts, function(lay) lay[grepl("^yaxis|^geo", names(lay))])
+  xAxes <- lapply(layouts, function(lay) {
+    lay[grepl("^xaxis|^geo", names(lay))] %||% list(xaxis = list(domain = c(0, 1)))
+  })
+  yAxes <- lapply(layouts, function(lay) {
+    lay[grepl("^yaxis|^geo", names(lay))] %||% list(yaxis = list(domain = c(0, 1)))
+  })
   # remove their titles
   if (!keep_titles) {
     xAxes <- lapply(xAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
