@@ -7,14 +7,15 @@
 #' columns have an equal relative width.
 #' @param heights relative height of each row on a 0-1 scale. By default all
 #' rows have an equal relative height.
-#' @param shareX should the x-axis be shared amongst the subplots?
-#' @param shareY should the y-axis be shared amongst the subplots?
 #' @param margin either a single value or four values (all between 0 and 1).
 #' If four values are provided, the first is used as the left margin, the second
 #' is used as the right margin, the third is used as the top margin, and the
 #' fourth is used as the bottom margin.
 #' If a single value is provided, it will be used as all four margins. 
-#' @param keep_titles should axis titles be retained?
+#' @param shareX should the x-axis be shared amongst the subplots?
+#' @param shareY should the y-axis be shared amongst the subplots?
+#' @param titleX should x-axis titles be retained?
+#' @param titleY should y-axis titles be retained?
 #' @param which_layout adopt the layout of which plot? If the default value of 
 #' "merge" is used, layout options found later in the sequence of plots will 
 #' override options found earlier in the sequence. This argument also accepts a 
@@ -28,9 +29,9 @@
 #' subplot(p1, p2, p1, p2, nrows = 2)
 #' }
 
-subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE, 
-                    shareY = FALSE, margin = 0.02, which_layout = "merge", 
-                    keep_titles = FALSE) {
+subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
+                    shareX = FALSE, shareY = FALSE, titleX = shareX, 
+                    titleY = shareY, which_layout = "merge") {
   # build each plot
   plotz <- lapply(list(...), plotly_build)
   # ensure "axis-reference" trace attributes are properly formatted
@@ -98,9 +99,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
   yAxes <- lapply(layouts, function(lay) {
     lay[grepl("^yaxis|^geo", names(lay))] %||% list(yaxis = list(domain = c(0, 1)))
   })
-  # remove their titles
-  if (!keep_titles) {
+  if (!titleX) {
     xAxes <- lapply(xAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
+  }
+  if (!titleY) {
     yAxes <- lapply(yAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
   }
   # number of x/y axes per plot

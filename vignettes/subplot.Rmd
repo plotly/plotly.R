@@ -18,17 +18,17 @@ knitr::opts_chunk$set(
 
 The `subplot()` function provides a flexible interface for arranging multiple plots in a single view. There are a few different ways to use `subplot()`, but the simplest way to pass plotly visualization objects directly to `subplot()`.
 
-```{r, fig.width = 2}
+```{r}
 library(plotly)
 p1 <- plot_ly(economics, x = date, y = unemploy)
 p2 <- plot_ly(economics, x = date, y = uempmed)
 subplot(p1, p2)
 ```
 
-This particular subplot could be improved if we share the x-axis so that zooming and panning events are synchronized. It also makes sense to keep x/y titles and remove the redundant legend (since `subplot()` returns a plotly visualization object, any [layout attribute](https://plot.ly/r/reference/#layout) can be altered via `layout()`).
+This particular subplot could be improved if we share the x-axis so that zooming and panning events are synchronized. It also makes sense to keep axis titles and remove the redundant legend (since `subplot()` returns a plotly visualization object, any [layout attribute](https://plot.ly/r/reference/#layout) can be altered via `layout()`).
 
 ```{r}
-s <- subplot(p1, p2, nrows = 2, shareX = TRUE, keep_titles = TRUE)
+s <- subplot(p1, p2, nrows = 2, shareX = TRUE, titleY = TRUE)
 layout(s, showlegend = FALSE)
 ```
 
@@ -70,13 +70,16 @@ subplot(
 
 The `subplot()` function also understands ggplot2 objects and converts them via `ggplotly()`.
 
-```{r}
+```{r, fig.height = 8}
 e <- tidyr::gather(economics, variable, value, -date)
 gg1 <- ggplot(e, aes(date, value)) + geom_line() +
   facet_wrap(~variable, scales = "free_y", ncol = 1)
 gg2 <- ggplot(e, aes(factor(1), value)) + geom_violin() +
   facet_wrap(~variable, scales = "free_y", ncol = 1) + 
-  theme(axis.text.x = element_blank())
-subplot(gg1, gg2)
+  theme(axis.text = element_blank(), axis.ticks = element_blank())
+subplot(gg1, gg2) %>% layout(margin = list(l = 50))
 ```
+
+
+
 

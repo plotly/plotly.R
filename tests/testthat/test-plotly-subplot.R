@@ -68,7 +68,6 @@ test_that("share both axes", {
 })
 
 # https://github.com/ropensci/plotly/issues/376
-library(plotly)
 d <- data.frame(
   x = rnorm(100),
   y = rnorm(100)
