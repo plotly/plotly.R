@@ -5,7 +5,8 @@
 \title{View multiple plots in a single view}
 \usage{
 subplot(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE,
-  shareY = FALSE, margin = 0.02, which_layout = "merge")
+  shareY = FALSE, margin = 0.02, which_layout = "merge",
+  keep_titles = FALSE)
 }
 \arguments{
 \item{...}{any number of plotly objects}
@@ -30,8 +31,11 @@ fourth is used as the bottom margin.
 If a single value is provided, it will be used as all four margins.}
 
 \item{which_layout}{adopt the layout of which plot? If the default value of 
-"merge" is used, all plot level layout options will be included in the final 
-layout. This argument also accepts a numeric vector specifying}
+"merge" is used, layout options found later in the sequence of plots will 
+override options found earlier in the sequence. This argument also accepts a 
+numeric vector specifying which plots to consider when merging.}
+
+\item{keep_titles}{should axis titles be retained?}
 }
 \value{
 A plotly object

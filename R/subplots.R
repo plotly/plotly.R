@@ -31,27 +31,73 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALSE, 
                     shareY = FALSE, margin = 0.02, which_layout = "merge", 
                     keep_titles = FALSE) {
-  # build each plot and collect relevant info 
-  plots <- lapply(list(...), plotly_build)
+  # build each plot
+  plotz <- lapply(list(...), plotly_build)
+  # ensure "axis-reference" trace attributes are properly formatted
+  # TODO: should this go inside plotly_build()?
+  plotz <- lapply(plotz, function(p) {
+    p$data <- lapply(p$data, function(tr) {
+      if (length(tr[["geo"]])) {
+        tr[["geo"]] <- sub("^geo1$", "geo", tr[["geo"]][1]) %||% NULL
+        tr[["xaxis"]] <- NULL
+        tr[["yaxis"]] <- NULL
+      } else {
+        tr[["geo"]] <- NULL
+        tr[["xaxis"]] <- sub("^x1$", "x", tr[["xaxis"]][1] %||% "x") 
+        tr[["yaxis"]] <- sub("^y1$", "y", tr[["yaxis"]][1] %||% "y")
+      }
+      tr
+    })
+    p
+  })
+  # Are any traces referencing "axis-like" layout attributes that are missing?
+  # If so, move those traces to a "new plot", and inherit layout attributes,
+  # which makes this sort of thing possible:
+  # https://plot.ly/r/map-subplots-and-small-multiples/
+  plots <- list()
+  for (i in seq_along(plotz)) {
+    p <- plots[[i]] <- plotz[[i]]
+    layoutAttrs <- names(p$layout)
+    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["xaxis"]]))
+    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["yaxis"]]))
+    missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
+    # move to next iteration if trace references are complete
+    if (!length(missingAttrs)) next
+    # remove each "missing" trace from this plot
+    missingTraces <- xTraceAttrs %in% missingAttrs | yTraceAttrs %in% missingAttrs
+    plots[[i]]$data[missingTraces] <- NULL
+    # move traces with "similar missingness" to a new plot
+    for (j in missingAttrs) {
+      newPlot <- list(
+        data = p$data[xTraceAttrs %in% j | yTraceAttrs %in% j],
+        layout = p$layout
+      )
+      # reset the anchors
+      newPlot$data <- lapply(newPlot$data, function(tr) {
+        for (k in c("geo", "xaxis", "yaxis")) {
+          tr[[k]] <- sub("[0-9]+", "", tr[[k]]) %||% NULL
+        }
+        tr
+      })
+      plots <- c(plots, list(newPlot))
+    }
+  }
+  # main plot objects
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
   shapes <- lapply(layouts, "[[", "shapes")
-  # keep non axis title annotations
   annotations <- lapply(layouts, function(x) {
+    # keep non axis title annotations
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
   # collect axis objects
-  xAxes <- lapply(layouts, function(x) {
-    x[grepl("^xaxis", names(x))] %||% list(xaxis = list(domain = c(0, 1), anchor = "y"))
-  })
-  yAxes <- lapply(layouts, function(x) {
-    x[grepl("^yaxis", names(x))] %||% list(yaxis = list(domain = c(0, 1), anchor = "x"))
-  })
+  xAxes <- lapply(layouts, function(lay) lay[grepl("^xaxis|^geo", names(lay))])
+  yAxes <- lapply(layouts, function(lay) lay[grepl("^yaxis|^geo", names(lay))])
   # remove their titles
   if (!keep_titles) {
-    xAxes <- lapply(xAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
-    yAxes <- lapply(yAxes, function(x) lapply(x, function(y) { y$title <- NULL; y }))
+    xAxes <- lapply(xAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
+    yAxes <- lapply(yAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
   }
   # number of x/y axes per plot
   xAxisN <- vapply(xAxes, length, numeric(1))
@@ -68,14 +114,19 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
   } else {
     seq_len(sum(yAxisN))
   }
-  xAxisMap <- setNames(
-    unlist(lapply(xAxes, names)),
-    paste0("xaxis", sub("^1$", "", xAxisID))
+  # current "axis" names
+  xCurrentNames <- unlist(lapply(xAxes, names))
+  yCurrentNames <- unlist(lapply(yAxes, names))
+  xNewNames <- paste0(
+    sub("[0-9]+$", "", xCurrentNames), 
+    sub("^1$", "", xAxisID)
   )
-  yAxisMap <- setNames(
-    unlist(lapply(yAxes, names)),
-    paste0("yaxis", sub("^1$", "", yAxisID))
+  yNewNames <- paste0(
+    sub("[0-9]+$", "", yCurrentNames), 
+    sub("^1$", "", yAxisID)
   )
+  xAxisMap <- setNames(xCurrentNames, xNewNames)
+  yAxisMap <- setNames(yCurrentNames, yNewNames)
   # split the map by plot ID
   xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
   yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
@@ -93,35 +144,64 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
     xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
     yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
     for (j in seq_along(xAxes[[i]])) {
-      # before bumping axis anchor, bump trace info, where appropriate
+      # TODO: support ternary as well!
+      isGeo <- grepl("^geo", xMap[[j]])
+      anchorKey <- if (isGeo) "geo" else "xaxis"
       traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr$xaxis <- tr$xaxis %||% "x"
-        tr$xaxis[sub("axis", "", xMap[[j]]) %in% tr$xaxis] <- sub("axis", "", names(xMap[j]))
+        tr[[anchorKey]] <- tr[[anchorKey]] %||% sub("axis", "", anchorKey)
+        # bump trace anchors, where appropriate
+        if (sub("axis", "", xMap[[j]]) %in% tr[[anchorKey]]) {
+          tr[[anchorKey]] <- sub("axis", "", names(xMap[j]))
+        }
         tr
       })
-      # bump anchors
-      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
-      xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-      xAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        xAxes[[i]][[j]]$domain %||% c(0, 1), xDom, from = c(0, 1)
-      ))
+      if (isGeo) {
+        xAxes[[i]][[j]]$domain$x <- sort(scales::rescale(
+          xAxes[[i]][[j]]$domain$x %||% c(0, 1), xDom, from = c(0, 1)
+        ))
+        xAxes[[i]][[j]]$domain$y <- sort(scales::rescale(
+          xAxes[[i]][[j]]$domain$y %||% c(0, 1), yDom, from = c(0, 1)
+        ))
+      } else {
+        xAxes[[i]][[j]]$domain <- sort(scales::rescale(
+          xAxes[[i]][[j]]$domain %||% c(0, 1), xDom, from = c(0, 1)
+        ))
+        # for cartesian, bump corresponding axis
+        map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
+        xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      }
     }
     for (j in seq_along(yAxes[[i]])) {
+      # TODO: support ternary as well!
+      isGeo <- grepl("^geo", yMap[[j]])
+      anchorKey <- if (isGeo) "geo" else "yaxis"
       traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr$yaxis <- tr$yaxis %||% "y"
-        tr$yaxis[sub("axis", "", yMap[[j]]) %in% tr$yaxis] <- sub("axis", "", names(yMap[j]))
+        tr[[anchorKey]] <- tr[[anchorKey]] %||% sub("axis", "", anchorKey)
+        # bump trace anchors, where appropriate
+        if (sub("axis", "", yMap[[j]]) %in% tr[[anchorKey]]) {
+          tr[[anchorKey]] <- sub("axis", "", names(yMap[j]))
+        }
         tr
       })
-      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
-      yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-      yAxes[[i]][[j]]$domain <- sort(scales::rescale(
-        yAxes[[i]][[j]]$domain %||% c(0, 1), yDom, from = c(0, 1)
-      ))
+      if (isGeo) {
+        yAxes[[i]][[j]]$domain$x <- sort(scales::rescale(
+          yAxes[[i]][[j]]$domain$x %||% c(0, 1), xDom, from = c(0, 1)
+        ))
+        yAxes[[i]][[j]]$domain$y <- sort(scales::rescale(
+          yAxes[[i]][[j]]$domain$y %||% c(0, 1), yDom, from = c(0, 1)
+        ))
+      } else {
+        yAxes[[i]][[j]]$domain <- sort(scales::rescale(
+          yAxes[[i]][[j]]$domain %||% c(0, 1), yDom, from = c(0, 1)
+        ))
+        # for cartesian, bump corresponding axis
+        map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
+        yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      }
     }
     xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
     yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
   }
-  
   # start merging the plots into a single subplot
   p <- list(
     data = Reduce(c, traces),
@@ -131,7 +211,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
   p$layout$shapes <- Reduce(c, shapes)
   
   # merge non-axis layout stuff
-  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis", names(x))] %||% list())
+  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis|^geo", names(x))] %||% list())
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
     if (!all(idx <- which_layout %in% seq_along(plots))) {
@@ -141,7 +221,9 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, shareX = FALS
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modifyList, layouts))
-  hash_plot(data.frame(), p)
+  
+  res <- hash_plot(data.frame(), p)
+  prefix_class(res, "plotly_subplot")
 }
 
 
@@ -160,7 +242,7 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
     stop("The length of the heights argument must be equal ",
          "to the number of rows", call. = FALSE)
   }
-  if (any(widths < 0 | heights < 0)) {
+  if (any(widths < 0) | any(heights < 0)) {
     stop("The widths and heights arguments must contain positive values")
   }
   if (sum(widths) > 1 | sum(heights) > 1) {
@@ -172,7 +254,6 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
   # 'center' these values if there is still room left 
   widths <- widths + (1 - max(widths)) / 2
   heights <- heights + (1 - max(heights)) / 2
-  
   
   xs <- vector("list", ncols)
   for (i in seq_len(ncols)) {

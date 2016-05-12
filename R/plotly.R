@@ -255,8 +255,13 @@ plotly_build.plotly_built <- function(l = last_plot()) {
 }
 
 #' @export
+plotly_build.plotly_subplot <- function(l = last_plot()) {
+  prefix_class(get_plot(l), "plotly_built")
+}
+
+#' @export
 plotly_build.gg <- function(l = last_plot()) {
-  structure(get_plot(ggplotly(l)), class = "plotly_built")
+  prefix_class(get_plot(ggplotly(l)), "plotly_built")
 }
 
 #' @export
