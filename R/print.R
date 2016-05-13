@@ -23,7 +23,7 @@ print.plotly_built <- print.plotly_hash
 #' @export
 knit_print.plotly_hash <- function(x, options, ...) {
   x <- as.widget(x)
-  knitr::knit_print(x, options, ...)
+  knitr::knit_print(x, options = options, ...)
 }
 
 #' Print a 'built' plotly object in a knitr doc
