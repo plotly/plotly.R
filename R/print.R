@@ -64,7 +64,9 @@ as.widget <- function(x, ...) {
     height = x$height,
     sizingPolicy = htmlwidgets::sizingPolicy(
       padding = 5, 
-      browser.fill = TRUE
+      browser.fill = TRUE,
+      defaultWidth = '100%',
+      defaultHeight = 400
     ),
     ...
   )
