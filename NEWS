@@ -1,3 +1,13 @@
+3.5.7 -- 13 May 2016
+
+CHANGES:
+
+Better defaults for defaultWidth/defaultHeight in the htmlwidget's sizing policy.
+
+BUG FIX:
+
+Pass knitr options to the named argument options. Fixes #582.
+
 3.5.6 -- 12 May 2016
 
 BUG FIX:
