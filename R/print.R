@@ -23,7 +23,7 @@ print.plotly_built <- print.plotly_hash
 #' @export
 knit_print.plotly_hash <- function(x, options, ...) {
   x <- as.widget(x)
-  knitr::knit_print(x, options, ...)
+  knitr::knit_print(x, options = options, ...)
 }
 
 #' Print a 'built' plotly object in a knitr doc
@@ -135,7 +135,7 @@ embed_notebook <- function(x, width = NULL, height = NULL,
 
 plotly_iframe <- function(url = "", width = NULL, height = NULL) {
   sprintf(
-    '<iframe src="%s" width="%s" height="%s" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>', 
+    '<iframe src="%s.embed" width="%s" height="%s" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>', 
     url, width %||% "100%", height %||% "400"
   )
 }
