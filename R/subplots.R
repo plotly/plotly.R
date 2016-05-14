@@ -34,7 +34,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
                     titleY = shareY, which_layout = "merge") {
   # are the dots a list of plotly objects?
   dotz <- list(...)
-  if (length(dotz) == 1 && is.list(dotz) && !is.plotly(dotz)) {
+  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
     dotz <- dotz[[1]]
   }
   # build each plot
