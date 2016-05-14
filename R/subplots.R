@@ -32,8 +32,13 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
+  # are the dots a list of plotly objects?
+  dotz <- list(...)
+  if (length(dotz) == 1 && is.list(dotz) && !is.plotly(dotz)) {
+    dotz <- dotz[[1]]
+  }
   # build each plot
-  plotz <- lapply(list(...), plotly_build)
+  plotz <- lapply(dotz, plotly_build)
   # ensure "axis-reference" trace attributes are properly formatted
   # TODO: should this go inside plotly_build()?
   plotz <- lapply(plotz, function(p) {
@@ -245,8 +250,8 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
          "to the number of columns", call. = FALSE)
   }
   if (length(heights) != nrows) {
-    stop("The length of the heights argument must be equal ",
-         "to the number of rows", call. = FALSE)
+    stop("The length of the heights argument is ", length(heights),
+         ", but the number of rows is ", nrows, call. = FALSE)
   }
   if (any(widths < 0) | any(heights < 0)) {
     stop("The widths and heights arguments must contain positive values")
