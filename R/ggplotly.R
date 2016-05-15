@@ -649,8 +649,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
-  l$width <- width
-  l$height <- height
+  l$layout$width <- width
+  l$layout$height <- height
   l$source <- source
   structure(l, class = "plotly_built")
 }
