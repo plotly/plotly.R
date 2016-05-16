@@ -1,3 +1,20 @@
+3.6.0 -- 16 May 2016
+
+NEW FEATURES & CHANGES:
+
+* Many improvements to the subplot() function:
+  * ggplot2 objects are now officially supported (#520).
+  * Several new arguments allow one to synchronize x/y axes (#298), height/width (#376), hide/show x/y axis titles.
+  * A list of plots can now be passed to the first argument.
+  * A new vignette with examples and more explanation can be accessed via `vignette("subplot")`.
+
+* ggplotly() is now a generic function with a method for ggmatrix objects.
+* plotly_build() is now a generic function. 
+
+BUG FIX: 
+
+Column facet strips will no longer be drawn when there is only one column.
+
 3.5.7 -- 13 May 2016
 
 CHANGES:
