@@ -90,3 +90,49 @@ test_that("Row/column height/width", {
   expect_equal(diff(l$layout$yaxis2$domain), 0.8 - 0.005)
 })
 
+test_that("recursive subplots work", {
+  p1 <- plot_ly(economics, x = date, y = unemploy)
+  p2 <- plot_ly(economics, x = date, y = uempmed)
+  s1 <- subplot(p1, p1, shareY = TRUE)
+  s2 <- subplot(p2, p2, shareY = TRUE)
+  s <- subplot(s1, s2, nrows = 2, shareX = TRUE)
+  l <- expect_traces(s, 4, "recursive")
+  xaxes <- l$layout[grepl("^xaxis", names(l$layout))]
+  yaxes <- l$layout[grepl("^yaxis", names(l$layout))]
+  expect_true(length(xaxes) == 2)
+  expect_true(length(yaxes) == 2)
+  # both x-axes are anchored on the same y-axis
+  yanchor <- unique(unlist(lapply(xaxes, "[[", "anchor")))
+  expect_true(length(yanchor) == 1)
+  # both y-axes are anchored on the same x-axis
+  xanchor <- unique(unlist(lapply(yaxes, "[[", "anchor")))
+  expect_true(length(xanchor) == 1)
+  # x/y are anchored on the bottom/left
+  expect_true(l$layout[[sub("x", "xaxis", xanchor)]]$domain[1] == 0)
+  expect_true(l$layout[[sub("y", "yaxis", yanchor)]]$domain[1] == 0)
+  # every trace is anchored on a different x/y axis pair
+  xTraceAnchors <- sapply(l$data, "[[", "xaxis")
+  yTraceAnchors <- sapply(l$data, "[[", "yaxis")
+  expect_true(length(unique(paste(xTraceAnchors, yTraceAnchors))) == 4)
+})
+
+test_that("subplot accepts a list of plots", {
+  vars <- setdiff(names(economics), "date")
+  plots <- lapply(vars, function(var) {
+    plot_ly(x = economics$date, y = economics[[var]], name = var)
+  })
+  s <- subplot(plots, nrows = length(plots), shareX = TRUE, titleX = FALSE)
+  l <- expect_traces(s, 5, "plot-list")
+  xaxes <- l$layout[grepl("^xaxis", names(l$layout))]
+  yaxes <- l$layout[grepl("^yaxis", names(l$layout))]
+  expect_true(length(xaxes) == 1)
+  expect_true(length(yaxes) == 5)
+  # x-axis is anchored at the bottom
+  expect_true(l$layout[[sub("y", "yaxis", xaxes[[1]]$anchor)]]$domain[1] == 0)
+})
+
+
+test_that("ggplotly understands ggmatrix", {
+  L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+})
+
