@@ -98,11 +98,20 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     x$annotations[!axes]
   })
   # collect axis objects (note a _single_ geo object counts a both an x and y)
+  geoDomainDefault <- list(x = c(0, 1), y = c(0, 1))
   xAxes <- lapply(layouts, function(lay) {
-    lay[grepl("^xaxis|^geo", names(lay))] %||% list(xaxis = list(domain = c(0, 1)))
+    keys <- grep("^geo|^xaxis", names(lay), value = TRUE) %||% "xaxis"
+    for (k in keys) {
+      lay[[k]]$domain <- lay[[k]]$domain %||% if (grepl("^geo", k)) geoDomainDefault else c(0, 1)
+    }
+    lay[keys]
   })
   yAxes <- lapply(layouts, function(lay) {
-    lay[grepl("^yaxis|^geo", names(lay))] %||% list(yaxis = list(domain = c(0, 1)))
+    keys <- grep("^geo|^yaxis", names(lay), value = TRUE) %||% "yaxis"
+    for (k in keys) {
+      lay[[k]]$domain <- lay[[k]]$domain %||% if (grepl("^geo", k)) geoDomainDefault else c(0, 1)
+    }
+    lay[keys]
   })
   if (!titleX) {
     xAxes <- lapply(xAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))

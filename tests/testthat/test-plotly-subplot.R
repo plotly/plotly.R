@@ -136,3 +136,35 @@ test_that("ggplotly understands ggmatrix", {
   L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
 })
 
+test_that("geo+cartesian behaves", {
+  # specify some map projection/options
+  g <- list(
+    scope = 'usa',
+    projection = list(type = 'albers usa'),
+    lakecolor = toRGB('white')
+  )
+  # create a map of population density
+  density <- state.x77[, "Population"] / state.x77[, "Area"]
+  map <- plot_ly(
+    z = density, 
+    text = state.name, locations = state.abb,
+    type = 'choropleth', locationmode = 'USA-states', geo = "geo"
+  ) %>% layout(geo = g)
+  # create a bunch of horizontal bar charts 
+  vars <- colnames(state.x77)
+  barcharts <- lapply(vars, function(var) {
+    plot_ly(x = state.x77[, var], y = state.name, type = "bar", 
+            orientation = "h", name = var) %>%
+      layout(showlegend = FALSE, hovermode = "y",
+             yaxis = list(showticklabels = FALSE))
+  })
+  s <- subplot(
+    subplot(barcharts, margin = 0.01), map, 
+    nrows = 2, heights = c(0.3, 0.7)
+  )
+  l <- expect_traces(s, 9, "geo-cartesian")
+  geoDom <- l$layout[[grep("^geo", names(l$layout))]]$domain
+  expect_equal(geoDom$x, c(0, 1))
+  expect_equal(geoDom$y, c(0, 0.68))
+})
+
