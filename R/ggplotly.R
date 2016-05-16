@@ -38,18 +38,35 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", source = "A", ...) {
-  plotList <- list()
-  for (i in seq_len(p$nrow)) {
-    for (j in seq_len(p$ncol)) {
-      plotList <- c(plotList, list(p[i, j]))
+  subplotList <- list()
+  for (i in seq_len(p$ncol)) {
+    columnList <- list()
+    for (j in seq_len(p$nrow)) {
+      thisPlot <- p[j, i]
+      if (i == 1) {
+        if (p$showYAxisPlotLabels) thisPlot <- thisPlot + ylab(p$yAxisLabels[j])
+      } else {
+        # y-axes are never drawn on the interior, and diagonal plots are densities,
+        # so it doesn't make sense to synch zoom actions on y
+        thisPlot <- thisPlot +
+          theme(
+            axis.ticks.y = element_blank(), 
+            axis.text.y = element_blank()
+          )
+      }
+      columnList <- c(columnList, list(ggplotly(thisPlot, tooltip = tooltip)))
     }
+    # conditioned on a column in a ggmatrix, the x-axis should be on the 
+    # same scale.
+    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
+    #if (i == 3) browser()
+    subplotList <- c(subplotList, list(s))
   }
-  # TODO: 
-  # (1) how to show x/y titles? Should these be arguments in subplot?
-  # (2) it only makes since to share axes on the lower diagonal
-  l <- get_plot(do.call(subplot, c(plotList, list(nrows = p$nrow, ...))))
-  l$layout$title <- p$title
-  hash_plot(p$data, l)
+  s <- subplot(subplotList, nrows = 1)
+  if (nchar(p$title) > 0) {
+    s <- layout(s, title = p$title)
+  }
+  layout(s, width = width, height = height)
 }
   
 #' @export
@@ -673,8 +690,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
-  l$width <- width
-  l$height <- height
+  l$layout$width <- width
+  l$layout$height <- height
   l$source <- source
   structure(l, class = "plotly_built")
 }
