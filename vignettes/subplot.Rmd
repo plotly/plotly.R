@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `subplot()` function provides a flexible interface for arranging multiple **plotly** plots in a single view. There are a few different ways to use `subplot()`, but the simplest way to pass plotly visualization objects directly to `subplot()`.
+The `subplot()` function provides a flexible interface for arranging multiple **plotly** plots in a single view. The simplest way to use it is to pass plotly visualizations directly to `subplot()`.
 
 ```{r}
 library(plotly)
@@ -54,7 +54,7 @@ Conceptually, `subplot()` provides a way to place a collection of plots into a t
   <img src = "proportions.svg" width="200" height="250" />
 </div>
 
-This can be quite useful for a number of visualizations, for example, a joint density plot:
+This flexibility is quite useful for a number of visualizations, for example, a joint density plot (the new [heatmaply](https://github.com/talgalili/heatmaply) package is another good example).
 
 ```{r}
 x <- rnorm(100)
@@ -75,11 +75,8 @@ Note that, since `subplot()` returns a plotly object, any [layout attribute](htt
 
 ## Recursive subplots
 
-The `subplot()` function is designed to work recursively so that you can have subplots of subplots. This idea is useful when your desired layout doesn't conform to the table structure described in the previous section. In fact, you can think of a subplot of subplots like an excel spreadsheet with merged cells.
+The `subplot()` function is designed to work recursively so that you can have subplots of subplots. This idea is useful when your desired layout doesn't conform to the table structure described in the previous section. In fact, you can think of a subplot of subplots like a spreadsheet with merged cells.
 
-<!-- 
-Original 
--->
 <div align = "center">
   <img src = "subplot.svg" width="200" height="300" />
 </div>
@@ -94,8 +91,7 @@ s2 <- subplot(plotList(2), shareY = TRUE)
 subplot(s1, s2, plot_ly(), nrows = 3, margin = 0.04, heights = c(0.6, 0.3, 0.1))
 ```
 
-
-
+The concept is particularly useful when you want plot(s) in a given row to have different widths from plot(s) in another row.
 
 ```{r, fig.height = 6}
 # specify some map projection/options
@@ -125,13 +121,11 @@ subplot(
 )
 ```
 
+## ggplot2 subplots
 
-## subplots with ggplot2
+The `subplot()` function also understands ggplot2 objects, and converts them to an interactive web-based version via `ggplotly()` before arranging them in the final layout.
 
-
-The `subplot()` function also understands ggplot2 objects and converts them via `ggplotly()`.
-
-```{r, fig.height = 8}
+```{r, fig.height = 6}
 e <- tidyr::gather(economics, variable, value, -date)
 gg1 <- ggplot(e, aes(date, value)) + geom_line() +
   facet_wrap(~variable, scales = "free_y", ncol = 1)
@@ -141,13 +135,13 @@ gg2 <- ggplot(e, aes(factor(1), value)) + geom_violin() +
 subplot(gg1, gg2) %>% layout(margin = list(l = 50))
 ```
 
-The new `subplot()` infrastructure allows `ggplotly()` to understand ggmatrix 
+This infrastructure allows `ggplotly()` to understand ggmatrix 
 objects -- the class of object returned by the `ggpairs()` function in the 
 **GGally** package.
 
-```{r}
-pm <- GGally::ggpairs(reshape::tips[, 1:3])
-ggplotly(pm, margin = 0.04)
+```{r, fig.height = 5}
+pm <- GGally::ggpairs(iris)
+ggplotly(pm)
 ```
 
 
