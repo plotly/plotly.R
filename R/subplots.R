@@ -97,7 +97,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
-  # collect axis objects
+  # collect axis objects (note a _single_ geo object counts a both an x and y)
   xAxes <- lapply(layouts, function(lay) {
     lay[grepl("^xaxis|^geo", names(lay))] %||% list(xaxis = list(domain = c(0, 1)))
   })
@@ -115,15 +115,21 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   yAxisN <- vapply(yAxes, length, numeric(1))
   # old -> new axis name dictionary
   ncols <- ceiling(length(plots) / nrows)
-  xAxisID <- if (shareX) {
-    rep(rep(1:ncols, length.out = length(plots)), xAxisN)
-  } else {
-    seq_len(sum(xAxisN))
+  xAxisID <- seq_len(sum(xAxisN))
+  if (shareX) {
+    if (length(unique(xAxisN)) > 1) {
+      warning("Must have a consistent number of axes per 'subplot' to share them.")
+    } else {
+      xAxisID <- rep(rep(seq_len(ncols * unique(xAxisN)), length.out = length(plots)), unique(xAxisN))
+    }
   }
-  yAxisID <- if (shareY) {
-    rep(rep(1:nrows, each = ncols, length.out = length(plots)), yAxisN)
-  } else {
-    seq_len(sum(yAxisN))
+  yAxisID <- seq_len(sum(yAxisN))
+  if (shareY) {
+    if (length(unique(yAxisN)) > 1) {
+      warning("Must have a consistent number of axes per 'subplot' to share them.")
+    } else {
+      yAxisID <- rep(rep(seq_len(nrows * unique(xAxisN)), each = ncols, length.out = length(plots)), unique(yAxisN))
+    }
   }
   # current "axis" names
   xCurrentNames <- unlist(lapply(xAxes, names))
@@ -145,82 +151,71 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   domainInfo <- get_domains(
     length(plots), nrows, margin, widths = widths, heights = heights
   )
-  # reposition shapes and annotations
-  annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
-  shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
-  # rename axis objects, anchors, and scale their domains
   for (i in seq_along(plots)) {
+    # map axis object names
     xMap <- xAxisMap[[i]]
     yMap <- yAxisMap[[i]]
-    xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
-    yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
-    for (j in seq_along(xAxes[[i]])) {
-      # TODO: support ternary as well!
-      isGeo <- grepl("^geo", xMap[[j]])
-      anchorKey <- if (isGeo) "geo" else "xaxis"
-      traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr[[anchorKey]] <- tr[[anchorKey]] %||% sub("axis", "", anchorKey)
-        # bump trace anchors, where appropriate
-        if (sub("axis", "", xMap[[j]]) %in% tr[[anchorKey]]) {
-          tr[[anchorKey]] <- sub("axis", "", names(xMap[j]))
-        }
-        tr
-      })
-      if (isGeo) {
-        xAxes[[i]][[j]]$domain$x <- sort(scales::rescale(
-          xAxes[[i]][[j]]$domain$x %||% c(0, 1), xDom, from = c(0, 1)
-        ))
-        xAxes[[i]][[j]]$domain$y <- sort(scales::rescale(
-          xAxes[[i]][[j]]$domain$y %||% c(0, 1), yDom, from = c(0, 1)
-        ))
-      } else {
-        xAxes[[i]][[j]]$domain <- sort(scales::rescale(
-          xAxes[[i]][[j]]$domain %||% c(0, 1), xDom, from = c(0, 1)
-        ))
-        # for cartesian, bump corresponding axis
-        map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
-        xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-      }
-    }
-    for (j in seq_along(yAxes[[i]])) {
-      # TODO: support ternary as well!
-      isGeo <- grepl("^geo", yMap[[j]])
-      anchorKey <- if (isGeo) "geo" else "yaxis"
-      traces[[i]] <- lapply(traces[[i]], function(tr) {
-        tr[[anchorKey]] <- tr[[anchorKey]] %||% sub("axis", "", anchorKey)
-        # bump trace anchors, where appropriate
-        if (sub("axis", "", yMap[[j]]) %in% tr[[anchorKey]]) {
-          tr[[anchorKey]] <- sub("axis", "", names(yMap[j]))
-        }
-        tr
-      })
-      if (isGeo) {
-        yAxes[[i]][[j]]$domain$x <- sort(scales::rescale(
-          yAxes[[i]][[j]]$domain$x %||% c(0, 1), xDom, from = c(0, 1)
-        ))
-        yAxes[[i]][[j]]$domain$y <- sort(scales::rescale(
-          yAxes[[i]][[j]]$domain$y %||% c(0, 1), yDom, from = c(0, 1)
-        ))
-      } else {
-        yAxes[[i]][[j]]$domain <- sort(scales::rescale(
-          yAxes[[i]][[j]]$domain %||% c(0, 1), yDom, from = c(0, 1)
-        ))
-        # for cartesian, bump corresponding axis
-        map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
-        yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-      }
-    }
     xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
     yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
+    # for cartesian, bump corresponding axis anchor
+    for (j in seq_along(xAxes[[i]])) {
+      if (grepl("^geo", names(xAxes[[i]][j]))) next
+      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
+      xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+    }
+    for (j in seq_along(yAxes[[i]])) {
+      if (grepl("^geo", names(yAxes[[i]][j]))) next
+      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
+      yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+    }
+    # map trace xaxis/yaxis/geo attributes
+    for (key in c("geo", "xaxis", "yaxis")) {
+      oldAnchors <- unlist(lapply(traces[[i]], "[[", key))
+      if (!length(oldAnchors)) next
+      axisMap <- if (key == "yaxis") yMap else xMap
+      axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
+      newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
+      traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
+    }
+    # rescale domains according to the tabular layout
+    xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
+    yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
+    reScale <- function(old, new) {
+      sort(scales::rescale(
+        old %||% c(0, 1), new, from = c(0, 1)
+      ))
+    }
+    xAxes[[i]] <- lapply(xAxes[[i]], function(ax) {
+      if (all(c("x", "y") %in% names(ax$domain))) {
+        # geo domains are different from cartesian
+        ax$domain$x <- reScale(ax$domain$x, xDom)
+        ax$domain$y <- reScale(ax$domain$y, yDom)
+      } else {
+        ax$domain <- reScale(ax$domain, xDom)
+      }
+      ax
+    })
+    yAxes[[i]] <- lapply(yAxes[[i]], function(ax) {
+      if (all(c("x", "y") %in% names(ax$domain))) {
+        # geo domains are different from cartesian
+        ax$domain$x <- reScale(ax$domain$x, xDom)
+        ax$domain$y <- reScale(ax$domain$y, yDom)
+      } else {
+        ax$domain <- reScale(ax$domain, yDom)
+      }
+      ax
+    })
   }
   # start merging the plots into a single subplot
   p <- list(
     data = Reduce(c, traces),
     layout = Reduce(modifyList, c(xAxes, rev(yAxes)))
   )
+  # reposition shapes and annotations
+  annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
+  shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
   p$layout$annotations <- Reduce(c, annotations)
   p$layout$shapes <- Reduce(c, shapes)
-  
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis|^geo", names(x))] %||% list())
   if (which_layout != "merge") {
