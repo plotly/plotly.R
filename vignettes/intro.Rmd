@@ -36,7 +36,7 @@ You can manually add a trace to an existing plot with `add_trace()`. In that cas
 ```{r}
 m <- loess(unemploy / pop ~ as.numeric(date), data = economics)
 p <- plot_ly(economics, x = date, y = unemploy / pop, name = "raw") 
-add_trace(p, y = fitted(m), name = "loess")
+add_trace(p, x = date, y = fitted(m), name = "loess")
 ```
 
 __plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to create a visualization pipeline:
@@ -44,7 +44,7 @@ __plotly__ was designed with a [pure, predictable, and pipeable interface](https
 ```{r}
 economics %>%
   plot_ly(x = date, y = unemploy / pop) %>% 
-  add_trace(y = fitted(m)) %>%
+  add_trace(x = date, y = fitted(m)) %>%
   layout(showlegend = F)
 ```
 
@@ -161,46 +161,3 @@ To change the default symbols used, use the symbols argument. All the valid symb
 plot_ly(iris, x = Petal.Length, y = Petal.Width, mode = "markers",
         symbol = Species, symbols = c("cross", "square", "triangle-down"))
 ```
-
-
-### The group argument and `subplot()`
-
-Using the group argument splits the data into different plotly "traces".
-
-```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        group = Species, mode = "markers")
-```
-
-Although we haven't specified a coloring scheme, plotly will employ one on it's own default scheme. The group argument is quite powerful when used in conjunction with `subplot()` in order to anchor traces onto different axes.
-
-```{r}
-iris$id <- as.integer(iris$Species)
-p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
-             xaxis = paste0("x", id), mode = "markers")
-subplot(p)
-```
-
-Since `subplot()` does not assume x/y axes are on a common scale, it does not impose any restrictions on the range by default. However, you can change this by pre-specifying the range of the [axis objects](https://plot.ly/r/reference/#xaxis) via the `layout()` function.
-
-```{r}
-p2 <- layout(
-  p, 
-  xaxis = list(range = range(Petal.Length) + c(-0.1, 0.1)),
-  yaxis = list(range = range(Petal.Width) + c(-0.1, 0.1))
-)
-subplot(p2)
-```
-
-Part of the magic of `subplot()` is that it generates axis objects with appropriate anchor and domain properties. After generating a subplot, you can always reference these axis objects to customize each plot.
-
-```{r}
-layout(
-    subplot(p2),
-    yaxis2 = list(title = ""), 
-    yaxis3 = list(title = "")
-)
-```
-
-
-[See here](https://plot.ly/r/map-subplots-and-small-multiples/) for another example of using the group argument to make small multiples (with maps!).

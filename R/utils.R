@@ -1,4 +1,6 @@
-is.plotly <- function(x) inherits(x, "plotly")
+is.plotly <- function(x) {
+  inherits(x, c("plotly_hash", "plotly_built", "plotly_subplot"))
+}
 
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y

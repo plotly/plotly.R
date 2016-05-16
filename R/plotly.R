@@ -221,20 +221,51 @@ style <- function(p = last_plot(), ..., traces = 1, evaluate = FALSE) {
   hash_plot(data, p)
 }
 
-#' Build a plotly object before viewing it
+#' Create a 'plotly_built' object
 #' 
-#' For convenience and efficiency purposes, plotly objects are subject to lazy 
-#' evaluation. That is, the actual content behind a plotly object is not 
-#' created until it is absolutely necessary. In some instances, you may want 
-#' to perform this evaluation yourself, and work directly with the resulting 
-#' list.
+#' This generic function creates the list object sent to plotly.js
+#' for rendering. Using this function can be useful for overriding defaults
+#' provided by \code{ggplotly}/\code{plot_ly} or for debugging rendering
+#' errors.
 #' 
-#' @param l a ggplot object, or a plotly object, or a list.
+#' @param l a ggplot object, or a plotly_hash object, or a list.
 #' @export
+#' @examples
+#' 
+#' p <- plot_ly()
+#' # data frame
+#' str(p)
+#' # the actual list of options sent to plotly.js
+#' str(plotly_build(p))
+#' 
+#' p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
+#' l <- plotly_build(p)
+#' # turn off hoverinfo for the smooth (but keep it for the points)
+#' l$data[[2]]$hoverinfo <- "none"
+#' l$data[[3]]$hoverinfo <- "none"
+#' l
+#' 
 plotly_build <- function(l = last_plot()) {
-  #if (inherits(l, "ggmatrix"))
-  # ggplot objects don't need any special type of handling
-  if (ggplot2::is.ggplot(l)) return(gg2list(l))
+  UseMethod("plotly_build")
+}
+
+#' @export
+plotly_build.plotly_built <- function(l = last_plot()) {
+  l
+}
+
+#' @export
+plotly_build.plotly_subplot <- function(l = last_plot()) {
+  prefix_class(get_plot(l), "plotly_built")
+}
+
+#' @export
+plotly_build.gg <- function(l = last_plot()) {
+  prefix_class(get_plot(ggplotly(l)), "plotly_built")
+}
+
+#' @export
+plotly_build.plotly_hash <- function(l = last_plot()) {
   l <- get_plot(l)
   # assume unnamed list elements are data/traces
   nms <- names(l)

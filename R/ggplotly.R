@@ -13,6 +13,7 @@
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
 #' @param source Only relevant for \link{event_data}.
+#' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @return a plotly object
 #' @export
@@ -31,7 +32,46 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", source = "A") {
+                     tooltip = "all", source = "A", ...) {
+  UseMethod("ggplotly", p)
+}
+
+#' @export
+ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
+                              height = NULL, tooltip = "all", source = "A", ...) {
+  subplotList <- list()
+  for (i in seq_len(p$ncol)) {
+    columnList <- list()
+    for (j in seq_len(p$nrow)) {
+      thisPlot <- p[j, i]
+      if (i == 1) {
+        if (p$showYAxisPlotLabels) thisPlot <- thisPlot + ylab(p$yAxisLabels[j])
+      } else {
+        # y-axes are never drawn on the interior, and diagonal plots are densities,
+        # so it doesn't make sense to synch zoom actions on y
+        thisPlot <- thisPlot +
+          theme(
+            axis.ticks.y = element_blank(), 
+            axis.text.y = element_blank()
+          )
+      }
+      columnList <- c(columnList, list(ggplotly(thisPlot, tooltip = tooltip)))
+    }
+    # conditioned on a column in a ggmatrix, the x-axis should be on the 
+    # same scale.
+    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
+    subplotList <- c(subplotList, list(s))
+  }
+  s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
+  if (nchar(p$title) > 0) {
+    s <- layout(s, title = p$title)
+  }
+  hash_plot(p$data, plotly_build(s))
+}
+  
+#' @export
+ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
+                            height = NULL, tooltip = "all", source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
   hash_plot(p$data, l)
 }
@@ -44,9 +84,10 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
 #' @param source Only relevant for \link{event_data}.
+#' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A") {
+gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -425,55 +466,55 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
               gglayout$annotations,
               make_label(
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = "center", yanchor = "middle"
+                xanchor = "center", yanchor = "middle", annotationType = "axis"
               )
             )
           }
         }
       }
-      
-      if (has_facet(p)) {
-        gglayout[[axisName]]$title <- ""
-      }
-      
+      if (has_facet(p)) gglayout[[axisName]]$title <- ""
     } # end of axis loop
 
+    # theme(panel.border = ) -> plotly rect shape
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-
+    
     # facet strips -> plotly annotations
-    if (!is_blank(theme[["strip.text.x"]]) &&
-        (inherits(p$facet, "wrap") || inherits(p$facet, "grid") && lay$ROW == 1)) {
-      vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
-      txt <- paste(
-        p$facet$labeller(lay[names(p$facet[[vars]])]), collapse = ", "
+    if (has_facet(p)) {
+      col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
+      col_txt <- paste(
+        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = ", "
       )
-      lab <- make_label(
-        txt, x = mean(xdom), y = max(ydom),
-        el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
-        xanchor = "center", yanchor = "bottom"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      strip <- make_strip_rect(xdom, ydom, theme, "top")
-      gglayout$shapes <- c(gglayout$shapes, strip)
-    }
-    if (inherits(p$facet, "grid") && lay$COL == nCols && nRows > 1 &&
-        !is_blank(theme[["strip.text.y"]])) {
-      txt <- paste(
+      if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
+      if (inherits(p$facet, "grid") && lay$ROW != 1) col_txt <- ""
+      if (nchar(col_txt) > 0) {
+        col_lab <- make_label(
+          col_txt, x = mean(xdom), y = max(ydom),
+          el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
+          xanchor = "center", yanchor = "bottom"
+        )
+        gglayout$annotations <- c(gglayout$annotations, col_lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "top")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
+      row_txt <- paste(
         p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
       )
-      lab <- make_label(
-        txt, x = max(xdom), y = mean(ydom),
-        el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-        xanchor = "left", yanchor = "middle"
-      )
-      gglayout$annotations <- c(gglayout$annotations, lab)
-      strip <- make_strip_rect(xdom, ydom, theme, "right")
-      gglayout$shapes <- c(gglayout$shapes, strip)
+      if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
+      if (inherits(p$facet, "grid") && lay$COL != nCols) row_txt <- ""
+      if (nchar(row_txt) > 0) {
+        row_lab <- make_label(
+          row_txt, x = max(xdom), y = mean(ydom),
+          el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
+          xanchor = "left", yanchor = "middle"
+        )
+        gglayout$annotations <- c(gglayout$annotations, row_lab)
+        strip <- make_strip_rect(xdom, ydom, theme, "right")
+        gglayout$shapes <- c(gglayout$shapes, strip)
+      }
     }
-
   } # end of panel loop
 
   # ------------------------------------------------------------------------
