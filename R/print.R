@@ -1,5 +1,5 @@
 #' Print a plotly object
-#' 
+#'
 #' @param x a plotly object
 #' @param ... additional arguments
 #' @export
@@ -16,7 +16,7 @@ print.plotly_hash <- function(x, ...) {
 print.plotly_built <- print.plotly_hash
 
 #' Print a plotly object in a knitr doc
-#' 
+#'
 #' @param x a plotly object
 #' @param options knitr options.
 #' @param ... additional arguments
@@ -34,7 +34,7 @@ knit_print.plotly_hash <- function(x, options, ...) {
 knit_print.plotly_built <- knit_print.plotly_hash
 
 #' Convert a plotly object to an htmlwidget object
-#' 
+#'
 #' @param x a plotly object.
 #' @param ... other options passed onto \code{htmlwidgets::createWidget}
 #' @export
@@ -42,7 +42,7 @@ knit_print.plotly_built <- knit_print.plotly_hash
 #' p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
 #' htmlwidgets::saveWidget(as.widget(p), "index.html")
 #' }
-#' 
+#'
 
 as.widget <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)
@@ -68,6 +68,7 @@ as.widget <- function(x, ...) {
       defaultWidth = '100%',
       defaultHeight = 400
     ),
+    dependencies = crosstalk::dependencies(),
     ...
   )
 }
@@ -76,7 +77,7 @@ as.widget <- function(x, ...) {
 toWidget <- as.widget
 
 #' Print a plotly figure object
-#' 
+#'
 #' @param x a plotly figure object
 #' @param ... additional arguments (currently ignored)
 #' @export
@@ -85,7 +86,7 @@ print.figure <- function(x, ...) {
 }
 
 #' Embed a plotly figure as an iframe in a knitr doc
-#' 
+#'
 #' @param x a plotly figure object
 #' @param options knitr options.
 #' @param ... placeholder.
@@ -108,10 +109,10 @@ knit_print.figure <- function(x, options, ...) {
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
 #' @param height attribute of the iframe. If \code{NULL}, the height in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
-#' @param file a filename for saving the standalone HTML 
+#' @param file a filename for saving the standalone HTML
 #' (only used if x is a non-figure object)
 #' @export
-embed_notebook <- function(x, width = NULL, height = NULL, 
+embed_notebook <- function(x, width = NULL, height = NULL,
                            file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html")) {
   if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
