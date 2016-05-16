@@ -160,7 +160,9 @@ HTMLWidgets.widget({
       }
       return curves;
     }
-    
+
+    var traceManager = new TraceManager(graphDiv);
+
     // Gather all sets.
     var crosstalkGroups = {};
     var allSets = [];
@@ -219,48 +221,18 @@ HTMLWidgets.widget({
                 outlines[i].remove();
               }
             }
-            
-            // Restyle each relevant trace
-            var selectedPoints = keysToPoints(set, e.value || []);
-            
-            var opacityTraces = [];
-            var relevantTraces = crosstalkGroups[set];
 
-            for (var i = 0; i < relevantTraces.length; i++) {
-              var trace = x.data[relevantTraces[i]];
+            traceManager.updateSelection(set, e.value);
+          });
 
-              // Make an opacity array, one element for each data point
-              // in this trace.
-              var opacity = new Array(trace.x.length);
-              
-              if (typeof(e.value) === "undefined" || e.value === null) {
-                // The Crosstalk selection has been cleared. Full opacity
-                for (var k = 0; k < opacity.length; k++) {
-                  opacity[k] = 1;
-                }
-              } else {
-                // Array of pointNumber numbers that should be highlighted
-                var theseSelectedPoints = selectedPoints[relevantTraces[i]] || [];
-                
-                for (var j = 0; j < opacity.length; j++) {
-                  if (theseSelectedPoints.indexOf(j) >= 0) {
-                    opacity[j] = 1;
-                  } else {
-                    opacity[j] = 0.2;
-                  }
-                }
-              }
-              
-              opacityTraces.push(opacity);
-            }
-            console.log(graphDiv.id, relevantTraces, opacityTraces)
-            // Restyle the current trace
-            Plotly.restyle(graphDiv, {"marker.opacity": opacityTraces}, relevantTraces);
+          grp.var("filter").on("change", function crosstalk_filter_change(e) {
+            traceManager.updateFilter(set, e.value);
           });
   
           // Remove event listeners in the future
           instance.onNextRender.push(function() {
-            grp.removeListener("selection", crosstalk_sel_change);
+            grp.var("selection").removeListener("change", crosstalk_sel_change);
+            grp.var("filter").removeListener("change", crosstalk_filter_change);
           });
         })();
       }
@@ -300,3 +272,163 @@ HTMLWidgets.widget({
   }
 
 });
+
+
+
+/**
+ * @param graphDiv The Plotly graph div
+ * @param group The crosstalk group object
+ */
+function TraceManager(graphDiv) {
+  // The Plotly graph div
+  this.gd = graphDiv;
+
+  // Preserve the original data. We'll subset based off of this whenever
+  // filtering is (re)applied.
+  this.origData = JSON.parse(JSON.stringify(graphDiv.data));
+
+  // key: group name, value: null or array of keys representing the
+  // most recently received selection for that group.
+  this.groupSelections = {};
+}
+
+TraceManager.prototype.close = function() {
+  // TODO: Unhook all event handlers
+};
+
+TraceManager.prototype.updateFilter = function(group, keys) {
+  // Be sure NOT to modify origData (or trace, which is a reference to
+  // a child of origData).
+
+  var keySet = new Set(keys);
+
+  for (var i = 0; i < this.origData.length; i++) {
+    var trace = this.origData[i];
+    if (!trace.key || trace.set !== group) {
+      continue;
+    }
+    var matches = findMatches(trace.key, keySet);
+    // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+    this.gd.data[i] = subsetArrayAttrs(trace, matches);
+  }
+
+  Plotly.redraw(this.gd);
+
+  // If this group had a selection, restore it now
+  if (this.groupSelections[group]) {
+    this.updateSelection(group, this.groupSelections[group]);
+  }
+};
+
+TraceManager.prototype.updateSelection = function(group, keys) {
+  if (keys !== null && !Array.isArray(keys)) {
+    throw new Error("Invalid keys argument; null or array expected");
+  }
+
+  var keySet = new Set(keys || []);
+
+  this.groupSelections[group] = keys;
+
+  var affectedTraces = [];
+  var opacitiesList = [];
+
+  for (var i = 0; i < this.origData.length; i++) {
+    var trace = this.origData[i];
+    if (!trace.key || trace.set !== group) {
+      continue;
+    }
+
+    var opacities = [];
+
+    if (typeof(keys) === "undefined" || keys === null) {
+      // Selection has been cleared--full opacity
+      for (var j = 0; j < trace.key.length; j++) {
+        opacities.push(1.0);
+      }
+    } else {
+      // Get sorted array of matching indices in trace.key
+      var matches = findMatches(trace.key, keySet);
+
+      for (var j = 0; j < matches.length; j++) {
+        while (opacities.length < matches[j]) {
+          opacities.push(0.2);
+        }
+        opacities.push(1);
+      }
+      while (opacities.length < trace.key.length) {
+        opacities.push(0.2);
+      }
+    }
+
+    affectedTraces.push(i);
+    opacitiesList.push(opacities);
+  }
+
+  Plotly.restyle(this.gd, {"marker.opacity": opacitiesList}, affectedTraces);
+};
+
+
+function Set(contents /* optional */) {
+  this._map = {};
+  if (contents) {
+    contents.forEach(this.add, this);
+  }
+}
+Set.prototype.has = function(val) {
+  return !!this._map[val];
+}
+Set.prototype.add = function(val) {
+  this._map[val] = true;
+}
+Set.prototype.remove = function(val) {
+  delete this._map[val];
+}
+
+function findMatches(haystack, needleSet) {
+  var matches = [];
+  haystack.forEach(function(obj, i) {
+    if (needleSet.has(obj)) {
+      matches.push(i);
+    }
+  });
+  return matches;
+}
+
+function isPlainObject(obj) {
+    return (
+        Object.prototype.toString.call(obj) === '[object Object]' &&
+        Object.getPrototypeOf(obj) === Object.prototype
+    );
+}
+
+function subsetArrayAttrs(obj, indices) {
+  var newObj = {};
+  Object.keys(obj).forEach(function(k) {
+    var val = obj[k];
+
+    if (k.charAt(0) === "_") {
+      newObj[k] = val;
+    } else if (k === "transforms" && Array.isArray(val)) {
+      newObj[k] = val.map(function(transform) {
+        return subsetArrayAttrs(transform, indices);
+      });
+    } else if (k === "colorscale" && Array.isArray(val)) {
+      newObj[k] = val;
+    } else if (isPlainObject(val)) {
+      newObj[k] = subsetArrayAttrs(val, indices);
+    } else if (Array.isArray(val)) {
+      newObj[k] = subsetArray(val, indices);
+    } else {
+      newObj[k] = val;
+    }
+  });
+  return newObj;
+}
+
+function subsetArray(arr, indices) {
+  var result = [];
+  for (var i = 0; i < indices.length; i++) {
+    result.push(arr[i]);
+  }
+  return result;
+}
