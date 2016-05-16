@@ -59,14 +59,13 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     # conditioned on a column in a ggmatrix, the x-axis should be on the 
     # same scale.
     s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
-    #if (i == 3) browser()
     subplotList <- c(subplotList, list(s))
   }
-  s <- subplot(subplotList, nrows = 1)
+  s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
-  layout(s, width = width, height = height)
+  hash_plot(pm$data, plotly_build(s))
 }
   
 #' @export
@@ -690,8 +689,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
-  l$layout$width <- width
-  l$layout$height <- height
+  l$width <- width
+  l$height <- height
   l$source <- source
   structure(l, class = "plotly_built")
 }
