@@ -13,6 +13,7 @@
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
 #' @param source Only relevant for \link{event_data}.
+#' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @return a plotly object
 #' @export
@@ -65,7 +66,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
-  hash_plot(pm$data, plotly_build(s))
+  hash_plot(p$data, plotly_build(s))
 }
   
 #' @export
