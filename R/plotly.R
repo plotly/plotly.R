@@ -340,7 +340,8 @@ plotly_build.plotly_hash <- function(l = last_plot()) {
       points_df <- data.frame(dat_index = seq_along(dat[["x"]] %||% dat[["y"]] %||% dat[["z"]])) %>% # indices of the original data elements used in the trace FIXME properly define data length
         tracify_by_color(dat) %>%
         tracify_by_column(dat, "symbol", force_numeric=TRUE) %>%
-        tracify_by_column(dat, "group", force_numeric=TRUE)
+        tracify_by_column(dat, "group", force_numeric=TRUE) %>%
+        tracify_by_column(dat, "legenditem", force_numeric=TRUE)
       subtrace_key_cols <- setdiff(colnames(points_df), "dat_index")
       trace_key_cols <- setdiff(subtrace_key_cols, "group_index")
       points_df <- dplyr::arrange_(points_df, .dots = c(subtrace_key_cols, "dat_index")) %>%
@@ -397,6 +398,17 @@ plotly_build.plotly_hash <- function(l = last_plot()) {
       # TODO: add a legend title (is this only possible via annotations?!?)
       if (!is.null(dat[["symbol"]])) {
         trace_brushes <- append(trace_brushes, symbol_brush(dat))
+      }
+      if ("legenditem_index" %in% trace_key_cols) {
+          legenditems <- unique(dat[["legenditem"]])
+          first_traces <- dplyr::group_by(points_df, legenditem_index) %>% dplyr::filter(row_number() == 1) %>% .$trace_index
+          trace_brushes <- append(trace_brushes, function(trace, trace_ix, dat, dat_indices) {
+            trace$legendgroup <- trace[["legenditem"]][[1]]
+            trace$name <- trace[["legenditem"]][[1]] # override the trace name by legenditem
+            trace$showlegend <- trace_ix %in% first_traces # put each trace group to legend once
+            trace$legenditem <- NULL
+            trace
+         })
       }
       generate_traces(dat, max(points_df$dat_index, na.rm=TRUE), trace_dat_indices, trace_brushes)
     } else {
