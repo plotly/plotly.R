@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_freqpoly. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Histograms and frequency polygons.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_freqpoly(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"bin", position&nbsp;=&nbsp;"identity", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>geom_histogram(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"bin", binwidth&nbsp;=&nbsp;NULL, bins&nbsp;=&nbsp;NULL, origin&nbsp;=&nbsp;NULL, right&nbsp;=&nbsp;FALSE, position&nbsp;=&nbsp;"stack", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_bin(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"bar", position&nbsp;=&nbsp;"stack", width&nbsp;=&nbsp;0.9, drop&nbsp;=&nbsp;FALSE, right&nbsp;=&nbsp;FALSE, binwidth&nbsp;=&nbsp;NULL, bins&nbsp;=&nbsp;NULL, origin&nbsp;=&nbsp;NULL, breaks&nbsp;=&nbsp;NULL, na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+      <dt>binwidth</dt>
+      <dd>Bin width to use. Defaults to 1/<code>bins</code> of the range of
+the data</dd>
+      <dt>bins</dt>
+      <dd>Number of bins. Overridden by <code>binwidth</code> or <code>breaks</code>.
+Defaults to 30</dd>
+      <dt>origin</dt>
+      <dd>Origin of first bin</dd>
+      <dt>right</dt>
+      <dd>If <code>TRUE</code>, right-closed, left-open, if <code>FALSE</code>,
+the default, right-open, left-closed.</dd>
+      <dt>geom, stat</dt>
+      <dd>Use to override the default connection between
+<code>geom_histogram</code>/<code>geom_freqpoly</code> and <code>stat_bin</code>.</dd>
+      <dt>width</dt>
+      <dd>Width of bars when used with categorical data</dd>
+      <dt>drop</dt>
+      <dd>If TRUE, remove all bins with zero counts</dd>
+      <dt>breaks</dt>
+      <dd>Actual breaks to use. Overrides bin width, bin number and
+origin</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Display a 1d distribution by dividing into bins and counting the number
+of observations in each bin. Histograms use bars; frequency polygons use
+lines.</p>
+  
+      <p><code>stat_bin</code> is suitable only for continuous x data. If your x data is
+  discrete, you probably want to use <code><a href='geom_bar.html'>stat_count</a></code>.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>By default, <code>stat_bin</code> uses 30 bins - this is not a good default,
+but the idea is to get you experimenting with different binwidths. You
+may need to look at a few to uncover the full story behind your data.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>geom_histogram</code> uses the same aesthetics as <code>geom_bar</code>;
+<code>geom_freqpoly</code> uses the same aesthetics as <code>geom_line</code>.</p>
+  
+    </div>
+
+    <div class="Computed variables">
+      <h2>Computed variables</h2>
+
+      <p></p>
+  
+      <p><dl>
+  <dt>count</dt><dd>number of points in bin</dd></p>
+  
+      <p><dt>density</dt><dd>density of points in bin, scaled to integrate to 1</dd></p>
+  
+      <p><dt>ncount</dt><dd>count, scaled to maximum of 1</dd></p>
+  
+      <p><dt>ndensity</dt><dd>density, scaled to maximum of 1</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>ggplot(diamonds, aes(carat)) +
+  geom_histogram()
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11963</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11963"> <img src="https://plot.ly/~cpsievert/11963.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(diamonds, aes(carat)) +
+  geom_histogram(binwidth = 0.01)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11965</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11965"> <img src="https://plot.ly/~cpsievert/11965.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(diamonds, aes(carat)) +
+  geom_histogram(bins = 200)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11967</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11967"> <img src="https://plot.ly/~cpsievert/11967.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Rather than stacking histograms, it&#39;s easier to compare frequency
+# polygons
+ggplot(diamonds, aes(price, fill = cut)) +
+  geom_histogram(binwidth = 500)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11969</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11969"> <img src="https://plot.ly/~cpsievert/11969.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(diamonds, aes(price, colour = cut)) +
+  geom_freqpoly(binwidth = 500)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11971</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11971"> <img src="https://plot.ly/~cpsievert/11971.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# To make it easier to compare distributions with very different counts,
+# put density on the y axis instead of the default count
+ggplot(diamonds, aes(price, ..density.., colour = cut)) +
+  geom_freqpoly(binwidth = 500)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11973</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11973"> <img src="https://plot.ly/~cpsievert/11973.png" width="540" height="400" /> </a></div>
+<div class='input'>
+if (require(&quot;ggplot2movies&quot;)) {
+# Often we don&#39;t want the height of the bar to represent the
+# count of observations, but the sum of some other variable.
+# For example, the following plot shows the number of movies
+# in each rating.
+m &lt;- ggplot(movies, aes(rating))
+m + geom_histogram(binwidth = 0.1)
+
+# If, however, we want to see the number of votes cast in each
+# category, we need to weight by the votes variable
+m + geom_histogram(aes(weight = votes), binwidth = 0.1) + ylab(&quot;votes&quot;)
+
+# For transformed scales, binwidth applies to the transformed data.
+# The bins have constant width on the transformed scale.
+m + geom_histogram() + scale_x_log10()
+m + geom_histogram(binwidth = 0.05) + scale_x_log10()
+
+# For transformed coordinate systems, the binwidth applies to the
+# raw data. The bins have constant width on the original scale.
+
+# Using log scales does not work here, because the first
+# bar is anchored at zero, and so when transformed becomes negative
+# infinity. This is not a problem when transforming the scales, because
+# no observations have 0 ratings.
+m + geom_histogram(origin = 0) + coord_trans(x = &quot;log10&quot;)
+# Use origin = 0, to make sure we don&#39;t take sqrt of negative values
+m + geom_histogram(origin = 0) + coord_trans(x = &quot;sqrt&quot;)
+
+# You can also transform the y axis.  Remember that the base of the bars
+# has value 0, so log transformations are not appropriate
+m &lt;- ggplot(movies, aes(x = rating))
+m + geom_histogram(binwidth = 0.5) + scale_y_sqrt()
+}
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11975</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11975"> <img src="https://plot.ly/~cpsievert/11975.png" width="540" height="400" /> </a></div>
+<div class='input'>rm(movies)
+</div>
+<strong class='warning'>Warning message:
+object &#39;movies&#39; not found</strong></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_freqpoly</li><li>geom_histogram</li><li>stat_bin</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='geom_bar.html'>stat_count</a></code>, which counts the number of cases at each x
+  posotion, without binning. It is suitable for both discrete and continuous
+  x data, whereas <a href='geom_histogram.html'>stat_bin</a> is suitable only for continuous x data.
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_freqpoly'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

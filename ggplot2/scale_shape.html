@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_shape. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Scale for shapes, aka glyphs.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_shape(..., solid&nbsp;=&nbsp;TRUE)</div>
+<div>scale_shape_discrete(..., solid&nbsp;=&nbsp;TRUE)</div>
+<div>scale_shape_continuous(...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>common discrete scale parameters: <code>name</code>, <code>breaks</code>,
+<code>labels</code>, <code>na.value</code>, <code>limits</code> and <code>guide</code>.  See
+<code><a href='discrete_scale.html'>discrete_scale</a></code> for more details</dd>
+      <dt>solid</dt>
+      <dd>Are the shapes solid, <code>TRUE</code>, or hollow <code>FALSE</code>?</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>A continuous variable can not be mapped to shape.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>dsmall &lt;- diamonds[sample(nrow(diamonds), 100), ]
+
+(d &lt;- ggplot(dsmall, aes(carat, price)) + geom_point(aes(shape = cut)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12602</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12602"> <img src="https://plot.ly/~cpsievert/12602.png" width="540" height="400" /> </a></div>
+<div class='input'>d + scale_shape(solid = TRUE) # the default
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12604</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12604"> <img src="https://plot.ly/~cpsievert/12604.png" width="540" height="400" /> </a></div>
+<div class='input'>d + scale_shape(solid = FALSE)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12606</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12606"> <img src="https://plot.ly/~cpsievert/12606.png" width="540" height="400" /> </a></div>
+<div class='input'>d + scale_shape(name = &quot;Cut of diamond&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12608</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12608"> <img src="https://plot.ly/~cpsievert/12608.png" width="540" height="400" /> </a></div>
+<div class='input'>d + scale_shape(name = &quot;Cut of\ndiamond&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12610</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12610"> <img src="https://plot.ly/~cpsievert/12610.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# To change order of levels, change order of
+# underlying factor
+levels(dsmall$cut) &lt;- c(&quot;Fair&quot;, &quot;Good&quot;, &quot;Very Good&quot;, &quot;Premium&quot;, &quot;Ideal&quot;)
+
+# Need to recreate plot to pick up new data
+ggplot(dsmall, aes(price, carat)) + geom_point(aes(shape = cut))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12612</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12612"> <img src="https://plot.ly/~cpsievert/12612.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Or for short:
+d %+% dsmall
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12614</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12614"> <img src="https://plot.ly/~cpsievert/12614.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_shape</li><li>scale_shape_continuous</li><li>scale_shape_discrete</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_shape'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

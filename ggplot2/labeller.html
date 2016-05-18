@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>labeller. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Generic labeller function for facets</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>labeller(..., .rows&nbsp;=&nbsp;NULL, .cols&nbsp;=&nbsp;NULL, keep.as.numeric&nbsp;=&nbsp;NULL, .multi_line&nbsp;=&nbsp;TRUE, .default&nbsp;=&nbsp;label_value)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>Named arguments of the form <code>variable =
+labeller</code>. Each labeller is passed to <code><a href='as_labeller.html'>as_labeller</a>()</code>
+and can be a lookup table, a function taking and returning
+character vectors, or simply a labeller function.</dd>
+      <dt>.rows, .cols</dt>
+      <dd>Labeller for a whole margin (either the rows or
+the columns). It is passed to <code><a href='as_labeller.html'>as_labeller</a>()</code>. When a
+margin-wide labeller is set, make sure you don't mention in
+<code>...</code> any variable belonging to the margin.</dd>
+      <dt>keep.as.numeric</dt>
+      <dd>Deprecated. All supplied labellers and
+on-labeller functions should be able to work with character
+labels.</dd>
+      <dt>.multi_line</dt>
+      <dd>Whether to display the labels of multiple
+factors on separate lines. This is passed to the labeller
+function.</dd>
+      <dt>.default</dt>
+      <dd>Default labeller for variables not specified. Also
+used with lookup tables or non-labeller functions.</dd>
+    </dl>
+    
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+A labeller function to supply to <code><a href='facet_grid.html'>facet_grid</a></code>
+  for the argument <code>labeller</code>.
+</dl></p>
+  
+    </div>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>This function makes it easy to assign different labellers to
+different factors. The labeller can be a function or it can be a
+named character vectors that will serve as a lookup table.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>In case of functions, if the labeller has class <code>labeller</code>, it
+is directly applied on the data frame of labels. Otherwise, it is
+applied to the columns of the data frame of labels. The data frame
+is then processed with the function specified in the
+<code>.default</code> argument. This is intended to be used with
+functions taking a character vector such as
+<code><a href='http://www.inside-r.org/packages/cran/Hmisc/docs/capitalize'>capitalize</a></code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+p1 &lt;- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
+
+# You can assign different labellers to variables:
+p1 + facet_grid(vs + am ~ gear,
+  labeller = labeller(vs = label_both, am = label_value))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12326</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12326"> <img src="https://plot.ly/~cpsievert/12326.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Or whole margins:
+p1 + facet_grid(vs + am ~ gear,
+  labeller = labeller(.rows = label_both, .cols = label_value))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12328</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12328"> <img src="https://plot.ly/~cpsievert/12328.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# You can supply functions operating on strings:
+capitalize &lt;- function(string) {
+  substr(string, 1, 1) &lt;- toupper(substr(string, 1, 1))
+  string
+}
+p2 &lt;- ggplot(msleep, aes(x = sleep_total, y = awake)) + geom_point()
+p2 + facet_grid(vore ~ conservation, labeller = labeller(vore = capitalize))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12330</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12330"> <img src="https://plot.ly/~cpsievert/12330.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Or use character vectors as lookup tables:
+conservation_status &lt;- c(
+  cd = &quot;Conservation Dependent&quot;,
+  en = &quot;Endangered&quot;,
+  lc = &quot;Least concern&quot;,
+  nt = &quot;Near Threatened&quot;,
+  vu = &quot;Vulnerable&quot;,
+  domesticated = &quot;Domesticated&quot;
+)
+## Source: http://en.wikipedia.org/wiki/Wikipedia:Conservation_status
+
+p2 + facet_grid(vore ~ conservation, labeller = labeller(
+  .default = capitalize,
+  conservation = conservation_status
+))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12332</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12332"> <img src="https://plot.ly/~cpsievert/12332.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# In the following example, we rename the levels to the long form,
+# then apply a wrap labeller to the columns to prevent cropped text
+msleep$conservation2 &lt;- plyr::revalue(msleep$conservation,
+  conservation_status)
+
+p2 %+% msleep + facet_grid(vore ~ conservation2)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12334</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12334"> <img src="https://plot.ly/~cpsievert/12334.png" width="540" height="400" /> </a></div>
+<div class='input'>p2 %+% msleep +
+  facet_grid(vore ~ conservation2,
+    labeller = labeller(conservation2 = label_wrap_gen(10))
+  )
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12336</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12336"> <img src="https://plot.ly/~cpsievert/12336.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# labeller() is especially useful to act as a global labeller. You
+# can set it up once and use it on a range of different plots with
+# different facet specifications.
+
+global_labeller &lt;- labeller(
+  vore = capitalize,
+  conservation = conservation_status,
+  conservation2 = label_wrap_gen(10),
+  .default = label_both
+)
+
+p2 + facet_grid(vore ~ conservation, labeller = global_labeller)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12338</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12338"> <img src="https://plot.ly/~cpsievert/12338.png" width="540" height="400" /> </a></div>
+<div class='input'>p2 + facet_wrap(~vore, labeller = global_labeller)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12340</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12340"> <img src="https://plot.ly/~cpsievert/12340.png" width="540" height="400" /> </a></div>
+<div class='input'>p2 %+% msleep + facet_wrap(~conservation2, labeller = global_labeller)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12342</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12342"> <img src="https://plot.ly/~cpsievert/12342.png" width="540" height="400" /> </a></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>labeller</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='as_labeller.html'>as_labeller</a>()</code>, <a href='labellers.html'>labellers</a>
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=labeller'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

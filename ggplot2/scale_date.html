@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_date. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Position scale, date & date times</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_x_date(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), date_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), date_labels&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), date_minor_breaks&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver())</div>
+<div>scale_y_date(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), date_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), date_labels&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), date_minor_breaks&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver())</div>
+<div>scale_x_datetime(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), date_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), date_labels&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), date_minor_breaks&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver())</div>
+<div>scale_y_datetime(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), date_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), date_labels&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), date_minor_breaks&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver())</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>name</dt>
+      <dd>The name of the scale. Used as axis or legend title. If
+<code>NULL</code>, the default, the name of the scale is taken from the first
+mapping used for that aesthetic.</dd>
+      <dt>breaks</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no breaks
+  </li>
+<li> <code>waiver()</code> for the default breaks computed by the
+    transformation object
+  </li>
+<li> A numeric vector of positions
+  </li>
+<li> A function that takes the limits as input and returns breaks
+    as output
+</li>
+</ul>
+</dd>
+      <dt>date_breaks</dt>
+      <dd>A string giving the distance between breaks like "2
+weeks", or "10 years". If both <code>breaks</code> and <code>date_breaks</code> are
+specified, <code>date_breaks</code> wins.</dd>
+      <dt>labels</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no labels
+  </li>
+<li> <code>waiver()</code> for the default labels computed by the
+    transformation object
+  </li>
+<li> A character vector giving labels (must be same length as <code>breaks</code>)
+  </li>
+<li> A function that takes the breaks as input and returns labels
+    as output
+</li>
+</ul>
+</dd>
+      <dt>date_labels</dt>
+      <dd>A string giving the formatting specification for the
+labels. Codes are defined in <code><a href='http://www.inside-r.org/r-doc/base/strptime'>strftime</a></code>. If both <code>labels</code>
+and <code>date_labels</code> are specified, <code>date_labels</code> wins.</dd>
+      <dt>minor_breaks</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no minor breaks
+  </li>
+<li> <code>waiver()</code> for the default breaks (one minor break between
+    each major break)
+  </li>
+<li> A numeric vector of positions
+  </li>
+<li> A function that given the limits returns a vector of minor breaks.
+</li>
+</ul>
+</dd>
+      <dt>date_minor_breaks</dt>
+      <dd>A string giving the distance between minor breaks
+like "2 weeks", or "10 years". If both <code>minor_breaks</code> and
+<code>date_minor_breaks</code> are specified, <code>date_minor_breaks</code> wins.</dd>
+      <dt>limits</dt>
+      <dd>A numeric vector of length two providing limits of the scale.
+Use <code>NA</code> to refer to the existing minimum or maximum.</dd>
+      <dt>expand</dt>
+      <dd>A numeric vector of length two giving multiplicative and
+additive expansion constants. These constants ensure that the data is
+placed some distance away from the axes. The defaults are
+<code>c(0.05, 0)</code> for continuous variables, and <code>c(0, 0.6)</code> for
+discrete variables.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Use <code>scale_*_date</code> with <code>Date</code> variables, and
+<code>scale_*_datetime</code> with <code>POSIXct</code> variables.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>last_month &lt;- Sys.Date() - 0:29
+df &lt;- data.frame(
+  date = last_month,
+  price = runif(30)
+)
+base &lt;- ggplot(df, aes(date, price)) +
+  geom_line()
+
+# The date scale will attempt to pick sensible defaults for
+# major and minor tick marks. Override with date_breaks, date_labels
+# date_minor_breaks arguments.
+base + scale_x_date(date_labels = &quot;%b %d&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12492</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12492"> <img src="https://plot.ly/~cpsievert/12492.png" width="540" height="400" /> </a></div>
+<div class='input'>base + scale_x_date(date_breaks = &quot;1 week&quot;, date_labels = &quot;%W&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12494</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12494"> <img src="https://plot.ly/~cpsievert/12494.png" width="540" height="400" /> </a></div>
+<div class='input'>base + scale_x_date(date_minor_breaks = &quot;1 day&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12494</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12494"> <img src="https://plot.ly/~cpsievert/12494.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Set limits
+base + scale_x_date(limits = c(Sys.Date() - 7, NA))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12496</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12496"> <img src="https://plot.ly/~cpsievert/12496.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_date</li><li>scale_x_date</li><li>scale_x_datetime</li><li>scale_y_date</li><li>scale_y_datetime</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='scale_continuous.html'>scale_continuous</a></code> for continuous position scales.
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_date'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

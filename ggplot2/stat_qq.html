@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stat_qq. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Calculation for quantile-quantile plot.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stat_qq(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"point", position&nbsp;=&nbsp;"identity", distribution&nbsp;=&nbsp;stats::qnorm, dparams&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>geom_qq(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"point", position&nbsp;=&nbsp;"identity", distribution&nbsp;=&nbsp;stats::qnorm, dparams&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>The aesthetic mapping, usually constructed with
+<code><a href='aes.html'>aes</a></code> or <code><a href='aes_.html'>aes_string</a></code>. Only needs to be set
+at the layer level if you are overriding the plot defaults.</dd>
+      <dt>data</dt>
+      <dd>A layer specific dataset - only needed if you want to override
+the plot defaults.</dd>
+      <dt>geom</dt>
+      <dd>The geometric object to use display the data</dd>
+      <dt>position</dt>
+      <dd>The position adjustment to use for overlapping points
+on this layer</dd>
+      <dt>distribution</dt>
+      <dd>Distribution function to use, if x not specified</dd>
+      <dt>dparams</dt>
+      <dd>Additional parameters passed on to <code>distribution</code>
+function.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. This can
+include aesthetics whose values you want to set, not map. See
+<code><a href='layer.html'>layer</a></code> for more details.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Calculation for quantile-quantile plot.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>stat_qq</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>sample</strong></code>
+  </li>
+<li> <code>x</code>
+  </li>
+<li> <code>y</code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+
+    <div class="Computed variables">
+      <h2>Computed variables</h2>
+
+      <p></p>
+  
+      <p><dl>
+  <dt>sample</dt><dd>sample quantiles</dd></p>
+  
+      <p><dt>theoretical</dt><dd>theoretical quantiles</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+df &lt;- data.frame(y = rt(200, df = 5))
+p &lt;- ggplot(df, aes(sample = y))
+p + stat_qq()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12652</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12652"> <img src="https://plot.ly/~cpsievert/12652.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(stat = &quot;qq&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12654</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12654"> <img src="https://plot.ly/~cpsievert/12654.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Use fitdistr from MASS to estimate distribution params
+params &lt;- as.list(MASS::fitdistr(df$y, &quot;t&quot;)$estimate)
+</div>
+<strong class='warning'>Warning message:
+NaNs produced</strong>
+<strong class='warning'>Warning message:
+NaNs produced</strong>
+<div class='input'>ggplot(df, aes(sample = y)) +
+  stat_qq(distribution = qt, dparams = params[&quot;df&quot;])
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12656</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12656"> <img src="https://plot.ly/~cpsievert/12656.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Using to explore the distribution of a variable
+ggplot(mtcars) +
+  stat_qq(aes(sample = mpg))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12656</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12656"> <img src="https://plot.ly/~cpsievert/12656.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(mtcars) +
+  stat_qq(aes(sample = mpg, colour = factor(cyl)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12658</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12658"> <img src="https://plot.ly/~cpsievert/12658.png" width="540" height="400" /> </a></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_qq</li><li>stat_qq</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=stat_qq'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

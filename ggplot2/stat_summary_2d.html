@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stat_summary_2d. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Bin and summarise in 2d (rectangle & hexagons)</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stat_summary_2d(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"tile", position&nbsp;=&nbsp;"identity", bins&nbsp;=&nbsp;30, binwidth&nbsp;=&nbsp;NULL, drop&nbsp;=&nbsp;TRUE, fun&nbsp;=&nbsp;"mean", fun.args&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_summary_hex(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"hex", position&nbsp;=&nbsp;"identity", bins&nbsp;=&nbsp;30, binwidth&nbsp;=&nbsp;NULL, drop&nbsp;=&nbsp;TRUE, fun&nbsp;=&nbsp;"mean", fun.args&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>The aesthetic mapping, usually constructed with
+<code><a href='aes.html'>aes</a></code> or <code><a href='aes_.html'>aes_string</a></code>. Only needs to be set
+at the layer level if you are overriding the plot defaults.</dd>
+      <dt>data</dt>
+      <dd>A layer specific dataset - only needed if you want to override
+the plot defaults.</dd>
+      <dt>geom</dt>
+      <dd>The geometric object to use display the data</dd>
+      <dt>position</dt>
+      <dd>The position adjustment to use for overlapping points
+on this layer</dd>
+      <dt>bins</dt>
+      <dd>numeric vector giving number of bins in both vertical and
+horizontal directions. Set to 30 by default.</dd>
+      <dt>binwidth</dt>
+      <dd>Numeric vector giving bin width in both vertical and
+horizontal directions. Overrides <code>bins</code> if both set.</dd>
+      <dt>drop</dt>
+      <dd>drop if the output of <code>fun</code> is <code>NA</code>.</dd>
+      <dt>fun</dt>
+      <dd>function for summary.</dd>
+      <dt>fun.args</dt>
+      <dd>A list of extra arguments to pass to <code>fun</code></dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. This can
+include aesthetics whose values you want to set, not map. See
+<code><a href='layer.html'>layer</a></code> for more details.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>stat_summary_2d</code> is a 2d variation of <code><a href='stat_summary.html'>stat_summary</a></code>.
+<code>stat_summary_hex</code> is a hexagonal variation of
+<code><a href='stat_summary_2d.html'>stat_summary_2d</a></code>. The data are divided into bins defined
+by <code>x</code> and <code>y</code>, and then the values of <code>z</code> in each cell is
+are summarised with <code>fun</code>.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><ul>
+<li> <code>x</code>: horizontal position
+ </li>
+<li> <code>y</code>: vertical position
+ </li>
+<li> <code>z</code>: value passed to the summary function
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>d &lt;- ggplot(diamonds, aes(carat, depth, z = price))
+d + stat_summary_2d()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12660</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12660"> <img src="https://plot.ly/~cpsievert/12660.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Specifying function
+d + stat_summary_2d(fun = function(x) sum(x^2))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12662</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12662"> <img src="https://plot.ly/~cpsievert/12662.png" width="540" height="400" /> </a></div>
+<div class='input'>d + stat_summary_2d(fun = var)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12664</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12664"> <img src="https://plot.ly/~cpsievert/12664.png" width="540" height="400" /> </a></div>
+<div class='input'>d + stat_summary_2d(fun = &quot;quantile&quot;, fun.args = list(probs = 0.1))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12666</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12666"> <img src="https://plot.ly/~cpsievert/12666.png" width="540" height="400" /> </a></div>
+<div class='input'>
+if (requireNamespace(&quot;hexbin&quot;)) {
+d + stat_summary_hex()
+}
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12668</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12668"> <img src="https://plot.ly/~cpsievert/12668.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stat_summary2d</li><li>stat_summary_2d</li><li>stat_summary_hex</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='stat_summary_2d.html'>stat_summary_hex</a></code> for hexagonal summarization.
+  <code><a href='geom_bin2d.html'>stat_bin2d</a></code> for the binning options.
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=stat_summary_2d'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

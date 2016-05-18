@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>annotation_raster. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Annotation: High-performance rectangular tiling.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>annotation_raster(raster, xmin, xmax, ymin, ymax, interpolate&nbsp;=&nbsp;FALSE)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>raster</dt>
+      <dd>raster object to display</dd>
+      <dt>xmin, xmax</dt>
+      <dd>x location (in data coordinates) giving horizontal
+location of raster</dd>
+      <dt>ymin, ymax</dt>
+      <dd>y location (in data coordinates) giving vertical
+location of raster</dd>
+      <dt>interpolate</dt>
+      <dd>If <code>TRUE</code> interpolate linearly, if <code>FALSE</code>
+(the default) don't interpolate.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>This is a special version of <code><a href='geom_tile.html'>geom_raster</a></code> optimised for static
+annotations that are the same in every panel. These annotations will not
+affect scales (i.e. the x and y axes will not grow to cover the range
+of the raster, and the raster must already have its own colours).</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Most useful for adding bitmap images.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># Generate data
+rainbow &lt;- matrix(hcl(seq(0, 360, length.out = 50 * 50), 80, 70), nrow = 50)
+ggplot(mtcars, aes(mpg, wt)) +
+  geom_point() +
+  annotation_raster(rainbow, 15, 20, 3, 4)
+</div>
+<strong class='warning'>Warning message:
+geom_GeomRasterAnn() has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11607</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11607"> <img src="https://plot.ly/~cpsievert/11607.png" width="540" height="400" /> </a></div>
+<div class='input'># To fill up whole plot
+ggplot(mtcars, aes(mpg, wt)) +
+  annotation_raster(rainbow, -Inf, Inf, -Inf, Inf) +
+  geom_point()
+</div>
+<strong class='warning'>Warning message:
+geom_GeomRasterAnn() has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11609</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11609"> <img src="https://plot.ly/~cpsievert/11609.png" width="540" height="400" /> </a></div>
+<div class='input'>
+rainbow2 &lt;- matrix(hcl(seq(0, 360, length.out = 10), 80, 70), nrow = 1)
+ggplot(mtcars, aes(mpg, wt)) +
+  annotation_raster(rainbow2, -Inf, Inf, -Inf, Inf) +
+  geom_point()
+</div>
+<strong class='warning'>Warning message:
+geom_GeomRasterAnn() has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11611</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11611"> <img src="https://plot.ly/~cpsievert/11611.png" width="540" height="400" /> </a></div>
+<div class='input'>rainbow2 &lt;- matrix(hcl(seq(0, 360, length.out = 10), 80, 70), nrow = 1)
+ggplot(mtcars, aes(mpg, wt)) +
+  annotation_raster(rainbow2, -Inf, Inf, -Inf, Inf, interpolate = TRUE) +
+  geom_point()
+</div>
+<strong class='warning'>Warning message:
+geom_GeomRasterAnn() has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11613</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11613"> <img src="https://plot.ly/~cpsievert/11613.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>annotation_raster</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=annotation_raster'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

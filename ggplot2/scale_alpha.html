@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_alpha. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Alpha scales.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_alpha(..., range&nbsp;=&nbsp;c(0.1, 1))</div>
+<div>scale_alpha_continuous(..., range&nbsp;=&nbsp;c(0.1, 1))</div>
+<div>scale_alpha_discrete(..., range&nbsp;=&nbsp;c(0.1, 1))</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>Other arguments passed on to <code><a href='continuous_scale.html'>continuous_scale</a></code>
+or <code><a href='discrete_scale.html'>discrete_scale</a></code> as appropriate, to control name, limits,
+breaks, labels and so forth.</dd>
+      <dt>range</dt>
+      <dd>range of output alpha values.  Should lie between 0 and 1.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>scale_alpha</code> is an alias for <code>scale_alpha_continuous</code> since
+that is the most common use of alpha, and it saves a bit of typing.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>(p &lt;- ggplot(mtcars, aes(mpg, cyl)) +
+  geom_point(aes(alpha = cyl)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12458</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12458"> <img src="https://plot.ly/~cpsievert/12458.png" width="540" height="400" /> </a></div>
+<div class='input'>p + scale_alpha(&quot;cylinders&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12460</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12460"> <img src="https://plot.ly/~cpsievert/12460.png" width="540" height="400" /> </a></div>
+<div class='input'>p + scale_alpha(&quot;number\nof\ncylinders&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12460</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12460"> <img src="https://plot.ly/~cpsievert/12460.png" width="540" height="400" /> </a></div>
+<div class='input'>
+p + scale_alpha(range = c(0.4, 0.8))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12462</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12462"> <img src="https://plot.ly/~cpsievert/12462.png" width="540" height="400" /> </a></div>
+<div class='input'>
+(p &lt;- ggplot(mtcars, aes(mpg, cyl)) +
+  geom_point(aes(alpha = factor(cyl))))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12464</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12464"> <img src="https://plot.ly/~cpsievert/12464.png" width="540" height="400" /> </a></div>
+<div class='input'>p + scale_alpha_discrete(range = c(0.4, 0.8))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12466</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12466"> <img src="https://plot.ly/~cpsievert/12466.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_alpha</li><li>scale_alpha_continuous</li><li>scale_alpha_discrete</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_alpha'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

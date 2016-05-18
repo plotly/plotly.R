@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_identity. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Use values without scaling.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_colour_identity(..., guide&nbsp;=&nbsp;"none")</div>
+<div>scale_fill_identity(..., guide&nbsp;=&nbsp;"none")</div>
+<div>scale_shape_identity(..., guide&nbsp;=&nbsp;"none")</div>
+<div>scale_linetype_identity(..., guide&nbsp;=&nbsp;"none")</div>
+<div>scale_alpha_identity(..., guide&nbsp;=&nbsp;"none")</div>
+<div>scale_size_identity(..., guide&nbsp;=&nbsp;"none")</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>Other arguments passed on to <code><a href='discrete_scale.html'>discrete_scale</a></code> or
+<code><a href='continuous_scale.html'>continuous_scale</a></code></dd>
+      <dt>guide</dt>
+      <dd>Guide to use for this scale - defaults to <code>"none"</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Use values without scaling.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>ggplot(luv_colours, aes(u, v)) +
+  geom_point(aes(colour = col), size = 3) +
+  scale_color_identity() +
+  coord_equal()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12570</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12570"> <img src="https://plot.ly/~cpsievert/12570.png" width="540" height="400" /> </a></div>
+<div class='input'>
+df &lt;- data.frame(
+  x = 1:4,
+  y = 1:4,
+  colour = c(&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;yellow&quot;)
+)
+ggplot(df, aes(x, y)) + geom_tile(aes(fill = colour))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12572</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12572"> <img src="https://plot.ly/~cpsievert/12572.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(df, aes(x, y)) +
+  geom_tile(aes(fill = colour)) +
+  scale_fill_identity()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12574</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12574"> <img src="https://plot.ly/~cpsievert/12574.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# To get a legend guide, specify guide = &quot;legend&quot;
+ggplot(df, aes(x, y)) +
+  geom_tile(aes(fill = colour)) +
+  scale_fill_identity(guide = &quot;legend&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12576</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12576"> <img src="https://plot.ly/~cpsievert/12576.png" width="540" height="400" /> </a></div>
+<div class='input'># But you&#39;ll typically also need to supply breaks and labels:
+ggplot(df, aes(x, y)) +
+  geom_tile(aes(fill = colour)) +
+  scale_fill_identity(&quot;trt&quot;, labels = letters[1:4], breaks = df$colour,
+  guide = &quot;legend&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12578</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12578"> <img src="https://plot.ly/~cpsievert/12578.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# cyl scaled to appropriate size
+ggplot(mtcars, aes(mpg, wt)) + geom_point(aes(size = cyl))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12580</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12580"> <img src="https://plot.ly/~cpsievert/12580.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# cyl used as point size
+ggplot(mtcars, aes(mpg, wt)) +
+  geom_point(aes(size = cyl)) +
+  scale_size_identity()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12580</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12580"> <img src="https://plot.ly/~cpsievert/12580.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_alpha_identity</li><li>scale_color_identity</li><li>scale_colour_identity</li><li>scale_fill_identity</li><li>scale_identity</li><li>scale_linetype_identity</li><li>scale_shape_identity</li><li>scale_size_identity</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_identity'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

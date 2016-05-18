@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>coord_cartesian. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Cartesian coordinates.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>coord_cartesian(xlim&nbsp;=&nbsp;NULL, ylim&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;TRUE)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>xlim, ylim</dt>
+      <dd>Limits for the x and y axes.</dd>
+      <dt>expand</dt>
+      <dd>If <code>TRUE</code>, the default, adds a small expansion factor to
+the limits to ensure that data and axes don't overlap. If <code>FALSE</code>,
+limits are taken exactly from the data or <code>xlim</code>/<code>ylim</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>The Cartesian coordinate system is the most familiar, and common, type of
+coordinate system. Setting limits on the coordinate system will zoom the
+plot (like you're looking at it with a magnifying glass), and will not
+change the underlying data like setting limits on a scale will.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># There are two ways of zooming the plot display: with scales or
+# with coordinate systems.  They work in two rather different ways.
+
+p &lt;- ggplot(mtcars, aes(disp, wt)) +
+  geom_point() +
+  geom_smooth()
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11625</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11625"> <img src="https://plot.ly/~cpsievert/11625.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Setting the limits on a scale converts all values outside the range to NA.
+p + scale_x_continuous(limits = c(325, 500))
+</div>
+<strong class='warning'>Warning message:
+Removed 24 rows containing non-finite values (stat_smooth).</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11627</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11627"> <img src="https://plot.ly/~cpsievert/11627.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Setting the limits on the coordinate system performs a visual zoom.
+# The data is unchanged, and we just view a small portion of the original
+# plot. Note how smooth continues past the points visible on this plot.
+p + coord_cartesian(xlim = c(325, 500))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11629</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11629"> <img src="https://plot.ly/~cpsievert/11629.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# By default, the same expansion factor is applied as when setting scale
+# limits. You can set the limits precisely by setting expand = FALSE
+p + coord_cartesian(xlim = c(325, 500), expand = FALSE)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11631</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11631"> <img src="https://plot.ly/~cpsievert/11631.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Simiarly, we can use expand = FALSE to turn off expansion with the
+# default limits
+p + coord_cartesian(expand = FALSE)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11633</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11633"> <img src="https://plot.ly/~cpsievert/11633.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# You can see the same thing with this 2d histogram
+d &lt;- ggplot(diamonds, aes(carat, price)) +
+  stat_bin2d(bins = 25, colour = &quot;white&quot;)
+d
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11635</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11635"> <img src="https://plot.ly/~cpsievert/11635.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# When zooming the scale, the we get 25 new bins that are the same
+# size on the plot, but represent smaller regions of the data space
+d + scale_x_continuous(limits = c(0, 1))
+</div>
+<strong class='warning'>Warning message:
+Removed 17502 rows containing non-finite values (stat_bin2d).</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11637</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11637"> <img src="https://plot.ly/~cpsievert/11637.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# When zooming the coordinate system, we see a subset of original 50 bins,
+# displayed bigger
+d + coord_cartesian(xlim = c(0, 1))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11639</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11639"> <img src="https://plot.ly/~cpsievert/11639.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>coord_cartesian</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=coord_cartesian'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

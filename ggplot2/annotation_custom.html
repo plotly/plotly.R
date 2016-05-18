@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>annotation_custom. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Annotation: Custom grob.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>annotation_custom(grob, xmin&nbsp;=&nbsp;-Inf, xmax&nbsp;=&nbsp;Inf, ymin&nbsp;=&nbsp;-Inf, ymax&nbsp;=&nbsp;Inf)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>grob</dt>
+      <dd>grob to display</dd>
+      <dt>xmin, xmax</dt>
+      <dd>x location (in data coordinates) giving horizontal
+location of raster</dd>
+      <dt>ymin, ymax</dt>
+      <dd>y location (in data coordinates) giving vertical
+location of raster</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>This is a special geom intended for use as static annotations
+that are the same in every panel. These annotations will not
+affect scales (i.e. the x and y axes will not grow to cover the range
+of the grob, and the grob will not be modified by any ggplot settings or mappings).</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Most useful for adding tables, inset plots, and other grid-based decorations.</p>
+  
+    </div>
+
+    <div class="Note">
+      <h2>Note</h2>
+
+      <p><code>annotation_custom</code> expects the grob to fill the entire viewport
+defined by xmin, xmax, ymin, ymax. Grobs with a different (absolute) size
+will be center-justified in that region.
+Inf values can be used to fill the full plot panel (see examples).</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># Dummy plot
+df &lt;- data.frame(x = 1:10, y = 1:10)
+base &lt;- ggplot(df, aes(x, y)) +
+  geom_blank() +
+  theme_bw()
+# Adding a table
+## Not run: 
+#  if (require(gridExtra)) {
+# base + annotation_custom(grob = tableGrob(head(iris[ ,1:3])),
+#         xmin = 3, xmax = 6, ymin = 2, ymax = 8)
+# # full panel
+# base + annotation_custom(grob = roundrectGrob(),
+#           xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf)
+# }
+# ## End(Not run)
+# Inset plot
+df2 &lt;- data.frame(x = 1 , y = 1)
+g &lt;- ggplotGrob(ggplot(df2, aes(x, y)) +
+  geom_point() +
+  theme(plot.background = element_rect(colour = &quot;black&quot;)))
+base +
+  annotation_custom(grob = g, xmin = 1, xmax = 10, ymin = 8, ymax = 10)
+</div>
+<strong class='warning'>Warning message:
+geom_GeomCustomAnn() has yet to be implemented in plotly.
+  If you&#39;d like to see this geom implemented,
+  Please open an issue with your example code at
+  https://github.com/ropensci/plotly/issues</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11592</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11592"> <img src="https://plot.ly/~cpsievert/11592.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>annotation_custom</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=annotation_custom'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
