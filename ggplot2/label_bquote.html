@@ -82,19 +82,13 @@ variables will be replaced with their value in the facet.</p>
 p &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
 p + facet_grid(vs ~ ., labeller = label_bquote(alpha ^ .(vs)))
 </div>
-<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12320</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12320"> <img src="https://plot.ly/~cpsievert/12320.png" width="540" height="400" /> </a></div>
+<strong class='error'>Error in if (attr(labels, &quot;facet&quot;) == &quot;wrap&quot;) {    if (!is.null(cols) &amp;&amp; !is.null(rows)) {        stop(&quot;Cannot supply both rows and cols to facet_wrap()&quot;,             call. = FALSE)    }    cols %||% rows} else {    if (attr(labels, &quot;type&quot;) == &quot;rows&quot;) {        rows    }    else {        cols    }}: argument is of length zero</strong>
 <div class='input'>p + facet_grid(. ~ vs, labeller = label_bquote(cols = .(vs) ^ .(vs)))
 </div>
-<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12322</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12322"> <img src="https://plot.ly/~cpsievert/12322.png" width="540" height="400" /> </a></div>
+<strong class='error'>Error in if (attr(labels, &quot;facet&quot;) == &quot;wrap&quot;) {    if (!is.null(cols) &amp;&amp; !is.null(rows)) {        stop(&quot;Cannot supply both rows and cols to facet_wrap()&quot;,             call. = FALSE)    }    cols %||% rows} else {    if (attr(labels, &quot;type&quot;) == &quot;rows&quot;) {        rows    }    else {        cols    }}: argument is of length zero</strong>
 <div class='input'>p + facet_grid(. ~ vs + am, labeller = label_bquote(cols = .(am) ^ .(vs)))
 </div>
-<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12324</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12324"> <img src="https://plot.ly/~cpsievert/12324.png" width="540" height="400" /> </a></div></pre>
+<strong class='error'>Error in if (attr(labels, &quot;facet&quot;) == &quot;wrap&quot;) {    if (!is.null(cols) &amp;&amp; !is.null(rows)) {        stop(&quot;Cannot supply both rows and cols to facet_wrap()&quot;,             call. = FALSE)    }    cols %||% rows} else {    if (attr(labels, &quot;type&quot;) == &quot;rows&quot;) {        rows    }    else {        cols    }}: argument is of length zero</strong></pre>
   </div>
   <div class="span4">
     <!-- <ul>

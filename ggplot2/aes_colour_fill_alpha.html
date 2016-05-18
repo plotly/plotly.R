@@ -71,26 +71,26 @@ c &lt;- ggplot(mtcars, aes(factor(cyl)))
 c + geom_bar()
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11478</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11478"> <img src="https://plot.ly/~cpsievert/11478.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12837</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12837"> <img src="https://api.plot.ly/v2/files/cpsievert:12837/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'># To change the interior colouring use fill aesthetic
 c + geom_bar(fill = &quot;red&quot;)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11480</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11480"> <img src="https://plot.ly/~cpsievert/11480.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12839</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12839"> <img src="https://api.plot.ly/v2/files/cpsievert:12839/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'># Compare with the colour aesthetic which changes just the bar outline
 c + geom_bar(colour = &quot;red&quot;)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11482</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11482"> <img src="https://plot.ly/~cpsievert/11482.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12841</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12841"> <img src="https://api.plot.ly/v2/files/cpsievert:12841/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'># Combining both, you can see the changes more clearly
 c + geom_bar(fill = &quot;white&quot;, colour = &quot;red&quot;)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11482</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11482"> <img src="https://plot.ly/~cpsievert/11482.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12843</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12843"> <img src="https://api.plot.ly/v2/files/cpsievert:12843/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # The aesthetic fill also takes different colouring scales
 # setting fill equal to a factor variable uses a discrete colour scale
@@ -98,8 +98,8 @@ k &lt;- ggplot(mtcars, aes(factor(cyl), fill = factor(vs)))
 k + geom_bar()
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11484</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11484"> <img src="https://plot.ly/~cpsievert/11484.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12843</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12843"> <img src="https://api.plot.ly/v2/files/cpsievert:12843/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # Fill aesthetic can also be used with a continuous variable
 m &lt;- ggplot(faithfuld, aes(waiting, eruptions))
@@ -109,35 +109,35 @@ m + geom_raster()
 no non-missing arguments to min; returning Inf</strong>
 <strong class='warning'>Warning message:
 no non-missing arguments to max; returning -Inf</strong>
-<strong class='error'>Error in order(data$fill_plotlyDomain): argument 1 is not a vector</strong>
+<strong class='error'>Error in `$&lt;-.data.frame`(`*tmp*`, &quot;fill_plotlyDomain&quot;, value = numeric(0)): replacement has 0 rows, data has 5625</strong>
 <div class='input'>m + geom_raster(aes(fill = density))
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11486</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11486"> <img src="https://plot.ly/~cpsievert/11486.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12845</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12845"> <img src="https://api.plot.ly/v2/files/cpsievert:12845/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # Some geoms don&#39;t use both aesthetics (i.e. geom_point or geom_line)
 b &lt;- ggplot(economics, aes(x = date, y = unemploy))
 b + geom_line()
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11488</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11488"> <img src="https://plot.ly/~cpsievert/11488.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12847</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12847"> <img src="https://api.plot.ly/v2/files/cpsievert:12847/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>b + geom_line(colour = &quot;green&quot;)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11490</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11490"> <img src="https://plot.ly/~cpsievert/11490.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12849</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12849"> <img src="https://api.plot.ly/v2/files/cpsievert:12849/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>b + geom_point()
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11492</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11492"> <img src="https://plot.ly/~cpsievert/11492.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12851</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12851"> <img src="https://api.plot.ly/v2/files/cpsievert:12851/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>b + geom_point(colour = &quot;red&quot;)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11494</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11494"> <img src="https://plot.ly/~cpsievert/11494.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12853</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12853"> <img src="https://api.plot.ly/v2/files/cpsievert:12853/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # For large datasets with overplotting the alpha
 # aesthetic will make the points more transparent
@@ -146,39 +146,39 @@ h  &lt;- ggplot(df, aes(x,y))
 h + geom_point()
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11496</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11496"> <img src="https://plot.ly/~cpsievert/11496.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12855</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12855"> <img src="https://api.plot.ly/v2/files/cpsievert:12855/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>h + geom_point(alpha = 0.5)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11498</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11498"> <img src="https://plot.ly/~cpsievert/11498.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12857</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12857"> <img src="https://api.plot.ly/v2/files/cpsievert:12857/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>h + geom_point(alpha = 1/10)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11500</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11500"> <img src="https://plot.ly/~cpsievert/11500.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12859</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12859"> <img src="https://api.plot.ly/v2/files/cpsievert:12859/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # Alpha can also be used to add shading
 j &lt;- b + geom_line()
 j
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11502</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11502"> <img src="https://plot.ly/~cpsievert/11502.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12861</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12861"> <img src="https://api.plot.ly/v2/files/cpsievert:12861/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>yrng &lt;- range(economics$unemploy)
 j &lt;- j + geom_rect(aes(NULL, NULL, xmin = start, xmax = end, fill = party),
 ymin = yrng[1], ymax = yrng[2], data = presidential)
 j
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11504</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11504"> <img src="https://plot.ly/~cpsievert/11504.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12863</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12863"> <img src="https://api.plot.ly/v2/files/cpsievert:12863/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>j + scale_fill_manual(values = alpha(c(&quot;blue&quot;, &quot;red&quot;), .3))
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11506</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/11506"> <img src="https://plot.ly/~cpsievert/11506.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12865</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12865"> <img src="https://api.plot.ly/v2/files/cpsievert:12865/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">

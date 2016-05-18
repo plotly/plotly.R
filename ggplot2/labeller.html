@@ -122,16 +122,14 @@ p1 + facet_grid(vs + am ~ gear,
   labeller = labeller(vs = label_both, am = label_value))
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12326</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12326"> <img src="https://plot.ly/~cpsievert/12326.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13705</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13705"> <img src="https://api.plot.ly/v2/files/cpsievert:13705/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # Or whole margins:
 p1 + facet_grid(vs + am ~ gear,
   labeller = labeller(.rows = label_both, .cols = label_value))
 </div>
-<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12328</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12328"> <img src="https://plot.ly/~cpsievert/12328.png" width="540" height="400" /> </a></div>
+<strong class='error'>Error in if (attr(labels, &quot;facet&quot;) == &quot;wrap&quot;) {    if (!is.null(cols) &amp;&amp; !is.null(rows)) {        stop(&quot;Cannot supply both rows and cols to facet_wrap()&quot;,             call. = FALSE)    }    cols %||% rows} else {    if (attr(labels, &quot;type&quot;) == &quot;rows&quot;) {        rows    }    else {        cols    }}: argument is of length zero</strong>
 <div class='input'>
 # You can supply functions operating on strings:
 capitalize &lt;- function(string) {
@@ -142,8 +140,8 @@ p2 &lt;- ggplot(msleep, aes(x = sleep_total, y = awake)) + geom_point()
 p2 + facet_grid(vore ~ conservation, labeller = labeller(vore = capitalize))
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12330</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12330"> <img src="https://plot.ly/~cpsievert/12330.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13707</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13707"> <img src="https://api.plot.ly/v2/files/cpsievert:13707/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # Or use character vectors as lookup tables:
 conservation_status &lt;- c(
@@ -162,8 +160,8 @@ p2 + facet_grid(vore ~ conservation, labeller = labeller(
 ))
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12332</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12332"> <img src="https://plot.ly/~cpsievert/12332.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13709</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13709"> <img src="https://api.plot.ly/v2/files/cpsievert:13709/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # In the following example, we rename the levels to the long form,
 # then apply a wrap labeller to the columns to prevent cropped text
@@ -173,16 +171,16 @@ msleep$conservation2 &lt;- plyr::revalue(msleep$conservation,
 p2 %+% msleep + facet_grid(vore ~ conservation2)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12334</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12334"> <img src="https://plot.ly/~cpsievert/12334.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13711</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13711"> <img src="https://api.plot.ly/v2/files/cpsievert:13711/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>p2 %+% msleep +
   facet_grid(vore ~ conservation2,
     labeller = labeller(conservation2 = label_wrap_gen(10))
   )
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12336</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12336"> <img src="https://plot.ly/~cpsievert/12336.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13713</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13713"> <img src="https://api.plot.ly/v2/files/cpsievert:13713/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>
 # labeller() is especially useful to act as a global labeller. You
 # can set it up once and use it on a range of different plots with
@@ -198,18 +196,18 @@ global_labeller &lt;- labeller(
 p2 + facet_grid(vore ~ conservation, labeller = global_labeller)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12338</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12338"> <img src="https://plot.ly/~cpsievert/12338.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13715</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13715"> <img src="https://api.plot.ly/v2/files/cpsievert:13715/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>p2 + facet_wrap(~vore, labeller = global_labeller)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12340</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12340"> <img src="https://plot.ly/~cpsievert/12340.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13717</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13717"> <img src="https://api.plot.ly/v2/files/cpsievert:13717/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'>p2 %+% msleep + facet_wrap(~conservation2, labeller = global_labeller)
 </div>
 <strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
-<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12342</strong>
-<div class='output'><a href="https://plot.ly/~cpsievert/12342"> <img src="https://plot.ly/~cpsievert/12342.png" width="540" height="400" /> </a></div>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/13719</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/13719"> <img src="https://api.plot.ly/v2/files/cpsievert:13719/image?image_name=default" width="540" height="400" /> </a></div>
 <div class='input'></div></pre>
   </div>
   <div class="span4">
