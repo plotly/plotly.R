@@ -31,9 +31,9 @@ Imports:
     base64enc,
     htmlwidgets,
     tidyr,
+    dplyr,
     hexbin
 Suggests:
-    dplyr,
     maps,
     ggthemes,
     GGally,
