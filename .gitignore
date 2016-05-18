@@ -1,2 +1,4 @@
 *.png
 inst/
+.Rproj.user
+.Rhistory
