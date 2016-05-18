@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>coord_flip. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Flipped cartesian coordinates.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>coord_flip(xlim&nbsp;=&nbsp;NULL, ylim&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;TRUE)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>xlim</dt>
+      <dd>Limits for the x and y axes.</dd>
+      <dt>ylim</dt>
+      <dd>Limits for the x and y axes.</dd>
+      <dt>expand</dt>
+      <dd>If <code>TRUE</code>, the default, adds a small expansion factor to
+the limits to ensure that data and axes don't overlap. If <code>FALSE</code>,
+limits are taken exactly from the data or <code>xlim</code>/<code>ylim</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Flipped cartesian coordinates so that horizontal becomes vertical, and
+vertical, horizontal. This is primarily useful for converting geoms and
+statistics which display y conditional on x, to x conditional on y.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># Very useful for creating boxplots, and other interval
+# geoms in the horizontal instead of vertical position.
+
+ggplot(diamonds, aes(cut, price)) +
+  geom_boxplot() +
+  coord_flip()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11647</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11647"> <img src="https://plot.ly/~cpsievert/11647.png" width="540" height="400" /> </a></div>
+<div class='input'>
+h &lt;- ggplot(diamonds, aes(carat)) +
+  geom_histogram()
+h
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11649</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11649"> <img src="https://plot.ly/~cpsievert/11649.png" width="540" height="400" /> </a></div>
+<div class='input'>h + coord_flip()
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11651</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11651"> <img src="https://plot.ly/~cpsievert/11651.png" width="540" height="400" /> </a></div>
+<div class='input'>h + coord_flip() + scale_x_reverse()
+</div>
+<strong class='message'>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</strong>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11653</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11653"> <img src="https://plot.ly/~cpsievert/11653.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# You can also use it to flip line and area plots:
+df &lt;- data.frame(x = 1:5, y = (1:5) ^ 2)
+ggplot(df, aes(x, y)) +
+  geom_area()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11655</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11655"> <img src="https://plot.ly/~cpsievert/11655.png" width="540" height="400" /> </a></div>
+<div class='input'>last_plot() + coord_flip()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11657</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11657"> <img src="https://plot.ly/~cpsievert/11657.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>coord_flip</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=coord_flip'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

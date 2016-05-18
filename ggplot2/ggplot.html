@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>ggplot. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Create a new ggplot plot.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>ggplot(data&nbsp;=&nbsp;NULL, mapping&nbsp;=&nbsp;aes(), ..., environment&nbsp;=&nbsp;parent.frame())</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>data</dt>
+      <dd>Default dataset to use for plot. If not already a data.frame,
+will be converted to one by <code><a href='fortify.html'>fortify</a></code>. If not specified,
+must be suppled in each layer added to the plot.</dd>
+      <dt>mapping</dt>
+      <dd>Default list of aesthetic mappings to use for plot.
+If not specified, must be suppled in each layer added to the plot.</dd>
+      <dt>...</dt>
+      <dd>Other arguments passed on to methods. Not currently used.</dd>
+      <dt>environment</dt>
+      <dd>If an variable defined in the aesthetic mapping is not
+found in the data, ggplot will look for it in this environment. It defaults
+to using the environment in which <code>ggplot()</code> is called.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>ggplot()</code> initializes a ggplot object. It can be used to
+declare the input data frame for a graphic and to specify the
+set of plot aesthetics intended to be common throughout all
+subsequent layers unless specifically overridden.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p><code>ggplot()</code> is typically used to construct a plot
+incrementally, using the + operator to add layers to the
+existing ggplot object. This is advantageous in that the
+code is explicit about which layers are added and the order
+in which they are added. For complex graphics with multiple
+layers, initialization with <code>ggplot</code> is recommended.</p>
+  
+      <p>There are three common ways to invoke <code>ggplot</code>:
+<ul>
+<li> <code>ggplot(df, aes(x, y, <other aesthetics>))</code>
+   </li>
+<li> <code>ggplot(df)</code>
+   </li>
+<li> <code>ggplot()</code>
+  </li>
+</ul></p>
+  
+      <p>The first method is recommended if all layers use the same
+data and the same set of aesthetics, although this method
+can also be used to add a layer using data from another
+data frame. See the first example below. The second
+method specifies the default data frame to use for the plot,
+but no aesthetics are defined up front. This is useful when
+one data frame is used predominantly as layers are added,
+but the aesthetics may vary from one layer to another. The
+third method initializes a skeleton <code>ggplot</code> object which
+is fleshed out as layers are added. This method is useful when
+multiple data frames are used to produce different layers, as
+is often the case in complex graphics.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>df &lt;- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+                 y = rnorm(30))
+# Compute sample mean and standard deviation in each group
+ds &lt;- plyr::ddply(df, &quot;gp&quot;, plyr::summarise, mean = mean(y), sd = sd(y))
+
+# Declare the data frame and common aesthetics.
+# The summary data frame ds is used to plot
+# larger red points in a second geom_point() layer.
+# If the data = argument is not specified, it uses the
+# declared data frame from ggplot(); ditto for the aesthetics.
+ggplot(df, aes(x = gp, y = y)) +
+   geom_point() +
+   geom_point(data = ds, aes(y = mean),
+              colour = &#39;red&#39;, size = 3)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12226</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12226"> <img src="https://plot.ly/~cpsievert/12226.png" width="540" height="400" /> </a></div>
+<div class='input'># Same plot as above, declaring only the data frame in ggplot().
+# Note how the x and y aesthetics must now be declared in
+# each geom_point() layer.
+ggplot(df) +
+   geom_point(aes(x = gp, y = y)) +
+   geom_point(data = ds, aes(x = gp, y = mean),
+                 colour = &#39;red&#39;, size = 3)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12228</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12228"> <img src="https://plot.ly/~cpsievert/12228.png" width="540" height="400" /> </a></div>
+<div class='input'># Set up a skeleton ggplot object and add layers:
+ggplot() +
+  geom_point(data = df, aes(x = gp, y = y)) +
+  geom_point(data = ds, aes(x = gp, y = mean),
+                        colour = &#39;red&#39;, size = 3) +
+  geom_errorbar(data = ds, aes(x = gp, y = mean,
+                    ymin = mean - sd, ymax = mean + sd),
+                    colour = &#39;red&#39;, width = 0.4)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12230</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12230"> <img src="https://plot.ly/~cpsievert/12230.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>ggplot</li><li>ggplot.data.frame</li><li>ggplot.default</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=ggplot'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

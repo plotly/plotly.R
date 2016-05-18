@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_blank. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Blank, draws nothing.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_blank(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"identity", position&nbsp;=&nbsp;"identity", show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>stat</dt>
+      <dd>The statistical transformation to use on the data for this
+layer, as a string.</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>The blank geom draws nothing, but can be a useful way of ensuring common
+scales between different plots.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>ggplot(mtcars, aes(wt, mpg)) + geom_blank()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11857</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11857"> <img src="https://plot.ly/~cpsievert/11857.png" width="540" height="400" /> </a></div>
+<div class='input'># Nothing to see here!
+
+# Take the following scatter plot
+a &lt;- ggplot(mtcars, aes(x = wt, y = mpg), . ~ cyl) + geom_point()
+# Add to that some lines with geom_abline()
+df &lt;- data.frame(a = rnorm(10, 25), b = rnorm(10, 0))
+a + geom_abline(aes(intercept = a, slope = b), data = df)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11858</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11858"> <img src="https://plot.ly/~cpsievert/11858.png" width="540" height="400" /> </a></div>
+<div class='input'># Suppose you then wanted to remove the geom_point layer
+# If you just remove geom_point, you will get an error
+b &lt;- ggplot(mtcars, aes(x = wt, y = mpg))
+## Not run: b + geom_abline(aes(intercept = a, slope = b), data = df)
+# Switching to geom_blank() gets the desired plot
+c &lt;- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_blank()
+c + geom_abline(aes(intercept = a, slope = b), data = df)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11860</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11860"> <img src="https://plot.ly/~cpsievert/11860.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_blank</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_blank'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

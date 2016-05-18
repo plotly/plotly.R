@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>aes_position. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Position related aesthetics: x, y, xmin, xmax, ymin, ymax, xend, yend</h1>
+
+<div class="row">
+  <div class="span8">
+        
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>This page demonstrates the usage of a sub-group
+of aesthetics; x, y, xmin, xmax, ymin, ymax, xend, and yend.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+# Generate data: means and standard errors of means for prices
+# for each type of cut
+dmod &lt;- lm(price ~ cut, data = diamonds)
+cuts &lt;- data.frame(cut = unique(diamonds$cut), predict(dmod, data.frame(cut =
+unique(diamonds$cut)), se = TRUE)[c(&quot;fit&quot;, &quot;se.fit&quot;)])
+se &lt;- ggplot(cuts, aes(x = cut, y = fit, ymin = fit - se.fit,
+ymax = fit + se.fit, colour = cut))
+se + geom_pointrange()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11564</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11564"> <img src="https://plot.ly/~cpsievert/11564.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Using annotate
+p &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+p + annotate(&quot;rect&quot;, xmin = 2, xmax = 3.5, ymin = 2, ymax = 25,
+  fill = &quot;dark grey&quot;, alpha = .5)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11566</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11566"> <img src="https://plot.ly/~cpsievert/11566.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Geom_segment examples
+p + geom_segment(aes(x = 2, y = 15, xend = 2, yend = 25),
+  arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11568</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11568"> <img src="https://plot.ly/~cpsievert/11568.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_segment(aes(x = 2, y = 15, xend = 3, yend = 15),
+  arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11570</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11570"> <img src="https://plot.ly/~cpsievert/11570.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_segment(aes(x = 5, y = 30, xend = 3.5, yend = 25),
+  arrow = arrow(length = unit(0.5, &quot;cm&quot;)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11572</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11572"> <img src="https://plot.ly/~cpsievert/11572.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# You can also use geom_segment to recreate plot(type = &quot;h&quot;) :
+counts &lt;- as.data.frame(table(x = rpois(100, 5)))
+counts$x &lt;- as.numeric(as.character(counts$x))
+with(counts, plot(x, Freq, type = &quot;h&quot;, lwd = 10))
+
+ggplot(counts, aes(x, Freq)) +
+  geom_segment(aes(yend = 0, xend = x), size = 10)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11574</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11574"> <img src="https://plot.ly/~cpsievert/11574.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>aes_position</li><li>x</li><li>xend</li><li>xmax</li><li>xmin</li><li>y</li><li>yend</li><li>ymax</li><li>ymin</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=aes_position'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

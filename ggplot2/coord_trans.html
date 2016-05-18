@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>coord_trans. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Transformed cartesian coordinate system.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>coord_trans(x&nbsp;=&nbsp;"identity", y&nbsp;=&nbsp;"identity", limx&nbsp;=&nbsp;NULL, limy&nbsp;=&nbsp;NULL, xtrans, ytrans)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>x, y</dt>
+      <dd>transformers for x and y axes</dd>
+      <dt>limx, limy</dt>
+      <dd>limits for x and y axes. (Named so for backward
+compatibility)</dd>
+      <dt>xtrans, ytrans</dt>
+      <dd>Deprecated; use <code>x</code> and <code>y</code> instead.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>coord_trans</code> is different to scale transformations in that it occurs after
+statistical transformation and will affect the visual appearance of geoms - there is
+no guarantee that straight lines will continue to be straight.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>All current transformations only work with continuous values - see
+<code><a href='http://www.inside-r.org/packages/cran/scales/docs/trans_new'>trans_new</a></code> for list of transformations, and instructions on
+how to create your own.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+# See ?geom_boxplot for other examples
+
+# Three ways of doing transformation in ggplot:
+#  * by transforming the data
+ggplot(diamonds, aes(log10(carat), log10(price))) +
+  geom_point()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11661</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11661"> <img src="https://plot.ly/~cpsievert/11661.png" width="540" height="400" /> </a></div>
+<div class='input'>#  * by transforming the scales
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11663</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11663"> <img src="https://plot.ly/~cpsievert/11663.png" width="540" height="400" /> </a></div>
+<div class='input'>#  * by transforming the coordinate system:
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  coord_trans(x = &quot;log10&quot;, y = &quot;log10&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11665</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11665"> <img src="https://plot.ly/~cpsievert/11665.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# The difference between transforming the scales and
+# transforming the coordinate system is that scale
+# transformation occurs BEFORE statistics, and coordinate
+# transformation afterwards.  Coordinate transformation also
+# changes the shape of geoms:
+
+d &lt;- subset(diamonds, carat &gt; 0.5)
+
+ggplot(d, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  scale_x_log10() +
+  scale_y_log10()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11667</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11667"> <img src="https://plot.ly/~cpsievert/11667.png" width="540" height="400" /> </a></div>
+<div class='input'>
+ggplot(d, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  coord_trans(x = &quot;log10&quot;, y = &quot;log10&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11669</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11669"> <img src="https://plot.ly/~cpsievert/11669.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Here I used a subset of diamonds so that the smoothed line didn&#39;t
+# drop below zero, which obviously causes problems on the log-transformed
+# scale
+
+# With a combination of scale and coordinate transformation, it&#39;s
+# possible to do back-transformations:
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  scale_x_log10() +
+  scale_y_log10() +
+  coord_trans(x = scales::exp_trans(10), y = scales::exp_trans(10))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11671</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11671"> <img src="https://plot.ly/~cpsievert/11671.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# cf.
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11673</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11673"> <img src="https://plot.ly/~cpsievert/11673.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Also works with discrete scales
+df &lt;- data.frame(a = abs(rnorm(26)),letters)
+plot &lt;- ggplot(df,aes(a,letters)) + geom_point()
+
+plot + coord_trans(x = &quot;log10&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11675</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11675"> <img src="https://plot.ly/~cpsievert/11675.png" width="540" height="400" /> </a></div>
+<div class='input'>plot + coord_trans(x = &quot;sqrt&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11677</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11677"> <img src="https://plot.ly/~cpsievert/11677.png" width="540" height="400" /> </a></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>coord_trans</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=coord_trans'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

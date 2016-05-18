@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>label_bquote. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Backquoted labeller</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>label_bquote(rows&nbsp;=&nbsp;NULL, cols&nbsp;=&nbsp;NULL, default&nbsp;=&nbsp;label_value)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>rows</dt>
+      <dd>Backquoted labelling expression for rows.</dd>
+      <dt>cols</dt>
+      <dd>Backquoted labelling expression for columns.</dd>
+      <dt>default</dt>
+      <dd>Default labeller function for the rows or the
+columns when no plotmath expression is provided.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code><a href='label_bquote.html'>label_bquote</a>()</code> offers a flexible way of labelling
+facet rows or columns with plotmath expressions. Backquoted
+variables will be replaced with their value in the facet.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># The variables mentioned in the plotmath expression must be
+# backquoted and referred to by their names.
+p &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+p + facet_grid(vs ~ ., labeller = label_bquote(alpha ^ .(vs)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12320</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12320"> <img src="https://plot.ly/~cpsievert/12320.png" width="540" height="400" /> </a></div>
+<div class='input'>p + facet_grid(. ~ vs, labeller = label_bquote(cols = .(vs) ^ .(vs)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12322</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12322"> <img src="https://plot.ly/~cpsievert/12322.png" width="540" height="400" /> </a></div>
+<div class='input'>p + facet_grid(. ~ vs + am, labeller = label_bquote(cols = .(am) ^ .(vs)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12324</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12324"> <img src="https://plot.ly/~cpsievert/12324.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>label_bquote</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<a href='labellers.html'>labellers</a>, <code><a href='labeller.html'>labeller</a>()</code>,
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=label_bquote'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>discrete_scale. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Discrete scale constructor.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>discrete_scale(aesthetics, scale_name, palette, name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver(), na.value&nbsp;=&nbsp;NA, drop&nbsp;=&nbsp;TRUE, guide&nbsp;=&nbsp;"legend")</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>aesthetics</dt>
+      <dd>the names of the aesthetics that this scale works with</dd>
+      <dt>scale_name</dt>
+      <dd>the name of the scale</dd>
+      <dt>palette</dt>
+      <dd>a palette function that when called with a single integer
+argument (the number of levels in the scale) returns the values that
+they should take</dd>
+      <dt>name</dt>
+      <dd>the name of the scale - used as the axis label or the legend
+title</dd>
+      <dt>breaks</dt>
+      <dd>control the breaks in the guide.  There are four possible
+types of input:
+<ul>
+<li> <code>NULL</code>: don't display any breaks
+  </li>
+<li> a character vector giving the breaks as they should appear on the
+   axis or in the legend.
+  </li>
+<li> <code>waiver()</code> to use the default break computation.
+  </li>
+<li> a function, that when called with a single argument, a character
+    vector giving the limits of the scale, returns a character vector
+    specifying which breaks to display.
+</li>
+</ul>
+
+This parameter does not affect in any way how the data is scaled - it
+only affects the appearance of the legend.</dd>
+      <dt>labels</dt>
+      <dd><code>NULL</code> for no labels, <code>waiver()</code> for default
+labels (labels the same as breaks), a character vector the same length
+as breaks, or a named character vector whose names are used to match
+replacement the labels for matching breaks.</dd>
+      <dt>limits</dt>
+      <dd>A character vector specifying the data range for the scale.
+and the default order of their display in guides.</dd>
+      <dt>expand</dt>
+      <dd>a numeric vector of length two, giving a multiplicative and
+additive constant used to expand the range of the scales so that there
+is a small gap between the data and the axes. The defaults are (0,0.6)
+for discrete scales and (0.05,0) for continuous scales.</dd>
+      <dt>na.value</dt>
+      <dd>how should missing values be displayed?</dd>
+      <dt>drop</dt>
+      <dd>drop unused factor levels from the scale (<code>TRUE</code> or
+<code>FALSE</code>)</dd>
+      <dt>guide</dt>
+      <dd>the name of, or actual function, used to create the
+guide. See <code><a href='guides.html'>guides</a></code> for more info.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Discrete scale constructor.</p>
+  
+    </div>
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>discrete_scale</li>
+    </ul>
+    <ul>
+      <li>internal</li>
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=discrete_scale'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

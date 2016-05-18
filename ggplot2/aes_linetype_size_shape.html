@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>aes_linetype_size_shape. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Differentiation related aesthetics: linetype, size, shape</h1>
+
+<div class="row">
+  <div class="span8">
+        
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>This page demonstrates the usage of a sub-group
+of aesthetics; linetype, size and shape.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+# Line types should be specified with either an integer, a name, or with a string of
+# an even number (up to eight) of hexadecimal digits which give the lengths in
+# consecutive positions in the string.
+# 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 4 = dotdash, 5 = longdash, 6 = twodash
+
+# Data
+df &lt;- data.frame(x = 1:10 , y = 1:10)
+f &lt;- ggplot(df, aes(x, y))
+f + geom_line(linetype = 2)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11536</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11536"> <img src="https://plot.ly/~cpsievert/11536.png" width="540" height="400" /> </a></div>
+<div class='input'>f + geom_line(linetype = &quot;dotdash&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11538</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11538"> <img src="https://plot.ly/~cpsievert/11538.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# An example with hex strings, the string &quot;33&quot; specifies three units on followed
+# by three off and &quot;3313&quot; specifies three units on followed by three off followed
+# by one on and finally three off.
+f + geom_line(linetype = &quot;3313&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11540</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11540"> <img src="https://plot.ly/~cpsievert/11540.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Mapping line type from a variable
+ggplot(economics_long, aes(date, value01)) +
+  geom_line(aes(linetype = variable))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11542</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11542"> <img src="https://plot.ly/~cpsievert/11542.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Size examples
+# Should be specified with a numerical value (in millimetres),
+# or from a variable source
+p &lt;- ggplot(mtcars, aes(wt, mpg))
+p + geom_point(size = 4)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11544</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11544"> <img src="https://plot.ly/~cpsievert/11544.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(aes(size = qsec))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11546</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11546"> <img src="https://plot.ly/~cpsievert/11546.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(size = 2.5) +
+  geom_hline(yintercept = 25, size = 3.5)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11548</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11548"> <img src="https://plot.ly/~cpsievert/11548.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Shape examples
+# Shape takes four types of values: an integer in [0, 25],
+# a single character-- which uses that character as the plotting symbol,
+# a . to draw the smallest rectangle that is visible (i.e., about one pixel)
+# an NA to draw nothing
+p + geom_point()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11548</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11548"> <img src="https://plot.ly/~cpsievert/11548.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(shape = 5)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11550</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11550"> <img src="https://plot.ly/~cpsievert/11550.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(shape = &quot;k&quot;, size = 3)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11552</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11552"> <img src="https://plot.ly/~cpsievert/11552.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(shape = &quot;.&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11554</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11554"> <img src="https://plot.ly/~cpsievert/11554.png" width="540" height="400" /> </a></div>
+<div class='input'>p + geom_point(shape = NA)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11556</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11556"> <img src="https://plot.ly/~cpsievert/11556.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Shape can also be mapped from a variable
+p + geom_point(aes(shape = factor(cyl)))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11558</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11558"> <img src="https://plot.ly/~cpsievert/11558.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# A look at all 25 symbols
+df2 &lt;- data.frame(x = 1:5 , y = 1:25, z = 1:25)
+s &lt;- ggplot(df2, aes(x, y))
+s + geom_point(aes(shape = z), size = 4) +
+  scale_shape_identity()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11558</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11558"> <img src="https://plot.ly/~cpsievert/11558.png" width="540" height="400" /> </a></div>
+<div class='input'># While all symbols have a foreground colour, symbols 19-25 also take a
+# background colour (fill)
+s + geom_point(aes(shape = z), size = 4, colour = &quot;Red&quot;) +
+  scale_shape_identity()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11560</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11560"> <img src="https://plot.ly/~cpsievert/11560.png" width="540" height="400" /> </a></div>
+<div class='input'>s + geom_point(aes(shape = z), size = 4, colour = &quot;Red&quot;, fill = &quot;Black&quot;) +
+  scale_shape_identity()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/11562</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/11562"> <img src="https://plot.ly/~cpsievert/11562.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>aes_linetype_size_shape</li><li>linetype</li><li>shape</li><li>size</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=aes_linetype_size_shape'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

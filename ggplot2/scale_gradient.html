@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_colour_gradient. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Smooth gradient between two colours</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_colour_gradient(..., low&nbsp;=&nbsp;"#132B43", high&nbsp;=&nbsp;"#56B1F7", space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar")</div>
+<div>scale_fill_gradient(..., low&nbsp;=&nbsp;"#132B43", high&nbsp;=&nbsp;"#56B1F7", space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar")</div>
+<div>scale_colour_gradient2(..., low&nbsp;=&nbsp;muted("red"), mid&nbsp;=&nbsp;"white", high&nbsp;=&nbsp;muted("blue"), midpoint&nbsp;=&nbsp;0, space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar")</div>
+<div>scale_fill_gradient2(..., low&nbsp;=&nbsp;muted("red"), mid&nbsp;=&nbsp;"white", high&nbsp;=&nbsp;muted("blue"), midpoint&nbsp;=&nbsp;0, space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar")</div>
+<div>scale_colour_gradientn(..., colours, values&nbsp;=&nbsp;NULL, space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar", colors)</div>
+<div>scale_fill_gradientn(..., colours, values&nbsp;=&nbsp;NULL, space&nbsp;=&nbsp;"Lab", na.value&nbsp;=&nbsp;"grey50", guide&nbsp;=&nbsp;"colourbar", colors)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>Other arguments passed on to <code><a href='discrete_scale.html'>discrete_scale</a></code>
+to control name, limits, breaks, labels and so forth.</dd>
+      <dt>low, high</dt>
+      <dd>Colours for low and high ends of the gradient.</dd>
+      <dt>space</dt>
+      <dd>colour space in which to calculate gradient. Must be "Lab" -
+other values are deprecated.</dd>
+      <dt>na.value</dt>
+      <dd>Colour to use for missing values</dd>
+      <dt>guide</dt>
+      <dd>Type of legend. Use <code>"colourbar"</code> for continuous
+colour bar, or <code>"legend"</code> for discrete colour legend.</dd>
+      <dt>mid</dt>
+      <dd>colour for mid point</dd>
+      <dt>midpoint</dt>
+      <dd>The midpoint (in data value) of the diverging scale.
+Defaults to 0.</dd>
+      <dt>colours, colors</dt>
+      <dd>Vector of colours to use for n-colour gradient.</dd>
+      <dt>values</dt>
+      <dd>if colours should not be evenly positioned along the gradient
+this vector gives the position (between 0 and 1) for each colour in the
+<code>colours</code> vector. See <code><a href='http://www.inside-r.org/packages/cran/scales/docs/rescale'>rescale</a></code> for a convience function
+to map an arbitrary range to between 0 and 1.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>scale_*_gradient</code> creates a two colour gradient (low-high),
+<code>scale_*_gradient2</code> creates a diverging colour gradient (low-mid-high),
+<code>scale_*_gradientn</code> creats a n-colour gradient.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Default colours are generated with <span class = "pkg">munsell</span> and
+<code>mnsl(c("2.5PB 2/4", "2.5PB 7/10")</code>. Generally, for continuous
+colour scales you want to keep hue constant, but vary chroma and
+luminance. The <span class = "pkg">munsell</span> package makes this easy to do using the
+Munsell colour system.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>df &lt;- data.frame(
+  x = runif(100),
+  y = runif(100),
+  z1 = rnorm(100),
+  z2 = abs(rnorm(100))
+)
+
+# Default colour scale colours from light blue to dark blue
+ggplot(df, aes(x, y)) +
+  geom_point(aes(colour = z2))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12522</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12522"> <img src="https://plot.ly/~cpsievert/12522.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# For diverging colour scales use gradient2
+ggplot(df, aes(x, y)) +
+  geom_point(aes(colour = z1)) +
+  scale_colour_gradient2()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12524</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12524"> <img src="https://plot.ly/~cpsievert/12524.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Use your own colour scale with gradientn
+ggplot(df, aes(x, y)) +
+  geom_point(aes(colour = z1)) +
+  scale_colour_gradientn(colours = terrain.colors(10))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12526</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12526"> <img src="https://plot.ly/~cpsievert/12526.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Equivalent fill scales do the same job for the fill aesthetic
+ggplot(faithfuld, aes(waiting, eruptions)) +
+  geom_raster(aes(fill = density)) +
+  scale_fill_gradientn(colours = terrain.colors(10))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12528</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12528"> <img src="https://plot.ly/~cpsievert/12528.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Adjust colour choices with low and high
+ggplot(df, aes(x, y)) +
+  geom_point(aes(colour = z2)) +
+  scale_colour_gradient(low = &quot;white&quot;, high = &quot;black&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12530</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12530"> <img src="https://plot.ly/~cpsievert/12530.png" width="540" height="400" /> </a></div>
+<div class='input'># Avoid red-green colour contrasts because ~10% of men have difficulty
+# seeing them
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_color_continuous</li><li>scale_color_gradient</li><li>scale_color_gradient2</li><li>scale_color_gradientn</li><li>scale_colour_continuous</li><li>scale_colour_gradient</li><li>scale_colour_gradient2</li><li>scale_colour_gradientn</li><li>scale_fill_continuous</li><li>scale_fill_gradient</li><li>scale_fill_gradient2</li><li>scale_fill_gradientn</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='http://www.inside-r.org/packages/cran/scales/docs/seq_gradient_pal'>seq_gradient_pal</a></code> for details on underlying
+  palette
+
+Other colour scales:
+  <code><a href='scale_brewer.html'>scale_colour_brewer</a></code>,
+  <code><a href='scale_grey.html'>scale_colour_grey</a></code>,
+  <code><a href='scale_hue.html'>scale_colour_hue</a></code>
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_colour_gradient'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

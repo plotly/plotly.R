@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>scale_continuous. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Continuous position scales (x & y).</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>scale_x_continuous(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver(), oob&nbsp;=&nbsp;censor, na.value&nbsp;=&nbsp;NA_real_, trans&nbsp;=&nbsp;"identity")</div>
+<div>scale_y_continuous(name&nbsp;=&nbsp;waiver(), breaks&nbsp;=&nbsp;waiver(), minor_breaks&nbsp;=&nbsp;waiver(), labels&nbsp;=&nbsp;waiver(), limits&nbsp;=&nbsp;NULL, expand&nbsp;=&nbsp;waiver(), oob&nbsp;=&nbsp;censor, na.value&nbsp;=&nbsp;NA_real_, trans&nbsp;=&nbsp;"identity")</div>
+<div>scale_x_log10(...)</div>
+<div>scale_y_log10(...)</div>
+<div>scale_x_reverse(...)</div>
+<div>scale_y_reverse(...)</div>
+<div>scale_x_sqrt(...)</div>
+<div>scale_y_sqrt(...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>name</dt>
+      <dd>The name of the scale. Used as axis or legend title. If
+<code>NULL</code>, the default, the name of the scale is taken from the first
+mapping used for that aesthetic.</dd>
+      <dt>breaks</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no breaks
+  </li>
+<li> <code>waiver()</code> for the default breaks computed by the
+    transformation object
+  </li>
+<li> A numeric vector of positions
+  </li>
+<li> A function that takes the limits as input and returns breaks
+    as output
+</li>
+</ul>
+</dd>
+      <dt>minor_breaks</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no minor breaks
+  </li>
+<li> <code>waiver()</code> for the default breaks (one minor break between
+    each major break)
+  </li>
+<li> A numeric vector of positions
+  </li>
+<li> A function that given the limits returns a vector of minor breaks.
+</li>
+</ul>
+</dd>
+      <dt>labels</dt>
+      <dd>One of: <ul>
+<li> <code>NULL</code> for no labels
+  </li>
+<li> <code>waiver()</code> for the default labels computed by the
+    transformation object
+  </li>
+<li> A character vector giving labels (must be same length as <code>breaks</code>)
+  </li>
+<li> A function that takes the breaks as input and returns labels
+    as output
+</li>
+</ul>
+</dd>
+      <dt>limits</dt>
+      <dd>A numeric vector of length two providing limits of the scale.
+Use <code>NA</code> to refer to the existing minimum or maximum.</dd>
+      <dt>expand</dt>
+      <dd>A numeric vector of length two giving multiplicative and
+additive expansion constants. These constants ensure that the data is
+placed some distance away from the axes. The defaults are
+<code>c(0.05, 0)</code> for continuous variables, and <code>c(0, 0.6)</code> for
+discrete variables.</dd>
+      <dt>oob</dt>
+      <dd>Function that handles limits outside of the scale limits
+(out of bounds). The default replaces out of bounds values with NA.</dd>
+      <dt>na.value</dt>
+      <dd>Missing values will be replaced with this value.</dd>
+      <dt>trans</dt>
+      <dd>Either the name of a transformation object, or the
+  object itself. Built-in transformations include "asn", "atanh",
+  "boxcox", "exp", "identity", "log", "log10", "log1p", "log2",
+  "logit", "probability", "probit", "reciprocal", "reverse" and "sqrt".
+
+  A transformation object bundles together a transform, it's inverse,
+  and methods for generating breaks and labels. Transformation objects
+  are defined in the scales package, and are called <code>name_trans</code>, e.g.
+  <code><a href='http://www.inside-r.org/packages/cran/scales/docs/boxcox_trans'>boxcox_trans</a></code>. You can create your own
+  transformation with <code><a href='http://www.inside-r.org/packages/cran/scales/docs/trans_new'>trans_new</a></code>.</dd>
+      <dt>...</dt>
+      <dd>Other arguments passed on to <code>scale_(x|y)_continuous</code></dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p><code>scale_x_continuous</code> and <code>scale_y_continuous</code> are the key functions.
+The others, <code>scale_x_log10</code>, <code>scale_y_sqrt</code> etc, are aliases
+that set the <code>trans</code> argument to commonly used transformations.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>
+if (require(ggplot2movies)) {
+m &lt;- ggplot(subset(movies, votes &gt; 1000), aes(rating, votes)) +
+  geom_point(na.rm = TRUE)
+m
+
+# Manipulating the default position scales lets you:
+
+#  * change the axis labels
+m + scale_y_continuous(&quot;number of votes&quot;)
+m + scale_y_continuous(quote(votes ^ alpha))
+
+#  * modify the axis limits
+m + scale_y_continuous(limits = c(0, 5000))
+m + scale_y_continuous(limits = c(1000, 10000))
+m + scale_x_continuous(limits = c(7, 8))
+
+# you can also use the short hand functions xlim and ylim
+m + ylim(0, 5000)
+m + ylim(1000, 10000)
+m + xlim(7, 8)
+
+#  * choose where the ticks appear
+m + scale_x_continuous(breaks = 1:10)
+m + scale_x_continuous(breaks = c(1,3,7,9))
+
+#  * manually label the ticks
+m + scale_x_continuous(breaks = c(2,5,8), labels = c(&quot;two&quot;, &quot;five&quot;, &quot;eight&quot;))
+m + scale_x_continuous(breaks = c(2,5,8), labels = c(&quot;horrible&quot;, &quot;ok&quot;, &quot;awesome&quot;))
+m + scale_x_continuous(breaks = c(2,5,8), labels = expression(Alpha, Beta, Omega))
+
+# There are a few built in transformation that you can use:
+m + scale_y_log10()
+m + scale_y_sqrt()
+m + scale_y_reverse()
+# You can also create your own and supply them to the trans argument.
+# See ?scales::trans_new
+
+# You can control the formatting of the labels with the formatter
+# argument.  Some common formats are built into the scales package:
+df &lt;- data.frame(
+  x = rnorm(10) * 100000,
+  y = seq(0, 1, length.out = 10)
+)
+p &lt;- ggplot(df, aes(x, y)) + geom_point()
+p + scale_y_continuous(labels = scales::percent)
+p + scale_y_continuous(labels = scales::dollar)
+p + scale_x_continuous(labels = scales::comma)
+
+# Other shortcut functions
+ggplot(movies, aes(rating, votes)) +
+  geom_point() +
+  ylim(1e4, 5e4)
+#   * axis labels
+ggplot(movies, aes(rating, votes)) +
+  geom_point() +
+  labs(x = &quot;My x axis&quot;, y = &quot;My y axis&quot;)
+#   * log scaling
+ggplot(movies, aes(rating, votes)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+}
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='warning'>Warning message:
+Estimated Draw Time Slow</strong>
+<strong class='message'>The draw time for this plot will be slow for clients without much RAM.FALSE</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12490</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12490"> <img src="https://plot.ly/~cpsievert/12490.png" width="540" height="400" /> </a></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>scale_continuous</li><li>scale_x_continuous</li><li>scale_x_log10</li><li>scale_x_reverse</li><li>scale_x_sqrt</li><li>scale_y_continuous</li><li>scale_y_log10</li><li>scale_y_reverse</li><li>scale_y_sqrt</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='scale_date.html'>scale_date</a></code> for date/time position scales.
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=scale_continuous'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

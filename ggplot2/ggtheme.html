@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>ggtheme. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>ggplot2 themes</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>theme_grey(base_size&nbsp;=&nbsp;11, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_gray(base_size&nbsp;=&nbsp;11, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_bw(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_linedraw(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_light(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_minimal(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_classic(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_dark(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div>
+<div>theme_void(base_size&nbsp;=&nbsp;12, base_family&nbsp;=&nbsp;"")</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>base_size</dt>
+      <dd>base font size</dd>
+      <dt>base_family</dt>
+      <dd>base font family</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Themes set the general aspect of the plot such as the colour of the
+background, gridlines, the size and colour of fonts.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p><dl></p>
+  
+      <p><dt><code>theme_gray</code></dt><dd>
+The signature ggplot2 theme with a grey background and white gridlines,
+designed to put the data forward yet make comparisons easy.</dd></p>
+  
+      <p><dt><code>theme_bw</code></dt><dd>
+The classic dark-on-light ggplot2 theme. May work better for presentations
+displayed with a projector.</dd></p>
+  
+      <p><dt><code>theme_linedraw</code></dt><dd>
+A theme with only black lines of various widths on white backgrounds,
+reminiscent of a line drawings. Serves a purpose similar to <code>theme_bw</code>.
+Note that this theme has some very thin lines (<< 1 pt) which some journals
+may refuse.</dd></p>
+  
+      <p><dt><code>theme_light</code></dt><dd>
+A theme similar to <code>theme_linedraw</code> but with light grey lines and axes,
+to direct more attention towards the data.</dd></p>
+  
+      <p><dt><code>theme_dark</code></dt><dd>
+The dark cousin of <code>theme_light</code>, with similar line sizes but a dark background. Useful to make thin coloured lines pop out.</dd></p>
+  
+      <p><dt><code>theme_minimal</code></dt><dd>
+A minimalistic theme with no background annotations.</dd></p>
+  
+      <p><dt><code>theme_classic</code></dt><dd>
+A classic-looking theme, with x and y axis lines and no gridlines.</dd></p>
+  
+      <p><dt><code>theme_void</code></dt><dd>
+A completely empty theme.</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>p &lt;- ggplot(mtcars) + geom_point(aes(x = wt, y = mpg,
+     colour=factor(gear))) + facet_wrap(~am)
+
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12232</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12232"> <img src="https://plot.ly/~cpsievert/12232.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_gray()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12232</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12232"> <img src="https://plot.ly/~cpsievert/12232.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_bw()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12234</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12234"> <img src="https://plot.ly/~cpsievert/12234.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_linedraw()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12236</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12236"> <img src="https://plot.ly/~cpsievert/12236.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_light()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12236</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12236"> <img src="https://plot.ly/~cpsievert/12236.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_minimal()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12238</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12238"> <img src="https://plot.ly/~cpsievert/12238.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_classic()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12240</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12240"> <img src="https://plot.ly/~cpsievert/12240.png" width="540" height="400" /> </a></div>
+<div class='input'>p + theme_void()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12242</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12242"> <img src="https://plot.ly/~cpsievert/12242.png" width="540" height="400" /> </a></div>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>ggtheme</li><li>theme_bw</li><li>theme_classic</li><li>theme_dark</li><li>theme_gray</li><li>theme_grey</li><li>theme_light</li><li>theme_linedraw</li><li>theme_minimal</li><li>theme_void</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=ggtheme'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

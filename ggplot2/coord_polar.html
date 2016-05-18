@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>coord_polar. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Polar coordinates.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>coord_polar(theta&nbsp;=&nbsp;"x", start&nbsp;=&nbsp;0, direction&nbsp;=&nbsp;1)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>theta</dt>
+      <dd>variable to map angle to (<code>x</code> or <code>y</code>)</dd>
+      <dt>start</dt>
+      <dd>offset of starting point from 12 o'clock in radians</dd>
+      <dt>direction</dt>
+      <dd>1, clockwise; -1, anticlockwise</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>The polar coordinate system is most commonly used for pie charts, which
+are a stacked bar chart in polar coordinates.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'># NOTE: Use these plots with caution - polar coordinates has
+# major perceptual problems.  The main point of these examples is
+# to demonstrate how these common plots can be described in the
+# grammar.  Use with EXTREME caution.
+
+#&#39; # A pie chart = stacked bar chart + polar coordinates
+pie &lt;- ggplot(mtcars, aes(x = factor(1), fill = factor(cyl))) +
+ geom_bar(width = 1)
+pie + coord_polar(theta = &quot;y&quot;)
+</div>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'>
+
+
+# A coxcomb plot = bar chart + polar coordinates
+cxc &lt;- ggplot(mtcars, aes(x = factor(cyl))) +
+  geom_bar(width = 1, colour = &quot;black&quot;)
+cxc + coord_polar()
+</div>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'># A new type of plot?
+cxc + coord_polar(theta = &quot;y&quot;)
+</div>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'>
+# The bullseye chart
+pie + coord_polar()
+</div>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'>
+# Hadley&#39;s favourite pie chart
+df &lt;- data.frame(
+  variable = c(&quot;does not resemble&quot;, &quot;resembles&quot;),
+  value = c(20, 80)
+)
+ggplot(df, aes(x = &quot;&quot;, y = value, fill = variable)) +
+  geom_bar(width = 1, stat = &quot;identity&quot;) +
+  scale_fill_manual(values = c(&quot;red&quot;, &quot;yellow&quot;)) +
+  coord_polar(&quot;y&quot;, start = pi / 3) +
+  labs(title = &quot;Pac man&quot;)
+</div>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'>
+# Windrose + doughnut plot
+if (require(&quot;ggplot2movies&quot;)) {
+movies$rrating &lt;- cut_interval(movies$rating, length = 1)
+movies$budgetq &lt;- cut_number(movies$budget, 4)
+
+doh &lt;- ggplot(movies, aes(x = rrating, fill = budgetq))
+
+# Wind rose
+doh + geom_bar(width = 1) + coord_polar()
+# Race track plot
+doh + geom_bar(width = 0.9, position = &quot;fill&quot;) + coord_polar(theta = &quot;y&quot;)
+}
+</div>
+<strong class='message'>Loading required package: ggplot2movies</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to min; returning Inf</strong>
+<strong class='warning'>Warning message:
+no non-missing arguments to max; returning -Inf</strong>
+<strong class='error'>Error in zero_range(to): x must be length 1 or 2</strong>
+<div class='input'></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>coord_polar</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=coord_polar'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

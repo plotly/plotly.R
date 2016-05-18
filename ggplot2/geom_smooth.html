@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>geom_smooth. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Add a smoothed conditional mean.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>geom_smooth(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, stat&nbsp;=&nbsp;"smooth", method&nbsp;=&nbsp;"auto", formula&nbsp;=&nbsp;y ~ x, se&nbsp;=&nbsp;TRUE, position&nbsp;=&nbsp;"identity", na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div>
+<div>stat_smooth(mapping&nbsp;=&nbsp;NULL, data&nbsp;=&nbsp;NULL, geom&nbsp;=&nbsp;"smooth", position&nbsp;=&nbsp;"identity", method&nbsp;=&nbsp;"auto", formula&nbsp;=&nbsp;y ~ x, se&nbsp;=&nbsp;TRUE, n&nbsp;=&nbsp;80, span&nbsp;=&nbsp;0.75, fullrange&nbsp;=&nbsp;FALSE, level&nbsp;=&nbsp;0.95, method.args&nbsp;=&nbsp;list(), na.rm&nbsp;=&nbsp;FALSE, show.legend&nbsp;=&nbsp;NA, inherit.aes&nbsp;=&nbsp;TRUE, ...)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>mapping</dt>
+      <dd>Set of aesthetic mappings created by <code><a href='aes.html'>aes</a></code> or
+<code><a href='aes_.html'>aes_</a></code>. If specified and <code>inherit.aes = TRUE</code> (the
+default), is combined with the default mapping at the top level of the
+plot. You only need to supply <code>mapping</code> if there isn't a mapping
+defined for the plot.</dd>
+      <dt>data</dt>
+      <dd>A data frame. If specified, overrides the default data frame
+defined at the top level of the plot.</dd>
+      <dt>method</dt>
+      <dd>smoothing method (function) to use, eg. lm, glm, gam, loess,
+rlm. For datasets with n < 1000 default is <code><a href='http://www.inside-r.org/r-doc/stats/loess'>loess</a></code>. For datasets
+with 1000 or more observations defaults to gam, see <code><a href='http://www.inside-r.org/r-doc/mgcv/gam'>gam</a></code>
+for more details.</dd>
+      <dt>formula</dt>
+      <dd>formula to use in smoothing function, eg. <code>y ~ x</code>,
+<code>y ~ poly(x, 2)</code>, <code>y ~ log(x)</code></dd>
+      <dt>se</dt>
+      <dd>display confidence interval around smooth? (TRUE by default, see
+level to control</dd>
+      <dt>position</dt>
+      <dd>Position adjustment, either as a string, or the result of
+a call to a position adjustment function.</dd>
+      <dt>na.rm</dt>
+      <dd>If <code>FALSE</code> (the default), removes missing values with
+a warning.  If <code>TRUE</code> silently removes missing values.</dd>
+      <dt>show.legend</dt>
+      <dd>logical. Should this layer be included in the legends?
+<code>NA</code>, the default, includes if any aesthetics are mapped.
+<code>FALSE</code> never includes, and <code>TRUE</code> always includes.</dd>
+      <dt>inherit.aes</dt>
+      <dd>If <code>FALSE</code>, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. <code><a href='borders.html'>borders</a></code>.</dd>
+      <dt>...</dt>
+      <dd>other arguments passed on to <code><a href='layer.html'>layer</a></code>. There are
+  three types of arguments you can use here:
+
+  <ul>
+<li> Aesthetics: to set an aesthetic to a fixed value, like
+     <code>color = "red"</code> or <code>size = 3</code>.
+  </li>
+<li> Other arguments to the layer, for example you override the
+    default <code>stat</code> associated with the layer.
+  </li>
+<li> Other arguments passed on to the stat.
+  </li>
+</ul>
+</dd>
+      <dt>geom, stat</dt>
+      <dd>Use to override the default connection between
+<code>geom_smooth</code> and <code>stat_smooth</code>.</dd>
+      <dt>n</dt>
+      <dd>number of points to evaluate smoother at</dd>
+      <dt>span</dt>
+      <dd>Controls the amount of smoothing for the default loess smoother.
+Smaller numbers produce wigglier lines, larger numbers produce smoother
+lines.</dd>
+      <dt>fullrange</dt>
+      <dd>should the fit span the full range of the plot, or just
+the data</dd>
+      <dt>level</dt>
+      <dd>level of confidence interval to use (0.95 by default)</dd>
+      <dt>method.args</dt>
+      <dd>List of additional arguments passed on to the modelling
+function defined by <code>method</code>.</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Aids the eye in seeing patterns in the presence of overplotting.
+<code>geom_smooth</code> and <code>stat_smooth</code> are effectively aliases: they
+both use the same arguments. Use <code>geom_smooth</code> unless you want to
+display the results with a non-standard geom.</p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Calculation is performed by the (currently undocumented)
+<code>predictdf</code> generic and its methods.  For most methods the standard
+error bounds are computed using the <code><a href='http://www.inside-r.org/r-doc/stats/predict'>predict</a></code> method - the
+exceptions are <code>loess</code> which uses a t-based approximation, and
+<code>glm</code> where the normal confidence interval is constructed on the link
+scale, and then back-transformed to the response scale.</p>
+  
+    </div>
+
+    <div class="Aesthetics">
+      <h2>Aesthetics</h2>
+
+      <p></p>
+  
+      <p><code>geom_smooth</code> understands the following aesthetics (required aesthetics are in bold):</p>
+  
+      <p><ul>
+<li> <code><strong>x</strong></code>
+  </li>
+<li> <code><strong>y</strong></code>
+  </li>
+<li> <code>alpha</code>
+  </li>
+<li> <code>colour</code>
+  </li>
+<li> <code>fill</code>
+  </li>
+<li> <code>linetype</code>
+  </li>
+<li> <code>size</code>
+  </li>
+<li> <code>weight</code>
+</li>
+</ul></p>
+  
+      <p></p>
+  
+    </div>
+
+    <div class="Computed variables">
+      <h2>Computed variables</h2>
+
+      <p></p>
+  
+      <p><dl>
+  <dt>y</dt><dd>predicted value</dd></p>
+  
+      <p><dt>ymin</dt><dd>lower pointwise confidence interval around the mean</dd></p>
+  
+      <p><dt>ymax</dt><dd>upper pointwise confidence interval around the mean</dd></p>
+  
+      <p><dt>se</dt><dd>standard error</dd></p>
+  
+      <p></dl></p>
+  
+      <p></p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth()
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12117</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12117"> <img src="https://plot.ly/~cpsievert/12117.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Use span to control the &quot;wiggliness&quot; of the default loess smoother
+# The span is the fraction of points used to fit each local regression:
+# small numbers make a wigglier curve, larger numbers make a smoother curve.
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(span = 0.3)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12119</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12119"> <img src="https://plot.ly/~cpsievert/12119.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Instead of a loess smooth, you can use any other modelling function:
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = FALSE)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12121</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12121"> <img src="https://plot.ly/~cpsievert/12121.png" width="540" height="400" /> </a></div>
+<div class='input'>
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, formula = y ~ splines::bs(x, 3), se = FALSE)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12123</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12123"> <img src="https://plot.ly/~cpsievert/12123.png" width="540" height="400" /> </a></div>
+<div class='input'>
+# Smoothes are automatically fit to each group (defined by categorical
+# aesthetics or the group aesthetic) and for each facet
+
+ggplot(mpg, aes(displ, hwy, colour = class)) +
+  geom_point() +
+  geom_smooth(se = FALSE, method = &quot;lm&quot;)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12125</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12125"> <img src="https://plot.ly/~cpsievert/12125.png" width="540" height="400" /> </a></div>
+<div class='input'>ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(span = 0.8) +
+  facet_wrap(~drv)
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12127</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12127"> <img src="https://plot.ly/~cpsievert/12127.png" width="540" height="400" /> </a></div>
+<div class='input'>
+## Not run: 
+# # To fit a logistic regression, you need to coerce the values to
+# # a numeric vector lying between 0 and 1.
+# binomial_smooth &lt;- function(...) {
+#   geom_smooth(method = &quot;glm&quot;, method.args = list(family = &quot;binomial&quot;), ...)
+# }
+# 
+# ggplot(rpart::kyphosis, aes(Age, Kyphosis)) +
+#   geom_jitter(height = 0.05) +
+#   binomial_smooth()
+# 
+# ggplot(rpart::kyphosis, aes(Age, as.numeric(Kyphosis) - 1)) +
+#   geom_jitter(height = 0.05) +
+#   binomial_smooth()
+# 
+# ggplot(rpart::kyphosis, aes(Age, as.numeric(Kyphosis) - 1)) +
+#   geom_jitter(height = 0.05) +
+#   binomial_smooth(formula = y ~ splines::ns(x, 2))
+# 
+# # But in this case, it&#39;s probably better to fit the model yourself
+# # so you can exercise more control and see whether or not it&#39;s a good model
+# ## End(Not run)
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>geom_smooth</li><li>stat_smooth</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+See individual modelling functions for more details:
+  <code><a href='http://www.inside-r.org/r-doc/stats/lm'>lm</a></code> for linear smooths,
+  <code><a href='http://www.inside-r.org/r-doc/stats/glm'>glm</a></code> for generalised linear smooths,
+  <code><a href='http://www.inside-r.org/r-doc/stats/loess'>loess</a></code> for local smooths
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=geom_smooth'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

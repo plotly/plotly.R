@@ -1,0 +1,246 @@
+
+R version 3.2.4 Revised (2016-03-16 r70336) -- "Very Secure Dishes"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # requires my fork
+> # devtools::install_github("cpsievert/staticdocs") 
+> # $ nohup R CMD BATCH ./build_site.R & 
+> 
+> library(grid)
+> library(ggplot2)
+> printly <- function(x) {
++   if (ggplot2::is.ggplot(x)) {
++     u <- plotly::plotly_POST(x, filename = Sys.time())
++     a <- sprintf(
++       '<a href="%s"> <img src="%s" width="540" height="400" /> </a>', 
++       u$url, paste0(u$url, ".png")
++     )
++     structure(a, class = "html")
++   } else {
++     x
++   }
++ }
+> 
+> assignInNamespace("print.ggplot", printly, asNamespace("ggplot2"))
+> 
+> # WARNING: this takes close to an hour and was giving me memory leaks in RStudio
+> # (I ended up running this on my remote machine to avoid memory issues)
+> staticdocs::build_site("../ggplot2")
+
+ # maps v3.1: updated 'world': all lakes moved to separate new #
+ # 'lakes' database. Type '?world' or 'news(package="maps")'.  #
+
+
+Generating absoluteGrob.html
+Generating add_theme.html
+Generating aes_all.html
+Generating aes_auto.html
+Generating aes_colour_fill_alpha.html
+Generating aes_group_order.html
+Generating aes_linetype_size_shape.html
+Generating aes_position.html
+Generating aes_.html
+Generating aes.html
+Generating annotate.html
+Generating annotation_custom.html
+Generating annotation_logticks.html
+Generating annotation_map.html
+Generating annotation_raster.html
+Generating as_labeller.html
+Generating as.list.ggproto.html
+Generating autoplot.html
+Generating benchplot.html
+Generating borders.html
+Generating calc_element.html
+Generating continuous_scale.html
+Generating coord_cartesian.html
+Generating coord_fixed.html
+Generating coord_flip.html
+Generating coord_map.html
+Generating coord_munch.html
+Generating coord_polar.html
+Generating coord_trans.html
+Generating cut_interval.html
+Generating diamonds.html
+Generating discrete_scale.html
+Generating draw_key.html
+Generating economics.html
+Generating element_blank.html
+Generating element_grob.html
+Generating element_line.html
+Generating element_rect.html
+Generating element_text.html
+Generating expand_limits.html
+Generating facet_grid.html
+Generating facet_null.html
+Generating facet.html
+Generating facet_wrap.html
+Generating faithfuld.html
+Generating format.ggproto.html
+Generating fortify.lm.html
+Generating fortify.map.html
+Generating fortify-multcomp.html
+Generating fortify.html
+Generating fortify.sp.html
+Generating geom_abline.html
+Generating geom_bar.html
+Generating geom_bin2d.html
+Generating geom_blank.html
+Generating geom_boxplot.html
+Generating geom_contour.html
+Generating geom_count.html
+Generating geom_density_2d.html
+Generating geom_density.html
+Generating geom_dotplot.html
+Generating geom_errorbarh.html
+Generating geom_hex.html
+Generating geom_histogram.html
+Generating geom_jitter.html
+Generating geom_linerange.html
+Generating geom_map.html
+Generating geom_path.html
+Generating geom_point.html
+Generating geom_polygon.html
+Generating geom_quantile.html
+Generating geom_ribbon.html
+Generating geom_rug.html
+Generating geom_segment.html
+Generating geom_smooth.html
+Generating geom_spoke.html
+Generating geom_text.html
+Generating geom_tile.html
+Generating geom_violin.html
+Generating gg-add.html
+Generating gg_dep.html
+Generating ggplot2-ggproto.html
+Generating ggplot_build.html
+Generating ggplotGrob.html
+Generating ggplot_gtable.html
+Generating ggplot.html
+Generating ggproto.html
+Generating ggsave.html
+Generating ggtheme.html
+Generating graphical-units.html
+Generating guide_colourbar.html
+Generating guide_legend.html
+Generating guides.html
+Generating hmisc.html
+Generating is.Coord.html
+Generating is.facet.html
+Generating is.ggplot.html
+Generating is.ggproto.html
+Generating is.rel.html
+Generating is.theme.html
+Generating label_bquote.html
+Generating labeller.html
+Generating labellers.html
+Generating labs.html
+Generating last_plot.html
+Generating layer.html
+Generating limits.html
+Generating lims.html
+Generating luv_colours.html
+Generating map_data.html
+Generating margin.html
+Generating mean_se.html
+Generating midwest.html
+Generating mpg.html
+Generating msleep.html
+Generating position_dodge.html
+Generating position_identity.html
+Generating position_jitterdodge.html
+Generating position_jitter.html
+Generating position_nudge.html
+Generating position_stack.html
+Generating presidential.html
+Generating print.ggplot.html
+Generating print.ggproto.html
+Generating qplot.html
+Generating reexports.html
+Generating rel.html
+Generating remove_missing.html
+Generating resolution.html
+Generating scale_alpha.html
+Generating scale_brewer.html
+Generating scale_continuous.html
+Generating scale_date.html
+Generating scale_discrete.html
+Generating scale_gradient.html
+Generating scale_grey.html
+Generating scale_hue.html
+Generating scale_identity.html
+Generating scale_linetype.html
+Generating scale_manual.html
+Generating scale_shape.html
+Generating scale_size.html
+Generating seals.html
+Generating should_stop.html
+Generating stat_ecdf.html
+Generating stat_ellipse.html
+Generating stat_function.html
+Generating stat_identity.html
+Generating stat_qq.html
+Generating stat_summary_2d.html
+Generating stat_summary.html
+Generating stat_unique.html
+Generating summary.ggplot.html
+Generating theme.html
+Generating theme_update.html
+Generating transform_position.html
+Generating translate_qplot_base.html
+Generating translate_qplot_ggplot.html
+Generating translate_qplot_lattice.html
+Generating txhousing.html
+Generating update_defaults.html
+Generating update_labels.html
+Generating waiver.html
+Generating zeroGrob.html
+Generating index.html
+Warning message:
+Can't find index topics: geom_area, geom_curve, geom_errorbar, geom_histogram, geom_hline, geom_line, geom_linerange, geom_pointrange, geom_rect, geom_step, geom_text, geom_tile, geom_vline, stat_binhex, stat_contour, stat_density, stat_density_2d, stat_spoke, stat_sum, stat_summary, stat_summary_hex, scale_area, scale_size_area, scale_colour_gradient2, scale_colour_gradientn, scale_x_continuous, scale_x_date, scale_x_datetime, xlim, coord_quickmap, label_both, label_parsed, label_value, label_wrap_gen, position_stack, opts, theme_blank, theme_bw, theme_classic, theme_grey, theme_minimal, update_element, ggplot.data.frame, is.ggplot, aes_all, aes_auto, aes_string 
+> 
+> # push changes to gh-pages
+> # system("git checkout gh-pages")
+> # system("git checkout master -- inst/web")
+> # system("cp -r inst/web ./")
+> 
+> 
+> # this is essentially what staticdocs is doing
+> #x <- "p <- ggplot(mtcars, aes(wt, mpg)); p + geom_point()"
+> #y <- evaluate::evaluate(x, envir = new.env(parent = globalenv()), new_device = TRUE)
+> #str(y)
+> 
+> 
+> # old non-local version
+> # printly <- function(x) {
+> #   if (ggplot2::is.ggplot(x)) {
+> #     p <- plotly:::plotly_iframe(plotly::plotly_POST(x)$url)
+> #     structure(p, class = "html")
+> #   } else {
+> #     x
+> #   }
+> # }
+> # assignInNamespace("print.ggplot", printly, asNamespace("ggplot2"))
+> # # should be printly
+> # # getS3method("print", "ggplot")
+> 
+> proc.time()
+   user  system elapsed 
+258.216   2.017 971.849 

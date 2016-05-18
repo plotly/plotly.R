@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>theme_update. ggplot2 2.0.0.9001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-67989-15']);
+  _gaq.push(['_setDomainName', 'ggplot2.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">ggplot2 2.0.0.9001</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Get, set and update themes.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>theme_update(...)</div>
+<div>theme_get()</div>
+<div>theme_set(new)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>...</dt>
+      <dd>named list of theme settings</dd>
+      <dt>new</dt>
+      <dd>new theme (a list of theme elements)</dd>
+    </dl>
+    
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Use <code>theme_update</code> to modify a small number of elements of the current
+theme or use <code>theme_set</code> to completely override it.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>p &lt;- ggplot(mtcars, aes(mpg, wt)) +
+  geom_point()
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12783</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12783"> <img src="https://plot.ly/~cpsievert/12783.png" width="540" height="400" /> </a></div>
+<div class='input'>old &lt;- theme_set(theme_bw())
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12785</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12785"> <img src="https://plot.ly/~cpsievert/12785.png" width="540" height="400" /> </a></div>
+<div class='input'>theme_set(old)
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12787</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12787"> <img src="https://plot.ly/~cpsievert/12787.png" width="540" height="400" /> </a></div>
+<div class='input'>
+old &lt;- theme_update(panel.background = element_rect(colour = &quot;pink&quot;))
+p
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12789</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12789"> <img src="https://plot.ly/~cpsievert/12789.png" width="540" height="400" /> </a></div>
+<div class='input'>theme_set(old)
+theme_get()
+</div>
+<div class='output'>List of 44
+ $ line                 :List of 4
+  ..$ colour  : chr &quot;black&quot;
+  ..$ size    : num 0.5
+  ..$ linetype: num 1
+  ..$ lineend : chr &quot;butt&quot;
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ rect                 :List of 4
+  ..$ fill    : chr &quot;white&quot;
+  ..$ colour  : chr &quot;black&quot;
+  ..$ size    : num 0.5
+  ..$ linetype: num 1
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ text                 :List of 10
+  ..$ family    : chr &quot;&quot;
+  ..$ face      : chr &quot;plain&quot;
+  ..$ colour    : chr &quot;black&quot;
+  ..$ size      : num 11
+  ..$ hjust     : num 0.5
+  ..$ vjust     : num 0.5
+  ..$ angle     : num 0
+  ..$ lineheight: num 0.9
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 0 0 0 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : logi FALSE
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ axis.line            :List of 4
+  ..$ colour  : NULL
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..$ lineend : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ axis.line.x          : list()
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_blank&quot; &quot;element&quot;
+ $ axis.line.y          : list()
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_blank&quot; &quot;element&quot;
+ $ axis.text            :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : chr &quot;grey30&quot;
+  ..$ size      :Class &#39;rel&#39;  num 0.8
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    : NULL
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ axis.text.x          :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : NULL
+  ..$ vjust     : num 1
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 2.2 0 0 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ axis.text.y          :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : num 1
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 0 2.2 0 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ axis.ticks           :List of 4
+  ..$ colour  : chr &quot;grey20&quot;
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..$ lineend : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ axis.ticks.length    :Class &#39;unit&#39;  atomic [1:1] 2.75
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+ $ axis.title.x         :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 4.4 0 2.2 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ axis.title.y         :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : num 90
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 0 4.4 0 2.2
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ legend.background    :List of 4
+  ..$ fill    : NULL
+  ..$ colour  : logi NA
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ legend.margin        :Class &#39;unit&#39;  atomic [1:1] 0.2
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;cm&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 1
+ $ legend.key           :List of 4
+  ..$ fill    : chr &quot;grey95&quot;
+  ..$ colour  : chr &quot;white&quot;
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ legend.key.size      :Class &#39;unit&#39;  atomic [1:1] 1.2
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;lines&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 3
+ $ legend.key.height    : NULL
+ $ legend.key.width     : NULL
+ $ legend.text          :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      :Class &#39;rel&#39;  num 0.8
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    : NULL
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ legend.text.align    : NULL
+ $ legend.title         :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : num 0
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    : NULL
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ legend.title.align   : NULL
+ $ legend.position      : chr &quot;right&quot;
+ $ legend.direction     : NULL
+ $ legend.justification : chr &quot;center&quot;
+ $ legend.box           : NULL
+ $ panel.background     :List of 4
+  ..$ fill    : chr &quot;grey92&quot;
+  ..$ colour  : logi NA
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ panel.border         : list()
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_blank&quot; &quot;element&quot;
+ $ panel.grid.major     :List of 4
+  ..$ colour  : chr &quot;white&quot;
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..$ lineend : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ panel.grid.minor     :List of 4
+  ..$ colour  : chr &quot;white&quot;
+  ..$ size    : num 0.25
+  ..$ linetype: NULL
+  ..$ lineend : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_line&quot; &quot;element&quot;
+ $ panel.margin         :Class &#39;unit&#39;  atomic [1:1] 5.5
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+ $ panel.margin.x       : NULL
+ $ panel.margin.y       : NULL
+ $ panel.ontop          : logi FALSE
+ $ strip.background     :List of 4
+  ..$ fill    : chr &quot;grey85&quot;
+  ..$ colour  : logi NA
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ strip.text           :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : chr &quot;grey10&quot;
+  ..$ size      :Class &#39;rel&#39;  num 0.8
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    : NULL
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ strip.text.x         :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 5.5 0 5.5 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ strip.text.y         :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      : NULL
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : num -90
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 0 5.5 0 5.5
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ strip.switch.pad.grid:Class &#39;unit&#39;  atomic [1:1] 0.1
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;cm&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 1
+ $ strip.switch.pad.wrap:Class &#39;unit&#39;  atomic [1:1] 0.1
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;cm&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 1
+ $ plot.background      :List of 4
+  ..$ fill    : NULL
+  ..$ colour  : chr &quot;white&quot;
+  ..$ size    : NULL
+  ..$ linetype: NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_rect&quot; &quot;element&quot;
+ $ plot.title           :List of 10
+  ..$ family    : NULL
+  ..$ face      : NULL
+  ..$ colour    : NULL
+  ..$ size      :Class &#39;rel&#39;  num 1.2
+  ..$ hjust     : NULL
+  ..$ vjust     : NULL
+  ..$ angle     : NULL
+  ..$ lineheight: NULL
+  ..$ margin    :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 0 0 6.6 0
+  .. .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+  ..$ debug     : NULL
+  ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;element_text&quot; &quot;element&quot;
+ $ plot.margin          :Classes &#39;margin&#39;, &#39;unit&#39;  atomic [1:4] 5.5 5.5 5.5 5.5
+  .. ..- attr(*, &quot;unit&quot;)= chr &quot;pt&quot;
+  .. ..- attr(*, &quot;valid.unit&quot;)= int 8
+ - attr(*, &quot;class&quot;)= chr [1:2] &quot;theme&quot; &quot;gg&quot;
+ - attr(*, &quot;complete&quot;)= logi TRUE
+ - attr(*, &quot;validate&quot;)= logi TRUE
+</div>
+<div class='input'>
+ggplot(mtcars, aes(mpg, wt)) +
+  geom_point(aes(color = mpg)) +
+  theme(legend.position = c(0.95, 0.95),
+        legend.justification = c(1, 1))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12791</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12791"> <img src="https://plot.ly/~cpsievert/12791.png" width="540" height="400" /> </a></div>
+<div class='input'>last_plot() +
+ theme(legend.background = element_rect(fill = &quot;white&quot;, colour = &quot;white&quot;, size = 3))
+</div>
+<strong class='message'>No encoding supplied: defaulting to UTF-8.</strong>
+<strong class='message'>Success! Modified your plotly here -&gt; https://plot.ly/~cpsievert/12793</strong>
+<div class='output'><a href="https://plot.ly/~cpsievert/12793"> <img src="https://plot.ly/~cpsievert/12793.png" width="540" height="400" /> </a></div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>theme_get</li><li>theme_set</li><li>theme_update</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='gg-add.html'>%+replace%</a></code> and <code><a href='gg-add.html'>+.gg</a></code>
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+
+<p class='feedback'>What do you think of the documentation?  <a href='http://hadley.wufoo.com/forms/documentation-feedback/def/field0=theme_update'>Please let me know by filling out this short online survey</a>.</p>
+
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
