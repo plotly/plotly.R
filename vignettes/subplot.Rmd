@@ -4,7 +4,7 @@ author: "Carson Sievert"
 output: 
   rmarkdown::html_vignette:
     toc: true
-    standalone: false
+    self_contained: false
 vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteIndexEntry{subplot}
@@ -17,6 +17,17 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7
 )
+# someday we may want to do pngs to reduce size...
+# printly <- function(p, options, ...) { 
+#   p <- layout(p, height = options$fig.height, width = options$fig.width)
+#   u <- plotly::plotly_POST(p, filename = Sys.time())$url
+#   sprintf(
+#     "<a href='%s'> <img src='%s.png' style='%s' /> </a>", 
+#     u, u, "max-width:100%"
+#   )
+# }
+# assignInNamespace("knit_print.plotly_hash", printly, asNamespace("plotly"))
+# assignInNamespace("knit_print.plotly_built", printly, asNamespace("plotly"))
 ```
 
 ## Introduction

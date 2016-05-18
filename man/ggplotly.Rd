@@ -22,6 +22,8 @@ also control the order they appear. For example, use
 colour last.}
 
 \item{source}{Only relevant for \link{event_data}.}
+
+\item{...}{arguments passed onto methods.}
 }
 \value{
 a plotly object

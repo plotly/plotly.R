@@ -29,6 +29,7 @@ knit_print.plotly_hash <- function(x, options, ...) {
 #' Print a 'built' plotly object in a knitr doc
 #' 
 #' @param x a plotly object
+#' @param options knitr options.
 #' @param ... additional arguments
 #' @export
 knit_print.plotly_built <- knit_print.plotly_hash

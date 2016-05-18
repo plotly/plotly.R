@@ -1,7 +1,9 @@
 ---
 title: "An overview of plotly's R API"
 author: "Carson Sievert"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteIndexEntry{Plotly DSL}

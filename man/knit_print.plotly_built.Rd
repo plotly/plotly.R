@@ -9,6 +9,8 @@ knit_print.plotly_built(x, options, ...)
 \arguments{
 \item{x}{a plotly object}
 
+\item{options}{knitr options.}
+
 \item{...}{additional arguments}
 }
 \description{
