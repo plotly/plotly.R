@@ -25,6 +25,20 @@ test_that("Using group argument doesn't transform the data in markers mode", {
   expect_identical(l$data[[1]]$group, iris$Species)
 })
 
+test_that("Using group argument for scatter plot in lines mode introduces breaks (NA values separating different groups)", {
+  p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, group = Species, mode = "lines")
+  l <- expect_traces(p, 1, "scatterplot-group-lines")
+  expect_identical(l$layout$xaxis$title, "Sepal.Length")
+  expect_identical(l$layout$yaxis$title, "Petal.Length")
+  n_groups <- length(unique(iris$Species))
+  n_pts <- length(l$data[[1]]$x)
+  expect_identical(n_pts, nrow(iris)+n_groups-1L)
+  expect_identical(sum(is.na(l$data[[1]]$x)), n_groups-1L)
+  expect_true(all(is.na(l$data[[1]]$group[-1]) |
+                  is.na(l$data[[1]]$group[-n_pts]) |
+                  (l$data[[1]]$group[-1] == l$data[[1]]$group[-n_pts])))
+})
+
 test_that("Mapping a variable to symbol works", {
   p <- plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, symbol = Species)
   l <- expect_traces(p, 3, "scatterplot-symbol")

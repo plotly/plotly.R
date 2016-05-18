@@ -339,13 +339,28 @@ plotly_build.plotly_hash <- function(l = last_plot()) {
       # define the dat traces
       points_df <- data.frame(dat_index = seq_along(dat[["x"]] %||% dat[["y"]] %||% dat[["z"]])) %>% # indices of the original data elements used in the trace FIXME properly define data length
         tracify_by_color(dat) %>%
-        tracify_by_column(dat, "symbol", force_numeric=TRUE)
-      trace_key_cols <- setdiff(colnames(points_df), "dat_index")
-      points_df <- dplyr::arrange_(points_df, .dots = c(trace_key_cols, "dat_index")) %>%
-                   dplyr::group_by_(.dots = trace_key_cols)
+        tracify_by_column(dat, "symbol", force_numeric=TRUE) %>%
+        tracify_by_column(dat, "group", force_numeric=TRUE)
+      subtrace_key_cols <- setdiff(colnames(points_df), "dat_index")
+      trace_key_cols <- setdiff(subtrace_key_cols, "group_index")
+      points_df <- dplyr::arrange_(points_df, .dots = c(subtrace_key_cols, "dat_index")) %>%
+                   dplyr::group_by_(.dots = subtrace_key_cols)
+      points_df$subtrace_index <- dplyr::group_indices(points_df)
+      points_df <- dplyr::group_by_(points_df, .dots = trace_key_cols)
       points_df$trace_index <- dplyr::group_indices(points_df)
       points_df <- dplyr::ungroup(points_df)
       points_df$point_order <- seq_len(nrow(points_df))
+
+      # polylines should be further disrupted at 'group' boundaries by inserting NAs
+      if (grepl("lines", dat[["mode"]] %||% "markers+lines") && "group_index" %in% subtrace_key_cols) {
+        subtrace_bound <- points_df$trace_index[-1] == points_df$trace_index[-nrow(points_df)] &
+                          points_df$subtrace_index[-1] != points_df$subtrace_index[-nrow(points_df)]
+        if (any(subtrace_bound)) {
+          points_df <- rbind(points_df, points_df[subtrace_bound,]) %>% dplyr::arrange(point_order)
+          points_df$dat_index[c(FALSE, points_df$point_order[-1] == points_df$point_order[-nrow(points_df)])] <- NA
+          points_df$point_order <- seq_len(nrow(points_df)) # order wrt added points
+        }
+      }
 
       trace_point_indices <- attr(dplyr::group_by(points_df, trace_index), "indices")
       if (length(trace_point_indices) > 0) {
