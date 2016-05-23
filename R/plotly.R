@@ -370,6 +370,9 @@ plotly_build.plotly_hash <- function(l = last_plot()) {
   structure(x, class = unique("plotly_built", class(x)))
 }
 
+#' @export
+plotly_build.list <- plotly_build.plotly_hash
+
 # returns a _list of traces_.
 colorize <- function(dat, title = "") {
   cols <- dat[["color"]] %||% dat[["z"]]
