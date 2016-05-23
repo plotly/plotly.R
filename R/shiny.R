@@ -42,7 +42,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
-#' shiny::runApp(system.file("examples", "events", package = "plotly"))
+#' shiny::runApp(system.file("examples", "plotlyEvents", package = "plotly"))
 #' }
 
 event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
