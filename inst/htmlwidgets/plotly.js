@@ -324,47 +324,47 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   if (keys !== null && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
-
-  var keySet = new Set(keys || []);
-
-  this.groupSelections[group] = keys;
-
-  var affectedTraces = [];
-  var opacitiesList = [];
-
-  for (var i = 0; i < this.origData.length; i++) {
-    var trace = this.origData[i];
-    if (!trace.key || trace.set !== group) {
-      continue;
+  
+  // NOTE: for a given selection, this is being called 4 times in examples/shiny-crosstalk/app.R (twice per group). Why is it sometimes being passed an empty array?
+  
+  // selection has been cleared
+  if (keys === null) {
+    // delete any existing selection traces
+    for (var i = this.origData.length; i < this.gd.data.length; i++) {
+      Plotly.deleteTraces(this.gd, i);
     }
-
-    var opacities = [];
-
-    if (typeof(keys) === "undefined" || keys === null) {
-      // Selection has been cleared--full opacity
-      for (var j = 0; j < trace.key.length; j++) {
-        opacities.push(1.0);
+    // back to original opactiy
+    for (var i = 0; i < this.origData.length; i++) {
+      Plotly.restyle(this.gd, {"opacity": (this.origData[i].opacity || 1)}, i);
+    }
+  } else if (keys.length > 1) {
+    // TODO: add control(s) for persistant selections?
+    for (var i = this.origData.length; i < this.gd.data.length; i++) {
+      Plotly.deleteTraces(this.gd, i);
+    }
+    var keySet = new Set(keys || []);
+    this.groupSelections[group] = keys;
+  
+    for (var i = 0; i < this.origData.length; i++) {
+      var trace = this.origData[i];
+      if (!trace.key || trace.set !== group) {
+        continue;
       }
-    } else {
+      // TODO: opacity multiplier should be configurable from R 
+      var opacity = (this.origData[i].opacity || 1) * 0.2;
+      Plotly.restyle(this.gd, {"opacity": opacity}, i);
+      
       // Get sorted array of matching indices in trace.key
       var matches = findMatches(trace.key, keySet);
-
-      for (var j = 0; j < matches.length; j++) {
-        while (opacities.length < matches[j]) {
-          opacities.push(0.2);
-        }
-        opacities.push(1);
-      }
-      while (opacities.length < trace.key.length) {
-        opacities.push(0.2);
+      if (matches.length > 0) {
+        trace = subsetArrayAttrs(trace, matches);
+        trace.showlegend = false;
+        // TODO: color should be configurable from R 
+        trace.marker = {color: "black"};
+        Plotly.addTraces(this.gd, trace);
       }
     }
-
-    affectedTraces.push(i);
-    opacitiesList.push(opacities);
   }
-
-  Plotly.restyle(this.gd, {"marker.opacity": opacitiesList}, affectedTraces);
 };
 
 
@@ -374,15 +374,18 @@ function Set(contents /* optional */) {
     contents.forEach(this.add, this);
   }
 }
+
 Set.prototype.has = function(val) {
   return !!this._map[val];
-}
+};
+
 Set.prototype.add = function(val) {
   this._map[val] = true;
-}
+};
+
 Set.prototype.remove = function(val) {
   delete this._map[val];
-}
+};
 
 function findMatches(haystack, needleSet) {
   var matches = [];
@@ -428,7 +431,7 @@ function subsetArrayAttrs(obj, indices) {
 function subsetArray(arr, indices) {
   var result = [];
   for (var i = 0; i < indices.length; i++) {
-    result.push(arr[i]);
+    result.push(arr[indices[i]]);
   }
   return result;
 }
