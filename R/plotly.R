@@ -250,6 +250,11 @@ plotly_build <- function(l = last_plot()) {
 }
 
 #' @export
+plotly_build.default <- function(l = last_plot()) {
+  l
+}
+
+#' @export
 plotly_build.plotly_built <- function(l = last_plot()) {
   l
 }
