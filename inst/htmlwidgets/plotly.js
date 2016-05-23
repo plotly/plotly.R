@@ -350,17 +350,19 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      // TODO: opacity multiplier should be configurable from R 
-      var opacity = (this.origData[i].opacity || 1) * 0.2;
+      var ct = trace.crosstalk || {};
+      var opacity = (trace.opacity || 1) * ct.opacityDim;
       Plotly.restyle(this.gd, {"opacity": opacity}, i);
-      
       // Get sorted array of matching indices in trace.key
       var matches = findMatches(trace.key, keySet);
       if (matches.length > 0) {
         trace = subsetArrayAttrs(trace, matches);
-        trace.showlegend = false;
-        // TODO: color should be configurable from R 
-        trace.marker = {color: "black"};
+        trace.showlegend = ct.showInLegend;
+        trace.name = "selected";
+        if (ct.color) {
+          trace.marker = trace.marker || {};
+          trace.marker.color = ct.color;
+        }
         Plotly.addTraces(this.gd, trace);
       }
     }

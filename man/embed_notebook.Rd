@@ -16,7 +16,7 @@ embed_notebook(x, width = NULL, height = NULL,
 \item{height}{attribute of the iframe. If \code{NULL}, the height in
 \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.}
 
-\item{file}{a filename for saving the standalone HTML 
+\item{file}{a filename for saving the standalone HTML
 (only used if x is a non-figure object)}
 }
 \description{

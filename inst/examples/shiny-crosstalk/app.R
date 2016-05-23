@@ -21,19 +21,17 @@ server <- function(input, output, session) {
   # Move rownames to a proper column
   mtcars <- mtcars %>% add_rownames()
   
-  sd <- SharedData$new(mtcars, "rowname", group = "A")
+  sd <- SharedData$new(mtcars, "rowname")
   
   output$p1 <- renderPlotly({
-    plot_ly(mtcars, x = wt, y = mpg, color = cyl, mode = "markers", 
-      key = mtcars$rowname, set = "A", height = "100%") %>%
-      add_trace(x = wt, y = hp, mode = "markers", key = mtcars$rowname, set = "B") %>%
+    plot_ly(mtcars, x = wt, y = mpg, color = cyl, mode = "markers") %>%
+      add_trace(x = wt, y = hp, mode = "markers", set = "B") %>%
       layout(dragmode = "select")
   })
   
   output$p2 <- renderPlotly({
-    plot_ly(mtcars, x = wt, y = disp, color = cyl, mode = "markers", 
-      key = mtcars$rowname, set = "A", height = "100%") %>%
-      add_trace(x = wt, y = hp, mode = "markers", key = mtcars$rowname, set = "B") %>%
+    plot_ly(mtcars, x = wt, y = disp, color = cyl, mode = "markers") %>%
+      add_trace(x = wt, y = hp, mode = "markers", set = "B") %>%
       layout(dragmode = "select")
   })
   

@@ -5,7 +5,8 @@
 \title{Add a trace to a plotly visualization}
 \usage{
 add_trace(p = last_plot(), ..., group, color, colors, symbol, symbols, size,
-  key, set, data = NULL, evaluate = FALSE)
+  data = NULL, crosstalk = ct_opts(key = rownames(data)),
+  evaluate = FALSE)
 }
 \arguments{
 \item{p}{A plotly object.}
@@ -13,13 +14,13 @@ add_trace(p = last_plot(), ..., group, color, colors, symbol, symbols, size,
 \item{...}{These arguments are documented in the references section below.
 Note that acceptable arguments depend on the trace type.}
 
-\item{group}{Either a variable name or a vector to use for grouping. If used, 
+\item{group}{Either a variable name or a vector to use for grouping. If used,
 a different trace will be created for each unique value.}
 
 \item{color}{Either a variable name or a vector to use for color mapping.}
 
-\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
-or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
+\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
+or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
 or a color interpolation function like \code{colorRamp}.}
 
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
@@ -29,8 +30,10 @@ or a color interpolation function like \code{colorRamp}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
-\item{data}{A data frame to associate with this trace (optional). If not 
+\item{data}{A data frame to associate with this trace (optional). If not
 provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
+
+\item{crosstalk}{a list of extra options for controlling client-side interactivity.}
 
 \item{evaluate}{logical. Evaluate arguments when this function is called?}
 }

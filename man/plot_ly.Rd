@@ -6,7 +6,8 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
   symbol, symbols, size, width = NULL, height = NULL, inherit = FALSE,
-  evaluate = FALSE, source = "A")
+  crosstalkEvents = "plotly_selected", crosstalkOpts = ct_opts(),
+  evaluate = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -16,13 +17,13 @@ Note that acceptable arguments depend on the value of \code{type}.}
 
 \item{type}{A character string describing the type of trace.}
 
-\item{group}{Either a variable name or a vector to use for grouping. If used, 
+\item{group}{Either a variable name or a vector to use for grouping. If used,
 a different trace will be created for each unique value.}
 
 \item{color}{Either a variable name or a vector to use for color mapping.}
 
-\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
-or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
+\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
+or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
 or a color interpolation function like \code{colorRamp()}.}
 
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
@@ -38,22 +39,26 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
-\item{evaluate}{logical. Evaluate arguments when this function is called?}
+\item{crosstalkEvents}{inform crosstalk about these plotly events to 
+enable client-side linked interactions. Currently 'plotly_hover', 'plotly_click', 
+'plotly_selected', and 'plotly_relayout' are supported.}
 
-\item{source}{Only relevant for \link{event_data}.}
+\item{crosstalkOpts}{a list of options for controlling the appearance of selections.}
+
+\item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
 \description{
 Transform data into a plotly visualization.
 }
 \details{
-There are a number of "visual properties" that aren't included in the officical 
+There are a number of "visual properties" that aren't included in the officical
 Reference section (see below).
 }
 \examples{
 \dontrun{
 data(economics, package = "ggplot2")
 # basic time-series plot
-p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", 
+p <- plot_ly(economics, x = date, y = uempmed, type = "scatter",
   showlegend = FALSE)
 # add a loess smoother
 p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
@@ -64,9 +69,9 @@ layout(p3, font = list(family = "Courier New, monospace"))
 
 # using the color argument
 plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
-plot_ly(economics, x = date, y = unemploy / pop, color = pop, 
+plot_ly(economics, x = date, y = unemploy / pop, color = pop,
   colors = terrain.colors(5), mode = "markers")
-  
+
 # function to extract the decade of a given date
 decade <- function(x) {
   factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
@@ -84,6 +89,18 @@ economics \%>\%
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
+
+# client-side interactions
+library(crosstalk)
+mtcars$id <- seq_len(nrow(mtcars))
+sd <- SharedData$new(mtcars, "id")
+o <- ct_opts(color = "red")
+subplot(
+  plot_ly(sd, x = wt, y = mpg, mode = "markers", crosstalkOpts = o),
+  plot_ly(sd, x = wt, y = disp, mode = "markers", crosstalkOpts = o)
+) \%>\% layout(dragmode = "select")
+
+
 }
 
 }

@@ -22,8 +22,11 @@
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param inherit logical. Should future traces inherit properties from this initial trace?
+#' @param crosstalkEvents inform crosstalk about these plotly events to 
+#' enable client-side linked interactions. Currently 'plotly_hover', 'plotly_click', 
+#' 'plotly_selected', and 'plotly_relayout' are supported.
+#' @param crosstalkOpts a list of options for controlling the appearance of selections.
 #' @param evaluate logical. Evaluate arguments when this function is called?
-#' @param source Only relevant for \link{event_data}.
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
 #' @export
@@ -62,12 +65,25 @@
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
+#' 
+#' # client-side interactions
+#' library(crosstalk)
+#' mtcars$id <- seq_len(nrow(mtcars))
+#' sd <- SharedData$new(mtcars, "id")
+#' o <- ct_opts(color = "red")
+#' subplot(
+#'   plot_ly(sd, x = wt, y = mpg, mode = "markers", crosstalkOpts = o),
+#'   plot_ly(sd, x = wt, y = disp, mode = "markers", crosstalkOpts = o)
+#' ) %>% layout(dragmode = "select")
+#' 
+#' 
 #' }
 #'
 plot_ly <- function(data = data.frame(), ..., type = "scatter",
                     group, color, colors, symbol, symbols, size,
                     width = NULL, height = NULL, inherit = FALSE,
-                    evaluate = FALSE, source = "A") {
+                    crosstalkEvents = "plotly_selected",
+                    crosstalkOpts = ct_opts(), evaluate = FALSE) {
   
   if (crosstalk::is.SharedData(data)) {
     key <- data$key()
@@ -102,7 +118,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     args = argz,
     env = list2env(data),    # environment in which to evaluate arguments
     enclos = parent.frame(), # if objects aren't found in env, look here
-    inherit = inherit
+    inherit = inherit,
+    crosstalk = c(crosstalkOpts, crosstalkEvents = crosstalkEvents)
   )
   # plotly objects should always have a _list_ of trace(s)
   p <- list(
@@ -110,8 +127,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
     layout = NULL,
     url = NULL,
     width = width,
-    height = height,
-    source = source
+    height = height
   )
 
   if (evaluate) p <- plotly_build(p)
@@ -135,6 +151,7 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param data A data frame to associate with this trace (optional). If not
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
+#' @param crosstalk a list of extra options for controlling client-side interactivity.
 #' @param evaluate logical. Evaluate arguments when this function is called?
 #' @seealso \code{\link{plot_ly}()}
 #' @references \url{https://plot.ly/r/reference/}
@@ -142,7 +159,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
 #' @export
 add_trace <- function(p = last_plot(), ...,
                       group, color, colors, symbol, symbols, size,
-                      data = NULL, evaluate = FALSE) {
+                      data = NULL, crosstalk = ct_opts(key = rownames(data)),
+                      evaluate = FALSE) {
   
   if (crosstalk::is.SharedData(data)) {
     key <- data$key()

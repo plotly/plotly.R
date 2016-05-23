@@ -33,7 +33,8 @@ Imports:
     tidyr,
     plyr,
     hexbin,
-    crosstalk
+    crosstalk,
+    RColorBrewer
 Suggests:
     dplyr,
     maps,
@@ -46,7 +47,6 @@ Suggests:
     htmltools,
     curl,
     rmarkdown,
-    RColorBrewer,
     Rserve,
     RSclient,
     broom

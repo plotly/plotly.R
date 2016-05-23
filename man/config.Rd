@@ -9,7 +9,7 @@ config(p = last_plot(), ...)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{these arguments are documented at 
+\item{...}{these arguments are documented at
 \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}}
 }
 \description{
