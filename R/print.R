@@ -57,6 +57,10 @@ as.widget <- function(x, ...) {
   x$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
+  deps <- c(
+    crosstalk::dependencies(), 
+    list(get("jqueryLib", asNamespace("crosstalk"))())
+  )
   htmlwidgets::createWidget(
     name = "plotly",
     x = x,
@@ -68,7 +72,7 @@ as.widget <- function(x, ...) {
       defaultWidth = '100%',
       defaultHeight = 400
     ),
-    dependencies = crosstalk::dependencies(),
+    dependencies = deps,
     ...
   )
 }
