@@ -1,3 +1,9 @@
+3.6.1 -- 23 May 2016
+
+BUG FIX: 
+
+Add a default method for plotly_build. Fixes #592.
+
 3.6.0 -- 16 May 2016
 
 NEW FEATURES & CHANGES:
