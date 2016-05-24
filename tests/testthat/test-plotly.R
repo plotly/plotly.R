@@ -101,7 +101,7 @@ test_that("axis titles get attached to scene object for 3D plots", {
 
 test_that("inheriting properties works as expected", {
   library(dplyr)
-  p <- iris %>%
+  p <- iris %>% 
     count(Species) %>%
     plot_ly(x = Species, y = n, opacity = 0.5, type = "bar", inherit = TRUE) %>%
     layout(barmode = "overlay", showlegend = FALSE)
