@@ -19,7 +19,7 @@ This function must be called within a reactive shiny context.
 }
 \examples{
 \dontrun{
-shiny::runApp(system.file("examples", "events", package = "plotly"))
+shiny::runApp(system.file("examples", "plotlyEvents", package = "plotly"))
 }
 }
 \author{
