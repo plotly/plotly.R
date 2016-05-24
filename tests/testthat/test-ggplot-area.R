@@ -17,7 +17,8 @@ expect_traces <- function(gg, n_traces, name) {
 }
 
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-huron$decade <- plyr::round_any(huron$year, 10, floor)
+# like getAnywhere(round_any.numeric)
+huron$decade <- floor(huron$year / 10) * 10 
 
 ar <- ggplot(huron) + geom_area(aes(x = year, y = level))
 
