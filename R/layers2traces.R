@@ -585,49 +585,6 @@ geom2trace.default <- function(data, params, p) {
 # Utility functions
 # --------------------------------------------------------------------------
 
-# Drawing ggplot2 geoms with a group aesthetic is most efficient in
-# plotly when we convert groups of things that look the same to
-# vectors with NA.
-group2NA <- function(data) {
-  if (!"group" %in% names(data)) return(data)
-  poly.list <- split(data, data$group, drop = TRUE)
-  is.group <- names(data) == "group"
-  poly.na.list <- list()
-  forward.i <- seq_along(poly.list)
-  ## When group2NA is called on geom_polygon (or geom_rect, which is
-  ## treated as a basic polygon), we need to retrace the first points
-  ## of each group, see https://github.com/ropensci/plotly/pull/178
-  retrace.first.points <- inherits(data, "GeomPolygon")
-  for (i in forward.i) {
-    no.group <- poly.list[[i]][, !is.group, drop = FALSE]
-    na.row <- no.group[1, ]
-    na.row[, c("x", "y")] <- NA
-    retrace.first <- if (retrace.first.points) {
-      no.group[1,]
-    }
-    poly.na.list[[paste(i, "forward")]] <-
-      rbind(no.group, retrace.first, na.row)
-  }
-  if (retrace.first.points) {
-    backward.i <- rev(forward.i[-1])[-1]
-    for (i in backward.i) {
-      no.group <- poly.list[[i]][1, !is.group, drop = FALSE]
-      na.row <- no.group[1, ]
-      na.row[, c("x", "y")] <- NA
-      poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
-    }
-    if (length(poly.list) > 1) {
-      first.group <- poly.list[[1]][1, !is.group, drop = FALSE]
-      poly.na.list[["last"]] <- rbind(first.group, first.group)
-    }
-  }
-  data <- do.call(rbind, poly.na.list)
-  if (is.na(data$x[nrow(data)])) {
-    data <- data[-nrow(data), ]
-  }
-  data
-}
-
 # given a geom, should we split on any continuous variables?
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
