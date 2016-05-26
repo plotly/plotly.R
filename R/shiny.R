@@ -25,8 +25,6 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px") {
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
-  # https://github.com/ramnathv/htmlwidgets/issues/166#issuecomment-153000306
-  expr <- call("as.widget", expr)
   shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
 }
 

@@ -236,9 +236,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modifyList, layouts))
-  
-  res <- hash_plot(data.frame(), p)
-  prefix_class(res, "plotly_subplot")
+  p
 }
 
 

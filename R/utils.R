@@ -1,21 +1,13 @@
 is.plotly <- function(x) {
-  inherits(x, c("plotly_hash", "plotly_built", "plotly_subplot"))
+  inherits(x, "plotly")
+}
+
+is.formula <- function(f) {
+  inherits(f, "formula")
 }
 
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
-}
-
-# modify %||% so that NA is considered NULL
-"%|x|%" <- function(x, y) {
-  if (length(x) == 1) {
-    if (is.na(x)) x <- NULL
-  }
-  x %||% y
-}
-
-strextract <- function(str, pattern) {
-  regmatches(str, regexpr(pattern, str))
 }
 
 compact <- function(x) {
@@ -26,57 +18,47 @@ is.discrete <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
 
-# special enviroment that enables NSE
-plotlyEnv <- new.env(parent = emptyenv())
+deparse2 <- function(x) paste(deparse(x, 500L), collapse = "")
 
-# hash plot info, assign it to the special plotly environment, & attach it to data
-hash_plot <- function(df, p) {
-  if (missing(df) || is.null(df)) df <- data.frame()
-  hash <- digest::digest(p)
-  # terrible hack to ensure we can always find the most recent hash
-  hash <- paste(hash, length(ls(plotlyEnv)), sep = "#")
-  assign(hash, p, envir = plotlyEnv)
-  attr(df, "plotly_hash") <- hash
-  # add plotly class mainly for printing method
-  class(df) <- unique(c("plotly_hash", class(df)))
-  # return a data frame to be compatible with things like dplyr
-  df
-}
-
-#' Obtain underlying data of plotly object
-#' 
-#' Given a data frame with a class of plotly, this function returns the arguments
-#' and/or data used to create the plotly. If no data frame is provided, 
-#' the last plotly object created in this R session is returned (if it exists).
-#' 
-#' @param data a data frame with a class of plotly (and a plotly_hash attribute).
-#' @param last if no plotly attribute is found, return the last plot or NULL?
-get_plot <- function(data = NULL, last = FALSE) {
-  hash <- attr(data, "plotly_hash")
-  if (!is.null(hash)) {
-    get(hash, envir = plotlyEnv)
-  } else if (last) {
-    envs <- strsplit(ls(plotlyEnv), "#")
-    last_env <- ls(plotlyEnv)[which.max(sapply(envs, "[[", 2))]
-    get(last_env, envir = plotlyEnv)
-  } else {
-    data %||% list()
+verify_arg <- function(arg) {
+  if (missing(arg)) return(NULL)
+  if (!is.formula(arg)) {
+    stop("Argument must be a formula.")
   }
+  arg
 }
 
-#' Retrive and create the last plotly (or ggplot).
-#' 
-#' @seealso \link{plotly_build}
-#' @param data (optional) a data frame with a class of plotly (and a plotly_hash attribute).
-#' @export
-last_plot <- function(data = NULL) {
-  p <- try(get_plot(data, last = TRUE), silent = TRUE)
-  if (inherits(p, "try-error")) p <- try(ggplotly(), silent = TRUE)
-  if (inherits(p, "try-error")) stop("The last plot doesn't exist")
-  structure(
-    p, 
-    class = unique(c("plotly_hash", class(p)))
-  )
+verify_plot <- function(p) {
+  if (!is.plotly(p)) {
+    stop("Don't know how to add traces to an object of class:", 
+         class(p), call. = FALSE)
+  }
+  p
+}
+
+# make sure trace type is valid
+# TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
+verify_type <- function(type = NULL) {
+  if (is.null(type)) {
+    message("No trace type specified. Guessing you want a scatter trace")
+    type <- "scatter"
+  }
+  if (!is.character(type) || length(type) != 1) {
+    stop("The trace type must be a character vector of length 1.\n", 
+         call. = FALSE)
+  }
+  if (!type %in% traces) {
+    stop("Trace type must be one of the following: \n",
+         "'", paste(traces, collapse = "', '"), "'",
+         call. = FALSE)
+  }
+  type
+}
+
+# is a given trace type 3d?
+is3d <- function(type = NULL) {
+  type <- type %||% "scatter"
+  type %in% c("mesh3d", "scatter3d", "surface")
 }
 
 # Check for credentials/configuration and throw warnings where appropriate
@@ -248,24 +230,6 @@ plotly_headers <- function(type = "main") {
   httr::add_headers(.headers = h)
 }
 
-
-perform_eval <- function(x) {
-  if (should_eval(x)) do_eval(x) else x
-}
-
-# env/enclos are special properties specific to the R API 
-# if they appear _and_ are environments, then evaluate arguments
-# (sometimes figures return these properties but evaluation doesn't make sense)
-should_eval <- function(x) { 
-  any(vapply(x[c("env", "enclos")], is.environment, logical(1))) 
-}
-
-# perform evaluation of arguments, keeping other list elements
-do_eval <- function(x) {
-  y <- c(x, eval(x$args, as.list(x$env, all.names = TRUE), x$enclos))
-  y[c("args", "env", "enclos")] <- NULL
-  y
-}
 
 # try to write environment variables to an .Rprofile
 cat_profile <- function(key, value, path = "~") {

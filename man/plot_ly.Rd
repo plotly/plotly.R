@@ -4,9 +4,9 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, width = NULL, height = NULL, inherit = FALSE,
-  evaluate = FALSE, source = "A")
+plot_ly(data = data.frame(), ..., type = NULL, group, color, colors, symbol,
+  symbols, size, width = NULL, height = NULL, inherit = FALSE,
+  source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -38,8 +38,6 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
-\item{evaluate}{logical. Evaluate arguments when this function is called?}
-
 \item{source}{Only relevant for \link{event_data}.}
 }
 \description{
@@ -53,10 +51,9 @@ Reference section (see below).
 \dontrun{
 data(economics, package = "ggplot2")
 # basic time-series plot
-p <- plot_ly(economics, x = date, y = uempmed, type = "scatter", 
-  showlegend = FALSE)
+p <- plot_ly(economics, x = ~date, y = ~uempmed, inherit = TRUE)
 # add a loess smoother
-p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
+p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 # add a title
 p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
 # change the font
@@ -73,17 +70,24 @@ decade <- function(x) {
 }
 plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
 
-# plotly loves pipelines
-economics \%>\%
- transform(rate = unemploy / pop) \%>\%
- plot_ly(x = date, y = rate) \%>\%
- loess(rate ~ as.numeric(date), data = .) \%>\%
- broom::augment() \%>\%
+# monads::`\%>>\%` enables data-plot-pipelines
+
+plot_ly(mtcars, x = ~wt, y = ~mpg)
+
+
+economics \%>>\%
+ transform(rate = unemploy / pop) \%>>\%
+ 
+ \%>\%
+  \%>>\%
+ loess(rate ~ as.numeric(date), data = .) \%>>\%
+ broom::augment() \%>>\%
  add_trace(y = .fitted)
 
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural
 plot_ly(z = volcano, type = "surface")
+
 }
 
 }

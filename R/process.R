@@ -24,7 +24,7 @@ process.image <- function(resp) {
            error = function(e) httr::content(resp, as = "raw"))
 }
 
-process.figure <- function(resp) {
+process.plotly_figure <- function(resp) {
   httr::stop_for_status(resp)
   con <- from_JSON(content(resp, as = "text"))
   fig <- con$payload$figure
@@ -33,8 +33,7 @@ process.figure <- function(resp) {
   con$url <- sub("^http[s]?:", "https:", con$url)
   fig <- add_boxed(fig)
   fig$data[[1]]$inherit <- FALSE
-  # any reasonable way to return a data frame?
-  hash_plot(data.frame(), fig)
+  as.widget(fig)
 }
 
 process.signup <- function(resp) {

@@ -66,14 +66,14 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
-  hash_plot(p$data, plotly_build(s))
+  s
 }
   
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
                             height = NULL, tooltip = "all", source = "A", ...) {
-  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
-  hash_plot(p$data, l)
+  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source, ...)
+  as.widget(l)
 }
 
 #' Convert a ggplot to a list.
@@ -687,13 +687,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
 
-  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
+  l <- list(data = setNames(traces, NULL), layout = list(compact(gglayout)))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
-  l$width <- width
-  l$height <- height
+  l$layout$width <- width
+  l$layout$height <- height
   l$source <- source
-  structure(l, class = "plotly_built")
+  l
 }
 
 
