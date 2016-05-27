@@ -38,7 +38,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     dotz <- dotz[[1]]
   }
   # build each plot
-  plotz <- lapply(dotz, plotly_build)
+  plotz <- lapply(dotz, function(d) plotly_build(d)$x)
   # ensure "axis-reference" trace attributes are properly formatted
   # TODO: should this go inside plotly_build()?
   plotz <- lapply(plotz, function(p) {
@@ -236,7 +236,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modifyList, layouts))
-  p
+  as.widget(p)
 }
 
 

@@ -62,7 +62,7 @@ if (report_diffs || build_table) {
 # object (aka the data behind the plot).
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- plotly_build(gg)
+  p <- plotly_build(gg)$x
   has_diff <- if (report_diffs) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)

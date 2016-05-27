@@ -687,7 +687,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
 
-  l <- list(data = setNames(traces, NULL), layout = list(compact(gglayout)))
+  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
   # ensure properties are boxed correctly
   l <- add_boxed(rm_asis(l))
   l$layout$width <- width

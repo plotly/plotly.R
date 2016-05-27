@@ -9,7 +9,7 @@ test_that("basic geom_violin works", {
   expect_identical(tr$type, "scatter")
   expect_true(tr$fill == "tozerox")
   expect_false(tr$showlegend)
-  expect_true(all(grepl("density", tr$text)))
+  expect_true(all(grepl("density", tr$text[!is.na(tr$text)])))
   expect_true(tr$hoverinfo == "text")
 })
 

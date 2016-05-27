@@ -31,7 +31,7 @@ test_that("nrows argument works", {
 
 test_that("group + [x/y]axis works", {
   iris$id <- as.integer(iris$Species)
-  p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
+  p <- plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, color = ~Species,
                xaxis = paste0("x", id), mode = "markers")
   s <- expect_traces(subplot(p, margin = 0.05), 3, "group")
   ax <- s$layout[grepl("^[x-y]axis", names(s$layout))]

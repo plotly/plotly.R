@@ -469,7 +469,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
       ),
       dash = aes2plotly(data, params, "linetype")
     ),
-    fill = "tozerox",
+    fill = "toself",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")

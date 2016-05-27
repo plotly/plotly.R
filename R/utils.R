@@ -18,7 +18,18 @@ is.discrete <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
 
-deparse2 <- function(x) paste(deparse(x, 500L), collapse = "")
+deparse2 <- function(x) {
+  paste(deparse(x, 500L), collapse = "")
+}
+
+new_id <- function() {
+  basename(tempfile(""))
+}
+
+# obtain the current data from a plotly vis
+plotly_data <- function(p, id = p$x$cur_data) {
+  p$x$visdat[[id]]()
+}
 
 verify_arg <- function(arg) {
   if (missing(arg)) return(NULL)

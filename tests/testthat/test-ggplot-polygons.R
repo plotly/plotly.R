@@ -24,16 +24,10 @@ test_that("polygons filled with the same color become one trace", {
   gg <- ggplot(poly.df) + geom_polygon(aes(x, y, group = g))
   info <- expect_traces(gg, 1, "black")
   tr <- info$data[[1]]
-  expected.x <-
-    c(10, 11, 11, 10, 10, NA,
-      12, 13, 13, 12, 12, NA,
-      10, 10)
+  expected.x <- c(10, 11, 11, 10, 10, NA, 12, 13, 13, 12, 12)
   expect_equal(tr$x, expected.x)
   expect_equal(tr$fill, "tozerox")
-  expected.y <- 
-    c(0, 0, 1, 1, 0, NA,
-      0, 0, 1, 1, 0, NA,
-      0, 0)
+  expected.y <- c(0, 0, 1, 1, 0, NA, 0, 0, 1, 1, 0)
   expect_equal(tr$y, expected.y)
 })
 
@@ -156,14 +150,12 @@ test_that("geom_polygon(aes(group)) -> 1 trace", {
   info <- expect_traces(star.group, 1, "star-group")
   tr <- info$data[[1]]
   expect_equal(tr$fill, "tozerox")
-  expect_equal(tr$x,
-               c(0, -1, 2, -2, 1, 0, NA,
-                 10, 9, 12, 8, 11, 10, NA,
-                 0, 0))
-  expect_equal(tr$y,
-               c(2, 0, 1, 1, 0, 2, NA,
-                 2, 0, 1, 1, 0, 2, NA,
-                 2, 2))
+  expect_equal(
+    tr$x, c(0, -1, 2, -2, 1, 0, NA, 10, 9, 12, 8, 11, 10)
+  )
+  expect_equal(
+    tr$y, c(2, 0, 1, 1, 0, 2, NA, 2, 0, 1, 1, 0, 2)
+  )
 })
 
 star.group.color <- ggplot(stars) +
@@ -175,10 +167,10 @@ test_that("geom_polygon(aes(group), color) -> 1 trace", {
   expect_true(tr$fill == "tozerox")
   expect_true(tr$line$color == toRGB("red"))
   expect_equal(
-    tr$x, c(0, -1, 2, -2, 1, 0, NA, 10, 9, 12, 8, 11, 10, NA, 0, 0)
+    tr$x, c(0, -1, 2, -2, 1, 0, NA, 10, 9, 12, 8, 11, 10)
   )
   expect_equal(
-    tr$y, c(2, 0, 1, 1, 0, 2, NA, 2, 0, 1, 1, 0, 2, NA, 2, 2)
+    tr$y, c(2, 0, 1, 1, 0, 2, NA, 2, 0, 1, 1, 0, 2)
   )
 })
 

@@ -10,8 +10,8 @@
 #' @examples
 #' 
 #' p <- plot_ly(economics, x = ~date, y = ~pce)
-#' # the unevaluated data
-#' str(p$x$data)
+#' # the unevaluated plotly object
+#' str(p)
 #' # the evaluated data
 #' str(plotly_build(p)$x$data)
 #' 
@@ -20,51 +20,58 @@ plotly_build <- function(p) {
 }
 
 #' @export
+plotly_build.default <- identity
+
+#' @export
 plotly_build.gg <- function(p) {
-  ggplotly(p)
+  l <- ggplotly(p)
+  browser()
 }
 
 #' @export
 plotly_build.plotly <- function(p) {
   
-  # Initiating a plot with plot_ly() should have a _list_ of layouts
-  if (is.list(p$x$layout) && is.null(names(p$x$layout))) {
-    p$x$layout <- lapply(p$x$layout, function(lay) {
-      is_formula <- vapply(lay$attrs, is.formula, logical(1))
-      fl <- lazyeval::as_f_list(lay$attrs[is_formula] %||% list())
-      for (var in names(fl)) {
-        lay[[var]] <- lazyeval::f_eval(fl[[var]], lay$rdata)
-      }
-      # tack on attributes, that aren't formulas, without evaluating them
-      lay <- c(lay, lay$attrs[!is_formula])
-      lay[c("attrs", "rdata")] <- NULL
-      lay[lengths(lay) > 0]
-    })
-    # combine all the layouts into one layout 
-    # (with later layout() calls overriding previous ones)
-    p$x$layout <- Reduce(modifyList, p$x$layout)
-  }
-  
-  p$x$data <- lapply(p$x$data, function(tr) {
-    is_formula <- vapply(tr$attrs, is.formula, logical(1))
-    fl <- lazyeval::as_f_list(tr$attrs[is_formula] %||% list())
+  layouts <- Map(function(x, y) {
+    
+    is_formula <- vapply(x, is.formula, logical(1))
+    fl <- lazyeval::as_f_list(x[is_formula] %||% list())
     for (var in names(fl)) {
-      tr[[var]] <- lazyeval::f_eval(fl[[var]], tr$rdata)
+      x[[var]] <- lazyeval::f_eval(fl[[var]], plotly_data(p, y))
+    }
+    x[lengths(x) > 0]
+    
+  }, p$x$layoutAttrs, names(p$x$layoutAttrs))
+  
+  # get rid of the data -> layout mapping and merge all the layouts
+  # into a single layout (more recent layouts will override older ones)
+  p$x$layoutAttrs <- NULL
+  p$x$layout <- modifyList(p$x$layout %||% list(), layouts)
+  
+  p$x$data <- Map(function(x, y) {
+    
+    is_formula <- vapply(x, is.formula, logical(1))
+    fl <- lazyeval::as_f_list(x[is_formula] %||% list())
+    for (var in names(fl)) {
+      x[[var]] <- lazyeval::f_eval(fl[[var]], plotly_data(p, y))
       varname <- sub("^~", "", deparse2(fl[[var]]))
       # deparse axis names and add to layout
       if (any(c("x", "y", "z") %in% var)) {
-        if (is3d(tr$type)) {
+        if (is3d(x$type)) {
           p$x$layout$scene[[paste0(var, "axis")]]$title <<- varname
         } else {
           p$x$layout[[paste0(var, "axis")]]$title <<- varname
         }
       }
     }
-    # tack on attributes, that aren't formulas, without evaluating them
-    tr <- c(tr, tr$attrs[!is_formula])
-    tr[c("attrs", "rdata")] <- NULL
-    tr[lengths(tr) > 0]
-  })
+    x[lengths(x) > 0]
+  
+  }, p$x$attrs, names(p$x$attrs))
+  
+  # get rid of data -> vis mapping stuff
+  p$x[c("visdat", "cur_data", "attrs")] <- NULL
+  
+  # traces can't have names
+  p$x$data <- setNames(p$x$data, NULL)
   
   p
 }

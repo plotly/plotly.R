@@ -39,28 +39,15 @@
 #' layout(p3, font = list(family = "Courier New, monospace"))
 #' 
 #' # using the color argument
-#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
-#' plot_ly(economics, x = date, y = unemploy / pop, color = pop, 
+#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")
+#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
 #'   colors = terrain.colors(5), mode = "markers")
 #'   
 #' # function to extract the decade of a given date
 #' decade <- function(x) {
 #'   factor(floor(as.numeric(format(x, "%Y")) / 10) * 10)
 #' }
-#' plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
-#' 
-#' 
-#' plot_ly(mtcars, x = ~wt, y = ~mpg)
-#' 
-#' 
-#' economics %>>%
-#'  transform(rate = unemploy / pop) %>>%
-#'  
-#'  %>%
-#'   %>>%
-#'  loess(rate ~ as.numeric(date), data = .) %>>%
-#'  broom::augment() %>>%
-#'  add_trace(y = .fitted)
+#' plot_ly(economics, x = ~unemploy / pop, color = ~decade(date), type = "box")
 #' 
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
@@ -89,24 +76,21 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   # TODO: do we really need to verify these?
   argz$colors <- verify_arg(colors)
   argz$symbols <- verify_arg(symbols)
+  argz$type <- verify_type(type)
   
-  # we always deal with a _list_ of traces and _list_ of layouts 
-  # since they can each have different data
+  # id for tracking attribute mappings and finding the most current data
+  id <- new_id()
   p <- list(
-    data = list(
-      list(
-        type = verify_type(type),
-        attrs = argz,
-        rdata = data
-      )
-    ),
+    visdat = setNames(list(function() data), id),
+    cur_data = id,
+    attrs = setNames(list(argz), id),
+    # we always deal with a _list_ of traces and _list_ of layouts 
+    # since they can each have different data
     layout = list(
-      list(
         width = width, 
         height = height,
         # sane margin defaults (mainly for RStudio)
         margin = list(b = 40, l = 60, t = 25, r = 10)
-      )
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
     inherit = inherit,

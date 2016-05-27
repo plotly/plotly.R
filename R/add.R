@@ -1,3 +1,21 @@
+#' Add data to a plotly visualization
+#' 
+#' @param p a plotly visualization
+#' @param data a data frame.
+#' @export
+#' @examples 
+#' 
+#' NULL %>% plot_ly() %>% add_data(economics) %>% add_trace(x = ~date, y = ~pce)
+add_data <- function(p, data = NULL) {
+  if (is.null(data)) return(p)
+  p <- verify_plot(p)
+  id <- new_id()
+  p$x$visdat[[id]] <- function() data
+  p$x$cur_data <- id
+  # TODO: should this also override the data used for the most recent trace?
+  p
+}
+
 #' Add a trace to a plotly visualization
 #' 
 #' @param p a plotly or ggplot object.
@@ -21,7 +39,6 @@
 #' @export
 add_trace <- function(p, ...,
                       group, color, colors, symbol, symbols, size, data = NULL) {
-  p <- verify_plot(p)
   # "native" plotly arguments
   argz <- list(...)
   # tack on "special" arguments
@@ -31,16 +48,10 @@ add_trace <- function(p, ...,
   if (!missing(symbol)) argz$symbol <- substitute(symbol)
   if (!missing(symbols)) argz$symbols <- substitute(symbols)
   if (!missing(size)) argz$size <- substitute(size)
-  
   argz$type <- verify_type(argz$type)
   
-  nTraces <- length(p$x$data)
-  
-  p$x$data[[nTraces + 1]] <- list(
-    attrs = argz, 
-    rdata = data %||% p$x$data[[1]]$rdata
-  )
-  
+  p <- add_data(p, data)
+  p$x$attrs[[p$x$cur_data]] <- argz
   p
 }
 

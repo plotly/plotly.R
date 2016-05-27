@@ -18,8 +18,8 @@ errors.
 \examples{
 
 p <- plot_ly(economics, x = ~date, y = ~pce)
-# the unevaluated data
-str(p$x$data)
+# the unevaluated plotly object
+str(p)
 # the evaluated data
 str(plotly_build(p)$x$data)
 
