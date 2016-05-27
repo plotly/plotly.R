@@ -4,13 +4,13 @@
 \alias{group2NA}
 \title{Insert missing values to create trace groupings}
 \usage{
-group2NA(data, groupName = "group", nested = NULL,
+group2NA(data, groupNames = "group", nested = NULL,
   retrace.first = inherits(data, "GeomPolygon"))
 }
 \arguments{
 \item{data}{a data frame.}
 
-\item{groupName}{the name of the grouping variable as a character string}
+\item{groupNames}{name(s) of the grouping variable(s) as a character vector}
 
 \item{nested}{other variables that group should be nested 
 (i.e., ordered) within.}

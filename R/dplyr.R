@@ -19,23 +19,15 @@
 group2NA <- function(data, groupNames = "group", nested = NULL, 
                      retrace.first = inherits(data, "GeomPolygon")) {
   if (nrow(data) == 0) return(data)
-  idx <- groupNames %in% names(data)
-  if (any(!idx)) {
-    message(
-      "Couldn't group by the following columns:",
-      paste(groupNames[!idx], collapse = ", ")
-    )
-    groupNames <- groupNames[idx]
-  }
   nested <- nested[nested %in% names(data)]
-  data <- data[do.call(order, data[c(nested, groupNames)]), , drop = FALSE]
-  
-  s <- split(data, data[groupNames], drop = TRUE)
-  f <- if (retrace.first) {
-    function(x) rbind(x, x[1, , drop = FALSE], NA)
-  } else {
-    function(x) rbind(x, NA)
+  if (length(nested)) {
+    data <- dplyr::arrange_(data, nested)
   }
-  d <- dplyr::bind_rows(lapply(s, f))
-  structure(d, class = unique(class(data), class(d)))
+  d <- dplyr::group_by_(data, groupNames)
+  d <- if (retrace.first) {
+    dplyr::do(d, rbind(., .[1,], NA))
+  } else {
+    dplyr::do(d, rbind(., NA))
+  }
+  structure(tidyr::unnest(d), class = unique(class(data), class(d)))
 }
