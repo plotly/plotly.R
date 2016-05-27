@@ -59,3 +59,9 @@ add_text <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "text", ...)
 }
 
+#' @export
+add_polygons <- function(p, ...) {
+  # TODO: Should mode='markers+lines'? If so, retrace first points?
+  add_trace(p, type = "scatter", mode = "none", fill = "toself", ...)
+}
+

@@ -18,17 +18,10 @@ errors.
 \examples{
 
 p <- plot_ly(economics, x = ~date, y = ~pce)
-# a plotly visualization object
+# the unevaluated data
 str(p$x$data)
-# the actual list of options sent to plotly.js
-str(plotly_build(p))
-
-p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
-l <- plotly_build(p)
-# turn off hoverinfo for the smooth (but keep it for the points)
-l$x$data[[2]]$hoverinfo <- "none"
-l$x$data[[3]]$hoverinfo <- "none"
-l
+# the evaluated data
+str(plotly_build(p)$x$data)
 
 }
 

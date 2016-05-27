@@ -840,7 +840,8 @@ bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
 # if a vector has one unique value, return that value
-uniq <- function(x) {
+uniq <- function(x, na.rm = TRUE) {
+  if (na.rm) x <- x[!is.na(x)]
   u <- unique(x)
   if (length(u) == 1) u else x
 }

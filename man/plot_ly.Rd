@@ -70,7 +70,6 @@ decade <- function(x) {
 }
 plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
 
-# monads::`\%>>\%` enables data-plot-pipelines
 
 plot_ly(mtcars, x = ~wt, y = ~mpg)
 

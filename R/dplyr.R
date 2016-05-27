@@ -6,7 +6,7 @@
 #' This is a helper function for inserting missing values into a data set
 #' 
 #' @param data a data frame.
-#' @param groupName the name of the grouping variable as a character string
+#' @param groupNames name(s) of the grouping variable(s) as a character vector
 #' @param nested other variables that group should be nested 
 #' (i.e., ordered) within.
 #' @param retrace.first should the first row of each group be appended to the 
@@ -16,16 +16,26 @@
 #' plot_ly(group2NA(elong, "variable"), x = ~date, y = ~value)
 #' 
 
-group2NA <- function(data, groupName = "group", nested = NULL, 
+group2NA <- function(data, groupNames = "group", nested = NULL, 
                      retrace.first = inherits(data, "GeomPolygon")) {
-  if (nrow(data) == 0 || any(!groupName %in% names(data))) return(data)
+  if (nrow(data) == 0) return(data)
+  idx <- groupNames %in% names(data)
+  if (any(!idx)) {
+    message(
+      "Couldn't group by the following columns:",
+      paste(groupNames[!idx], collapse = ", ")
+    )
+    groupNames <- groupNames[idx]
+  }
   nested <- nested[nested %in% names(data)]
-  data <- data[do.call(order, data[c(nested, groupName)]), , drop = FALSE]
-  s <- split(data, data[[groupName]], drop = TRUE)
+  data <- data[do.call(order, data[c(nested, groupNames)]), , drop = FALSE]
+  
+  s <- split(data, data[groupNames], drop = TRUE)
   f <- if (retrace.first) {
     function(x) rbind(x, x[1, , drop = FALSE], NA)
   } else {
     function(x) rbind(x, NA)
   }
-  dplyr::bind_rows(lapply(s, f))
+  d <- dplyr::bind_rows(lapply(s, f))
+  structure(d, class = unique(class(data), class(d)))
 }

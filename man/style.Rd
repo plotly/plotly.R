@@ -17,6 +17,12 @@ style(p, ..., traces = 1)
 Modify trace(s) of an existing plotly visualization. Useful when used in
 conjunction with \code{\link{get_figure}()}.
 }
+\examples{
+
+p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
+style(p, hoverinfo = "none", traces = c(2, 3))
+
+}
 \author{
 Carson Sievert
 }

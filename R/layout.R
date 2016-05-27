@@ -45,22 +45,3 @@ config <- function(p, ...) {
   p$x$config[[nConfig + 1]] <- list(...)
   p
 }
-
-#' Modify trace(s)
-#'
-#' Modify trace(s) of an existing plotly visualization. Useful when used in
-#' conjunction with \code{\link{get_figure}()}.
-#'
-#' @param p A plotly visualization.
-#' @param ... Visual properties.
-#' @param traces numeric vector. Which traces should be modified?
-#' @seealso \code{\link{get_figure}()}
-#' @author Carson Sievert
-#' @export
-style <- function(p, ..., traces = 1) {
-  p <- plotly_build(p)
-  idx <- traces >= length(p$x$data)
-  if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
-  p$x$style <- c(p$x$style, list(...))
-  p
-}
