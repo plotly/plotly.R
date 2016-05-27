@@ -14,28 +14,28 @@
 \alias{transmute_.plotly}
 \alias{ungroup.plotly}
 \usage{
-\method{groups}{plotly}(x)
+groups.plotly(x)
 
-\method{group_by_}{plotly}(.data, ..., .dots, add = FALSE)
+group_by_.plotly(.data, ..., .dots, add = FALSE)
 
-\method{ungroup}{plotly}(x)
+ungroup.plotly(x)
 
-\method{summarise_}{plotly}(.data, ..., .dots)
+summarise_.plotly(.data, ..., .dots)
 
-\method{mutate_}{plotly}(.data, ..., .dots)
+mutate_.plotly(.data, ..., .dots)
 
-\method{arrange_}{plotly}(.data, ..., .dots)
+arrange_.plotly(.data, ..., .dots)
 
-\method{select_}{plotly}(.data, ..., .dots)
+select_.plotly(.data, ..., .dots)
 
-\method{filter_}{plotly}(.data, ..., .dots)
+filter_.plotly(.data, ..., .dots)
 
-\method{distinct_}{plotly}(.data, ..., .dots)
+distinct_.plotly(.data, ..., .dots)
 
-\method{slice_}{plotly}(.data, ..., .dots)
+slice_.plotly(.data, ..., .dots)
 
-\method{rename_}{plotly}(.data, ..., .dots)
+rename_.plotly(.data, ..., .dots)
 
-\method{transmute_}{plotly}(.data, ..., .dots)
+transmute_.plotly(.data, ..., .dots)
 }
 

@@ -20,12 +20,13 @@ plotly_build <- function(p) {
 }
 
 #' @export
-plotly_build.default <- identity
+plotly_build.default <- function(p) {
+  p
+}
 
 #' @export
 plotly_build.gg <- function(p) {
-  l <- ggplotly(p)
-  browser()
+  ggplotly(p)
 }
 
 #' @export
@@ -47,7 +48,7 @@ plotly_build.plotly <- function(p) {
   p$x$layoutAttrs <- NULL
   p$x$layout <- modifyList(p$x$layout %||% list(), layouts)
   
-  p$x$data <- Map(function(x, y) {
+  dats <- Map(function(x, y) {
     
     is_formula <- vapply(x, is.formula, logical(1))
     fl <- lazyeval::as_f_list(x[is_formula] %||% list())
@@ -66,6 +67,8 @@ plotly_build.plotly <- function(p) {
     x[lengths(x) > 0]
   
   }, p$x$attrs, names(p$x$attrs))
+  
+  p$x$data <- c(p$x$data, dats)
   
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
