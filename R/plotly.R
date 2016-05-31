@@ -9,8 +9,6 @@
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
 #' @param type A character string describing the type of trace.
-#' @param group Either a variable name or a vector to use for grouping. If used, 
-#' a different trace will be created for each unique value.
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
@@ -38,6 +36,7 @@
 #' # change the font
 #' layout(p3, font = list(family = "Courier New, monospace"))
 #' 
+#' 
 #' # using the color argument
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
@@ -56,32 +55,37 @@
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL,
-                    group, color, colors, symbol, symbols, size,
+                    color, colors, symbol, symbols, size,
                     width = NULL, height = NULL, inherit = FALSE,
                     source = "A") {
   # "native" plotly arguments
   argz <- list(...)
   # old arguments to this function that are no longer supported
-  if (!is.null(argz$filename)) 
-    warning("Ignoring filename. Use plotly_POST() if you want to post figures to plotly.")
-  if (!is.null(argz$fileopt)) 
-    warning("Ignoring fileopt. Use plotly_POST() if you want to post figures to plotly.")
-  if (!is.null(argz$world_readable)) 
-    warning("Ignoring world_readable. Use plotly_POST() if you want to post figures to plotly.")
+  for (i in c("filename", "fileopt", "world_readable")) {
+    if (is.null(argz[[i]])) next
+    warning("Ignoring ", i, ". Use plotly_POST() if you want to post figures to plotly.")
+  }
+  if (!is.null(argz[["group"]])) {
+    warning("The group argument has been deprecated. Use group_by() instead.")
+  }
+  
+  # if type is NULL, return the default trace type with a message
+  # if type is invalid, throw an error
+  argz$type <- verify_type(type)
   # tack on "special" arguments
-  argz$group <- verify_arg(group)
   argz$color <- verify_arg(color)
   argz$symbol <- verify_arg(symbol)
   argz$size <- verify_arg(size)
   # TODO: do we really need to verify these?
   argz$colors <- verify_arg(colors)
   argz$symbols <- verify_arg(symbols)
-  argz$type <- verify_type(type)
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()
+  # avoid weird naming clashes
+  plotlyVisDat <- data
   p <- list(
-    visdat = setNames(list(function() data), id),
+    visdat = setNames(list(function() plotlyVisDat), id),
     cur_data = id,
     attrs = setNames(list(argz), id),
     # we always deal with a _list_ of traces and _list_ of layouts 

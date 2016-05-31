@@ -4,7 +4,7 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = NULL, group, color, colors, symbol,
+plot_ly(data = data.frame(), ..., type = NULL, color, colors, symbol,
   symbols, size, width = NULL, height = NULL, inherit = FALSE,
   source = "A")
 }
@@ -15,9 +15,6 @@ plot_ly(data = data.frame(), ..., type = NULL, group, color, colors, symbol,
 Note that acceptable arguments depend on the value of \code{type}.}
 
 \item{type}{A character string describing the type of trace.}
-
-\item{group}{Either a variable name or a vector to use for grouping. If used, 
-a different trace will be created for each unique value.}
 
 \item{color}{Either a variable name or a vector to use for color mapping.}
 
@@ -58,6 +55,7 @@ p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
 # change the font
 layout(p3, font = list(family = "Courier New, monospace"))
+
 
 # using the color argument
 plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")

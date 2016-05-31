@@ -1,36 +1,37 @@
-#' Dplyr verbs for plotly.
+#' Data manipulation verbs for plotly.
 #'
-#' @name plotly-ggvis
+#' @name plotly-data
 #' @keywords internal
 #' @examples
 #' 
+#' # loading dplyr is super important!
 #' library(dplyr)
-#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
+#' 
+#' mtcars %>%
+#'   plot_ly(x = ~wt, y = ~mpg, name = "scatter trace") %>%
 #'   filter(cyl == 4) %>%
-#'   add_points()
+#'   add_points(x = ~wt, y = ~mpg, name = "filtered points", 
+#'     marker = list(color = "red"))
+#'     
+#' library(tidyr)
+#' economics %>%
+#'   gather(variable, value, -date) %>%
+#'   group_by(variable) %>%
+#'   plot_ly(x = ~date, y = ~value)
+#'   
+#'   
+#'
 #' 
 NULL
 
-#' Divide data into groups.
-#'
-#' @param p a plotly visualization.
-#' @param ... variables to group by.
-#' @param add By default, when \code{add = FALSE}, \code{group_by} will
-#'   override existing groups. To instead add to the existing groups,
-#'   use \code{add = TRUE}
-#' @importFrom dplyr group_by
-#' @name group_by
 #' @export
-NULL
-
-#' @export
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 groups.plotly <- function(x) {
   dplyr::groups(plotly_data(x))
 }
 
 #' @export
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
   d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
@@ -39,13 +40,12 @@ group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
 }
 
 #' @export
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 ungroup.plotly <- function(x) {
   dplyr::ungroup(plotly_data(x))
 }
 
-
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -53,7 +53,7 @@ summarise_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -61,7 +61,7 @@ mutate_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -69,7 +69,7 @@ arrange_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -77,7 +77,7 @@ select_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -85,7 +85,7 @@ filter_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -93,7 +93,7 @@ distinct_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -101,7 +101,7 @@ slice_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -109,14 +109,13 @@ rename_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
-#' @rdname dplyr-plotly
+#' @rdname plotly-data
 #' @export
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::transmute_(d, ..., .dots, add = add)
   add_data(.data, d)
 }
-
 
 #' Insert missing values to create trace groupings
 #' 

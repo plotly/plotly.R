@@ -21,8 +21,6 @@ add_data <- function(p, data = NULL) {
 #' @param p a plotly or ggplot object.
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
-#' @param group Either a variable name or a vector to use for grouping. If used, 
-#' a different trace will be created for each unique value.
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
@@ -38,17 +36,22 @@ add_data <- function(p, data = NULL) {
 #' @author Carson Sievert
 #' @export
 add_trace <- function(p, ...,
-                      group, color, colors, symbol, symbols, size, data = NULL) {
+                      color, colors, symbol, symbols, size, data = NULL) {
   # "native" plotly arguments
   argz <- list(...)
-  # tack on "special" arguments
-  if (!missing(group)) argz$group <- substitute(group)
-  if (!missing(color)) argz$color <- substitute(color)
-  if (!missing(colors)) argz$colors <- substitute(colors)
-  if (!missing(symbol)) argz$symbol <- substitute(symbol)
-  if (!missing(symbols)) argz$symbols <- substitute(symbols)
-  if (!missing(size)) argz$size <- substitute(size)
+  
   argz$type <- verify_type(argz$type)
+  
+  if (!is.null(argz[["group"]])) {
+    warning("The group argument has been deprecated. Use group_by() instead.")
+  }
+  
+  # tack on "special" arguments
+  argz$color <- verify_arg(color)
+  argz$colors <- verify_arg(colors)
+  argz$symbol <- verify_arg(symbol)
+  argz$symbols <- verify_arg(symbols)
+  argz$size <- verify_arg(size)
   
   p <- add_data(p, data)
   p$x$attrs[[p$x$cur_data]] <- argz

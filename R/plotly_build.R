@@ -52,8 +52,14 @@ plotly_build.plotly <- function(p) {
     
     is_formula <- vapply(x, is.formula, logical(1))
     fl <- lazyeval::as_f_list(x[is_formula] %||% list())
+    d <- plotly_data(p, y)
+    grps <- dplyr::groups(d)
+    # insert missing values to differentiate groups
+    if (length(grps) > 0) {
+      d <- group2NA(d, as.character(grps))
+    }
     for (var in names(fl)) {
-      x[[var]] <- lazyeval::f_eval(fl[[var]], plotly_data(p, y))
+      x[[var]] <- lazyeval::f_eval(fl[[var]], d)
       varname <- sub("^~", "", deparse2(fl[[var]]))
       # deparse axis names and add to layout
       if (any(c("x", "y", "z") %in% var)) {
