@@ -4,10 +4,13 @@
 \alias{plotly_spec}
 \title{Obtain JSON sent to plotly.js}
 \usage{
-plotly_spec(p = plot_ly(), as = c("json", "plain"), pretty = TRUE)
+plotly_spec(p = plot_ly(), attr = NULL, as = c("json", "plain"),
+  pretty = TRUE)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
+
+\item{attr}{focus on a particular attribute in the spec.}
 
 \item{as}{in what format should the spec be printed?}
 
@@ -19,6 +22,6 @@ debugging.
 }
 \examples{
   
-plotly_spec(plot_ly(), as = "json", pretty = TRUE)
+plotly_spec(plot_ly(), "data")
 }
 

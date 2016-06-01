@@ -12,7 +12,7 @@ Traces created via `add_trace()` (or, more generally, by any `add_*()` function)
 
 NEW FEATURES & IMPROVEMENTS:
 
-* Error checking for trace types and their attributes. 
+* Error checking for trace types and their attributes. Also added a `show_attributes()` function to obtain information about trace attributes.
 * New `add_points()`/`add_lines()`/`add_text()` functions provide a shorthand for common plots.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).

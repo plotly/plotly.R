@@ -31,6 +31,13 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 \description{
 Add a trace to a plotly visualization
 }
+\examples{
+
+p <- plot_ly(economics, x = ~date, y = ~uempmed)
+# add a loess smoother
+p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
+
+}
 \author{
 Carson Sievert
 }

@@ -4,7 +4,7 @@
 \alias{plotly_empty}
 \title{Create a complete empty plotly graph.}
 \usage{
-plotly_empty()
+plotly_empty(...)
 }
 \description{
 Useful when used with \link{subplot}

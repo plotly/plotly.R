@@ -46,7 +46,7 @@ plotly_build.plotly <- function(p) {
   # get rid of the data -> layout mapping and merge all the layouts
   # into a single layout (more recent layouts will override older ones)
   p$x$layoutAttrs <- NULL
-  p$x$layout <- modifyList(p$x$layout %||% list(), Reduce(modifyList, layouts))
+  p$x$layout <- modifyList(p$x$layout %||% list(), Reduce(modifyList, layouts) %||% list())
   
   dats <- Map(function(x, y) {
     
@@ -81,6 +81,8 @@ plotly_build.plotly <- function(p) {
   
   # traces can't have names
   p$x$data <- setNames(p$x$data, NULL)
+  
+  
   
   p
 }

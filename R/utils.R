@@ -46,19 +46,32 @@ verify_plot <- function(p) {
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
 verify_type <- function(type = NULL) {
   if (is.null(type)) {
-    message("No trace type specified. Guessing you want a scatter trace")
+    message("No trace type specified. Guessing you want a 'scatter' trace")
     type <- "scatter"
   }
   if (!is.character(type) || length(type) != 1) {
     stop("The trace type must be a character vector of length 1.\n", 
          call. = FALSE)
   }
-  if (!type %in% traces) {
+  if (!type %in% names(traces)) {
     stop("Trace type must be one of the following: \n",
          "'", paste(traces, collapse = "', '"), "'",
          call. = FALSE)
   }
   type
+}
+
+verify_attrs <- function(type = NULL, attributes = NULL) {
+  type <- verify_type(type)
+  attrs <- traces[[type]]$attributes
+  idx <- attributes %in% names(attrs)
+  if (any(!idx)) {
+    stop(
+      "The '", type, "' trace type doesn't have attribute(s) named: '", 
+      paste(attributes[!idx], collapse = "', '"), "'", call. = FALSE
+    )
+  }
+  attrs[attributes]
 }
 
 # is a given trace type 3d?

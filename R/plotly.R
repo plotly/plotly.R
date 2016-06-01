@@ -58,21 +58,25 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
                     width = NULL, height = NULL, source = "A") {
   # "native" plotly arguments
   argz <- list(...)
-  # old arguments to this function that are no longer supported
+  # warn about old arguments that are no longer supported
   for (i in c("filename", "fileopt", "world_readable")) {
     if (is.null(argz[[i]])) next
     warning("Ignoring ", i, ". Use plotly_POST() if you want to post figures to plotly.")
+    argz[[i]] <- NULL
   }
   if (!is.null(argz[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
+    argz[["group"]] <- NULL
   }
   if (!is.null(argz[["inherit"]])) {
     warning("The inherit argument has been deprecated.")
+    argz[["inherit"]] <- NULL
   }
   
-  # if type is NULL, return the default trace type with a message
-  # if type is invalid, throw an error
+  # verify trace type and it's attributes
   argz$type <- verify_type(type)
+  attrs <- verify_attrs(argz$type, names(argz))
+  
   # tack on "special" arguments
   argz$color <- verify_arg(color)
   argz$symbol <- verify_arg(symbol)

@@ -9,9 +9,12 @@ add_polygons(p, ...)
 
 library(dplyr)
 data(canada.cities, package = "maps")
-canada.cities \%>\%
-  group_by(name) \%>\%
-  plot_ly(x = ~long, y = ~lat) \%>\%
-  add_points()
+
+ggplot2::map_data("world", "canada") \%>\%
+  group_by(group) \%>\%
+  plot_ly(x = ~long, y = ~lat, hoverinfo = "none") \%>\%
+  add_points(text = ~paste(name, "<br />", pop), hoverinfo = "text",
+    data = canada.cities) \%>\%
+  layout(showlegend = FALSE)
 }
 

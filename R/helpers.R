@@ -23,6 +23,18 @@ plotly_spec <- function(p = plot_ly(), attr = NULL, as = c("json", "plain"), pre
   spec
 }
 
+#' Show information about attribute(s) of a given trace type
+#' 
+#' @export
+#' @param type a trace type
+#' @param attrs attributes for the race type
+#' @examples 
+#' 
+#' explain_attrs()
+explain_attrs <- function(type = "scatter", attrs = c("x", "y")) {
+  jsonlite::toJSON(verify_attrs(type, attrs), pretty = TRUE)
+}
+
 
 #' Convert trace types to WebGL
 #' 

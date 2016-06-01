@@ -45,7 +45,7 @@ Reference section (see below).
 \dontrun{
 data(economics, package = "ggplot2")
 # basic time-series plot
-p <- plot_ly(economics, x = ~date, y = ~uempmed, inherit = TRUE)
+p <- plot_ly(economics, x = ~date, y = ~uempmed)
 # add a loess smoother
 p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 # add a title
