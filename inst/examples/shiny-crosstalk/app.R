@@ -5,12 +5,23 @@ library(ggplot2)
 library(crosstalk)
 library(dplyr)
 
+# Prepare mtcars
+mtcars2 <- mtcars
+mtcars2$gear <- factor(mtcars2$gear)
+mtcars2$cyl <- factor(mtcars2$cyl)
+# Move rownames to a proper column
+mtcars2 <- mtcars2 %>% add_rownames()
+
+sd <- SharedData$new(mtcars2, "rowname", group = "A")
+
 ui <- fluidPage(
   fillRow(height = 500,
     plotlyOutput("p1"),
     plotlyOutput("p2"),
     plotOutput("plot1")
-  )
+  ),
+  crosstalk::filter_select("gears", "Gears", sd, ~gear),
+  crosstalk::filter_select("cyl", "Cylinders", sd, ~cyl)
 )
 
 server <- function(input, output, session) {
@@ -21,17 +32,17 @@ server <- function(input, output, session) {
   # Move rownames to a proper column
   mtcars <- mtcars %>% add_rownames()
   
-  sd <- SharedData$new(mtcars, "rowname")
+  sd <- SharedData$new(mtcars, "rowname", group = "A")
   
   output$p1 <- renderPlotly({
-    plot_ly(mtcars, x = wt, y = mpg, color = cyl, mode = "markers") %>%
-      add_trace(x = wt, y = hp, mode = "markers", set = "B") %>%
+    plot_ly(sd, x = wt, y = mpg, color = gear, mode = "markers", 
+      height = "100%") %>%
       layout(dragmode = "select")
   })
   
   output$p2 <- renderPlotly({
-    plot_ly(mtcars, x = wt, y = disp, color = cyl, mode = "markers") %>%
-      add_trace(x = wt, y = hp, mode = "markers", set = "B") %>%
+    plot_ly(sd, x = wt, y = disp, color = gear, mode = "markers", 
+      height = "100%") %>%
       layout(dragmode = "select")
   })
   
