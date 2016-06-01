@@ -4,17 +4,21 @@
 #' debugging.
 #' 
 #' @param p a plotly or ggplot object.
+#' @param attr focus on a particular attribute in the spec.
 #' @param as in what format should the spec be printed?
-#' @param ... arguments passed onto \code{jsonlite::toJSON}
+#' @param pretty adds indentation whitespace to JSON output.
 #' @export
 #' @examples 
 #'   
-#' plotly_spec(plot_ly(), as = "json", pretty = TRUE)
+#' plotly_spec(plot_ly(), "data")
 
-plotly_spec <- function(p = plot_ly(), as = c("plain", "json"), ...) {
+plotly_spec <- function(p = plot_ly(), attr = NULL, as = c("json", "plain"), pretty = TRUE) {
   spec <- plotly_build(p)$x
+  if (!is.null(attr)) {
+    spec <- spec[[attr]]
+  }
   if (identical("json", match.arg(as))) {
-    return(to_JSON(spec, ...))
+    return(to_JSON(spec, pretty = pretty))
   }
   spec
 }
@@ -56,11 +60,11 @@ toWebGL <- function(p, warn = TRUE) {
 #' Useful when used with \link{subplot}
 #' 
 #' @export
-plotly_empty <- function() {
+plotly_empty <- function(...) {
   eaxis <- list(
     showticklabels = FALSE,
     showgrid = FALSE,
     zeroline = FALSE
   )
-  layout(plot_ly(), xaxis = eaxis, yaxis = eaxis)
+  layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
 }

@@ -5,8 +5,7 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors, symbol,
-  symbols, size, width = NULL, height = NULL, inherit = FALSE,
-  source = "A")
+  symbols, size, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -32,8 +31,6 @@ or a color interpolation function like \code{colorRamp()}.}
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
-
-\item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
 \item{source}{Only relevant for \link{event_data}.}
 }

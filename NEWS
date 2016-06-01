@@ -4,18 +4,20 @@ MAJOR CHANGES & IMPROVEMENTS:
 
 * Formulas (instead of plain expressions) are now required when referring to variable names. For example, `plot_ly(mtcars, x = wt, y = mpg, color = vs)` should now be `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~vs)`. This is a major breaking change, but it is necessary to ensure that evaluation is correct in all contexts (as a result, `evaluate` argument is now deprecated). It also has the benefit of being easier to program with (i.e., writing your own custom functions that wrap `plot_ly()`). For more details, see the [lazyeval vignette](https://github.com/hadley/lazyeval/blob/master/vignettes/lazyeval.Rmd)
 * The central object (i.e., the return value and first argument to functions) is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, plotly objects can now be serialized across R sessions and avoid [memory leak issues](https://github.com/rstudio/shiny/issues/1151). This also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `help("plotly-data")` for more details).
-* The `group` argument has been deprecated in favor of `group_by()`. Also, groupings will no longer create multiple traces (fixes #418, #381, #577).
+* The `group` argument is deprecated. Groups should be added to the data via `dplyr::group_by()`. Also, groupings will no longer create multiple traces (fixes #418, #381, #577).
+* The `inherit` argument is deprecated. Any arguments/attributes specified in `plot_ly()` will automatically be passed along to additional traces added via `add_trace()` (or any of it's `add_*()` siblings).
+
+Traces created via `add_trace()` (or, more generally, by any `add_*()` function), will inherit _required_ attributes from parent traces.
 
 
 NEW FEATURES & IMPROVEMENTS:
 
-* Error checking for trace types.
+* Error checking for trace types and their attributes. 
 * New `add_points()`/`add_lines()`/`add_text()` functions provide a shorthand for common plots.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
 * Added a `plotly_spec()` function for inspecting the data sent to plotly.js (as an R list or JSON).
-
 
 
 3.6.2 -- 24 May 2016

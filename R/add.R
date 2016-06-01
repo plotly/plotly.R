@@ -35,6 +35,12 @@ add_data <- function(p, data = NULL) {
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
+#' @examples 
+#' 
+#' p <- plot_ly(economics, x = ~date, y = ~uempmed)
+#' # add a loess smoother
+#' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
+#' 
 add_trace <- function(p, ...,
                       color, colors, symbol, symbols, size, data = NULL) {
   # "native" plotly arguments
@@ -54,7 +60,14 @@ add_trace <- function(p, ...,
   argz$size <- verify_arg(size)
   
   p <- add_data(p, data)
-  p$x$attrs[[p$x$cur_data]] <- argz
+  
+  # inherit arguments from the "first layer"
+  new_attrs <- modifyList(p$x$attrs[[1]] %||% list(), argz)
+  p$x$attrs <- c(
+    p$x$attrs %||% list(),
+    setNames(list(new_attrs), p$x$cur_data)
+  )
+  
   p
 }
 
@@ -74,8 +87,61 @@ add_text <- function(p, ...) {
 }
 
 #' @export
+#' @examples 
+#' 
+#' library(dplyr)
+#' data(canada.cities, package = "maps")
+#' 
+#' ggplot2::map_data("world", "canada") %>%
+#'   group_by(group) %>%
+#'   plot_ly(x = ~long, y = ~lat, hoverinfo = "none") %>%
+#'   add_points(text = ~paste(name, "<br />", pop), hoverinfo = "text",
+#'     data = canada.cities) %>%
+#'   layout(showlegend = FALSE)
 add_polygons <- function(p, ...) {
   # TODO: Should mode='markers+lines'? If so, retrace first points?
-  add_trace(p, type = "scatter", mode = "none", fill = "toself", ...)
+  add_trace(p, type = "scatter", mode = "lines", fill = "toself", ...)
 }
+
+#' @export
+add_ribbons <- function(p, ...) {
+  # TODO: Should mode='markers+lines'? If so, retrace first points?
+  add_polygons(...)
+}
+
+
+#' @export
+#' @examples
+#' 
+#' x <- rnorm(10)
+#' plot_ly(x = ~x) %>%
+#'   add_chull()
+add_chull <- function(p, ...) {
+  stop("not yet implemented")
+  ch <- chull(x, y = NULL)
+  # TODO: Should mode='markers+lines'? If so, retrace first points?
+  add_polygons(...)
+}
+
+
+# ------------------------------------------------------------------------
+# Non-trace addition
+# ------------------------------------------------------------------------
+
+#' @export
+add_transform <- function(p, ...) {
+  stop("not yet implemented")
+}
+
+
+#' @export
+add_shape <- function(p, ...) {
+  stop("not yet implemented")
+}
+
+#' @export
+add_annotation <- function(p, ...) {
+  stop("not yet implemented")
+}
+
 

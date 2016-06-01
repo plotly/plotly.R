@@ -42,11 +42,11 @@ plotly_build.plotly <- function(p) {
     x[lengths(x) > 0]
     
   }, p$x$layoutAttrs, names(p$x$layoutAttrs))
-  
+
   # get rid of the data -> layout mapping and merge all the layouts
   # into a single layout (more recent layouts will override older ones)
   p$x$layoutAttrs <- NULL
-  p$x$layout <- modifyList(p$x$layout %||% list(), layouts)
+  p$x$layout <- modifyList(p$x$layout %||% list(), Reduce(modifyList, layouts))
   
   dats <- Map(function(x, y) {
     

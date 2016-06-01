@@ -19,7 +19,6 @@
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
-#' @param inherit logical. Should future traces inherit properties from this initial trace?
 #' @param source Only relevant for \link{event_data}.
 #' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
@@ -28,7 +27,7 @@
 #' \dontrun{
 #' data(economics, package = "ggplot2")
 #' # basic time-series plot
-#' p <- plot_ly(economics, x = ~date, y = ~uempmed, inherit = TRUE)
+#' p <- plot_ly(economics, x = ~date, y = ~uempmed)
 #' # add a loess smoother
 #' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 #' # add a title
@@ -56,8 +55,7 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL,
                     color, colors, symbol, symbols, size,
-                    width = NULL, height = NULL, inherit = FALSE,
-                    source = "A") {
+                    width = NULL, height = NULL, source = "A") {
   # "native" plotly arguments
   argz <- list(...)
   # old arguments to this function that are no longer supported
@@ -67,6 +65,9 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   if (!is.null(argz[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
+  }
+  if (!is.null(argz[["inherit"]])) {
+    warning("The inherit argument has been deprecated.")
   }
   
   # if type is NULL, return the default trace type with a message
@@ -97,7 +98,6 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
         margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
-    inherit = inherit,
     base_url = get_domain()
   )
   

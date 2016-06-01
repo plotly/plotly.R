@@ -26,11 +26,6 @@ new_id <- function() {
   basename(tempfile(""))
 }
 
-# obtain the current data from a plotly vis
-plotly_data <- function(p, id = p$x$cur_data) {
-  p$x$visdat[[id]]()
-}
-
 verify_arg <- function(arg) {
   if (missing(arg)) return(NULL)
   if (!is.formula(arg)) {

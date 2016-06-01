@@ -4,14 +4,14 @@
 \alias{plotly_spec}
 \title{Obtain JSON sent to plotly.js}
 \usage{
-plotly_spec(p = plot_ly(), as = c("plain", "json"), ...)
+plotly_spec(p = plot_ly(), as = c("json", "plain"), pretty = TRUE)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
 
 \item{as}{in what format should the spec be printed?}
 
-\item{...}{arguments passed onto \code{jsonlite::toJSON}}
+\item{pretty}{adds indentation whitespace to JSON output.}
 }
 \description{
 This function returns the JSON sent to plotly.js which can be useful for 
