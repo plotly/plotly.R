@@ -300,16 +300,20 @@ TraceManager.prototype.updateFilter = function(group, keys) {
   // Be sure NOT to modify origData (or trace, which is a reference to
   // a child of origData).
 
-  var keySet = new Set(keys);
-
-  for (var i = 0; i < this.origData.length; i++) {
-    var trace = this.origData[i];
-    if (!trace.key || trace.set !== group) {
-      continue;
+  if (typeof(keys) === "undefined" || keys === null) {
+    this.gd.data = JSON.parse(JSON.stringify(this.origData));
+  } else {
+    var keySet = new Set(keys);
+  
+    for (var i = 0; i < this.origData.length; i++) {
+      var trace = this.origData[i];
+      if (!trace.key || trace.set !== group) {
+        continue;
+      }
+      var matches = findMatches(trace.key, keySet);
+      // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+      this.gd.data[i] = subsetArrayAttrs(trace, matches);
     }
-    var matches = findMatches(trace.key, keySet);
-    // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
-    this.gd.data[i] = subsetArrayAttrs(trace, matches);
   }
 
   Plotly.redraw(this.gd);
