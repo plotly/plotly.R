@@ -36,9 +36,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
     d <- datz[[i]]
     # always split on discrete scales, and other geom specific aesthetics that
     # can't translate to a single trace
-    split_by <- c(split_on(d), names(discreteScales))
+    split_by <- unique(c(split_on(d), names(discreteScales)))
+    if (length(split_by)>0) split_by <- paste0(split_by, "_plotlyDomain")
     # always split on PANEL and domain values (for trace ordering)
-    split_by <- c("PANEL", paste0(split_by, "_plotlyDomain"))
+    split_by <- c("PANEL", split_by)
     # split "this layers" data into a list of data frames
     idx <- names(d) %in% split_by
     # ensure the factor level orders (which determies traces order)
@@ -55,16 +56,20 @@ layers2traces <- function(data, prestats_data, layout, p) {
     trs <- Map(geom2trace, dl, paramz[i], list(p))
     # are we splitting by a discrete scale on this layer?
     # if so, set name/legendgroup/showlegend
-    isDiscrete <- names(d) %in% paste0(names(discreteScales), "_plotlyDomain")
+    isDiscrete <- names(d) %in% (if (length(discreteScales) > 0) { paste0(names(discreteScales), "_plotlyDomain") } else as.character())
     if (length(trs) > 1 && sum(isDiscrete) >= 1) {
-      nms <- names(trs)
-      # ignore "non-discrete" scales that we've split on
-      for (w in seq_len(sum(names(d) %in% c("PANEL", split_on(d))))) {
-        nms <- sub("^[^@%&]@%&", "", nms)
-      }
-      nms <- strsplit(nms, "@%&")
+      nms <- strsplit(names(trs), "@%&", fixed = TRUE)
+      # ignore "non-discrete" scales that we've split by
+      n_ignore <- sum(!isDiscrete & (names(d) %in% split_by))
       nms <- vapply(nms, function(x) {
-        if (length(x) > 1) paste0("(", paste0(x, collapse = ","), ")") else x
+        n_x <- length(x)
+        if (n_x > n_ignore + 1) {
+          paste0("(", paste0(x[(n_ignore+1):n_x], collapse = ","), ")")
+        } else if (n_x > n_ignore) {
+          x[[n_ignore+1]]
+        } else {
+          NA_character_
+        }
       }, character(1))
       trs <- Map(function(x, y) {
         x$name <- y
