@@ -105,7 +105,7 @@ add_polygons <- function(p, ...) {
 
 #' @export
 add_ribbons <- function(p, ...) {
-  # TODO: Should mode='markers+lines'? If so, retrace first points?
+  # TODO: add ymin, ymax arguments?
   add_polygons(...)
 }
 

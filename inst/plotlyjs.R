@@ -30,6 +30,7 @@ update_attributes <- function(path = ".") {
   devtools::load_all(path)
   pjs <- RSelenium::phantom()
   on.exit(pjs$stop(), add = TRUE)
+  on.exit(unlink("index.html"), add = TRUE)
   remDr <- RSelenium::remoteDriver(browserName = "phantomjs")
   Sys.sleep(5)
   remDr$open(silent = TRUE)
