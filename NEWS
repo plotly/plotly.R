@@ -1,5 +1,11 @@
 3.6.4 -- 31 May 2016
 
+IMPROVEMENT:
+
+Multiple rows of facet strips will now be separated by <br> (i.e., line breaks) instead of ,. See #593.
+
+3.6.4 -- 31 May 2016
+
 BUG FIX:
 
 embed_notebook() will no longer use a '.embed' extension in the iframe src attribute. See #613.
