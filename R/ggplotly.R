@@ -31,14 +31,19 @@
 #'  ggplotly(viz)
 #' }
 #'
-ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
+ggplotly <- function(p = ggplot2::last_plot(),
+                     width = NULL, height = NULL,
+                     virt.width = ifelse(is.numeric(width), width, 1024),
+                     virt.height = ifelse(is.numeric(height), height, 768),
                      tooltip = "all", source = "A", ...) {
   UseMethod("ggplotly", p)
 }
 
 #' @export
-ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
-                              height = NULL, tooltip = "all", source = "A", ...) {
+ggplotly.ggmatrix <- function(p = ggplot2::last_plot(),
+                              width = NULL, height = NULL,
+                              virt.width = NULL, virt.height = NULL,
+                              tooltip = "all", source = "A", ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -70,9 +75,12 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 }
   
 #' @export
-ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
-                            height = NULL, tooltip = "all", source = "A", ...) {
-  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
+ggplotly.ggplot <- function(p = ggplot2::last_plot(),
+                            width = NULL, height = NULL,
+                            virt.width = NULL, virt.height = NULL,
+                            tooltip = "all", source = "A", ...) {
+  l <- gg2list(p, width = width, height = height, virt.width=virt.width, virt.height=virt.height,
+               tooltip = tooltip, source = source)
   hash_plot(p$data, l)
 }
 
@@ -87,11 +95,18 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A", ...) {
+gg2list <- function(p, width = NULL, height = NULL,
+                    virt.width = NULL, virt.height = NULL,
+                    tooltip = "all", source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
+  vp <- NULL
+  if (is.numeric(virt.width) && is.numeric(virt.height)) {
+    vp <- grid::viewport(width=grid::unit(virt.width, "points"), height=unit(virt.height, "points"))
+    grid::pushViewport(vp, recording=FALSE)
+  }
   p <- ggfun("plot_clone")(p)
   if (length(p$layers) == 0) {
     p <- p + geom_blank()
@@ -693,6 +708,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   l$width <- width
   l$height <- height
   l$source <- source
+  if (!is.null(vp)) grid::popViewport()
   structure(l, class = "plotly_built")
 }
 
