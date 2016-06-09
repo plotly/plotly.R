@@ -19,6 +19,24 @@ NEW FEATURES & IMPROVEMENTS:
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
 * Added a `plotly_spec()` function for inspecting the data sent to plotly.js (as an R list or JSON).
 
+3.6.5 -- 10 June 2016
+
+IMPROVEMENT:
+
+Multiple rows of facet strips will now be separated by <br> (i.e., line breaks) instead of ,. See #593.
+
+3.6.4 -- 31 May 2016
+
+BUG FIX:
+
+embed_notebook() will no longer use a '.embed' extension in the iframe src attribute. See #613.
+
+3.6.3 -- 24 May 2016
+
+CHANGES:
+
+Provided a better way of reexporting magrittr::`%>%`. See #597.
+>>>>>>> master
 
 3.6.2 -- 24 May 2016
 

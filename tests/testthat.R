@@ -57,6 +57,17 @@ if (report_diffs || build_table) {
   }
 }
 
+# Some tests make plot.ly HTTP requests and require a valid user account
+# (see test-plotly-filename.R). For security reasons, these tests should be 
+# skipped on pull requests (the .travis.yml file uses encrypted credentials
+# & encrypted environment vars cannot be accessed on pull request builds)
+skip_on_pull_request <- function() {
+  if (!grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))) {
+    return(invisible(TRUE))
+  }
+  skip("Can't test plot.ly API calls on a pull request")
+}
+
 # This function is called within testthat/test-*.R files.
 # It takes a ggplot or plotly object as input, and it returns a figure
 # object (aka the data behind the plot).
