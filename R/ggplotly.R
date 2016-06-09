@@ -485,7 +485,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     if (has_facet(p)) {
       col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       col_txt <- paste(
-        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = ", "
+        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(p$facet, "grid") && lay$ROW != 1) col_txt <- ""
@@ -500,7 +500,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gglayout$shapes <- c(gglayout$shapes, strip)
       }
       row_txt <- paste(
-        p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
+        p$facet$labeller(lay[names(p$facet$rows)]), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
       if (inherits(p$facet, "grid") && lay$COL != nCols) row_txt <- ""
