@@ -54,7 +54,7 @@
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL,
-                    color, colors, symbol, symbols, size,
+                    color, colors = NULL, symbol, symbols = NULL, size,
                     width = NULL, height = NULL, source = "A") {
   # "native" plotly arguments
   argz <- list(...)
@@ -82,8 +82,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   argz$symbol <- verify_arg(symbol)
   argz$size <- verify_arg(size)
   # TODO: do we really need to verify these?
-  argz$colors <- verify_arg(colors)
-  argz$symbols <- verify_arg(symbols)
+  argz$colors <- colors
+  argz$symbols <- symbols
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()

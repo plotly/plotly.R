@@ -42,7 +42,8 @@ add_data <- function(p, data = NULL) {
 #' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 #' 
 add_trace <- function(p, ...,
-                      color, colors, symbol, symbols, size, data = NULL) {
+                      color, colors = NULL, symbol, symbols = NULL, 
+                      size, data = NULL) {
   # "native" plotly arguments
   argz <- list(...)
   
@@ -54,10 +55,11 @@ add_trace <- function(p, ...,
   
   # tack on "special" arguments
   argz$color <- verify_arg(color)
-  argz$colors <- verify_arg(colors)
   argz$symbol <- verify_arg(symbol)
-  argz$symbols <- verify_arg(symbols)
   argz$size <- verify_arg(size)
+  
+  argz$colors <- colors
+  argz$colors <- symbols
   
   p <- add_data(p, data)
   

@@ -26,7 +26,7 @@ test_that("polygons filled with the same color become one trace", {
   tr <- info$data[[1]]
   expected.x <- c(10, 11, 11, 10, 10, NA, 12, 13, 13, 12, 12)
   expect_equal(tr$x, expected.x)
-  expect_equal(tr$fill, "tozerox")
+  expect_equal(tr$fill, "toself")
   expected.y <- c(0, 0, 1, 1, 0, NA, 0, 0, 1, 1, 0)
   expect_equal(tr$y, expected.y)
 })
@@ -35,13 +35,13 @@ blue.color <- rgb(0.23, 0.45, 0.67)
 
 test_that("polygons with different color become separate traces", {
   gg <- ggplot(poly.df) +
-    geom_polygon(aes(x, y, color = lab), fill = "grey")+
+    geom_polygon(aes(x, y, color = lab), fill = "grey") +
     scale_color_manual(values = c(left = blue.color, right = "springgreen3"))
   info <- expect_traces(gg, 2, "aes-color")
   traces.by.name <- list()
   for(tr in info$data){
     expect_equal(tr$fillcolor, toRGB("grey"))
-    expect_equal(tr$fill, "tozerox")
+    expect_equal(tr$fill, "toself")
     traces.by.name[[tr$name]] <- tr
   }
   expect_equal(traces.by.name[[1]]$x, c(10, 11, 11, 10, 10))
@@ -78,7 +78,7 @@ test_that("geom_polygon(aes(fill), color) -> line$color", {
   traces.by.name <- list()
   for(tr in info$data){
     expect_true(tr$line$color == toRGB("black"))
-    expect_true(tr$fill == "tozerox")
+    expect_true(tr$fill == "toself")
     traces.by.name[[tr$name]] <- tr
   }
   expect_equal(traces.by.name[[1]]$x, c(10, 11, 11, 10, 10))
@@ -98,7 +98,7 @@ test_that("geom_polygon(aes(linetype), fill, color)", {
   for(tr in info$data){
     expect_true(tr$fillcolor == toRGB("red"))
     expect_true(tr$line$color == toRGB("blue"))
-    expect_true(tr$fill == "tozerox")
+    expect_true(tr$fill == "toself")
     traces.by.name[[tr$name]] <- tr
   }
   expect_equal(traces.by.name[[1]]$x, c(10, 11, 11, 10, 10))
@@ -118,7 +118,7 @@ test_that("geom_polygon(aes(size), fill, colour)", {
   for(tr in info$data){
     expect_true(tr$fillcolor == toRGB("orange"))
     expect_true(tr$line$color == toRGB("black"))
-    expect_true(tr$fill == "tozerox")
+    expect_true(tr$fill == "toself")
     traces.by.name[[tr$name]] <- tr
   }
   expect_equal(traces.by.name[[1]]$x, c(10, 11, 11, 10, 10))
@@ -149,7 +149,7 @@ star.group <- ggplot(stars) +
 test_that("geom_polygon(aes(group)) -> 1 trace", {
   info <- expect_traces(star.group, 1, "star-group")
   tr <- info$data[[1]]
-  expect_equal(tr$fill, "tozerox")
+  expect_equal(tr$fill, "toself")
   expect_equal(
     tr$x, c(0, -1, 2, -2, 1, 0, NA, 10, 9, 12, 8, 11, 10)
   )
@@ -164,7 +164,7 @@ star.group.color <- ggplot(stars) +
 test_that("geom_polygon(aes(group), color) -> 1 trace", {
   info <- expect_traces(star.group.color, 1, "star-group-color")
   tr <- info$data[[1]]
-  expect_true(tr$fill == "tozerox")
+  expect_true(tr$fill == "toself")
   expect_true(tr$line$color == toRGB("red"))
   expect_equal(
     tr$x, c(0, -1, 2, -2, 1, 0, NA, 10, 9, 12, 8, 11, 10)
@@ -183,7 +183,7 @@ test_that("geom_polygon(aes(group, fill), color) -> 2 trace", {
   traces.by.name <- list()
   for(tr in info$data){
     expect_true(tr$line$color == toRGB("black"))
-    expect_true(tr$fill == "tozerox")
+    expect_true(tr$fill == "toself")
     expect_equal(tr$y, c(2, 0, 1, 1, 0, 2))
     traces.by.name[[tr$name]] <- tr
   }

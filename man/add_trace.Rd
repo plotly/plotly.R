@@ -4,7 +4,8 @@
 \alias{add_trace}
 \title{Add a trace to a plotly visualization}
 \usage{
-add_trace(p, ..., color, colors, symbol, symbols, size, data = NULL)
+add_trace(p, ..., color, colors = NULL, symbol, symbols = NULL, size,
+  data = NULL)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
