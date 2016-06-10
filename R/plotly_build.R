@@ -56,8 +56,9 @@ plotly_build.plotly <- function(p) {
     grps <- dplyr::groups(d)
     # insert missing values to differentiate groups
     if (length(grps) > 0) {
-      d <- group2NA(d, as.character(grps))
+      d <- group2NA(d, groupNames = as.character(grps))
     }
+    # perform the evaluation
     for (var in names(fl)) {
       x[[var]] <- lazyeval::f_eval(fl[[var]], d)
       varname <- sub("^~", "", deparse2(fl[[var]]))
@@ -70,10 +71,28 @@ plotly_build.plotly <- function(p) {
         }
       }
     }
+    
+    # create an index for splitting the trace into multiple traces
+    #discreteVars <- compact(list(if (is.discrete(x$color)) x$color, x$symbol))
+    #if (length(discreteVars) > 0) {
+    #  idx <- do.call("interaction", discreteVars)
+    #  lvls <- levels(idx)
+    #  
+    #}
+    
+    
+    # "transforms" for special arguments
+    # TODO: let plotly.js handle this logic?
+    # browser()
+    
+    
+    
     x[lengths(x) > 0]
   
   }, p$x$attrs, names(p$x$attrs))
   
+  # it's possible that somethings, like figures (pulled from a plotly server), 
+  # already have "built" data
   p$x$data <- c(p$x$data, dats)
   
   # get rid of data -> vis mapping stuff
@@ -82,8 +101,6 @@ plotly_build.plotly <- function(p) {
   # traces can't have names
   p$x$data <- setNames(p$x$data, NULL)
   
-  
-  
   p
 }
 
@@ -91,8 +108,8 @@ plotly_build.plotly <- function(p) {
 colorize <- function(dat, title = "") {
   cols <- dat[["color"]] %||% dat[["z"]]
   if (is.numeric(cols)) {
-    # by default, use viridis::viridis(10) -> http://rud.is/b/2015/07/20/using-the-new-viridis-colormap-in-r-thanks-to-simon-garnier/
-    colors <- dat[["colors"]] %||% viridis::viridis(10)
+    # http://rud.is/b/2015/07/20/using-the-new-viridis-colormap-in-r-thanks-to-simon-garnier/
+    colors <- dat[["colors"]] %||% viridisLite::viridis(10)
     cols <- as.vector(cols)
     rng <- range(cols, na.rm = TRUE)
     x <- seq(min(rng), max(rng), length.out = 10)
@@ -117,7 +134,7 @@ colorize <- function(dat, title = "") {
   } else { # discrete color scale
     lvls <- unique(cols)
     N <- length(lvls)
-    default <- if (is.ordered(cols)) viridis::viridis(N) 
+    default <- if (is.ordered(cols)) viridisLite::viridis(N) 
     else RColorBrewer::brewer.pal(N, "Set2")
     colors <- dat[["colors"]] %||% default
     colz <- scales::col_factor(colors, levels = lvls, na.color = "transparent")(lvls)
@@ -131,7 +148,7 @@ colorize <- function(dat, title = "") {
 
 symbolize <- function(dat) {
   # symbols really only make sense when markers are in the mode, right?
-  dat$mode <- dat$mode %||% "markers"
+  dat$mode <- grepl("markers", dat$mode %||% "markers")
   dat <- traceify(dat, "symbol")
   dat <- lapply(dat, function(x) { x$symbol <- NULL; x })
   N <- length(dat)
@@ -144,7 +161,7 @@ symbolize <- function(dat) {
 
 # break up a single trace into multiple traces according to values stored 
 # a particular key name
-traceify <- function(dat, nm = "group") {
+traceify <- function(dat, nm = "color") {
   x <- dat[[nm]]
   if (is.null(x)) {
     return(list(dat))

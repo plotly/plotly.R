@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 3.6.5
+Version: 4.0.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -27,7 +27,7 @@ Imports:
     jsonlite,
     magrittr,
     digest,
-    viridis,
+    viridisLite,
     base64enc,
     htmlwidgets,
     tidyr,
