@@ -47,7 +47,7 @@ add_trace <- function(p, ...,
   # "native" plotly arguments
   argz <- list(...)
   
-  argz$type <- verify_type(argz$type)
+  argz$type <- verify_type(argz$type %||% p$x$attrs[[1]]$type)
   
   if (!is.null(argz[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
