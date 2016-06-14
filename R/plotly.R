@@ -95,10 +95,8 @@ plot_ly <- function(data = data.frame(), ..., type = "scatter",
   # plotly objects should always have a _list_ of trace(s)
   p <- list(
     data = list(tr),
-    layout = NULL,
+    layout = list(width = width, height = height),
     url = NULL,
-    width = width,
-    height = height,
     source = source
   )
   

@@ -31,6 +31,9 @@ HTMLWidgets.widget({
       instance.plotly = true;
       instance.autosize = x.layout.autosize;
     } else {
+      // for some reason, we must explictly set this explicitly?
+      // https://github.com/plotly/plotly.js/issues/537
+      x.layout.autosize = true;
       Plotly.newPlot(graphDiv, x.data, x.layout);
     }
     
