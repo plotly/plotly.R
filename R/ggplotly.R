@@ -700,7 +700,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     source = source
   )
   # ensure properties are boxed correctly
-  add_boxed(rm_asis(l))
+  rm_asis(l)
 }
 
 

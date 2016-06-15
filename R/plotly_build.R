@@ -48,7 +48,15 @@ plotly_build.plotly <- function(p) {
   p$x$layoutAttrs <- NULL
   p$x$layout <- modifyList(p$x$layout %||% list(), Reduce(modifyList, layouts) %||% list())
   
+  # If type was not specified in plot_ly(), it doesn't create a trace unless
+  # there are no other traces
+  if (length(p$x$attrs) > 1 && is.null(p$x$attrs[[1]][["type"]])) {
+    p$x$attrs[[1]] <- NULL
+  }
+  
   dats <- Map(function(x, y) {
+    
+    x$type <- verify_type(x$type)
     
     is_formula <- vapply(x, is.formula, logical(1))
     fl <- lazyeval::as_f_list(x[is_formula] %||% list())
@@ -71,8 +79,6 @@ plotly_build.plotly <- function(p) {
         }
       }
     }
-    
-    x$type <- verify_type(x$type)
     
     x[lengths(x) > 0]
     
@@ -126,7 +132,8 @@ plotly_build.plotly <- function(p) {
   
   # verify plot attributes are legal according to the plotly.js spec
   # (and box attributes data_array attributes where appropriate)
-  verify_plot(p)
+  verify_attr_names(p)
+  verify_boxed(p)
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
@@ -137,6 +144,10 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   if (all(nColors == 0)) {
     return(traces)
   }
+  isNumeric <- vapply(color, is.numeric, logical(1))
+  isDiscrete <- vapply(color, is.discrete, logical(1))
+  colors <- lapply(traces, "[[", "colors")
+  
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   types <- vapply(traces, function(tr) tr$type, character(1))
   modes <- vapply(traces, function(tr) {
@@ -147,9 +158,6 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   hasText <- has_text(types, modes)
   hasZ <- !grepl("scatter", types) & 
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
-  
-  isNumeric <- vapply(color, is.numeric, logical(1))
-  colors <- lapply(traces, "[[", "colors")
   
   if (any(isNumeric)) {
     palette <- compact(colors[isNumeric]) %||% viridisLite::viridis(10)
@@ -205,11 +213,12 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
   
-  if (any(!isNumeric)) {
-    allColor <- unlist(color[!isNumeric])
+  if (any(isDiscrete)) {
+    browser()
+    allColor <- unlist(color[isDiscrete])
     lvls <- unique(allColor)
     N <- length(lvls)
-    palette <- compact(colors[!isNumeric]) %||% 
+    palette <- compact(colors[isDiscrete]) %||% 
       if (is.ordered(allColor)) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
     if (is.list(palette) && length(palette) > 1) {
       stop("Multiple numeric color palettes specified (via the colors argument).\n",
@@ -217,7 +226,7 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
            call. = FALSE)
     }
     colScale <- scales::col_factor(palette, levels = lvls, na.color = na.color)
-    for (i in which(!isNumeric)) {
+    for (i in which(isDiscrete)) {
       if (hasLine[[i]]) {
         traces[[i]]$line$color <- colScale(color[[i]])
       }                 
@@ -227,7 +236,6 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
       if (hasText[[i]]) {
         traces[[i]]$textfont$color <- colScale(color[[i]])
       }
-      
     }
   }
   

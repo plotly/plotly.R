@@ -6,6 +6,10 @@ is.formula <- function(f) {
   inherits(f, "formula")
 }
 
+is.colorbar <- function(tr) {
+  inherits(tr, "plotly_colorbar")
+}
+
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
@@ -35,38 +39,86 @@ verify_arg <- function(arg) {
   arg
 }
 
-# make sure plot attributes are valid according to the plotly.js schema
-verify_plot <- function(p) {
+# make sure plot attributes adhere to the plotly.js schema
+verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
-  layoutAttrs <- sub("[0-9]+$", "", names(p$x$layout))
-  validLayoutAttrs <- names(Schema$layout$layoutAttributes)
-  illegalLayoutAttrs <- setdiff(layoutAttrs, validLayoutAttrs)
-  if (length(illegalLayoutAttrs)) {
-    stop("The following layout attributes don't exist:\n'",
-         paste(illegalLayoutAttrs, collapse = "', '"), "'\n", 
-         "Valid layout attributes include:\n'",
-         paste(validLayoutNames, collapse = "', '"), "'\n", 
-         call. = FALSE)
-  }
-  
-  traceTypes <- unlist(lapply(p$x$data, "[[", "type"))
-  validTraceTypes <- names(Schema$traces)
-  illegalTraceTypes <- setdiff(traceTypes, validTraceTypes)
-  if (length(illegalTraceTypes)) {
-    stop("The following trace types don't exist:\n'",
-         paste(illegalTraceTypes, collapse = "', '"), "'\n", 
-         "Valid layout attributes include:\n'",
-         paste(validTraceTypes, collapse = "', '"), "'\n", 
-         call. = FALSE)
+  check_attrs(
+    sub("[0-9]+$", "", names(p$x$layout)),
+    names(Schema$layout$layoutAttributes)
+  )
+  for (tr in seq_along(p$x$data)) {
+    thisTrace <- p$x$data[[tr]]
+    validAttrs <- Schema$traces[[thisTrace$type]]$attributes
+    check_attrs(names(thisTrace), names(validAttrs))
   }
   invisible(p)
+}
+
+check_attrs <- function(proposedAttrs, validAttrs) {
+  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if (length(illegalAttrs)) {
+    stop("The following attributes don't exist:\n'",
+         paste(illegalAttrs, collapse = "', '"), "'\n", 
+         "Valid options include:\n'",
+         paste(validAttrs, collapse = "', '"), "'\n", 
+         call. = FALSE)
+  }
+  invisible(proposedAttrs)
+}
+
+# ensure both the layout and trace attributes are sent to plotly.js
+# as data_arrays
+verify_boxed <- function(p) {
+  layoutNames <- names(p$x$layout)
+  layoutNew <- verify_box(
+    setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
+    Schema$layout$layoutAttributes
+  )
+  p$x$layout <- setNames(layoutNew, layoutNames)
+  for (tr in seq_along(p$x$data)) {
+    thisTrace <- p$x$data[[tr]]
+    validAttrs <- Schema$traces[[thisTrace$type]]$attributes
+    p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
+  }
+  p
+}
+
+verify_box <- function(proposed, schema) {
+  for (attr in names(proposed)) {
+    attrVal <- proposed[[attr]]
+    attrSchema <- schema[[attr]]
+    isArray <- tryCatch(
+      identical(attrSchema[["valType"]], "data_array"),
+      error = function(e) FALSE
+    )
+    isObject <- tryCatch(
+      identical(attrSchema[["role"]], "object"),
+      error = function(e) FALSE
+    )
+    if (isArray) {
+      proposed[[attr]] <- i(attrVal)
+    }
+    # we don't have to go more than two-levels, right?
+    if (isObject) {
+      for (attr2 in names(attrVal)) {
+        isArray2 <- tryCatch(
+          identical(attrSchema[[attr2]][["valType"]], "data_array"),
+          error = function(e) FALSE
+        )
+        if (isArray2) {
+          proposed[[attr]][[attr2]] <- i(attrVal[[attr2]])
+        }
+      }
+    }
+  }
+  proposed
 }
 
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
 verify_type <- function(type = NULL) {
   if (is.null(type)) {
-    message("No trace type specified. Guessing you want a 'scatter' trace")
+    message("No trace type specified. Using the default 'scatter'")
     type <- "scatter"
   }
   if (!is.character(type) || length(type) != 1) {
@@ -80,20 +132,6 @@ verify_type <- function(type = NULL) {
   }
   type
 }
-
-# verify_attrs <- function(type = NULL, attributes = NULL) {
-#   type <- verify_type(type)
-#   attrs <- traces[[type]]$attributes
-#   idx <- attributes %in% names(attrs)
-#   if (any(!idx)) {
-#     stop(
-#       "The '", type, "' trace type doesn't have attribute(s) named: '", 
-#       paste(attributes[!idx], collapse = "', '"), "'", call. = FALSE
-#     )
-#   }
-#   attrs[attributes]
-# }
-
 
 has_marker <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
@@ -128,7 +166,7 @@ has_legend <- function(p) {
 
 has_colorbar <- function(p) {
   isVisibleBar <- function(tr) {
-    inherits(tr, "plotly_colorbar") && isTRUE(tr$showscale %||% TRUE)
+    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
   }
   any(vapply(p$x$data, isVisibleBar, logical(1)))
 }
@@ -185,51 +223,6 @@ to_JSON <- function(x, ...) {
 from_JSON <- function(x, ...) {
   jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
-
-add_boxed <- function(x) {
-  for (i in seq_along(x$data)) {
-    # some object keys require an array, even if length one
-    # one way to ensure atomic vectors of length 1 are not automatically unboxed,
-    # by to_JSON(), is to attach a class of AsIs (via I())
-    d <- x$data[[i]]
-    idx <- names(d) %in% get_boxed(d$type %||% "scatter") & sapply(d, length) == 1
-    if (any(idx)) x$data[[i]][idx] <- lapply(d[idx], I)
-    # (safely) mark individual nested properties
-    x$data[[i]]$error_x$array <- i(d$error_x$array)
-    x$data[[i]]$error_y$array <- i(d$error_y$array)
-    x$data[[i]]$error_x$arrayminus <- i(d$error_x$arrayminus)
-    x$data[[i]]$error_y$arrayminus <- i(d$error_y$arrayminus)
-  }
-  axes <- grep("^[x-y]axis", names(x$layout))
-  for (ax in axes) {
-    x$layout[[ax]]$ticktext <- i(x$layout[[ax]]$ticktext)
-    x$layout[[ax]]$tickvals <- i(x$layout[[ax]]$tickvals)
-  }
-  x
-}
-
-# plotlyjs properties that must _always_ be an array (even if length 1)
-get_boxed <- function(type = "scatter") {
-  # if the trace type isn't found, provide some sensible defaults
-  boxers[[type]] %||% c("x", "y", "z", "lat", "lon", "text", "locations")
-}
-
-# if this ever needs updating see
-# https://github.com/ropensci/plotly/issues/415#issuecomment-173353138
-boxers <- list(
-  choropleth = c("locations", "z", "text"),
-  box = c("x", "y"),
-  heatmap = c("z", "text"),
-  histogram = c("x", "y"),
-  histogram2d = c("z", "color"),
-  mesh3d = c("x", "y", "z", "i", "j", "k", "intensity", "vertexcolor", "facecolor"),
-  # TODO: what to do about marker.colors?
-  pie = c("labels", "values", "text"),
-  scatter = c("x", "y", "r", "t"),
-  scatter3d = c("x", "y", "z"),
-  scattergeo = c("lon", "lat", "locations"),
-  surface = c("x", "y", "z", "text")
-)
 
 i <- function(x) {
   if (is.null(x)) {

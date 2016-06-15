@@ -8,7 +8,8 @@
 #' @param data A data frame (optional).
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
-#' @param type A character string describing the type of trace.
+#' @param type A character string describing the type of trace. If \code{NULL}
+#' (the default), the initial trace type is determined by \code{add_trace}
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
@@ -66,11 +67,14 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   # warn about old arguments that are no longer supported
   for (i in c("filename", "fileopt", "world_readable")) {
     if (is.null(attrs[[i]])) next
-    warning("Ignoring ", i, ". Use plotly_POST() if you want to post figures to plotly.")
+    warning("Ignoring ", i, ". Use `plotly_POST()` if you want to post figures to plotly.")
     attrs[[i]] <- NULL
   }
   if (!is.null(attrs[["group"]])) {
-    warning("The group argument has been deprecated. Use group_by() instead.")
+    warning(
+      "The group argument has been deprecated. Use `group_by()` instead.\n",
+      "See `help('plotly-data')` for examples"
+    )
     attrs[["group"]] <- NULL
   }
   if (!is.null(attrs[["inherit"]])) {
@@ -87,6 +91,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   attrs$colors <- colors
   attrs$symbols <- symbols
   attrs$linetypes <- linetypes
+  attrs$type <- type
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()

@@ -19,7 +19,7 @@ add_data <- function(p, data = NULL) {
   p
 }
 
-#' Add a trace to a plotly visualization
+#' Add trace(s) to a plotly visualization
 #' 
 #' @param p a plotly or ggplot object.
 #' @param ... These arguments are documented in the references section below.
@@ -32,6 +32,8 @@ add_data <- function(p, data = NULL) {
 #' @param symbols A character vector of symbol types. Possible values:
 #' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
+#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
+#' @param linetypes A character vector of line types. For possible values, see \link{schema}.
 #' @param data A data frame to associate with this trace (optional). If not 
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
 #' @seealso \code{\link{plot_ly}()}
@@ -41,6 +43,18 @@ add_data <- function(p, data = NULL) {
 #' @examples 
 #' 
 #' p <- plot_ly(economics, x = ~date, y = ~uempmed)
+#' p
+#' p %>% add_points()
+#' p %>% add_lines()
+#' p %>% add_text(text = ".")
+#' 
+#' # attributes declared in plot_ly() carry over to downstream traces
+#' plot_ly(economics, x = ~date, y = ~uempmed) %>% 
+#'   add_points(color = ~pop) %>%
+#'   add_lines(line = list(color = "red"))
+#' 
+#' 
+#' 
 #' # add a loess smoother
 #' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 #' 
@@ -48,28 +62,27 @@ add_trace <- function(p, ...,
                       color, colors = NULL, symbol, symbols = NULL, size,
                       linetype, linetypes = NULL, data = NULL) {
   # "native" plotly arguments
-  argz <- list(...)
+  attrs <- list(...)
   
-  argz$type <- verify_type(argz$type %||% p$x$attrs[[1]]$type)
+  # tack on "special" arguments
+  attrs$color <- verify_arg(color)
+  attrs$symbol <- verify_arg(symbol)
+  attrs$size <- verify_arg(size)
   
-  if (!is.null(argz[["group"]])) {
+  attrs$colors <- colors
+  attrs$symbols <- symbols
+  
+  if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
   }
   
-  # tack on "special" arguments
-  argz$color <- verify_arg(color)
-  argz$symbol <- verify_arg(symbol)
-  argz$size <- verify_arg(size)
-  
-  argz$colors <- colors
-  argz$colors <- symbols
-  
   p <- add_data(p, data)
   
-  # inherit arguments from the "first layer"
-  new_attrs <- modifyList(p$x$attrs[[1]] %||% list(), argz)
+  # inherit attributes from the "first layer"
+  new_attrs <- modifyList(p$x$attrs[[1]] %||% list(), attrs)
+  
   p$x$attrs <- c(
-    p$x$attrs %||% list(),
+    p$x$attrs %||% list(), 
     setNames(list(new_attrs), p$x$cur_data)
   )
   
@@ -94,6 +107,7 @@ add_lines <- function(p, ...) {
 #' 
 #' @export
 add_text <- function(p, ...) {
+  # TODO: throw error if no text attribute is found
   add_trace(p, type = "scatter", mode = "text", ...)
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/add.R
 \name{add_trace}
 \alias{add_trace}
-\title{Add a trace to a plotly visualization}
+\title{Add trace(s) to a plotly visualization}
 \usage{
 add_trace(p, ..., color, colors = NULL, symbol, symbols = NULL, size,
   linetype, linetypes = NULL, data = NULL)
@@ -26,15 +26,31 @@ or a color interpolation function like \code{colorRamp}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
+\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
+
+\item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
+
 \item{data}{A data frame to associate with this trace (optional). If not 
 provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
 }
 \description{
-Add a trace to a plotly visualization
+Add trace(s) to a plotly visualization
 }
 \examples{
 
 p <- plot_ly(economics, x = ~date, y = ~uempmed)
+p
+p \%>\% add_points()
+p \%>\% add_lines()
+p \%>\% add_text(text = ".")
+
+# attributes declared in plot_ly() carry over to downstream traces
+plot_ly(economics, x = ~date, y = ~uempmed) \%>\% 
+  add_points(color = ~pop) \%>\%
+  add_lines(line = list(color = "red"))
+
+
+
 # add a loess smoother
 p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 

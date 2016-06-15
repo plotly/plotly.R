@@ -1,3 +1,26 @@
+#' Hide a color bar 
+#' 
+#' @param p a plotly object.
+#' @export
+#' 
+#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
+#'   add_points() %>%
+#'   hide_colorbar()
+hide_colorbar <- function(p) {
+  idx <- vapply(p$x$data, is.colorbar, logical(1))
+  browser()
+  for (i in which(idx)) {
+    p$x$data[[i]]$marker$colorbar$showscale <- FALSE
+  }
+  p
+}
+
+hide_legend <- function(p) {
+  layout(p, showlegend = FALSE)
+}
+
+
+
 #' Convert trace types to WebGL
 #' 
 #' @param p a plotly or ggplot object.
