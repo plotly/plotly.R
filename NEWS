@@ -12,12 +12,16 @@ Traces created via `add_trace()` (or, more generally, by any `add_*()` function)
 
 NEW FEATURES & IMPROVEMENTS:
 
-* Error checking for trace types and their attributes. Also added a `show_attributes()` function to obtain information about trace attributes.
+* Error checking for trace types and their attributes. Also added a `explain_attrs()` function to obtain information about trace attributes.
 * New `add_points()`/`add_lines()`/`add_text()` functions provide a shorthand for common plots.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
 * Added a `plotly_spec()` function for inspecting the data sent to plotly.js (as an R list or JSON).
+
+OTHER CHANGES:
+
+* Upgraded to plotly.js v1.13.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.13.0
 
 3.6.5 -- 10 June 2016
 
@@ -36,7 +40,6 @@ embed_notebook() will no longer use a '.embed' extension in the iframe src attri
 CHANGES:
 
 Provided a better way of reexporting magrittr::`%>%`. See #597.
->>>>>>> master
 
 3.6.2 -- 24 May 2016
 

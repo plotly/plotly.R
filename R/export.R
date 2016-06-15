@@ -17,7 +17,7 @@ export <- function(p, file = "plotly.png", ...) {
   }
   f <- basename(tempfile('plotly', '.', '.html'))
   on.exit(unlink(f), add = TRUE)
-  html <- htmlwidgets::saveWidget(plotly_build(p), f)
+  html <- htmlwidgets::saveWidget(p, f)
   webshot::webshot(f, file, ...)
 }
 

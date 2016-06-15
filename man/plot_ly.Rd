@@ -5,8 +5,8 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
-  symbol, symbols = NULL, size, width = NULL, height = NULL,
-  source = "A")
+  symbol, symbols = NULL, size, linetype, linetypes = NULL, width = NULL,
+  height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -24,10 +24,13 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
 
-\item{symbols}{A character vector of symbol types. Possible values:
-'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
+\item{symbols}{A character vector of symbol types. For possible values, see \link{schema}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
+
+\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
+
+\item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
@@ -57,6 +60,7 @@ layout(p3, font = list(family = "Courier New, monospace"))
 
 # using the color argument
 plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")
+# smooth gradient between 5 colors
 plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
   colors = terrain.colors(5), mode = "markers")
   
@@ -65,6 +69,8 @@ decade <- function(x) {
   factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
 }
 plot_ly(economics, x = ~unemploy / pop, color = ~decade(date), type = "box")
+
+plot_ly(economics, x = ~date, y = ~unemploy / pop, linetype = ~decade(date))
 
 # sometimes, a data frame isn't fit for the use case...
 # for 3D surface plots, a numeric matrix is more natural

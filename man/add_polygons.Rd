@@ -2,8 +2,12 @@
 % Please edit documentation in R/add.R
 \name{add_polygons}
 \alias{add_polygons}
+\title{Add polygons to a plotly vis}
 \usage{
 add_polygons(p, ...)
+}
+\description{
+Add polygons to a plotly vis
 }
 \examples{
 

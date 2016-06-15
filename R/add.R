@@ -8,7 +8,10 @@
 #' NULL %>% plot_ly() %>% add_data(economics) %>% add_trace(x = ~date, y = ~pce)
 add_data <- function(p, data = NULL) {
   if (is.null(data)) return(p)
-  p <- verify_plot(p)
+  if (!is.plotly(p)) {
+    stop("Don't know how to add traces to an object of class: ", 
+         class(p), call. = FALSE)
+  }
   id <- new_id()
   p$x$visdat[[id]] <- function() data
   p$x$cur_data <- id
@@ -42,8 +45,8 @@ add_data <- function(p, data = NULL) {
 #' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
 #' 
 add_trace <- function(p, ...,
-                      color, colors = NULL, symbol, symbols = NULL, 
-                      size, data = NULL) {
+                      color, colors = NULL, symbol, symbols = NULL, size,
+                      linetype, linetypes = NULL, data = NULL) {
   # "native" plotly arguments
   argz <- list(...)
   
@@ -73,21 +76,29 @@ add_trace <- function(p, ...,
   p
 }
 
+#' Add points to a plotly vis
+#' 
 #' @export
 add_points <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "markers", ...)
 }
 
+#' Add lines to a plotly vis
+#' 
 #' @export
 add_lines <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "lines", ...)
 }
 
+#' Add text to a plotly vis
+#' 
 #' @export
 add_text <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "text", ...)
 }
 
+#' Add polygons to a plotly vis
+#' 
 #' @export
 #' @examples 
 #' 
@@ -105,6 +116,10 @@ add_polygons <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "lines", fill = "toself", ...)
 }
 
+#' Add ribbons to a plotly vis
+#' 
+#' Ribbons are a special case of polygons.
+#' 
 #' @export
 add_ribbons <- function(p, ...) {
   # TODO: add ymin, ymax arguments?
@@ -112,38 +127,40 @@ add_ribbons <- function(p, ...) {
 }
 
 
-#' @export
-#' @examples
-#' 
-#' x <- rnorm(10)
-#' plot_ly(x = ~x) %>%
-#'   add_chull()
-add_chull <- function(p, ...) {
-  stop("not yet implemented")
-  ch <- chull(x, y = NULL)
-  # TODO: Should mode='markers+lines'? If so, retrace first points?
-  add_polygons(...)
-}
+# #' 
+# #' 
+# #' @export
+# #' @examples
+# #' 
+# #' x <- rnorm(10)
+# #' plot_ly(x = ~x) %>%
+# #'   add_chull()
+# add_chull <- function(p, ...) {
+#   stop("not yet implemented")
+#   ch <- chull(x, y = NULL)
+#   # TODO: Should mode='markers+lines'? If so, retrace first points?
+#   add_polygons(...)
+# }
 
 
-# ------------------------------------------------------------------------
-# Non-trace addition
-# ------------------------------------------------------------------------
-
-#' @export
-add_transform <- function(p, ...) {
-  stop("not yet implemented")
-}
-
-
-#' @export
-add_shape <- function(p, ...) {
-  stop("not yet implemented")
-}
-
-#' @export
-add_annotation <- function(p, ...) {
-  stop("not yet implemented")
-}
+## ------------------------------------------------------------------------
+## Non-trace addition
+## ------------------------------------------------------------------------
+#
+##' @export
+#add_transform <- function(p, ...) {
+#  stop("not yet implemented")
+#}
+#
+#
+##' @export
+#add_shape <- function(p, ...) {
+#  stop("not yet implemented")
+#}
+#
+##' @export
+#add_annotation <- function(p, ...) {
+#  stop("not yet implemented")
+#}
 
 

@@ -36,12 +36,8 @@ update_attributes <- function(path = ".") {
   remDr$open(silent = TRUE)
   htmlwidgets::saveWidget(plotly::plot_ly(), "index.html")
   remDr$navigate(file.path(getwd(), "index.html"))
-  traces <- remDr$executeScript("return Plotly.PlotSchema.get().traces")
-  devtools::use_data(traces, overwrite = TRUE, internal = TRUE)
+  Schema <- remDr$executeScript("return Plotly.PlotSchema.get()")
+  devtools::use_data(Schema, overwrite = TRUE, internal = TRUE)
 }
 
-
 update_attributes()
-
-
-

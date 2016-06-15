@@ -5,7 +5,7 @@
 \title{Add a trace to a plotly visualization}
 \usage{
 add_trace(p, ..., color, colors = NULL, symbol, symbols = NULL, size,
-  data = NULL)
+  linetype, linetypes = NULL, data = NULL)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}

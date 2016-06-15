@@ -13,7 +13,7 @@ toWebGL(p, warn = TRUE)
 a WebGL equivalent?}
 }
 \description{
-This function will also build
+Convert trace types to WebGL
 }
 \examples{
 

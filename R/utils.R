@@ -19,6 +19,7 @@ is.discrete <- function(x) {
 }
 
 deparse2 <- function(x) {
+  if (is.null(x)) return(NULL)
   paste(deparse(x, 500L), collapse = "")
 }
 
@@ -34,12 +35,31 @@ verify_arg <- function(arg) {
   arg
 }
 
+# make sure plot attributes are valid according to the plotly.js schema
 verify_plot <- function(p) {
-  if (!is.plotly(p)) {
-    stop("Don't know how to add traces to an object of class:", 
-         class(p), call. = FALSE)
+  # some layout attributes (e.g., [x-y]axis can have trailing numbers)
+  layoutAttrs <- sub("[0-9]+$", "", names(p$x$layout))
+  validLayoutAttrs <- names(Schema$layout$layoutAttributes)
+  illegalLayoutAttrs <- setdiff(layoutAttrs, validLayoutAttrs)
+  if (length(illegalLayoutAttrs)) {
+    stop("The following layout attributes don't exist:\n'",
+         paste(illegalLayoutAttrs, collapse = "', '"), "'\n", 
+         "Valid layout attributes include:\n'",
+         paste(validLayoutNames, collapse = "', '"), "'\n", 
+         call. = FALSE)
   }
-  p
+  
+  traceTypes <- unlist(lapply(p$x$data, "[[", "type"))
+  validTraceTypes <- names(Schema$traces)
+  illegalTraceTypes <- setdiff(traceTypes, validTraceTypes)
+  if (length(illegalTraceTypes)) {
+    stop("The following trace types don't exist:\n'",
+         paste(illegalTraceTypes, collapse = "', '"), "'\n", 
+         "Valid layout attributes include:\n'",
+         paste(validTraceTypes, collapse = "', '"), "'\n", 
+         call. = FALSE)
+  }
+  invisible(p)
 }
 
 # make sure trace type is valid
@@ -53,25 +73,64 @@ verify_type <- function(type = NULL) {
     stop("The trace type must be a character vector of length 1.\n", 
          call. = FALSE)
   }
-  if (!type %in% names(traces)) {
+  if (!type %in% names(Schema$traces)) {
     stop("Trace type must be one of the following: \n",
-         "'", paste(traces, collapse = "', '"), "'",
+         "'", paste(names(Schema$traces), collapse = "', '"), "'",
          call. = FALSE)
   }
   type
 }
 
-verify_attrs <- function(type = NULL, attributes = NULL) {
-  type <- verify_type(type)
-  attrs <- traces[[type]]$attributes
-  idx <- attributes %in% names(attrs)
-  if (any(!idx)) {
-    stop(
-      "The '", type, "' trace type doesn't have attribute(s) named: '", 
-      paste(attributes[!idx], collapse = "', '"), "'", call. = FALSE
-    )
+# verify_attrs <- function(type = NULL, attributes = NULL) {
+#   type <- verify_type(type)
+#   attrs <- traces[[type]]$attributes
+#   idx <- attributes %in% names(attrs)
+#   if (any(!idx)) {
+#     stop(
+#       "The '", type, "' trace type doesn't have attribute(s) named: '", 
+#       paste(attributes[!idx], collapse = "', '"), "'", call. = FALSE
+#     )
+#   }
+#   attrs[attributes]
+# }
+
+
+has_marker <- function(types, modes) {
+  is_scatter <- grepl("scatter", types)
+  ifelse(is_scatter, grepl("marker", modes), has_attr(types, "marker"))
+}
+
+has_line <- function(types, modes) {
+  is_scatter <- grepl("scatter", types)
+  ifelse(is_scatter, grepl("line", modes), has_attr(types, "line"))
+}
+
+has_text <- function(types, modes) {
+  is_scatter <- grepl("scatter", types)
+  ifelse(is_scatter, grepl("text", modes), has_attr(types, "textfont"))
+}
+
+has_attr <- function(types, attr) {
+  isMissing <- function(x) {
+    e <- try(verify_attrs(x, attr), silent = TRUE)
+    inherits(e, "try-error")
   }
-  attrs[attributes]
+  !vapply(types, isMissing, logical(1), USE.NAMES = FALSE)
+}
+
+has_legend <- function(p) {
+  showLegend <- function(tr) {
+    tr$showlegend %||% TRUE
+  }
+  any(vapply(p$x$data, showLegend, logical(1))) && 
+    isTRUE(p$x$layout$showlegend %||% TRUE)
+}
+
+has_colorbar <- function(p) {
+  isVisibleBar <- function(tr) {
+    inherits(tr, "plotly_colorbar") && isTRUE(tr$showscale %||% TRUE)
+  }
+  any(vapply(p$x$data, isVisibleBar, logical(1)))
 }
 
 # is a given trace type 3d?

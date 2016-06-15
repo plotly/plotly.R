@@ -14,8 +14,9 @@
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 #' or a color interpolation function like \code{colorRamp()}.
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
-#' @param symbols A character vector of symbol types. Possible values:
-#' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
+#' @param symbols A character vector of symbol types. For possible values, see \link{schema}.
+#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
+#' @param linetypes A character vector of line types. For possible values, see \link{schema}.
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
@@ -38,6 +39,7 @@
 #' 
 #' # using the color argument
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")
+#' # smooth gradient between 5 colors
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
 #'   colors = terrain.colors(5), mode = "markers")
 #'   
@@ -47,6 +49,8 @@
 #' }
 #' plot_ly(economics, x = ~unemploy / pop, color = ~decade(date), type = "box")
 #' 
+#' plot_ly(economics, x = ~date, y = ~unemploy / pop, linetype = ~decade(date))
+#' 
 #' # sometimes, a data frame isn't fit for the use case...
 #' # for 3D surface plots, a numeric matrix is more natural
 #' plot_ly(z = volcano, type = "surface")
@@ -55,35 +59,34 @@
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL,
                     color, colors = NULL, symbol, symbols = NULL, size,
+                    linetype, linetypes = NULL,
                     width = NULL, height = NULL, source = "A") {
   # "native" plotly arguments
-  argz <- list(...)
+  attrs <- list(...)
   # warn about old arguments that are no longer supported
   for (i in c("filename", "fileopt", "world_readable")) {
-    if (is.null(argz[[i]])) next
+    if (is.null(attrs[[i]])) next
     warning("Ignoring ", i, ". Use plotly_POST() if you want to post figures to plotly.")
-    argz[[i]] <- NULL
+    attrs[[i]] <- NULL
   }
-  if (!is.null(argz[["group"]])) {
+  if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
-    argz[["group"]] <- NULL
+    attrs[["group"]] <- NULL
   }
-  if (!is.null(argz[["inherit"]])) {
+  if (!is.null(attrs[["inherit"]])) {
     warning("The inherit argument has been deprecated.")
-    argz[["inherit"]] <- NULL
+    attrs[["inherit"]] <- NULL
   }
-  
-  # verify trace type and it's attributes
-  argz$type <- verify_type(type)
-  attrs <- verify_attrs(argz$type, names(argz))
   
   # tack on "special" arguments
-  argz$color <- verify_arg(color)
-  argz$symbol <- verify_arg(symbol)
-  argz$size <- verify_arg(size)
-  # TODO: do we really need to verify these?
-  argz$colors <- colors
-  argz$symbols <- symbols
+  attrs$color <- verify_arg(color)
+  attrs$symbol <- verify_arg(symbol)
+  attrs$linetype <- verify_arg(linetype)
+  attrs$size <- verify_arg(size)
+  
+  attrs$colors <- colors
+  attrs$symbols <- symbols
+  attrs$linetypes <- linetypes
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()
@@ -92,7 +95,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   p <- list(
     visdat = setNames(list(function() plotlyVisDat), id),
     cur_data = id,
-    attrs = setNames(list(argz), id),
+    attrs = setNames(list(attrs), id),
     # we always deal with a _list_ of traces and _list_ of layouts 
     # since they can each have different data
     layout = list(
@@ -106,4 +109,19 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   )
   
   as.widget(p)
+}
+
+
+#' Create a complete empty plotly graph.
+#' 
+#' Useful when used with \link{subplot}
+#' 
+#' @export
+plotly_empty <- function(...) {
+  eaxis <- list(
+    showticklabels = FALSE,
+    showgrid = FALSE,
+    zeroline = FALSE
+  )
+  layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
 }
