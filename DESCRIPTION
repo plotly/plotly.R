@@ -29,6 +29,7 @@ Imports:
     digest,
     viridis,
     base64enc,
+    htmltools,
     htmlwidgets,
     tidyr,
     plyr,
@@ -49,7 +50,10 @@ Suggests:
     rmarkdown,
     Rserve,
     RSclient,
-    broom
+    broom,
+    crosstalk
 LazyData: true
+Remotes:
+    rstudio/crosstalk
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

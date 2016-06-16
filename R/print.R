@@ -57,10 +57,7 @@ as.widget <- function(x, ...) {
   x$base_url <- get_domain()
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
-  deps <- c(
-    crosstalk::dependencies(), 
-    list(get("jqueryLib", asNamespace("crosstalk"))())
-  )
+  deps <- crosstalk::crosstalkLibs()
   htmlwidgets::createWidget(
     name = "plotly",
     x = x,
@@ -79,6 +76,15 @@ as.widget <- function(x, ...) {
 
 # for legacy reasons
 toWidget <- as.widget
+
+#' @importFrom htmltools as.tags
+#' @export
+as.tags.plotly_built <- function(x, ...) {
+  as.tags(as.widget(x))
+}
+
+#' @export
+as.tags.plotly_hash <- as.tags.plotly_built
 
 #' Print a plotly figure object
 #'
