@@ -22,14 +22,14 @@ To create a plotly visualization, start with `plot_ly()`.
 
 ```{r}
 library(plotly)
-plot_ly(economics, x = date, y = unemploy / pop)
+plot_ly(economics, x = ~date, y = ~unemploy / pop)
 ```
 
 A plotly visualization is composed of one (or more) trace(s), and every trace has a `type` (the default type is 'scatter'). The arguments/properties that a trace will respect ([documented here](https://plot.ly/r/reference)) depend on it's type. A scatter trace respects `mode`, which can be any combination of "lines", "markers", "text" joined with a "+":
 
 ```{r}
 library(plotly)
-plot_ly(economics, x = date, y = unemploy / pop, 
+plot_ly(economics, x = ~date, y = ~unemploy / pop, 
         type = "scatter", mode = "markers+lines")
 ```
 
@@ -37,29 +37,30 @@ You can manually add a trace to an existing plot with `add_trace()`. In that cas
 
 ```{r}
 m <- loess(unemploy / pop ~ as.numeric(date), data = economics)
-p <- plot_ly(economics, x = date, y = unemploy / pop, name = "raw") 
-add_trace(p, x = date, y = fitted(m), name = "loess")
+p <- plot_ly(economics, x = ~date, y = ~unemploy / pop, name = "raw") 
+add_lines(p, y = ~fitted(m), name = "loess")
 ```
 
 __plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to create a visualization pipeline:
 
 ```{r}
 economics %>%
-  plot_ly(x = date, y = unemploy / pop) %>% 
-  add_trace(x = date, y = fitted(m)) %>%
+  plot_ly(x = ~date, y = ~unemploy / pop) %>% 
+  add_lines(y = ~fitted(m)) %>%
   layout(showlegend = F)
 ```
 
-Furthermore, `plot_ly()`, `add_trace()`, and `layout()`, all accept a data frame as their first argument and output a data frame. As a result, we can inter-weave data manipulations and visual mappings in a single pipeline.
+TODO: talk about dplyr verbs!
 
 ```{r}
+library(dplyr)
 economics %>%
-  transform(rate = unemploy / pop) %>%
-  plot_ly(x = date, y = rate) %>% 
-  subset(rate == max(rate)) %>%
+  mutate(rate = unemploy / pop) %>%
+  plot_ly(x = ~date, y = ~rate) %>% 
+  filter(rate == max(rate)) %>%
   layout(
     showlegend = F, 
-    annotations = list(x = date, y = rate, text = "Peak", showarrow = T)
+    annotations = list(x = ~date, y = ~rate, text = "Peak", showarrow = T)
   )
 ```
 

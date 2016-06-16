@@ -27,7 +27,6 @@ HTMLWidgets.widget({
     
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      console.log(x);
       var plot = Plotly.plot(graphDiv, x.data, x.layout, x.config);
       instance.plotly = true;
       instance.autosize = x.layout.autosize;
