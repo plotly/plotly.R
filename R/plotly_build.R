@@ -20,8 +20,8 @@ plotly_build <- function(p) {
 }
 
 #' @export
-plotly_build.default <- function(p) {
-  p
+plotly_build.list <- function(p) {
+  as.widget(p)
 }
 
 #' @export
@@ -34,11 +34,9 @@ plotly_build.plotly <- function(p) {
   
   layouts <- Map(function(x, y) {
     
-    is_formula <- vapply(x, is.formula, logical(1))
-    fl <- lazyeval::as_f_list(x[is_formula] %||% list())
-    for (var in names(fl)) {
-      x[[var]] <- lazyeval::f_eval(fl[[var]], plotly_data(p, y))
-    }
+    d <- plotly_data(p, y)
+    
+    x <- rapply(x, eval_attr, data = d, how = "list")
     x[lengths(x) > 0]
     
   }, p$x$layoutAttrs, names(p$x$layoutAttrs))
@@ -46,7 +44,7 @@ plotly_build.plotly <- function(p) {
   # get rid of the data -> layout mapping and merge all the layouts
   # into a single layout (more recent layouts will override older ones)
   p$x$layoutAttrs <- NULL
-  p$x$layout <- modifyList(p$x$layout %||% list(), Reduce(modifyList, layouts) %||% list())
+  p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
   
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
@@ -58,29 +56,33 @@ plotly_build.plotly <- function(p) {
     
     x$type <- verify_type(x$type)
     
-    is_formula <- vapply(x, is.formula, logical(1))
-    fl <- lazyeval::as_f_list(x[is_formula] %||% list())
     d <- plotly_data(p, y)
-    grps <- dplyr::groups(d)
-    # insert missing values to differentiate groups
-    if (length(grps) > 0) {
-      d <- group2NA(d, groupNames = as.character(grps))
-    }
-    # perform the evaluation
-    for (var in names(fl)) {
-      x[[var]] <- lazyeval::f_eval(fl[[var]], d)
-      varname <- sub("^~", "", deparse2(fl[[var]]))
-      # deparse axis names and add to layout
-      if (any(c("x", "y", "z") %in% var)) {
+    
+    # add sensible axis names to layout
+    for (i in c("x", "y", "z")) {
+      nm <- paste0(i, "axis")
+      idx <- which(names(x) %in% i)
+      if (length(idx) == 1) {
+        title <- sub("^~", "", deparse2(x[[idx]]))
         if (is3d(x$type)) {
-          p$x$layout$scene[[paste0(var, "axis")]]$title <<- varname
+          p$x$layout$scene[[nm]]$title <- title
         } else {
-          p$x$layout[[paste0(var, "axis")]]$title <<- varname
+          p$x$layout[[nm]]$title <- title
         }
       }
     }
     
-    x[lengths(x) > 0]
+    # perform the evaluation
+    x <- rapply(x, eval_attr, data = d, how = "list")
+    
+    attrLengths <- lengths(x)
+    
+    # if appropriate, set the mode now since we need to reference it later
+    if (grepl("scatter", x$type)) {
+      x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
+    }
+    
+    x[attrLengths > 0]
     
   }, p$x$attrs, names(p$x$attrs))
   
@@ -95,6 +97,10 @@ plotly_build.plotly <- function(p) {
   traces <- list()
   for (i in seq_along(dats)) {
     d <- dats[[i]]
+    # no longer need these special variable mapping attributes
+    for (j in c("color", "colors", "symbol", "symbols", "linetype", "linetypes")) {
+      dats[[i]][[j]] <- NULL
+    }
     params <- list(
       if (is.discrete(d[["color"]])) d[["color"]], 
       d[["symbol"]],
@@ -102,8 +108,6 @@ plotly_build.plotly <- function(p) {
     )
     params <- compact(params) %||% list(NULL)
     idx <- do.call("interaction", params)
-    dats[[i]][["color"]] <- NULL
-    dats[[i]][["symbol"]] <- NULL
     traces <- c(traces, traceify(dats[[i]], idx))
   }
   
@@ -114,26 +118,35 @@ plotly_build.plotly <- function(p) {
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
   
-  if (has_legend(p) && has_colorbar(p)) {
-    # shrink the colorbar
-    idx <- which(vapply(p$x$data, function(x) inherits(x, "plotly_colorbar"), logical(1)))
-    p$x$data[[idx]]$marker$colorbar <- modifyList(
-      p$x$data[[idx]]$marker$colorbar %||% list(), 
-      list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top")
-    )
-    p$x$layout$legend <- modifyList(
-      p$x$layout$legend %||% list(),
-      list(y = 1/2, yanchor = "top")
-    )
+  if (has_colorbar(p) && has_legend(p)) {
+    if (length(p$x$data) <= 2) {
+      p$x$layout$showlegend <- FALSE
+    } else {
+      # shrink the colorbar
+      idx <- which(vapply(p$x$data, function(x) inherits(x, "plotly_colorbar"), logical(1)))
+      p$x$data[[idx]]$marker$colorbar <- modify_list(
+        list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top"),
+        p$x$data[[idx]]$marker$colorbar
+      )
+      p$x$layout$legend <- modify_list(
+        list(y = 1/2, yanchor = "top"),
+        p$x$layout$legend
+      )
+    }
   }
   
   # traces can't have names
   p$x$data <- setNames(p$x$data, NULL)
   
   # verify plot attributes are legal according to the plotly.js spec
-  # (and box attributes data_array attributes where appropriate)
   verify_attr_names(p)
+  # box up 'data_array' attributes where appropriate
   verify_boxed(p)
+  # if it makes sense, add markers/lines/text to mode
+  verify_mode(p)
+  # annotations & shapes must be an array of objects
+  # TODO: should we add anything else to this?
+  verify_arrays(p)
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
@@ -146,13 +159,10 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   }
   isNumeric <- vapply(color, is.numeric, logical(1))
   isDiscrete <- vapply(color, is.discrete, logical(1))
-  colors <- lapply(traces, "[[", "colors")
   
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   types <- vapply(traces, function(tr) tr$type, character(1))
-  modes <- vapply(traces, function(tr) {
-    tr$mode %||% if (any(lengths(tr) > 20)) "lines" else "markers+lines"
-  }, character(1))
+  modes <- vapply(traces, function(tr) tr$mode, character(1))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
@@ -160,12 +170,7 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
   
   if (any(isNumeric)) {
-    palette <- compact(colors[isNumeric]) %||% viridisLite::viridis(10)
-    if (is.list(palette) && length(palette) > 1) {
-      stop("Multiple numeric color palettes specified (via the colors argument).\n",
-           "When using the color/colors arguments, only one palette is allowed.",
-           call. = FALSE)
-    }
+    palette <- traces[[1]]$colors %||% viridisLite::viridis(10)
     # TODO: use ggstat::frange() when it's on CRAN?
     allColor <- unlist(color[isNumeric])
     rng <- range(allColor, na.rm = TRUE)
@@ -183,13 +188,18 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
     for (i in which(isNumeric)) {
       colorObj$color <- color[[i]]
       if (hasLine[[i]]) {
-        traces[[i]]$line <- modifyList(traces[[i]]$line %||% list(), colorObj)
+        if (types[[i]] %in% c("scatter", "scattergl")) {
+          warning("Numeric color variables cannot (yet) be mapped to lines.\n",
+                  " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
+          traces[[i]]$mode <- "markers"
+          hasMarker[[i]] <- TRUE
+        }
       }                 
       if (hasMarker[[i]]) {
-        traces[[i]]$marker <- modifyList(traces[[i]]$marker %||% list(), colorObj)
+        traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
       }
       if (hasZ[[i]]) {
-        traces[[i]] <- modifyList(traces[[i]] %||% list(), colorObj)
+        traces[[i]] <- modify_list(colorObj, traces[[i]])
       }
       if (hasText[[i]]) {
         warning("Numeric color variables cannot (yet) be mapped to text.\n",
@@ -214,11 +224,10 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   }
   
   if (any(isDiscrete)) {
-    browser()
     allColor <- unlist(color[isDiscrete])
     lvls <- unique(allColor)
     N <- length(lvls)
-    palette <- compact(colors[isDiscrete]) %||% 
+    palette <- traces[[1]]$colors %||% 
       if (is.ordered(allColor)) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
     if (is.list(palette) && length(palette) > 1) {
       stop("Multiple numeric color palettes specified (via the colors argument).\n",
@@ -228,13 +237,22 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
     colScale <- scales::col_factor(palette, levels = lvls, na.color = na.color)
     for (i in which(isDiscrete)) {
       if (hasLine[[i]]) {
-        traces[[i]]$line$color <- colScale(color[[i]])
+        traces[[i]]$line <- modify_list(
+          list(color = colScale(color[[i]])),
+          traces[[i]]$line
+        )
       }                 
       if (hasMarker[[i]]) {
-        traces[[i]]$marker$color <- colScale(color[[i]])
+        traces[[i]]$marker <- modify_list(
+          list(color = colScale(color[[i]])),
+          traces[[i]]$marker
+        )
       }
       if (hasText[[i]]) {
-        traces[[i]]$textfont$color <- colScale(color[[i]])
+        traces[[i]]$textfont <- modify_list(
+          list(color = colScale(color[[i]])),
+          traces[[i]]$textfont
+        )
       }
     }
   }
@@ -285,8 +303,6 @@ mapSymbol <- function(traces) {
   traces
 }
 
-
-
 mapLinetype <- function(traces) {
   linetypeList <- lapply(traces, "[[", "linetype")
   nLinetypes <- lengths(linetypeList)
@@ -325,7 +341,6 @@ mapLinetype <- function(traces) {
       message("Adding lines to mode; otherwise linetype would have no effect.")
       traces[[i]]$mode <- paste0(traces[[i]]$mode, "+lines")
     }
-    
   }
   traces
 }
@@ -350,4 +365,9 @@ traceify <- function(dat, x = NULL) {
     new_dat[[j]]$name <- lvls[j]
   }
   return(new_dat)
+}
+
+
+eval_attr <- function(x, data = NULL) {
+  if (lazyeval::is_formula(x)) lazyeval::f_eval(x, data) else x
 }
