@@ -38,6 +38,7 @@
 plotly_POST <- function(x, filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret")) {
   x <- plotly_build(x)
+  if (inherits(x, "htmlwidget")) x <- x$x
   # try our damndest to assign a sensible filename
   x$filename <- filename %||% x$filename %||% as.character(x$layout$title) %||% 
       paste(c(x$layout$xaxis$title, x$layout$yaxis$title, x$layout$zaxis$title), 

@@ -25,15 +25,9 @@ add_data <- function(p, data = NULL) {
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
 #' @param color Either a variable name or a vector to use for color mapping.
-#' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
-#' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
-#' or a color interpolation function like \code{colorRamp}.
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
-#' @param symbols A character vector of symbol types. Possible values:
-#' 'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up' 
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
-#' @param linetypes A character vector of line types. For possible values, see \link{schema}.
 #' @param data A data frame to associate with this trace (optional). If not 
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
 #' @seealso \code{\link{plot_ly}()}
@@ -52,15 +46,10 @@ add_data <- function(p, data = NULL) {
 #' plot_ly(economics, x = ~date, y = ~uempmed) %>% 
 #'   add_points(color = ~pop) %>%
 #'   add_lines(line = list(color = "red"))
-#' 
-#' 
-#' 
-#' # add a loess smoother
-#' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
+#'   
 #' 
 add_trace <- function(p, ...,
-                      color, colors = NULL, symbol, symbols = NULL, size,
-                      linetype, linetypes = NULL, data = NULL) {
+                      color, symbol, size, linetype, data = NULL) {
   # "native" plotly arguments
   attrs <- list(...)
   
@@ -79,7 +68,7 @@ add_trace <- function(p, ...,
   p <- add_data(p, data)
   
   # inherit attributes from the "first layer"
-  new_attrs <- modifyList(p$x$attrs[[1]] %||% list(), attrs)
+  new_attrs <- modify_list(p$x$attrs[[1]], attrs)
   
   p$x$attrs <- c(
     p$x$attrs %||% list(), 

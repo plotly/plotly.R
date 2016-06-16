@@ -7,7 +7,7 @@ test_that("basic geom_violin works", {
   expect_equal(length(L$data), 1)
   tr <- L$data[[1]]
   expect_identical(tr$type, "scatter")
-  expect_true(tr$fill == "tozerox")
+  expect_true(tr$fill == "toself")
   expect_false(tr$showlegend)
   expect_true(all(grepl("density", tr$text[!is.na(tr$text)])))
   expect_true(tr$hoverinfo == "text")

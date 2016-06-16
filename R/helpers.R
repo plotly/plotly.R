@@ -7,10 +7,10 @@
 #'   add_points() %>%
 #'   hide_colorbar()
 hide_colorbar <- function(p) {
+  p <- plotly_build(p)
   idx <- vapply(p$x$data, is.colorbar, logical(1))
-  browser()
   for (i in which(idx)) {
-    p$x$data[[i]]$marker$colorbar$showscale <- FALSE
+    p$x$data[[i]]$marker$showscale <- FALSE
   }
   p
 }

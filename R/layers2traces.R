@@ -461,7 +461,6 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     type = "scatter",
     mode = "lines",
     line = list(
-      # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),
       color = toRGB(
         aes2plotly(data, params, "colour"),
@@ -640,7 +639,7 @@ ribbon_dat <- function(dat) {
   n <- nrow(dat)
   o <- order(dat$x)
   o2 <- order(dat$x, decreasing = TRUE)
-  used <- c("x", "ymin", "ymax")
+  used <- c("x", "ymin", "ymax", "y")
   not_used <- setdiff(names(dat), used)
   # top-half of ribbon
   tmp <- dat[o, ]

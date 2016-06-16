@@ -18,6 +18,10 @@ compact <- function(x) {
   Filter(Negate(is.null), x)
 }
 
+modify_list <- function(x, y, ...) {
+  modifyList(x %||% list(), y %||% list(), ...)
+}
+
 is.discrete <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
@@ -44,12 +48,12 @@ verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
   check_attrs(
     sub("[0-9]+$", "", names(p$x$layout)),
-    names(Schema$layout$layoutAttributes)
+    c(names(Schema$layout$layoutAttributes), c("barmode", "bargap"))
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type]]$attributes
-    check_attrs(names(thisTrace), names(validAttrs))
+    check_attrs(names(thisTrace), c(names(validAttrs), "key"))
   }
   invisible(p)
 }
@@ -118,7 +122,7 @@ verify_box <- function(proposed, schema) {
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
 verify_type <- function(type = NULL) {
   if (is.null(type)) {
-    message("No trace type specified. Using the default 'scatter'")
+    message("No trace type specified. Using the 'scatter' default.")
     type <- "scatter"
   }
   if (!is.character(type) || length(type) != 1) {
@@ -131,6 +135,46 @@ verify_type <- function(type = NULL) {
          call. = FALSE)
   }
   type
+}
+
+verify_mode <- function(p) {
+  for (tr in seq_along(p$x$data)) {
+    trace <- p$x$data[[tr]]
+    if (grepl("scatter", trace$type %||% "scatter")) {
+      if (!is.null(trace$marker) && !grepl("markers", trace$mode)) {
+        message(
+          "A marker object has been specified, but markers is not in the mode\n",
+          "Adding markers to the mode..."
+        )
+        p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+markers")
+      }
+      if (!is.null(trace$line) && !grepl("lines", trace$mode)) {
+        message(
+          "A line object has been specified, but lines is not in the mode\n",
+          "Adding lines to the mode..."
+        )
+        p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+lines")
+      }
+      if (!is.null(trace$textfont) && !grepl("text", trace$mode)) {
+        warning(
+          "A textfont object has been specified, but text is not in the mode\n",
+          "Adding text to the mode..."
+        )
+        p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+text")
+      }
+    }
+  }
+  p
+}
+
+verify_arrays <- function(p) {
+  for (i in c("annotations", "shapes")) {
+    thing <- p$x$layout[[i]]
+    if (is.list(thing) && !is.null(names(thing))) {
+      p$x$layout[[i]] <- list(thing)
+    }
+  }
+  p
 }
 
 has_marker <- function(types, modes) {

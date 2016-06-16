@@ -21,7 +21,13 @@ layout.matrix <- function(p, ..., data = NULL) {
 #' @export
 layout.plotly <- function(p, ..., data = NULL) {
   p <- add_data(p, data)
-  p$x$layoutAttrs[[p$x$cur_data]] <- list(...)
+  attrs <- list(...)
+  if (is.null(p$x$cur_data)) {
+    nlayouts <- length(p$x$layout)
+    p$x$layout <- c(p$x$layout, attrs)
+  } else {
+    p$x$layoutAttrs[[p$x$cur_data]] <- attrs
+  }
   p
 }
 

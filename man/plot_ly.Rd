@@ -14,7 +14,8 @@ plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
 
-\item{type}{A character string describing the type of trace.}
+\item{type}{A character string describing the type of trace. If \code{NULL}
+(the default), the initial trace type is determined by \code{add_trace}}
 
 \item{color}{Either a variable name or a vector to use for color mapping.}
 

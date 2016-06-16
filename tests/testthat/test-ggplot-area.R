@@ -26,7 +26,7 @@ test_that("sanity check for geom_area", {
   L <- expect_traces(ar, 1, "simple")
   expect_identical(L$data[[1]]$type, "scatter")
   expect_identical(L$data[[1]]$mode, "lines")
-  expect_identical(L$data[[1]]$fill, "tozerox")
+  expect_identical(L$data[[1]]$fill, "toself")
   expect_true(
     L$data[[1]]$fillcolor ==
     toRGB(GeomArea$default_aes$fill, GeomArea$default_aes$alpha)

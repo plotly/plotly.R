@@ -4,8 +4,7 @@
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-add_trace(p, ..., color, colors = NULL, symbol, symbols = NULL, size,
-  linetype, linetypes = NULL, data = NULL)
+add_trace(p, ..., color, symbol, size, linetype, data = NULL)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -15,20 +14,11 @@ Note that acceptable arguments depend on the trace type.}
 
 \item{color}{Either a variable name or a vector to use for color mapping.}
 
-\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
-or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
-or a color interpolation function like \code{colorRamp}.}
-
 \item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
-
-\item{symbols}{A character vector of symbol types. Possible values:
-'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
 \item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
-
-\item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
 
 \item{data}{A data frame to associate with this trace (optional). If not 
 provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
@@ -48,11 +38,7 @@ p \%>\% add_text(text = ".")
 plot_ly(economics, x = ~date, y = ~uempmed) \%>\% 
   add_points(color = ~pop) \%>\%
   add_lines(line = list(color = "red"))
-
-
-
-# add a loess smoother
-p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
+  
 
 }
 \author{

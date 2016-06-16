@@ -258,7 +258,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       varName <- y[[i]]
       # by default assume the values don't need any formatting
       forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-      if (aesName %in% c("x", "y")) {
+      if (isTRUE(aesName %in% c("x", "y"))) {
         scaleName <- scales$get_scales(aesName)$scale_name
         # convert "milliseconds from the UNIX epoch" to a date/datetime
         # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
@@ -668,7 +668,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       idx <- which(hashes %in% i)
       # for now we just merge markers and lines -- I can't imagine text being worthwhile
       if (all(modes[idx] %in% c("lines", "markers"))) {
-        mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
+        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
         mergedTraces[[i]]$mode <- "markers+lines"
         if (any(sapply(traces[idx], "[[", "showlegend"))) {
           mergedTraces[[i]]$showlegend <- TRUE
@@ -847,8 +847,7 @@ bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
 # if a vector has one unique value, return that value
-uniq <- function(x, na.rm = TRUE) {
-  if (na.rm) x <- x[!is.na(x)]
+uniq <- function(x) {
   u <- unique(x)
   if (length(u) == 1) u else x
 }
