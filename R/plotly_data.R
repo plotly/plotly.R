@@ -1,3 +1,16 @@
+#' Divide data into groups.
+#'
+#' @param x a visualisation
+#' @param ... variables to group by.
+#' @param add By default, when \code{add = FALSE}, \code{group_by} will
+#'   override existing groups. To instead add to the existing groups,
+#'   use \code{add = TRUE}
+#' @importFrom dplyr group_by
+#' @name group_by
+#' @export
+NULL
+
+
 #' View and manipulate data associated with a plotly graph
 #'
 #' \code{plotly_data()} returns the data associated with 
@@ -156,8 +169,8 @@ group2NA <- function(data, groupNames = "group", nested = NULL,
   } else {
     dplyr::do(d, rbind(., NA))
   }
-  d <- tidyr::unnest(d)
+  d <- tidyr::unnest(d, groupNames)
   n <- nrow(d)
-  if (all(is.na(d[n, ]))) d <- d[-n, ]
+  if (all(is.na(d[n, !groupNames %in% names(d)]))) d <- d[-n, ]
   structure(d, class = unique(class(data), class(d)))
 }
