@@ -79,29 +79,11 @@ plot_ly(economics, x = ~date, line = list(color = "black")) \%>\%
 # reference. These arguments make it easier to map abstract data values to
 # visual attributes.
 p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
-add_markers(p, color = ~Petal.Length)
+add_markers(p, color = ~Petal.Length, size = ~Petal.Length)
 add_markers(p, color = ~Species)
 add_markers(p, color = ~Species, colors = "Set1")
-add_paths(p, line = ~Species)
-  
- 
-  
- plot_ly(economics, x = ~date) \%>\%
-  add_lines(y = ~uempmed) \%>\% 
-  add_lines(y = ~fitted(loess(uempmed ~ as.numeric(date)))) \%>\%
-  layout(title = "Median duration of unemployment (in weeks)")
-
-# smooth gradient between 5 colors
-plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
-  colors = terrain.colors(5), mode = "markers")
-  
-# function to extract the decade of a given date
-decade <- function(x) {
-  factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
-}
-plot_ly(economics, x = ~unemploy / pop, color = ~decade(date), type = "box")
-
-plot_ly(economics, x = ~date, y = ~unemploy / pop, linetype = ~decade(date))
+add_markers(p, symbol = ~Species)
+add_paths(p, linetype = ~Species)
 
 }
 
