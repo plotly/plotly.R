@@ -30,13 +30,13 @@ Add trace(s) to a plotly visualization
 
 p <- plot_ly(economics, x = ~date, y = ~uempmed)
 p
-p \%>\% add_points()
+p \%>\% add_markers()
 p \%>\% add_lines()
 p \%>\% add_text(text = ".")
 
 # attributes declared in plot_ly() carry over to downstream traces
 plot_ly(economics, x = ~date, y = ~uempmed) \%>\% 
-  add_points(color = ~pop) \%>\%
+  add_markers(color = ~pop) \%>\%
   add_lines(line = list(color = "red"))
   
 

@@ -55,7 +55,7 @@ library(dplyr)
 mtcars \%>\%
   plot_ly(x = ~wt, y = ~mpg, name = "scatter trace") \%>\%
   filter(cyl == 4) \%>\%
-  add_points(x = ~wt, y = ~mpg, name = "filtered points", 
+  add_markers(x = ~wt, y = ~mpg, name = "filtered points", 
     marker = list(color = "red"))
     
 library(tidyr)

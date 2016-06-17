@@ -4,7 +4,7 @@
 #' @export
 #' 
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
-#'   add_points() %>%
+#'   add_markers() %>%
 #'   hide_colorbar()
 hide_colorbar <- function(p) {
   p <- plotly_build(p)

@@ -38,13 +38,13 @@ add_data <- function(p, data = NULL) {
 #' 
 #' p <- plot_ly(economics, x = ~date, y = ~uempmed)
 #' p
-#' p %>% add_points()
+#' p %>% add_markers()
 #' p %>% add_lines()
 #' p %>% add_text(text = ".")
 #' 
 #' # attributes declared in plot_ly() carry over to downstream traces
 #' plot_ly(economics, x = ~date, y = ~uempmed) %>% 
-#'   add_points(color = ~pop) %>%
+#'   add_markers(color = ~pop) %>%
 #'   add_lines(line = list(color = "red"))
 #'   
 #' 
@@ -81,7 +81,7 @@ add_trace <- function(p, ...,
 #' Add points to a plotly vis
 #' 
 #' @export
-add_points <- function(p, ...) {
+add_markers <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "markers", ...)
 }
 
@@ -111,7 +111,7 @@ add_text <- function(p, ...) {
 #' ggplot2::map_data("world", "canada") %>%
 #'   group_by(group) %>%
 #'   plot_ly(x = ~long, y = ~lat, hoverinfo = "none") %>%
-#'   add_points(text = ~paste(name, "<br />", pop), hoverinfo = "text",
+#'   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
 #'     data = canada.cities) %>%
 #'   layout(showlegend = FALSE)
 add_polygons <- function(p, ...) {

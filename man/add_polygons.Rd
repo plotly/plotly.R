@@ -17,7 +17,7 @@ data(canada.cities, package = "maps")
 ggplot2::map_data("world", "canada") \%>\%
   group_by(group) \%>\%
   plot_ly(x = ~long, y = ~lat, hoverinfo = "none") \%>\%
-  add_points(text = ~paste(name, "<br />", pop), hoverinfo = "text",
+  add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
     data = canada.cities) \%>\%
   layout(showlegend = FALSE)
 }

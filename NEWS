@@ -11,8 +11,9 @@ BREAKING CHANGES & IMPROVEMENTS:
 NEW FEATURES & IMPROVEMENTS:
 
 * Error checking for trace and layout attributes.
+* Trace type inference based on specified attributes.
 * Added `linetype`/`linetypes` arguments for mapping discrete variables to line types (this works very much like the `symbol`/`symbols`).
-* New `add_points()`/`add_lines()`/`add_text()`/`add_polygon`/`add_ribbon()` functions provide a shorthand for common plots.
+* New `add_markers()`/`add_lines()`/`add_text()`/`add_polygon`/`add_ribbon()` functions provide a shorthand for common plots.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
