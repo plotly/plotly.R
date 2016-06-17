@@ -118,22 +118,50 @@ verify_box <- function(proposed, schema) {
   proposed
 }
 
+
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
-verify_type <- function(type = NULL) {
-  if (is.null(type)) {
-    message("No trace type specified. Using the 'scatter' default.")
-    type <- "scatter"
+verify_type <- function(trace) {
+  if (is.null(trace$type)) {
+    attrs <- names(trace)
+    attrLengths <- lengths(trace)
+    if (all(c("x", "y", "z") %in% attrs)) {
+      trace$type <- if (all(c("i", "j", "k") %in% attrs)) relay_type("mesh3d") else relay_type("scatter3d")
+    } else if (all(c("x", "y") %in% attrs)) {
+      if (is.numeric(trace$x) && is.numeric(trace$y)) {
+        trace$type <- if (any(attrLengths) > 15000) relay_type("scattergl") else relay_type("scatter")
+      } else if (is.numeric(trace$x)) {
+        trace$type <- relay_type("bar")
+        trace$orientation <- "h"
+      } else if (is.numeric(trace$y)) {
+        trace$type <- relay_type("bar")
+      } else {
+        trace$type <- relay_type("histogram2d")
+      }
+    } else if ("y" %in% attrs || "x" %in% attrs) {
+        trace$type <- relay_type("histogram")
+    } else {
+      warning("No trace type specified and no positional attributes specified", call. = FALSE)
+      trace$type <- relay_type("scatter")
+    }
   }
-  if (!is.character(type) || length(type) != 1) {
+  if (!is.character(trace$type) || length(trace$type) != 1) {
     stop("The trace type must be a character vector of length 1.\n", 
          call. = FALSE)
   }
-  if (!type %in% names(Schema$traces)) {
+  if (!trace$type %in% names(Schema$traces)) {
     stop("Trace type must be one of the following: \n",
          "'", paste(names(Schema$traces), collapse = "', '"), "'",
          call. = FALSE)
   }
+  trace
+}
+
+relay_type <- function(type) {
+  message(
+    "No trace type specified. Inferring a type of '", type, "'.\n",
+    "Read more about this trace type here -> https://plot.ly/r/reference/#", type
+  )
   type
 }
 

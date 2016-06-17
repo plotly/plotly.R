@@ -54,10 +54,6 @@ plotly_build.plotly <- function(p) {
   
   dats <- Map(function(x, y) {
     
-    x$type <- verify_type(x$type)
-    
-    d <- plotly_data(p, y)
-    
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
@@ -73,12 +69,15 @@ plotly_build.plotly <- function(p) {
     }
     
     # perform the evaluation
+    d <- plotly_data(p, y)
     x <- rapply(x, eval_attr, data = d, how = "list")
+    
+    x <- verify_type(x)
     
     attrLengths <- lengths(x)
     
     # if appropriate, set the mode now since we need to reference it later
-    if (grepl("scatter", x$type)) {
+    if (grepl("scatter", x$type) && is.null(x$mode)) {
       x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
     }
     
