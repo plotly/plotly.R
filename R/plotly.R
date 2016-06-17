@@ -27,8 +27,22 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' data(economics, package = "ggplot2")
-#' # basic time-series plot
+#' 
+#' # If you don't explicitly add a trace, via add_trace() or similar,
+#' # plot_ly() will add one for you, and infer an appropriate trace type
+#' plot_ly(economics, x = ~pop)
+#' plot_ly(economics, x = ~date, y = ~pop)
+#' 
+#' # Attributes set in plot_ly() define 'global' attributes that 
+#' # are carried onto subsequent traces
+#' plot_ly(economics, x = ~date, line = list(color = "black")) %>%
+#'  add_trace(y = ~uempmed, mode = "markers+lines") %>%
+#'  add_lines(y = ~psavert)
+#' 
+#' plot_ly(economics, x = ~date) %>%
+#'   add_lines(y = ~uempmed) %>% 
+#'   add_lines(y = ~fitted(loess(uempmed ~ as.numeric(date))))
+#'   
 #' p <- plot_ly(economics, x = ~date, y = ~uempmed)
 #' # add a loess smoother
 #' p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))

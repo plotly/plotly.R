@@ -16,7 +16,7 @@ NEW FEATURES & IMPROVEMENTS:
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
-* Added a `plotly_spec()` function for inspecting the data sent to plotly.js (as an R list or JSON).
+* Added a `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
 
 OTHER CHANGES:
 

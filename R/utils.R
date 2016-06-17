@@ -128,18 +128,20 @@ verify_type <- function(trace) {
     if (all(c("x", "y", "z") %in% attrs)) {
       trace$type <- if (all(c("i", "j", "k") %in% attrs)) relay_type("mesh3d") else relay_type("scatter3d")
     } else if (all(c("x", "y") %in% attrs)) {
-      if (is.numeric(trace$x) && is.numeric(trace$y)) {
+      if (!is.discrete(trace$x) && !is.discrete(trace$y)) {
         trace$type <- if (any(attrLengths) > 15000) relay_type("scattergl") else relay_type("scatter")
-      } else if (is.numeric(trace$x)) {
+      } else if (!is.discrete(trace$x)) {
         trace$type <- relay_type("bar")
         trace$orientation <- "h"
-      } else if (is.numeric(trace$y)) {
+      } else if (!is.discrete(trace$y)) {
         trace$type <- relay_type("bar")
       } else {
         trace$type <- relay_type("histogram2d")
       }
     } else if ("y" %in% attrs || "x" %in% attrs) {
-        trace$type <- relay_type("histogram")
+      trace$type <- relay_type("histogram")
+    } else if ("z" %in% attrs) {
+      trace$type <- relay_type("heatmap")
     } else {
       warning("No trace type specified and no positional attributes specified", call. = FALSE)
       trace$type <- relay_type("scatter")
