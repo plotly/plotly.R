@@ -22,12 +22,11 @@ layout.matrix <- function(p, ..., data = NULL) {
 layout.plotly <- function(p, ..., data = NULL) {
   p <- add_data(p, data)
   attrs <- list(...)
-  if (is.null(p$x$cur_data)) {
-    nlayouts <- length(p$x$layout)
-    p$x$layout <- c(p$x$layout, attrs)
-  } else {
-    p$x$layoutAttrs[[p$x$cur_data]] <- attrs
-  }
+  # similar to add_trace()
+  p$x$layoutAttrs <- c(
+    p$x$layoutAttrs %||% list(), 
+    setNames(list(attrs), p$x$cur_data)
+  )
   p
 }
 
