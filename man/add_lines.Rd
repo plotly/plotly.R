@@ -7,6 +7,6 @@
 add_lines(p, ...)
 }
 \description{
-Add lines to a plotly vis
+Equivalent to \code{add_paths}, but with the x-values sorted.
 }
 

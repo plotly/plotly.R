@@ -93,17 +93,18 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$zaxis$title, "Sepal.Width")
 })
 
-test_that("inheriting properties works as expected", {
-  library(dplyr)
-  p <- iris %>% 
-    count(Species) %>%
-    plot_ly(x = ~Species, y = ~n, opacity = 0.5, type = "bar") %>%
-    layout(barmode = "overlay", showlegend = FALSE)
-  s <- count(iris[sample(nrow(iris), 10), ], Species)
-  p2 <- add_trace(p, data = s)
-  l <- plotly_build(p2)
-  expect_equal(l$data[[2]]$opacity, 0.5)
-  expect_true(all(l$data[[1]]$y > l$data[[2]]$y))
+test_that("type inference + add_data + layering works as expected", {
+p <- plot_ly(iris, x = ~Species) %>% 
+  add_trace(opacity = 0.3) %>%
+  add_data(iris[sample(nrow(iris), 10), ]) %>% 
+  add_trace() %>%
+  layout(barmode = "overlay")
+  l <- expect_traces(p, 2, "bar-inference")
+  types <- unique(unlist(lapply(l$data, "[[", "type")))
+  expect_equal(types, "histogram")
+  expect_equal(l$data[[1]]$opacity, 0.3)
+  expect_equal(l$layout$barmode, "overlay")
+  expect_true(length(l$data[[1]]$x) > length(l$data[[2]]$x))
 })
 
 test_that("x/y/z properties have a class of AsIs", {

@@ -89,6 +89,7 @@ plotly_build.plotly <- function(p) {
   # TODO: should non-formula object names populate titles?
   colorTitle <- unlist(lapply(p$x$attrs, "[[", "color"))[[1]]
   dats <- mapColor(dats, title = sub("^~", "", deparse2(colorTitle)))
+  dats <- mapSize(dats)
   dats <- mapSymbol(dats)
   dats <- mapLinetype(dats)
   
@@ -97,7 +98,11 @@ plotly_build.plotly <- function(p) {
   for (i in seq_along(dats)) {
     d <- dats[[i]]
     # no longer need these special variable mapping attributes
-    for (j in c("color", "colors", "symbol", "symbols", "linetype", "linetypes")) {
+    specialAttrs <- c(
+      "color", "colors", "symbol", "symbols", 
+      "linetype", "linetypes", "size", "sizes"
+    )
+    for (j in specialAttrs) {
       dats[[i]][[j]] <- NULL
     }
     params <- list(
@@ -148,6 +153,49 @@ plotly_build.plotly <- function(p) {
   verify_arrays(p)
 }
 
+
+mapSize <- function(traces) {
+  sizeList <- lapply(traces, "[[", "size")
+  nSizes <- lengths(sizeList)
+  # if no "top-level" color is present, return traces untouched
+  if (all(nSizes == 0)) {
+    return(traces)
+  }
+  allSize <- unlist(compact(sizeList))
+  if (!is.null(allSize) && is.discrete(allSize)) {
+    stop("Size must be mapped to a numeric variable", 
+         "symbols only make sense for discrete variables", call. = FALSE)
+  }
+  sizeRange <- range(allSize, na.rm = TRUE)
+  
+  types <- vapply(traces, function(tr) tr$type, character(1))
+  modes <- vapply(traces, function(tr) tr$mode, character(1))
+  hasMarker <- has_marker(types, modes)
+  hasLine <- has_line(types, modes)
+  hasText <- has_text(types, modes)
+  
+  for (i in which(nSizes > 0)) {
+    sizeI <- scales::rescale(sizeList[[i]], from = sizeRange, to = traces[[1]]$sizes)
+    traces[[i]]$marker <- modify_list(
+      list(size = sizeI, sizemode = "area"), 
+      traces[[i]]$marker
+    )
+    if (hasLine[[i]]) {
+      warning(
+        "Can't map size to lines since plotly.js doesn't yet support line.width arrays",
+        call. = FALSE
+      )
+    }
+    if (hasText[[i]]) {
+      warning(
+        "Can't map size to text since plotly.js doesn't yet support textfont.size arrays",
+        call. = FALSE
+      )
+    }
+  }
+  traces
+}
+
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 mapColor <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, "[[", "color")
@@ -158,7 +206,6 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   }
   isNumeric <- vapply(color, is.numeric, logical(1))
   isDiscrete <- vapply(color, is.discrete, logical(1))
-  
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   types <- vapply(traces, function(tr) tr$type, character(1))
   modes <- vapply(traces, function(tr) tr$mode, character(1))
@@ -280,8 +327,13 @@ mapSymbol <- function(traces) {
   }
   # symbol values are duplicated (there is a valid numeric and character string for each symbol)
   validSymbols <- as.character(Schema$traces$scatter$attributes$marker$symbol$values)
-  symbols <- unique(unlist(lapply(traces, "[[", "symbols"))) %||% 
-    grep("[0-9]", validSymbols, invert = TRUE, value = TRUE)
+  # give a sensible ordering the valid symbols so that we map 
+  # to a palette that can be easily perceived
+  symbolPalette <- c(
+    'circle', 'cross', 'diamond', 'square', 'triangle-down', 
+    'triangle-left', 'triangle-right', 'triangle-up'
+  )
+  symbols <- unique(unlist(traces[[1]]$symbols)) %||% symbolPalette
   illegalSymbols <- setdiff(symbols, validSymbols)
   if (length(illegalSymbols)) {
     stop("The following are not valid symbol codes:\n",

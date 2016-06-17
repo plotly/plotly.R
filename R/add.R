@@ -58,9 +58,6 @@ add_trace <- function(p, ...,
   attrs$symbol <- verify_arg(symbol)
   attrs$size <- verify_arg(size)
   
-  attrs$colors <- colors
-  attrs$symbols <- symbols
-  
   if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")
   }
@@ -85,7 +82,16 @@ add_markers <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "markers", ...)
 }
 
+#' Add paths to a plotly vis
+#' 
+#' @export
+add_paths <- function(p, ...) {
+  add_trace(p, type = "scatter", mode = "lines", ...)
+}
+
 #' Add lines to a plotly vis
+#' 
+#' Equivalent to \code{add_paths}, but with the x-values sorted.
 #' 
 #' @export
 add_lines <- function(p, ...) {

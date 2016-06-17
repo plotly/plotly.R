@@ -5,8 +5,8 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
-  symbol, symbols = NULL, size, linetype, linetypes = NULL, width = NULL,
-  height = NULL, source = "A")
+  symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
+  linetypes = NULL, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -29,6 +29,8 @@ or a color interpolation function like \code{colorRamp()}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
+\item{sizes}{a numeric vector of length 2 used to scale sizes to pixels.}
+
 \item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
 
 \item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
@@ -49,32 +51,46 @@ Reference section (see below).
 \examples{
 \dontrun{
 
-# If you don't explicitly add a trace, via add_trace() or similar,
-# plot_ly() will add one for you, and infer an appropriate trace type
+# plot_ly() tries to create a sensible plot based on the information you 
+# give it. If you don't provide a trace type, plot_ly() will infer one.
 plot_ly(economics, x = ~pop)
 plot_ly(economics, x = ~date, y = ~pop)
+# plot_ly() doesn't require data frame(s), which allows one to take 
+# advantage of trace type(s) designed specifically for numeric matrices
+plot_ly(z = volcano)
+plot_ly(z = volcano, type = "surface")
 
-# Attributes set in plot_ly() define 'global' attributes that 
+# plotly has a functional interface: every plotly function takes a plotly
+# object as it's first input argument and returns a modified plotly object
+add_points(plot_ly(economics, x = ~date, y = ~unemploy/pop))
+
+# To make code more readable, plotly imports the pipe operator from magrittr
+economics \%>\% plot_ly(x = ~date, y = ~unemploy/pop) \%>\% add_points()
+
+# Attributes defined via plot_ly() set 'global' attributes that 
 # are carried onto subsequent traces
 plot_ly(economics, x = ~date, line = list(color = "black")) \%>\%
  add_trace(y = ~uempmed, mode = "markers+lines") \%>\%
- add_lines(y = ~psavert)
+ add_lines(y = ~psavert) \%>\%
+ layout(title = "Setting global trace attributes")
 
-plot_ly(economics, x = ~date) \%>\%
-  add_lines(y = ~uempmed) \%>\% 
-  add_lines(y = ~fitted(loess(uempmed ~ as.numeric(date))))
+# Attributes are documented in the figure reference -> https://plot.ly/r/reference
+# You might notice plot_ly() has named arguments that aren't in the figure
+# reference. These arguments make it easier to map abstract data values to
+# visual attributes.
+p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
+add_markers(p, color = ~Petal.Length)
+add_markers(p, color = ~Species)
+add_markers(p, color = ~Species, colors = "Set1")
+add_paths(p, line = ~Species)
   
-p <- plot_ly(economics, x = ~date, y = ~uempmed)
-# add a loess smoother
-p2 <- add_trace(p, y = ~fitted(loess(uempmed ~ as.numeric(date))))
-# add a title
-p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
-# change the font
-layout(p3, font = list(family = "Courier New, monospace"))
+ 
+  
+ plot_ly(economics, x = ~date) \%>\%
+  add_lines(y = ~uempmed) \%>\% 
+  add_lines(y = ~fitted(loess(uempmed ~ as.numeric(date)))) \%>\%
+  layout(title = "Median duration of unemployment (in weeks)")
 
-
-# using the color argument
-plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, mode = "markers")
 # smooth gradient between 5 colors
 plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop, 
   colors = terrain.colors(5), mode = "markers")
@@ -86,10 +102,6 @@ decade <- function(x) {
 plot_ly(economics, x = ~unemploy / pop, color = ~decade(date), type = "box")
 
 plot_ly(economics, x = ~date, y = ~unemploy / pop, linetype = ~decade(date))
-
-# sometimes, a data frame isn't fit for the use case...
-# for 3D surface plots, a numeric matrix is more natural
-plot_ly(z = volcano, type = "surface")
 
 }
 

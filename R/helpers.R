@@ -15,12 +15,6 @@ hide_colorbar <- function(p) {
   p
 }
 
-hide_legend <- function(p) {
-  layout(p, showlegend = FALSE)
-}
-
-
-
 #' Convert trace types to WebGL
 #' 
 #' @param p a plotly or ggplot object.
