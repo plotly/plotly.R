@@ -20,6 +20,7 @@ Description: Easily translate 'ggplot2' graphs to an interactive web-based versi
 URL: https://plot.ly/r, https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
+    R (>= 2.10),
     ggplot2 (>= 2.1.0)
 Imports:
     scales,
@@ -49,7 +50,8 @@ Suggests:
     Rserve,
     RSclient,
     broom,
-    webshot
+    webshot,
+    listviewer
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

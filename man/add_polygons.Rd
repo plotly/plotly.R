@@ -6,6 +6,12 @@
 \usage{
 add_polygons(p, ...)
 }
+\arguments{
+\item{p}{a plotly or ggplot object.}
+
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
+}
 \description{
 Add polygons to a plotly vis
 }

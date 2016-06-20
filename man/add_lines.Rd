@@ -6,6 +6,12 @@
 \usage{
 add_lines(p, ...)
 }
+\arguments{
+\item{p}{a plotly or ggplot object.}
+
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
+}
 \description{
 Equivalent to \code{add_paths}, but with the x-values sorted.
 }

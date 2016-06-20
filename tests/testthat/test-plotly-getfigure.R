@@ -29,7 +29,7 @@ test_that("retrieving a public figure ... works.", {
   skip_on_pull_request()
   fig <- get_figure("get_test_user", 0)
   # get the data behind the hash
-  p <- plotly_build(fig)
+  p <- plotly_build(fig)$x
   expect_equivalent(p$data[[1]]$x, c("1", "2", "3"))
 })
 
@@ -38,8 +38,8 @@ test_that("can add traces to a subplot figure", {
   skip_on_pull_request()
   fig <- get_figure('chelsea_lyn', 6366)
   p <- add_trace(fig, x = c(1, 2, 3), y = c(4, 2, 4))
-  l <- plotly_build(p)
-  expect_equivalent(length(plotly_build(fig)$data) + 1, length(l$data))
+  l <- plotly_build(p)$x
+  expect_equivalent(length(plotly_build(fig)$x$data) + 1, length(l$data))
 })
 
 test_that("posting a hidden plot returns a secret key", {

@@ -178,21 +178,21 @@ verify_mode <- function(p) {
   for (tr in seq_along(p$x$data)) {
     trace <- p$x$data[[tr]]
     if (grepl("scatter", trace$type %||% "scatter")) {
-      if (!is.null(trace$marker) && !grepl("markers", trace$mode)) {
+      if (!is.null(trace$marker) && !grepl("markers", trace$mode %||% "")) {
         message(
           "A marker object has been specified, but markers is not in the mode\n",
           "Adding markers to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+markers")
       }
-      if (!is.null(trace$line) && !grepl("lines", trace$mode)) {
+      if (!is.null(trace$line) && !grepl("lines", trace$mode %||% "")) {
         message(
           "A line object has been specified, but lines is not in the mode\n",
           "Adding lines to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+lines")
       }
-      if (!is.null(trace$textfont) && !grepl("text", trace$mode)) {
+      if (!is.null(trace$textfont) && !grepl("text", trace$mode %||% "")) {
         warning(
           "A textfont object has been specified, but text is not in the mode\n",
           "Adding text to the mode..."

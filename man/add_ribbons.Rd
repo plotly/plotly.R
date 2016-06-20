@@ -6,6 +6,12 @@
 \usage{
 add_ribbons(p, ...)
 }
+\arguments{
+\item{p}{a plotly or ggplot object.}
+
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
+}
 \description{
 Ribbons are a special case of polygons.
 }

@@ -20,6 +20,6 @@ sent to plotly.js.
 \examples{
   
 plotly_json(plot_ly())
-plotly_json(plot_ly(), F)
+plotly_json(plot_ly(), FALSE)
 }
 

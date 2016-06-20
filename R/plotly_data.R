@@ -114,7 +114,7 @@ filter_.plotly <- function(.data, ..., .dots) {
 #' @export
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::distinct_(d, ..., .dots, add = add)
+  d <- dplyr::distinct_(d, ..., .dots)
   add_data(.data, d)
 }
 
@@ -122,7 +122,7 @@ distinct_.plotly <- function(.data, ..., .dots) {
 #' @export
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::slice_(d, ..., .dots, add = add)
+  d <- dplyr::slice_(d, ..., .dots)
   add_data(.data, d)
 }
 
@@ -130,7 +130,7 @@ slice_.plotly <- function(.data, ..., .dots) {
 #' @export
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::rename_(d, ..., .dots, add = add)
+  d <- dplyr::rename_(d, ..., .dots)
   add_data(.data, d)
 }
 
@@ -138,7 +138,7 @@ rename_.plotly <- function(.data, ..., .dots) {
 #' @export
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::transmute_(d, ..., .dots, add = add)
+  d <- dplyr::transmute_(d, ..., .dots)
   add_data(.data, d)
 }
 

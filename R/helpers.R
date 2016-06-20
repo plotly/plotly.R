@@ -30,7 +30,7 @@ hide_colorbar <- function(p) {
 toWebGL <- function(p, warn = TRUE) {
   p <- plotly_build(p)
   types <- sapply(p$x$data, function(x) x[["type"]][1] %||% "scatter")
-  idx <- paste0(types, "gl") %in% traces
+  idx <- paste0(types, "gl") %in% names(Schema$traces)
   if (any(!idx) && warn) {
     warning(
       "The following traces don't have a WebGL equivalent: ",

@@ -6,6 +6,12 @@
 \usage{
 add_markers(p, ...)
 }
+\arguments{
+\item{p}{a plotly or ggplot object.}
+
+\item{...}{These arguments are documented in the references section below.
+Note that acceptable arguments depend on the trace type.}
+}
 \description{
 Add points to a plotly vis
 }

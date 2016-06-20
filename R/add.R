@@ -77,6 +77,7 @@ add_trace <- function(p, ...,
 
 #' Add points to a plotly vis
 #' 
+#' @inheritParams add_trace
 #' @export
 add_markers <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "markers", ...)
@@ -84,6 +85,7 @@ add_markers <- function(p, ...) {
 
 #' Add paths to a plotly vis
 #' 
+#' @inheritParams add_trace
 #' @export
 add_paths <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "lines", ...)
@@ -93,6 +95,7 @@ add_paths <- function(p, ...) {
 #' 
 #' Equivalent to \code{add_paths}, but with the x-values sorted.
 #' 
+#' @inheritParams add_trace
 #' @export
 add_lines <- function(p, ...) {
   add_trace(p, type = "scatter", mode = "lines", ...)
@@ -100,6 +103,7 @@ add_lines <- function(p, ...) {
 
 #' Add text to a plotly vis
 #' 
+#' @inheritParams add_trace
 #' @export
 add_text <- function(p, ...) {
   # TODO: throw error if no text attribute is found
@@ -108,6 +112,7 @@ add_text <- function(p, ...) {
 
 #' Add polygons to a plotly vis
 #' 
+#' @inheritParams add_trace
 #' @export
 #' @examples 
 #' 
@@ -129,6 +134,7 @@ add_polygons <- function(p, ...) {
 #' 
 #' Ribbons are a special case of polygons.
 #' 
+#' @inheritParams add_trace
 #' @export
 add_ribbons <- function(p, ...) {
   # TODO: add ymin, ymax arguments?
