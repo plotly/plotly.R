@@ -53,14 +53,13 @@ plotly_build.plotly <- function(p) {
   }
   
   dats <- Map(function(x, y) {
-    
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
       idx <- which(names(x) %in% i)
       if (length(idx) == 1) {
         title <- sub("^~", "", deparse2(x[[idx]]))
-        if (is3d(x$type)) {
+        if (is3d(x$type) || i == "z") {
           p$x$layout$scene[[nm]]$title <<- title
         } else {
           p$x$layout[[nm]]$title <<- title
@@ -68,10 +67,13 @@ plotly_build.plotly <- function(p) {
       }
     }
     
-    # perform the evaluation
     d <- plotly_data(p, y)
+    # if the data has groups, insert missing values to introduce gaps
     grps <- dplyr::groups(d)
     if (length(grps)) {
+      if (isTRUE(x$connectgaps)) {
+        stop("Can't set connectgaps=T in a trace that has 1 or more groups.", call. = FALSE)
+      }
       # in order to do grouping _within trace_ correctly, we need to know about 
       # variables that transform one trace into multiple traces
       nestedVars <- list()
@@ -85,9 +87,10 @@ plotly_build.plotly <- function(p) {
       d <- group2NA(d, as.character(grps), names(nestedVars))
     }
     
+    # perform the evaluation
     x <- rapply(x, eval_attr, data = d, how = "list")
     
-    # ensure we have a trace type
+    # ensure we have a trace type (depends on the # of data points)
     x <- verify_type(x)
     
     attrLengths <- lengths(x)
@@ -102,7 +105,7 @@ plotly_build.plotly <- function(p) {
   
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: these should be applied at the plot-level
-  colorTitle <- unlist(lapply(p$x$attrs, "[[", "color"))[[1]]
+  colorTitle <- unlist(lapply(p$x$attrs, function(x) x$color %||% x$z))[[1]]
   dats <- map_color(dats, title = sub("^~", "", deparse2(colorTitle)))
   dats <- map_size(dats)
   dats <- map_symbol(dats)
@@ -159,16 +162,16 @@ plotly_build.plotly <- function(p) {
   p$x$data <- setNames(p$x$data, NULL)
   
   # verify plot attributes are legal according to the plotly.js spec
-  verify_attr_names(p)
+  p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
-  verify_boxed(p)
+  p <- verify_boxed(p)
   # if it makes sense, add markers/lines/text to mode
-  verify_mode(p)
+  p <- verify_mode(p)
   # annotations & shapes must be an array of objects
   # TODO: should we add anything else to this?
-  verify_arrays(p)
+  p <- verify_arrays(p)
   # set a sensible hovermode if it hasn't been specified already
-  verify_hovermode(p)
+  p <- verify_hovermode(p)
 }
 
 map_size <- function(traces) {
@@ -215,7 +218,7 @@ map_size <- function(traces) {
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 map_color <- function(traces, title = "", na.color = "transparent") {
-  color <- lapply(traces, "[[", "color")
+  color <- lapply(traces, function(x) x$color %||% if (has_attr(x$type, "zmin")) x$z else NULL)
   nColors <- lengths(color)
   # if no "top-level" color is present, return traces untouched
   if (all(nColors == 0)) {
@@ -232,7 +235,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
-  hasZ <- !grepl("scatter", types) & 
+  hasZ <- has_attr(types, "zmin") & 
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
   
   if (any(isNumeric)) {
@@ -242,7 +245,11 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     rng <- range(allColor, na.rm = TRUE)
     colScale <- scales::col_numeric(palette, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
-    vals <- if (diff(rng) > 0) as.numeric(quantile(allColor, na.rm = TRUE)) else c(0, 1)
+    vals <- if (diff(rng) > 0) {
+      as.numeric(quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE)) 
+    } else {
+      c(0, 1)
+    }
     colorScale <- matrix(c(scales::rescale(vals), colScale(vals)), ncol = 2)
     colorObj <- list(
       colorbar = list(title = as.character(title), ticklen = 2),
@@ -265,6 +272,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
       }
       if (hasZ[[i]]) {
+        colorObj[c("zmin", "zmax")] <- colorObj[c("cmin", "cmax")]
+        colorObj[c("cmin", "cmax")] <- NULL
+        colorObj$showscale <- TRUE
         traces[[i]] <- modify_list(colorObj, traces[[i]])
       }
       if (hasText[[i]]) {
@@ -273,6 +283,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
                 "https://github.com/plotly/plotly.js", call. = FALSE)
       }
     }
+    if (any(hasZ)) return(traces) 
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
     colorObj$showscale <- TRUE

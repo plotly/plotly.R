@@ -146,7 +146,7 @@ test_that("geo+cartesian behaves", {
   # create a map of population density
   density <- state.x77[, "Population"] / state.x77[, "Area"]
   map <- plot_ly(
-    z = density, 
+    z = ~density, 
     text = state.name, locations = state.abb,
     type = 'choropleth', locationmode = 'USA-states', geo = "geo"
   ) %>% layout(geo = g)

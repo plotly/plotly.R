@@ -1,5 +1,9 @@
 context("plot_ly")
 
+test_that("uniq works as expected", {
+  expect_equal(uniq(c("red", "red", NA)), "red")
+})
+
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-", name))
@@ -20,10 +24,11 @@ test_that("plot_ly() handles a simple scatterplot", {
 
 test_that("Mapping a variable to symbol works", {
   p <- plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length, symbol = ~Species)
+  expect_message(plotly_build(p), "Adding markers to mode")
   l <- expect_traces(p, 3, "scatterplot-symbol")
   markers <- lapply(l$data, "[[", "marker")
   syms <- unlist(lapply(markers, "[[", "symbol"))
-  expect_identical(syms, c("dot", "cross", "diamond"))
+  expect_identical(syms, c("circle", "cross", "diamond"))
 })
 
 test_that("Mapping a factor variable to color works", {
@@ -66,21 +71,23 @@ test_that("Passing hex codes to colors argument works", {
 test_that("Mapping a numeric variable to color works", {
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, 
                color = ~Petal.Width, mode = "markers")
-  l <- expect_traces(p, 1, "scatterplot-color-numeric")
-  marker <- l$data[[1]]$marker
-  expect_identical(marker$colorbar$title, "Petal.Width")
-  expect_identical(marker$color, iris$Petal.Width)
-  expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
+  # one trace is for the colorbar
+  l <- expect_traces(p, 2, "scatterplot-color-numeric")
+  idx <- vapply(l$data, is.colorbar, logical(1))
+  markerScale <- l$data[[which(idx)]]$marker
+  markerDat <- l$data[[which(!idx)]]$marker
+  expect_identical(markerDat$color, iris$Petal.Width)
+  expect_identical(markerScale$colorbar$title, "Petal.Width")
+  expect_equal(min(iris$Petal.Width), markerScale$cmin)
+  expect_equal(max(iris$Petal.Width), markerScale$cmax)
+  expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
 })
 
 test_that("Custom RColorBrewer pallette works for numeric variable", {
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, 
                color = ~Petal.Width, colors = "Greens", mode = "markers")
-  l <- expect_traces(p, 1, "scatterplot-color-numeric-custom")
-  marker <- l$data[[1]]$marker
-  expect_identical(marker$colorbar$title, "Petal.Width")
-  expect_identical(marker$color, iris$Petal.Width)
-  expect_true(all(0 <= marker$colorscale[,1] & marker$colorscale[,1] <= 1))
+  # one trace is for the colorbar
+  l <- expect_traces(p, 2, "scatterplot-color-numeric-custom")
 })
 
 test_that("axis titles get attached to scene object for 3D plots", {
@@ -109,7 +116,7 @@ p <- plot_ly(iris, x = ~Species) %>%
 
 test_that("x/y/z properties have a class of AsIs", {
   p <- plot_ly(x = 1, y = 1, z = 1, type = "scatter3d")
-  l <- plotly_build(p)
+  l <- expect_traces(p, 1, "box-data-array")
   tr <- l$data[[1]]
   expect_true(inherits(tr$x, "AsIs"))
   expect_true(inherits(tr$y, "AsIs"))

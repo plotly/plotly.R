@@ -162,9 +162,18 @@ transmute_.plotly <- function(.data, ..., .dots) {
 group2NA <- function(data, groupNames = "group", nested = NULL, 
                      retrace.first = inherits(data, "GeomPolygon")) {
   if (nrow(data) == 0) return(data)
-  # arrange + group_by
+  # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
+  retrace <- force(retrace.first)
+  datClass <- class(data)
+  # sanitize variable names
+  groupNames <- groupNames[groupNames %in% names(data)]
+  nested <- nested[nested %in% names(data)]
+  # nothing to do if the group var doesn't exist
+  if (!length(groupNames)) return(data)
+  # arrange + group_by, ignoring any already existing groups
   vars <- c(nested, groupNames)
-  data <- data[do.call(order, data[, vars]), ]
+  data <- data[do.call(order, data[, vars, drop = FALSE]), ]
+  data <- dplyr::ungroup(data)
   for (i in vars) {
     data <- dplyr::group_by_(data, i, add = TRUE)
   }
@@ -173,9 +182,13 @@ group2NA <- function(data, groupNames = "group", nested = NULL,
   } else {
     dplyr::do(data, rbind(., NA))
   }
-  #d <- tidyr::unnest(d, vars)
-  d <- d[, names(d) %in% names(data)]
+  # TODO: how to drop the NAs separating the nested values?
+  # d <- dplyr::ungroup(d)
+  # for (i in nested) {
+  #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
+  # }
+  # d <- dplyr::do(d, .[seq_len(NROW(.)),])
   n <- NROW(d)
   if (all(is.na(d[n, ]))) d <- d[-n, ]
-  structure(d, class = unique(class(data), class(d)))
+  structure(d, class = datClass)
 }
