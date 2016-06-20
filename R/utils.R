@@ -99,6 +99,7 @@ verify_box <- function(proposed, schema) {
       identical(attrSchema[["role"]], "object"),
       error = function(e) FALSE
     )
+    
     if (isArray) {
       proposed[[attr]] <- i(attrVal)
     }
@@ -234,12 +235,9 @@ has_text <- function(types, modes) {
   ifelse(is_scatter, grepl("text", modes), has_attr(types, "textfont"))
 }
 
-has_attr <- function(types, attr) {
-  isMissing <- function(x) {
-    e <- try(verify_attrs(x, attr), silent = TRUE)
-    inherits(e, "try-error")
-  }
-  !vapply(types, isMissing, logical(1), USE.NAMES = FALSE)
+has_attr <- function(types, attr = "marker") {
+  if (length(attr) != 1) stop("attr must be of length 1")
+  vapply(types, function(x) attr %in% names(Schema$traces[[x]]$attributes), logical(1))
 }
 
 has_legend <- function(p) {
