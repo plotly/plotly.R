@@ -4,9 +4,9 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
-  symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, width = NULL, height = NULL, source = "A")
+plot_ly(data = data.frame(), ..., type = NULL, group, color,
+  colors = NULL, symbol, symbols = NULL, size, sizes = c(10, 100),
+  linetype, linetypes = NULL, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}

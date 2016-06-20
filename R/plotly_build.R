@@ -83,7 +83,8 @@ plotly_build.plotly <- function(p) {
         nestedVars[[id]] <- i
         d[[id]] <- newVar
       }
-      d <- group2NA(d, as.character(grps), names(nestedVars))
+      retrace <- inherits(x, "plotly_polygon")
+      d <- group2NA(d, as.character(grps), names(nestedVars), retrace)
     }
     
     # perform the evaluation
@@ -245,7 +246,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     colScale <- scales::col_numeric(palette, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
     vals <- if (diff(rng) > 0) {
-      as.numeric(quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE)) 
+      as.numeric(stats::quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE)) 
     } else {
       c(0, 1)
     }

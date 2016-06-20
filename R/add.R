@@ -75,6 +75,13 @@ add_trace <- function(p, ...,
   p
 }
 
+add_trace_classed <- function(p, class = "plotly_polygon", ...) {
+  p <- add_trace(p, ...)
+  nAttrs <- length(p$x$attrs)
+  p$x$attrs[[nAttrs]] <- prefix_class(p$x$attrs[[nAttrs]], class)
+  p
+}
+
 #' Add points to a plotly vis
 #' 
 #' @inheritParams add_trace
@@ -98,7 +105,7 @@ add_paths <- function(p, ...) {
 #' @inheritParams add_trace
 #' @export
 add_lines <- function(p, ...) {
-  add_trace(p, type = "scatter", mode = "lines", ...)
+  add_trace_classed(p, type = "scatter", mode = "lines", class = "plotly_lines", ...)
 }
 
 #' Add text to a plotly vis
@@ -113,21 +120,23 @@ add_text <- function(p, ...) {
 #' Add polygons to a plotly vis
 #' 
 #' @inheritParams add_trace
+#' @param mode Determines the drawing mode for this scatter trace 
+#' \url{https://plot.ly/r/reference/#scatter-mode}
 #' @export
 #' @examples 
 #' 
-#' library(dplyr)
-#' data(canada.cities, package = "maps")
-#' 
 #' ggplot2::map_data("world", "canada") %>%
 #'   group_by(group) %>%
-#'   plot_ly(x = ~long, y = ~lat, hoverinfo = "none") %>%
+#'   plot_ly(x = ~long, y = ~lat) %>%
+#'   add_polygons(hoverinfo = "none") %>%
 #'   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
-#'     data = canada.cities) %>%
+#'     data = maps::canada.cities) %>%
 #'   layout(showlegend = FALSE)
-add_polygons <- function(p, ...) {
-  # TODO: Should mode='markers+lines'? If so, retrace first points?
-  add_trace(p, type = "scatter", mode = "lines", fill = "toself", ...)
+add_polygons <- function(p, mode = "lines", ...) {
+  add_trace_classed(
+    p, class = "plotly_polygon", type = "scatter", 
+    fill = "toself", mode = mode,  ...
+  )
 }
 
 #' Add ribbons to a plotly vis

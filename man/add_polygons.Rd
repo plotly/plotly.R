@@ -4,10 +4,13 @@
 \alias{add_polygons}
 \title{Add polygons to a plotly vis}
 \usage{
-add_polygons(p, ...)
+add_polygons(p, mode = "lines", ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
+
+\item{mode}{Determines the drawing mode for this scatter trace 
+\url{https://plot.ly/r/reference/#scatter-mode}}
 
 \item{...}{These arguments are documented in the references section below.
 Note that acceptable arguments depend on the trace type.}
@@ -17,14 +20,12 @@ Add polygons to a plotly vis
 }
 \examples{
 
-library(dplyr)
-data(canada.cities, package = "maps")
-
 ggplot2::map_data("world", "canada") \%>\%
   group_by(group) \%>\%
-  plot_ly(x = ~long, y = ~lat, hoverinfo = "none") \%>\%
+  plot_ly(x = ~long, y = ~lat) \%>\%
+  add_polygons(hoverinfo = "none") \%>\%
   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
-    data = canada.cities) \%>\%
+    data = maps::canada.cities) \%>\%
   layout(showlegend = FALSE)
 }
 

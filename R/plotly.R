@@ -65,7 +65,7 @@
 #' 
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = NULL,
+plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     color, colors = NULL, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
                     width = NULL, height = NULL, source = "A") {
