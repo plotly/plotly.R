@@ -42,7 +42,11 @@ NULL
 #' @export
 #' @rdname plotly_data
 plotly_data <- function(p, id = p$x$cur_data) {
-  p$x$visdat[[id]]() %||% data.frame()
+  f <- p$x$visdat[[id]]
+  # if data has been specified, this should be a closure that, when called
+  # returns data
+  if (is.function(f)) return(f())
+  data.frame()
 }
 
 #' @export

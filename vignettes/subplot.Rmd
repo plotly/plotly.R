@@ -36,8 +36,8 @@ The `subplot()` function provides a flexible interface for arranging multiple **
 
 ```{r}
 library(plotly)
-p1 <- plot_ly(economics, x = date, y = unemploy, name = "unemploy")
-p2 <- plot_ly(economics, x = date, y = uempmed, name = "uempmed")
+p1 <- plot_ly(economics, x = ~date, y = ~unemploy, name = "unemploy")
+p2 <- plot_ly(economics, x = ~date, y = ~uempmed, name = "uempmed")
 subplot(p1, p2)
 ```
 
@@ -55,7 +55,7 @@ subplot(plots, nrows = length(plots), shareX = TRUE, titleX = FALSE)
 # this works too, but I'm not sure we should advertise...
 elong <- tidyr::gather(economics, variable, value, -date)
 elong$id <- as.integer(factor(elong$variable))
-p <- plot_ly(elong, x = date, y = value, group = variable, yaxis = paste0("y", id))
+p <- plot_ly(elong, x = ~date, y = ~value, group = ~variable, yaxis = ~paste0("y", id))
 subplot(p, nrows = 5, shareX = TRUE)
 ```
 
@@ -114,7 +114,7 @@ g <- list(
 # create a map of population density
 density <- state.x77[, "Population"] / state.x77[, "Area"]
 map <- plot_ly(
-  z = density, 
+  z = ~density, 
   text = state.name, locations = state.abb,
   type = 'choropleth', locationmode = 'USA-states', geo = "geo"
 ) %>% layout(geo = g)
@@ -154,7 +154,4 @@ objects -- the class of object returned by the `ggpairs()` function in the
 pm <- GGally::ggpairs(iris)
 ggplotly(pm)
 ```
-
-
-
 

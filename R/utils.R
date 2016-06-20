@@ -35,6 +35,10 @@ new_id <- function() {
   basename(tempfile(""))
 }
 
+names2 <- function(x) {
+  names(x) %||% rep("", length(x))
+}
+
 verify_arg <- function(arg) {
   if (missing(arg)) return(NULL)
   if (!is.formula(arg)) {

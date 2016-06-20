@@ -35,11 +35,10 @@ plotly_build.plotly <- function(p) {
   layouts <- Map(function(x, y) {
     
     d <- plotly_data(p, y)
-    
     x <- rapply(x, eval_attr, data = d, how = "list")
     x[lengths(x) > 0]
     
-  }, p$x$layoutAttrs, names(p$x$layoutAttrs))
+  }, p$x$layoutAttrs, names2(p$x$layoutAttrs))
   
   # get rid of the data -> layout mapping and merge all the layouts
   # into a single layout (more recent layouts will override older ones)
@@ -101,7 +100,7 @@ plotly_build.plotly <- function(p) {
     
     x[attrLengths > 0]
     
-  }, p$x$attrs, names(p$x$attrs))
+  }, p$x$attrs, names2(p$x$attrs))
   
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: these should be applied at the plot-level
