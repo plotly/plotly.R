@@ -846,9 +846,11 @@ faced <- function(txt, face = "plain") {
 bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
-# if a vector has one unique value, return that value
+# if a vector that has one unique value (ignoring missings), return that value
 uniq <- function(x) {
   u <- unique(x)
+  if (identical(u, NA) || length(u) == 0) return(u)
+  u <- u[!is.na(u)]
   if (length(u) == 1) u else x
 }
 
@@ -902,7 +904,9 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
 
 # We need access to internal ggplot2 functions in several places
 # this helps us import functions in a way that R CMD check won't cry about
-ggfun <- function(x) getFromNamespace(x, "ggplot2")
+ggfun <- function(x) {
+  tryCatch(getFromNamespace(x, "ggplot2"), error = function(e) NULL)
+}
 
 ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
