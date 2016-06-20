@@ -18,7 +18,7 @@ if (report_diffs || build_table) {
   # we don't make assumptions about ggplot2 versioning,
   # but it is _strongly_ recommended to use the CRAN version (of ggplot2)
   RSeval(conn, "devtools::install_github('ropensci/plotly')")
-  RSeval(conn, "library(plotly)")
+  #RSeval(conn, "library(plotly)")
   if (report_diffs) {
     # hash of the version being tested
     this_hash <- substr(Sys.getenv("TRAVIS_COMMIT"), 1, 7)
