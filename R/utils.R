@@ -207,6 +207,18 @@ verify_arrays <- function(p) {
   p
 }
 
+verify_hovermode <- function(p) {
+  if (!is.null(p$x$layout$hovermode)) {
+    return(p)
+  }
+  types <- vapply(p$x$data, function(tr) tr$type, character(1))
+  modes <- vapply(p$x$data, function(tr) tr$mode %||% "lines", character(1))
+  if (any(grepl("markers", modes) & types == "scatter")) {
+    p$x$layout$hovermode <- "closest"
+  }
+  p
+}
+
 has_marker <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("marker", modes), has_attr(types, "marker"))

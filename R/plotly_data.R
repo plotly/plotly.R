@@ -152,6 +152,9 @@ transmute_.plotly <- function(.data, ..., .dots) {
 #' @param retrace.first should the first row of each group be appended to the 
 #' last row? This is useful for enclosing polygons with lines.
 #' @examples 
+#' 
+#' group2NA(mtcars, "vs", "cyl")
+#' 
 #' elong <- tidyr::gather(economics, variable, value, -date)
 #' plot_ly(group2NA(elong, "variable"), x = ~date, y = ~value)
 #' 
@@ -159,18 +162,20 @@ transmute_.plotly <- function(.data, ..., .dots) {
 group2NA <- function(data, groupNames = "group", nested = NULL, 
                      retrace.first = inherits(data, "GeomPolygon")) {
   if (nrow(data) == 0) return(data)
-  nested <- nested[nested %in% names(data)]
-  if (length(nested)) {
-    data <- dplyr::arrange_(data, nested)
+  # arrange + group_by
+  vars <- c(nested, groupNames)
+  data <- data[do.call(order, data[, vars]), ]
+  for (i in vars) {
+    data <- dplyr::group_by_(data, i, add = TRUE)
   }
-  d <- dplyr::group_by_(data, groupNames)
   d <- if (retrace.first) {
-    dplyr::do(d, rbind(., .[1,], NA))
+    dplyr::do(data, rbind(., .[1,], NA))
   } else {
-    dplyr::do(d, rbind(., NA))
+    dplyr::do(data, rbind(., NA))
   }
-  d <- tidyr::unnest(d, groupNames)
-  n <- nrow(d)
-  if (all(is.na(d[n, !groupNames %in% names(d)]))) d <- d[-n, ]
+  #d <- tidyr::unnest(d, vars)
+  d <- d[, names(d) %in% names(data)]
+  n <- NROW(d)
+  if (all(is.na(d[n, ]))) d <- d[-n, ]
   structure(d, class = unique(class(data), class(d)))
 }

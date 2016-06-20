@@ -61,21 +61,36 @@ plotly_build.plotly <- function(p) {
       if (length(idx) == 1) {
         title <- sub("^~", "", deparse2(x[[idx]]))
         if (is3d(x$type)) {
-          p$x$layout$scene[[nm]]$title <- title
+          p$x$layout$scene[[nm]]$title <<- title
         } else {
-          p$x$layout[[nm]]$title <- title
+          p$x$layout[[nm]]$title <<- title
         }
       }
     }
     
     # perform the evaluation
     d <- plotly_data(p, y)
+    grps <- dplyr::groups(d)
+    if (length(grps)) {
+      # in order to do grouping _within trace_ correctly, we need to know about 
+      # variables that transform one trace into multiple traces
+      nestedVars <- list()
+      for (i in c("symbol", "linetype", "color")) {
+        newVar <- eval_attr(x[[i]], d)
+        if (is.null(newVar) || i == "color" && !is.discrete(newVar)) next
+        id <- paste0("x", new_id())
+        nestedVars[[id]] <- i
+        d[[id]] <- newVar
+      }
+      d <- group2NA(d, as.character(grps), names(nestedVars))
+    }
+    
     x <- rapply(x, eval_attr, data = d, how = "list")
     
+    # ensure we have a trace type
     x <- verify_type(x)
     
     attrLengths <- lengths(x)
-    
     # if appropriate, set the mode now since we need to reference it later
     if (grepl("scatter", x$type) && is.null(x$mode)) {
       x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
@@ -85,24 +100,25 @@ plotly_build.plotly <- function(p) {
     
   }, p$x$attrs, names(p$x$attrs))
   
-  # "transforms" (i.e., apply scaling to) for special arguments
-  # TODO: should non-formula object names populate titles?
+  # "transforms" of (i.e., apply scaling to) special arguments
+  # IMPORTANT: these should be applied at the plot-level
   colorTitle <- unlist(lapply(p$x$attrs, "[[", "color"))[[1]]
-  dats <- mapColor(dats, title = sub("^~", "", deparse2(colorTitle)))
-  dats <- mapSize(dats)
-  dats <- mapSymbol(dats)
-  dats <- mapLinetype(dats)
+  dats <- map_color(dats, title = sub("^~", "", deparse2(colorTitle)))
+  dats <- map_size(dats)
+  dats <- map_symbol(dats)
+  dats <- map_linetype(dats)
   
   # traceify by the interaction of discrete variables
+  # although I hate this programming pattern, it seems necessary since we don't
+  # know how many traces we need
   traces <- list()
   for (i in seq_along(dats)) {
     d <- dats[[i]]
-    # no longer need these special variable mapping attributes
-    specialAttrs <- c(
+    mappingAttrs <- c(
       "color", "colors", "symbol", "symbols", 
       "linetype", "linetypes", "size", "sizes"
     )
-    for (j in specialAttrs) {
+    for (j in mappingAttrs) {
       dats[[i]][[j]] <- NULL
     }
     params <- list(
@@ -151,10 +167,11 @@ plotly_build.plotly <- function(p) {
   # annotations & shapes must be an array of objects
   # TODO: should we add anything else to this?
   verify_arrays(p)
+  # set a sensible hovermode if it hasn't been specified already
+  verify_hovermode(p)
 }
 
-
-mapSize <- function(traces) {
+map_size <- function(traces) {
   sizeList <- lapply(traces, "[[", "size")
   nSizes <- lengths(sizeList)
   # if no "top-level" color is present, return traces untouched
@@ -169,7 +186,7 @@ mapSize <- function(traces) {
   sizeRange <- range(allSize, na.rm = TRUE)
   
   types <- vapply(traces, function(tr) tr$type, character(1))
-  modes <- vapply(traces, function(tr) tr$mode, character(1))
+  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
@@ -197,7 +214,7 @@ mapSize <- function(traces) {
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
-mapColor <- function(traces, title = "", na.color = "transparent") {
+map_color <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, "[[", "color")
   nColors <- lengths(color)
   # if no "top-level" color is present, return traces untouched
@@ -206,9 +223,12 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   }
   isNumeric <- vapply(color, is.numeric, logical(1))
   isDiscrete <- vapply(color, is.discrete, logical(1))
+  if (any(isNumeric & isDiscrete)) {
+    stop("Can't have both discrete and numeric color mappings", call. = FALSE)
+  }
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   types <- vapply(traces, function(tr) tr$type, character(1))
-  modes <- vapply(traces, function(tr) tr$mode, character(1))
+  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
@@ -222,7 +242,7 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
     rng <- range(allColor, na.rm = TRUE)
     colScale <- scales::col_numeric(palette, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
-    vals <- if (diff(rng) > 0) as.numeric(quantile(allColor)) else c(0, 1)
+    vals <- if (diff(rng) > 0) as.numeric(quantile(allColor, na.rm = TRUE)) else c(0, 1)
     colorScale <- matrix(c(scales::rescale(vals), colScale(vals)), ncol = 2)
     colorObj <- list(
       colorbar = list(title = as.character(title), ticklen = 2),
@@ -306,7 +326,7 @@ mapColor <- function(traces, title = "", na.color = "transparent") {
   traces
 }
 
-mapSymbol <- function(traces) {
+map_symbol <- function(traces) {
   symbolList <- lapply(traces, "[[", "symbol")
   nSymbols <- lengths(symbolList)
   # if no "top-level" symbol is present, return traces untouched
@@ -354,7 +374,7 @@ mapSymbol <- function(traces) {
   traces
 }
 
-mapLinetype <- function(traces) {
+map_linetype <- function(traces) {
   linetypeList <- lapply(traces, "[[", "linetype")
   nLinetypes <- lengths(linetypeList)
   # if no "top-level" linetype is present, return traces untouched
@@ -401,10 +421,11 @@ mapLinetype <- function(traces) {
 # a particular key name
 traceify <- function(dat, x = NULL) {
   if (length(x) == 0) return(list(dat))
+  lvls <- if (is.factor(x)) levels(x) else unique(x)
   # the order of lvls determines the order in which traces are drawn
   # for ordered factors at least, it makes sense to draw the highest level first
   # since that _should_ be the darkest color in a sequential pallette
-  lvls <- if (is.factor(x)) rev(levels(x)) else unique(x)
+  if (is.ordered(x)) lvls <- rev(lvls)
   n <- length(x)
   # recursively search for a non-list of appropriate length (if it is, subset it)
   recurse <- function(z, n, idx) {
