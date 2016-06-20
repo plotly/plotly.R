@@ -32,7 +32,8 @@ Imports:
     htmlwidgets,
     tidyr,
     dplyr,
-    hexbin
+    hexbin,
+    lazyeval (>= 0.2.0)
 Suggests:
     maps,
     ggthemes,
