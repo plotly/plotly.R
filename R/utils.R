@@ -56,7 +56,7 @@ verify_attr_names <- function(p) {
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
-    validAttrs <- Schema$traces[[thisTrace$type]]$attributes
+    validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     check_attrs(names(thisTrace), c(names(validAttrs), "key"))
   }
   invisible(p)
@@ -65,7 +65,7 @@ verify_attr_names <- function(p) {
 check_attrs <- function(proposedAttrs, validAttrs) {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
-    stop("The following attributes don't exist:\n'",
+    warning("The following attributes don't exist:\n'",
          paste(illegalAttrs, collapse = "', '"), "'\n", 
          "Valid options include:\n'",
          paste(validAttrs, collapse = "', '"), "'\n", 
@@ -77,12 +77,14 @@ check_attrs <- function(proposedAttrs, validAttrs) {
 # ensure both the layout and trace attributes are sent to plotly.js
 # as data_arrays
 verify_boxed <- function(p) {
-  layoutNames <- names(p$x$layout)
-  layoutNew <- verify_box(
-    setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
-    Schema$layout$layoutAttributes
-  )
-  p$x$layout <- setNames(layoutNew, layoutNames)
+  if (!is.null(p$x$layout)) {
+    layoutNames <- names(p$x$layout)
+    layoutNew <- verify_box(
+      setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
+      Schema$layout$layoutAttributes
+    )
+    p$x$layout <- setNames(layoutNew, layoutNames)
+  }
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type]]$attributes
