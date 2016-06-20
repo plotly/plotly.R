@@ -67,25 +67,26 @@ plotly_build.plotly <- function(p) {
     }
     
     d <- plotly_data(p, y)
+    # in order to do grouping _within trace_ correctly, we need to know about 
+    # variables that transform one trace into multiple traces
+    nestedVars <- list()
+    for (i in c("symbol", "linetype", "color")) {
+      newVar <- eval_attr(x[[i]], d)
+      if (is.null(newVar) || i == "color" && !is.discrete(newVar)) next
+      id <- paste0("x", new_id())
+      nestedVars[[id]] <- i
+      d[[id]] <- newVar
+    }
     # if the data has groups, insert missing values to introduce gaps
     grps <- dplyr::groups(d)
-    if (length(grps)) {
-      if (isTRUE(x$connectgaps)) {
-        stop("Can't set connectgaps=T in a trace that has 1 or more groups.", call. = FALSE)
-      }
-      # in order to do grouping _within trace_ correctly, we need to know about 
-      # variables that transform one trace into multiple traces
-      nestedVars <- list()
-      for (i in c("symbol", "linetype", "color")) {
-        newVar <- eval_attr(x[[i]], d)
-        if (is.null(newVar) || i == "color" && !is.discrete(newVar)) next
-        id <- paste0("x", new_id())
-        nestedVars[[id]] <- i
-        d[[id]] <- newVar
-      }
-      retrace <- inherits(x, "plotly_polygon")
-      d <- group2NA(d, as.character(grps), names(nestedVars), retrace)
+    if (length(grps) &&isTRUE(x$connectgaps)) {
+      stop("Can't set connectgaps=T in a trace that has 1 or more groups.", call. = FALSE)
     }
+    d <- group2NA(
+      d, as.character(grps), names(nestedVars), 
+      if (inherits(x, "plotly_line")) "x" else NULL, 
+      inherits(x, "plotly_polygon")
+    )
     
     # perform the evaluation
     x <- rapply(x, eval_attr, data = d, how = "list")

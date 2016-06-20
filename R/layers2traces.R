@@ -193,7 +193,7 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
-  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
+  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
   data <- with(data, {
     rbind(cbind(x = xmin, y = ymin, others),
           cbind(x = xmin, y = ymax, others),

@@ -11,8 +11,8 @@ BREAKING CHANGES & IMPROVEMENTS:
 NEW FEATURES & IMPROVEMENTS:
 
 * Error checking for trace and layout attributes.
-* Trace type inference based on specified attributes.
-* New `add_markers()`/`add_lines()`/`add_text()`/`add_polygon`/`add_ribbon()` functions provide a shorthand for common plots.
+* If no trace type is provided, a sensible type is inferred from the supplied data.
+* New `add_polygons()`/`add_ribbons()`/`add_lines()`/`add_markers()`/`add_paths()`/`add_text()` functions provide a shorthand for common plots.
 * Added `linetype`/`linetypes` arguments for mapping discrete variables to line types (this works very much like the `symbol`/`symbols`).
 * Added a `sizes` argument for controlling the range of marker size scaling.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.

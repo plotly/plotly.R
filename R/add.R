@@ -105,16 +105,20 @@ add_paths <- function(p, ...) {
 #' @inheritParams add_trace
 #' @export
 add_lines <- function(p, ...) {
-  add_trace_classed(p, type = "scatter", mode = "lines", class = "plotly_lines", ...)
+  add_trace_classed(
+    p, class = "plotly_line", type = "scatter", mode = "lines", ...
+  )
 }
 
 #' Add text to a plotly vis
 #' 
 #' @inheritParams add_trace
 #' @export
-add_text <- function(p, ...) {
-  # TODO: throw error if no text attribute is found
-  add_trace(p, type = "scatter", mode = "text", ...)
+add_text <- function(p, text = NULL, ...) {
+  if (is.null(text %||% p$x$attrs[[1]]$text)) {
+    stop("Must supply text attribute", call. = FALSE)
+  }
+  add_trace(p, type = "scatter", mode = "text", text = text, ...)
 }
 
 #' Add polygons to a plotly vis
@@ -147,7 +151,24 @@ add_polygons <- function(p, mode = "lines", ...) {
 #' @export
 add_ribbons <- function(p, ...) {
   # TODO: add ymin, ymax arguments?
-  add_polygons(...)
+  add_trace_classed(
+    p, class = c("plotly_ribbon", "plotly_polygon"), type = "scatter", 
+    fill = "toself", mode = "lines",  ...
+  )
+}
+
+#' Area
+#' 
+#' Ribbons are a special case of polygons.
+#' 
+#' @inheritParams add_trace
+#' @export
+add_ribbons <- function(p, ...) {
+  # TODO: add ymin, ymax arguments?
+  add_trace_classed(
+    p, class = c("plotly_ribbon", "plotly_polygon"), type = "scatter", 
+    fill = "toself", mode = "lines",  ...
+  )
 }
 
 
