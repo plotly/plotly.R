@@ -48,14 +48,6 @@ as_df <- function(x) {
   }
 }
 
-verify_arg <- function(arg) {
-  if (missing(arg)) return(NULL)
-  if (!is.formula(arg)) {
-    stop("Argument must be a formula.")
-  }
-  arg
-}
-
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)

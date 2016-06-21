@@ -90,10 +90,10 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   }
   
   # tack on "special" arguments
-  attrs$color <- verify_arg(color)
-  attrs$symbol <- verify_arg(symbol)
-  attrs$linetype <- verify_arg(linetype)
-  attrs$size <- verify_arg(size)
+  attrs$color <- if (!missing(color)) color
+  attrs$symbol <- if (!missing(symbol)) symbol
+  attrs$linetype <- if (!missing(linetype)) linetype
+  attrs$size <- if (!missing(size)) size
   
   attrs$colors <- colors
   attrs$symbols <- symbols

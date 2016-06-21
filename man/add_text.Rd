@@ -4,7 +4,7 @@
 \alias{add_text}
 \title{Add text to a plotly vis}
 \usage{
-add_text(p, ...)
+add_text(p, text = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}

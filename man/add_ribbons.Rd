@@ -5,6 +5,8 @@
 \title{Add ribbons to a plotly vis}
 \usage{
 add_ribbons(p, ...)
+
+add_ribbons(p, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -13,6 +15,8 @@ add_ribbons(p, ...)
 Note that acceptable arguments depend on the trace type.}
 }
 \description{
+Ribbons are a special case of polygons.
+
 Ribbons are a special case of polygons.
 }
 

@@ -54,9 +54,10 @@ add_trace <- function(p, ...,
   attrs <- list(...)
   
   # tack on "special" arguments
-  attrs$color <- verify_arg(color)
-  attrs$symbol <- verify_arg(symbol)
-  attrs$size <- verify_arg(size)
+  attrs$color <- if (!missing(color)) color
+  attrs$symbol <- if (!missing(symbol)) symbol
+  attrs$linetype <- if (!missing(linetype)) linetype
+  attrs$size <- if (!missing(size)) size
   
   if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() instead.")

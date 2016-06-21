@@ -8,9 +8,14 @@
 #'   hide_colorbar()
 hide_colorbar <- function(p) {
   p <- plotly_build(p)
-  idx <- vapply(p$x$data, is.colorbar, logical(1))
-  for (i in which(idx)) {
-    p$x$data[[i]]$marker$showscale <- FALSE
+  for (i in seq_along(p$x$data)) {
+    trace <- p$x$data[[i]]
+    if (has_attr(trace$type, "showscale")) {
+      p$x$data[[i]]$showscale <- FALSE
+    }
+    if (has_attr(trace$type, "marker")) {
+      p$x$data[[i]]$marker$showscale <- FALSE
+    }
   }
   p
 }
