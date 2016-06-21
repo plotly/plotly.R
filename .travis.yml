@@ -17,9 +17,9 @@ env:
     # GITHUB_PAT (for pushing to plotly-test-table)
     - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
 
-cache:
-  directories:
-    $R_LIBS_USER
+#cache:
+#  directories:
+#    $R_LIBS_USER
 
 before_script:
   - mkdir -p "$R_LIBS_USER"
