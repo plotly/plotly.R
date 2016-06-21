@@ -150,7 +150,7 @@ This infrastructure allows `ggplotly()` to understand ggmatrix
 objects -- the class of object returned by the `ggpairs()` function in the 
 **GGally** package.
 
-```{r, fig.height = 5}
+```{r, fig.height = 5, eval = FALSE}
 pm <- GGally::ggpairs(iris)
 ggplotly(pm)
 ```
