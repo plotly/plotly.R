@@ -154,7 +154,7 @@ plotly_build.plotly <- function(p) {
   # IMPORTANT: scales are applied at the plot-level!!
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
     col <- x[["color"]] %||% x[["z"]]
-    if (lazyeval::is_lang(col)) sub("^~", "", deparse2(col)) else ""
+    if (is.language(col)) sub("^~", "", deparse2(col)) else ""
   }))
   traces <- map_color(traces, title = paste(colorTitle, collapse = "<br>"))
   traces <- map_size(traces)
@@ -255,7 +255,7 @@ map_size <- function(traces) {
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 map_color <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, function(x) {
-    x[["color"]] %||% if (has_attr(x$type, "zmin")) x[["z"]] else NULL
+    x[["color"]] %||% if (has_attr(x$type, "colorscale")) x[["z"]] else NULL
   })
   nColors <- lengths(color)
   # if no "top-level" color is present, return traces untouched
@@ -273,7 +273,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
-  hasZ <- has_attr(types, "zmin") & 
+  hasZ <- has_attr(types, "colorscale") & 
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
   
   if (any(isNumeric)) {
@@ -297,6 +297,13 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showscale = FALSE
     )
     for (i in which(isNumeric)) {
+      if (hasZ[[i]]) {
+        colorObj[c("cmin", "cmax")] <- NULL
+        colorObj[["showscale"]] <- TRUE
+        traces[[i]] <- modify_list(colorObj, traces[[i]])
+        traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
+        next
+      }
       colorObj$color <- color[[i]]
       if (hasLine[[i]]) {
         if (types[[i]] %in% c("scatter", "scattergl")) {
@@ -309,13 +316,6 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       if (hasMarker[[i]]) {
         traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
-      }
-      if (hasZ[[i]]) {
-        colorObj[c("zmin", "zmax")] <- colorObj[c("cmin", "cmax")]
-        colorObj[c("cmin", "cmax")] <- NULL
-        colorObj[["showscale"]] <- TRUE
-        traces[[i]] <- modify_list(colorObj, traces[[i]])
-        traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
       }
       if (hasText[[i]]) {
         warning("Numeric color variables cannot (yet) be mapped to text.\n",
@@ -337,6 +337,10 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
+    if ("scatter3d" %in% unlist(lapply(traces, "[[", "type"))) {
+      colorBarTrace$type <- "scatter3d"
+      colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+    }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
   
