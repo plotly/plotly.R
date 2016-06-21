@@ -39,6 +39,15 @@ names2 <- function(x) {
   names(x) %||% rep("", length(x))
 }
 
+# modifyList turns elements that are data.frames into lists
+# which changes the behavior of toJSON
+as_df <- function(x) {
+  if (is.null(x) || is.matrix(x)) return(x)
+  if (is.list(x) && !is.data.frame(x)) {
+    setNames(as.data.frame(x), NULL)
+  }
+}
+
 verify_arg <- function(arg) {
   if (missing(arg)) return(NULL)
   if (!is.formula(arg)) {

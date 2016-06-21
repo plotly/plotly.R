@@ -152,8 +152,11 @@ plotly_build.plotly <- function(p) {
   
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: scales are applied at the plot-level!!
-  colorTitle <- unlist(lapply(p$x$attrs, function(x) x$color %||% x$z))[[1]]
-  traces <- map_color(traces, title = sub("^~", "", deparse2(colorTitle)))
+  colorTitle <- unlist(lapply(p$x$attrs, function(x) {
+    col <- x[["color"]] %||% x[["z"]]
+    if (lazyeval::is_lang(col)) sub("^~", "", deparse2(col)) else ""
+  }))
+  traces <- map_color(traces, title = paste(colorTitle, collapse = "<br>"))
   traces <- map_size(traces)
   traces <- map_symbol(traces)
   traces <- map_linetype(traces)
@@ -251,7 +254,9 @@ map_size <- function(traces) {
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 map_color <- function(traces, title = "", na.color = "transparent") {
-  color <- lapply(traces, function(x) x$color %||% if (has_attr(x$type, "zmin")) x$z else NULL)
+  color <- lapply(traces, function(x) {
+    x[["color"]] %||% if (has_attr(x$type, "zmin")) x[["z"]] else NULL
+  })
   nColors <- lengths(color)
   # if no "top-level" color is present, return traces untouched
   if (all(nColors == 0)) {
@@ -272,7 +277,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
   
   if (any(isNumeric)) {
-    palette <- traces[[1]]$colors %||% viridisLite::viridis(10)
+    palette <- traces[[1]][["colors"]] %||% viridisLite::viridis(10)
     # TODO: use ggstat::frange() when it's on CRAN?
     allColor <- unlist(color[isNumeric])
     rng <- range(allColor, na.rm = TRUE)
@@ -297,18 +302,20 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         if (types[[i]] %in% c("scatter", "scattergl")) {
           warning("Numeric color variables cannot (yet) be mapped to lines.\n",
                   " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
-          traces[[i]]$mode <- "markers"
+          traces[[i]]$mode <- paste0(traces[[i]]$mode, "+markers")
           hasMarker[[i]] <- TRUE
         }
       }                 
       if (hasMarker[[i]]) {
         traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
+        traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
       if (hasZ[[i]]) {
         colorObj[c("zmin", "zmax")] <- colorObj[c("cmin", "cmax")]
         colorObj[c("cmin", "cmax")] <- NULL
-        colorObj$showscale <- TRUE
+        colorObj[["showscale"]] <- TRUE
         traces[[i]] <- modify_list(colorObj, traces[[i]])
+        traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
       }
       if (hasText[[i]]) {
         warning("Numeric color variables cannot (yet) be mapped to text.\n",
@@ -337,7 +344,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     allColor <- unlist(color[isDiscrete])
     lvls <- unique(allColor)
     N <- length(lvls)
-    palette <- traces[[1]]$colors %||% 
+    palette <- traces[[1]][["colors"]] %||% 
       if (is.ordered(allColor)) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
     if (is.list(palette) && length(palette) > 1) {
       stop("Multiple numeric color palettes specified (via the colors argument).\n",
