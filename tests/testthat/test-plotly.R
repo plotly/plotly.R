@@ -122,3 +122,17 @@ test_that("x/y/z properties have a class of AsIs", {
   expect_true(inherits(tr$y, "AsIs"))
   expect_true(inherits(tr$z, "AsIs"))
 })
+
+test_that("grouping within multiples traces works", {
+  g <- expand.grid(visit = 1:2, id = 1:3, cohort = c("A", "B"))
+  g$response <- rnorm(nrow(g))
+  d <- group_by(g, id)
+  p <- plot_ly(d, x = ~visit, y = ~response, color = ~cohort, colors = c("red", "blue"))
+  l <- expect_traces(p, 2, "group-within-trace")
+  expect_equal(l$data[[1]]$x, c(1, 2, NA, 1, 2, NA, 1, 2))
+  expect_equal(l$data[[2]]$x, c(1, 2, NA, 1, 2, NA, 1, 2))
+  expect_true(l$data[[1]]$marker$color == "#FF0000")
+  expect_true(l$data[[1]]$line$color == "#FF0000")
+  expect_true(l$data[[2]]$marker$color == "#0000FF")
+  expect_true(l$data[[2]]$line$color == "#0000FF")
+})

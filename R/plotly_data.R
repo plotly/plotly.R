@@ -167,16 +167,18 @@ transmute_.plotly <- function(.data, ..., .dots) {
 
 group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
                      retrace.first = inherits(data, "GeomPolygon")) {
-  if (nrow(data) == 0) return(data)
+  if (NROW(data) == 0) return(data)
   # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
   retrace <- force(retrace.first)
   datClass <- class(data)
+  
   # sanitize variable names
   groupNames <- groupNames[groupNames %in% names(data)]
   nested <- nested[nested %in% names(data)]
   ordered <- ordered[ordered %in% names(data)]
   # ignore any already existing groups
   data <- dplyr::ungroup(data)
+  
   # if group doesn't exist, just arrange before returning
   if (!length(groupNames)) {
     if (length(ordered)) {

@@ -52,6 +52,7 @@ plotly_build.plotly <- function(p) {
   }
   
   dats <- Map(function(x, y) {
+    
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
@@ -59,43 +60,69 @@ plotly_build.plotly <- function(p) {
       if (length(idx) == 1) {
         title <- sub("^~", "", deparse2(x[[idx]]))
         if (is3d(x$type) || i == "z") {
-          p$x$layout$scene[[nm]]$title <<- title
+          p$x$layout$scene[[nm]]$title <<- p$x$layout$scene[[nm]]$title %||% title
         } else {
-          p$x$layout[[nm]]$title <<- title
+          p$x$layout[[nm]]$title <<- p$x$layout[[nm]]$title %||% title
         }
       }
     }
     
-    d <- plotly_data(p, y)
-    # in order to do grouping _within trace_ correctly, we need to know about 
-    # variables that transform one trace into multiple traces
-    nestedVars <- list()
-    for (i in c("symbol", "linetype", "color")) {
-      newVar <- eval_attr(x[[i]], d)
-      if (is.null(newVar) || i == "color" && !is.discrete(newVar)) next
-      id <- paste0("x", new_id())
-      nestedVars[[id]] <- i
-      d[[id]] <- newVar
-    }
-    # if the data has groups, insert missing values to introduce gaps
-    grps <- dplyr::groups(d)
-    if (length(grps) &&isTRUE(x$connectgaps)) {
-      stop("Can't set connectgaps=T in a trace that has 1 or more groups.", call. = FALSE)
-    }
-    d <- group2NA(
-      d, as.character(grps), names(nestedVars), 
-      if (inherits(x, "plotly_line")) "x" else NULL, 
-      inherits(x, "plotly_polygon")
-    )
-    
     # perform the evaluation
-    x <- rapply(x, eval_attr, data = d, how = "list")
-    
+    # TODO: remove/warn about missing values here? Provide a way to control na.color?
+    dat <- plotly_data(p, y)
+    x <- rapply(x, eval_attr, data = dat, how = "list")
     # ensure we have a trace type (depends on the # of data points)
     x <- verify_type(x)
     
-    attrLengths <- lengths(x)
+    # TODO: if we ever provide some semantics for statistics, it should probably go here
+    
+    # gather the "built" or "evaluated" data
+    nobs <- NROW(dat)
+    isVar <- vapply(x, function(attr) length(attr) == nobs, logical(1))
+    builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
+    x$.plotlyVariableMapping <- names(builtData)
+    
+    # find any groupings, so we can arrange the data now, 
+    # and insert missing values (to create gaps between traces) later
+    grps <- as.character(dplyr::groups(dat))
+    # does grouping even make sense for this trace type?
+    hasGrp <- inherits(x, c("plotly_lines", "plotly_polygon")) ||
+      (grepl("scatter", x$type) && grepl("lines", x$mode %||% "lines"))
+    if (length(grps) && hasGrp) {
+      if (isTRUE(x$connectgaps)) {
+        stop(
+          "Can't set connectgaps=T in a trace that has 1 or more groups.", 
+          call. = FALSE
+        )
+      }
+      builtData$group <- interaction(dat[, grps, drop = FALSE])
+    }
+    
+    # build the index used to transform one "trace" into multiple traces
+    discreteMappings <- list()
+    for (i in c("symbol", "linetype", "color")) {
+      if (is.null(x[[i]]) || i == "color" && !is.discrete(x[[i]])) next
+      discreteMappings[[i]] <- x[[i]]
+    }
+    if (!is.null(names(discreteMappings))) {
+      paste_it <- function(...) paste(..., sep = "<br>")
+      builtData$.plotlyTraceIndex <- do.call(paste_it, discreteMappings)
+    }
+    # arrange the built data
+    arrangeVars <- c(
+      ".plotlyTraceIndex", "group", if (inherits(x, "plotly_line")) "x"
+    )
+    arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
+    if (length(arrangeVars)) {
+      builtData <- dplyr::arrange_(builtData, arrangeVars)
+    }
+    # copy over to the trace data
+    for (i in names(builtData)) {
+      x[[i]] <- builtData[[i]]
+    }
+    
     # if appropriate, set the mode now since we need to reference it later
+    attrLengths <- lengths(x)
     if (grepl("scatter", x$type) && is.null(x$mode)) {
       x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
     }
@@ -104,40 +131,48 @@ plotly_build.plotly <- function(p) {
     
   }, p$x$attrs, names2(p$x$attrs))
   
-  # "transforms" of (i.e., apply scaling to) special arguments
-  # IMPORTANT: these should be applied at the plot-level
-  colorTitle <- unlist(lapply(p$x$attrs, function(x) x$color %||% x$z))[[1]]
-  dats <- map_color(dats, title = sub("^~", "", deparse2(colorTitle)))
-  dats <- map_size(dats)
-  dats <- map_symbol(dats)
-  dats <- map_linetype(dats)
-  
   # traceify by the interaction of discrete variables
-  # although I hate this programming pattern, it seems necessary since we don't
-  # know how many traces we need
   traces <- list()
   for (i in seq_along(dats)) {
     d <- dats[[i]]
-    mappingAttrs <- c(
-      "color", "colors", "symbol", "symbols", 
-      "linetype", "linetypes", "size", "sizes"
-    )
-    for (j in mappingAttrs) {
-      dats[[i]][[j]] <- NULL
-    }
-    params <- list(
-      if (is.discrete(d[["color"]])) d[["color"]], 
-      d[["symbol"]],
-      d[["linetype"]]
-    )
-    params <- compact(params) %||% list(NULL)
-    idx <- do.call("interaction", params)
-    traces <- c(traces, traceify(dats[[i]], idx))
+    scaleAttrs <- names(d) %in% c("colors", "linetypes", "symbols", "sizes")
+    traces <- c(traces, traceify(d[!scaleAttrs], d$.plotlyTraceIndex))
+    if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
   }
   
-  # it's possible that some things (like figures pulled from a plotly server)
-  # already have "built" data
-  p$x$data <- c(p$x$data, traces)
+  # insert NAs to differentiate groups
+  traces <- lapply(traces, function(x) {
+    d <- data.frame(x[names(x) %in% c(x$.plotlyVariableMapping, "group")])
+    d <- group2NA(d, retrace.first = inherits(x, "plotly_polygon"))
+    for (i in x$.plotlyVariableMapping) {
+      x[[i]] <- uniq(d[[i]])
+    }
+    x
+  })
+  
+  # "transforms" of (i.e., apply scaling to) special arguments
+  # IMPORTANT: scales are applied at the plot-level!!
+  colorTitle <- unlist(lapply(p$x$attrs, function(x) x$color %||% x$z))[[1]]
+  traces <- map_color(traces, title = sub("^~", "", deparse2(colorTitle)))
+  traces <- map_size(traces)
+  traces <- map_symbol(traces)
+  traces <- map_linetype(traces)
+  
+  # remove special mapping attributes
+  for (i in seq_along(traces)) {
+    mappingAttrs <- c(
+      "color", "colors", "symbol", "symbols", 
+      "linetype", "linetypes", "size", "sizes", 
+      "group", ".plotlyTraceIndex", ".plotlyVariableMapping"
+    )
+    for (j in mappingAttrs) {
+      traces[[i]][[j]] <- NULL
+    }
+  }
+  
+  # it's possible that the plot object already has some traces 
+  # (like figures pulled from a plotly server)
+  p$x$data <- setNames(c(p$x$data, traces), NULL)
   
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
@@ -158,9 +193,6 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
-  
-  # traces can't have names
-  p$x$data <- setNames(p$x$data, NULL)
   
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
@@ -312,6 +344,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
            "When using the color/colors arguments, only one palette is allowed.",
            call. = FALSE)
     }
+    
     colScale <- scales::col_factor(palette, levels = lvls, na.color = na.color)
     for (i in which(isDiscrete)) {
       if (hasLine[[i]]) {
@@ -441,7 +474,7 @@ traceify <- function(dat, x = NULL) {
   n <- length(x)
   # recursively search for a non-list of appropriate length (if it is, subset it)
   recurse <- function(z, n, idx) {
-    if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) uniq(z[idx]) else z
+    if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
   }
   new_dat <- list()
   for (j in seq_along(lvls)) {
