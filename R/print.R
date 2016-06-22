@@ -1,35 +1,3 @@
-#' Convert a plotly object to an htmlwidget object
-#' 
-#' As of version 4.0.0, plotly objects are now htmlwidget objects,
-#' so users shouldn't have to use this function directly.
-#' 
-#' @param x a plotly object.
-#' @param ... other options passed onto \code{htmlwidgets::createWidget}
-#' @export
-#' 
-
-as.widget <- function(x, ...) {
-  if (inherits(x, "htmlwidget")) return(x)
-  # add plotly class mainly for printing method
-  # customize the JSON serializer (for htmlwidgets)
-  attr(x, 'TOJSON_FUNC') <- to_JSON
-  htmlwidgets::createWidget(
-    name = "plotly",
-    x = x,
-    width = x$layout$width,
-    height = x$layout$height,
-    sizingPolicy = htmlwidgets::sizingPolicy(
-      browser.fill = TRUE,
-      defaultWidth = '100%',
-      defaultHeight = 400
-    ),
-    preRenderHook = plotly_build
-  )
-}
-
-# for legacy reasons
-toWidget <- as.widget
-
 #' Print a plotly figure object
 #' 
 #' @param x a plotly figure object
@@ -79,7 +47,7 @@ embed_notebook <- function(x, width = NULL, height = NULL,
     if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
     owd <- setwd(dir)
     on.exit(setwd(owd), add = TRUE)
-    htmlwidgets::saveWidget(as.widget(l), file = basename(file))
+    htmlwidgets::saveWidget(l, file = basename(file))
     file
   } else {
     l$url

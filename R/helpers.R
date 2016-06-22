@@ -35,3 +35,19 @@ toWebGL <- function(p) {
   p
 }
 
+
+#' Create a complete empty plotly graph.
+#' 
+#' Useful when used with \link{subplot}
+#' 
+#' @export
+plotly_empty <- function(...) {
+  eaxis <- list(
+    showticklabels = FALSE,
+    showgrid = FALSE,
+    zeroline = FALSE
+  )
+  layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
+}
+
+

@@ -4,13 +4,10 @@
 \alias{toWebGL}
 \title{Convert trace types to WebGL}
 \usage{
-toWebGL(p, warn = TRUE)
+toWebGL(p)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
-
-\item{warn}{should a warning be produced if the trace type doesn't have 
-a WebGL equivalent?}
 }
 \description{
 Convert trace types to WebGL

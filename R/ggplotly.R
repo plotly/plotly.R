@@ -73,7 +73,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
                             height = NULL, tooltip = "all", source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source, ...)
-  as.widget(l)
+  as_widget(l)
 }
 
 #' Convert a ggplot to a list.

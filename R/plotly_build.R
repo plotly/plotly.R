@@ -21,7 +21,7 @@ plotly_build <- function(p) {
 
 #' @export
 plotly_build.list <- function(p) {
-  as.widget(p)
+  as_widget(p)
 }
 
 #' @export

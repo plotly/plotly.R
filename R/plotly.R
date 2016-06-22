@@ -121,20 +121,31 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
     base_url = get_domain()
   )
   
-  as.widget(p)
+  as_widget(p)
 }
 
 
-#' Create a complete empty plotly graph.
-#' 
-#' Useful when used with \link{subplot}
-#' 
-#' @export
-plotly_empty <- function(...) {
-  eaxis <- list(
-    showticklabels = FALSE,
-    showgrid = FALSE,
-    zeroline = FALSE
+# Convert a list to a plotly htmlwidget object
+# 
+# @param x a plotly object.
+# @param ... other options passed onto \code{htmlwidgets::createWidget}
+# 
+
+as_widget <- function(x, ...) {
+  if (inherits(x, "htmlwidget")) return(x)
+  # add plotly class mainly for printing method
+  # customize the JSON serializer (for htmlwidgets)
+  attr(x, 'TOJSON_FUNC') <- to_JSON
+  htmlwidgets::createWidget(
+    name = "plotly",
+    x = x,
+    width = x$layout$width,
+    height = x$layout$height,
+    sizingPolicy = htmlwidgets::sizingPolicy(
+      browser.fill = TRUE,
+      defaultWidth = '100%',
+      defaultHeight = 400
+    ),
+    preRenderHook = plotly_build
   )
-  layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
 }
