@@ -12,4 +12,10 @@ hide_colorbar(p)
 \description{
 Hide a color bar
 }
+\examples{
+
+plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) \%>\%
+  add_markers() \%>\%
+  hide_colorbar()
+}
 

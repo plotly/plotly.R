@@ -68,8 +68,6 @@ Add text to a plotly vis
 
 Equivalent to \code{add_paths}, but with the x-values sorted.
 
-Ribbon plots
-
 Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
 }
 \examples{
@@ -94,6 +92,13 @@ ggplot2::map_data("world", "canada") \%>\%
   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
     data = maps::canada.cities) \%>\%
   layout(showlegend = FALSE)
+
+plot_ly(economics, x = ~date) \%>\% 
+  add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
+
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
+plot_ly(huron, x = ~year, ymax = ~level) \%>\% add_area()
+
 }
 \author{
 Carson Sievert

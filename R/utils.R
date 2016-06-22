@@ -106,7 +106,6 @@ verify_box <- function(proposed, schema) {
       identical(attrSchema[["role"]], "object"),
       error = function(e) FALSE
     )
-    
     if (isArray) {
       proposed[[attr]] <- i(attrVal)
     }

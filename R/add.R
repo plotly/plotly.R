@@ -153,7 +153,6 @@ add_lines <- function(p, x = NULL, y = NULL, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' 
 add_segments <- function(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
@@ -174,6 +173,8 @@ add_segments <- function(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...) {
 }
 
 
+#' 
+#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
@@ -199,11 +200,11 @@ add_polygons <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' Ribbon plots
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
+#' @examples 
 #' 
 #' plot_ly(economics, x = ~date) %>% 
 #'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
@@ -232,6 +233,7 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
+#' @examples 
 #' 
 #' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 #' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()

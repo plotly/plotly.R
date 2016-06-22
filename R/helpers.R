@@ -2,6 +2,7 @@
 #' 
 #' @param p a plotly object.
 #' @export
+#' @examples 
 #' 
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
 #'   add_markers() %>%
