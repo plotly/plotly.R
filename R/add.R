@@ -82,20 +82,19 @@ add_trace <- function(p, ...,
   p
 }
 
-# attach a class to a trace which informs data processing in plotly_build
-add_trace_classed <- function(p, class = "plotly_polygon", ...) {
-  p <- add_trace(p, ...)
-  nAttrs <- length(p$x$attrs)
-  p$x$attrs[[nAttrs]] <- prefix_class(p$x$attrs[[nAttrs]], class)
-  p
-}
-
 #' Add points to a plotly vis
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_markers <- function(p, ...) {
-  add_trace(p, type = "scatter", mode = "markers", ...)
+add_markers <- function(p, x = NULL, y = NULL, ...) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
+  add_trace(p, x = x, y = y, type = "scatter", mode = "markers", ...)
 }
 
 #' Add paths to a plotly vis
@@ -104,13 +103,31 @@ add_markers <- function(p, ...) {
 #' @rdname add_trace
 #' @export
 add_paths <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
-  add_trace(p, type = "scatter", mode = "lines", ...)
+  add_trace(p, x = x, y = y, type = "scatter", mode = "lines", ...)
+}
+
+#' Add text to a plotly vis
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
+  if (is.null(text <- text %||% p$x$attrs[[1]]$text)) {
+    stop("Must supply `text` attribute", call. = FALSE)
+  }
+  add_trace(p, x = x, y = y, text = text, type = "scatter", mode = "text",  ...)
 }
 
 #' Add lines to a plotly vis
@@ -121,33 +138,15 @@ add_paths <- function(p, x = NULL, y = NULL, ...) {
 #' @rdname add_trace
 #' @export
 add_lines <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_line", type = "scatter", mode = "lines", ...
+    p, x = x, y = y, class = "plotly_line", type = "scatter", mode = "lines", ...
   )
-}
-
-#' Add text to a plotly vis
-#' 
-#' @inheritParams add_trace
-#' @rdname add_trace
-#' @export
-add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
-    stop("Must supply `x` attribute", call. = FALSE)
-  }
-  if (is.null(y %||% p$x$attrs[[1]]$y)) {
-    stop("Must supply `y` attribute", call. = FALSE)
-  }
-  if (is.null(text %||% p$x$attrs[[1]]$text)) {
-    stop("Must supply `text` attribute", call. = FALSE)
-  }
-  add_trace(p, type = "scatter", mode = "text", text = text, ...)
 }
 
 #' Add polygons to a plotly vis
@@ -165,15 +164,15 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
 #'     data = maps::canada.cities) %>%
 #'   layout(showlegend = FALSE)
 add_polygons <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_polygon", type = "scatter", 
-    fill = "toself", mode = "lines",  ...
+    p, class = "plotly_polygon", x = x, y = y,
+    type = "scatter", fill = "toself", mode = "lines",  ...
   )
 }
 
@@ -185,20 +184,21 @@ add_polygons <- function(p, x = NULL, y = NULL, ...) {
 #' 
 #' plot_ly(economics, x = ~date) %>% 
 #'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
-#' 
+
 add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(ymin %||% p$x$attrs[[1]]$ymin)) {
+  if (is.null(ymin <- ymin %||% p$x$attrs[[1]]$ymin)) {
     stop("Must supply `ymin` attribute", call. = FALSE)
   }
-  if (is.null(ymax %||% p$x$attrs[[1]]$ymax)) {
+  if (is.null(ymax <- ymax %||% p$x$attrs[[1]]$ymax)) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = c("plotly_ribbon", "plotly_polygon"), type = "scatter", 
-    fill = "toself", mode = "lines",  ...
+    p, class = c("plotly_ribbon", "plotly_polygon"), 
+    x = x, ymin = ymin, ymax = ymax,
+    type = "scatter", fill = "toself", mode = "lines",  ...
   )
 }
 
@@ -214,16 +214,25 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
 #' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
 #' 
 add_area <- function(p, x = NULL, ymax = NULL, ...) {
-  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(ymax %||% p$x$attrs[[1]]$ymax)) {
+  if (is.null(ymax <- ymax %||% p$x$attrs[[1]]$ymax)) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), type = "scatter", 
-    fill = "toself", mode = "lines",  ...
+    p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), 
+    x = x, ymax = ymax,
+    type = "scatter", fill = "toself", mode = "lines",  ...
   )
+}
+
+# attach a class to a trace which informs data processing in plotly_build
+add_trace_classed <- function(p, class = "plotly_polygon", ...) {
+  p <- add_trace(p, ...)
+  nAttrs <- length(p$x$attrs)
+  p$x$attrs[[nAttrs]] <- prefix_class(p$x$attrs[[nAttrs]], class)
+  p
 }
 
 

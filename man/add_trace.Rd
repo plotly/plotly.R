@@ -3,6 +3,7 @@
 \name{add_trace}
 \alias{add_area}
 \alias{add_lines}
+\alias{add_markers}
 \alias{add_paths}
 \alias{add_polygons}
 \alias{add_ribbons}
@@ -12,11 +13,13 @@
 \usage{
 add_trace(p, ..., color, symbol, size, linetype, data = NULL)
 
+add_markers(p, x = NULL, y = NULL, ...)
+
 add_paths(p, x = NULL, y = NULL, ...)
 
-add_lines(p, x = NULL, y = NULL, ...)
-
 add_text(p, x = NULL, y = NULL, text = NULL, ...)
+
+add_lines(p, x = NULL, y = NULL, ...)
 
 add_polygons(p, x = NULL, y = NULL, ...)
 
@@ -54,11 +57,13 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 \description{
 Add trace(s) to a plotly visualization
 
+Add points to a plotly vis
+
 Add paths to a plotly vis
 
-Equivalent to \code{add_paths}, but with the x-values sorted.
-
 Add text to a plotly vis
+
+Equivalent to \code{add_paths}, but with the x-values sorted.
 
 Add polygons to a plotly vis
 
