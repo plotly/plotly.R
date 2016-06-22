@@ -42,7 +42,6 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' }
 
 config <- function(p, ...) {
-  nConfig <- length(p$x$config)
-  p$x$config[[nConfig + 1]] <- list(...)
+  p$x$config <- modify_list(p$x$config, list(...))
   p
 }
