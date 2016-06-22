@@ -58,7 +58,7 @@ plotly_build.plotly <- function(p) {
       nm <- paste0(i, "axis")
       idx <- which(names(x) %in% i)
       if (length(idx) == 1) {
-        title <- sub("^~", "", deparse2(x[[idx]]))
+        title <- deparse2(x[[idx]])
         if (is3d(x$type) || i == "z") {
           p$x$layout$scene[[nm]]$title <<- p$x$layout$scene[[nm]]$title %||% title
         } else {
@@ -153,8 +153,7 @@ plotly_build.plotly <- function(p) {
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: scales are applied at the plot-level!!
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
-    col <- x[["color"]] %||% x[["z"]]
-    if (is.language(col)) sub("^~", "", deparse2(col)) else NULL
+    deparse2(x[["color"]] %||% x[["z"]])
   }))
   traces <- map_color(traces, title = paste(colorTitle, collapse = "<br>"))
   traces <- map_size(traces)

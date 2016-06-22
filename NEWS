@@ -3,22 +3,24 @@
 BREAKING CHANGES & IMPROVEMENTS:
 
 * Formulas (instead of plain expressions) are now required when using variable mappings. For example, `plot_ly(mtcars, x = wt, y = mpg, color = vs)` should now be `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~vs)`. This is a major breaking change, but it is necessary to ensure that evaluation is correct in all contexts (as a result, `evaluate` argument is now deprecated as it is no longer needed). It also has the benefit of being easier to program with (i.e., writing your own custom functions that wrap `plot_ly()`). For more details, see the [lazyeval vignette](https://github.com/hadley/lazyeval/blob/master/vignettes/lazyeval.Rmd)
-* The data structure used to represent plotly objects is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, plotly objects can now be serialized across R sessions and avoid [memory leak issues](https://github.com/rstudio/shiny/issues/1151). This also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `help("plotly-data")` for more details).
-* The `group` variable mapping no longer create multiple traces, but instead defines "gaps" within a trace (fixes #418, #381, #577). Groupings should be declared via the new `group_by()` function (for examples, see `help("plotly-data")`) instead of the `group` argument (which is now deprecated).
-* Scales for variable mappings (such as `color`, `symbol`, `linetype`) are now applied at the plot-level instead of the trace level. As a result, the `colors`/`symbols` arguments have been removed from `add_trace()`.
+* The data structure used to represent plotly objects is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, the `as.widget()` function has been deprecated, and [serialization/memory leak problems](https://github.com/rstudio/shiny/issues/1151) are no longer an issue. This change also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `help("plotly-data")` for examples).
+* The `group` variable mapping no longer create multiple traces, but instead defines "gaps" within a trace (fixes #418, #381, #577). Groupings should be declared via the new `group_by()` function (see `help("plotly-data")` for examples) instead of the `group` argument (which is now deprecated).
+* `plot_ly()` now _initializes_ a plotly object (i.e., won't add a scatter trace by default), meaning that something like `plot_ly(x = 1:10, y = 1:10) %>% add_trace(y = 10:1)` will create one trace, instead of two. However, `plot_ly()` will draw a trace if you manually specify a trace type, for example, `plot_ly(x = 1:10, y = 1:10, type = "scatter") %>% add_trace(y = 10:1)` will draw two scatter traces. If no trace type is provided, a sensible type is inferred from the supplied data, and automatically added (i.e., `plot_ly(x = rnorm(100))` now creates a histogram).
 * The `inherit` argument is deprecated. Any arguments/attributes specified in `plot_ly()` will automatically be passed along to additional traces added via `add_trace()` (or any of it's `add_*()` siblings).
+* Scales for variable mappings (such as `color`, `symbol`, `linetype`) are now applied at the plot-level instead of the trace level. For this reason, the range of these scales (`colors`/`symbols`/`linetypes`) should be specified in `plot_ly()`, instead of `add_trace()` or any of it's `add_*()` siblings.
 
 NEW FEATURES & IMPROVEMENTS:
 
 * Error checking for trace and layout attributes.
-* If no trace type is provided, a sensible type is inferred from the supplied data.
-* New `add_polygons()`/`add_ribbons()`/`add_lines()`/`add_markers()`/`add_paths()`/`add_text()` functions provide a shorthand for common plots.
+* New `add_polygons()`/`add_ribbons()`/`add_area()`/`add_segments()`/`add_lines()`/`add_markers()`/`add_paths()`/`add_text()` functions provide a shorthand for common visual markings.
+* New `plotly_data()` function for returning/inspecting data frame(s) associated with a plotly object.
+* New `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
 * Added `linetype`/`linetypes` arguments for mapping discrete variables to line types (this works very much like the `symbol`/`symbols`).
 * Added a `sizes` argument for controlling the range of marker size scaling.
 * New `toWebGL()` function for easy conversion from SVG to WebGL.
 * New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
 * `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
-* Added a `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
+
 
 OTHER CHANGES:
 

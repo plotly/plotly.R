@@ -27,8 +27,8 @@ is.discrete <- function(x) {
 }
 
 deparse2 <- function(x) {
-  if (is.null(x)) return(NULL)
-  paste(deparse(x, 500L), collapse = "")
+  if (is.null(x) || !is.language(x)) return(NULL)
+  sub("^~", "", paste(deparse(x, 500L), collapse = ""))
 }
 
 new_id <- function() {
