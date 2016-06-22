@@ -22,38 +22,18 @@ shinyServer(function(input, output, session) {
       graph_title  <- paste("Ideal Points for ", j_names, sep="")
 
       ggideal_point <- ggplot(df_trend) +
-        geom_line(aes(x = Year, y = Ideal.point, by = Name, color = Name)) +
+        geom_line(aes(x = Year, y = Ideal.point, color = Name)) +
         labs(x = "Year", y = "Ideology", title = graph_title) +
         scale_colour_hue("clarity", l = 70, c = 150) + ggthemes::theme_few() +
-        theme(legend.direction = "horizontal", legend.position = "bottom")
+        theme(legend.position = "none")
 
       # Convert ggplot object to plotly
-      gg <- plotly_build(ggideal_point)
-
-      # Use Plotly syntax to further edit the plot:
-      gg$layout$annotations <- NULL # Remove the existing annotations (the legend label)
-      gg$layout$annotations <- list()
-
-      # Add colored text annotations next to the end of each line
-      # More about plotly annotations: https://plot.ly/r/reference/#annotation
-      # Each key that we update is documented in that link above.
-      for (i in 1:length(gg$data)) { # data is a list of the lines in the graph
-        gg$layout$annotations[[i]] <- list(
-          text = gg$data[[i]]$name,  # The text label of the annotation, e.g. "Canada"
-          font = list(color = gg$data[[i]]$line$color), # Match the font color to the line color
-          showarrow = FALSE, # Don't show the annotation arrow
-          y = gg$data[[i]]$y[[length(gg$data[[i]]$y)]], # set the y position of the annotation to the last point of the line
-          yref = "y1", # the "y" coordinates above are with respect to the yaxis
-          x = 1, # set the x position of the graph to the right hand side of the graph
-          xref = "paper", # the x coordinates are with respect to the "paper", where 1 means the right hand side of the graph and 0 means the left hand side
-          xanchor = "left" # position the x coordinate with respect to the left of the text
-        );
-      }
-
-      gg$layout$showlegend <- FALSE # remove the legend
-      gg$layout$margin$r <- 170 # increase the size of the right margin to accommodate more room for the annotation labels
-      gg
-
+      ggplotly(ggideal_point) %>%
+        layout(
+          showlegend = FALSE,
+          # increase the size of the right margin to accommodate more room for the annotation labels
+          margin = list(r = 170)
+        )
     }
   })
 

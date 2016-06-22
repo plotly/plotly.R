@@ -55,7 +55,7 @@ subplot(plots, nrows = length(plots), shareX = TRUE, titleX = FALSE)
 # this works too, but I'm not sure we should advertise...
 elong <- tidyr::gather(economics, variable, value, -date)
 elong$id <- as.integer(factor(elong$variable))
-p <- plot_ly(elong, x = ~date, y = ~value, group = ~variable, yaxis = ~paste0("y", id))
+p <- plot_ly(elong, x = ~date, y = ~value, color = ~variable, yaxis = ~paste0("y", id))
 subplot(p, nrows = 5, shareX = TRUE)
 ```
 

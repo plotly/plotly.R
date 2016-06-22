@@ -88,7 +88,7 @@ verify_boxed <- function(p) {
   }
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
-    validAttrs <- Schema$traces[[thisTrace$type]]$attributes
+    validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
   }
   p

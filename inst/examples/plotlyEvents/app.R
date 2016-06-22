@@ -20,7 +20,7 @@ server <- function(input, output, session) {
         geom_point()
       ggplotly(p) %>% layout(dragmode = "select")
     } else {
-      plot_ly(mtcars, x = mpg, y = wt, key = key, mode = "markers") %>%
+      plot_ly(mtcars, x = ~mpg, y = ~wt, key = ~key, mode = "markers") %>%
         layout(dragmode = "select")
     }
   })
