@@ -252,8 +252,8 @@ map_size <- function(traces) {
   }
   sizeRange <- range(allSize, na.rm = TRUE)
   
-  types <- vapply(traces, function(tr) tr$type, character(1))
-  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
+  types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
+  modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
@@ -296,8 +296,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     stop("Can't have both discrete and numeric color mappings", call. = FALSE)
   }
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
-  types <- vapply(traces, function(tr) tr$type, character(1))
-  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
+  types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
+  modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
