@@ -227,6 +227,25 @@ verify_hovermode <- function(p) {
   p
 }
 
+verify_webgl <- function(p) {
+  # see toWebGL
+  if (!isTRUE(p$x$.plotlyWebGl)) {
+    return(p)
+  }
+  types <- sapply(p$x$data, function(x) x[["type"]][1] %||% "scatter")
+  idx <- paste0(types, "gl") %in% names(Schema$traces)
+  if (any(!idx)) {
+    warning(
+      "The following traces don't have a WebGL equivalent: ",
+      paste(which(!idx), collapse = ", ")
+    )
+  }
+  for (i in which(idx)) {
+    p$x$data[[i]]$type <- paste0(p$x$data[[i]]$type, "gl")
+  }
+  p
+}
+
 has_marker <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("marker", modes), has_attr(types, "marker"))

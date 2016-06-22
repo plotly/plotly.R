@@ -98,7 +98,7 @@ plotly_build.plotly <- function(p) {
           call. = FALSE
         )
       }
-      builtData$group <- interaction(builtData[, grps, drop = FALSE])
+      builtData$.plotlyGroupIndex <- interaction(builtData[, grps, drop = FALSE])
     }
     
     # build the index used to transform one "trace" into multiple traces
@@ -142,8 +142,8 @@ plotly_build.plotly <- function(p) {
   
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
-    d <- data.frame(x[names(x) %in% c(x$.plotlyVariableMapping, "group")])
-    d <- group2NA(d, retrace.first = inherits(x, "plotly_polygon"))
+    d <- data.frame(x[names(x) %in% c(x$.plotlyVariableMapping)])
+    d <- group2NA(d, ".plotlyGroupIndex", retrace.first = inherits(x, "plotly_polygon"))
     for (i in x$.plotlyVariableMapping) {
       x[[i]] <- uniq(d[[i]])
     }
@@ -166,7 +166,7 @@ plotly_build.plotly <- function(p) {
     mappingAttrs <- c(
       "color", "colors", "symbol", "symbols", 
       "linetype", "linetypes", "size", "sizes", 
-      "group", ".plotlyTraceIndex", ".plotlyVariableMapping"
+      ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
     for (j in mappingAttrs) {
       traces[[i]][[j]] <- NULL
@@ -208,6 +208,8 @@ plotly_build.plotly <- function(p) {
   p <- verify_arrays(p)
   # set a sensible hovermode if it hasn't been specified already
   p <- verify_hovermode(p)
+  # try to convert to webgl if toWebGl was used
+  verify_webgl(p)
 }
 
 # ----------------------------------------------------------------
