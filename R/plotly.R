@@ -118,7 +118,9 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
         margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
-    base_url = get_domain()
+    base_url = get_domain(),
+    # TODO: make this trace specific when we merge with crosstalk branch
+    source = source
   )
   
   as_widget(p)
