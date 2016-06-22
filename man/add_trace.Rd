@@ -7,6 +7,7 @@
 \alias{add_paths}
 \alias{add_polygons}
 \alias{add_ribbons}
+\alias{add_segments}
 \alias{add_text}
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
@@ -20,6 +21,8 @@ add_paths(p, x = NULL, y = NULL, ...)
 add_text(p, x = NULL, y = NULL, text = NULL, ...)
 
 add_lines(p, x = NULL, y = NULL, ...)
+
+add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...)
 
 add_polygons(p, x = NULL, y = NULL, ...)
 
@@ -65,8 +68,6 @@ Add text to a plotly vis
 
 Equivalent to \code{add_paths}, but with the x-values sorted.
 
-Add polygons to a plotly vis
-
 Ribbon plots
 
 Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
@@ -81,9 +82,9 @@ p \%>\% add_text(text = ".")
 
 # attributes declared in plot_ly() carry over to downstream traces
 plot_ly(economics, x = ~date, y = ~uempmed) \%>\% 
+  add_lines(line = list(color = "red")) \%>\%
   add_markers(color = ~pop) \%>\%
-  add_lines(line = list(color = "red"))
-  
+  layout(showlegend = FALSE)
 
 
 ggplot2::map_data("world", "canada") \%>\%

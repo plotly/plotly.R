@@ -82,14 +82,14 @@ plotly_build.plotly <- function(p) {
     builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
     builtData <- train_data(builtData, x)
     # TODO: provide a better way to clean up "high-level" attrs
-    x[c("ymin", "ymax")] <- NULL
+    x[c("ymin", "ymax", "yend", "xend")] <- NULL
     x$.plotlyVariableMapping <- names(builtData)
     
     # find any groupings, so we can arrange the data now, 
     # and insert missing values (to create gaps between traces) later
-    grps <- as.character(dplyr::groups(dat))
+    grps <- as.character(dplyr::groups(builtData))
     # does grouping even make sense for this trace type?
-    hasGrp <- inherits(x, c("plotly_lines", "plotly_polygon")) ||
+    hasGrp <- inherits(x, c("plotly_segment", "plotly_line", "plotly_polygon")) ||
       (grepl("scatter", x$type) && grepl("lines", x$mode %||% "lines"))
     if (length(grps) && hasGrp) {
       if (isTRUE(x$connectgaps)) {
@@ -98,18 +98,15 @@ plotly_build.plotly <- function(p) {
           call. = FALSE
         )
       }
-      builtData$group <- interaction(dat[, grps, drop = FALSE])
+      builtData$group <- interaction(builtData[, grps, drop = FALSE])
     }
     
     # build the index used to transform one "trace" into multiple traces
-    discreteMappings <- list()
-    for (i in c("symbol", "linetype", "color")) {
-      if (is.null(x[[i]]) || i == "color" && !is.discrete(x[[i]])) next
-      discreteMappings[[i]] <- x[[i]]
-    }
-    if (!is.null(names(discreteMappings))) {
-      paste_it <- function(...) paste(..., sep = "<br>")
-      builtData$.plotlyTraceIndex <- do.call(paste_it, discreteMappings)
+    discreteData <- builtData[vapply(builtData, is.discrete, logical(1))]
+    discreteData <- discreteData[names(discreteData) %in% c("symbol", "linetype", "color")]
+    if (NCOL(discreteData) > 0) {
+      paste2 <- function(x, y) paste(x, y, sep = "<br>")
+      builtData$.plotlyTraceIndex <- Reduce(paste2, discreteData)
     }
     # arrange the built data
     arrangeVars <- c(
@@ -157,7 +154,7 @@ plotly_build.plotly <- function(p) {
   # IMPORTANT: scales are applied at the plot-level!!
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
     col <- x[["color"]] %||% x[["z"]]
-    if (is.language(col)) sub("^~", "", deparse2(col)) else ""
+    if (is.language(col)) sub("^~", "", deparse2(col)) else NULL
   }))
   traces <- map_color(traces, title = paste(colorTitle, collapse = "<br>"))
   traces <- map_size(traces)
@@ -223,6 +220,17 @@ train_data <- function(data, trace) {
   }
   if (inherits(trace, "plotly_ribbon")) {
     data <- ribbon_dat(data)
+  }
+  if (inherits(trace, "plotly_segment")) {
+    # TODO: this could be faster, more efficient
+    data$.plotlyGroupIndex <- seq_len(NROW(data))
+    data <- gather_(
+      gather_(data, "tmp", "x", c("x", "xend")), 
+      "tmp", "y", c("y", "yend")
+    )
+    data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
+    data <- dplyr::distinct(data)
+    data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
   }
   # TODO: a lot more geoms!!!
   data

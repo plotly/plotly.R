@@ -50,9 +50,9 @@ add_data <- function(p, data = NULL) {
 #' 
 #' # attributes declared in plot_ly() carry over to downstream traces
 #' plot_ly(economics, x = ~date, y = ~uempmed) %>% 
+#'   add_lines(line = list(color = "red")) %>%
 #'   add_markers(color = ~pop) %>%
-#'   add_lines(line = list(color = "red"))
-#'   
+#'   layout(showlegend = FALSE)
 #' 
 add_trace <- function(p, ...,
                       color, symbol, size, linetype, data = NULL) {
@@ -88,10 +88,10 @@ add_trace <- function(p, ...,
 #' @rdname add_trace
 #' @export
 add_markers <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace(p, x = x, y = y, type = "scatter", mode = "markers", ...)
@@ -103,10 +103,10 @@ add_markers <- function(p, x = NULL, y = NULL, ...) {
 #' @rdname add_trace
 #' @export
 add_paths <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace(p, x = x, y = y, type = "scatter", mode = "lines", ...)
@@ -118,13 +118,13 @@ add_paths <- function(p, x = NULL, y = NULL, ...) {
 #' @rdname add_trace
 #' @export
 add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
-  if (is.null(text <- text %||% p$x$attrs[[1]]$text)) {
+  if (is.null(text <- text %||% p$x$attrs[[1]][["text"]])) {
     stop("Must supply `text` attribute", call. = FALSE)
   }
   add_trace(p, x = x, y = y, text = text, type = "scatter", mode = "text",  ...)
@@ -138,10 +138,10 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
 #' @rdname add_trace
 #' @export
 add_lines <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace_classed(
@@ -149,11 +149,34 @@ add_lines <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' Add polygons to a plotly vis
-#' 
+
 #' @inheritParams add_trace
-#' @export
 #' @rdname add_trace
+#' @export
+#' 
+add_segments <- function(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
+  if (is.null(xend <- xend %||% p$x$attrs[[1]][["xend"]])) {
+    stop("Must supply `xend` attribute", call. = FALSE)
+  }
+  if (is.null(yend <- yend %||% p$x$attrs[[1]][["yend"]])) {
+    stop("Must supply `yend` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, x = x, y = y, xend = xend, yend = yend,
+    class = "plotly_segment", type = "scatter", mode = "lines", ...
+  )
+}
+
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
 #' @examples 
 #' 
 #' ggplot2::map_data("world", "canada") %>%
@@ -164,10 +187,10 @@ add_lines <- function(p, x = NULL, y = NULL, ...) {
 #'     data = maps::canada.cities) %>%
 #'   layout(showlegend = FALSE)
 add_polygons <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(y <- y %||% p$x$attrs[[1]]$y)) {
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
   add_trace_classed(
@@ -186,13 +209,13 @@ add_polygons <- function(p, x = NULL, y = NULL, ...) {
 #'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
 
 add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(ymin <- ymin %||% p$x$attrs[[1]]$ymin)) {
+  if (is.null(ymin <- ymin %||% p$x$attrs[[1]][["ymin"]])) {
     stop("Must supply `ymin` attribute", call. = FALSE)
   }
-  if (is.null(ymax <- ymax %||% p$x$attrs[[1]]$ymax)) {
+  if (is.null(ymax <- ymax %||% p$x$attrs[[1]][["ymax"]])) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
   add_trace_classed(
@@ -214,10 +237,10 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
 #' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
 #' 
 add_area <- function(p, x = NULL, ymax = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]]$x)) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
-  if (is.null(ymax <- ymax %||% p$x$attrs[[1]]$ymax)) {
+  if (is.null(ymax <- ymax %||% p$x$attrs[[1]][["ymax"]])) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
   add_trace_classed(
