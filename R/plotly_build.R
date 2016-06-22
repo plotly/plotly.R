@@ -70,7 +70,7 @@ plotly_build.plotly <- function(p) {
     # perform the evaluation
     # TODO: remove/warn about missing values here? Provide a way to control na.color?
     dat <- plotly_data(p, y)
-    x <- rapply(x, eval_attr, data = dat, how = "list")
+    x <- structure(rapply(x, eval_attr, data = dat, how = "list"), class = class(x))
     # ensure we have a trace type (depends on the # of data points)
     x <- verify_type(x)
     
@@ -80,6 +80,9 @@ plotly_build.plotly <- function(p) {
     nobs <- NROW(dat)
     isVar <- vapply(x, function(attr) length(attr) == nobs, logical(1))
     builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
+    builtData <- train_data(builtData, x)
+    # TODO: provide a better way to clean up "high-level" attrs
+    x[c("ymin", "ymax")] <- NULL
     x$.plotlyVariableMapping <- names(builtData)
     
     # find any groupings, so we can arrange the data now, 
@@ -209,6 +212,22 @@ plotly_build.plotly <- function(p) {
   # set a sensible hovermode if it hasn't been specified already
   p <- verify_hovermode(p)
 }
+
+# ----------------------------------------------------------------
+# Functions used solely within plotly_build
+# ----------------------------------------------------------------
+
+train_data <- function(data, trace) {
+  if (inherits(trace, "plotly_area")) {
+    data$ymin <- 0
+  }
+  if (inherits(trace, "plotly_ribbon")) {
+    data <- ribbon_dat(data)
+  }
+  # TODO: a lot more geoms!!!
+  data
+}
+
 
 map_size <- function(traces) {
   sizeList <- lapply(traces, "[[", "size")

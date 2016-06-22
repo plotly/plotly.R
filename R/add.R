@@ -24,6 +24,11 @@ add_data <- function(p, data = NULL) {
 #' @param p a plotly or ggplot object.
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
+#' @param x the x variable.
+#' @param y the y variable.
+#' @param text textual labels.
+#' @param ymin a variable used to define the lower boundary of a polygon.
+#' @param ymax a variable used to define the upper boundary of a polygon.
 #' @param color Either a variable name or a vector to use for color mapping.
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param size A variable name or numeric vector to encode the size of markers.
@@ -34,6 +39,7 @@ add_data <- function(p, data = NULL) {
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
+#' @rdname add_trace
 #' @examples 
 #' 
 #' p <- plot_ly(economics, x = ~date, y = ~uempmed)
@@ -76,6 +82,7 @@ add_trace <- function(p, ...,
   p
 }
 
+# attach a class to a trace which informs data processing in plotly_build
 add_trace_classed <- function(p, class = "plotly_polygon", ...) {
   p <- add_trace(p, ...)
   nAttrs <- length(p$x$attrs)
@@ -94,8 +101,15 @@ add_markers <- function(p, ...) {
 #' Add paths to a plotly vis
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_paths <- function(p, ...) {
+add_paths <- function(p, x = NULL, y = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
   add_trace(p, type = "scatter", mode = "lines", ...)
 }
 
@@ -104,8 +118,15 @@ add_paths <- function(p, ...) {
 #' Equivalent to \code{add_paths}, but with the x-values sorted.
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_lines <- function(p, ...) {
+add_lines <- function(p, x = NULL, y = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
   add_trace_classed(
     p, class = "plotly_line", type = "scatter", mode = "lines", ...
   )
@@ -114,10 +135,17 @@ add_lines <- function(p, ...) {
 #' Add text to a plotly vis
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_text <- function(p, text = NULL, ...) {
+add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
   if (is.null(text %||% p$x$attrs[[1]]$text)) {
-    stop("Must supply text attribute", call. = FALSE)
+    stop("Must supply `text` attribute", call. = FALSE)
   }
   add_trace(p, type = "scatter", mode = "text", text = text, ...)
 }
@@ -125,9 +153,8 @@ add_text <- function(p, text = NULL, ...) {
 #' Add polygons to a plotly vis
 #' 
 #' @inheritParams add_trace
-#' @param mode Determines the drawing mode for this scatter trace 
-#' \url{https://plot.ly/r/reference/#scatter-mode}
 #' @export
+#' @rdname add_trace
 #' @examples 
 #' 
 #' ggplot2::map_data("world", "canada") %>%
@@ -137,37 +164,64 @@ add_text <- function(p, text = NULL, ...) {
 #'   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
 #'     data = maps::canada.cities) %>%
 #'   layout(showlegend = FALSE)
-add_polygons <- function(p, mode = "lines", ...) {
+add_polygons <- function(p, x = NULL, y = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y %||% p$x$attrs[[1]]$y)) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
   add_trace_classed(
     p, class = "plotly_polygon", type = "scatter", 
-    fill = "toself", mode = mode,  ...
+    fill = "toself", mode = "lines",  ...
   )
 }
 
-#' Add ribbons to a plotly vis
-#' 
-#' Ribbons are a special case of polygons.
+#' Ribbon plots
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_ribbons <- function(p, ...) {
-  # TODO: add ymin, ymax arguments?
+#' 
+#' plot_ly(economics, x = ~date) %>% 
+#'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
+#' 
+add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(ymin %||% p$x$attrs[[1]]$ymin)) {
+    stop("Must supply `ymin` attribute", call. = FALSE)
+  }
+  if (is.null(ymax %||% p$x$attrs[[1]]$ymax)) {
+    stop("Must supply `ymax` attribute", call. = FALSE)
+  }
   add_trace_classed(
     p, class = c("plotly_ribbon", "plotly_polygon"), type = "scatter", 
     fill = "toself", mode = "lines",  ...
   )
 }
 
-#' Area
+#' Area plots
 #' 
-#' Ribbons are a special case of polygons.
+#' Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
 #' 
 #' @inheritParams add_trace
+#' @rdname add_trace
 #' @export
-add_ribbons <- function(p, ...) {
-  # TODO: add ymin, ymax arguments?
+#' 
+#' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
+#' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
+#' 
+add_area <- function(p, x = NULL, ymax = NULL, ...) {
+  if (is.null(x %||% p$x$attrs[[1]]$x)) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(ymax %||% p$x$attrs[[1]]$ymax)) {
+    stop("Must supply `ymax` attribute", call. = FALSE)
+  }
   add_trace_classed(
-    p, class = c("plotly_ribbon", "plotly_polygon"), type = "scatter", 
+    p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), type = "scatter", 
     fill = "toself", mode = "lines",  ...
   )
 }

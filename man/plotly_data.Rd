@@ -32,7 +32,7 @@ plotly_data(p, id = p$x$cur_data)
 
 \method{select_}{plotly}(.data, ..., .dots)
 
-filter_.plotly(.data, ..., .dots)
+\method{filter_}{plotly}(.data, ..., .dots)
 
 \method{distinct_}{plotly}(.data, ..., .dots)
 
