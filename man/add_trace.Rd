@@ -2,6 +2,7 @@
 % Please edit documentation in R/add.R
 \name{add_trace}
 \alias{add_area}
+\alias{add_heatmap}
 \alias{add_lines}
 \alias{add_markers}
 \alias{add_paths}
@@ -29,6 +30,8 @@ add_polygons(p, x = NULL, y = NULL, ...)
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...)
 
 add_area(p, x = NULL, ymax = NULL, ...)
+
+add_heatmap(p, z = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -69,6 +72,8 @@ Add paths to a plotly vis
 Equivalent to \code{add_paths}, but with the x-values sorted.
 
 Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
+
+Heatmaps
 }
 \examples{
 
@@ -104,6 +109,9 @@ plot_ly(economics, x = ~date) \%>\%
 
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 plot_ly(huron, x = ~year, ymax = ~level) \%>\% add_area()
+
+
+plot_ly(z = ~volcano) \%>\% add_heatmap()
 
 }
 \author{

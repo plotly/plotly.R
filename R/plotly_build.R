@@ -74,6 +74,17 @@ plotly_build.plotly <- function(p) {
     # ensure we have a trace type (depends on the # of data points)
     x <- verify_type(x)
     
+    # do some attribute type checking for special trace types
+    if (inherits(x, "plotly_heatmap")) {
+      if (!is.matrix(x$z)) {
+        stop("`z` must be a matrix", call. = FALSE)
+      }
+      if (!is.numeric(x$z)) {
+        stop("`z` must be numeric", call. = FALSE)
+      }
+    }
+    
+    
     # TODO: if we ever provide some semantics for statistics, it should probably go here
     
     # gather the "built" or "evaluated" data

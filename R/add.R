@@ -261,6 +261,27 @@ add_area <- function(p, x = NULL, ymax = NULL, ...) {
   )
 }
 
+#' Heatmaps
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(z = ~volcano) %>% add_heatmap()
+#' 
+add_heatmap <- function(p, z = NULL, ...) {
+  if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
+    stop("Must supply `z` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_heatmap", z = z,
+    type = "heatmap",  ...
+  )
+}
+
+
+
 # attach a class to a trace which informs data processing in plotly_build
 add_trace_classed <- function(p, class = "plotly_polygon", ...) {
   p <- add_trace(p, ...)
