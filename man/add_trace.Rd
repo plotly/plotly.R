@@ -3,13 +3,19 @@
 \name{add_trace}
 \alias{add_area}
 \alias{add_bars}
+\alias{add_boxplot}
+\alias{add_choropleth}
+\alias{add_contour}
 \alias{add_heatmap}
 \alias{add_histogram}
+\alias{add_histogram2d}
+\alias{add_histogram2dcontour}
 \alias{add_lines}
 \alias{add_markers}
 \alias{add_paths}
 \alias{add_polygons}
 \alias{add_ribbons}
+\alias{add_scattergeo}
 \alias{add_segments}
 \alias{add_surface}
 \alias{add_text}
@@ -38,9 +44,21 @@ add_bars(p, x = NULL, y = NULL, ...)
 
 add_histogram(p, x = NULL, y = NULL, ...)
 
+add_histogram2d(p, x = NULL, y = NULL, z = NULL, ...)
+
+add_histogram2dcontour(p, x = NULL, y = NULL, z = NULL, ...)
+
 add_heatmap(p, z = NULL, ...)
 
+add_contour(p, z = NULL, ...)
+
+add_boxplot(p, x = NULL, y = NULL, ...)
+
 add_surface(p, z = NULL, ...)
+
+add_scattergeo(p, ...)
+
+add_choropleth(p, z = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -86,9 +104,21 @@ Bar chart
 
 Histogram
 
+2D Histogram
+
+2D Histogram Contour
+
 Heatmaps
 
+Contours
+
+Boxplots
+
 Surface
+
+Geo
+
+Choropleths
 }
 \examples{
 
@@ -136,10 +166,35 @@ mtcars \%>\%
 plot_ly(x = ~rnorm(100)) \%>\% add_histogram()
 
 
+plot_ly(x = ~LETTERS, y = ~LETTERS) \%>\% add_histogram2d()
+z <- as.matrix(table(LETTERS, LETTERS))
+plot_ly(x = ~LETTERS, y = ~LETTERS, z = ~z) \%>\% add_histogram2d()
+
+
+plot_ly(MASS::geyser, x = ~waiting, y = ~duration) \%>\% 
+add_histogram2dcontour()
+
+
+
 plot_ly(z = ~volcano) \%>\% add_heatmap()
 
 
+plot_ly(z = ~volcano) \%>\% add_contour()
+
+
+plot_ly(mtcars, x = ~factor(vs), y = ~mpg) \%>\% add_boxplot()
+
+
 plot_ly(z = ~volcano) \%>\% add_surface()
+
+
+plot_ly() \%>\% add_scattergeo()
+
+
+density <- state.x77[, "Population"] / state.x77[, "Area"]
+plot_ly(z = ~density) \%>\% 
+  add_choropleth(locations = state.abb, locationmode = 'USA-states') \%>\%
+  layout(geo = list(scope = "usa"))
 
 }
 \author{

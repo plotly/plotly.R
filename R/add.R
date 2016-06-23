@@ -308,6 +308,60 @@ add_histogram <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
+#' 2D Histogram
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(x = ~LETTERS, y = ~LETTERS) %>% add_histogram2d()
+#' z <- as.matrix(table(LETTERS, LETTERS))
+#' plot_ly(x = ~LETTERS, y = ~LETTERS, z = ~z) %>% add_histogram2d()
+#' 
+add_histogram2d <- function(p, x = NULL, y = NULL, z = NULL, ...) {
+  x <- x %||% p$x$attrs[[1]][["x"]]
+  y <- y %||% p$x$attrs[[1]][["y"]]
+  z <- z %||% p$x$attrs[[1]][["z"]]
+  if (is.null(z)) {
+    if (is.null(x) || is.null(y)) {
+      stop("Must supply both `x` and `y` attributes if `z` is NULL", call. = FALSE)
+    }
+  }
+  # TODO: provide type checking in plotly_build for this trace type
+  add_trace_classed(
+    p, class = "plotly_histogram2d", x = x, y = y, z = z,
+    type = "histogram2d",  ...
+  )
+}
+
+#' 2D Histogram Contour
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(MASS::geyser, x = ~waiting, y = ~duration) %>% 
+#' add_histogram2dcontour()
+#' 
+#' 
+add_histogram2dcontour <- function(p, x = NULL, y = NULL, z = NULL, ...) {
+  x <- x %||% p$x$attrs[[1]][["x"]]
+  y <- y %||% p$x$attrs[[1]][["y"]]
+  z <- z %||% p$x$attrs[[1]][["z"]]
+  if (is.null(z)) {
+    if (is.null(x) || is.null(y)) {
+      stop("Must supply both `x` and `y` attributes if `z` is NULL", call. = FALSE)
+    }
+  }
+  # TODO: provide type checking in plotly_build for this trace type
+  add_trace_classed(
+    p, class = "plotly_histogram2dcontour", x = x, y = y, z = z,
+    type = "histogram2dcontour",  ...
+  )
+}
+
 
 #' Heatmaps
 #' 
@@ -328,6 +382,45 @@ add_heatmap <- function(p, z = NULL, ...) {
   )
 }
 
+#' Contours
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(z = ~volcano) %>% add_contour()
+#' 
+add_contour <- function(p, z = NULL, ...) {
+  if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
+    stop("Must supply `z` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_contour", z = z,
+    type = "contour",  ...
+  )
+}
+
+#' Boxplots
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(mtcars, x = ~factor(vs), y = ~mpg) %>% add_boxplot()
+#' 
+add_boxplot <- function(p, x = NULL, y = NULL, ...) {
+  x <- x %||% p$x$attrs[[1]][["x"]]
+  y <- y %||% p$x$attrs[[1]][["y"]]
+  if (is.null(x) && is.null(y)) {
+    stop("Must supply either `x` or `y` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_boxplot", x = x,  y = y, type = "box",  ...
+  )
+}
+
 #' Surface
 #' 
 #' @inheritParams add_trace
@@ -345,6 +438,44 @@ add_surface <- function(p, z = NULL, ...) {
     p, class = "plotly_surface", z = z, type = "surface",  ...
   )
 }
+
+
+#' Geo
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly() %>% add_scattergeo()
+#' 
+add_scattergeo <- function(p, ...) {
+  add_trace_classed(
+    p, class = "plotly_scattergeo", type = "scattergeo", ...
+  )
+}
+
+#' Choropleths
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' density <- state.x77[, "Population"] / state.x77[, "Area"]
+#' plot_ly(z = ~density) %>% 
+#'   add_choropleth(locations = state.abb, locationmode = 'USA-states') %>%
+#'   layout(geo = list(scope = "usa"))
+#' 
+add_choropleth <- function(p, z = NULL, ...) {
+  if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
+    stop("Must supply `z` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_choropleth", type = "choropleth", ...
+  )
+}
+
 
 
 
