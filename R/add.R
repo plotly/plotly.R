@@ -97,21 +97,6 @@ add_markers <- function(p, x = NULL, y = NULL, ...) {
   add_trace(p, x = x, y = y, type = "scatter", mode = "markers", ...)
 }
 
-#' Add paths to a plotly vis
-#' 
-#' @inheritParams add_trace
-#' @rdname add_trace
-#' @export
-add_paths <- function(p, x = NULL, y = NULL, ...) {
-  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
-    stop("Must supply `x` attribute", call. = FALSE)
-  }
-  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
-    stop("Must supply `y` attribute", call. = FALSE)
-  }
-  add_trace(p, x = x, y = y, type = "scatter", mode = "lines", ...)
-}
-
 #' Add text to a plotly vis
 #' 
 #' @inheritParams add_trace
@@ -130,6 +115,23 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
   add_trace(p, x = x, y = y, text = text, type = "scatter", mode = "text",  ...)
 }
 
+#' Add paths to a plotly vis
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+add_paths <- function(p, x = NULL, y = NULL, ...) {
+  if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
+    stop("Must supply `x` attribute", call. = FALSE)
+  }
+  if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
+    stop("Must supply `y` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, x = x, y = y, class = "plotly_path", type = "scatter", mode = "lines", ...
+  )
+}
+
 #' Add lines to a plotly vis
 #' 
 #' Equivalent to \code{add_paths}, but with the x-values sorted.
@@ -137,6 +139,13 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
+#' @examples 
+#' 
+#' txhousing %>% 
+#'   group_by(city) %>% 
+#'   plot_ly(x = ~date, y = ~median) %>%
+#'   add_lines(line = list(color = toRGB("black", 0.2)))
+#' 
 add_lines <- function(p, x = NULL, y = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)

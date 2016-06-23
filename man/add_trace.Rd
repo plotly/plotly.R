@@ -16,9 +16,9 @@ add_trace(p, ..., color, symbol, size, linetype, data = NULL)
 
 add_markers(p, x = NULL, y = NULL, ...)
 
-add_paths(p, x = NULL, y = NULL, ...)
-
 add_text(p, x = NULL, y = NULL, text = NULL, ...)
+
+add_paths(p, x = NULL, y = NULL, ...)
 
 add_lines(p, x = NULL, y = NULL, ...)
 
@@ -62,9 +62,9 @@ Add trace(s) to a plotly visualization
 
 Add points to a plotly vis
 
-Add paths to a plotly vis
-
 Add text to a plotly vis
+
+Add paths to a plotly vis
 
 Equivalent to \code{add_paths}, but with the x-values sorted.
 
@@ -83,6 +83,12 @@ plot_ly(economics, x = ~date, y = ~uempmed) \%>\%
   add_lines(line = list(color = "red")) \%>\%
   add_markers(color = ~pop) \%>\%
   layout(showlegend = FALSE)
+
+
+txhousing \%>\% 
+  group_by(city) \%>\% 
+  plot_ly(x = ~date, y = ~median) \%>\%
+  add_lines(line = list(color = toRGB("black", 0.2)))
 
 
 ggplot2::map_data("world", "canada") \%>\%

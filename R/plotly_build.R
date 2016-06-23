@@ -80,16 +80,12 @@ plotly_build.plotly <- function(p) {
     nobs <- NROW(dat)
     isVar <- vapply(x, function(attr) length(attr) == nobs, logical(1))
     builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
-    builtData <- train_data(builtData, x)
-    # TODO: provide a better way to clean up "high-level" attrs
-    x[c("ymin", "ymax", "yend", "xend")] <- NULL
-    x$.plotlyVariableMapping <- names(builtData)
     
     # find any groupings, so we can arrange the data now, 
     # and insert missing values (to create gaps between traces) later
-    grps <- as.character(dplyr::groups(builtData))
+    grps <- as.character(dplyr::groups(dat))
     # does grouping even make sense for this trace type?
-    hasGrp <- inherits(x, c("plotly_segment", "plotly_line", "plotly_polygon")) ||
+    hasGrp <- inherits(x, c("plotly_segment", "plotly_path", "plotly_line", "plotly_polygon")) ||
       (grepl("scatter", x$type) && grepl("lines", x$mode %||% "lines"))
     if (length(grps) && hasGrp) {
       if (isTRUE(x$connectgaps)) {
@@ -98,8 +94,13 @@ plotly_build.plotly <- function(p) {
           call. = FALSE
         )
       }
-      builtData$.plotlyGroupIndex <- interaction(builtData[, grps, drop = FALSE])
+      builtData$.plotlyGroupIndex <- interaction(dat[, grps, drop = FALSE])
     }
+    
+    builtData <- train_data(builtData, x)
+    # TODO: provide a better way to clean up "high-level" attrs
+    x[c("ymin", "ymax", "yend", "xend")] <- NULL
+    x$.plotlyVariableMapping <- names(builtData)
     
     # build the index used to transform one "trace" into multiple traces
     discreteData <- builtData[vapply(builtData, is.discrete, logical(1))]
@@ -143,7 +144,10 @@ plotly_build.plotly <- function(p) {
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
     d <- data.frame(x[names(x) %in% c(x$.plotlyVariableMapping)])
-    d <- group2NA(d, ".plotlyGroupIndex", retrace.first = inherits(x, "plotly_polygon"))
+    d <- group2NA(
+      d, ".plotlyGroupIndex", ordered = if (inherits(x, "plotly_line")) "x",
+      retrace.first = inherits(x, "plotly_polygon")
+    )
     for (i in x$.plotlyVariableMapping) {
       x[[i]] <- uniq(d[[i]])
     }
