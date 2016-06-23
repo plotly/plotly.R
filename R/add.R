@@ -261,6 +261,54 @@ add_area <- function(p, x = NULL, ymax = NULL, ...) {
   )
 }
 
+
+#' Bar chart
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' library(dplyr)
+#' mtcars %>%
+#'   count(vs) %>%
+#'   plot_ly(x = ~vs, y = ~n) %>%
+#'   add_bars()
+#' 
+add_bars <- function(p, x = NULL, y = NULL, ...) {
+  x <- x %||% p$x$attrs[[1]][["x"]]
+  y <- y %||% p$x$attrs[[1]][["y"]]
+  if (is.null(x) && is.null(y)) {
+    stop("Must supply `x` and/or `y` attributes", call. = FALSE)
+  }
+  # TODO: provide type checking in plotly_build for this trace type
+  add_trace_classed(
+    p, class = "plotly_bar", x = x, y = y, type = "bar",  ...
+  )
+}
+
+#' Histogram
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(x = ~rnorm(100)) %>% add_histogram()
+#' 
+add_histogram <- function(p, x = NULL, y = NULL, ...) {
+  x <- x %||% p$x$attrs[[1]][["x"]]
+  y <- y %||% p$x$attrs[[1]][["y"]]
+  if (is.null(x) && is.null(y)) {
+    stop("Must supply `x` and/or `y` attributes", call. = FALSE)
+  }
+  # TODO: provide type checking in plotly_build for this trace type
+  add_trace_classed(
+    p, class = "plotly_histogram", x = x, y = y, type = "histogram",  ...
+  )
+}
+
+
 #' Heatmaps
 #' 
 #' @inheritParams add_trace
@@ -277,6 +325,24 @@ add_heatmap <- function(p, z = NULL, ...) {
   add_trace_classed(
     p, class = "plotly_heatmap", z = z,
     type = "heatmap",  ...
+  )
+}
+
+#' Surface
+#' 
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(z = ~volcano) %>% add_surface()
+#' 
+add_surface <- function(p, z = NULL, ...) {
+  if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
+    stop("Must supply `z` attribute", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_surface", z = z, type = "surface",  ...
   )
 }
 

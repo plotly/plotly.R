@@ -75,7 +75,7 @@ plotly_build.plotly <- function(p) {
     x <- verify_type(x)
     
     # do some attribute type checking for special trace types
-    if (inherits(x, "plotly_heatmap")) {
+    if (inherits(x, c("plotly_heatmap", "plotly_surface"))) {
       if (!is.matrix(x$z)) {
         stop("`z` must be a matrix", call. = FALSE)
       }

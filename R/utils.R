@@ -168,7 +168,7 @@ verify_type <- function(trace) {
 
 relay_type <- function(type) {
   message(
-    "No trace type specified. Inferring a type of '", type, "'.\n",
+    "No trace type specified. Applying `add_", type, "()`.\n",
     "Read more about this trace type here -> https://plot.ly/r/reference/#", type
   )
   type

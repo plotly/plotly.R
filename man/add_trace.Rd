@@ -2,13 +2,16 @@
 % Please edit documentation in R/add.R
 \name{add_trace}
 \alias{add_area}
+\alias{add_bars}
 \alias{add_heatmap}
+\alias{add_histogram}
 \alias{add_lines}
 \alias{add_markers}
 \alias{add_paths}
 \alias{add_polygons}
 \alias{add_ribbons}
 \alias{add_segments}
+\alias{add_surface}
 \alias{add_text}
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
@@ -31,7 +34,13 @@ add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...)
 
 add_area(p, x = NULL, ymax = NULL, ...)
 
+add_bars(p, x = NULL, y = NULL, ...)
+
+add_histogram(p, x = NULL, y = NULL, ...)
+
 add_heatmap(p, z = NULL, ...)
+
+add_surface(p, z = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -73,7 +82,13 @@ Equivalent to \code{add_paths}, but with the x-values sorted.
 
 Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
 
+Bar chart
+
+Histogram
+
 Heatmaps
+
+Surface
 }
 \examples{
 
@@ -111,7 +126,20 @@ huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 plot_ly(huron, x = ~year, ymax = ~level) \%>\% add_area()
 
 
+library(dplyr)
+mtcars \%>\%
+  count(vs) \%>\%
+  plot_ly(x = ~vs, y = ~n) \%>\%
+  add_bars()
+
+
+plot_ly(x = ~rnorm(100)) \%>\% add_histogram()
+
+
 plot_ly(z = ~volcano) \%>\% add_heatmap()
+
+
+plot_ly(z = ~volcano) \%>\% add_surface()
 
 }
 \author{
