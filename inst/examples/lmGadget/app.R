@@ -34,6 +34,7 @@ lmGadget <- function(dat, x, y, key = row.names(dat)) {
   init <- function() {
     selected <- rep(FALSE, nrow(dat))
     function(x) {
+      if (missing(x)) return(selected)
       selected <<- xor(selected, x)
       selected
     }
@@ -64,7 +65,12 @@ lmGadget <- function(dat, x, y, key = row.names(dat)) {
     
     # Return the most recent fitted model, when we press "done"
     observeEvent(input$done, {
-      stopApp(refit())
+      selected <- selection()
+      modelDat <- dat[!selected, ]
+      formula <- as.formula(
+        sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
+      )
+      stopApp(lm(formula, modelDat))
     })
   }
   
