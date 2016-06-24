@@ -644,12 +644,12 @@ ribbon_dat <- function(dat) {
   # top-half of ribbon
   tmp <- dat[o, ]
   others <- tmp[not_used]
-  dat1 <- cbind(x = tmp$x, y = tmp$ymax, others)
+  dat1 <- cbind(x = tmp$x, y = tmp$ymin, others)
   dat1[n+1, ] <- cbind(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
   # bottom-half of ribbon
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
-  dat2 <- cbind(x = tmp2$x, y = tmp2$ymin, others2)
+  dat2 <- cbind(x = tmp2$x, y = tmp2$ymax, others2)
   rbind(dat1, dat2)
 }
 

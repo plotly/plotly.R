@@ -82,8 +82,6 @@ add_trace <- function(p, ...,
   p
 }
 
-#' Add points to a plotly vis
-#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
@@ -97,8 +95,7 @@ add_markers <- function(p, x = NULL, y = NULL, ...) {
   add_trace(p, x = x, y = y, type = "scatter", mode = "markers", ...)
 }
 
-#' Add text to a plotly vis
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
@@ -115,8 +112,7 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
   add_trace(p, x = x, y = y, text = text, type = "scatter", mode = "text",  ...)
 }
 
-#' Add paths to a plotly vis
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
@@ -132,20 +128,14 @@ add_paths <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' Add lines to a plotly vis
-#' 
-#' Equivalent to \code{add_paths}, but with the x-values sorted.
-#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' txhousing %>% 
 #'   group_by(city) %>% 
 #'   plot_ly(x = ~date, y = ~median) %>%
 #'   add_lines(line = list(color = toRGB("black", 0.2)))
-#' 
 add_lines <- function(p, x = NULL, y = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
@@ -182,8 +172,7 @@ add_segments <- function(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...) {
 }
 
 
-#' 
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
@@ -235,18 +224,13 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
   )
 }
 
-#' Area plots
-#' 
-#' Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 #' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
-#' 
 add_area <- function(p, x = NULL, ymax = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
@@ -262,19 +246,16 @@ add_area <- function(p, x = NULL, ymax = NULL, ...) {
 }
 
 
-#' Bar chart
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' library(dplyr)
 #' mtcars %>%
 #'   count(vs) %>%
 #'   plot_ly(x = ~vs, y = ~n) %>%
 #'   add_bars()
-#' 
 add_bars <- function(p, x = NULL, y = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
@@ -287,15 +268,13 @@ add_bars <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' Histogram
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
 #' 
 #' plot_ly(x = ~rnorm(100)) %>% add_histogram()
-#' 
 add_histogram <- function(p, x = NULL, y = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
@@ -308,17 +287,14 @@ add_histogram <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' 2D Histogram
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(x = ~LETTERS, y = ~LETTERS) %>% add_histogram2d()
 #' z <- as.matrix(table(LETTERS, LETTERS))
 #' plot_ly(x = ~LETTERS, y = ~LETTERS, z = ~z) %>% add_histogram2d()
-#' 
 add_histogram2d <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
@@ -335,17 +311,12 @@ add_histogram2d <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   )
 }
 
-#' 2D Histogram Contour
-#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(MASS::geyser, x = ~waiting, y = ~duration) %>% 
 #' add_histogram2dcontour()
-#' 
-#' 
 add_histogram2dcontour <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
@@ -363,15 +334,12 @@ add_histogram2dcontour <- function(p, x = NULL, y = NULL, z = NULL, ...) {
 }
 
 
-#' Heatmaps
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(z = ~volcano) %>% add_heatmap()
-#' 
 add_heatmap <- function(p, z = NULL, ...) {
   if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
     stop("Must supply `z` attribute", call. = FALSE)
@@ -382,15 +350,11 @@ add_heatmap <- function(p, z = NULL, ...) {
   )
 }
 
-#' Contours
-#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(z = ~volcano) %>% add_contour()
-#' 
 add_contour <- function(p, z = NULL, ...) {
   if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
     stop("Must supply `z` attribute", call. = FALSE)
@@ -401,15 +365,12 @@ add_contour <- function(p, z = NULL, ...) {
   )
 }
 
-#' Boxplots
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(mtcars, x = ~factor(vs), y = ~mpg) %>% add_boxplot()
-#' 
 add_boxplot <- function(p, x = NULL, y = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
@@ -421,15 +382,12 @@ add_boxplot <- function(p, x = NULL, y = NULL, ...) {
   )
 }
 
-#' Surface
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly(z = ~volcano) %>% add_surface()
-#' 
 add_surface <- function(p, z = NULL, ...) {
   if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
     stop("Must supply `z` attribute", call. = FALSE)
@@ -440,33 +398,26 @@ add_surface <- function(p, z = NULL, ...) {
 }
 
 
-#' Geo
-#' 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' plot_ly() %>% add_scattergeo()
-#' 
 add_scattergeo <- function(p, ...) {
   add_trace_classed(
     p, class = "plotly_scattergeo", type = "scattergeo", ...
   )
 }
 
-#' Choropleths
-#' 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 
-#' 
 #' density <- state.x77[, "Population"] / state.x77[, "Area"]
 #' plot_ly(z = ~density) %>% 
 #'   add_choropleth(locations = state.abb, locationmode = 'USA-states') %>%
 #'   layout(geo = list(scope = "usa"))
-#' 
 add_choropleth <- function(p, z = NULL, ...) {
   if (is.null(z <- z %||% p$x$attrs[[1]][["z"]])) {
     stop("Must supply `z` attribute", call. = FALSE)

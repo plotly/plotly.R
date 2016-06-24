@@ -89,7 +89,9 @@ plotly_build.plotly <- function(p) {
     
     # gather the "built" or "evaluated" data
     nobs <- NROW(dat)
-    isVar <- vapply(x, function(attr) length(attr) == nobs, logical(1))
+    attrLengths <- lengths(x)
+    if (nobs == 0) nobs <- max(attrLengths)
+    isVar <- attrLengths == nobs
     builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
     
     # find any groupings, so we can arrange the data now, 
@@ -134,7 +136,6 @@ plotly_build.plotly <- function(p) {
     }
     
     # if appropriate, set the mode now since we need to reference it later
-    attrLengths <- lengths(x)
     if (grepl("scatter", x$type) && is.null(x$mode)) {
       x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
     }
@@ -463,7 +464,8 @@ map_symbol <- function(traces) {
   }
   palette <- setNames(symbols[seq_len(N)], unique(symbol))
   for (i in which(nSymbols > 0)) {
-    traces[[i]]$marker$symbol <- as.character(palette[symbolList[[i]]])
+    symbols <- as.character(palette[symbolList[[i]]])
+    traces[[i]]$marker <- modify_list(list(symbol = symbols), traces[[i]]$marker)
     # ensure the mode is set so that the symbol is relevant
     if (!grepl("markers", traces[[i]]$mode %||% "")) {
       message("Adding markers to mode; otherwise symbol would have no effect.")
@@ -497,7 +499,7 @@ map_linetype <- function(traces) {
   linetypes <- unique(unlist(lapply(traces, "[[", "linetypes"))) %||% validLinetypes
   illegalLinetypes <- setdiff(linetypes, validLinetypes)
   if (length(illegalLinetypes)) {
-    stop("The following are not valid symbol codes:\n'",
+    stop("The following are not valid linetype codes:\n'",
          paste(illegalLinetypes, collapse = "', '"), 
          "Valid linetypes include:\n'",
          paste(validLinetypes, collapse = "', '"),
@@ -505,11 +507,12 @@ map_linetype <- function(traces) {
   }
   palette <- setNames(linetypes[seq_len(N)], unique(linetype))
   for (i in which(nLinetypes > 0)) {
-    traces[[i]][["line"]][["dash"]] <- as.character(palette[linetypeList[[i]]])
+    dashes <- as.character(palette[linetypeList[[i]]])
+    traces[[i]][["line"]] <- modify_list(list(dash = dashes), traces[[i]][["line"]])
     # ensure the mode is set so that the linetype is relevant
     if (!grepl("lines", traces[[i]]$mode %||% "")) {
       message("Adding lines to mode; otherwise linetype would have no effect.")
-      traces[[i]]$mode <- paste0(traces[[i]]$mode, "+lines")
+      traces[[i]][["mode"]] <- paste0(traces[[i]][["mode"]], "+lines")
     }
   }
   traces

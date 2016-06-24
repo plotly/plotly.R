@@ -89,36 +89,6 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 }
 \description{
 Add trace(s) to a plotly visualization
-
-Add points to a plotly vis
-
-Add text to a plotly vis
-
-Add paths to a plotly vis
-
-Equivalent to \code{add_paths}, but with the x-values sorted.
-
-Equivalent to \link{add_ribbon} with \code{ymin} set to 0.
-
-Bar chart
-
-Histogram
-
-2D Histogram
-
-2D Histogram Contour
-
-Heatmaps
-
-Contours
-
-Boxplots
-
-Surface
-
-Geo
-
-Choropleths
 }
 \examples{
 
@@ -134,12 +104,10 @@ plot_ly(economics, x = ~date, y = ~uempmed) \%>\%
   add_markers(color = ~pop) \%>\%
   layout(showlegend = FALSE)
 
-
 txhousing \%>\% 
   group_by(city) \%>\% 
   plot_ly(x = ~date, y = ~median) \%>\%
   add_lines(line = list(color = toRGB("black", 0.2)))
-
 
 ggplot2::map_data("world", "canada") \%>\%
   group_by(group) \%>\%
@@ -151,51 +119,29 @@ ggplot2::map_data("world", "canada") \%>\%
 
 plot_ly(economics, x = ~date) \%>\% 
   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
-
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 plot_ly(huron, x = ~year, ymax = ~level) \%>\% add_area()
-
-
 library(dplyr)
 mtcars \%>\%
   count(vs) \%>\%
   plot_ly(x = ~vs, y = ~n) \%>\%
   add_bars()
 
-
 plot_ly(x = ~rnorm(100)) \%>\% add_histogram()
-
-
 plot_ly(x = ~LETTERS, y = ~LETTERS) \%>\% add_histogram2d()
 z <- as.matrix(table(LETTERS, LETTERS))
 plot_ly(x = ~LETTERS, y = ~LETTERS, z = ~z) \%>\% add_histogram2d()
-
-
 plot_ly(MASS::geyser, x = ~waiting, y = ~duration) \%>\% 
 add_histogram2dcontour()
-
-
-
 plot_ly(z = ~volcano) \%>\% add_heatmap()
-
-
 plot_ly(z = ~volcano) \%>\% add_contour()
-
-
 plot_ly(mtcars, x = ~factor(vs), y = ~mpg) \%>\% add_boxplot()
-
-
 plot_ly(z = ~volcano) \%>\% add_surface()
-
-
 plot_ly() \%>\% add_scattergeo()
-
-
 density <- state.x77[, "Population"] / state.x77[, "Area"]
 plot_ly(z = ~density) \%>\% 
   add_choropleth(locations = state.abb, locationmode = 'USA-states') \%>\%
   layout(geo = list(scope = "usa"))
-
 }
 \author{
 Carson Sievert
