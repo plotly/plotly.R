@@ -1,217 +1,141 @@
-#' Divide data into groups.
+#' Obtain data associated with a plotly graph
 #'
-#' @param x a visualisation
-#' @param ... variables to group by.
-#' @param add By default, when \code{add = FALSE}, \code{group_by} will
-#'   override existing groups. To instead add to the existing groups,
-#'   use \code{add = TRUE}
-#' @importFrom dplyr group_by
-#' @name group_by
-#' @export
-NULL
-
-
-#' View and manipulate data associated with a plotly graph
-#'
-#' \code{plotly_data()} returns the data associated with 
-#' a plotly visualization. This data can be manipulated via 
-#' the dplyr and tidyr verbs listed below:
+#' \code{plotly_data()} returns data associated with 
+#' a plotly visualization (if there are multiple data frames, by default, 
+#' it returns the most recent one). 
 #' 
-#'
-#' @name plotly_data
-#' @keywords internal
+#' @param p a plotly visualization
+#' @param id a character string or number referencing an "attribute layer".
+#' @return returns a data frame
 #' @examples
 #' 
-#' # loading dplyr is super important!
-#' library(dplyr)
+#' # use group_by() to define groups of visual markings
+#' p <- txhousing %>%
+#'   group_by(city) %>%
+#'   plot_ly(x = ~date, y = ~sales)
+#' p
 #' 
-#' mtcars %>%
-#'   plot_ly(x = ~wt, y = ~mpg, name = "scatter trace") %>%
-#'   filter(cyl == 4) %>%
-#'   add_markers(x = ~wt, y = ~mpg, name = "filtered points", 
-#'     marker = list(color = "red"))
-#'     
-#' library(tidyr)
-#' economics %>%
-#'   gather(variable, value, -date) %>%
-#'   group_by(variable) %>%
-#'   plot_ly(x = ~date, y = ~value)
+#' # plotly objects preserve data groupings 
+#' groups(p)
+#' plotly_data(p)
+#' 
+#' # dplyr verbs operate on plotly objects as if they were data frames
+#' p <- economics %>%
+#'   plot_ly(x = ~date, y = ~unemploy / pop) %>%
+#'   add_lines() %>%
+#'   mutate(rate = unemploy / pop) %>% 
+#'   filter(rate == max(rate))
+#' plotly_data(p)
+#' add_markers(p)
+#' layout(p, annotations = list(x = ~date, y = ~rate, text = "peak"))
+#' 
+#' # use group_by() + do() + subplot() for trellis displays 
+#' d <- group_by(mpg, drv)
+#' plots <- do(d, p = plot_ly(., x = ~cty, name = ~drv))
+#' subplot(plots[["p"]], nrows = 3, shareX = TRUE)
+#'
+#' # arrange displays by their mean
+#' means <- summarise(d, mn = mean(cty, na.rm = TRUE))
+#' means %>%
+#'   left_join(plots) %>%
+#'   arrange(mn) %>%
+#'   .[["p"]] %>%
+#'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
-NULL
-
-#' @export
-#' @rdname plotly_data
+#' # more dplyr verbs applied to plotly objects
+#' p <- mtcars %>%
+#'   plot_ly(x = ~wt, y = ~mpg, name = "scatter trace") %>%
+#'   add_markers()
+#' p %>% slice(1) %>% plotly_data()
+#' p %>% slice(1) %>% add_markers(name = "first observation")
+#' p %>% filter(cyl == 4) %>% plotly_data()
+#' p %>% filter(cyl == 4) %>% add_markers(name = "four cylinders")
+#' 
+#' 
 plotly_data <- function(p, id = p$x$cur_data) {
   f <- p$x$visdat[[id]]
-  # if data has been specified, this should be a closure that, when called
+  # if data has been specified, f should be a closure that, when called,
   # returns data
   if (is.function(f)) return(f())
   data.frame()
 }
 
-#' @export
-#' @rdname plotly_data
+#' @rawNamespace export(groups.plotly)
 groups.plotly <- function(x) {
   dplyr::groups(plotly_data(x))
 }
 
-#' @export
-#' @rdname plotly_data
-group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
-  d <- plotly_data(.data)
-  d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
-  # TODO: where to use group2NA? In plotly_build()
-  add_data(.data, d)
-}
-
-#' @export
-#' @rdname plotly_data
+#' @rawNamespace export(ungroup.plotly)
 ungroup.plotly <- function(x) {
   dplyr::ungroup(plotly_data(x))
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(group_by_.plotly)
+group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
+  d <- plotly_data(.data)
+  d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
+  add_data(.data, d)
+}
+
+#' @rawNamespace export(summarise_.plotly)
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::summarise_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(mutate_.plotly)
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::mutate_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(arrange_.plotly)
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::arrange_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(select_.plotly)
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::select_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(filter_.plotly)
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::filter_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(distinct_.plotly)
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::distinct_(d, ..., .dots)
+  d <- dplyr::distinct_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(slice_.plotly)
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::slice_(d, ..., .dots)
+  d <- dplyr::slice_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(rename_.plotly)
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::rename_(d, ..., .dots)
+  d <- dplyr::rename_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rdname plotly_data
-#' @export
+#' @rawNamespace export(transmute_.plotly)
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::transmute_(d, ..., .dots)
+  d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
-
-# Insert missing values to create trace groupings
-# 
-# If a group of traces share the same non-positional characteristics (i.e.,
-# color, fill, etc), it is more efficient to draw them as a single trace 
-# with missing values that separate the groups (instead of multiple traces).
-# This is a helper function for inserting missing values into a data set
-# 
-# @param data a data frame.
-# @param groupNames name(s) of the grouping variable(s) as a character vector
-# @param nested other variables that group should be nested 
-# (i.e., ordered) within.
-# @param ordered a variable to arrange by (within nested & groupNames). This
-# is useful primarily for ordering by x
-# @param retrace.first should the first row of each group be appended to the 
-# last row? This is useful for enclosing polygons with lines.
-# @examples 
-# 
-# group2NA(mtcars, "vs", "cyl")
-# 
-# elong <- tidyr::gather(economics, variable, value, -date)
-# plot_ly(group2NA(elong, "variable"), x = ~date, y = ~value)
-# 
-
-group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
-                     retrace.first = inherits(data, "GeomPolygon")) {
-  if (NROW(data) == 0) return(data)
-  # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
-  retrace <- force(retrace.first)
-  datClass <- class(data)
-  
-  # sanitize variable names
-  groupNames <- groupNames[groupNames %in% names(data)]
-  nested <- nested[nested %in% names(data)]
-  ordered <- ordered[ordered %in% names(data)]
-  # ignore any already existing groups
-  data <- dplyr::ungroup(data)
-  
-  # if group doesn't exist, just arrange before returning
-  if (!length(groupNames)) {
-    if (length(ordered)) {
-      data <- dplyr::arrange_(data, c(nested, ordered))
-    }
-    return(data)
-  }
-  allVars <- c(nested, groupNames, ordered)
-  for (i in allVars) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  # first, arrange everything
-  data <- dplyr::do(data, dplyr::arrange_(., allVars))
-  data <- dplyr::ungroup(data)
-  for (i in c(nested, groupNames)) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  d <- if (retrace.first) {
-    dplyr::do(data, rbind(., .[1,], NA))
-  } else {
-    dplyr::do(data, rbind(., NA))
-  }
-  # TODO: how to drop the NAs separating the nested values? Does it even matter?
-  # d <- dplyr::ungroup(d)
-  # for (i in nested) {
-  #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
-  # }
-  # d <- dplyr::do(d, .[seq_len(NROW(.)),])
-  n <- NROW(d)
-  if (all(is.na(d[n, ]))) d <- d[-n, ]
-  structure(d, class = datClass)
-}
-
-
-# to appease R CMD check (currently we reference '.' in group2NA)
-utils::globalVariables(".")
