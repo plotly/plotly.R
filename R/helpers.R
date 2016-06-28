@@ -32,6 +32,9 @@ hide_colorbar <- function(p) {
 #' toWebGL(qplot(1:10, 1:10))
 #' 
 toWebGL <- function(p) {
+  if (ggplot2::is.ggplot(p)) {
+    p <- plotly_build(p)
+  }
   p$x$.plotlyWebGl <- TRUE
   p
 }

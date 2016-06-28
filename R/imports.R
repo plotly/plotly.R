@@ -212,3 +212,21 @@ NULL
 #' @name slice_
 #' @export
 NULL
+
+#' Return rows with matching conditions.
+#' 
+#' See \link[dplyr]{filter}.
+#'
+#' @importFrom dplyr filter
+#' @name filter
+#' @export
+NULL
+
+#' Return rows with matching conditions.
+#' 
+#' See \link[dplyr]{filter_asw}.
+#'
+#' @importFrom dplyr filter_
+#' @name filter_
+#' @export
+NULL
