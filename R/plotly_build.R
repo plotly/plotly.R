@@ -130,6 +130,7 @@ plotly_build.plotly <- function(p) {
     if (length(arrangeVars)) {
       builtData <- dplyr::arrange_(builtData, arrangeVars)
     }
+    
     # copy over to the trace data
     for (i in names(builtData)) {
       x[[i]] <- builtData[[i]]
@@ -140,7 +141,7 @@ plotly_build.plotly <- function(p) {
       x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
     }
     
-    x[attrLengths > 0]
+    x[lengths(x) > 0]
     
   }, p$x$attrs, names2(p$x$attrs))
   

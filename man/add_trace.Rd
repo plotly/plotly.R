@@ -24,7 +24,8 @@
 \usage{
 add_trace(p, ..., color, symbol, size, linetype, data = NULL)
 
-add_markers(p, x = NULL, y = NULL, ...)
+add_markers(p, x = NULL, y = NULL, fill = NULL, stroke = NULL,
+  alpha = 1, ...)
 
 add_text(p, x = NULL, y = NULL, text = NULL, ...)
 
@@ -80,6 +81,12 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 \item{x}{the x variable.}
 
 \item{y}{the y variable.}
+
+\item{fill}{fill color}
+
+\item{stroke}{stroke color}
+
+\item{alpha}{alpha transparency}
 
 \item{text}{textual labels.}
 

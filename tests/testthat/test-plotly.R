@@ -1,9 +1,5 @@
 context("plot_ly")
 
-test_that("uniq works as expected", {
-  expect_equal(uniq(c("red", "red", NA)), "red")
-})
-
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-", name))

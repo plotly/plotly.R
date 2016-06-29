@@ -84,15 +84,27 @@ add_trace <- function(p, ...,
 
 #' @inheritParams add_trace
 #' @rdname add_trace
+#' @param fill fill color. Supplies defaults for 
+#' \url{https://plot.ly/r/reference/#scatter-marker-color}
+#' @param stroke stroke color. Supplies defaults for 
+#' \url{https://plot.ly/r/reference/#scatter-marker-line-color}
+#' @param alpha alpha channel for fill/stroke (on 0-1 scale).
 #' @export
-add_markers <- function(p, x = NULL, y = NULL, ...) {
+add_markers <- function(p, x = NULL, y = NULL, fill = "rgba(31, 119, 180, 1)", 
+                        stroke = "rgba(31, 119, 180, 1)", alpha = 1, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
   if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
-  add_trace(p, x = x, y = y, type = "scatter", mode = "markers", ...)
+  # TODO: should stroke/fill inherit from the top-level?
+  marker <- modify_list(p$x$attrs[[1]][["marker"]], list(...)[["marker"]])
+  marker <- modify_list(marker, list(color = toRGB(fill, alpha)))
+  marker$line <- modify_list(marker$line, list(color = toRGB(stroke, alpha)))
+  add_trace(
+    p, x = x, y = y, marker = marker, type = "scatter", mode = "markers", ...
+  )
 }
 
 
@@ -135,16 +147,20 @@ add_paths <- function(p, x = NULL, y = NULL, ...) {
 #' txhousing %>% 
 #'   group_by(city) %>% 
 #'   plot_ly(x = ~date, y = ~median) %>%
-#'   add_lines(line = list(color = toRGB("black", 0.2)))
-add_lines <- function(p, x = NULL, y = NULL, ...) {
+#'   add_lines(fill = "black")
+add_lines <- function(p, x = NULL, y = NULL, stroke = NULL, alpha = 1, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
   if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
+  
+  line <- modify_list(p$x$attrs[[1]][["line"]], list(...)[["line"]])
+  line <- modify_list(line, list(color = toRGB(stroke, alpha)))
+  
   add_trace_classed(
-    p, x = x, y = y, class = "plotly_line", type = "scatter", mode = "lines", ...
+    p, x = x, y = y, line = line, class = "plotly_line", type = "scatter", mode = "lines", ...
   )
 }
 
@@ -207,7 +223,9 @@ add_polygons <- function(p, x = NULL, y = NULL, ...) {
 #' plot_ly(economics, x = ~date) %>% 
 #'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
 
-add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
+add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, 
+                        fill = "rgba(31, 119, 180, 1)", 
+                        stroke = "transparent", alpha = 1, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
@@ -217,10 +235,15 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
   if (is.null(ymax <- ymax %||% p$x$attrs[[1]][["ymax"]])) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
+  # TODO: should stroke/fill inherit from the top-level?
+  # probably not, since fill conflicts with scatter's fill attribute!
+  line <- modify_list(p$x$attrs[[1]][["line"]], list(...)[["line"]])
+  line <- modify_list(line, list(color = toRGB(stroke, alpha)))
+  
   add_trace_classed(
     p, class = c("plotly_ribbon", "plotly_polygon"), 
-    x = x, ymin = ymin, ymax = ymax,
-    type = "scatter", fill = "toself", mode = "lines",  ...
+    x = x, ymin = ymin, ymax = ymax, type = "scatter", mode = "lines",
+    line = line, fillcolor = toRGB(fill, alpha), fill = "toself",  ...
   )
 }
 
