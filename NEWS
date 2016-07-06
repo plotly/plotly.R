@@ -7,7 +7,7 @@ BREAKING CHANGES & IMPROVEMENTS:
 * The `group` variable mapping no longer create multiple traces, but instead defines "gaps" within a trace (fixes #418, #381, #577). Groupings should be declared via the new `group_by()` function (see `help(plotly_data)` for examples) instead of the `group` argument (which is now deprecated).
 * `plot_ly()` now _initializes_ a plotly object (i.e., won't add a scatter trace by default), meaning that something like `plot_ly(x = 1:10, y = 1:10) %>% add_trace(y = 10:1)` will create one trace, instead of two. However, `plot_ly()` will draw a trace if you manually specify a trace type, for example, `plot_ly(x = 1:10, y = 1:10, type = "scatter") %>% add_trace(y = 10:1)` will draw two scatter traces. If no trace type is provided, a sensible type is inferred from the supplied data, and automatically added (i.e., `plot_ly(x = rnorm(100))` now creates a histogram).
 * The `inherit` argument is deprecated. Any arguments/attributes specified in `plot_ly()` will automatically be passed along to additional traces added via `add_trace()` (or any of it's `add_*()` siblings).
-* Scales for variable mappings (such as `color`, `symbol`, `linetype`) are now applied at the plot-level instead of the trace level. For this reason, the range of these scales (`colors`/`symbols`/`linetypes`) should be specified in `plot_ly()`, instead of `add_trace()` or any of it's `add_*()` siblings.
+* Scales for aesthetics (e.g., `color`, `symbol`, `linetype`) are now applied at the plot-level, instead of the trace level. To avoid scaling, wrap the aesthetic value with `I()`, for example: `plot_ly(x = 1:10, y = 1:10, color = I("red"))`.
 
 NEW FEATURES & IMPROVEMENTS:
 
@@ -24,7 +24,7 @@ NEW FEATURES & IMPROVEMENTS:
 
 OTHER CHANGES:
 
-* Upgraded to plotly.js v1.13.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.13.0
+* Upgraded to plotly.js v1.14.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.14.1
 
 3.6.5 -- 10 June 2016
 
