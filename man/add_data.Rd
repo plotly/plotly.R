@@ -16,6 +16,6 @@ Add data to a plotly visualization
 }
 \examples{
 
-NULL \%>\% plot_ly() \%>\% add_data(economics) \%>\% add_trace(x = ~date, y = ~pce)
+plot_ly() \%>\% add_data(economics) \%>\% add_trace(x = ~date, y = ~pce)
 }
 

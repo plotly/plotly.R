@@ -5,7 +5,7 @@
 #' @export
 #' @examples 
 #' 
-#' NULL %>% plot_ly() %>% add_data(economics) %>% add_trace(x = ~date, y = ~pce)
+#' plot_ly() %>% add_data(economics) %>% add_trace(x = ~date, y = ~pce)
 add_data <- function(p, data = NULL) {
   if (is.null(data)) return(p)
   if (!is.plotly(p)) {
