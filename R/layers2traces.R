@@ -645,7 +645,7 @@ ribbon_dat <- function(dat) {
   tmp <- dat[o, ]
   others <- tmp[not_used]
   dat1 <- cbind(x = tmp$x, y = tmp$ymin, others)
-  dat1[n+1, ] <- cbind(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
+  dat1[n+1, ] <- data.frame(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
   # bottom-half of ribbon
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
