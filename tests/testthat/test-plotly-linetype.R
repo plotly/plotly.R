@@ -22,7 +22,7 @@ test_that("Mapping a variable to linetype works", {
 
 test_that("Can set the linetype range.", {
   p <- plot_ly(tx, x = ~date, y = ~median, linetype = ~city, linetypes = 5:1)
-  l <- expect_traces(p, 5, "linetype")
+  l <- expect_traces(p, 5, "linetype2")
   lines <- lapply(l$data, "[[", "line")
   dashes <- unlist(lapply(lines, "[[", "dash"))
   expect_equal(dashes, plotly:::lty2dash(5:1))
@@ -30,7 +30,7 @@ test_that("Can set the linetype range.", {
 
 test_that("Can avoid scaling", {
   p <- plot_ly(tx, x = ~date, y = ~median, linetype = I(3))
-  l <- expect_traces(p, 1, "linetype")
+  l <- expect_traces(p, 1, "linetype3")
   lines <- lapply(l$data, "[[", "line")
   dashes <- unlist(lapply(lines, "[[", "dash"))
   expect_equal(dashes, plotly:::lty2dash(3))
