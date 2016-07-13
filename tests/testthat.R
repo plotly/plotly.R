@@ -73,7 +73,7 @@ skip_on_pull_request <- function() {
 # object (aka the data behind the plot).
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- plotly_build(gg)$x
+  p <- plotly_build(gg)$x[c("data", "layout")]
   has_diff <- if (report_diffs) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
@@ -85,7 +85,7 @@ save_outputs <- function(gg, name) {
   } else FALSE
   if (has_diff || build_table) {
     RSassign(conn, gg)
-    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg)$x, error = function(e) e$message)")
+    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg)$x[c('data', 'layout')], error = function(e) e$message)")
     if (build_table) {
       # save pngs of ggplot
       filename <- paste0(gsub("\\s+", "-", name), ".png")
