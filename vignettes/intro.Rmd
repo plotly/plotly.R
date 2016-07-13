@@ -3,8 +3,7 @@ title: "An intro to `plot_ly()`"
 author: "Carson Sievert"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_vignette:
-    self_contained: false
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteIndexEntry{Plotly Intro}
@@ -31,6 +30,7 @@ This vignette outlines the philosophy behind `plot_ly()` through a series of exa
 If no visualization type is specified, `plot_ly()` infers a sensible type based on the information provided. In this case, a numeric matrix (named `volcano`) is mapped to the `z` attribute, so a heatmap is a sensible default. 
 
 ```{r, message = TRUE}
+library(plotly)
 str(volcano)
 plot_ly(z = ~volcano)
 ```
