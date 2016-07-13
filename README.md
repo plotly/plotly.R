@@ -2,7 +2,7 @@
 
 # plotly
 
-An R package for creating interactive web graphics via [plotly.js](https://github.com/plotly/plotly.js).
+An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
 
 ## Installation
 
@@ -34,21 +34,21 @@ ggplotly(g)
 
 ![https://plot.ly/~cpsievert/9836](http://i.imgur.com/6G4zv7b.png)
 
-If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/) of the [official ggplot2 documentation](http://docs.ggplot2.org). We also have some of our own examples [here](https://plot.ly/ggplot2/).
+If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/ggplot2/) of the [official ggplot2 documentation](http://docs.ggplot2.org). We also have some of our own examples [here](https://plot.ly/ggplot2/).
 
 ### plotly's custom R interface
 
-__plotly__ supports some chart types that ggplot2 doesn't (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can create these (or any other plotly) charts using `plot_ly()`. 
+[plotly.js](https://github.com/plotly/plotly.js) supports some chart types that ggplot2 doesn't (our [cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) provides a nice summary of the available chart types). You can create any of these charts via `plot_ly()`.
 
 ```r
-plot_ly(z = volcano, type = "surface")
+plot_ly(z = ~volcano)
 ```
 
 ![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
 
-For a more concise overview of the `plot_ly()` interface, see [here](https://cran.r-project.org/web/packages/plotly/vignettes/intro.html). You might also find our [examples](https://plot.ly/r/#basic-charts) and the [figure reference](https://plot.ly/r/reference/) to be helpful.
+We have a number of [vignettes](https://ropensci.github.io/plotly/) which explain the `plot_ly()` interface in depth as well as numerous examples on the [plotly website](https://plot.ly/r/#basic-charts) and [bundled with the package](https://github.com/ropensci/plotly/tree/master/inst/examples).
 
-### Hooking onto plotly events
+### Capturing plotly events
 
 [plotly.js](https://github.com/plotly/plotly.js) exposes a number of 'standard' events that work consistently across plot types. It's easy to hook into these events using the `event_data()` function in shiny apps, as these examples demonstrate:
 
@@ -58,7 +58,7 @@ For a more concise overview of the `plot_ly()` interface, see [here](https://cra
 
 ![http://104.131.111.111:3838/plotlyLinkedBrush/](http://i.imgur.com/eVqsZma.gif)
 
-You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder, if not impossible, to coordinate views between htmlwidgets.
+You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder to coordinate views between htmlwidgets.
 
 ## Contributing
 

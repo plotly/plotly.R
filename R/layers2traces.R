@@ -723,7 +723,12 @@ pch2symbol <- function(x) {
     "O" = "circle-open",
     "+" = "cross-thin-open"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }
 
 # Convert R lty line type codes to plotly "dash" codes.
@@ -756,5 +761,10 @@ lty2dash <- function(x) {
     "224282F2" = "dash",
     "F1" = "dash"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }

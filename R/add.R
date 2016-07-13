@@ -30,6 +30,7 @@ add_data <- function(p, data = NULL) {
 #' @param ymin a variable used to define the lower boundary of a polygon.
 #' @param ymax a variable used to define the upper boundary of a polygon.
 #' @param color Either a variable name or a vector to use for color mapping.
+#' @param alpha alpha channel applied to color (on 0-1 scale).
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
@@ -84,26 +85,18 @@ add_trace <- function(p, ...,
 
 #' @inheritParams add_trace
 #' @rdname add_trace
-#' @param fill fill color. Supplies defaults for 
-#' \url{https://plot.ly/r/reference/#scatter-marker-color}
-#' @param stroke stroke color. Supplies defaults for 
-#' \url{https://plot.ly/r/reference/#scatter-marker-line-color}
-#' @param alpha alpha channel for fill/stroke (on 0-1 scale).
 #' @export
-add_markers <- function(p, x = NULL, y = NULL, fill = "rgba(31, 119, 180, 1)", 
-                        stroke = "rgba(31, 119, 180, 1)", alpha = 1, ...) {
+add_markers <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
   if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
-  # TODO: should stroke/fill inherit from the top-level?
-  marker <- modify_list(p$x$attrs[[1]][["marker"]], list(...)[["marker"]])
-  marker <- modify_list(marker, list(color = toRGB(fill, alpha)))
-  marker$line <- modify_list(marker$line, list(color = toRGB(stroke, alpha)))
+  hasZ <- !is.null(z <- z %||% p$x$attrs[[1]][["z"]])
+  type <- if (hasZ) "scatter3d" else "scatter"
   add_trace(
-    p, x = x, y = y, marker = marker, type = "scatter", mode = "markers", ...
+    p, x = x, y = y, type = type, mode = "markers", ...
   )
 }
 
@@ -111,7 +104,7 @@ add_markers <- function(p, x = NULL, y = NULL, fill = "rgba(31, 119, 180, 1)",
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
+add_text <- function(p, x = NULL, y = NULL, z = NULL, text = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
@@ -121,22 +114,26 @@ add_text <- function(p, x = NULL, y = NULL, text = NULL, ...) {
   if (is.null(text <- text %||% p$x$attrs[[1]][["text"]])) {
     stop("Must supply `text` attribute", call. = FALSE)
   }
-  add_trace(p, x = x, y = y, text = text, type = "scatter", mode = "text",  ...)
+  hasZ <- !is.null(z <- z %||% p$x$attrs[[1]][["z"]])
+  type <- if (hasZ) "scatter3d" else "scatter"
+  add_trace(p, x = x, y = y, text = text, type = type, mode = "text",  ...)
 }
 
 
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_paths <- function(p, x = NULL, y = NULL, ...) {
+add_paths <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
   if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
+  hasZ <- !is.null(z <- z %||% p$x$attrs[[1]][["z"]])
+  type <- if (hasZ) "scatter3d" else "scatter"
   add_trace_classed(
-    p, x = x, y = y, class = "plotly_path", type = "scatter", mode = "lines", ...
+    p, x = x, y = y, class = "plotly_path", type = type, mode = "lines", ...
   )
 }
 
@@ -148,19 +145,18 @@ add_paths <- function(p, x = NULL, y = NULL, ...) {
 #'   group_by(city) %>% 
 #'   plot_ly(x = ~date, y = ~median) %>%
 #'   add_lines(fill = "black")
-add_lines <- function(p, x = NULL, y = NULL, stroke = NULL, alpha = 1, ...) {
+add_lines <- function(p, x = NULL, y = NULL, z = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
   if (is.null(y <- y %||% p$x$attrs[[1]][["y"]])) {
     stop("Must supply `y` attribute", call. = FALSE)
   }
-  
-  line <- modify_list(p$x$attrs[[1]][["line"]], list(...)[["line"]])
-  line <- modify_list(line, list(color = toRGB(stroke, alpha)))
+  hasZ <- !is.null(z <- z %||% p$x$attrs[[1]][["z"]])
+  type <- if (hasZ) "scatter3d" else "scatter"
   
   add_trace_classed(
-    p, x = x, y = y, line = line, class = "plotly_line", type = "scatter", mode = "lines", ...
+    p, x = x, y = y, class = "plotly_line", type = type, mode = "lines", ...
   )
 }
 
@@ -223,9 +219,7 @@ add_polygons <- function(p, x = NULL, y = NULL, ...) {
 #' plot_ly(economics, x = ~date) %>% 
 #'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
 
-add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, 
-                        fill = "rgba(31, 119, 180, 1)", 
-                        stroke = "transparent", alpha = 1, ...) {
+add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...) {
   if (is.null(x <- x %||% p$x$attrs[[1]][["x"]])) {
     stop("Must supply `x` attribute", call. = FALSE)
   }
@@ -235,15 +229,11 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL,
   if (is.null(ymax <- ymax %||% p$x$attrs[[1]][["ymax"]])) {
     stop("Must supply `ymax` attribute", call. = FALSE)
   }
-  # TODO: should stroke/fill inherit from the top-level?
-  # probably not, since fill conflicts with scatter's fill attribute!
-  line <- modify_list(p$x$attrs[[1]][["line"]], list(...)[["line"]])
-  line <- modify_list(line, list(color = toRGB(stroke, alpha)))
   
   add_trace_classed(
     p, class = c("plotly_ribbon", "plotly_polygon"), 
     x = x, ymin = ymin, ymax = ymax, type = "scatter", mode = "lines",
-    line = line, fillcolor = toRGB(fill, alpha), fill = "toself",  ...
+    fill = "toself",  ...
   )
 }
 
@@ -426,9 +416,9 @@ add_surface <- function(p, z = NULL, ...) {
 #' @export
 #' @examples 
 #' plot_ly() %>% add_scattergeo()
-add_scattergeo <- function(p, ...) {
+add_scattergeo <- function(p, geo = "geo", ...) {
   add_trace_classed(
-    p, class = "plotly_scattergeo", type = "scattergeo", ...
+    p, class = "plotly_scattergeo", type = "scattergeo", geo = geo, ...
   )
 }
 
@@ -449,9 +439,6 @@ add_choropleth <- function(p, z = NULL, ...) {
     p, class = "plotly_choropleth", type = "choropleth", ...
   )
 }
-
-
-
 
 # attach a class to a trace which informs data processing in plotly_build
 add_trace_classed <- function(p, class = "plotly_polygon", ...) {

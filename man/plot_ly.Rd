@@ -5,8 +5,9 @@
 \title{Initiate a plotly visualization}
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, group, color,
-  colors = NULL, symbol, symbols = NULL, size, sizes = c(10, 100),
-  linetype, linetypes = NULL, width = NULL, height = NULL, source = "A")
+  colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
+  100), linetype, linetypes = NULL, width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -17,19 +18,29 @@ Note that acceptable arguments depend on the value of \code{type}.}
 \item{type}{A character string describing the type of trace. If \code{NULL}
 (the default), the initial trace type is determined by \code{add_trace}}
 
-\item{color}{Either a variable name or a vector to use for color mapping.}
+\item{color}{A formula containing a name or expression. 
+Values are scaled and mapped to color codes based on the value of 
+\code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},
+and provide value(s) that can be converted to rgb color codes by 
+\code{\link[grDevices]{col2rgb}()}.}
 
 \item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 or a color interpolation function like \code{colorRamp()}.}
 
-\item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
+\item{alpha}{A number between 0 and 1 specifying the alpha channel applied to color.}
+
+\item{symbol}{A formula containing a name or expression. 
+Values are scaled and mapped to symbols based on the value of \code{symbols}.
+To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
+\code{\link{pch}()} values and/or valid plotly symbol(s) as a string
+\url{}}
 
 \item{symbols}{A character vector of symbol types. For possible values, see \link{schema}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
-\item{sizes}{a numeric vector of length 2 used to scale sizes to pixels.}
+\item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
 
 \item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
 
@@ -57,15 +68,15 @@ plot_ly(economics, x = ~pop)
 plot_ly(economics, x = ~date, y = ~pop)
 # plot_ly() doesn't require data frame(s), which allows one to take 
 # advantage of trace type(s) designed specifically for numeric matrices
-plot_ly(z = volcano)
-plot_ly(z = volcano, type = "surface")
+plot_ly(z = ~volcano)
+plot_ly(z = ~volcano, type = "surface")
 
 # plotly has a functional interface: every plotly function takes a plotly
 # object as it's first input argument and returns a modified plotly object
-add_points(plot_ly(economics, x = ~date, y = ~unemploy/pop))
+add_lines(plot_ly(economics, x = ~date, y = ~unemploy/pop))
 
 # To make code more readable, plotly imports the pipe operator from magrittr
-economics \%>\% plot_ly(x = ~date, y = ~unemploy/pop) \%>\% add_points()
+economics \%>\% plot_ly(x = ~date, y = ~unemploy/pop) \%>\% add_lines()
 
 # Attributes defined via plot_ly() set 'global' attributes that 
 # are carried onto subsequent traces

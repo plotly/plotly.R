@@ -39,6 +39,11 @@ names2 <- function(x) {
   names(x) %||% rep("", length(x))
 }
 
+# currently implemented non-positional scales in plot_ly()
+npscales <- function() {
+  c("color", "symbol", "linetype", "size")
+}
+
 # modifyList turns elements that are data.frames into lists
 # which changes the behavior of toJSON
 as_df <- function(x) {
@@ -129,29 +134,31 @@ verify_box <- function(proposed, schema) {
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
 verify_type <- function(trace) {
-  if (is.null(trace$type)) {
+  isNULL <- is.null(trace$type)
+  if (isNULL) {
     attrs <- names(trace)
     attrLengths <- lengths(trace)
     if (all(c("x", "y", "z") %in% attrs)) {
-      trace$type <- if (all(c("i", "j", "k") %in% attrs)) relay_type("mesh3d") else relay_type("scatter3d")
+      trace$type <- if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
     } else if (all(c("x", "y") %in% attrs)) {
       if (!is.discrete(trace$x) && !is.discrete(trace$y)) {
-        trace$type <- if (any(attrLengths) > 15000) relay_type("scattergl") else relay_type("scatter")
+        trace$type <- if (any(attrLengths) > 15000) "scattergl" else "scatter"
       } else if (!is.discrete(trace$x)) {
-        trace$type <- relay_type("bar")
+        trace$type <- "bar"
         trace$orientation <- "h"
       } else if (!is.discrete(trace$y)) {
-        trace$type <- relay_type("bar")
+        trace$type <- "bar"
       } else {
-        trace$type <- relay_type("histogram2d")
+        trace$type <- "histogram2d"
       }
     } else if ("y" %in% attrs || "x" %in% attrs) {
-      trace$type <- relay_type("histogram")
+      trace$type <- "histogram"
     } else if ("z" %in% attrs) {
-      trace$type <- relay_type("heatmap")
+      trace$type <- "heatmap"
     } else {
-      warning("No trace type specified and no positional attributes specified", call. = FALSE)
-      trace$type <- relay_type("scatter")
+      warning("No trace type specified and no positional attributes specified", 
+              call. = FALSE)
+      trace$type <- "scatter"
     }
   }
   if (!is.character(trace$type) || length(trace$type) != 1) {
@@ -163,12 +170,17 @@ verify_type <- function(trace) {
          "'", paste(names(Schema$traces), collapse = "', '"), "'",
          call. = FALSE)
   }
+  # if scatter/scatter3d/scattergl, default to a scatterplot
+  if (grepl("scatter", trace$type)) {
+    trace$mode <- trace$mode %||% "markers"
+  }
+  if (isNULL) relay_type(trace$type, trace$mode)
   trace
 }
 
-relay_type <- function(type) {
+relay_type <- function(type, mode = NULL) {
   message(
-    "No trace type specified. Applying `add_", type, "()`.\n",
+    "No trace type specified. Applying `add_", mode %||% type, "()`.\n",
     "Read more about this trace type here -> https://plot.ly/r/reference/#", type
   )
   type

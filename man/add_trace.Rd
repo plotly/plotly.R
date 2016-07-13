@@ -24,14 +24,13 @@
 \usage{
 add_trace(p, ..., color, symbol, size, linetype, data = NULL)
 
-add_markers(p, x = NULL, y = NULL, fill = NULL, stroke = NULL,
-  alpha = 1, ...)
+add_markers(p, x = NULL, y = NULL, z = NULL, ...)
 
-add_text(p, x = NULL, y = NULL, text = NULL, ...)
+add_text(p, x = NULL, y = NULL, z = NULL, text = NULL, ...)
 
-add_paths(p, x = NULL, y = NULL, ...)
+add_paths(p, x = NULL, y = NULL, z = NULL, ...)
 
-add_lines(p, x = NULL, y = NULL, ...)
+add_lines(p, x = NULL, y = NULL, z = NULL, ...)
 
 add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...)
 
@@ -57,7 +56,7 @@ add_boxplot(p, x = NULL, y = NULL, ...)
 
 add_surface(p, z = NULL, ...)
 
-add_scattergeo(p, ...)
+add_scattergeo(p, geo = "geo", ...)
 
 add_choropleth(p, z = NULL, ...)
 }
@@ -82,17 +81,13 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 
 \item{y}{the y variable.}
 
-\item{fill}{fill color}
-
-\item{stroke}{stroke color}
-
-\item{alpha}{alpha transparency}
-
 \item{text}{textual labels.}
 
 \item{ymin}{a variable used to define the lower boundary of a polygon.}
 
 \item{ymax}{a variable used to define the upper boundary of a polygon.}
+
+\item{alpha}{alpha channel applied to color (on 0-1 scale).}
 }
 \description{
 Add trace(s) to a plotly visualization
@@ -114,7 +109,7 @@ plot_ly(economics, x = ~date, y = ~uempmed) \%>\%
 txhousing \%>\% 
   group_by(city) \%>\% 
   plot_ly(x = ~date, y = ~median) \%>\%
-  add_lines(line = list(color = toRGB("black", 0.2)))
+  add_lines(fill = "black")
 
 ggplot2::map_data("world", "canada") \%>\%
   group_by(group) \%>\%

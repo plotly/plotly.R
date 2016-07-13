@@ -53,13 +53,23 @@ plotly_build.plotly <- function(p) {
   
   dats <- Map(function(x, y) {
     
+    # perform the evaluation
+    dat <- plotly_data(p, y)
+    trace <- structure(
+      rapply(x, eval_attr, data = dat, how = "list"), 
+      class = oldClass(x)
+    )
+    # determine trace type (if not specified, can depend on the # of data points)
+    # note that this should also determine a sensible mode, if appropriate
+    trace <- verify_type(trace)
+    
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
-      idx <- which(names(x) %in% i)
+      idx <- which(names(trace) %in% i)
       if (length(idx) == 1) {
         title <- deparse2(x[[idx]])
-        if (is3d(x$type) || i == "z") {
+        if (is3d(trace$type) || i == "z") {
           p$x$layout$scene[[nm]]$title <<- p$x$layout$scene[[nm]]$title %||% title
         } else {
           p$x$layout[[nm]]$title <<- p$x$layout[[nm]]$title %||% title
@@ -67,81 +77,90 @@ plotly_build.plotly <- function(p) {
       }
     }
     
-    # perform the evaluation
-    # TODO: remove/warn about missing values here? Provide a way to control na.color?
-    dat <- plotly_data(p, y)
-    x <- structure(rapply(x, eval_attr, data = dat, how = "list"), class = class(x))
-    # ensure we have a trace type (depends on the # of data points)
-    x <- verify_type(x)
-    
-    # do some attribute type checking for special trace types
-    if (inherits(x, c("plotly_heatmap", "plotly_surface", "plotly_contour"))) {
-      if (!is.matrix(x$z)) {
-        stop("`z` must be a matrix", call. = FALSE)
-      }
-      if (!is.numeric(x$z)) {
-        stop("`z` must be numeric", call. = FALSE)
+    # attribute type checking for special trace types
+    if (inherits(trace, c("plotly_heatmap", "plotly_surface", "plotly_contour"))) {
+      if (!is.matrix(trace[["z"]]) || !is.numeric(trace[["z"]])) {
+        stop("`z` must be a numeric matrix", call. = FALSE)
       }
     }
     
-    
-    # TODO: if we ever provide some semantics for statistics, it should probably go here
+    # TODO: if we ever provide some semantics for summary statistics, 
+    # it should go here
     
     # gather the "built" or "evaluated" data
     nobs <- NROW(dat)
-    attrLengths <- lengths(x)
+    attrLengths <- lengths(trace)
     if (nobs == 0) nobs <- max(attrLengths)
-    isVar <- attrLengths == nobs
-    builtData <- data.frame(x[isVar & !names(x) %in% c("colors", "symbols", "linetypes")])
+    # NOTE: it's hard to distinguish variables/constants when there is 1 row.
+    # Fortunately, variable mappings don't make much sense with one observation,
+    # and that is the whole point of "recovering" the built data here, so we just ignore
+    # cases with one row
+    isVar <- attrLengths > 1 & attrLengths == nobs & !vapply(trace, is.matrix, logical(1))
+    builtData <- data.frame(trace[isVar], stringsAsFactors = FALSE)
     
-    # find any groupings, so we can arrange the data now, 
-    # and insert missing values (to create gaps between traces) later
-    grps <- as.character(dplyr::groups(dat))
-    # does grouping even make sense for this trace type?
-    hasGrp <- inherits(x, c("plotly_segment", "plotly_path", "plotly_line", "plotly_polygon")) ||
-      (grepl("scatter", x$type) && grepl("lines", x$mode %||% "lines"))
-    if (length(grps) && hasGrp) {
-      if (isTRUE(x$connectgaps)) {
-        stop(
-          "Can't set connectgaps=T in a trace that has 1 or more groups.", 
-          call. = FALSE
+    if (NROW(builtData) > 0) {
+      # Build the index used to split one "trace" into multiple traces
+      isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
+      isDiscrete <- vapply(builtData, is.discrete, logical(1))
+       # note: can only have one linetype per trace
+      isSplit <- names(builtData) %in% "linetype" |
+        !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
+      if (any(isSplit)) {
+        paste2 <- function(x, y) paste(x, y, sep = "<br>")
+        builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
+      }
+      # Build the index used to determine grouping (later on, NAs are inserted 
+      # via group2NA() to create the groups). This is done in 2 parts:
+      # 1. Translate missing values on positional scales to a grouping variable.
+      #    If grouping isn't relevant for this trace, a warning is thrown since 
+      #    NAs are removed.
+      # 2. The grouping from (1) and any groups detected via dplyr::groups() 
+      #    are combined into a single grouping variable, .plotlyGroupIndex
+      isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
+      # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
+      hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
+        (grepl("scatter", trace[["type"]]) && grepl("lines", trace[["mode"]]))
+      # warn about missing values if groups aren't relevant for this trace type
+      if (any(!isComplete) && !hasGrp) {
+        warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
+      }
+      builtData$.plotlyGroupIndex <- cumsum(!isComplete)
+      builtData <- builtData[isComplete, ]
+      grps <- tryCatch(
+        as.character(dplyr::groups(dat)), 
+        error = function(e) character(0)
+      )
+      if (length(grps) && hasGrp) {
+        if (isTRUE(trace[["connectgaps"]])) {
+          stop(
+            "Can't use connectgaps=TRUE when data has group(s).", 
+            call. = FALSE
+          )
+        }
+        builtData$.plotlyGroupIndex <- interaction(
+          interaction(dat[isComplete, grps, drop = FALSE]),
+          builtData$.plotlyGroupIndex %||% ""
         )
       }
-      builtData$.plotlyGroupIndex <- interaction(dat[, grps, drop = FALSE])
+      builtData <- train_data(builtData, trace)
+      # TODO: provide a better way to clean up "high-level" attrs
+      trace[c("ymin", "ymax", "yend", "xend")] <- NULL
+      trace$.plotlyVariableMapping <- names(builtData)
+      # arrange the built data
+      arrangeVars <- c(
+        ".plotlyTraceIndex", "group", if (inherits(trace, "plotly_line")) "x"
+      )
+      arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
+      if (length(arrangeVars)) {
+        builtData <- dplyr::arrange_(builtData, arrangeVars)
+      }
+      # copy over to the trace data
+      for (i in names(builtData)) {
+        trace[[i]] <- builtData[[i]]
+      }
     }
     
-    builtData <- train_data(builtData, x)
-    # TODO: provide a better way to clean up "high-level" attrs
-    x[c("ymin", "ymax", "yend", "xend")] <- NULL
-    x$.plotlyVariableMapping <- names(builtData)
-    
-    # build the index used to transform one "trace" into multiple traces
-    discreteData <- builtData[vapply(builtData, is.discrete, logical(1))]
-    discreteData <- discreteData[names(discreteData) %in% c("symbol", "linetype", "color")]
-    if (NCOL(discreteData) > 0) {
-      paste2 <- function(x, y) paste(x, y, sep = "<br>")
-      builtData$.plotlyTraceIndex <- Reduce(paste2, discreteData)
-    }
-    # arrange the built data
-    arrangeVars <- c(
-      ".plotlyTraceIndex", "group", if (inherits(x, "plotly_line")) "x"
-    )
-    arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
-    if (length(arrangeVars)) {
-      builtData <- dplyr::arrange_(builtData, arrangeVars)
-    }
-    
-    # copy over to the trace data
-    for (i in names(builtData)) {
-      x[[i]] <- builtData[[i]]
-    }
-    
-    # if appropriate, set the mode now since we need to reference it later
-    if (grepl("scatter", x$type) && is.null(x$mode)) {
-      x$mode <- if (any(attrLengths > 20)) "lines" else "markers+lines"
-    }
-    
-    x[lengths(x) > 0]
+    trace[lengths(trace) > 0]
     
   }, p$x$attrs, names2(p$x$attrs))
   
@@ -149,24 +168,23 @@ plotly_build.plotly <- function(p) {
   traces <- list()
   for (i in seq_along(dats)) {
     d <- dats[[i]]
-    scaleAttrs <- names(d) %in% c("colors", "linetypes", "symbols", "sizes")
+    scaleAttrs <- names(d) %in% paste0(npscales(), "s")
     traces <- c(traces, traceify(d[!scaleAttrs], d$.plotlyTraceIndex))
     if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
   }
   
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
-    d <- data.frame(x[names(x) %in% c(x$.plotlyVariableMapping)])
+    d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
     d <- group2NA(
       d, ".plotlyGroupIndex", ordered = if (inherits(x, "plotly_line")) "x",
       retrace.first = inherits(x, "plotly_polygon")
     )
     for (i in x$.plotlyVariableMapping) {
-      x[[i]] <- uniq(d[[i]])
+      x[[i]] <- structure(uniq(d[[i]]), class = oldClass(x[[i]]))
     }
     x
   })
-  
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: scales are applied at the plot-level!!
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
@@ -180,8 +198,7 @@ plotly_build.plotly <- function(p) {
   # remove special mapping attributes
   for (i in seq_along(traces)) {
     mappingAttrs <- c(
-      "color", "colors", "symbol", "symbols", 
-      "linetype", "linetypes", "size", "sizes", 
+      "alpha", npscales(), paste0(npscales(), "s"),
       ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
     for (j in mappingAttrs) {
@@ -212,7 +229,6 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
-  
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
@@ -276,21 +292,44 @@ map_size <- function(traces) {
   hasText <- has_text(types, modes)
   
   for (i in which(nSizes > 0)) {
-    sizeI <- scales::rescale(sizeList[[i]], from = sizeRange, to = traces[[1]]$sizes)
-    traces[[i]]$marker <- modify_list(
-      list(size = sizeI, sizemode = "area"), 
-      traces[[i]]$marker
-    )
+    s <- sizeList[[i]]
+    isConstant <- inherits(s, "AsIs")
+    sizeI <- if (isConstant) {
+      structure(s, class = setdiff(class(s), "AsIs"))
+    } else {
+      scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
+    }
+    if (hasMarker[[i]]) {
+      # plotly.js 
+      sizeI <- rep(sizeI, length.out = max(lengths(traces[[i]])))
+      traces[[i]]$marker <- modify_list(
+        list(size = sizeI, sizemode = "area"),
+        traces[[i]]$marker
+      )
+    }
     if (hasLine[[i]]) {
-      warning(
-        "Can't map size to lines since plotly.js doesn't yet support line.width arrays",
-        call. = FALSE
+      if (!isConstant || length(sizeI) > 1) {
+        warning(
+          "plotly.js doesn't yet support line.width arrays, track this issue for progress\n", 
+          "  https://github.com/plotly/plotly.js/issues/147",
+          call. = FALSE
+        )
+      }
+      traces[[i]]$line <- modify_list(
+        list(width = sizeI[1]),
+        traces[[i]]$line
       )
     }
     if (hasText[[i]]) {
-      warning(
-        "Can't map size to text since plotly.js doesn't yet support textfont.size arrays",
-        call. = FALSE
+      if (!isConstant || length(sizeI) > 1) {
+        warning(
+          "plotly.js doesn't yet support textfont.size arrays",
+          call. = FALSE
+        )
+      }
+      traces[[i]]$textfont <- modify_list(
+        list(size = sizeI[1]),
+        traces[[i]]$textfont
       )
     }
   }
@@ -307,8 +346,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   if (all(nColors == 0)) {
     return(traces)
   }
-  isNumeric <- vapply(color, is.numeric, logical(1))
-  isDiscrete <- vapply(color, is.discrete, logical(1))
+  isConstant <- vapply(color, function(x) inherits(x, "AsIs"), logical(1))
+  isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
+  isDiscrete <- vapply(color, is.discrete, logical(1)) & !isConstant
   if (any(isNumeric & isDiscrete)) {
     stop("Can't have both discrete and numeric color mappings", call. = FALSE)
   }
@@ -320,6 +360,27 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasText <- has_text(types, modes)
   hasZ <- has_attr(types, "colorscale") & 
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
+  
+  for (i in which(isConstant)) {
+    if (hasLine[[i]]) {
+      traces[[i]]$line <- modify_list(
+        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
+        traces[[i]]$line
+      )
+    }                 
+    if (hasMarker[[i]]) {
+      traces[[i]]$marker <- modify_list(
+        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
+        traces[[i]]$marker
+      )
+    }
+    if (hasText[[i]]) {
+      traces[[i]]$textfont <- modify_list(
+        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
+        traces[[i]]$textfont
+      )
+    }
+  }
   
   if (any(isNumeric)) {
     palette <- traces[[1]][["colors"]] %||% viridisLite::viridis(10)
@@ -333,7 +394,11 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     } else {
       c(0, 1)
     }
-    colorScale <- matrix(c(scales::rescale(vals), colScale(vals)), ncol = 2)
+    
+    colorScale <- matrix(
+      c(scales::rescale(vals), toRGB(colScale(vals), traces[[1]]$alpha %||% 1)), 
+      ncol = 2
+    )
     colorObj <- list(
       colorbar = list(title = as.character(title), ticklen = 2),
       cmin = rng[1],
@@ -356,6 +421,10 @@ map_color <- function(traces, title = "", na.color = "transparent") {
                   " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
           traces[[i]]$mode <- paste0(traces[[i]]$mode, "+markers")
           hasMarker[[i]] <- TRUE
+        } else {
+          # scatter3d supports data arrays for color
+          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
         }
       }                 
       if (hasMarker[[i]]) {
@@ -444,29 +513,34 @@ map_symbol <- function(traces) {
   if (N > 8) {
     warning("You've mapped a variable with ", N, " different levels to symbol.\n",
             "It's very difficult to perceive more than 8 different symbols\n",
-            "in a single plot.")
+            "in a single plot.", call. = FALSE)
   }
   # symbol values are duplicated (there is a valid numeric and character string for each symbol)
   validSymbols <- as.character(Schema$traces$scatter$attributes$marker$symbol$values)
   # give a sensible ordering the valid symbols so that we map 
   # to a palette that can be easily perceived
-  symbolPalette <- c(
+  defaultPalette <- c(
     'circle', 'cross', 'diamond', 'square', 'triangle-down', 
     'triangle-left', 'triangle-right', 'triangle-up'
   )
-  symbols <- unique(unlist(traces[[1]]$symbols)) %||% symbolPalette
-  illegalSymbols <- setdiff(symbols, validSymbols)
-  if (length(illegalSymbols)) {
-    stop("The following are not valid symbol codes:\n",
-         paste(illegalSymbols, collapse = ", "), 
-         "Valid symbols include:\n'",
-         paste(validSymbols, collapse = "', '"),
-         call. = FALSE)
-  }
+  symbols <- traces[[1]]$symbols %||% defaultPalette
   palette <- setNames(symbols[seq_len(N)], unique(symbol))
   for (i in which(nSymbols > 0)) {
-    symbols <- as.character(palette[symbolList[[i]]])
-    traces[[i]]$marker <- modify_list(list(symbol = symbols), traces[[i]]$marker)
+    s <- symbolList[[i]]
+    symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(palette[s]))
+    illegalSymbols <- setdiff(symbols, validSymbols)
+    if (length(illegalSymbols)) {
+      warning(
+        "The following are not valid symbol codes:\n'",
+        paste(illegalSymbols, collapse = "', '"), "'\n",
+        "Valid symbols include:\n'",
+        paste(validSymbols, collapse = "', '"), call. = FALSE
+      )
+    }
+    traces[[i]]$marker <- modify_list(
+      list(symbol = symbols), 
+      traces[[i]]$marker
+    )
     # ensure the mode is set so that the symbol is relevant
     if (!grepl("markers", traces[[i]]$mode %||% "")) {
       message("Adding markers to mode; otherwise symbol would have no effect.")
@@ -498,18 +572,22 @@ map_linetype <- function(traces) {
             length(validLinetypes), " different line types", call. = TRUE)
   }
   linetypes <- unique(unlist(lapply(traces, "[[", "linetypes"))) %||% validLinetypes
-  illegalLinetypes <- setdiff(linetypes, validLinetypes)
-  if (length(illegalLinetypes)) {
-    stop("The following are not valid linetype codes:\n'",
-         paste(illegalLinetypes, collapse = "', '"), 
-         "Valid linetypes include:\n'",
-         paste(validLinetypes, collapse = "', '"),
-         call. = FALSE)
-  }
   palette <- setNames(linetypes[seq_len(N)], unique(linetype))
   for (i in which(nLinetypes > 0)) {
-    dashes <- as.character(palette[linetypeList[[i]]])
-    traces[[i]][["line"]] <- modify_list(list(dash = dashes), traces[[i]][["line"]])
+    l <- linetypeList[[i]]
+    dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(palette[l]))
+    illegalLinetypes <- setdiff(dashes, validLinetypes)
+    if (length(illegalLinetypes)) {
+      warning(
+        "The following are not valid linetype codes:\n'",
+        paste(illegalLinetypes, collapse = "', '"), "'\n",
+        "Valid linetypes include:\n'",
+        paste(validLinetypes, collapse = "', '"), "'", call. = FALSE
+      )
+    }
+    traces[[i]][["line"]] <- modify_list(
+      list(dash = dashes), traces[[i]][["line"]]
+    )
     # ensure the mode is set so that the linetype is relevant
     if (!grepl("lines", traces[[i]]$mode %||% "")) {
       message("Adding lines to mode; otherwise linetype would have no effect.")
