@@ -58,12 +58,3 @@ test_that("can plot on sub-second time scale", {
   info <- save_outputs(g, "point-size-alpha2")
   expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
 })
-
-
-test_that("tickvals/ticktext are appropriately boxed", {
-  d <- data.frame(x = factor(75), y = 10)
-  p <- qplot(x, y, data = d) 
-  info <- save_outputs(p, "point-box")
-  expect_true(plotly:::to_JSON(info$layout$xaxis$tickvals) == '[1]')
-  expect_true(plotly:::to_JSON(info$layout$xaxis$ticktext) == '["75"]')
-})

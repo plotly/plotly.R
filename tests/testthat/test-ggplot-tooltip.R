@@ -31,7 +31,7 @@ test_that("dates are displayed in tooltip properly", {
 test_that("tooltip argument respects ordering", {
   p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
   p <- ggplotly(p, tooltip = c("density", "x"))
-  info <- plotly_build(p)
+  info <- plotly_build(p)$x
   txt <- strsplit(info$data[[1]]$text, "<br>")
   expect_true(all(grepl("^density", sapply(txt, "[[", 1))))
   expect_true(all(grepl("^mpg", sapply(txt, "[[", 2))))
@@ -40,7 +40,7 @@ test_that("tooltip argument respects ordering", {
 test_that("can hide x values in tooltip", {
   gg2 <- ggplot(mtcars, aes(factor(cyl), mpg, fill = factor(cyl))) + geom_violin()
   p <- ggplotly(gg2, tooltip = "y")
-  l <- plotly_build(p)
+  l <- plotly_build(p)$x
   expect_equal(sum(grepl("cyl", l$data[[1]]$text)), 0)
 })
 

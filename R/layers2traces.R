@@ -193,7 +193,7 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
-  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
+  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
   data <- with(data, {
     rbind(cbind(x = xmin, y = ymin, others),
           cbind(x = xmin, y = ymax, others),
@@ -461,7 +461,6 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     type = "scatter",
     mode = "lines",
     line = list(
-      # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),
       color = toRGB(
         aes2plotly(data, params, "colour"),
@@ -469,7 +468,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
       ),
       dash = aes2plotly(data, params, "linetype")
     ),
-    fill = "tozerox",
+    fill = "toself",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
@@ -585,49 +584,6 @@ geom2trace.default <- function(data, params, p) {
 # Utility functions
 # --------------------------------------------------------------------------
 
-# Drawing ggplot2 geoms with a group aesthetic is most efficient in
-# plotly when we convert groups of things that look the same to
-# vectors with NA.
-group2NA <- function(data) {
-  if (!"group" %in% names(data)) return(data)
-  poly.list <- split(data, data$group, drop = TRUE)
-  is.group <- names(data) == "group"
-  poly.na.list <- list()
-  forward.i <- seq_along(poly.list)
-  ## When group2NA is called on geom_polygon (or geom_rect, which is
-  ## treated as a basic polygon), we need to retrace the first points
-  ## of each group, see https://github.com/ropensci/plotly/pull/178
-  retrace.first.points <- inherits(data, "GeomPolygon")
-  for (i in forward.i) {
-    no.group <- poly.list[[i]][, !is.group, drop = FALSE]
-    na.row <- no.group[1, ]
-    na.row[, c("x", "y")] <- NA
-    retrace.first <- if (retrace.first.points) {
-      no.group[1,]
-    }
-    poly.na.list[[paste(i, "forward")]] <-
-      rbind(no.group, retrace.first, na.row)
-  }
-  if (retrace.first.points) {
-    backward.i <- rev(forward.i[-1])[-1]
-    for (i in backward.i) {
-      no.group <- poly.list[[i]][1, !is.group, drop = FALSE]
-      na.row <- no.group[1, ]
-      na.row[, c("x", "y")] <- NA
-      poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
-    }
-    if (length(poly.list) > 1) {
-      first.group <- poly.list[[1]][1, !is.group, drop = FALSE]
-      poly.na.list[["last"]] <- rbind(first.group, first.group)
-    }
-  }
-  data <- do.call(rbind, poly.na.list)
-  if (is.na(data$x[nrow(data)])) {
-    data <- data[-nrow(data), ]
-  }
-  data
-}
-
 # given a geom, should we split on any continuous variables?
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
@@ -683,17 +639,17 @@ ribbon_dat <- function(dat) {
   n <- nrow(dat)
   o <- order(dat$x)
   o2 <- order(dat$x, decreasing = TRUE)
-  used <- c("x", "ymin", "ymax")
+  used <- c("x", "ymin", "ymax", "y")
   not_used <- setdiff(names(dat), used)
   # top-half of ribbon
   tmp <- dat[o, ]
   others <- tmp[not_used]
-  dat1 <- cbind(x = tmp$x, y = tmp$ymax, others)
-  dat1[n+1, ] <- cbind(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
+  dat1 <- cbind(x = tmp$x, y = tmp$ymin, others)
+  dat1[n+1, ] <- data.frame(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
   # bottom-half of ribbon
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
-  dat2 <- cbind(x = tmp2$x, y = tmp2$ymin, others2)
+  dat2 <- cbind(x = tmp2$x, y = tmp2$ymax, others2)
   rbind(dat1, dat2)
 }
 
@@ -767,7 +723,12 @@ pch2symbol <- function(x) {
     "O" = "circle-open",
     "+" = "cross-thin-open"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }
 
 # Convert R lty line type codes to plotly "dash" codes.
@@ -800,5 +761,10 @@ lty2dash <- function(x) {
     "224282F2" = "dash",
     "F1" = "dash"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }

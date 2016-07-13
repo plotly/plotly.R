@@ -31,8 +31,8 @@ test_that("nrows argument works", {
 
 test_that("group + [x/y]axis works", {
   iris$id <- as.integer(iris$Species)
-  p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
-               xaxis = paste0("x", id), mode = "markers")
+  p <- plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, color = ~Species,
+               xaxis = ~paste0("x", id), mode = "markers")
   s <- expect_traces(subplot(p, margin = 0.05), 3, "group")
   ax <- s$layout[grepl("^[x-y]axis", names(s$layout))]
   doms <- lapply(ax, "[[", "domain")
@@ -91,8 +91,8 @@ test_that("Row/column height/width", {
 })
 
 test_that("recursive subplots work", {
-  p1 <- plot_ly(economics, x = date, y = unemploy)
-  p2 <- plot_ly(economics, x = date, y = uempmed)
+  p1 <- plot_ly(economics, x = ~date, y = ~unemploy)
+  p2 <- plot_ly(economics, x = ~date, y = ~uempmed)
   s1 <- subplot(p1, p1, shareY = TRUE)
   s2 <- subplot(p2, p2, shareY = TRUE)
   s <- subplot(s1, s2, nrows = 2, shareX = TRUE)
@@ -146,7 +146,7 @@ test_that("geo+cartesian behaves", {
   # create a map of population density
   density <- state.x77[, "Population"] / state.x77[, "Area"]
   map <- plot_ly(
-    z = density, 
+    z = ~density, 
     text = state.name, locations = state.abb,
     type = 'choropleth', locationmode = 'USA-states', geo = "geo"
   ) %>% layout(geo = g)

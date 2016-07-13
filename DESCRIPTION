@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 3.6.5
+Version: 4.0.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -20,6 +20,7 @@ Description: Easily translate 'ggplot2' graphs to an interactive web-based versi
 URL: https://plot.ly/r, https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
+    R (>= 2.10),
     ggplot2 (>= 2.1.0)
 Imports:
     scales,
@@ -27,13 +28,14 @@ Imports:
     jsonlite,
     magrittr,
     digest,
-    viridis,
+    viridisLite,
     base64enc,
     htmlwidgets,
     tidyr,
-    hexbin
-Suggests:
     dplyr,
+    hexbin,
+    lazyeval (>= 0.2.0)
+Suggests:
     maps,
     ggthemes,
     GGally,
@@ -47,7 +49,9 @@ Suggests:
     RColorBrewer,
     Rserve,
     RSclient,
-    broom
+    broom,
+    webshot,
+    listviewer
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

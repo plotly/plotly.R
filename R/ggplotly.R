@@ -66,14 +66,14 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
-  hash_plot(p$data, plotly_build(s))
+  s
 }
   
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
                             height = NULL, tooltip = "all", source = "A", ...) {
-  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
-  hash_plot(p$data, l)
+  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source, ...)
+  as_widget(l)
 }
 
 #' Convert a ggplot to a list.
@@ -258,7 +258,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       varName <- y[[i]]
       # by default assume the values don't need any formatting
       forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-      if (aesName %in% c("x", "y")) {
+      if (isTRUE(aesName %in% c("x", "y"))) {
         scaleName <- scales$get_scales(aesName)$scale_name
         # convert "milliseconds from the UNIX epoch" to a date/datetime
         # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
@@ -668,7 +668,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       idx <- which(hashes %in% i)
       # for now we just merge markers and lines -- I can't imagine text being worthwhile
       if (all(modes[idx] %in% c("lines", "markers"))) {
-        mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
+        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
         mergedTraces[[i]]$mode <- "markers+lines"
         if (any(sapply(traces[idx], "[[", "showlegend"))) {
           mergedTraces[[i]]$showlegend <- TRUE
@@ -686,14 +686,21 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
-
-  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
+  
+  gglayout$width <- width
+  gglayout$height <- height
+  
+  id <- new_id()
+  l <- list(
+    visdat = setNames(list(function() data[[length(data)]]), id),
+    attrs = list(),
+    cur_data = id,
+    data = setNames(traces, NULL), 
+    layout = compact(gglayout),
+    source = source
+  )
   # ensure properties are boxed correctly
-  l <- add_boxed(rm_asis(l))
-  l$width <- width
-  l$height <- height
-  l$source <- source
-  structure(l, class = "plotly_built")
+  rm_asis(l)
 }
 
 
@@ -839,9 +846,11 @@ faced <- function(txt, face = "plain") {
 bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
-# if a vector has one unique value, return that value
+# if a vector that has one unique value (ignoring missings), return that value
 uniq <- function(x) {
   u <- unique(x)
+  if (identical(u, NA) || length(u) == 0) return(u)
+  u <- u[!is.na(u)]
   if (length(u) == 1) u else x
 }
 
@@ -895,7 +904,9 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
 
 # We need access to internal ggplot2 functions in several places
 # this helps us import functions in a way that R CMD check won't cry about
-ggfun <- function(x) getFromNamespace(x, "ggplot2")
+ggfun <- function(x) {
+  tryCatch(getFromNamespace(x, "ggplot2"), error = function(e) NULL)
+}
 
 ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))

@@ -47,3 +47,22 @@ offline <- function(p, height, width, out_dir, open_browser) {
   .Deprecated("plot_ly")
   p
 }
+
+
+#' Convert a plotly object to an htmlwidget object
+#' 
+#' This function was deprecated in  4.0.0, 
+#' as plotly objects are now htmlwidget objects,
+#' so there is no need to convert them.
+#' 
+#' @param x a plotly object.
+#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @export
+
+as.widget <- function(x, ...) {
+  .Deprecated("plot_ly")
+  x
+}
+
+# for legacy reasons
+toWidget <- as.widget

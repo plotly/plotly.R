@@ -440,7 +440,7 @@ g2 <- c(
 
 plot_ly(df, type = 'scattergeo', mode = 'markers', locations = Country,
         locationmode = 'country names', text = paste(Value, "cases"), 
-        color = as.ordered(abbrev), marker = list(size = Value/50), inherit = F) %>%
+        color = as.ordered(abbrev), marker = list(size = Value/50)) %>%
   add_trace(type = 'scattergeo', mode = 'text', geo = 'geo2', showlegend = F,
             lon = 21.0936, lat = 7.1881, text = 'Africa') %>%
   add_trace(type = 'choropleth', locations = Country, locationmode = 'country names',
@@ -470,8 +470,7 @@ geo <- list(
 )
 
 plot_ly(air, lon = long, lat = lat, text = airport, type = 'scattergeo',
-        locationmode = 'USA-states', marker = list(size = 2, color = 'red'),
-        inherit = FALSE) %>% 
+        locationmode = 'USA-states', marker = list(size = 2, color = 'red')) %>% 
   add_trace(lon = list(start_lon, end_lon), lat = list(start_lat, end_lat),
             group = id, opacity = cnt/max(cnt), data = flights,
             mode = 'lines', line = list(width = 1, color = 'red'),

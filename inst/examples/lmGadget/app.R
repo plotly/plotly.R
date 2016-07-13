@@ -10,10 +10,11 @@ library(plotly)
 #' Click on points to add/remove them from consideration
 #' 
 #' @param dat a data.frame
-#' @param x a character string specifying the x variable
-#' @param y a character string specifying the y variable
+#' @param x a formula specifying the x variable
+#' @param y a formula specifying the y variable
+#' @param key a vector specifying unique attributes for each row
 
-lmGadget <- function(dat, x, y) {
+lmGadget <- function(dat, x, y, key = row.names(dat)) {
   
   ui <- miniPage(
     gadgetTitleBar("Interactive lm"),
@@ -33,6 +34,7 @@ lmGadget <- function(dat, x, y) {
   init <- function() {
     selected <- rep(FALSE, nrow(dat))
     function(x) {
+      if (missing(x)) return(selected)
       selected <<- xor(selected, x)
       selected
     }
@@ -40,47 +42,39 @@ lmGadget <- function(dat, x, y) {
   selection <- init()
   
   server <- function(input, output) {
-    
-    # obtain a subset of the data that is still under consideration
-    left <- reactive({
-      d <- event_data("plotly_click")
-      if (!is.null(d)) {
-        dat <- dat[!selection(row.names(dat) %in% d[["key"]]), ]
-      }
-      dat
-    })
-    
-    # fit a model to subsetted data
-    refit <- reactive({
-      req(input$degree)
-      formula <- as.formula(
-        sprintf("%s ~ poly(%s, degree = %s)", y, x, input$degree)
-      )
-      lm(formula, left())
-    })
 
     output$plot1 <- renderPlotly({
-      dat2 <- left()
-      dat2$yhat <- as.numeric(fitted(refit()))
-      # sort data by 'x' variable so we draw a line (not a path)
-      dat2 <- dat2[order(dat2[, x]), ]
+      req(input$degree)
+      d <- event_data("plotly_click")
+      selected <- selection(key %in% d[["key"]])
+      modelDat <- dat[!selected, ]
+      formula <- as.formula(
+        sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
+      )
+      m <- lm(formula, modelDat)
+      modelDat$yhat <- as.numeric(fitted(m))
+      mcolor <- rep(toRGB("black"), NROW(dat))
+      mcolor[selected] <- toRGB("grey90")
       
-      plot_ly(x = dat[, x], y = dat[, y], key = row.names(dat), mode = "markers",
-              marker = list(color = toRGB("grey90"), size = 10)) %>%
-        add_trace(x = dat2[, x], y = dat2[, y], mode = "markers",
-                  marker = list(color = toRGB("black"), size = 10)) %>%
-        add_trace(x = dat2[, x], y = dat2$yhat, mode = "lines",
-                  marker = list(color = toRGB("black"))) %>%
-        layout(showlegend = FALSE, xaxis = list(title = x), yaxis = list(title = y))
+      dat %>%
+        plot_ly(x = x, y = y) %>%
+        add_markers(key = key, marker = list(color = mcolor, size = 10)) %>%
+        add_lines(y = ~yhat, data = modelDat) %>%
+        layout(showlegend = FALSE)
     })
     
     # Return the most recent fitted model, when we press "done"
     observeEvent(input$done, {
-      stopApp(refit())
+      selected <- selection()
+      modelDat <- dat[!selected, ]
+      formula <- as.formula(
+        sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
+      )
+      stopApp(lm(formula, modelDat))
     })
   }
   
   runGadget(ui, server)
 }
 
-m <- lmGadget(mtcars, "wt", "mpg")
+m <- lmGadget(mtcars, x = ~wt, y = ~mpg)

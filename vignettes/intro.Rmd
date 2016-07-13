@@ -22,14 +22,14 @@ To create a plotly visualization, start with `plot_ly()`.
 
 ```{r}
 library(plotly)
-plot_ly(economics, x = date, y = unemploy / pop)
+plot_ly(economics, x = ~date, y = ~unemploy / pop)
 ```
 
 A plotly visualization is composed of one (or more) trace(s), and every trace has a `type` (the default type is 'scatter'). The arguments/properties that a trace will respect ([documented here](https://plot.ly/r/reference)) depend on it's type. A scatter trace respects `mode`, which can be any combination of "lines", "markers", "text" joined with a "+":
 
 ```{r}
 library(plotly)
-plot_ly(economics, x = date, y = unemploy / pop, 
+plot_ly(economics, x = ~date, y = ~unemploy / pop, 
         type = "scatter", mode = "markers+lines")
 ```
 
@@ -37,29 +37,30 @@ You can manually add a trace to an existing plot with `add_trace()`. In that cas
 
 ```{r}
 m <- loess(unemploy / pop ~ as.numeric(date), data = economics)
-p <- plot_ly(economics, x = date, y = unemploy / pop, name = "raw") 
-add_trace(p, x = date, y = fitted(m), name = "loess")
+p <- plot_ly(economics, x = ~date, y = ~unemploy / pop, name = "raw") 
+add_lines(p, y = ~fitted(m), name = "loess")
 ```
 
 __plotly__ was designed with a [pure, predictable, and pipeable interface](https://dl.dropboxusercontent.com/u/41902/pipe-dsls.pdf) in mind, so you can also use the `%>%` operator to create a visualization pipeline:
 
 ```{r}
 economics %>%
-  plot_ly(x = date, y = unemploy / pop) %>% 
-  add_trace(x = date, y = fitted(m)) %>%
+  plot_ly(x = ~date, y = ~unemploy / pop) %>% 
+  add_lines(y = ~fitted(m)) %>%
   layout(showlegend = F)
 ```
 
-Furthermore, `plot_ly()`, `add_trace()`, and `layout()`, all accept a data frame as their first argument and output a data frame. As a result, we can inter-weave data manipulations and visual mappings in a single pipeline.
+TODO: talk about dplyr verbs!
 
 ```{r}
+library(dplyr)
 economics %>%
-  transform(rate = unemploy / pop) %>%
-  plot_ly(x = date, y = rate) %>% 
-  subset(rate == max(rate)) %>%
+  mutate(rate = unemploy / pop) %>%
+  plot_ly(x = ~date, y = ~rate) %>% 
+  filter(rate == max(rate)) %>%
   layout(
     showlegend = F, 
-    annotations = list(x = date, y = rate, text = "Peak", showarrow = T)
+    annotations = list(x = ~date, y = ~rate, text = "Peak", showarrow = T)
   )
 ```
 
@@ -89,15 +90,15 @@ The __plotly__ function arguments used thus far are documented in [the figure re
 If a ordinal variable (aka a non-ordered factor variable) is assigned to color, then a qualitative color palette is used by default.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Species, mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Species, mode = "markers")
 ```
 
 If you want to change the default palette, it's recommended that you provide a <http://colorbrewer2.org> qualitative pallette name (e.g., "Set1" or "Accent") to the colors argument.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Species, colors = "Set1", mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Species, colors = "Set1", mode = "markers")
 ```
 
 In this case, the palette consists of 9 colors and the default behavior is to pick colors that are furthest apart ("#E41A1C", "#FF7F00", and "#999999").
@@ -111,8 +112,8 @@ If you'd like more control over the mapping, you can provide a vector of colors 
 
 ```{r}
 cols <- RColorBrewer::brewer.pal(nlevels(iris$Species), "Set1")
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Species, colors = cols, mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Species, colors = cols, mode = "markers")
 ```
 
 #### Sequential color mappings
@@ -120,22 +121,22 @@ plot_ly(iris, x = Petal.Length, y = Petal.Width,
 If either a numeric or an ordered factor is mapped to color, `plot_ly()` applies a sequential color scale by default.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = as.ordered(Species), mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~as.ordered(Species), mode = "markers")
 ```
 
 In the case of continuous numeric variables, `plot_ly()` performs a linear mapping between the data and an interpolated color pallette.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Sepal.Length, mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Sepal.Length, mode = "markers")
 ```
 
 The colors argument takes arbitrary color codes of arbitrary length. Here is how we could use it to replicate the default mapping in ggplot2.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Sepal.Length, colors = c("#132B43", "#56B1F7"), 
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Sepal.Length, colors = c("#132B43", "#56B1F7"), 
         mode = "markers")
 ```
 
@@ -144,8 +145,8 @@ plot_ly(iris, x = Petal.Length, y = Petal.Width,
 To obtain a diverging color mapping, just provide a diverging palette to the colors argument.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        color = Sepal.Length, colors = "PuOr", mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        color = ~Sepal.Length, colors = "PuOr", mode = "markers")
 ```
 
 ### The symbol argument
@@ -153,13 +154,13 @@ plot_ly(iris, x = Petal.Length, y = Petal.Width,
 To encode values using symbols, use the symbol argument.
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, 
-        symbol = Species, mode = "markers")
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, 
+        symbol = ~Species, mode = "markers")
 ```
 
 To change the default symbols used, use the symbols argument. All the valid symbol types are listed [here](https://plot.ly/r/reference/#marker).
 
 ```{r}
-plot_ly(iris, x = Petal.Length, y = Petal.Width, mode = "markers",
-        symbol = Species, symbols = c("cross", "square", "triangle-down"))
+plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, mode = "markers",
+        symbol = ~Species, symbols = c("cross", "square", "triangle-down"))
 ```

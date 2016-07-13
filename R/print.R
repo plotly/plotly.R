@@ -1,87 +1,9 @@
-#' Print a plotly object
-#' 
-#' @param x a plotly object
-#' @param ... additional arguments
-#' @export
-print.plotly_hash <- function(x, ...) {
-  x <- as.widget(x)
-  print(x, ...)
-}
-
-#' Print a 'built' plotly object
-#' 
-#' @param x a plotly object
-#' @param ... additional arguments
-#' @export
-print.plotly_built <- print.plotly_hash
-
-#' Print a plotly object in a knitr doc
-#' 
-#' @param x a plotly object
-#' @param options knitr options.
-#' @param ... additional arguments
-#' @export
-knit_print.plotly_hash <- function(x, options, ...) {
-  x <- as.widget(x)
-  knitr::knit_print(x, options = options, ...)
-}
-
-#' Print a 'built' plotly object in a knitr doc
-#' 
-#' @param x a plotly object
-#' @param options knitr options.
-#' @param ... additional arguments
-#' @export
-knit_print.plotly_built <- knit_print.plotly_hash
-
-#' Convert a plotly object to an htmlwidget object
-#' 
-#' @param x a plotly object.
-#' @param ... other options passed onto \code{htmlwidgets::createWidget}
-#' @export
-#' @examples \dontrun{
-#' p <- plot_ly(mtcars, x = mpg, y = disp, mode = "markers")
-#' htmlwidgets::saveWidget(as.widget(p), "index.html")
-#' }
-#' 
-
-as.widget <- function(x, ...) {
-  if (inherits(x, "htmlwidget")) return(x)
-  if (!inherits(x, "plotly_built")) x <- plotly_build(x)
-  # set some margin defaults if none are provided
-  x$layout$margin <- modifyList(
-    list(b = 40, l = 60, t = 25, r = 10),
-    x$layout$margin %||% list()
-  )
-  x$config$modeBarButtonsToRemove <- 
-    i(x$config$modeBarButtonsToRemove %||% "sendDataToCloud")
-  x$base_url <- get_domain()
-  # customize the JSON serializer (for htmlwidgets)
-  attr(x, 'TOJSON_FUNC') <- to_JSON
-  htmlwidgets::createWidget(
-    name = "plotly",
-    x = x,
-    width = x$width,
-    height = x$height,
-    sizingPolicy = htmlwidgets::sizingPolicy(
-      padding = 5, 
-      browser.fill = TRUE,
-      defaultWidth = '100%',
-      defaultHeight = 400
-    ),
-    ...
-  )
-}
-
-# for legacy reasons
-toWidget <- as.widget
-
 #' Print a plotly figure object
 #' 
 #' @param x a plotly figure object
 #' @param ... additional arguments (currently ignored)
 #' @export
-print.figure <- function(x, ...) {
+print.plotly_figure <- function(x, ...) {
   utils::browseURL(x$url)
 }
 
@@ -92,7 +14,7 @@ print.figure <- function(x, ...) {
 #' @param ... placeholder.
 #' @export
 #' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
-knit_print.figure <- function(x, options, ...) {
+knit_print.plotly_figure <- function(x, options, ...) {
   if (!requireNamespace("knitr")) {
     warning("Please install.packages('knitr')")
     return(x)
@@ -125,7 +47,7 @@ embed_notebook <- function(x, width = NULL, height = NULL,
     if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
     owd <- setwd(dir)
     on.exit(setwd(owd), add = TRUE)
-    htmlwidgets::saveWidget(as.widget(l), file = basename(file))
+    htmlwidgets::saveWidget(l, file = basename(file))
     file
   } else {
     l$url
