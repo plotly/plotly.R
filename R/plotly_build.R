@@ -95,7 +95,9 @@ plotly_build.plotly <- function(p) {
     # Fortunately, variable mappings don't make much sense with one observation,
     # and that is the whole point of "recovering" the built data here, so we just ignore
     # cases with one row
-    isVar <- attrLengths > 1 & attrLengths == nobs & !vapply(trace, is.matrix, logical(1))
+    isVar <- (attrLengths > 1 & attrLengths == nobs) & 
+      !vapply(trace, is.matrix, logical(1)) &
+      !vapply(trace, is.bare.list, logical(1))
     builtData <- data.frame(trace[isVar], stringsAsFactors = FALSE)
     
     if (NROW(builtData) > 0) {
@@ -181,7 +183,11 @@ plotly_build.plotly <- function(p) {
       retrace.first = inherits(x, "plotly_polygon")
     )
     for (i in x$.plotlyVariableMapping) {
-      x[[i]] <- structure(uniq(d[[i]]), class = oldClass(x[[i]]))
+      # try to reduce the amount of data we have to send for non-positional scales
+      x[[i]] <- structure(
+        if (i %in% npscales()) uniq(d[[i]]) else d[[i]], 
+        class = oldClass(x[[i]])
+      )
     }
     x
   })
