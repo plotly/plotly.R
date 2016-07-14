@@ -22,6 +22,13 @@ expect_same_data <- function(p1, p2) {
   expect_identical(d1, d2)
 }
 
+test_that("vector values with repeated values are returned verbatim", {
+  p <- plot_ly(x = c(1, 2), y = c(1, 1))
+  l <- plotly_build(p)$x
+  expect_identical(l$data[[1]]$x, c(1, 2))
+  expect_identical(l$data[[1]]$y, c(1, 1))
+})
+
 test_that("plot_ly defaults to scatterplot", {
   p1 <- plot_ly(mtcars, x = ~wt, y = ~mpg)
   p2 <- plot_ly(mtcars, x = ~wt, y = ~mpg) %>% add_markers()
