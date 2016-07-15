@@ -66,3 +66,15 @@ as.widget <- function(x, ...) {
 
 # for legacy reasons
 toWidget <- as.widget
+
+#' Retrive and create the last plotly (or ggplot).
+#' 
+#' This function was deprecated in version 4.0.
+#' 
+#' @param data	(optional) a data frame with a class of plotly (and a plotly_hash attribute).
+#' @export
+
+last_plot <- function(data = NULL) {
+  .Deprecated("plot_ly")
+  data
+}

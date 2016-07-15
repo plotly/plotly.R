@@ -10,6 +10,10 @@ is.colorbar <- function(tr) {
   inherits(tr, "plotly_colorbar")
 }
 
+is.bare.list <- function(x) {
+  is.list(x) && !is.data.frame(x)
+}
+
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
