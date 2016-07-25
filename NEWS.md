@@ -1,3 +1,9 @@
+# 4.0.2 -- 25 June 2016
+
+## BUG FIXES
+
+* Bug fix for formulas evaluating to a logical vector (#650)
+
 # 4.0.1 -- 14 June 2016
 
 ## BUG FIXES
