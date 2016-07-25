@@ -37,3 +37,12 @@ test_that("Warn about invalid symbol codes", {
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, symbol = I("DNE"))
   expect_warning(plotly_build(p), "DNE")
 })
+
+test_that("Formula resulting in logical vector works", {
+  s <- c("triangle-up", "circle-open")
+  p <- plot_ly(x = 1:10, y = 1:10, symbol = ~1:10 > 5, symbols = s)
+  l <- expect_traces(p, 2, "logical")
+  markers <- lapply(l$data, "[[", "marker")
+  syms <- unlist(lapply(markers, "[[", "symbol"))
+  expect_identical(syms, s)
+})
