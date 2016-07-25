@@ -533,7 +533,7 @@ map_symbol <- function(traces) {
   palette <- setNames(symbols[seq_len(N)], unique(symbol))
   for (i in which(nSymbols > 0)) {
     s <- symbolList[[i]]
-    symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(palette[s]))
+    symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(palette[as.character(s)]))
     illegalSymbols <- setdiff(symbols, validSymbols)
     if (length(illegalSymbols)) {
       warning(
@@ -581,7 +581,7 @@ map_linetype <- function(traces) {
   palette <- setNames(linetypes[seq_len(N)], unique(linetype))
   for (i in which(nLinetypes > 0)) {
     l <- linetypeList[[i]]
-    dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(palette[l]))
+    dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(palette[as.character(l)]))
     illegalLinetypes <- setdiff(dashes, validLinetypes)
     if (length(illegalLinetypes)) {
       warning(
