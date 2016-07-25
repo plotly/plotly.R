@@ -227,14 +227,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # --------------------------------------------------------------------
   
   aesMap <- lapply(p$layers, function(x) { 
+    # layer level mappings (including stat generated aesthetics)
     map <- c(
-      # plot level aes mappings
-      as.character(p$mapping), 
-      # layer level mappings
-      as.character(x$mapping), 
-      # stat specific mappings
+      as.character(x$mapping),
       grep("^\\.\\.", as.character(x$stat$default_aes), value = TRUE)
     )
+    # add on plot-level mappings, if they're inherited
+    if (isTRUE(x$inherit.aes)) map <- c(map, as.character(p$mapping))
     # "hidden" names should be taken verbatim
     idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
     hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
@@ -523,7 +522,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   #   To do so, we borrow some of the body of ggplot2:::guides_build().
   # ------------------------------------------------------------------------
   # will there be a legend?
-  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) > 1
+  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) >= 1
 
   # legend styling
   gglayout$legend <- list(

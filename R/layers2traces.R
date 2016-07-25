@@ -1,6 +1,6 @@
 # layer -> trace conversion
 layers2traces <- function(data, prestats_data, layout, p) {
-  # Attach a "geom class" to each layer of data for method dispatch 
+  # Attach a "geom class" to each layer of data for method dispatch
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
   # Extract parameters for each layer
   params <- lapply(p$layers, function(x) {
@@ -20,7 +20,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   datz <- list()
   paramz <- list()
   for (i in seq_along(data)) {
-    # This has to be done in a loop, since some layers are really two layers, 
+    # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
     if (is.data.frame(d)) d <- list(d)
@@ -29,54 +29,47 @@ layers2traces <- function(data, prestats_data, layout, p) {
       paramz <- c(paramz, params[j])
     }
   }
-  
+
   # now to the actual layer -> trace conversion
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # always split on discrete scales, and other geom specific aesthetics that
-    # can't translate to a single trace
-    split_by <- c(split_on(d), names(discreteScales))
-    # always split on PANEL and domain values (for trace ordering)
-    split_by <- c("PANEL", paste0(split_by, "_plotlyDomain"))
-    # split "this layers" data into a list of data frames
-    idx <- names(d) %in% split_by
-    # ensure the factor level orders (which determies traces order)
+    # variables that produce multiple traces and deserve their own legend entries
+    split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    # add variable that produce multiple traces, but do _not_ deserve entries
+    split_by <- c(split_legend, "PANEL", split_on(d))
+    # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
-    lvls <- unique(d[idx])
+    split_vars <- intersect(split_by, names(d))
+    lvls <- unique(d[split_vars])
     lvls <- lvls[do.call(order, lvls), , drop = FALSE]
+    separator <- new_id()
     fac <- factor(
-      apply(d[idx], 1, paste, collapse = "@%&"),
-      levels = apply(lvls, 1, paste, collapse = "@%&")
+      apply(d[split_vars], 1, paste, collapse = separator),
+      levels = apply(lvls, 1, paste, collapse = separator)
     )
     if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i], list(p))
-    # are we splitting by a discrete scale on this layer?
-    # if so, set name/legendgroup/showlegend
-    isDiscrete <- names(d) %in% paste0(names(discreteScales), "_plotlyDomain")
-    if (length(trs) > 1 && sum(isDiscrete) >= 1) {
-      nms <- names(trs)
-      # ignore "non-discrete" scales that we've split on
-      for (w in seq_len(sum(names(d) %in% c("PANEL", split_on(d))))) {
-        nms <- sub("^[^@%&]@%&", "", nms)
-      }
-      nms <- strsplit(nms, "@%&")
+    # if we need a legend, set name/legendgroup/showlegend
+    # note: this allows us to control multiple traces from one legend entry
+    if (any(split_legend %in% names(d))) {
+      nms <- strsplit(names(trs), separator, fixed = TRUE)
       nms <- vapply(nms, function(x) {
-        if (length(x) > 1) paste0("(", paste0(x, collapse = ","), ")") else x
+        paste(unique(x[seq_along(split_legend)]), collapse = ", ")
       }, character(1))
       trs <- Map(function(x, y) {
         x$name <- y
         x$legendgroup <- y
-        # depending on the geom (e.g. smooth) this may be FALSE already 
+        # depending on the geom (e.g. smooth) this may be FALSE already
         x$showlegend <- x$showlegend %||% TRUE
         x
       }, trs, nms)
     } else {
       trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
     }
-    
+
     # each trace is with respect to which axis?
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
@@ -94,12 +87,12 @@ layers2traces <- function(data, prestats_data, layout, p) {
 
 
 #' Convert a geom to a "basic" geom.
-#' 
+#'
 #' This function makes it possible to convert ggplot2 geoms that
-#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' are not included with ggplot2 itself. Users shouldn't need to use
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
-#' 
+#'
 #' @param data the data returned by \code{ggplot2::ggplot_build()}.
 #' @param prestats_data the data before statistics are computed.
 #' @param layout the panel layout.
@@ -133,7 +126,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
   }
   vars <- c("PANEL", "group", aez, grep("_plotlyDomain$", names(data), value = T))
   prefix_class(
-    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE), 
+    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
 }
@@ -311,7 +304,7 @@ to_basic.GeomJitter <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
-  # width for ggplot2 means size of the entire bar, on the data scale 
+  # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
   data$width <- (data$xmax - data$x) /(data$x_max - data$x_min)
@@ -321,7 +314,7 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) {
-  # height for ggplot2 means size of the entire bar, on the data scale 
+  # height for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
   data$width <- (data$ymax - data$y) / (data$y_max - data$y_min)
@@ -350,12 +343,12 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' Convert a "basic" geoms to a plotly.js trace.
-#' 
+#'
 #' This function makes it possible to convert ggplot2 geoms that
-#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' are not included with ggplot2 itself. Users shouldn't need to use
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
-#' 
+#'
 #' @param data the data returned by \code{plotly::to_basic}.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
@@ -453,10 +446,50 @@ geom2trace.GeomBar <- function(data, params, p) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
   data <- group2NA(data)
+  # find data value(s) mapped to this polygon for the hoverinfo
+  # since hoveron=fills, text needs to be of length 1
+
+  # Generate text field from data when hoveron=fills
+  #
+  # Text needs to be of length 1 in order for tooltip to work
+  #
+  # @param data a data frame
+  # @param a names character vector. The names should match columns in data
+  # values values are used as variable names in the resulting text
+  # hovertext_fill <- function(data, labels) {
+  #   # add the special text field, if it exists
+  #   if ("text" %in% names(data)) {
+  #     labels <- c(labels, c("text" = "text"))
+  #   }
+  #   labels <- labels[names(labels) %in% names(data)]
+  #   if (length(labels) == 0) return(NULL)
+  #   # convert factors to strings so they aren't converted to integers
+  #   # when we combine values
+  #   isFactor <- which(vapply(data, is.factor, logical(1)))
+  #   for (i in isFactor) {
+  #     data[, i] <- as.character(data[, i])
+  #   }
+  #   udata <- unique(data[names(data) %in% names(labels)])
+  #   if (NROW(udata) > 1) {
+  #     warning(
+  #       "When hoveron=fill, can't display more than one value for a given variable",
+  #       call. = FALSE
+  #     )
+  #   }
+  #   paste(
+  #     paste0(labels, ":"),
+  #     as.character(data[1, names(labels)]),
+  #     collapse = "<br />"
+  #   )
+  # }
+  # doms <- grep("_plotlyDomain$", names(data), value = TRUE)
+  # p$labels <- c(p$labels, setNames(sub("_plotlyDomain", "", doms), doms))
+  # txt <- hovertext_fill(data, p$labels)
+
   L <- list(
     x = data$x,
     y = data$y,
-    text = data$hovertext,
+    text = data$hovertext[1],
     key = data$key,
     type = "scatter",
     mode = "lines",
@@ -472,13 +505,14 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
-    )
+    ),
+    hoveron = "fills"
   )
   if (inherits(data, "GeomSmooth")) {
     L$hoverinfo <- "x+y"
   }
   L
-  
+
 }
 
 #' @export
@@ -542,7 +576,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   g <- g[order(g$order), ]
   # put fill domain on 0-1 scale for colorscale purposes
   g$fill_plotlyDomain <- scales::rescale(g$fill_plotlyDomain)
-  # create the colorscale 
+  # create the colorscale
   colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
   # colorscale goes crazy if there are NAs
   colScale <- colScale[stats::complete.cases(colScale), ]
@@ -598,6 +632,10 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
+  for (i in names(lookup)) {
+    lookup[[i]] <- paste0(lookup[[i]], "_plotlyDomain")
+  }
+  lookup$GeomPolygon <- c(lookup$GeomPolygon, "hovertext")
   splits <- lookup[[geom]]
   # make sure the variable is in the data, and is non-constant
   splits <- splits[splits %in% names(dat)]
@@ -610,7 +648,7 @@ split_on <- function(dat) {
   splits
 }
 
-# make trace with errorbars 
+# make trace with errorbars
 make_error <- function(data, params, xy = "x") {
   color <- aes2plotly(data, params, "colour")
   e <- list(
@@ -670,7 +708,7 @@ aes2plotly <- function(data, params, aes = "size") {
     height = function(x) { x / 2}
   )
   if (is.null(converter)) {
-    warning("A converter for ", aes, " wasn't found. \n", 
+    warning("A converter for ", aes, " wasn't found. \n",
             "Please report this issue to: \n",
             "https://github.com/ropensci/plotly/issues/new", call. = FALSE)
     converter <- identity
