@@ -191,10 +191,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
 
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  panel$layout$xaxis <- panel$layout$COL
-  panel$layout$yaxis <- panel$layout$ROW
-  panel$layout$xanchor <- nRows
-  panel$layout$yanchor <- 1
+  panel$layout <- dplyr::mutate( panel$layout,
+    xaxis = COL, yaxis = ROW,
+    yanchor = 1L ) %>%
+    dplyr::group_by( xaxis ) %>%
+    dplyr::mutate( xanchor = max(ROW) ) %>% # anchor X axis to the lowest plot in the column
+    dplyr::ungroup() %>% as.data.frame()
   if (inherits(p$facet, "wrap")) {
     if (p$facet$free$x) {
       panel$layout$xaxis <- panel$layout$PANEL
@@ -212,10 +214,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     }
   }
   # format the axis/anchor to a format plotly.js respects
-  panel$layout$xaxis <- paste0("xaxis", sub("1", "", panel$layout$xaxis))
-  panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
-  panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
-  panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
+  plotlyjs_axis_label <- function(prefix, ixs) paste0(prefix, ifelse(as.integer(ixs) > 1, ixs, ""))
+  panel$layout$xaxis <- plotlyjs_axis_label("xaxis", panel$layout$xaxis)
+  panel$layout$yaxis <- plotlyjs_axis_label("yaxis", panel$layout$yaxis)
+  panel$layout$xanchor <- plotlyjs_axis_label("y", panel$layout$xanchor)
+  panel$layout$yanchor <- plotlyjs_axis_label("x", panel$layout$yanchor)
   # for some layers2traces computations, we need the range of each panel
   panel$layout$x_min <- sapply(panel$ranges, function(z) min(z$x.range))
   panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
