@@ -446,46 +446,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
   data <- group2NA(data)
-  # find data value(s) mapped to this polygon for the hoverinfo
-  # since hoveron=fills, text needs to be of length 1
-
-  # Generate text field from data when hoveron=fills
-  #
-  # Text needs to be of length 1 in order for tooltip to work
-  #
-  # @param data a data frame
-  # @param a names character vector. The names should match columns in data
-  # values values are used as variable names in the resulting text
-  # hovertext_fill <- function(data, labels) {
-  #   # add the special text field, if it exists
-  #   if ("text" %in% names(data)) {
-  #     labels <- c(labels, c("text" = "text"))
-  #   }
-  #   labels <- labels[names(labels) %in% names(data)]
-  #   if (length(labels) == 0) return(NULL)
-  #   # convert factors to strings so they aren't converted to integers
-  #   # when we combine values
-  #   isFactor <- which(vapply(data, is.factor, logical(1)))
-  #   for (i in isFactor) {
-  #     data[, i] <- as.character(data[, i])
-  #   }
-  #   udata <- unique(data[names(data) %in% names(labels)])
-  #   if (NROW(udata) > 1) {
-  #     warning(
-  #       "When hoveron=fill, can't display more than one value for a given variable",
-  #       call. = FALSE
-  #     )
-  #   }
-  #   paste(
-  #     paste0(labels, ":"),
-  #     as.character(data[1, names(labels)]),
-  #     collapse = "<br />"
-  #   )
-  # }
-  # doms <- grep("_plotlyDomain$", names(data), value = TRUE)
-  # p$labels <- c(p$labels, setNames(sub("_plotlyDomain", "", doms), doms))
-  # txt <- hovertext_fill(data, p$labels)
-
+  
   L <- list(
     x = data$x,
     y = data$y,
