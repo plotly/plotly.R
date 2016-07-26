@@ -28,7 +28,7 @@
 #'   borders(regions = "canada") +
 #'   coord_equal() +
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
-#'  ggplotly(viz)
+#' ggplotly(viz, tooltip = c("text", "size"))
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
@@ -51,13 +51,13 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
         # so it doesn't make sense to synch zoom actions on y
         thisPlot <- thisPlot +
           theme(
-            axis.ticks.y = element_blank(), 
+            axis.ticks.y = element_blank(),
             axis.text.y = element_blank()
           )
       }
       columnList <- c(columnList, list(ggplotly(thisPlot, tooltip = tooltip)))
     }
-    # conditioned on a column in a ggmatrix, the x-axis should be on the 
+    # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
     s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
     subplotList <- c(subplotList, list(s))
@@ -68,9 +68,9 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   }
   s
 }
-  
+
 #' @export
-ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
+ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
                             height = NULL, tooltip = "all", source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source, ...)
   as_widget(l)
@@ -115,7 +115,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   scale_y <- function() scales$get_scales("y")
   panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
   # Before mapping x/y position, save the domain (for discrete scales)
-  # to display in tooltip. 
+  # to display in tooltip.
   data <- lapply(data, function(d) {
     if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
     if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
@@ -222,78 +222,20 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   panel$layout$y_min <- sapply(panel$ranges, function(z) min(z$y.range))
   panel$layout$y_max <- sapply(panel$ranges, function(z) max(z$y.range))
   
-  # --------------------------------------------------------------------
-  # Use aes mappings for sensible tooltips
-  # --------------------------------------------------------------------
-  
-  aesMap <- lapply(p$layers, function(x) { 
-    # layer level mappings (including stat generated aesthetics)
-    map <- c(
-      as.character(x$mapping),
-      grep("^\\.\\.", as.character(x$stat$default_aes), value = TRUE)
-    )
-    # add on plot-level mappings, if they're inherited
-    if (isTRUE(x$inherit.aes)) map <- c(map, as.character(p$mapping))
-    # "hidden" names should be taken verbatim
-    idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
-    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
-    map[idx] <- hiddenMap[idx]
-    names(map)[idx] <- hiddenMap[idx]
-    if (!identical(tooltip, "all")) {
-      map <- map[tooltip]
-    }
-    map
-  })
-  
-  
-  # attach a new column (hovertext) to each layer of data that should get mapped
-  # to the text trace property
-  data <- Map(function(x, y) {
-    if (nrow(x) == 0) return(x)
-    # make sure the relevant aes exists in the data
-    for (i in seq_along(y)) {
-      aesName <- names(y)[[i]]
-      # TODO: should we be getting the name from scale_*(name) first?
-      varName <- y[[i]]
-      # by default assume the values don't need any formatting
-      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-      if (isTRUE(aesName %in% c("x", "y"))) {
-        scaleName <- scales$get_scales(aesName)$scale_name
-        # convert "milliseconds from the UNIX epoch" to a date/datetime
-        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01")
-        # convert "days from the UNIX epoch" to a date/datetime
-        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
-      }
-      # add a line break if hovertext already exists
-      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
-      # text aestheic should be taken verbatim (for custom tooltips)
-      prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
-      # look for the domain, if that's not found, provide the range (useful for identity scales)
-      suffix <- tryCatch(
-        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
-        error = function(e) ""
-      )
-      x$hovertext <- paste0(x$hovertext, prefix, suffix)
-    }
-    x
-  }, data, aesMap)
-  
-  
-  
   # layers -> plotly.js traces
+  p$tooltip <- tooltip
   traces <- layers2traces(data, prestats_data, panel$layout, p)
-  
+
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
-  traces <- lapply(traces, function(tr) { 
-    tr$hoverinfo <- tr$hoverinfo %||%"text" 
-    tr 
+  traces <- lapply(traces, function(tr) {
+    tr$hoverinfo <- tr$hoverinfo %||%"text"
+    tr
   })
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
-  traces <- Map(function(x, y) { 
-    x$showlegend <- isTRUE(x$showlegend) && y 
+  traces <- Map(function(x, y) {
+    x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))
 
@@ -432,7 +374,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
           bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
           bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
-        
+
         if (nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
@@ -442,7 +384,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
                bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
                unitConvert(theme$axis.ticks.length, "npc", type))
         }
-        
+
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(p)) {
           stripSize <- unitConvert(stripText, "pixels", type)
@@ -479,7 +421,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-    
+
     # facet strips -> plotly annotations
     if (has_facet(p)) {
       col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
@@ -580,23 +522,25 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
     traces <- c(traces, colorbar)
-    
+
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-    legendTitle <- paste(legendTitles, collapse = "<br>")
-    titleAnnotation <- make_label(
-      legendTitle, 
-      x = gglayout$legend$x %||% 1.02,
-      y = gglayout$legend$y %||% 1, 
-      theme$legend.title,
-      xanchor = "left",
-      yanchor = "top"
-    )
-    gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-    # adjust the height of the legend to accomodate for the title
-    # this assumes the legend always appears below colorbars
-    gglayout$legend$y <- (gglayout$legend$y %||% 1) - 
-      length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+    if (isTRUE(gglayout$showlegend)) {
+      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
+      legendTitle <- paste(legendTitles, collapse = "<br>")
+      titleAnnotation <- make_label(
+        legendTitle,
+        x = gglayout$legend$x %||% 1.02,
+        y = gglayout$legend$y %||% 1,
+        theme$legend.title,
+        xanchor = "left",
+        yanchor = "top"
+      )
+      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
+      # adjust the height of the legend to accomodate for the title
+      # this assumes the legend always appears below colorbars
+      gglayout$legend$y <- (gglayout$legend$y %||% 1) -
+        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+    }
   }
 
   # geom_bar() hacks
@@ -685,16 +629,16 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
-  
+
   gglayout$width <- width
   gglayout$height <- height
-  
+
   id <- new_id()
   l <- list(
     visdat = setNames(list(function() data[[length(data)]]), id),
     attrs = list(),
     cur_data = id,
-    data = setNames(traces, NULL), 
+    data = setNames(traces, NULL),
     layout = compact(gglayout),
     source = source
   )
