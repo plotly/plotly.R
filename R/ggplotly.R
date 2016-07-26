@@ -109,6 +109,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   panel <- ggfun("new_panel")()
   panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
   data <- ggfun("map_layout")(panel, p$facet, layer_data)
+  # save the domain of the group for display in tooltips
+  groupDomains <- Map(function(x, y) {
+    tryCatch(
+      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x), 
+      error = function(e) NULL
+    )
+  }, data, p$layers)
   data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
   scale_x <- function() scales$get_scales("x")
@@ -176,19 +183,19 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   gglayout$margin$t <- gglayout$margin$t + 16
-
+  
   # important stuff like panel$ranges is already flipped, but
   # p$scales/p$labels/data aren't. We flip x/y trace data at the very end
   # and scales in the axis loop below.
   if (inherits(p$coordinates, "CoordFlip")) {
     p$labels[c("x", "y")] <- p$labels[c("y", "x")]
   }
-
+  
   # important panel summary stats
   nPanels <- nrow(panel$layout)
   nRows <- max(panel$layout$ROW)
   nCols <- max(panel$layout$COL)
-
+  
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
   panel$layout$xaxis <- panel$layout$COL
@@ -224,8 +231,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   
   # layers -> plotly.js traces
   p$tooltip <- tooltip
+  data <- Map(function(x, y) {
+    tryCatch({x$group_plotlyDomain <- y; x}, error = function(e) x)
+  }, data, groupDomains)
   traces <- layers2traces(data, prestats_data, panel$layout, p)
-
+  
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
   traces <- lapply(traces, function(tr) {
@@ -238,11 +248,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))
-
+  
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
   # ------------------------------------------------------------------------
-
+  
   # panel margins must be computed before panel/axis loops
   # (in order to use get_domains())
   panelMarginX <- unitConvert(
@@ -291,7 +301,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginY, 2)
   )
   doms <- get_domains(nPanels, nRows, margins)
-
+  
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
@@ -305,7 +315,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
-
+      
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
@@ -364,7 +374,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       )
       # attach axis object to the layout
       gglayout[[axisName]] <- axisObj
-
+      
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
@@ -374,7 +384,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
           bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
           bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
-
+        
         if (nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
@@ -384,7 +394,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
                bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
                unitConvert(theme$axis.ticks.length, "npc", type))
         }
-
+        
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(p)) {
           stripSize <- unitConvert(stripText, "pixels", type)
@@ -415,13 +425,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
       if (has_facet(p)) gglayout[[axisName]]$title <- ""
     } # end of axis loop
-
+    
     # theme(panel.border = ) -> plotly rect shape
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
-
+    
     # facet strips -> plotly annotations
     if (has_facet(p)) {
       col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
@@ -457,7 +467,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
   } # end of panel loop
-
+  
   # ------------------------------------------------------------------------
   # guide conversion
   #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
@@ -465,7 +475,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # ------------------------------------------------------------------------
   # will there be a legend?
   gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) >= 1
-
+  
   # legend styling
   gglayout$legend <- list(
     bgcolor = toRGB(theme$legend.background$fill),
@@ -473,18 +483,18 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
     font = text2font(theme$legend.text)
   )
-
+  
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
   } else {
     # by default, guide boxes are vertically aligned
     theme$legend.box <- theme$legend.box %||% "vertical"
-
+    
     # size of key (also used for bar in colorbar guide)
     theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
     theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
-
+    
     # legend direction must be vertical
     theme$legend.direction <- theme$legend.direction %||% "vertical"
     if (!identical(theme$legend.direction, "vertical")) {
@@ -496,7 +506,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       )
       theme$legend.direction <- "vertical"
     }
-
+    
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
@@ -505,7 +515,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       gdefs <- ggfun("guides_merge")(gdefs)
       gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
     }
-
+    
     # colourbar -> plotly.js colorbar
     colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
     nguides <- length(colorbar) + gglayout$showlegend
@@ -522,7 +532,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
     traces <- c(traces, colorbar)
-
+    
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
     if (isTRUE(gglayout$showlegend)) {
       legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
@@ -542,7 +552,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
     }
   }
-
+  
   # geom_bar() hacks
   geoms <- sapply(layers, ggtype, "geom")
   if (any(idx <- geoms %in% "bar")) {
@@ -571,7 +581,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       gglayout$bargap <- 0
     }
   }
-
+  
   # flip x/y in traces for flipped coordinates
   # (we've already done appropriate flipping for axis objects)
   if (inherits(p$coordinates, "CoordFlip")) {
@@ -584,7 +594,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }
   }
-
+  
   # Error bar widths in ggplot2 are on the range of the x/y scale,
   # but plotly wants them in pixels:
   for (xy in c("x", "y")) {
@@ -599,7 +609,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
   }
-
+  
   # try to merge marker/line traces that have the same values for these props
   props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name")
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
@@ -620,7 +630,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     }
     traces <- mergedTraces
   }
-
+  
   # better layout defaults (TODO: provide a mechanism for templating defaults)
   gglayout$hovermode <- "closest"
   ax <- grep("^[x-y]axis", names(gglayout))
@@ -629,10 +639,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
-
+  
   gglayout$width <- width
   gglayout$height <- height
-
+  
   id <- new_id()
   l <- list(
     visdat = setNames(list(function() data[[length(data)]]), id),
@@ -654,7 +664,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
   u <- verifyUnit(u)
-
+  
   convert <- switch(
     type[1],
     x = grid::convertX,

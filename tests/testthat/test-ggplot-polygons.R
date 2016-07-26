@@ -20,8 +20,8 @@ poly.df <- data.frame(
   lab = rep(c("left", "right"), each = 4)
 )
 
-test_that("polygons filled with the same color become one trace", {
-  gg <- ggplot(poly.df) + geom_polygon(aes(x, y, group = g))
+test_that("polygons with different hovertext must be different traces ", {
+  gg <- ggplot(poly.df) + geom_polygon(aes(x, y, group = lab))
   info <- expect_traces(gg, 2, "black")
   expect_equal(info$data[[1]]$x, c(10, 11, 11, 10, 10))
   expect_equal(info$data[[2]]$x, c(12, 13, 13, 12, 12))
@@ -29,6 +29,18 @@ test_that("polygons filled with the same color become one trace", {
   expect_equal(info$data[[2]]$y, c(0, 0, 1, 1, 0))
   expect_equal(unique(sapply(info$data, "[[", "fill")), "toself")
   expect_equal(unique(sapply(info$data, "[[", "hoveron")), "fills")
+  expect_equal(sapply(info$data, "[[", "text"), c("lab: left", "lab: right"))
+})
+
+test_that("polygons with identical fill and hovertext generate one trace", {
+  gg <- ggplot(poly.df) + geom_polygon(aes(x, y, group = lab))
+  info <- plotly_build(ggplotly(gg, tooltip = NULL))$x
+  expect_equal(length(info$data), 1)
+  expect_equal(info$data[[1]]$x, c(10, 11, 11, 10, 10, NA, 12, 13, 13, 12, 12))
+  expect_equal(info$data[[1]]$y, c(0, 0, 1, 1, 0, NA, 0, 0, 1, 1, 0))
+  expect_equal(info$data[[1]]$fill, "toself")
+  expect_equal(info$data[[1]]$hoveron, "fills")
+  expect_equal(nchar(info$data[[1]]$text), 0)
 })
 
 blue.color <- rgb(0.23, 0.45, 0.67)
