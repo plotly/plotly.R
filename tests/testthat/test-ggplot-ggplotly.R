@@ -17,7 +17,7 @@ test_that("can filter data returned by ggplotly", {
 
 test_that("can add traces with original _and_ scaled data", {
   l1 <- ggplotly(p) %>% add_lines() %>% plotly_build() %>% .[["x"]]
-  expect_equal(length(l$data), 2)
+  expect_equal(length(l1$data), 2)
   l2 <- ggplotly(p, originalData = FALSE) %>% 
     add_lines() %>% plotly_build() %>% .[["x"]]
   expect_equal(l1, l2)
