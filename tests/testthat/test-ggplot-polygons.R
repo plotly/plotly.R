@@ -147,6 +147,7 @@ test_that("borders become one trace with NA", {
   info <- save_outputs(gg, "polygons-canada-borders")
   expect_equal(length(info$data), 1)
   expect_true(any(is.na(info$data[[1]]$x)))
+  expect_equal(nchar(info$data[[1]]$text), 0)
 })
 
 x <- c(0, -1, 2, -2, 1)

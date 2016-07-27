@@ -219,10 +219,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     }
   }
   # format the axis/anchor to a format plotly.js respects
-  panel$layout$xaxis <- paste0("xaxis", sub("1$", "", panel$layout$xaxis))
-  panel$layout$yaxis <- paste0("yaxis", sub("1$", "", panel$layout$yaxis))
-  panel$layout$xanchor <- paste0("y", sub("1$", "", panel$layout$xanchor))
-  panel$layout$yanchor <- paste0("x", sub("1$", "", panel$layout$yanchor))
+  panel$layout$xaxis <- paste0("xaxis", sub("^1$", "", panel$layout$xaxis))
+  panel$layout$yaxis <- paste0("yaxis", sub("^1$", "", panel$layout$yaxis))
+  panel$layout$xanchor <- paste0("y", sub("^1$", "", panel$layout$xanchor))
+  panel$layout$yanchor <- paste0("x", sub("^1$", "", panel$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
   panel$layout$x_min <- sapply(panel$ranges, function(z) min(z$x.range))
   panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
