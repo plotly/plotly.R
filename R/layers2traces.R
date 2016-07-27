@@ -577,7 +577,7 @@ geom2trace.GeomText <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data$label,
+    text = uniq(data$hovertext),
     key = data$key,
     textfont = list(
       # TODO: how to translate fontface/family?
