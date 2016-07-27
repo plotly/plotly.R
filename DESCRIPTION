@@ -33,6 +33,7 @@ Imports:
     htmlwidgets,
     tidyr,
     dplyr,
+    tibble,
     hexbin,
     lazyeval (>= 0.2.0)
 Suggests:

@@ -12,6 +12,7 @@
 #' also control the order they appear. For example, use
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
+#' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
@@ -32,13 +33,14 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", source = "A", ...) {
+                     tooltip = "all", originalData = TRUE, source = "A", ...) {
   UseMethod("ggplotly", p)
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
-                              height = NULL, tooltip = "all", source = "A", ...) {
+                              height = NULL, tooltip = "all", 
+                              originalData = TRUE, source = "A", ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -71,8 +73,10 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
-                            height = NULL, tooltip = "all", source = "A", ...) {
-  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source, ...)
+                            height = NULL, tooltip = "all", originalData = TRUE,
+                            source = "A", ...) {
+  l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
+               originalData = originalData, source = source, ...)
   as_widget(l)
 }
 
@@ -83,11 +87,13 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
+#' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A", ...) {
+gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
+                    originalData = TRUE, source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -643,17 +649,35 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   gglayout$width <- width
   gglayout$height <- height
   
-  id <- new_id()
   l <- list(
-    visdat = setNames(list(function() data[[length(data)]]), id),
-    attrs = list(),
-    cur_data = id,
     data = setNames(traces, NULL),
     layout = compact(gglayout),
     source = source
   )
-  # ensure properties are boxed correctly
-  rm_asis(l)
+  # strip any existing 'AsIs' list elements of their 'AsIs' status.
+  # this is necessary since ggplot_build(qplot(1:10, fill = I("red")))
+  # returns list element with their 'AsIs' class,
+  # which conflicts with our JSON unboxing strategy.
+  l <- rm_asis(l)
+  l$cur_data <- new_id()
+  # translate "plot-wide" aesthetic mappings to formulas so plotly_build() 
+  # understands them
+  mappingFormulas <- if (originalData) {
+    lapply(p$mapping, lazyeval::f_new)
+  } else {
+    nms <- names(p$mapping)
+    setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+  }
+  # TODO: if exposing "scaled" data, how do we ensure it is "global"?
+  dat <- if (originalData) p$data else data[[1]]
+  if (!is.null(mappingFormulas[["group"]])) {
+    dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
+  }
+  # don't need to add group as an attribute anymore
+  mappingFormulas <- mappingFormulas[!grepl("^group$", names(mappingFormulas))]
+  l$attrs <- setNames(list(mappingFormulas), l$cur_data)
+  l$visdat <- setNames(list(function() dat), l$cur_data)
+  l
 }
 
 

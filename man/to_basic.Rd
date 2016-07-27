@@ -21,7 +21,7 @@ to_basic(data, prestats_data, layout, params, p, ...)
 }
 \description{
 This function makes it possible to convert ggplot2 geoms that
-are not included with ggplot2 itself. Users shouldn't need to use 
+are not included with ggplot2 itself. Users shouldn't need to use
 this function. It exists purely to allow other package authors to write
 their own conversion method(s).
 }

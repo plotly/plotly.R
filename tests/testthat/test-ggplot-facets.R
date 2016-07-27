@@ -121,3 +121,13 @@ test_that("facet_grid translates simple labeller function", {
   )
 })
 
+p <- economics %>% tidyr::gather(variable, value, -date) %>% 
+  qplot(data = ., date, value) + 
+  facet_wrap(~variable, scale = "free_y", ncol = 2)
+
+test_that("when y scales are free, x-axes are still anchored on exterior", {
+  info <- save_outputs(p, "facet_wrap-free_y")
+  xaxes <- info$layout[grep("^xaxis", names(info$layout))]
+  yaxes <- info$layout[grep("^yaxis", names(info$layout))]
+  expect_equal(unique(sapply(xaxes, "[[", "anchor")), "y5")
+})

@@ -57,3 +57,14 @@ test_that("geom_tile() displays correct info in tooltip with discrete y", {
   expect_true(all(grepl("factor\\(cyl\\): [4,6,8]", txt)))
 })
 
+p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
+  geom_line(alpha = 0.3)
+
+test_that("group domain is included in hovertext", {
+  L <- save_outputs(p, "group-lines-hovertext")
+  expect_equal(length(L$data), 1)
+  txt <- L$data[[1]]$text
+  txt <- txt[!is.na(txt)]
+  pattern <- paste(unique(txhousing$city), collapse = "|")
+  expect_true(all(grepl(pattern, txt)))
+})
