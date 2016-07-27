@@ -77,7 +77,7 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
                             source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
                originalData = originalData, source = source, ...)
-  as_widget(l)
+  structure(as_widget(l), ggplotly = TRUE)
 }
 
 #' Convert a ggplot to a list.

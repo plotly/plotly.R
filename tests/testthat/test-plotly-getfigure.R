@@ -37,9 +37,11 @@ test_that("can add traces to a subplot figure", {
   skip_on_cran()
   skip_on_pull_request()
   fig <- get_figure('chelsea_lyn', 6366)
-  p <- add_trace(fig, x = c(1, 2, 3), y = c(4, 2, 4))
-  l <- plotly_build(p)$x
-  expect_equivalent(length(plotly_build(fig)$x$data) + 1, length(l$data))
+  p <- add_lines(fig, x = c(1, 2, 3), y = c(4, 2, 4))
+  expect_equivalent(
+    length(plotly_build(fig)$x$data) + 1, 
+    length(plotly_build(p)$x$data)
+  )
 })
 
 test_that("posting a hidden plot returns a secret key", {
