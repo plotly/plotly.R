@@ -48,7 +48,7 @@ plotly_build.plotly <- function(p) {
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]])) {
-    if (length(p$x$attrs) > 1 || isTRUE(attr(p$x, "ggplotly"))) {
+    if (length(p$x$attrs) > 1 || isTRUE(attr(p, "ggplotly"))) {
       p$x$attrs[[1]] <- NULL
     }
   }
