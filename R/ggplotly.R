@@ -216,6 +216,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     if (p$facet$free$y) {
       panel$layout$yaxis <- panel$layout$PANEL
       panel$layout$yanchor <- panel$layout$COL
+      panel$layout$xanchor <- nPanels
     }
     if (p$facet$free$x && p$facet$free$y) {
       panel$layout$xaxis <- panel$layout$PANEL
