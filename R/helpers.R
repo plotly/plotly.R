@@ -1,8 +1,21 @@
-#' Hide a color bar 
+#' Hide guides (legends and colorbars)
+#'
+#' @param p a plotly object.
+#' @export
+#' @seealso \link{hide_legend}, \link{hide_colorbar}
+#'
+
+hide_guides <- function(p) {
+  hide_legend(hide_colorbar(p))
+}
+
+
+#' Hide color bar(s)
 #' 
 #' @param p a plotly object.
 #' @export
-#' @examples 
+#' @seealso \link{hide_legend}
+#' @examples
 #' 
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
 #'   add_markers() %>%
@@ -18,6 +31,30 @@ hide_colorbar <- function(p) {
       p$x$data[[i]]$marker$showscale <- FALSE
     }
   }
+  p
+}
+
+#' Hide legend
+#' 
+#' @param p a plotly object.
+#' @export
+#' @seealso \link{hide_legend}
+#' @examples 
+#' 
+#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
+#'   add_markers() %>%
+#'   hide_colorbar()
+
+hide_legend <- function(p) {
+  p <- plotly_build(p)
+  # annotations have to be an array of objects, so this should be a list of lists
+  ann <- p$x$layout$annotations
+  for (i in seq_along(ann)) {
+    if (isTRUE(ann[[i]]$legendTitle)) {
+      p$x$layout$annotations[[i]] <- NULL
+    }
+  }
+  p$x$layout$showlegend <- FALSE
   p
 }
 

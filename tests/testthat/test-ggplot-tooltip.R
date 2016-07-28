@@ -68,3 +68,30 @@ test_that("group domain is included in hovertext", {
   pattern <- paste(unique(txhousing$city), collapse = "|")
   expect_true(all(grepl(pattern, txt)))
 })
+
+
+labelDF <- data.frame(
+  label = paste0(("label"), c(1:10)), 
+  x = runif(10, 1, 10), 
+  y = runif(10, 1, 10)
+)
+# Create data frame for 10 edges
+edgeDF <- data.frame(
+  x = runif(10, 1, 10), 
+  y = runif(10, 1, 10), 
+  xend = runif(10, 1, 10), 
+  yend = runif(10, 1, 10)
+)
+
+myPlot <- ggplot(data = labelDF, aes(x = x, y = y)) +
+  geom_segment(data = edgeDF, aes(x = x, y = y, xend = xend, yend = yend), 
+               colour = "pink") +
+  geom_text(data = labelDF, aes(x = x, y = y, label = label), size = 10)
+
+test_that("Hoverinfo is only displayed if no tooltip variables are present", {
+  L <- save_outputs(p, "hovertext-display")
+  L <- plotly_build(ggplotly(myPlot, tooltip = "label"))[["x"]]
+  expect_equal(length(L$data), 2)
+  expect_equal(sum(nchar(L$data[[1]]$text)), 0)
+  expect_true(all(grepl("^label:", L$data[[2]]$text)))
+})
