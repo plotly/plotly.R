@@ -32,7 +32,6 @@ process.plotly_figure <- function(resp) {
   # make sure that we always return a HTTPS link
   con$url <- sub("^http[s]?:", "https:", con$url)
   fig <- verify_boxed(fig)
-  fig$data <- lapply(fig$data, verify_type)
   as_widget(fig)
 }
 

@@ -25,6 +25,7 @@
 group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
                      retrace.first = inherits(data, "GeomPolygon")) {
   if (NROW(data) == 0) return(data)
+  data <- data[!duplicated(names(data))]
   # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
   retrace <- force(retrace.first)
   datClass <- class(data)

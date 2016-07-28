@@ -5,7 +5,6 @@ PlantGrowth$type <-
 boxes <- ggplot(PlantGrowth, aes(x = group, y = weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("ticks-", name))
   all.traces <- L$data

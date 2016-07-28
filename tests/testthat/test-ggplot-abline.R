@@ -3,7 +3,6 @@ context("Abline")
 # 'Abline' refers to the line coefficients, as in y = a  b * x
 
 expect_traces <- function(gg, n.traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("cookbook-axes-", name))
   all.traces <- L$data

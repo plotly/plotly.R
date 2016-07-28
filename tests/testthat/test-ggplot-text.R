@@ -5,7 +5,8 @@ gg <- ggplot(mtcars, aes(x = wt, y = mpg, label = rownames(mtcars))) +
 info <- save_outputs(gg, "text")
 
 test_that("label is translated correctly", {
-  expect_identical(as.character(info$data[[1]]$text), rownames(mtcars))
+  greps <- Map(function(x, y) grepl(x, y), rownames(mtcars), info$data[[1]]$text)
+  expect_true(all(unlist(greps)))
 })
 
 test_that("position is translated correctly", {

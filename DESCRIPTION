@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.0.2
+Version: 4.1.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -33,6 +33,7 @@ Imports:
     htmlwidgets,
     tidyr,
     dplyr,
+    tibble,
     hexbin,
     lazyeval (>= 0.2.0)
 Suggests:

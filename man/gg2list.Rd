@@ -4,8 +4,8 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL, tooltip = "all", source = "A",
-  ...)
+gg2list(p, width = NULL, height = NULL, tooltip = "all",
+  originalData = TRUE, source = "A", ...)
 }
 \arguments{
 \item{p}{ggplot2 plot.}
@@ -17,6 +17,8 @@ gg2list(p, width = NULL, height = NULL, tooltip = "all", source = "A",
 \item{tooltip}{a character vector specifying which aesthetic tooltips to show in the
 tooltip. The default, "all", means show all the aesthetic tooltips
 (including the unofficial "text" aesthetic).}
+
+\item{originalData}{should the "original" or "scaled" data be returned?}
 
 \item{source}{Only relevant for \link{event_data}.}
 

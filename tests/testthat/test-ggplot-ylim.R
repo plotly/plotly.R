@@ -15,7 +15,6 @@ gg.ylim <-
   ggtitle("Average bill for 2 people")
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("ylim-", name))
   all.traces <- L$data
