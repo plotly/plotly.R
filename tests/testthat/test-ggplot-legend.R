@@ -1,7 +1,6 @@
 context("legends")
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("legend-", name))
   all.traces <- L$data

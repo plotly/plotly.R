@@ -2,7 +2,6 @@ context("geom_jitter")
 
 # Expect trace function
 expect_traces <- function(gg, n_traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n_traces))
   save_outputs(gg, paste0("jitter-", name))
   L <- gg2list(gg)

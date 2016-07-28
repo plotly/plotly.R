@@ -3,7 +3,6 @@ context("Area")
 # Test that the order of traces is correct
 # Expect traces function
 expect_traces <- function(gg, n_traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n_traces))
   save_outputs(gg, paste0("area-", name))
   L <- gg2list(gg)

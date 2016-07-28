@@ -54,6 +54,9 @@ hide_legend <- function(p) {
       p$x$layout$annotations[[i]] <- NULL
     }
   }
+  if (length(p$x$layout$annotations) == 0) {
+    p$x$layout$annotations <- NULL
+  }
   p$x$layout$showlegend <- FALSE
   p
 }
