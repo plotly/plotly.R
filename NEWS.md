@@ -1,3 +1,23 @@
+# 4.1.0 -- 27 June 2016
+
+## NEW FEATURES
+
+* `ggplotly()` gains a new `originalData` argument which allows one to attach either the original (global) data, or a "scaled"/"trained" version of the data used by __ggplot2__ to draw the graph (for a quick example, `ggplotly(qplot(1:10), originalData = FALSE) %>% plotly_data()`). 
+* Hoverinfo is now shown for fill, instead of points, for several geoms (`geom_polygon()`/`geom_hex()`/`geom_rect()`/`geom_map()`). 
+* If `stat_identity()` is used, group domain values are preserved and displayed in hoverinfo.
+* New functions `hide_guides()`/`hide_legend()` were added (these work similarly to the existing `hide_colorbar()`) to simply the hiding of guides (i.e., legends/colorbars).
+
+## BUG FIXES
+
+* Legend titles (annotations) are no longer generated when no legend is displayed (#635, #607)
+* Hoverinfo is no longer displayed if no tooltip variables are present in a layer (#563).
+* Facets with 10 or more columns/rows should now render correctly (#640).
+* x-axis anchors in `facet_wrap()` should now be correct.
+
+## OTHER CHANGES
+
+* Upgraded to plotly.js v1.15.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.15.0
+
 # 4.0.2 -- 25 June 2016
 
 ## BUG FIXES
