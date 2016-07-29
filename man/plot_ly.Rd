@@ -100,15 +100,21 @@ add_markers(p, color = ~Species, colors = "Set1")
 add_markers(p, symbol = ~Species)
 add_paths(p, linetype = ~Species)
 
-# client-side interactions
+# client-side linked brushing
 library(crosstalk)
-mtcars$id <- seq_len(nrow(mtcars))
-sd <- SharedData$new(mtcars, "id")
+sd <- SharedData$new(mtcars)
 o <- ct_opts(color = "red")
 subplot(
-  plot_ly(sd, x = ~wt, y = ~mpg, crosstalkOpts = o),
-  plot_ly(sd, x = ~wt, y = ~disp, crosstalkOpts = o)
-) \%>\% layout(dragmode = "select")
+  plot_ly(sd, x = ~wt, y = ~mpg, color = I("black"), crosstalkOpts = o),
+  plot_ly(sd, x = ~wt, y = ~disp, color = I("black"), crosstalkOpts = o)
+) \%>\% hide_legend()
+
+# client-side highlighting
+sd <- SharedData$new(txhousing, ~city)
+plot_ly(sd, x = ~date, y = ~median) \%>\%
+  group_by(city) \%>\%
+  add_lines() \%>\% 
+  add_markers()
 
 }
 

@@ -75,15 +75,21 @@
 #' add_markers(p, symbol = ~Species)
 #' add_paths(p, linetype = ~Species)
 #' 
-#' # client-side interactions
+#' # client-side linked brushing
 #' library(crosstalk)
-#' mtcars$id <- seq_len(nrow(mtcars))
-#' sd <- SharedData$new(mtcars, "id")
+#' sd <- SharedData$new(mtcars)
 #' o <- ct_opts(color = "red")
 #' subplot(
-#'   plot_ly(sd, x = ~wt, y = ~mpg, crosstalkOpts = o),
-#'   plot_ly(sd, x = ~wt, y = ~disp, crosstalkOpts = o)
-#' ) %>% layout(dragmode = "select")
+#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black"), crosstalkOpts = o),
+#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"), crosstalkOpts = o)
+#' ) %>% hide_legend()
+#' 
+#' # client-side highlighting
+#' sd <- SharedData$new(txhousing, ~city)
+#' plot_ly(sd, x = ~date, y = ~median) %>%
+#'   group_by(city) %>%
+#'   add_lines() %>% 
+#'   add_markers()
 #' 
 #' }
 #'
@@ -95,12 +101,11 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     crosstalkEvents = "plotly_selected",
                     crosstalkOpts = ct_opts()) {
   
-  if (crosstalk::is.SharedData(data)) {
-    set <- data$groupName()
+  is_sd <- crosstalk::is.SharedData(data)
+  if (is_sd) {
     key <- data$key()
+    set <- data$groupName()
     data <- data$origData()
-    # get the actual key values as opposed to just the variable name
-    key <- if (is.formula(key)) lazyeval::f_eval(key, data) else data[[key]]
   } else {
     key <- NULL
     set <- NULL
@@ -160,10 +165,11 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
     # we always deal with a _list_ of traces and _list_ of layouts 
     # since they can each have different data
     layout = list(
-        width = width, 
-        height = height,
-        # sane margin defaults (mainly for RStudio)
-        margin = list(b = 40, l = 60, t = 25, r = 10)
+      width = width, 
+      height = height,
+      # sane margin defaults (mainly for RStudio)
+      margin = list(b = 40, l = 60, t = 25, r = 10),
+      dragmode = if (is_sd) "select"
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
     base_url = get_domain()
