@@ -73,7 +73,7 @@ skip_on_pull_request <- function() {
 # object (aka the data behind the plot).
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- plotly_build(gg)
+  p <- plotly_build(gg)$x[c("data", "layout")]
   has_diff <- if (report_diffs) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
@@ -84,14 +84,8 @@ save_outputs <- function(gg, name) {
     !isTRUE(plot_hash == test_info$hash)
   } else FALSE
   if (has_diff || build_table) {
-    # hack to transfer workspace to the other R session
-    rs_assign <- function(obj, name) RSassign(conn, obj, name)
-    res <- mapply(rs_assign, mget(ls()), ls())
-    # also need to transfer over the plotly environment to enable NSE
-    res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
-    res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
-    res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
-    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg), error = function(e) 'plotly build error')")
+    RSassign(conn, gg)
+    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg)$x[c('data', 'layout')], error = function(e) e$message)")
     if (build_table) {
       # save pngs of ggplot
       filename <- paste0(gsub("\\s+", "-", name), ".png")

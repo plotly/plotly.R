@@ -1,7 +1,6 @@
 context("geom_point")
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("smooth-", name))
   all.traces <- L$data
@@ -57,13 +56,4 @@ test_that("can plot on sub-second time scale", {
   g <- ggplot(d, aes(x, y)) + geom_point()
   info <- save_outputs(g, "point-size-alpha2")
   expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
-})
-
-
-test_that("tickvals/ticktext are appropriately boxed", {
-  d <- data.frame(x = factor(75), y = 10)
-  p <- qplot(x, y, data = d) 
-  info <- save_outputs(p, "point-box")
-  expect_true(plotly:::to_JSON(info$layout$xaxis$tickvals) == '[1]')
-  expect_true(plotly:::to_JSON(info$layout$xaxis$ticktext) == '["75"]')
 })

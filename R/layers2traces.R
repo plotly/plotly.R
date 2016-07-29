@@ -1,12 +1,76 @@
 # layer -> trace conversion
 layers2traces <- function(data, prestats_data, layout, p) {
-  # Attach a "geom class" to each layer of data for method dispatch 
+  # Attach a "geom class" to each layer of data for method dispatch
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
-  # Extract parameters for each layer
-  params <- lapply(p$layers, function(x) {
-    c(x$geom_params, x$stat_params, x$aes_params, position = ggtype(x, "position"))
-  })
-  # we draw legends only for discrete scales
+  
+  # Extract parameters (and "hovertext aesthetics") in each layer
+  params <- Map(function(x, y) {
+    param <- c(
+      y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
+      position = ggtype(y, "position")
+    )
+    # by default, show all user-specified and generated aesthetics in hovertext
+    map <- c(
+      as.character(y$mapping),
+      grep("^\\.\\.", as.character(y$stat$default_aes), value = TRUE)
+    )
+    # add on plot-level mappings, if they're inherited
+    if (isTRUE(y$inherit.aes)) map <- c(map, as.character(p$mapping))
+    # "hidden" names should be taken verbatim
+    idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
+    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
+    map[idx] <- setNames(hiddenMap[idx], hiddenMap[idx])
+    if (!identical(p$tooltip, "all")) {
+      map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
+    }
+    # throw out positional coordinates if we're hovering on fill
+    if (identical("fills", hover_on(x))) {
+      map <- map[!names(map) %in% c("x", "xmin", "xmax", "y", "ymin", "ymax")]
+    }
+    param[["hoverTextAes"]] <- map
+    param
+  }, data, p$layers)
+  
+  hoverTextAes <- lapply(params, "[[", "hoverTextAes")
+  
+  # attach a new column (hovertext) to each layer of data
+  # (mapped to the text trace property)
+  data <- Map(function(x, y) {
+    if (nrow(x) == 0) return(x)
+    # make sure the relevant aes exists in the data
+    for (i in seq_along(y)) {
+      aesName <- names(y)[[i]]
+      if (!aesName %in% names(x)) next
+      # TODO: should we be getting the name from scale_*(name) first?
+      varName <- y[[i]]
+      # "automatically" generated group aes is not informative
+      if (identical("group", unique(varName, aesName))) next
+      # by default assume the values don't need any formatting
+      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
+      if (isTRUE(aesName %in% c("x", "y"))) {
+        scaleName <- p$scales$get_scales(aesName)$scale_name
+        # convert "milliseconds from the UNIX epoch" to a date/datetime
+        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
+        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01")
+        # convert "days from the UNIX epoch" to a date/datetime
+        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
+      }
+      # add a line break if hovertext already exists
+      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
+      # text aestheic should be taken verbatim (for custom tooltips)
+      prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
+      # look for the domain, if that's not found, provide the range (useful for identity scales)
+      suffix <- tryCatch(
+        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
+        error = function(e) ""
+      )
+      x$hovertext <- paste0(x$hovertext, prefix, suffix)
+    }
+    x$hovertext <- x$hovertext %||% ""
+    x
+  }, data, hoverTextAes)
+  
+  # draw legends only for discrete scales
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
     if (sc$is_discrete()) {
@@ -20,7 +84,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   datz <- list()
   paramz <- list()
   for (i in seq_along(data)) {
-    # This has to be done in a loop, since some layers are really two layers, 
+    # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
     if (is.data.frame(d)) d <- list(d)
@@ -29,47 +93,40 @@ layers2traces <- function(data, prestats_data, layout, p) {
       paramz <- c(paramz, params[j])
     }
   }
-  
   # now to the actual layer -> trace conversion
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # always split on discrete scales, and other geom specific aesthetics that
-    # can't translate to a single trace
-    split_by <- c(split_on(d), names(discreteScales))
-    # always split on PANEL and domain values (for trace ordering)
-    split_by <- c("PANEL", paste0(split_by, "_plotlyDomain"))
-    # split "this layers" data into a list of data frames
-    idx <- names(d) %in% split_by
-    # ensure the factor level orders (which determies traces order)
+    # variables that produce multiple traces and deserve their own legend entries
+    split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    # add variable that produce multiple traces, but do _not_ deserve entries
+    split_by <- c(split_legend, "PANEL", split_on(d))
+    # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
-    lvls <- unique(d[idx])
+    split_vars <- intersect(split_by, names(d))
+    lvls <- unique(d[split_vars])
     lvls <- lvls[do.call(order, lvls), , drop = FALSE]
+    separator <- new_id()
     fac <- factor(
-      apply(d[idx], 1, paste, collapse = "@%&"),
-      levels = apply(lvls, 1, paste, collapse = "@%&")
+      apply(d[split_vars], 1, paste, collapse = separator),
+      levels = apply(lvls, 1, paste, collapse = separator)
     )
     if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i], list(p))
-    # are we splitting by a discrete scale on this layer?
-    # if so, set name/legendgroup/showlegend
-    isDiscrete <- names(d) %in% paste0(names(discreteScales), "_plotlyDomain")
-    if (length(trs) > 1 && sum(isDiscrete) >= 1) {
-      nms <- names(trs)
-      # ignore "non-discrete" scales that we've split on
-      for (w in seq_len(sum(names(d) %in% c("PANEL", split_on(d))))) {
-        nms <- sub("^[^@%&]@%&", "", nms)
-      }
-      nms <- strsplit(nms, "@%&")
+    # if we need a legend, set name/legendgroup/showlegend
+    # note: this allows us to control multiple traces from one legend entry
+    if (any(split_legend %in% names(d))) {
+      nms <- strsplit(names(trs), separator, fixed = TRUE)
       nms <- vapply(nms, function(x) {
-        if (length(x) > 1) paste0("(", paste0(x, collapse = ","), ")") else x
+        y <- unique(x[seq_along(split_legend)])
+        if (length(y) > 1) paste0("(", paste(y, collapse = ","), ")") else y
       }, character(1))
       trs <- Map(function(x, y) {
         x$name <- y
         x$legendgroup <- y
-        # depending on the geom (e.g. smooth) this may be FALSE already 
+        # depending on the geom (e.g. smooth) this may be FALSE already
         x$showlegend <- x$showlegend %||% TRUE
         x
       }, trs, nms)
@@ -94,12 +151,12 @@ layers2traces <- function(data, prestats_data, layout, p) {
 
 
 #' Convert a geom to a "basic" geom.
-#' 
+#'
 #' This function makes it possible to convert ggplot2 geoms that
-#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' are not included with ggplot2 itself. Users shouldn't need to use
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
-#' 
+#'
 #' @param data the data returned by \code{ggplot2::ggplot_build()}.
 #' @param prestats_data the data before statistics are computed.
 #' @param layout the panel layout.
@@ -114,11 +171,11 @@ to_basic <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
   n <- nrow(data)
-  revData <- data[order(data$y, decreasing = TRUE), ]
+  revData <- data[order(data[["y"]], decreasing = TRUE), ]
   idx <- !names(data) %in% c("x", "xmin", "xmax")
   data <- rbind(
-    cbind(x = data$x - data$violinwidth / 2, data[, idx]),
-    cbind(x = revData$x + revData$violinwidth / 2, revData[, idx])
+    cbind(x = data[["x"]] - data$violinwidth / 2, data[, idx]),
+    cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
   if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, "<br>")
   data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
@@ -133,7 +190,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
   }
   vars <- c("PANEL", "group", aez, grep("_plotlyDomain$", names(data), value = T))
   prefix_class(
-    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE), 
+    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
 }
@@ -168,7 +225,7 @@ to_basic.GeomDensity <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomLine <- function(data, prestats_data, layout, params, p, ...) {
-  data <- data[order(data$x), ]
+  data <- data[order(data[["x"]]), ]
   prefix_class(data, "GeomPath")
 }
 
@@ -193,14 +250,14 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
-  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax")]
-  data <- with(data, {
+  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
+  dat <- with(data, {
     rbind(cbind(x = xmin, y = ymin, others),
           cbind(x = xmin, y = ymax, others),
           cbind(x = xmax, y = ymax, others),
           cbind(x = xmax, y = ymin, others))
   })
-  prefix_class(data, "GeomPolygon")
+  prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
 #' @export
@@ -237,16 +294,16 @@ to_basic.GeomTile <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomHex <- function(data, prestats_data, layout, params, p, ...) {
   # see ggplot2:::hexGrob
-  dx <- resolution(data$x, FALSE)
-  dy <- resolution(data$y, FALSE)/sqrt(3)/2 * 1.15
+  dx <- resolution(data[["x"]], FALSE)
+  dy <- resolution(data[["y"]], FALSE)/sqrt(3)/2 * 1.15
   hexC <- hexbin::hexcoords(dx, dy, n = 1)
   n <- nrow(data)
   data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 6)
-  x <- rep.int(hexC$x, n) * rep(data$size, each = 6) + rep(data$x, each = 6)
-  y <- rep.int(hexC$y, n) * rep(data$size, each = 6) + rep(data$y, each = 6)
+  x <- rep.int(hexC[["x"]], n) * rep(data$size, each = 6) + rep(data[["x"]], each = 6)
+  y <- rep.int(hexC[["y"]], n) * rep(data$size, each = 6) + rep(data[["y"]], each = 6)
   data <- data[rep(seq_len(n), each = 6), ]
-  data$x <- x
-  data$y <- y
+  data[["x"]] <- x
+  data[["y"]] <- y
   data$group <- rep(seq_len(n), each = 6)
   prefix_class(data, c("GeomPolygon", "GeomHex"))
 }
@@ -275,7 +332,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   )
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
-  data$y <- with(data, intercept + slope * x)
+  data[["y"]] <- with(data, intercept + slope * x)
   prefix_class(data, "GeomPath")
 }
 
@@ -287,7 +344,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   )
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
-  data$y <- data$yintercept
+  data[["y"]] <- data$yintercept
   prefix_class(data, "GeomPath")
 }
 
@@ -299,7 +356,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   )
   lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
-  data$x <- data$xintercept
+  data[["x"]] <- data$xintercept
   prefix_class(data, "GeomPath")
 }
 
@@ -311,20 +368,20 @@ to_basic.GeomJitter <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
-  # width for ggplot2 means size of the entire bar, on the data scale 
+  # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
-  data$width <- (data$xmax - data$x) /(data$x_max - data$x_min)
+  data$width <- (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
 }
 
 #' @export
 to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) {
-  # height for ggplot2 means size of the entire bar, on the data scale 
+  # height for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout, by = "PANEL", sort = FALSE)
-  data$width <- (data$ymax - data$y) / (data$y_max - data$y_min)
+  data$width <- (data[["ymax"]] - data[["y"]]) / (data[["y_max"]] - data[["y_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbarh")
 }
@@ -350,12 +407,12 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' Convert a "basic" geoms to a plotly.js trace.
-#' 
+#'
 #' This function makes it possible to convert ggplot2 geoms that
-#' are not included with ggplot2 itself. Users shouldn't need to use 
+#' are not included with ggplot2 itself. Users shouldn't need to use
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
-#' 
+#'
 #' @param data the data returned by \code{plotly::to_basic}.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
@@ -373,9 +430,9 @@ geom2trace.GeomBlank <- function(data, params, p) {
 geom2trace.GeomPath <- function(data, params, p) {
   data <- group2NA(data)
   L <- list(
-    x = data$x,
-    y = data$y,
-    text = data$hovertext,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     key = data$key,
     type = "scatter",
     mode = "lines",
@@ -388,7 +445,8 @@ geom2trace.GeomPath <- function(data, params, p) {
         aes2plotly(data, params, "alpha")
       ),
       dash = aes2plotly(data, params, "linetype")
-    )
+    ),
+    hoveron = hover_on(data)
   )
   if (inherits(data, "GeomStep")) L$line$shape <- params$direction %||% "hv"
   L
@@ -399,9 +457,9 @@ geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
   color <- aes2plotly(data, params, "colour")
   L <- list(
-    x = data$x,
-    y = data$y,
-    text = data$hovertext,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     key = data$key,
     type = "scatter",
     mode = "markers",
@@ -415,7 +473,8 @@ geom2trace.GeomPoint <- function(data, params, p) {
         width = aes2plotly(data, params, "stroke"),
         color = color
       )
-    )
+    ),
+    hoveron = hover_on(data)
   )
   # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
@@ -427,13 +486,13 @@ geom2trace.GeomPoint <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBar <- function(data, params, p) {
-  data$y <- data$ymax - data$ymin
+  data[["y"]] <- data[["ymax"]] - data[["ymin"]]
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths
   # https://github.com/plotly/plotly.js/issues/80
   list(
-    x = data$x,
-    y = data$y,
-    text = data$hovertext,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     key = data$key,
     type = "bar",
     marker = list(
@@ -453,15 +512,15 @@ geom2trace.GeomBar <- function(data, params, p) {
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
   data <- group2NA(data)
+  
   L <- list(
-    x = data$x,
-    y = data$y,
-    text = data$hovertext,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     key = data$key,
     type = "scatter",
     mode = "lines",
     line = list(
-      # NOTE: line attributes must be constant on a polygon
       width = aes2plotly(data, params, "size"),
       color = toRGB(
         aes2plotly(data, params, "colour"),
@@ -469,11 +528,12 @@ geom2trace.GeomPolygon <- function(data, params, p) {
       ),
       dash = aes2plotly(data, params, "linetype")
     ),
-    fill = "tozerox",
+    fill = "toself",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
-    )
+    ),
+    hoveron = hover_on(data)
   )
   if (inherits(data, "GeomSmooth")) {
     L$hoverinfo <- "x+y"
@@ -485,8 +545,8 @@ geom2trace.GeomPolygon <- function(data, params, p) {
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
   list(
-    x = data$x,
-    y = data$y,
+    x = data[["x"]],
+    y = data[["y"]],
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -515,9 +575,9 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
   list(
-    x = data$x,
-    y = data$y,
-    text = data$label,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     key = data$key,
     textfont = list(
       # TODO: how to translate fontface/family?
@@ -528,14 +588,15 @@ geom2trace.GeomText <- function(data, params, p) {
       )
     ),
     type = "scatter",
-    mode = "text"
+    mode = "text",
+    hoveron = hover_on(data)
   )
 }
 
 #' @export
 geom2trace.GeomTile <- function(data, params, p) {
-  x <- sort(unique(data$x))
-  y <- sort(unique(data$y))
+  x <- sort(unique(data[["x"]]))
+  y <- sort(unique(data[["y"]]))
   # make sure we're dealing with a complete grid
   g <- expand.grid(x = x, y = y)
   g$order <- seq_len(nrow(g))
@@ -543,7 +604,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   g <- g[order(g$order), ]
   # put fill domain on 0-1 scale for colorscale purposes
   g$fill_plotlyDomain <- scales::rescale(g$fill_plotlyDomain)
-  # create the colorscale 
+  # create the colorscale
   colScale <- unique(g[, c("fill_plotlyDomain", "fill")])
   # colorscale goes crazy if there are NAs
   colScale <- colScale[stats::complete.cases(colScale), ]
@@ -585,49 +646,6 @@ geom2trace.default <- function(data, params, p) {
 # Utility functions
 # --------------------------------------------------------------------------
 
-# Drawing ggplot2 geoms with a group aesthetic is most efficient in
-# plotly when we convert groups of things that look the same to
-# vectors with NA.
-group2NA <- function(data) {
-  if (!"group" %in% names(data)) return(data)
-  poly.list <- split(data, data$group, drop = TRUE)
-  is.group <- names(data) == "group"
-  poly.na.list <- list()
-  forward.i <- seq_along(poly.list)
-  ## When group2NA is called on geom_polygon (or geom_rect, which is
-  ## treated as a basic polygon), we need to retrace the first points
-  ## of each group, see https://github.com/ropensci/plotly/pull/178
-  retrace.first.points <- inherits(data, "GeomPolygon")
-  for (i in forward.i) {
-    no.group <- poly.list[[i]][, !is.group, drop = FALSE]
-    na.row <- no.group[1, ]
-    na.row[, c("x", "y")] <- NA
-    retrace.first <- if (retrace.first.points) {
-      no.group[1,]
-    }
-    poly.na.list[[paste(i, "forward")]] <-
-      rbind(no.group, retrace.first, na.row)
-  }
-  if (retrace.first.points) {
-    backward.i <- rev(forward.i[-1])[-1]
-    for (i in backward.i) {
-      no.group <- poly.list[[i]][1, !is.group, drop = FALSE]
-      na.row <- no.group[1, ]
-      na.row[, c("x", "y")] <- NA
-      poly.na.list[[paste(i, "backward")]] <- rbind(no.group, na.row)
-    }
-    if (length(poly.list) > 1) {
-      first.group <- poly.list[[1]][1, !is.group, drop = FALSE]
-      poly.na.list[["last"]] <- rbind(first.group, first.group)
-    }
-  }
-  data <- do.call(rbind, poly.na.list)
-  if (is.na(data$x[nrow(data)])) {
-    data <- data[-nrow(data), ]
-  }
-  data
-}
-
 # given a geom, should we split on any continuous variables?
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
@@ -642,7 +660,15 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
+  # split on the domain to ensure sensible trace ordering
+  for (i in names(lookup)) {
+    lookup[[i]] <- paste0(lookup[[i]], "_plotlyDomain")
+  }
   splits <- lookup[[geom]]
+  # if hovering on fill, we need to split on hovertext
+  if (identical(hover_on(dat), "fills")) {
+    splits <- c(splits, "hovertext")
+  }
   # make sure the variable is in the data, and is non-constant
   splits <- splits[splits %in% names(dat)]
   # is there more than one unique value for this aes split in the data?
@@ -654,13 +680,24 @@ split_on <- function(dat) {
   splits
 }
 
-# make trace with errorbars 
+# given a geom, are we hovering over points or fill?
+hover_on <- function(data) {
+  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic")) ||
+      # is this a "basic" polygon?
+      identical("GeomPolygon", grep("^Geom", class(data), value = T))) {
+    "fills"
+  } else {
+    "points"
+  }
+}
+
+# make trace with errorbars
 make_error <- function(data, params, xy = "x") {
   color <- aes2plotly(data, params, "colour")
   e <- list(
-    x = data$x,
-    y = data$y,
-    text = data$hovertext,
+    x = data[["x"]],
+    y = data[["y"]],
+    text = uniq(data$hovertext),
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),
@@ -681,20 +718,20 @@ make_error <- function(data, params, xy = "x") {
 # (note this function is also used for geom_smooth)
 ribbon_dat <- function(dat) {
   n <- nrow(dat)
-  o <- order(dat$x)
-  o2 <- order(dat$x, decreasing = TRUE)
-  used <- c("x", "ymin", "ymax")
+  o <- order(dat[["x"]])
+  o2 <- order(dat[["x"]], decreasing = TRUE)
+  used <- c("x", "ymin", "ymax", "y")
   not_used <- setdiff(names(dat), used)
   # top-half of ribbon
   tmp <- dat[o, ]
   others <- tmp[not_used]
-  dat1 <- cbind(x = tmp$x, y = tmp$ymax, others)
-  dat1[n+1, ] <- cbind(x = tmp$x[n], y = tmp$ymin[n], others[n, ])
+  dat1 <- cbind(x = tmp[["x"]], y = tmp[["ymin"]], others)
+  dat1[n+1, ] <- data.frame(x = tmp[["x"]][n], y = tmp[["ymin"]][n], others[n, ])
   # bottom-half of ribbon
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
-  dat2 <- cbind(x = tmp2$x, y = tmp2$ymin, others2)
-  rbind(dat1, dat2)
+  dat2 <- cbind(x = tmp2[["x"]], y = tmp2[["ymax"]], others2)
+  structure(rbind(dat1, dat2), class = oldClass(dat))
 }
 
 aes2plotly <- function(data, params, aes = "size") {
@@ -714,7 +751,7 @@ aes2plotly <- function(data, params, aes = "size") {
     height = function(x) { x / 2}
   )
   if (is.null(converter)) {
-    warning("A converter for ", aes, " wasn't found. \n", 
+    warning("A converter for ", aes, " wasn't found. \n",
             "Please report this issue to: \n",
             "https://github.com/ropensci/plotly/issues/new", call. = FALSE)
     converter <- identity
@@ -767,7 +804,12 @@ pch2symbol <- function(x) {
     "O" = "circle-open",
     "+" = "cross-thin-open"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }
 
 # Convert R lty line type codes to plotly "dash" codes.
@@ -800,5 +842,10 @@ lty2dash <- function(x) {
     "224282F2" = "dash",
     "F1" = "dash"
   )
-  as.character(lookup[as.character(x)])
+  x <- as.character(x)
+  idx <- x %in% names(lookup)
+  if (any(idx)) {
+    x[idx] <- lookup[x[idx]]
+  }
+  as.character(x)
 }

@@ -12,6 +12,7 @@
 #' also control the order they appear. For example, use
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
+#' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
@@ -28,17 +29,18 @@
 #'   borders(regions = "canada") +
 #'   coord_equal() +
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
-#'  ggplotly(viz)
+#' ggplotly(viz, tooltip = c("text", "size"))
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", source = "A", ...) {
+                     tooltip = "all", originalData = TRUE, source = "A", ...) {
   UseMethod("ggplotly", p)
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
-                              height = NULL, tooltip = "all", source = "A", ...) {
+                              height = NULL, tooltip = "all", 
+                              originalData = TRUE, source = "A", ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -51,13 +53,13 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
         # so it doesn't make sense to synch zoom actions on y
         thisPlot <- thisPlot +
           theme(
-            axis.ticks.y = element_blank(), 
+            axis.ticks.y = element_blank(),
             axis.text.y = element_blank()
           )
       }
       columnList <- c(columnList, list(ggplotly(thisPlot, tooltip = tooltip)))
     }
-    # conditioned on a column in a ggmatrix, the x-axis should be on the 
+    # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
     s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
     subplotList <- c(subplotList, list(s))
@@ -66,14 +68,16 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
-  hash_plot(p$data, plotly_build(s))
+  s
 }
-  
+
 #' @export
-ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL, 
-                            height = NULL, tooltip = "all", source = "A", ...) {
-  l <- gg2list(p, width = width, height = height, tooltip = tooltip, source = source)
-  hash_plot(p$data, l)
+ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
+                            height = NULL, tooltip = "all", originalData = TRUE,
+                            source = "A", ...) {
+  l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
+               originalData = originalData, source = source, ...)
+  structure(as_widget(l), ggplotly = TRUE)
 }
 
 #' Convert a ggplot to a list.
@@ -83,11 +87,13 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
+#' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A", ...) {
+gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
+                    originalData = TRUE, source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -109,13 +115,20 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   panel <- ggfun("new_panel")()
   panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
   data <- ggfun("map_layout")(panel, p$facet, layer_data)
+  # save the domain of the group for display in tooltips
+  groupDomains <- Map(function(x, y) {
+    tryCatch(
+      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x), 
+      error = function(e) NULL
+    )
+  }, data, p$layers)
   data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
   scale_x <- function() scales$get_scales("x")
   scale_y <- function() scales$get_scales("y")
   panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
   # Before mapping x/y position, save the domain (for discrete scales)
-  # to display in tooltip. 
+  # to display in tooltip.
   data <- lapply(data, function(d) {
     if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
     if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
@@ -176,19 +189,19 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   gglayout$margin$t <- gglayout$margin$t + 16
-
+  
   # important stuff like panel$ranges is already flipped, but
   # p$scales/p$labels/data aren't. We flip x/y trace data at the very end
   # and scales in the axis loop below.
   if (inherits(p$coordinates, "CoordFlip")) {
     p$labels[c("x", "y")] <- p$labels[c("y", "x")]
   }
-
+  
   # important panel summary stats
   nPanels <- nrow(panel$layout)
   nRows <- max(panel$layout$ROW)
   nCols <- max(panel$layout$COL)
-
+  
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
   panel$layout$xaxis <- panel$layout$COL
@@ -203,6 +216,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     if (p$facet$free$y) {
       panel$layout$yaxis <- panel$layout$PANEL
       panel$layout$yanchor <- panel$layout$COL
+      panel$layout$xanchor <- nPanels
     }
     if (p$facet$free$x && p$facet$free$y) {
       panel$layout$xaxis <- panel$layout$PANEL
@@ -212,96 +226,40 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     }
   }
   # format the axis/anchor to a format plotly.js respects
-  panel$layout$xaxis <- paste0("xaxis", sub("1", "", panel$layout$xaxis))
-  panel$layout$yaxis <- paste0("yaxis", sub("1", "", panel$layout$yaxis))
-  panel$layout$xanchor <- paste0("y", sub("1", "", panel$layout$xanchor))
-  panel$layout$yanchor <- paste0("x", sub("1", "", panel$layout$yanchor))
+  panel$layout$xaxis <- paste0("xaxis", sub("^1$", "", panel$layout$xaxis))
+  panel$layout$yaxis <- paste0("yaxis", sub("^1$", "", panel$layout$yaxis))
+  panel$layout$xanchor <- paste0("y", sub("^1$", "", panel$layout$xanchor))
+  panel$layout$yanchor <- paste0("x", sub("^1$", "", panel$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
   panel$layout$x_min <- sapply(panel$ranges, function(z) min(z$x.range))
   panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
   panel$layout$y_min <- sapply(panel$ranges, function(z) min(z$y.range))
   panel$layout$y_max <- sapply(panel$ranges, function(z) max(z$y.range))
   
-  # --------------------------------------------------------------------
-  # Use aes mappings for sensible tooltips
-  # --------------------------------------------------------------------
-  
-  aesMap <- lapply(p$layers, function(x) { 
-    map <- c(
-      # plot level aes mappings
-      as.character(p$mapping), 
-      # layer level mappings
-      as.character(x$mapping), 
-      # stat specific mappings
-      grep("^\\.\\.", as.character(x$stat$default_aes), value = TRUE)
-    )
-    # "hidden" names should be taken verbatim
-    idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
-    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
-    map[idx] <- hiddenMap[idx]
-    names(map)[idx] <- hiddenMap[idx]
-    if (!identical(tooltip, "all")) {
-      map <- map[tooltip]
-    }
-    map
-  })
-  
-  
-  # attach a new column (hovertext) to each layer of data that should get mapped
-  # to the text trace property
-  data <- Map(function(x, y) {
-    if (nrow(x) == 0) return(x)
-    # make sure the relevant aes exists in the data
-    for (i in seq_along(y)) {
-      aesName <- names(y)[[i]]
-      # TODO: should we be getting the name from scale_*(name) first?
-      varName <- y[[i]]
-      # by default assume the values don't need any formatting
-      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-      if (aesName %in% c("x", "y")) {
-        scaleName <- scales$get_scales(aesName)$scale_name
-        # convert "milliseconds from the UNIX epoch" to a date/datetime
-        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01")
-        # convert "days from the UNIX epoch" to a date/datetime
-        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
-      }
-      # add a line break if hovertext already exists
-      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
-      # text aestheic should be taken verbatim (for custom tooltips)
-      prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
-      # look for the domain, if that's not found, provide the range (useful for identity scales)
-      suffix <- tryCatch(
-        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
-        error = function(e) ""
-      )
-      x$hovertext <- paste0(x$hovertext, prefix, suffix)
-    }
-    x
-  }, data, aesMap)
-  
-  
-  
   # layers -> plotly.js traces
+  p$tooltip <- tooltip
+  data <- Map(function(x, y) {
+    tryCatch({x$group_plotlyDomain <- y; x}, error = function(e) x)
+  }, data, groupDomains)
   traces <- layers2traces(data, prestats_data, panel$layout, p)
   
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
-  traces <- lapply(traces, function(tr) { 
-    tr$hoverinfo <- tr$hoverinfo %||%"text" 
-    tr 
+  traces <- lapply(traces, function(tr) {
+    tr$hoverinfo <- tr$hoverinfo %||%"text"
+    tr
   })
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
-  traces <- Map(function(x, y) { 
-    x$showlegend <- isTRUE(x$showlegend) && y 
+  traces <- Map(function(x, y) {
+    x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))
-
+  
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
   # ------------------------------------------------------------------------
-
+  
   # panel margins must be computed before panel/axis loops
   # (in order to use get_domains())
   panelMarginX <- unitConvert(
@@ -350,7 +308,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     rep(panelMarginY, 2)
   )
   doms <- get_domains(nPanels, nRows, margins)
-
+  
   for (i in seq_len(nPanels)) {
     lay <- panel$layout[i, ]
     for (xy in c("x", "y")) {
@@ -364,7 +322,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
-
+      
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- panel$ranges[[i]]
@@ -423,7 +381,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       )
       # attach axis object to the layout
       gglayout[[axisName]] <- axisObj
-
+      
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
@@ -474,7 +432,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
       if (has_facet(p)) gglayout[[axisName]]$title <- ""
     } # end of axis loop
-
+    
     # theme(panel.border = ) -> plotly rect shape
     xdom <- gglayout[[lay[, "xaxis"]]]$domain
     ydom <- gglayout[[lay[, "yaxis"]]]$domain
@@ -485,7 +443,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     if (has_facet(p)) {
       col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
       col_txt <- paste(
-        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = ", "
+        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(p$facet, "grid") && lay$ROW != 1) col_txt <- ""
@@ -500,7 +458,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
         gglayout$shapes <- c(gglayout$shapes, strip)
       }
       row_txt <- paste(
-        p$facet$labeller(lay[names(p$facet$rows)]), collapse = ", "
+        p$facet$labeller(lay[names(p$facet$rows)]), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
       if (inherits(p$facet, "grid") && lay$COL != nCols) row_txt <- ""
@@ -516,15 +474,15 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
   } # end of panel loop
-
+  
   # ------------------------------------------------------------------------
   # guide conversion
   #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
   #   To do so, we borrow some of the body of ggplot2:::guides_build().
   # ------------------------------------------------------------------------
   # will there be a legend?
-  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) > 1
-
+  gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) >= 1
+  
   # legend styling
   gglayout$legend <- list(
     bgcolor = toRGB(theme$legend.background$fill),
@@ -532,18 +490,18 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
     font = text2font(theme$legend.text)
   )
-
+  
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
   } else {
     # by default, guide boxes are vertically aligned
     theme$legend.box <- theme$legend.box %||% "vertical"
-
+    
     # size of key (also used for bar in colorbar guide)
     theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
     theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
-
+    
     # legend direction must be vertical
     theme$legend.direction <- theme$legend.direction %||% "vertical"
     if (!identical(theme$legend.direction, "vertical")) {
@@ -555,7 +513,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       )
       theme$legend.direction <- "vertical"
     }
-
+    
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
@@ -564,7 +522,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       gdefs <- ggfun("guides_merge")(gdefs)
       gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
     }
-
+    
     # colourbar -> plotly.js colorbar
     colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
     nguides <- length(colorbar) + gglayout$showlegend
@@ -583,23 +541,27 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     traces <- c(traces, colorbar)
     
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-    legendTitle <- paste(legendTitles, collapse = "<br>")
-    titleAnnotation <- make_label(
-      legendTitle, 
-      x = gglayout$legend$x %||% 1.02,
-      y = gglayout$legend$y %||% 1, 
-      theme$legend.title,
-      xanchor = "left",
-      yanchor = "top"
-    )
-    gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-    # adjust the height of the legend to accomodate for the title
-    # this assumes the legend always appears below colorbars
-    gglayout$legend$y <- (gglayout$legend$y %||% 1) - 
-      length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+    if (isTRUE(gglayout$showlegend)) {
+      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
+      legendTitle <- paste(legendTitles, collapse = "<br>")
+      titleAnnotation <- make_label(
+        legendTitle,
+        x = gglayout$legend$x %||% 1.02,
+        y = gglayout$legend$y %||% 1,
+        theme$legend.title,
+        xanchor = "left",
+        yanchor = "top",
+        # just so the R client knows this is a title
+        legendTitle = TRUE
+      )
+      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
+      # adjust the height of the legend to accomodate for the title
+      # this assumes the legend always appears below colorbars
+      gglayout$legend$y <- (gglayout$legend$y %||% 1) -
+        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+    }
   }
-
+  
   # geom_bar() hacks
   geoms <- sapply(layers, ggtype, "geom")
   if (any(idx <- geoms %in% "bar")) {
@@ -628,7 +590,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       gglayout$bargap <- 0
     }
   }
-
+  
   # flip x/y in traces for flipped coordinates
   # (we've already done appropriate flipping for axis objects)
   if (inherits(p$coordinates, "CoordFlip")) {
@@ -641,7 +603,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }
   }
-
+  
   # Error bar widths in ggplot2 are on the range of the x/y scale,
   # but plotly wants them in pixels:
   for (xy in c("x", "y")) {
@@ -656,7 +618,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       }
     }
   }
-
+  
   # try to merge marker/line traces that have the same values for these props
   props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name")
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
@@ -668,7 +630,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
       idx <- which(hashes %in% i)
       # for now we just merge markers and lines -- I can't imagine text being worthwhile
       if (all(modes[idx] %in% c("lines", "markers"))) {
-        mergedTraces[[i]] <- Reduce(modifyList, traces[idx])
+        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
         mergedTraces[[i]]$mode <- "markers+lines"
         if (any(sapply(traces[idx], "[[", "showlegend"))) {
           mergedTraces[[i]]$showlegend <- TRUE
@@ -677,7 +639,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
     }
     traces <- mergedTraces
   }
-
+  
   # better layout defaults (TODO: provide a mechanism for templating defaults)
   gglayout$hovermode <- "closest"
   ax <- grep("^[x-y]axis", names(gglayout))
@@ -686,14 +648,39 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
-
-  l <- list(data = setNames(traces, NULL), layout = compact(gglayout))
-  # ensure properties are boxed correctly
-  l <- add_boxed(rm_asis(l))
-  l$width <- width
-  l$height <- height
-  l$source <- source
-  structure(l, class = "plotly_built")
+  
+  gglayout$width <- width
+  gglayout$height <- height
+  
+  l <- list(
+    data = setNames(traces, NULL),
+    layout = compact(gglayout),
+    source = source
+  )
+  # strip any existing 'AsIs' list elements of their 'AsIs' status.
+  # this is necessary since ggplot_build(qplot(1:10, fill = I("red")))
+  # returns list element with their 'AsIs' class,
+  # which conflicts with our JSON unboxing strategy.
+  l <- rm_asis(l)
+  l$cur_data <- new_id()
+  # translate "plot-wide" aesthetic mappings to formulas so plotly_build() 
+  # understands them
+  mappingFormulas <- if (originalData) {
+    lapply(p$mapping, lazyeval::f_new)
+  } else {
+    nms <- names(p$mapping)
+    setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+  }
+  # TODO: if exposing "scaled" data, how do we ensure it is "global"?
+  dat <- if (originalData) p$data else data[[1]]
+  if (!is.null(mappingFormulas[["group"]])) {
+    dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
+  }
+  # don't need to add group as an attribute anymore
+  mappingFormulas <- mappingFormulas[!grepl("^group$", names(mappingFormulas))]
+  l$attrs <- setNames(list(mappingFormulas), l$cur_data)
+  l$visdat <- setNames(list(function() dat), l$cur_data)
+  l
 }
 
 
@@ -704,7 +691,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", source = "A
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
   u <- verifyUnit(u)
-
+  
   convert <- switch(
     type[1],
     x = grid::convertX,
@@ -839,9 +826,11 @@ faced <- function(txt, face = "plain") {
 bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
-# if a vector has one unique value, return that value
+# if a vector that has one unique value (ignoring missings), return that value
 uniq <- function(x) {
   u <- unique(x)
+  if (identical(u, NA) || length(u) == 0) return(u)
+  u <- u[!is.na(u)]
   if (length(u) == 1) u else x
 }
 
@@ -895,7 +884,9 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
 
 # We need access to internal ggplot2 functions in several places
 # this helps us import functions in a way that R CMD check won't cry about
-ggfun <- function(x) getFromNamespace(x, "ggplot2")
+ggfun <- function(x) {
+  tryCatch(getFromNamespace(x, "ggplot2"), error = function(e) NULL)
+}
 
 ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))

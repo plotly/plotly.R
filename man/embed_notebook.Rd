@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{embed_notebook}
 \alias{embed_notebook}
-\title{Embed a plotly figure as an iframe into a IPython Notebook}
+\title{Embed a plotly figure as an iframe into a Jupyter Notebook}
 \usage{
 embed_notebook(x, width = NULL, height = NULL,
   file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html"))
@@ -20,6 +20,6 @@ embed_notebook(x, width = NULL, height = NULL,
 (only used if x is a non-figure object)}
 }
 \description{
-Embed a plotly figure as an iframe into a IPython Notebook
+Embed a plotly figure as an iframe into a Jupyter Notebook
 }
 

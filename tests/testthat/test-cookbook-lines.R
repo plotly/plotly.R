@@ -1,7 +1,6 @@
 context("cookbook lines")
 
 expect_traces <- function(gg, n.traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("cookbook-axes-", name))
   all.traces <- L$data
@@ -184,6 +183,7 @@ test_that("scatter facet -> 2 traces", {
 temp <- spf + geom_hline(aes(yintercept=10))
 test_that("geom_hline -> 2 more traces", {
   info <- expect_traces(temp, 4, "scatter-facet-hline")
+  
   expect_true(info$layout$showlegend)
   has.name <- sapply(info$data, function(tr) nchar(tr$name) > 0)
   expect_equal(sum(has.name), 2)

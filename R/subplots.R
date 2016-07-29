@@ -38,7 +38,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     dotz <- dotz[[1]]
   }
   # build each plot
-  plotz <- lapply(dotz, plotly_build)
+  plotz <- lapply(dotz, function(d) plotly_build(d)$x)
   # ensure "axis-reference" trace attributes are properly formatted
   # TODO: should this go inside plotly_build()?
   plotz <- lapply(plotz, function(p) {
@@ -218,7 +218,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   # start merging the plots into a single subplot
   p <- list(
     data = Reduce(c, traces),
-    layout = Reduce(modifyList, c(xAxes, rev(yAxes)))
+    layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
@@ -235,10 +235,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
     layouts <- layouts[which_layout]
   }
-  p$layout <- c(p$layout, Reduce(modifyList, layouts))
-  
-  res <- hash_plot(data.frame(), p)
-  prefix_class(res, "plotly_subplot")
+  p$layout <- c(p$layout, Reduce(modify_list, layouts))
+  as_widget(p)
 }
 
 

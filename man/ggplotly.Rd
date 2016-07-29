@@ -5,7 +5,7 @@
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  tooltip = "all", source = "A", ...)
+  tooltip = "all", originalData = TRUE, source = "A", ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -20,6 +20,8 @@ in the tooltip. The default, "all", means show all the aesthetic mappings
 also control the order they appear. For example, use
 \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 colour last.}
+
+\item{originalData}{should the "original" or "scaled" data be returned?}
 
 \item{source}{Only relevant for \link{event_data}.}
 
@@ -43,7 +45,7 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
   borders(regions = "canada") +
   coord_equal() +
   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
- ggplotly(viz)
+ggplotly(viz, tooltip = c("text", "size"))
 }
 
 }

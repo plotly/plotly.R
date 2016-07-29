@@ -3,7 +3,6 @@ context("Area")
 # Test that the order of traces is correct
 # Expect traces function
 expect_traces <- function(gg, n_traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n_traces))
   save_outputs(gg, paste0("area-", name))
   L <- gg2list(gg)
@@ -17,7 +16,8 @@ expect_traces <- function(gg, n_traces, name) {
 }
 
 huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-huron$decade <- plyr::round_any(huron$year, 10, floor)
+# like getAnywhere(round_any.numeric)
+huron$decade <- floor(huron$year / 10) * 10 
 
 ar <- ggplot(huron) + geom_area(aes(x = year, y = level))
 
@@ -25,7 +25,7 @@ test_that("sanity check for geom_area", {
   L <- expect_traces(ar, 1, "simple")
   expect_identical(L$data[[1]]$type, "scatter")
   expect_identical(L$data[[1]]$mode, "lines")
-  expect_identical(L$data[[1]]$fill, "tozerox")
+  expect_identical(L$data[[1]]$fill, "toself")
   expect_true(
     L$data[[1]]$fillcolor ==
     toRGB(GeomArea$default_aes$fill, GeomArea$default_aes$alpha)

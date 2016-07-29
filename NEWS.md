@@ -1,3 +1,100 @@
+# 4.1.0 -- 27 June 2016
+
+## NEW FEATURES
+
+* `ggplotly()` gains a new `originalData` argument which allows one to attach either the original (global) data, or a "scaled"/"trained" version of the data used by __ggplot2__ to draw the graph (for a quick example, `ggplotly(qplot(1:10), originalData = FALSE) %>% plotly_data()`). 
+* Hoverinfo is now shown for fill, instead of points, for several geoms (`geom_polygon()`/`geom_hex()`/`geom_rect()`/`geom_map()`). 
+* If `stat_identity()` is used, group domain values are preserved and displayed in hoverinfo.
+* New functions `hide_guides()`/`hide_legend()` were added (these work similarly to the existing `hide_colorbar()`) to simply the hiding of guides (i.e., legends/colorbars).
+
+## BUG FIXES
+
+* Legend titles (annotations) are no longer generated when no legend is displayed (#635, #607)
+* Hoverinfo is no longer displayed if no tooltip variables are present in a layer (#563).
+* Facets with 10 or more columns/rows should now render correctly (#640).
+* x-axis anchors in `facet_wrap()` should now be correct.
+
+## OTHER CHANGES
+
+* Upgraded to plotly.js v1.15.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.15.0
+
+# 4.0.2 -- 25 June 2016
+
+## BUG FIXES
+
+* Bug fix for formulas evaluating to a logical vector (#650)
+
+# 4.0.1 -- 14 June 2016
+
+## BUG FIXES
+
+* Duplicated values of positional attributes are no longer removed (bug was introduced in v4.0.0).
+
+## OTHER CHANGES
+
+* Upgraded to plotly.js v1.14.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.14.2
+
+# 4.0.0 -- 13 June 2016
+
+## BREAKING CHANGES & IMPROVEMENTS:
+
+* Formulas (instead of plain expressions) are now required when using variable mappings. For example, `plot_ly(mtcars, x = wt, y = mpg, color = vs)` should now be `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~vs)`. This is a major breaking change, but it is necessary to ensure that evaluation is correct in all contexts (as a result, `evaluate` argument is now deprecated as it is no longer needed). It also has the benefit of being easier to program with (i.e., writing your own custom functions that wrap `plot_ly()`) since it preserves [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency). For more details, see the [lazyeval vignette](https://github.com/hadley/lazyeval/blob/master/vignettes/lazyeval.Rmd)
+* The data structure used to represent plotly objects is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, the `last_plot()`/`as.widget()` functions have been deprecated, and [serialization/memory leak problems](https://github.com/rstudio/shiny/issues/1151) are no longer an issue. This change also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `?plotly_data` for examples).
+* The `group` variable mapping no longer create multiple traces, but instead defines "gaps" within a trace (fixes #418, #381, #577). Groupings should be declared via the new `group_by()` function (see `help(plotly_data)` for examples) instead of the `group` argument (which is now deprecated).
+* `plot_ly()` now _initializes_ a plotly object (i.e., won't add a scatter trace by default), meaning that something like `plot_ly(x = 1:10, y = 1:10) %>% add_trace(y = 10:1)` creates one trace, instead of two. That being said, if you manually specify a trace type in `plot_ly()`, it will add a layer with that trace type (e.g. `plot_ly(x = 1:10, y = 1:10, type = "scatter") %>% add_trace(y = 10:1)` draws two scatter traces). If no trace type is provided, a sensible type is inferred from the supplied data, and automatically added (i.e., `plot_ly(x = rnorm(100))` now creates a histogram).
+* The `inherit` argument is deprecated. Any arguments/attributes specified in `plot_ly()` will automatically be passed along to additional traces added via `add_trace()` (or any of it's `add_*()` siblings).
+* Aesthetic scaling (e.g., `color`, `symbol`, `size`) is applied at the plot-level, instead of the trace level. 
+* Size is no longer automatically included in hovertext (closes #549).
+
+## NEW FEATURES & IMPROVEMENTS:
+
+* Added `linetype`/`linetypes` arguments for mapping discrete variables to line types (works very much like the `symbol`/`symbols`).
+* Scaling for aesthetics can be avoided via `I()` (closes #428). This is mainly useful for changing default appearance (e.g. `plot_ly(x = 1:10, y = 1:10, color = I("red"))`).
+* Symbols and linetypes now recognize `pch` and `lty` values (e.g. `plot_ly(x = 1:25, y = 1:25, symbol = I(0:24))`)
+* A new `alpha` argument controls the alpha transparency of `color` (e.g. `plot_ly(x = 1:10, y = 1:10, color = I("red"), alpha = 0.1)`).
+* Added a `sizes` argument for controlling the range of marker size scaling.
+* New `add_polygons()`/`add_ribbons()`/`add_area()`/`add_segments()`/`add_lines()`/`add_markers()`/`add_paths()`/`add_text()` functions provide a shorthand for common special cases of `add_trace()`.
+* New `toWebGL()` function for easy conversion from SVG to WebGL.
+* New `export()` function makes it easy to save plots as png/jpeg/pdf (fixes #311).
+* Misspecified trace/layout attributes produce a warning.
+* New `plotly_data()` function for returning/inspecting data frame(s) associated with a plotly object.
+* New `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
+* `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
+
+## OTHER CHANGES:
+
+* Upgraded to plotly.js v1.14.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.14.1
+
+3.6.5 -- 10 June 2016
+
+IMPROVEMENT:
+
+Multiple rows of facet strips will now be separated by <br> (i.e., line breaks) instead of ,. See #593.
+
+3.6.4 -- 31 May 2016
+
+BUG FIX:
+
+embed_notebook() will no longer use a '.embed' extension in the iframe src attribute. See #613.
+
+3.6.3 -- 24 May 2016
+
+CHANGES:
+
+Provided a better way of reexporting magrittr::`%>%`. See #597.
+
+3.6.2 -- 24 May 2016
+
+CHANGES: 
+
+Removed unnecessary plyr dependency.
+
+3.6.1 -- 23 May 2016
+
+BUG FIX: 
+
+Add a default method for plotly_build. Fixes #592.
+
 3.6.0 -- 16 May 2016
 
 NEW FEATURES & CHANGES:

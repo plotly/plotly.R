@@ -31,7 +31,7 @@ before_script:
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
   - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
-  - Rscript -e 'devtools::install_github("rstudio/crosstalk@joe/feature/filter", repos = "http://cran.rstudio.com")'
+  - Rscript -e 'devtools::install_github("rstudio/crosstalk", repos = "http://cran.rstudio.com")'
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
   - R CMD INSTALL ${R_PKG}_*.tar.gz
 

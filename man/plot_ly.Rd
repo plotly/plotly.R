@@ -4,10 +4,10 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
-  symbol, symbols, size, width = NULL, height = NULL, inherit = FALSE,
-  crosstalkEvents = "plotly_selected", crosstalkOpts = ct_opts(),
-  evaluate = FALSE)
+plot_ly(data = data.frame(), ..., type = NULL, group, color,
+  colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
+  100), linetype, linetypes = NULL, width = NULL, height = NULL,
+  crosstalkEvents = "plotly_selected", crosstalkOpts = ct_opts())
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -15,80 +15,90 @@ plot_ly(data = data.frame(), ..., type = "scatter", group, color, colors,
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
 
-\item{type}{A character string describing the type of trace.}
+\item{type}{A character string describing the type of trace. If \code{NULL}
+(the default), the initial trace type is determined by \code{add_trace}}
 
-\item{group}{Either a variable name or a vector to use for grouping. If used,
-a different trace will be created for each unique value.}
+\item{color}{A formula containing a name or expression. 
+Values are scaled and mapped to color codes based on the value of 
+\code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},
+and provide value(s) that can be converted to rgb color codes by 
+\code{\link[grDevices]{col2rgb}()}.}
 
-\item{color}{Either a variable name or a vector to use for color mapping.}
-
-\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
-or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
+\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
+or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 or a color interpolation function like \code{colorRamp()}.}
 
-\item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
+\item{alpha}{A number between 0 and 1 specifying the alpha channel applied to color.}
 
-\item{symbols}{A character vector of symbol types. Possible values:
-'dot', 'cross', 'diamond', 'square', 'triangle-down', 'triangle-left', 'triangle-right', 'triangle-up'}
+\item{symbol}{A formula containing a name or expression. 
+Values are scaled and mapped to symbols based on the value of \code{symbols}.
+To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
+\code{\link{pch}()} values and/or valid plotly symbol(s) as a string
+\url{}}
+
+\item{symbols}{A character vector of symbol types. For possible values, see \link{schema}.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
+
+\item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
+
+\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
+
+\item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
-
-\item{inherit}{logical. Should future traces inherit properties from this initial trace?}
 
 \item{crosstalkEvents}{inform crosstalk about these plotly events to 
 enable client-side linked interactions. Currently 'plotly_hover', 'plotly_click', 
 'plotly_selected', and 'plotly_relayout' are supported.}
 
 \item{crosstalkOpts}{a list of options for controlling the appearance of selections.}
-
-\item{evaluate}{logical. Evaluate arguments when this function is called?}
 }
 \description{
 Transform data into a plotly visualization.
 }
 \details{
-There are a number of "visual properties" that aren't included in the officical
+There are a number of "visual properties" that aren't included in the official
 Reference section (see below).
 }
 \examples{
 \dontrun{
-data(economics, package = "ggplot2")
-# basic time-series plot
-p <- plot_ly(economics, x = date, y = uempmed, type = "scatter",
-  showlegend = FALSE)
-# add a loess smoother
-p2 <- add_trace(p, y = fitted(loess(uempmed ~ as.numeric(date))))
-# add a title
-p3 <- layout(p2, title = "Median duration of unemployment (in weeks)")
-# change the font
-layout(p3, font = list(family = "Courier New, monospace"))
 
-# using the color argument
-plot_ly(economics, x = date, y = unemploy / pop, color = pop, mode = "markers")
-plot_ly(economics, x = date, y = unemploy / pop, color = pop,
-  colors = terrain.colors(5), mode = "markers")
+# plot_ly() tries to create a sensible plot based on the information you 
+# give it. If you don't provide a trace type, plot_ly() will infer one.
+plot_ly(economics, x = ~pop)
+plot_ly(economics, x = ~date, y = ~pop)
+# plot_ly() doesn't require data frame(s), which allows one to take 
+# advantage of trace type(s) designed specifically for numeric matrices
+plot_ly(z = ~volcano)
+plot_ly(z = ~volcano, type = "surface")
 
-# function to extract the decade of a given date
-decade <- function(x) {
-  factor(floor(as.numeric(format(x, "\%Y")) / 10) * 10)
-}
-plot_ly(economics, x = unemploy / pop, color = decade(date), type = "box")
+# plotly has a functional interface: every plotly function takes a plotly
+# object as it's first input argument and returns a modified plotly object
+add_lines(plot_ly(economics, x = ~date, y = ~unemploy/pop))
 
-# plotly loves pipelines
-economics \%>\%
- transform(rate = unemploy / pop) \%>\%
- plot_ly(x = date, y = rate) \%>\%
- loess(rate ~ as.numeric(date), data = .) \%>\%
- broom::augment() \%>\%
- add_trace(y = .fitted)
+# To make code more readable, plotly imports the pipe operator from magrittr
+economics \%>\% plot_ly(x = ~date, y = ~unemploy/pop) \%>\% add_lines()
 
-# sometimes, a data frame isn't fit for the use case...
-# for 3D surface plots, a numeric matrix is more natural
-plot_ly(z = volcano, type = "surface")
+# Attributes defined via plot_ly() set 'global' attributes that 
+# are carried onto subsequent traces
+plot_ly(economics, x = ~date, line = list(color = "black")) \%>\%
+ add_trace(y = ~uempmed, mode = "markers+lines") \%>\%
+ add_lines(y = ~psavert) \%>\%
+ layout(title = "Setting global trace attributes")
+
+# Attributes are documented in the figure reference -> https://plot.ly/r/reference
+# You might notice plot_ly() has named arguments that aren't in the figure
+# reference. These arguments make it easier to map abstract data values to
+# visual attributes.
+p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
+add_markers(p, color = ~Petal.Length, size = ~Petal.Length)
+add_markers(p, color = ~Species)
+add_markers(p, color = ~Species, colors = "Set1")
+add_markers(p, symbol = ~Species)
+add_paths(p, linetype = ~Species)
 
 # client-side interactions
 library(crosstalk)
@@ -96,10 +106,9 @@ mtcars$id <- seq_len(nrow(mtcars))
 sd <- SharedData$new(mtcars, "id")
 o <- ct_opts(color = "red")
 subplot(
-  plot_ly(sd, x = wt, y = mpg, mode = "markers", crosstalkOpts = o),
-  plot_ly(sd, x = wt, y = disp, mode = "markers", crosstalkOpts = o)
+  plot_ly(sd, x = ~wt, y = ~mpg, crosstalkOpts = o),
+  plot_ly(sd, x = ~wt, y = ~disp, crosstalkOpts = o)
 ) \%>\% layout(dragmode = "select")
-
 
 }
 
@@ -108,6 +117,6 @@ subplot(
 Carson Sievert
 }
 \seealso{
-\code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+\code{\link{ggplotly}()}
 }
 

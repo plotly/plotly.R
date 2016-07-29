@@ -31,7 +31,7 @@ test_that("dates are displayed in tooltip properly", {
 test_that("tooltip argument respects ordering", {
   p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
   p <- ggplotly(p, tooltip = c("density", "x"))
-  info <- plotly_build(p)
+  info <- plotly_build(p)$x
   txt <- strsplit(info$data[[1]]$text, "<br>")
   expect_true(all(grepl("^density", sapply(txt, "[[", 1))))
   expect_true(all(grepl("^mpg", sapply(txt, "[[", 2))))
@@ -40,7 +40,7 @@ test_that("tooltip argument respects ordering", {
 test_that("can hide x values in tooltip", {
   gg2 <- ggplot(mtcars, aes(factor(cyl), mpg, fill = factor(cyl))) + geom_violin()
   p <- ggplotly(gg2, tooltip = "y")
-  l <- plotly_build(p)
+  l <- plotly_build(p)$x
   expect_equal(sum(grepl("cyl", l$data[[1]]$text)), 0)
 })
 
@@ -57,3 +57,41 @@ test_that("geom_tile() displays correct info in tooltip with discrete y", {
   expect_true(all(grepl("factor\\(cyl\\): [4,6,8]", txt)))
 })
 
+p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
+  geom_line(alpha = 0.3)
+
+test_that("group domain is included in hovertext", {
+  L <- save_outputs(p, "group-lines-hovertext")
+  expect_equal(length(L$data), 1)
+  txt <- L$data[[1]]$text
+  txt <- txt[!is.na(txt)]
+  pattern <- paste(unique(txhousing$city), collapse = "|")
+  expect_true(all(grepl(pattern, txt)))
+})
+
+
+labelDF <- data.frame(
+  label = paste0(("label"), c(1:10)), 
+  x = runif(10, 1, 10), 
+  y = runif(10, 1, 10)
+)
+# Create data frame for 10 edges
+edgeDF <- data.frame(
+  x = runif(10, 1, 10), 
+  y = runif(10, 1, 10), 
+  xend = runif(10, 1, 10), 
+  yend = runif(10, 1, 10)
+)
+
+myPlot <- ggplot(data = labelDF, aes(x = x, y = y)) +
+  geom_segment(data = edgeDF, aes(x = x, y = y, xend = xend, yend = yend), 
+               colour = "pink") +
+  geom_text(data = labelDF, aes(x = x, y = y, label = label), size = 10)
+
+test_that("Hoverinfo is only displayed if no tooltip variables are present", {
+  L <- save_outputs(p, "hovertext-display")
+  L <- plotly_build(ggplotly(myPlot, tooltip = "label"))[["x"]]
+  expect_equal(length(L$data), 2)
+  expect_equal(sum(nchar(L$data[[1]]$text)), 0)
+  expect_true(all(grepl("^label:", L$data[[2]]$text)))
+})

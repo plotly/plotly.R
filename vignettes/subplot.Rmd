@@ -4,7 +4,7 @@ author: "Carson Sievert"
 output: 
   rmarkdown::html_vignette:
     toc: true
-    standalone: false
+    self_contained: false
 vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteIndexEntry{subplot}
@@ -17,6 +17,17 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7
 )
+# someday we may want to do pngs to reduce size...
+# printly <- function(p, options, ...) { 
+#   p <- layout(p, height = options$fig.height, width = options$fig.width)
+#   u <- plotly::plotly_POST(p, filename = Sys.time())$url
+#   sprintf(
+#     "<a href='%s'> <img src='%s.png' style='%s' /> </a>", 
+#     u, u, "max-width:100%"
+#   )
+# }
+# assignInNamespace("knit_print.plotly_hash", printly, asNamespace("plotly"))
+# assignInNamespace("knit_print.plotly_built", printly, asNamespace("plotly"))
 ```
 
 ## Introduction
@@ -25,8 +36,8 @@ The `subplot()` function provides a flexible interface for arranging multiple **
 
 ```{r}
 library(plotly)
-p1 <- plot_ly(economics, x = date, y = unemploy, name = "unemploy")
-p2 <- plot_ly(economics, x = date, y = uempmed, name = "uempmed")
+p1 <- plot_ly(economics, x = ~date, y = ~unemploy, name = "unemploy")
+p2 <- plot_ly(economics, x = ~date, y = ~uempmed, name = "uempmed")
 subplot(p1, p2)
 ```
 
@@ -44,7 +55,7 @@ subplot(plots, nrows = length(plots), shareX = TRUE, titleX = FALSE)
 # this works too, but I'm not sure we should advertise...
 elong <- tidyr::gather(economics, variable, value, -date)
 elong$id <- as.integer(factor(elong$variable))
-p <- plot_ly(elong, x = date, y = value, group = variable, yaxis = paste0("y", id))
+p <- plot_ly(elong, x = ~date, y = ~value, color = ~variable, yaxis = ~paste0("y", id))
 subplot(p, nrows = 5, shareX = TRUE)
 ```
 
@@ -103,7 +114,7 @@ g <- list(
 # create a map of population density
 density <- state.x77[, "Population"] / state.x77[, "Area"]
 map <- plot_ly(
-  z = density, 
+  z = ~density, 
   text = state.name, locations = state.abb,
   type = 'choropleth', locationmode = 'USA-states', geo = "geo"
 ) %>% layout(geo = g)
@@ -139,11 +150,8 @@ This infrastructure allows `ggplotly()` to understand ggmatrix
 objects -- the class of object returned by the `ggpairs()` function in the 
 **GGally** package.
 
-```{r, fig.height = 5}
+```{r, fig.height = 5, eval = FALSE}
 pm <- GGally::ggpairs(iris)
 ggplotly(pm)
 ```
-
-
-
 

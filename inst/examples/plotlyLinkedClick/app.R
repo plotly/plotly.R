@@ -40,13 +40,14 @@ server <- function(input, output, session) {
       vars <- c(s[["x"]], s[["y"]])
       d <- setNames(mtcars[vars], c("x", "y"))
       yhat <- fitted(lm(y ~ x, data = d))
-      plot_ly(d, x = x, y = y, mode = "markers") %>%
-        add_trace(x = x, y = yhat, mode = "lines") %>%
+      plot_ly(d, x = ~x) %>%
+        add_markers(y = ~y) %>%
+        add_lines(y = ~yhat) %>%
         layout(xaxis = list(title = s[["x"]]), 
                yaxis = list(title = s[["y"]]), 
                showlegend = FALSE)
     } else {
-      plot_ly()
+      plotly_empty()
     }
   })
   

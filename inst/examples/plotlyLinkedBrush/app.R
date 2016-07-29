@@ -72,7 +72,7 @@ server <- function(input, output, session) {
   
   output$xy <- renderPlotly({
     cars %>% 
-      plot_ly(x = speed, y = dist, 
+      plot_ly(x = ~speed, y = ~dist, 
               mode = "markers", marker = m) %>%
       layout(dragmode = "select")
   })

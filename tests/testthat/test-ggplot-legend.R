@@ -1,7 +1,6 @@
 context("legends")
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("legend-", name))
   all.traces <- L$data
@@ -70,8 +69,25 @@ test_that("very long legend items", {
   )
   p_long_items <- ggplot(long_items, aes(cat1, fill = cat2)) + 
     geom_bar(position = "dodge")
-  info <- expect_traces(p_long_items, 3, "very long legend items")
+  info <- expect_traces(p_long_items, 3, "very-long-legend-items")
 })
+
+iris$All <- "All species"
+p <- qplot(data = iris, x = Sepal.Length, y = Sepal.Width, color = All)
+
+test_that("legend is created with discrete mapping regardless of unique values", {
+  info <- expect_traces(p, 1, "one-entry")
+  expect_true(info$data[[1]]$showlegend)
+  expect_true(info$layout$showlegend)
+  expect_equal(length(info$layout$annotations), 1)
+})
+
+test_that("can hide legend", {
+  info <- expect_traces(hide_legend(p), 1, "hide-legend")
+  expect_false(info$layout$showlegend)
+  expect_null(info$layout$annotations)
+})
+
 
 # test of legend position
 test_that("many legend items", {

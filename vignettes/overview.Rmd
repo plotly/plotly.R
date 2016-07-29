@@ -1,0 +1,55 @@
+---
+title: "plotly overview"
+author: "Carson Sievert"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    self_contained: false
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{Plotly Intro}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 3
+)
+```
+
+plotly is an R package for making interactive graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js). It provides two main ways to create a plotly visualization: `ggplotly()` and `plot_ly()`. Both of these functions output an [htmlwidget](http://www.htmlwidgets.org/) object, which allows plots to work seamlessly and consistently across various contexts (e.g., R Markdown documents, shiny apps, inside RStudio, or any other R command prompt). For IPython/Jupyter notebook users, there is also an `embed_notebook()` function to embed plots as iframes pointing to a local HTML file. For [plot.ly](https://plot.ly/) subscribers, there is a `plotly_POST()` function for sending local graphs to your account, and a `get_figure()` function for downloading publicly hosted plot.ly figure(s).
+
+## Translate ggplot2 to plotly with `ggplotly()`
+
+The `ggplotly()` function translates [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html) graphics to a plotly equivalent, for example:
+
+```{r}
+library(plotly)
+p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
+  geom_line(alpha = 0.3) +
+  geom_line(data = subset(txhousing, city == "Houston"), color = "red")
+ggplotly(p)
+```
+
+If you know ggplot2, `ggplotly()` is great since you can add some interactivity (specifically, idenfication + zoom & pan) to your plots for free. Also, 
+
+The `ggplotly()` function tries its best to replicate what you see _exactly_ in the static ggplot2 graph. 
+
+The output of a `ggplotly()` function is a plotly object. 
+
+## The `plot_ly()` interface
+
+The `plot_ly()` function draws inspiration from ggplot2's implementation of the grammar of graphics, but provides a more flexible and direct interface to [plotly.js](https://github.com/plotly/plotly.js). The interface is also functional, and designed to work with dplyr, so visualization can be described as a sequence of data manipulations and visual components via the pipe operator (`%>%`) from the magrittr package.
+
+```{r}
+txhousing %>%
+  group_by(city) %>%
+  plot_ly(x = ~date, y = ~median) %>%
+  add_lines(alpha = 0.3, color = I("black"), name = "Texan Cities") %>%
+  filter(city == "Houston") %>%
+  add_lines(color = I("red"), name = "Houston")
+```
+
+TODO: list resources

@@ -20,7 +20,7 @@ test_that("geom_density() is translated to area chart", {
   tr <- info$data[[1]]
   expect_identical(tr$type, "scatter")
   expect_identical(tr$mode, "lines")
-  expect_identical(tr$fill, "tozerox")
+  expect_identical(tr$fill, "toself")
 })
 
 test_that("geom_density() respects fill aesthetic", {
@@ -31,7 +31,7 @@ test_that("geom_density() respects fill aesthetic", {
     unique(sapply(trs, "[[", "type")), "scatter"
   )
   expect_identical(
-    unique(sapply(trs, "[[", "fill")), "tozerox"
+    unique(sapply(trs, "[[", "fill")), "toself"
   )
   # check legend exists
   expect_true(info$layout$showlegend, TRUE)
@@ -46,7 +46,7 @@ test_that("geom_density() respects colour aesthetic", {
     unique(sapply(trs, "[[", "type")), "scatter"
   )
   expect_identical(
-    unique(sapply(trs, "[[", "fill")), "tozerox"
+    unique(sapply(trs, "[[", "fill")), "toself"
   )
 })
 

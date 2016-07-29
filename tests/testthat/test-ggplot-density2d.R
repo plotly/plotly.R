@@ -43,7 +43,7 @@ test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
     unique(unlist(lapply(polygons, "[[", "mode"))), "lines"
   )
   expect_identical(
-    unique(unlist(lapply(polygons, "[[", "fill"))), "tozerox"
+    unique(unlist(lapply(polygons, "[[", "fill"))), "toself"
   )
   # split on fill for polygons 
   # (you can't have two polygons with different fill in a single trace)
