@@ -325,27 +325,34 @@ TraceManager.prototype.updateFilter = function(group, keys) {
 };
 
 TraceManager.prototype.updateSelection = function(group, keys) {
+    // NOTE: for a given selection, this is being called 4 times in examples/shiny-crosstalk/app.R (twice per group). Why is it sometimes being passed an empty array?
+    
   if (keys !== null && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
   
-  // NOTE: for a given selection, this is being called 4 times in examples/shiny-crosstalk/app.R (twice per group). Why is it sometimes being passed an empty array?
+  // remove any existing selection traces
+  // TODO: add control(s) for persistant selections?
+  var tracesToRemove = [];
+  for (var i = this.origData.length; i < this.gd.data.length; i++) {
+    tracesToRemove.push(i);
+  }
+  Plotly.deleteTraces(this.gd, tracesToRemove);
   
   // selection has been cleared
   if (keys === null) {
-    // delete any existing selection traces
-    for (var i = this.origData.length; i < this.gd.data.length; i++) {
-      Plotly.deleteTraces(this.gd, i);
-    }
-    // back to original opactiy
+    
     for (var i = 0; i < this.origData.length; i++) {
-      Plotly.restyle(this.gd, {"opacity": (this.origData[i].opacity || 1)}, i);
+      // go back to original opacity
+      if (this.origData[i].opacity !== this.gd.data[i].opacity) {
+        Plotly.restyle(
+          this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
+        );
+      }
     }
+    
   } else if (keys.length > 1) {
-    // TODO: add control(s) for persistant selections?
-    for (var i = this.origData.length; i < this.gd.data.length; i++) {
-      Plotly.deleteTraces(this.gd, i);
-    }
+    
     var keySet = new Set(keys || []);
     this.groupSelections[group] = keys;
   
@@ -366,6 +373,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (ct.color) {
           trace.marker = trace.marker || {};
           trace.marker.color = ct.color;
+          trace.line = trace.line || {};
+          trace.line.color = ct.color;
         }
         Plotly.addTraces(this.gd, trace);
       }
