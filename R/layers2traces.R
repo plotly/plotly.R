@@ -10,16 +10,16 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     # by default, show all user-specified and generated aesthetics in hovertext
-    map <- c(
-      as.character(y$mapping),
-      grep("^\\.\\.", as.character(y$stat$default_aes), value = TRUE)
-    )
+    stat_aes <- y$stat$default_aes
+    map <- c(y$mapping, stat_aes[grepl("^\\.\\.", as.character(stat_aes))])
     # add on plot-level mappings, if they're inherited
-    if (isTRUE(y$inherit.aes)) map <- c(map, as.character(p$mapping))
+    if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
     # "hidden" names should be taken verbatim
     idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
-    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
-    map[idx] <- setNames(hiddenMap[idx], hiddenMap[idx])
+    map <- setNames(
+      sub("^\\.\\.", "", sub("\\.\\.$", "", as.character(map))),
+      names(map)
+    )
     if (!identical(p$tooltip, "all")) {
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
@@ -461,6 +461,8 @@ geom2trace.GeomPoint <- function(data, params, p) {
     y = data[["y"]],
     text = uniq(data$hovertext),
     key = data$key,
+    set = attr(data, "set"),
+    crosstalk = ct_opts(),
     type = "scatter",
     mode = "markers",
     marker = list(

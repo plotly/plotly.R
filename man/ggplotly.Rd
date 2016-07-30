@@ -5,7 +5,7 @@
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  tooltip = "all", originalData = TRUE, source = "A", ...)
+  tooltip = "all", originalData = TRUE, ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -22,8 +22,6 @@ also control the order they appear. For example, use
 colour last.}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
-
-\item{source}{Only relevant for \link{event_data}.}
 
 \item{...}{arguments passed onto methods.}
 }
@@ -46,6 +44,22 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
   coord_equal() +
   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 ggplotly(viz, tooltip = c("text", "size"))
+
+# client-side linked brushing
+library(crosstalk)
+d <- SharedData$new(mtcars)
+subplot(
+ qplot(data = d, x = mpg, y = wt),
+ qplot(data = d, x = mpg, y = vs)
+)
+
+# client-side linked brushing in a scatterplot matrix
+library(GGally)
+iris$id <- seq_len(nrow(iris))
+SharedData$new(iris, ~id) \%>\%
+  ggpairs(columns = 1:4, upper = NULL) \%>\%
+  ggplotly() \%>\% 
+  hide_legend()
 }
 
 }

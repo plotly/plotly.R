@@ -13,7 +13,6 @@
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
 #' @param originalData should the "original" or "scaled" data be returned?
-#' @param source Only relevant for \link{event_data}.
 #' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @return a plotly object
@@ -30,17 +29,33 @@
 #'   coord_equal() +
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 #' ggplotly(viz, tooltip = c("text", "size"))
+#' 
+#' # client-side linked brushing
+#' library(crosstalk)
+#' d <- SharedData$new(mtcars)
+#' subplot(
+#'  qplot(data = d, x = mpg, y = wt),
+#'  qplot(data = d, x = mpg, y = vs)
+#' )
+#' 
+#' # client-side linked brushing in a scatterplot matrix
+#' library(GGally)
+#' iris$id <- seq_len(nrow(iris))
+#' SharedData$new(iris, ~id) %>%
+#'   ggpairs(columns = 1:4, upper = NULL) %>%
+#'   ggplotly() %>% 
+#'   hide_legend()
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", originalData = TRUE, source = "A", ...) {
-  UseMethod("ggplotly", p)
+                     tooltip = "all", originalData = TRUE, ...) {
+  UseMethod("ggplotly")
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", 
-                              originalData = TRUE, source = "A", ...) {
+                              originalData = TRUE, ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -61,22 +76,34 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     }
     # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
-    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
+    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, 
+                 shareX = TRUE, titleY = TRUE) %>% hide_legend()
     subplotList <- c(subplotList, list(s))
   }
   s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
   if (nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
+  for (i in seq_along(p$xAxisLabels)) {
+    s$x$layout[[sub("^xaxis1$", "xaxis", paste0("xaxis", i))]]$title <- p$xAxisLabels[[i]]
+  }
+  for (i in seq_along(p$yAxisLabels)) {
+    s$x$layout[[sub("^yaxis1$", "yaxis", paste0("yaxis", i))]]$title <- rev(p$yAxisLabels)[[i]]
+  }
+  # TODO: make this more correct
+  if (length(p$yAxisLabels)) {
+    s$x$layout$margin$l <- s$x$layout$margin$l + 20
+  }
+  
   s
 }
 
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
-                            height = NULL, tooltip = "all", originalData = TRUE,
-                            source = "A", ...) {
+                            height = NULL, tooltip = "all", 
+                            originalData = TRUE, ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
-               originalData = originalData, source = source, ...)
+               originalData = originalData, ...)
   structure(as_widget(l), ggplotly = TRUE)
 }
 
@@ -88,22 +115,33 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
 #' @param originalData should the "original" or "scaled" data be returned?
-#' @param source Only relevant for \link{event_data}.
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
-                    originalData = TRUE, source = "A", ...) {
+                    originalData = TRUE, ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
+  
+  # add a key aesthetic if one doesn't already exist and crosstalk key is detected
+  has_crosstalk_key <- is.null(p$mapping[["key"]]) && 
+    crosstalk_key() %in% names(p$data)
+  if (has_crosstalk_key) {
+    p$mapping <- c(p$mapping, key = as.symbol(crosstalk_key()))
+  }
+  
   p <- ggfun("plot_clone")(p)
   if (length(p$layers) == 0) {
     p <- p + geom_blank()
   }
   layers <- p$layers
   layer_data <- lapply(layers, function(y) y$layer_data(p$data))
+  
+  # save crosstalk sets before this attribute gets squashed
+  sets <- lapply(layer_data, function(y) attr(y, "set"))
+  
   scales <- p$scales
   by_layer <- function(f) {
     out <- vector("list", length(data))
@@ -163,6 +201,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   }
   panel <- ggfun("train_ranges")(panel, p$coordinates)
   data <- by_layer(function(l, d) l$compute_geom_2(d))
+  
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
@@ -239,8 +278,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # layers -> plotly.js traces
   p$tooltip <- tooltip
   data <- Map(function(x, y) {
-    tryCatch({x$group_plotlyDomain <- y; x}, error = function(e) x)
+    tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
+  data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, panel$layout, p)
   
   # default to just the text in hover info, mainly because of this
@@ -651,11 +691,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   gglayout$width <- width
   gglayout$height <- height
+  if (has_crosstalk_key) gglayout$dragmode <- "lasso"
   
   l <- list(
     data = setNames(traces, NULL),
-    layout = compact(gglayout),
-    source = source
+    layout = compact(gglayout)
   )
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red")))

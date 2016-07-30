@@ -140,3 +140,17 @@ transmute_.plotly <- function(.data, ..., .dots) {
   d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
+
+
+# Avoid errors when passing a shared data to ggplot2
+# qplot(data = crosstalk::SharedData$new(mtcars), mpg, wt)
+
+#' @rawNamespace export(fortify.SharedData)
+fortify.SharedData <- function(model, data, ...) {
+  key <- model$key()
+  set <- model$groupName()
+  data <- model$origData()
+  # need a consistent name for the keyso we know how to access it ggplotly()
+  data[[".crossTalkKey"]] <- key
+  structure(data, set = set)
+}

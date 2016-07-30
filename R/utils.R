@@ -48,6 +48,10 @@ npscales <- function() {
   c("color", "symbol", "linetype", "size")
 }
 
+# column name for crosstalk key
+# TODO: make this more unique?
+crosstalk_key <- function() ".crossTalkKey"
+
 # modifyList turns elements that are data.frames into lists
 # which changes the behavior of toJSON
 as_df <- function(x) {

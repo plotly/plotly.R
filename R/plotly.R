@@ -82,7 +82,7 @@
 #' subplot(
 #'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black"), crosstalkOpts = o),
 #'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"), crosstalkOpts = o)
-#' ) %>% hide_legend()
+#' ) %>% hide_legend() %>% plotly_json()
 #' 
 #' # client-side highlighting
 #' sd <- SharedData$new(txhousing, ~city)
