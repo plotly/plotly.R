@@ -371,10 +371,15 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         trace.showlegend = ct.showInLegend;
         trace.name = "selected";
         if (ct.color) {
-          trace.marker = trace.marker || {};
-          trace.marker.color = ct.color;
-          trace.line = trace.line || {};
-          trace.line.color = ct.color;
+          trace.marker = trace.marker || this.gd._fullData[i].marker || {};
+          // TODO: why is ct.color an empty array?!?
+          if (typeof(ct.color) == "string") {
+            trace.marker.color = ct.color;
+          }
+          trace.line = trace.line || this.gd._fullData[i].line || {};
+          if (typeof(ct.color) == "string") {
+            trace.line.color = ct.color || trace.line.color;
+          }
         }
         Plotly.addTraces(this.gd, trace);
       }

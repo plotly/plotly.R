@@ -110,11 +110,12 @@ subplot(
 ) \%>\% hide_legend() \%>\% plotly_json()
 
 # client-side highlighting
-sd <- SharedData$new(txhousing, ~city)
-plot_ly(sd, x = ~date, y = ~median) \%>\%
+d <- SharedData$new(txhousing, ~city)
+ct <- ct_opts(color = "red")
+plot_ly(d, x = ~date, y = ~median, color = I("black"), crosstalkOpts = ct) \%>\%
   group_by(city) \%>\%
   add_lines() \%>\% 
-  add_markers()
+  add_markers(size = I(0.01))
 
 }
 
