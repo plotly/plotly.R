@@ -150,7 +150,7 @@ fortify.SharedData <- function(model, data, ...) {
   key <- model$key()
   set <- model$groupName()
   data <- model$origData()
-  # need a consistent name for the keyso we know how to access it ggplotly()
-  data[[".crossTalkKey"]] <- key
+  # need a consistent name so we know how to access it ggplotly()
+  data[[crosstalk_key()]] <- key
   structure(data, set = set)
 }

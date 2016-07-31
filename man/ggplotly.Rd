@@ -57,9 +57,8 @@ subplot(
 library(GGally)
 iris$id <- seq_len(nrow(iris))
 SharedData$new(iris, ~id) \%>\%
-  ggpairs(columns = 1:4, upper = NULL) \%>\%
-  ggplotly() \%>\% 
-  hide_legend()
+  ggpairs(aes(colour = Species), columns = 1:4) \%>\%
+  ggplotly(tooltip = c("x", "y", "colour"))
 }
 
 }

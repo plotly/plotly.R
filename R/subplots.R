@@ -235,7 +235,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
     layouts <- layouts[which_layout]
   }
-  p$layout <- c(p$layout, Reduce(modify_list, layouts))
+  p$layout <- modify_list(p$layout, Reduce(modify_list, layouts))
   as_widget(p)
 }
 

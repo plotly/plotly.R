@@ -49,14 +49,8 @@ hide_legend <- function(p) {
   p <- plotly_build(p)
   # annotations have to be an array of objects, so this should be a list of lists
   ann <- p$x$layout$annotations
-  for (i in seq_along(ann)) {
-    if (isTRUE(ann[[i]]$legendTitle)) {
-      p$x$layout$annotations[[i]] <- NULL
-    }
-  }
-  if (length(p$x$layout$annotations) == 0) {
-    p$x$layout$annotations <- NULL
-  }
+  is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
+  p$x$layout$annotations <- ann[!is_title]
   p$x$layout$showlegend <- FALSE
   p
 }
