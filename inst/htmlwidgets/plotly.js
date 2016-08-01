@@ -388,7 +388,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
     var keySet = new Set(keys || []);
     this.groupSelections[group] = keys;
-  
+    
+    var traces = [];
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.origData[i];
       if (!trace.key || trace.set !== group) {
@@ -414,9 +415,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             trace.line.color = ct.color || trace.line.color;
           }
         }
-        Plotly.addTraces(this.gd, trace);
+        traces.push(trace);
       }
     }
+    Plotly.addTraces(this.gd, traces);
   }
 };
 
