@@ -178,7 +178,7 @@ HTMLWidgets.widget({
 
     if (allSets.length > 0) {
       // When plotly selection changes, update crosstalk
-      graphDiv.on("plotly_selected", function plotly_selecting(e) {
+      var turnOn = function(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
           // Keys are group names, values are array of selected keys from group.
@@ -194,13 +194,44 @@ HTMLWidgets.widget({
             }
           }
         }
-      });
-      // When plotly selection is cleared, update crosstalk
-      graphDiv.on("plotly_deselect", function plotly_deselect(e) {
+      };
+      
+      // gather all the unique "on" event types
+      var onEvents = [];
+      for (var i = 0; i < x.data.length; i++) {
+        var evt = x.data[i].crosstalk.on;
+        for (var j = 0; j < evt.length; j++) {
+          if (onEvents.indexOf(evt[j]) === -1) {
+            onEvents.push(evt[j]);
+          }
+        }
+      }
+      
+      // register a callback for every type
+      for (var i = 0; i < onEvents.length; i++) {
+        graphDiv.on(onEvents[i], turnOn);
+      }
+      
+      // gather all the unique "off" event types
+      // TODO: eliminate this copy pasta
+      var offEvents = [];
+      for (var i = 0; i < x.data.length; i++) {
+        var evt = x.data[i].crosstalk.off;
+        for (var j = 0; j < evt.length; j++) {
+          if (offEvents.indexOf(evt[j]) === -1) {
+            offEvents.push(evt[j]);
+          }
+        }
+      }
+      
+      var turnOff = function(e) {
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
-      });
+      };
+      
+      // When plotly selection is cleared, update crosstalk
+      graphDiv.on(offEvents, turnOff);
 
       for (var i = 0; i < allSets.length; i++) {
         (function() {
@@ -221,8 +252,9 @@ HTMLWidgets.widget({
                 outlines[i].remove();
               }
             }
-
-            traceManager.updateSelection(set, e.value);
+            if (e.oldValue !== e.value) {
+              traceManager.updateSelection(set, e.value);
+            }
           });
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
@@ -243,8 +275,8 @@ HTMLWidgets.widget({
         graphDiv.removeListener("plotly_deselect", plotly_deselect);
       });
     }
-    
-    // send user input event data to shiny
+/*    
+    // TODO: modify event_data() to use crosstalk's R API
     if (shinyMode) {
       // https://plot.ly/javascript/zoom-events/
       graphDiv.on('plotly_relayout', function(d) {
@@ -268,6 +300,7 @@ HTMLWidgets.widget({
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
       });
     }
+*/ 
 
   }
 
@@ -326,7 +359,7 @@ TraceManager.prototype.updateFilter = function(group, keys) {
 
 TraceManager.prototype.updateSelection = function(group, keys) {
     // NOTE: for a given selection, this is being called 4 times in examples/shiny-crosstalk/app.R (twice per group). Why is it sometimes being passed an empty array?
-    
+    console.log(keys);
   if (keys !== null && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
@@ -351,7 +384,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
     }
     
-  } else if (keys.length > 1) {
+  } else if (keys.length >= 1) {
     
     var keySet = new Set(keys || []);
     this.groupSelections[group] = keys;

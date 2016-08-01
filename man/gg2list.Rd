@@ -5,7 +5,7 @@
 \title{Convert a ggplot to a list.}
 \usage{
 gg2list(p, width = NULL, height = NULL, tooltip = "all",
-  originalData = TRUE, ...)
+  crosstalkOpts = ct_opts(), originalData = TRUE, ...)
 }
 \arguments{
 \item{p}{ggplot2 plot.}

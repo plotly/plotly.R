@@ -12,6 +12,8 @@
 #' also control the order they appear. For example, use
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
+#' @param crosstalkOpts a list of options for controlling the type and 
+#' appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
@@ -47,13 +49,15 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", originalData = TRUE, ...) {
+                     tooltip = "all", crosstalkOpts = ct_opts(), 
+                     originalData = TRUE, ...) {
   UseMethod("ggplotly")
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", 
+                              crosstalkOpts = ct_opts(), 
                               originalData = TRUE, ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
@@ -100,9 +104,10 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
                             height = NULL, tooltip = "all", 
+                            crosstalkOpts = ct_opts(),
                             originalData = TRUE, ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
-               originalData = originalData, ...)
+               crosstalkOpts = crosstalkOpts, originalData = originalData, ...)
   structure(as_widget(l), ggplotly = TRUE)
 }
 
@@ -118,6 +123,7 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
+                    crosstalkOpts = ct_opts(), 
                     originalData = TRUE, ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
@@ -691,6 +697,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   gglayout$width <- width
   gglayout$height <- height
   if (has_crosstalk_key) gglayout$dragmode <- "lasso"
+  
+  traces <- lapply(traces, function(x) { x$crosstalk <- crosstalkOpts; x })
   
   l <- list(
     data = setNames(traces, NULL),

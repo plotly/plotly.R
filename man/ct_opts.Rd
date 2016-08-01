@@ -2,14 +2,18 @@
 % Please edit documentation in R/crosstalk.R
 \name{ct_opts}
 \alias{ct_opts}
-\title{Control selection appearance}
+\title{Client-side interaction controls}
 \usage{
-ct_opts(dynamic = FALSE, persitant = dynamic, color = NULL,
-  opacityDim = 0.2, showInLegend = FALSE)
+ct_opts(on = "plotly_selected", off = "plotly_deselect", color = NULL,
+  dynamic = FALSE, persitant = dynamic, opacityDim = 0.2,
+  showInLegend = FALSE)
 }
 \arguments{
-\item{dynamic}{should UI controls for managing selection aesthetics be 
-included in the output?}
+\item{on}{turn on a selection on which event(s)? Likely candidates are
+'plotly_hover', 'plotly_click', 'plotly_selected'.}
+
+\item{off}{turn off a selection on which event(s)? Likely candidates are
+'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.}
 
 \item{color}{color(s) to use for highlighting selections. 
 If \code{NULL} (the default), the color of selections are not altered. 
@@ -18,6 +22,9 @@ a valid color code,
 If not \code{dynamic}, this argument should be length 1,
 If \code{dynamic},
 this argument accepts a character}
+
+\item{dynamic}{should UI controls for managing selection aesthetics be 
+included in the output?}
 
 \item{opacityDim}{a number between 0 and 1 used to reduce the
 opacity of non-selected traces (by multiplying with the existing opacity).}

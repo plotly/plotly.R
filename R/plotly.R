@@ -31,10 +31,8 @@
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
-#' @param crosstalkEvents inform crosstalk about these plotly events to 
-#' enable client-side linked interactions. Currently 'plotly_hover', 'plotly_click', 
-#' 'plotly_selected', and 'plotly_relayout' are supported.
-#' @param crosstalkOpts a list of options for controlling the appearance of selections.
+#' @param crosstalkOpts a list of options for controlling the type and 
+#' appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.
 #' @seealso \code{\link{ggplotly}()}
 #' @author Carson Sievert
 #' @export
@@ -98,9 +96,7 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL, 
-                    crosstalkEvents = "plotly_selected",
-                    crosstalkOpts = ct_opts()) {
+                    width = NULL, height = NULL, crosstalkOpts = ct_opts()) {
   
   is_sd <- crosstalk::is.SharedData(data)
   if (is_sd) {
@@ -153,7 +149,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   # tack on crosstalk stuffs
   attrs$key <- key
   attrs$set <- set
-  attrs$crosstalk <- c(crosstalkOpts, crosstalkEvents = crosstalkEvents)
+  attrs$crosstalk <- crosstalkOpts
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()

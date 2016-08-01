@@ -7,7 +7,7 @@
 plot_ly(data = data.frame(), ..., type = NULL, group, color,
   colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
   100), linetype, linetypes = NULL, width = NULL, height = NULL,
-  crosstalkEvents = "plotly_selected", crosstalkOpts = ct_opts())
+  crosstalkOpts = ct_opts())
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -50,11 +50,8 @@ To avoid scaling, wrap with \code{\link{I}()}, and provide valid
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
 
-\item{crosstalkEvents}{inform crosstalk about these plotly events to 
-enable client-side linked interactions. Currently 'plotly_hover', 'plotly_click', 
-'plotly_selected', and 'plotly_relayout' are supported.}
-
-\item{crosstalkOpts}{a list of options for controlling the appearance of selections.}
+\item{crosstalkOpts}{a list of options for controlling the type and 
+appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.}
 }
 \description{
 Transform data into a plotly visualization.

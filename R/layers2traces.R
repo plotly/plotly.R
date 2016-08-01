@@ -428,12 +428,14 @@ geom2trace.GeomBlank <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPath <- function(data, params, p) {
+  set <- attr(data, "set")
   data <- group2NA(data)
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data$hovertext),
     key = data$key,
+    set = set,
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -462,7 +464,6 @@ geom2trace.GeomPoint <- function(data, params, p) {
     text = uniq(data$hovertext),
     key = data$key,
     set = attr(data, "set"),
-    crosstalk = ct_opts(),
     type = "scatter",
     mode = "markers",
     marker = list(
