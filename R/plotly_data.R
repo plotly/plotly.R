@@ -7,8 +7,8 @@
 #' @param p a plotly visualization
 #' @param id a character string or number referencing an "attribute layer".
 #' @return returns a data frame
-#' @examples
 #' @export
+#' @examples
 #' 
 #' # use group_by() to define groups of visual markings
 #' p <- txhousing %>%
