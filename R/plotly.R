@@ -166,7 +166,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
       height = height,
       # sane margin defaults (mainly for RStudio)
       margin = list(b = 40, l = 60, t = 25, r = 10),
-      dragmode = if (is_sd) "select"
+      dragmode = if (is_sd) "lasso",
+      hovermode = if (is_sd) "closest"
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
     base_url = get_domain()

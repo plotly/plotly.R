@@ -265,6 +265,15 @@ verify_webgl <- function(p) {
   p
 }
 
+verify_showlegend <- function(p) {
+  if (!is.null(p$x$layout$showlegend)) {
+    return(p)
+  }
+  show <- unlist(lapply(p$x$data, function(x) x$showlegend %||% TRUE))
+  p$x$layout$showlegend <- sum(show) > 1
+  p
+}
+
 has_marker <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("marker", modes), has_attr(types, "marker"))

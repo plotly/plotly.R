@@ -249,7 +249,9 @@ plotly_build.plotly <- function(p) {
   # set a sensible hovermode if it hasn't been specified already
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
-  verify_webgl(p)
+  p <- verify_webgl(p)
+  # verfiy showlegend is populated (mainly for crosstalk's ability to dynamically add traces)
+  verify_showlegend(p)
 }
 
 # ----------------------------------------------------------------
