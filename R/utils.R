@@ -22,6 +22,10 @@ compact <- function(x) {
   Filter(Negate(is.null), x)
 }
 
+tryNULL <- function(x) {
+  tryCatch(x, warning = function(w) NULL, error = function(e) NULL)
+}
+
 modify_list <- function(x, y, ...) {
   modifyList(x %||% list(), y %||% list(), ...)
 }

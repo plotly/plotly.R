@@ -63,7 +63,8 @@ plotly_build.plotly <- function(p) {
     )
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat)) {
-      trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
+      # try as hard as we can to support legacy code
+      trace[[crosstalk_key()]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
       p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% "lasso"
       p$x$layout[["hovermode"]] <<- p$x$layout[["hovermode"]] %||% "closest"
@@ -93,9 +94,6 @@ plotly_build.plotly <- function(p) {
       }
     }
     
-    # TODO: if we ever provide some semantics for summary statistics, 
-    # it should go here
-    
     # gather the "built" or "evaluated" data
     nobs <- NROW(dat)
     attrLengths <- lengths(trace)
@@ -108,66 +106,27 @@ plotly_build.plotly <- function(p) {
       !vapply(trace, is.matrix, logical(1)) &
       !vapply(trace, is.bare.list, logical(1))
     builtData <- data.frame(trace[isVar], stringsAsFactors = FALSE)
-    
+    # preserve groups
+    grps <- tryCatch(as.character(dplyr::groups(dat)), error = function(e) NULL)
+    for (i in grps) {
+      builtData[[i]] <- dat[[i]]
+      builtData <- group_by_(builtData, i, add = TRUE)
+    }
     if (NROW(builtData) > 0) {
       # Build the index used to split one "trace" into multiple traces
-      isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
-      isDiscrete <- vapply(builtData, is.discrete, logical(1))
-       # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% "linetype" |
-        !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
-      if (any(isSplit)) {
-        paste2 <- function(x, y) paste(x, y, sep = "<br>")
-        builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
-      }
-      # Build the index used to determine grouping (later on, NAs are inserted 
-      # via group2NA() to create the groups). This is done in 2 parts:
-      # 1. Translate missing values on positional scales to a grouping variable.
-      #    If grouping isn't relevant for this trace, a warning is thrown since 
-      #    NAs are removed.
-      # 2. The grouping from (1) and any groups detected via dplyr::groups() 
-      #    are combined into a single grouping variable, .plotlyGroupIndex
-      isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
-      # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
-      hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
-        (grepl("scatter", trace[["type"]]) && grepl("lines", trace[["mode"]]))
-      # warn about missing values if groups aren't relevant for this trace type
-      if (any(!isComplete) && !hasGrp) {
-        warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
-      }
-      builtData$.plotlyGroupIndex <- cumsum(!isComplete)
-      builtData <- builtData[isComplete, ]
-      grps <- tryCatch(
-        as.character(dplyr::groups(dat)), 
-        error = function(e) character(0)
-      )
-      if (length(grps) && hasGrp) {
-        if (isTRUE(trace[["connectgaps"]])) {
-          stop(
-            "Can't use connectgaps=TRUE when data has group(s).", 
-            call. = FALSE
-          )
-        }
-        builtData$.plotlyGroupIndex <- interaction(
-          interaction(dat[isComplete, grps, drop = FALSE]),
-          builtData$.plotlyGroupIndex %||% ""
-        )
-      }
+      builtData$.plotlyTraceIndex <- trace_index(builtData)
+      
+      # "train" data so we can arrange rows and assume "standard" plotly attributes
+      # _before_ constructing grouping index
       builtData <- train_data(builtData, trace)
+      
       # TODO: provide a better way to clean up "high-level" attrs
       trace[c("ymin", "ymax", "yend", "xend")] <- NULL
       trace$.plotlyVariableMapping <- names(builtData)
-      # arrange the built data
-      arrangeVars <- c(
-        ".plotlyTraceIndex", "group", if (inherits(trace, "plotly_line")) "x"
-      )
-      arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
-      if (length(arrangeVars)) {
-        builtData <- dplyr::arrange_(builtData, arrangeVars)
-      }
       # copy over to the trace data
       for (i in names(builtData)) {
-        trace[[i]] <- builtData[[i]]
+        j <- sub(crosstalk_key(), "key", i, fixed = TRUE)
+        trace[[j]] <- builtData[[i]]
       }
     }
     
@@ -184,22 +143,6 @@ plotly_build.plotly <- function(p) {
     if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
   }
   
-  # insert NAs to differentiate groups
-  traces <- lapply(traces, function(x) {
-    d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
-    d <- group2NA(
-      d, ".plotlyGroupIndex", ordered = if (inherits(x, "plotly_line")) "x",
-      retrace.first = inherits(x, "plotly_polygon")
-    )
-    for (i in x$.plotlyVariableMapping) {
-      # try to reduce the amount of data we have to send for non-positional scales
-      x[[i]] <- structure(
-        if (i %in% npscales()) uniq(d[[i]]) else d[[i]], 
-        class = oldClass(x[[i]])
-      )
-    }
-    x
-  })
   # "transforms" of (i.e., apply scaling to) special arguments
   # IMPORTANT: scales are applied at the plot-level!!
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
@@ -213,7 +156,7 @@ plotly_build.plotly <- function(p) {
   # remove special mapping attributes
   for (i in seq_along(traces)) {
     mappingAttrs <- c(
-      "alpha", npscales(), paste0(npscales(), "s"),
+      "alpha", npscales(), paste0(npscales(), "s"), ".crossTalkKey",
       ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
     for (j in mappingAttrs) {
@@ -265,7 +208,31 @@ plotly_build.plotly <- function(p) {
 # Functions used solely within plotly_build
 # ----------------------------------------------------------------
 
+trace_index <- function(data) {
+  isAsIs <- vapply(data, function(x) inherits(x, "AsIs"), logical(1))
+  isDiscrete <- vapply(data, is.discrete, logical(1))
+  # note: can only have one linetype per trace
+  isSplit <- names(data) %in% "linetype" |
+    !isAsIs & isDiscrete & names(data) %in% c("symbol", "color")
+  if (!any(isSplit)) {
+    return(NA)
+  }
+  paste2 <- function(x, y) paste(x, y, sep = "<br>")
+  Reduce(paste2, data[isSplit])
+}
+
 train_data <- function(data, trace) {
+  # is grouping relevant to this trace type? 
+  # (e.g., grouping doesn't effect a scatterplot)
+  grpTypes <- paste0("plotly_", c("segment", "path", "line", "polygon"))
+  hasGrp <- inherits(trace, grpTypes) ||
+    (grepl("scatter", trace[["type"]]) && grepl("lines", trace[["mode"]]))
+  # you're not allowed to connectgaps if there are groups
+  if (!is.null(dplyr::groups(data)) && hasGrp && isTRUE(trace[["connectgaps"]])) {
+    stop("Can't use connectgaps=TRUE when data has group(s).", call. = FALSE)
+  }
+  # 'geom' specific data wrangling
+  # TODO: a lot more geoms!!!
   if (inherits(trace, "plotly_area")) {
     data$ymin <- 0
   }
@@ -281,10 +248,42 @@ train_data <- function(data, trace) {
     )
     data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
     data <- dplyr::distinct(data)
-    data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
   }
-  # TODO: a lot more geoms!!!
-  data
+  
+  # arrange the data before translating missing values to a grouping var
+  arrangeVars <- c(
+    ".plotlyTraceIndex", "group", if (inherits(trace, "plotly_line")) "x"
+  )
+  arrangeVars <- arrangeVars[arrangeVars %in% names(data)]
+  if (length(arrangeVars)) {
+    data <- dplyr::arrange_(data, arrangeVars)
+  }
+  
+  # Build the index used to determine grouping (later on, NAs are inserted 
+  # via group2NA() to create the groups). This is done in 2 parts:
+  # 1. Translate missing values on positional scales to a grouping variable.
+  #    If grouping isn't relevant for this trace, a warning is thrown since 
+  #    NAs are removed.
+  # 2. The grouping from (1) and any groups detected via dplyr::groups() 
+  #    are combined into a single grouping variable, .plotlyGroupIndex
+  isComplete <- complete.cases(data[names(data) %in% c("x", "y", "z")])
+  # warn about missing values if groups aren't relevant for this trace type
+  if (any(!isComplete) && !hasGrp) {
+    warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
+  }
+  data$.plotlyGroupIndex <- paste(
+    tryNULL(data$.plotlyGroupIndex),
+    cumsum(!isComplete)
+  )
+  data <- data[isComplete, ]
+  data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
+  
+  # insert NAs to differentiate groups
+  grps <- tryCatch(as.character(dplyr::groups(data)), error = function(e) NULL)
+  group2NA(
+    data, grps, ordered = if (inherits(trace, "plotly_line")) "x",
+    retrace.first = inherits(trace, "plotly_polygon")
+  )
 }
 
 
