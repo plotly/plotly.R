@@ -54,11 +54,24 @@
 #' 
 #' 
 plotly_data <- function(p, id = p$x$cur_data) {
+  if (!is.plotly(p)) {
+    stop("This function can only retrieve data from plotly objects.")
+  }
   f <- p$x$visdat[[id]]
   # if data has been specified, f should be a closure that, when called,
   # returns data
-  if (is.function(f)) return(tibble::as_tibble(f()))
-  data.frame()
+  if (is.null(f)) return(f)
+  if (!is.function(f)) stop("Expected a closure", call. = FALSE)
+  dat <- f()
+  if (crosstalk::is.SharedData(dat)) {
+    key <- dat$key()
+    set <- dat$groupName()
+    dat <- dat$origData()
+    dat[[crosstalk_key()]] <- key
+    dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
+    dat <- structure(dat, set = set)
+  }
+  if (is.data.frame(dat)) tibble::as_tibble(dat) else dat
 }
 
 #' @rawNamespace export(groups.plotly)
@@ -74,8 +87,12 @@ ungroup.plotly <- function(x) {
 #' @rawNamespace export(group_by_.plotly)
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
-  d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
-  add_data(.data, d)
+  d2 <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
+  # _always_ preserve the crosstalk key
+  if (crosstalk_key() %in% as.character(dplyr::groups(d))) {
+    d2 <- dplyr::group_by_(d2, crosstalk_key(), add = TRUE)
+  }
+  add_data(.data, d2)
 }
 
 #' @rawNamespace export(summarise_.plotly)

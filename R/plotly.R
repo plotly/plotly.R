@@ -98,19 +98,10 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
                     width = NULL, height = NULL, crosstalkOpts = ct_opts()) {
   
-  is_sd <- crosstalk::is.SharedData(data)
-  if (is_sd) {
-    key <- data$key()
-    set <- data$groupName()
-    data <- data$origData()
-  } else {
-    key <- NULL
-    set <- NULL
-  }
-  
-  if (!is.data.frame(data)) {
+  if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
   }
+  
   
   # "native" plotly arguments
   attrs <- list(...)
@@ -147,8 +138,6 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   attrs$type <- type
   
   # tack on crosstalk stuffs
-  attrs$key <- key
-  attrs$set <- set
   attrs$crosstalk <- crosstalkOpts
   
   # id for tracking attribute mappings and finding the most current data
@@ -165,9 +154,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
       width = width, 
       height = height,
       # sane margin defaults (mainly for RStudio)
-      margin = list(b = 40, l = 60, t = 25, r = 10),
-      dragmode = if (is_sd) "lasso",
-      hovermode = if (is_sd) "closest"
+      margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
     base_url = get_domain()

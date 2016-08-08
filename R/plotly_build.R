@@ -61,6 +61,13 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"), 
       class = oldClass(x)
     )
+    # attach crosstalk info, if necessary
+    if (crosstalk_key() %in% names(dat)) {
+      trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
+      trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
+      p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% "lasso"
+      p$x$layout[["hovermode"]] <<- p$x$layout[["hovermode"]] %||% "closest"
+    }
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)

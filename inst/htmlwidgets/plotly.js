@@ -288,20 +288,19 @@ TraceManager.prototype.updateFilter = function(group, keys) {
   }
 
   Plotly.redraw(this.gd);
-
+  
   // If this group had a selection, restore it now
   if (this.groupSelections[group]) {
     this.updateSelection(group, this.groupSelections[group]);
   }
+  
 };
 
 TraceManager.prototype.updateSelection = function(group, keys) {
-    // NOTE: for a given selection, this is being called 4 times in examples/shiny-crosstalk/app.R (twice per group). Why is it sometimes being passed an empty array?
-    console.log(keys);
+  
   if (keys !== null && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
-  
   // remove any existing selection traces
   // TODO: add control(s) for persistant selections?
   var tracesToRemove = [];
@@ -310,54 +309,67 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   }
   Plotly.deleteTraces(this.gd, tracesToRemove);
   
-  // selection has been cleared
-  if (keys === null) {
-    
-    for (var i = 0; i < this.origData.length; i++) {
-      // go back to original opacity
-      if (this.origData[i].opacity !== this.gd.data[i].opacity) {
-        Plotly.restyle(
-          this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
-        );
-      }
-    }
-    
-  } else if (keys.length >= 1) {
-    
-    var keySet = new Set(keys || []);
-    this.groupSelections[group] = keys;
-    
-    var traces = [];
-    for (var i = 0; i < this.origData.length; i++) {
-      var trace = this.origData[i];
-      if (!trace.key || trace.set !== group) {
-        continue;
-      }
-      var ct = trace.crosstalk || {};
-      var opacity = (trace.opacity || 1) * ct.opacityDim;
-      Plotly.restyle(this.gd, {"opacity": opacity}, i);
-      // Get sorted array of matching indices in trace.key
-      var matches = findMatches(trace.key, keySet);
-      if (matches.length > 0) {
-        trace = subsetArrayAttrs(trace, matches);
-        trace.showlegend = ct.showInLegend;
-        trace.name = "selected";
-        if (ct.color) {
-          trace.marker = trace.marker || this.gd._fullData[i].marker || {};
-          // TODO: why is ct.color an empty array?!?
-          if (typeof(ct.color) == "string") {
-            trace.marker.color = ct.color;
-          }
-          trace.line = trace.line || this.gd._fullData[i].line || {};
-          if (typeof(ct.color) == "string") {
-            trace.line.color = ct.color || trace.line.color;
-          }
+  // In setTimeout, this refers to window object 
+  // http://stackoverflow.com/a/2130411/1583084
+  var that = this;
+  setTimeout(function() {
+    // selection has been cleared
+    if (keys === null) {
+      
+      for (var i = 0; i < that.origData.length; i++) {
+        // go back to original opacity
+        if (that.origData[i].opacity !== that.gd.data[i].opacity) {
+          Plotly.restyle(
+            that.gd, {"opacity": (that.origData[i].opacity || 1)}, i
+          );
         }
-        traces.push(trace);
       }
+      
+      // clear the TraceManager selection value
+      if (that.groupSelections[group]) {
+        that.updateSelection(group, null);
+      }
+      
+    } else if (keys.length >= 1) {
+      
+      var keySet = new Set(keys || []);
+      that.groupSelections[group] = keys;
+      
+      var traces = [];
+      for (var i = 0; i < that.origData.length; i++) {
+        var trace = that.origData[i];
+        if (!trace.key || trace.set !== group) {
+          continue;
+        }
+        var ct = trace.crosstalk || {};
+        var opacity = (trace.opacity || 1) * ct.opacityDim;
+        Plotly.restyle(that.gd, {"opacity": opacity}, i);
+        // Get sorted array of matching indices in trace.key
+        var matches = findMatches(trace.key, keySet);
+        if (matches.length > 0) {
+          trace = subsetArrayAttrs(trace, matches);
+          trace.showlegend = ct.showInLegend;
+          trace.name = "selected";
+          // TODO: make this configurable?
+          trace.hoverinfo = "none";
+          if (ct.color) {
+            trace.marker = trace.marker || that.gd._fullData[i].marker || {};
+            // TODO: why is ct.color an empty array?!?
+            if (typeof(ct.color) == "string") {
+              trace.marker.color = ct.color;
+            }
+            trace.line = trace.line || that.gd._fullData[i].line || {};
+            if (typeof(ct.color) == "string") {
+              trace.line.color = ct.color || trace.line.color;
+            }
+          }
+          traces.push(trace);
+        }
+      }
+      Plotly.addTraces(that.gd, traces);
     }
-    Plotly.addTraces(this.gd, traces);
-  }
+  }, 10);
+  
 };
 
 
@@ -383,7 +395,7 @@ Set.prototype.remove = function(val) {
 function findMatches(haystack, needleSet) {
   var matches = [];
   haystack.forEach(function(obj, i) {
-    if (needleSet.has(obj)) {
+    if (needleSet.has(obj) || obj === null) {
       matches.push(i);
     }
   });

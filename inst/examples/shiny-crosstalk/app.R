@@ -1,7 +1,5 @@
 library(plotly)
 library(shiny)
-library(htmltools)
-library(ggplot2)
 library(crosstalk)
 library(dplyr)
 
@@ -10,9 +8,9 @@ mtcars2 <- mtcars
 mtcars2$gear <- factor(mtcars2$gear)
 mtcars2$cyl <- factor(mtcars2$cyl)
 # Move rownames to a proper column
-mtcars2 <- mtcars2 %>% add_rownames()
+mtcars2 <- mtcars2 %>% tibble::rownames_to_column()
 
-sd <- SharedData$new(mtcars2, "rowname", group = "A")
+sd <- SharedData$new(mtcars2, ~rowname)
 
 ui <- fluidPage(
   fillRow(height = 500,
@@ -25,25 +23,13 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-
-  # Prepare mtcars
-  mtcars$gear <- factor(mtcars$gear)
-  mtcars$cyl <- factor(mtcars$cyl)
-  # Move rownames to a proper column
-  mtcars <- mtcars %>% add_rownames()
-  
-  sd <- SharedData$new(mtcars, "rowname", group = "A")
   
   output$p1 <- renderPlotly({
-    plot_ly(sd, x = wt, y = mpg, color = gear, mode = "markers", 
-      height = "100%") %>%
-      layout(dragmode = "select")
+    plot_ly(sd, x = ~wt, y = ~mpg, color = ~gear, height = "100%")
   })
   
   output$p2 <- renderPlotly({
-    plot_ly(sd, x = wt, y = disp, color = gear, mode = "markers", 
-      height = "100%") %>%
-      layout(dragmode = "select")
+    plot_ly(sd, x = ~wt, y = ~disp, color = ~gear, height = "100%")
   })
   
   output$plot1 <- renderPlot({
