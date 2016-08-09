@@ -61,6 +61,7 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"), 
       class = oldClass(x)
     )
+    
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat)) {
       # try as hard as we can to support legacy code
@@ -69,6 +70,7 @@ plotly_build.plotly <- function(p) {
       p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% "lasso"
       p$x$layout[["hovermode"]] <<- p$x$layout[["hovermode"]] %||% "closest"
     }
+    
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
@@ -120,13 +122,12 @@ plotly_build.plotly <- function(p) {
       # _before_ constructing grouping index
       builtData <- train_data(builtData, trace)
       
-      # TODO: provide a better way to clean up "high-level" attrs
-      trace[c("ymin", "ymax", "yend", "xend")] <- NULL
-      trace$.plotlyVariableMapping <- names(builtData)
       # copy over to the trace data
-      for (i in names(builtData)) {
-        j <- sub(crosstalk_key(), "key", i, fixed = TRUE)
-        trace[[j]] <- builtData[[i]]
+      # we should already have group index at this point, so don't copy over 
+      # (non-crosstalk-key) groups
+      nms <- setdiff(names(builtData), setdiff(grps, crosstalk_key()))
+      for (i in nms) {
+        trace[[i]] <- builtData[[i]]
       }
     }
     
@@ -153,16 +154,21 @@ plotly_build.plotly <- function(p) {
   traces <- map_symbol(traces)
   traces <- map_linetype(traces)
   
-  # remove special mapping attributes
   for (i in seq_along(traces)) {
+    # remove special mapping attributes
     mappingAttrs <- c(
-      "alpha", npscales(), paste0(npscales(), "s"), ".crossTalkKey",
-      ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
+      "alpha", npscales(), paste0(npscales(), "s"),
+      ".plotlyGroupIndex", ".plotlyTraceIndex"
     )
     for (j in mappingAttrs) {
       traces[[i]][[j]] <- NULL
     }
   }
+  
+  # .crossTalkKey -> key
+  traces <- lapply(traces, function(x) {
+    setNames(x, sub(crosstalk_key(), "key", names(x), fixed = TRUE))
+  })
   
   # it's possible that the plot object already has some traces 
   # (like figures pulled from a plotly server)
@@ -249,6 +255,9 @@ train_data <- function(data, trace) {
     data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
     data <- dplyr::distinct(data)
   }
+  
+  # TODO: provide a better way to clean up "high-level" attrs
+  data[c("ymin", "ymax", "yend", "xend")] <- NULL
   
   # arrange the data before translating missing values to a grouping var
   arrangeVars <- c(
