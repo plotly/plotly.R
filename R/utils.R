@@ -233,7 +233,8 @@ populate_categorical_axes <- function(p) {
     # collect all the data that goes on this axis
     d <- lapply(p$x$data, "[[", axisType)
     isOnThisAxis <- function(tr) {
-      sub("axis", "", axisName) %in% (tr[[sub("[0-9]+", "", axisName)]] %||% axisType)
+      is.null(tr[["geo"]]) && sub("axis", "", axisName) %in% 
+        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType)
     }
     d <- d[vapply(p$x$data, isOnThisAxis, logical(1))]
     if (length(d) == 0) next

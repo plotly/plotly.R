@@ -117,3 +117,13 @@ test_that("Alpha can be applied to both constant and scaled colors", {
   alpha <- sub("\\)", "", sapply(strsplit(rgb, ","), "[[", 4))
   expect_equal("0.4", alpha)
 })
+
+test_that("Factors are mapped to a categorical axis with categoryarray", {
+  x <- factor(c(1, 2, 4, 8, 16, 32))
+  p <- plot_ly(x = x, y = c(1, 2, 3, 4, 5, 6)) %>% add_markers()
+  l <- expect_traces(p, 1, "categorical-axis")
+  expect_equal(l$layout$xaxis$type, "category")
+  expect_equal(l$layout$xaxis$categoryorder, "array")
+  expect_equal(l$layout$xaxis$categoryarray, levels(x))
+  
+})
