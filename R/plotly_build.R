@@ -218,6 +218,8 @@ plotly_build.plotly <- function(p) {
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
   
+  
+  
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
   
@@ -237,6 +239,10 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
+  
+  # ensure we get the order of categories correct 
+  # (plotly.js uses the order in which categories appear by default)
+  p <- populate_categorical_axes(p)
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
