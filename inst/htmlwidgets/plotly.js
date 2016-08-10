@@ -125,8 +125,19 @@ HTMLWidgets.widget({
       }
       return curves;
     }
+    
+    // crosstalk selection config passed from R
+    var ct = x.crosstalk || {
+      on: "plotly_selected",
+      off: "plotly_deselect",
+      color: null,
+      dynamic: false,
+      persistent: false,
+      opacityDim: 0.2,
+      showInLegend: false
+    };
 
-    var traceManager = new TraceManager(graphDiv);
+    var traceManager = new TraceManager(graphDiv, ct);
 
     // Gather all sets.
     var crosstalkGroups = {};
@@ -142,14 +153,17 @@ HTMLWidgets.widget({
     }
 
     if (allSets.length > 0) {
-      // When plotly selection changes, update crosstalk
-      var turnOn = function(e) {
+      
+      // On plotly event, update crosstalk variable selection value
+      graphDiv.on(ct.on, function turnOn(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
           // Keys are group names, values are array of selected keys from group.
           for (var set in selectedKeys) {
-            if (selectedKeys.hasOwnProperty(set))
-              crosstalk.group(set).var("selection").set(selectedKeys[set], {sender: el});
+            if (selectedKeys.hasOwnProperty(set)) {
+              crosstalk.group(set).var("selection")
+                .set(selectedKeys[set], {sender: el});
+            }
           }
           // Any groups that weren't represented in the selection, should be
           // treated as if zero points were selected.
@@ -159,44 +173,15 @@ HTMLWidgets.widget({
             }
           }
         }
-      };
+      });
       
-      // gather all the unique "on" event types
-      var onEvents = [];
-      for (var i = 0; i < x.data.length; i++) {
-        var evt = x.data[i].crosstalk.on;
-        for (var j = 0; j < evt.length; j++) {
-          if (onEvents.indexOf(evt[j]) === -1) {
-            onEvents.push(evt[j]);
-          }
-        }
-      }
-      
-      // register a callback for every type
-      for (var i = 0; i < onEvents.length; i++) {
-        graphDiv.on(onEvents[i], turnOn);
-      }
-      
-      // gather all the unique "off" event types
-      // TODO: eliminate this copy pasta
-      var offEvents = [];
-      for (var i = 0; i < x.data.length; i++) {
-        var evt = x.data[i].crosstalk.off;
-        for (var j = 0; j < evt.length; j++) {
-          if (offEvents.indexOf(evt[j]) === -1) {
-            offEvents.push(evt[j]);
-          }
-        }
-      }
-      
-      var turnOff = function(e) {
+      // On a plotly "clear" event, set crosstalk variable value to null
+      graphDiv.on(ct.off, function turnOff(e) {
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
-      };
+      });
       
-      // When plotly selection is cleared, update crosstalk
-      graphDiv.on(offEvents, turnOff);
 
       for (var i = 0; i < allSets.length; i++) {
         (function() {
@@ -229,19 +214,15 @@ HTMLWidgets.widget({
           });
         })();
       }
-      
     }
   }
-
 });
-
-
 
 /**
  * @param graphDiv The Plotly graph div
- * @param group The crosstalk group object
+ * @param crosstalk An object with options for updating selection(s)
  */
-function TraceManager(graphDiv) {
+function TraceManager(graphDiv, crosstalk) {
   // The Plotly graph div
   this.gd = graphDiv;
 
@@ -252,6 +233,8 @@ function TraceManager(graphDiv) {
   // key: group name, value: null or array of keys representing the
   // most recently received selection for that group.
   this.groupSelections = {};
+  
+  this.crosstalk = crosstalk;
 }
 
 TraceManager.prototype.close = function() {
@@ -319,6 +302,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   } else if (keys.length >= 1) {
     
     var keySet = new Set(keys || []);
+    var ct = this.crosstalk;
     
     var traces = [];
     for (var i = 0; i < this.origData.length; i++) {
@@ -326,7 +310,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      var ct = trace.crosstalk || {};
       var opacity = (trace.opacity || 1) * ct.opacityDim;
       Plotly.restyle(this.gd, {"opacity": opacity}, i);
       // Get sorted array of matching indices in trace.key

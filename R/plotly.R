@@ -31,8 +31,6 @@
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
-#' @param crosstalkOpts a list of options for controlling the type and 
-#' appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.
 #' @seealso \code{\link{ggplotly}()}
 #' @author Carson Sievert
 #' @export
@@ -76,19 +74,17 @@
 #' # client-side linked brushing
 #' library(crosstalk)
 #' sd <- SharedData$new(mtcars)
-#' o <- ct_opts(color = "red")
 #' subplot(
-#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black"), crosstalkOpts = o),
-#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"), crosstalkOpts = o)
-#' ) %>% hide_legend() %>% plotly_json()
+#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
+#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
+#' ) %>% hide_legend() %>% crosstalk(color = "red")
 #' 
 #' # client-side highlighting
 #' d <- SharedData$new(txhousing, ~city)
-#' ct <- ct_opts(color = "red")
-#' plot_ly(d, x = ~date, y = ~median, color = I("black"), crosstalkOpts = ct) %>%
+#' plot_ly(d, x = ~date, y = ~median, color = I("black")) %>%
 #'   group_by(city) %>%
 #'   add_lines() %>% 
-#'   add_markers(size = I(0.01))
+#'   crosstalk(on = "plotly_hover", color = "red")
 #' 
 #' }
 #'
@@ -96,12 +92,11 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL, crosstalkOpts = ct_opts()) {
+                    width = NULL, height = NULL) {
   
   if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
   }
-  
   
   # "native" plotly arguments
   attrs <- list(...)
@@ -136,9 +131,6 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   attrs$linetypes <- linetypes
   attrs$sizes <- sizes
   attrs$type <- type
-  
-  # tack on crosstalk stuffs
-  attrs$crosstalk <- crosstalkOpts
   
   # id for tracking attribute mappings and finding the most current data
   id <- new_id()

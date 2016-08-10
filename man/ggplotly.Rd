@@ -5,7 +5,7 @@
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  tooltip = "all", crosstalkOpts = ct_opts(), originalData = TRUE, ...)
+  tooltip = "all", originalData = TRUE, ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -20,9 +20,6 @@ in the tooltip. The default, "all", means show all the aesthetic mappings
 also control the order they appear. For example, use
 \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 colour last.}
-
-\item{crosstalkOpts}{a list of options for controlling the type and 
-appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
 

@@ -6,8 +6,7 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, group, color,
   colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
-  100), linetype, linetypes = NULL, width = NULL, height = NULL,
-  crosstalkOpts = ct_opts())
+  100), linetype, linetypes = NULL, width = NULL, height = NULL)
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -49,9 +48,6 @@ To avoid scaling, wrap with \code{\link{I}()}, and provide valid
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
-
-\item{crosstalkOpts}{a list of options for controlling the type and 
-appearance of client-side interaction. For details, see \code{\link{ct_opts}()}.}
 }
 \description{
 Transform data into a plotly visualization.
@@ -100,19 +96,17 @@ add_paths(p, linetype = ~Species)
 # client-side linked brushing
 library(crosstalk)
 sd <- SharedData$new(mtcars)
-o <- ct_opts(color = "red")
 subplot(
-  plot_ly(sd, x = ~wt, y = ~mpg, color = I("black"), crosstalkOpts = o),
-  plot_ly(sd, x = ~wt, y = ~disp, color = I("black"), crosstalkOpts = o)
-) \%>\% hide_legend() \%>\% plotly_json()
+  plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
+  plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
+) \%>\% hide_legend() \%>\% crosstalk(color = "red")
 
 # client-side highlighting
 d <- SharedData$new(txhousing, ~city)
-ct <- ct_opts(color = "red")
-plot_ly(d, x = ~date, y = ~median, color = I("black"), crosstalkOpts = ct) \%>\%
+plot_ly(d, x = ~date, y = ~median, color = I("black")) \%>\%
   group_by(city) \%>\%
   add_lines() \%>\% 
-  add_markers(size = I(0.01))
+  crosstalk(on = "plotly_hover", color = "red")
 
 }
 

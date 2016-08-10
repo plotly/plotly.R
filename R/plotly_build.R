@@ -66,9 +66,6 @@ plotly_build.plotly <- function(p) {
     if (crosstalk_key() %in% names(dat)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
-      p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% 
-        if ("plotly_select" %in% trace$crosstalk$on) "lasso" else "zoom"
-      p$x$layout[["hovermode"]] <<- p$x$layout[["hovermode"]] %||% "closest"
     }
 
     # determine trace type (if not specified, can depend on the # of data points)
@@ -252,6 +249,8 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
+  # if crosstalk() hasn't been called on this plot, populate it with defaults
+  p$x$crosstalk <- p$x$crosstalk %||% crosstalk_defaults()
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
@@ -263,6 +262,8 @@ plotly_build.plotly <- function(p) {
   p <- verify_arrays(p)
   # set a sensible hovermode if it hasn't been specified already
   p <- verify_hovermode(p)
+  # set a sensible dragmode if it hasn't been specified already
+  p <- verify_dragmode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
   # verfiy showlegend is populated (mainly for crosstalk's ability to dynamically add traces)

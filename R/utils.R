@@ -240,11 +240,27 @@ verify_hovermode <- function(p) {
   }
   types <- unlist(lapply(p$x$data, function(tr) tr$type %||% "scatter"))
   modes <- unlist(lapply(p$x$data, function(tr) tr$mode %||% "lines"))
-  if (any(grepl("markers", modes) & types == "scatter")) {
+  if (any(grepl("markers", modes) & types == "scatter") ||
+      any(c("plotly_hover", "plotly_click") %in% p$x$crosstalk$on)) {
     p$x$layout$hovermode <- "closest"
   }
   p
 }
+
+verify_dragmode <- function(p) {
+  if (!is.null(p$x$layout$dragmode)) {
+    return(p)
+  }
+  selecty <- is_crosstalk(p) && "plotly_selected" %in% p$x$crosstalk$on
+  p$x$layout$dragmode <- if (selecty) "lasso" else "zoom"
+  p
+}
+
+is_crosstalk <- function(p) {
+  hasKey <- any(vapply(p$x$data, function(x) length(x[["key"]]), integer(1)) > 1)
+  hasKey && !is.null(p[["x"]][["crosstalk"]])
+}
+
 
 verify_webgl <- function(p) {
   # see toWebGL

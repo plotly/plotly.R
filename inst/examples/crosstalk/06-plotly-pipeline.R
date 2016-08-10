@@ -2,10 +2,10 @@ library(plotly)
 library(crosstalk)
 
 sd <- SharedData$new(txhousing, ~city)
-o <- ct_opts(on = "plotly_click", off = "plotly_unhover", color = "red")
 
-base <- plot_ly(sd, crosstalkOpts = o, color = I("black")) %>%
-  group_by(city)
+base <- plot_ly(sd, color = I("black")) %>%
+  group_by(city) %>%
+  crosstalk(on = "plotly_click", off = "plotly_unhover", color = "red")
 
 p1 <- base %>%
   summarise(has = sum(is.na(median))) %>%
