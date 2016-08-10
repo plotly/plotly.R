@@ -66,7 +66,8 @@ plotly_build.plotly <- function(p) {
     if (crosstalk_key() %in% names(dat)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
-      p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% "lasso"
+      p$x$layout[["dragmode"]] <<- p$x$layout[["dragmode"]] %||% 
+        if ("plotly_select" %in% trace$crosstalk$on) "lasso" else "zoom"
       p$x$layout[["hovermode"]] <<- p$x$layout[["hovermode"]] %||% "closest"
     }
 
