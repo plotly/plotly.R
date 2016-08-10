@@ -64,6 +64,14 @@ HTMLWidgets.widget({
       return set + "\n" + key;
     }
     
+    // Convenience function for removing plotly's brush 
+    function removeBrush() {
+      var outlines = el.querySelectorAll(".select-outline");
+      for (var i = 0; i < outlines.length; i++) {
+        outlines[i].remove();
+      }
+    }
+    
     // To allow translation from sets+keys to points in O(1) time, we
     // make a cache that lets us map keys to objects with
     // {curveNumber, pointNumber} properties.
@@ -205,18 +213,14 @@ HTMLWidgets.widget({
   
           // When crosstalk selection changes, update plotly style
           grp.var("selection").on("change", function crosstalk_sel_change(e) {
-            // e.value is either null, or an array of newly selected values
-            
             if (e.sender !== el) {
               // If we're not the originator of this selection, and we have an
               // active selection outline box, we need to remove it. Otherwise
               // it could appear like there are two active brushes in one plot
               // group.
-              var outlines = el.querySelectorAll(".select-outline");
-              for (var i = 0; i < outlines.length; i++) {
-                outlines[i].remove();
-              }
+              removeBrush();
             }
+            // e.value is either null, or an array of newly selected values
             if (e.oldValue !== e.value) {
               traceManager.updateSelection(set, e.value);
             }
@@ -289,10 +293,9 @@ TraceManager.prototype.updateFilter = function(group, keys) {
 
   Plotly.redraw(this.gd);
   
-  // If this group had a selection, restore it now
-  if (this.groupSelections[group]) {
-    this.updateSelection(group, this.groupSelections[group]);
-  }
+  // NOTE: we purposely do _not_ restore selection(s), since on filter,
+  // axis likely will update, changing the pixel -> data mapping, leading 
+  // to a confusing highlight
   
 };
 
@@ -301,6 +304,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   if (keys !== null && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
+  
+  this.groupSelections[group] = keys;
+  
   // remove any existing selection traces
   // TODO: add control(s) for persistant selections?
   var tracesToRemove = [];
@@ -325,15 +331,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
       }
       
-      // clear the TraceManager selection value
-      if (that.groupSelections[group]) {
-        that.updateSelection(group, null);
-      }
-      
     } else if (keys.length >= 1) {
       
       var keySet = new Set(keys || []);
-      that.groupSelections[group] = keys;
       
       var traces = [];
       for (var i = 0; i < that.origData.length; i++) {
