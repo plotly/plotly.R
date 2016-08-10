@@ -64,14 +64,6 @@ HTMLWidgets.widget({
       return set + "\n" + key;
     }
     
-    // Convenience function for removing plotly's brush 
-    function removeBrush() {
-      var outlines = el.querySelectorAll(".select-outline");
-      for (var i = 0; i < outlines.length; i++) {
-        outlines[i].remove();
-      }
-    }
-    
     // To allow translation from sets+keys to points in O(1) time, we
     // make a cache that lets us map keys to objects with
     // {curveNumber, pointNumber} properties.
@@ -311,76 +303,61 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   if (nNewTraces < 0) {
     throw new Error("Something went wrong. Please file an issue here -> https://github.com/ropensci/plotly/issues");
   }
-  // remove any existing selection traces
+  
+  // remove any prior selection traces
   // TODO: add control(s) for persistant selections?
-  var tracesToRemove = [];
-  for (var i = 0; i < nNewTraces; i++) {
-    tracesToRemove.push(i);
+  if (nNewTraces > 0) {
+    Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
   }
-  Plotly.deleteTraces(this.gd, tracesToRemove);
   
-  // In setTimeout, this refers to window object 
-  // http://stackoverflow.com/a/2130411/1583084
-  var that = this;
-  setTimeout(function() {
-    // selection has been cleared
-    if (keys === null) {
-      
-      for (var i = 0; i < that.origData.length; i++) {
-        // go back to original opacity
-        if (that.origData[i].opacity !== that.gd.data[i].opacity) {
-          Plotly.restyle(
-            that.gd, {"opacity": (that.origData[i].opacity || 1)}, i
-          );
-        }
+  if (keys === null) {
+    
+    // selection has been cleared...go back to original opacity
+    for (var i = 0; i < this.origData.length; i++) {
+      if (this.origData[i].opacity !== this.gd.data[i].opacity) {
+        Plotly.restyle(
+          this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
+        );
       }
-      
-    } else if (keys.length >= 1) {
-      
-      var keySet = new Set(keys || []);
-      
-      var traces = [];
-      for (var i = 0; i < that.origData.length; i++) {
-        var trace = that.origData[i];
-        if (!trace.key || trace.set !== group) {
-          continue;
-        }
-        var ct = trace.crosstalk || {};
-        var opacity = (trace.opacity || 1) * ct.opacityDim;
-        Plotly.restyle(that.gd, {"opacity": opacity}, i);
-        // Get sorted array of matching indices in trace.key
-        var matches = findMatches(trace.key, keySet);
-        if (matches.length > 0) {
-          trace = subsetArrayAttrs(trace, matches);
-          trace.showlegend = ct.showInLegend;
-          trace.name = "selected";
-          // TODO: make this configurable?
-          trace.hoverinfo = "none";
-          if (ct.color) {
-            trace.marker = trace.marker || that.gd._fullData[i].marker || {};
-            // TODO: why is ct.color an empty array?!?
-            if (typeof(ct.color) == "string") {
-              trace.marker.color = ct.color;
-            }
-            trace.line = trace.line || that.gd._fullData[i].line || {};
-            if (typeof(ct.color) == "string") {
-              trace.line.color = ct.color || trace.line.color;
-            }
-          }
-          traces.push(trace);
-        }
-      }
-      
-      // place these new traces _under_ existing traces to avoid hover conflicts
-      var traceIndicies = [];
-      for (var i = 0; i < traces.length; i++) {
-        traceIndicies.push(i)
-      }
-      
-      Plotly.addTraces(that.gd, traces, traceIndicies);
     }
-  }, 10);
-  
+    
+  } else if (keys.length >= 1) {
+    
+    var keySet = new Set(keys || []);
+    
+    var traces = [];
+    for (var i = 0; i < this.origData.length; i++) {
+      var trace = this.origData[i];
+      if (!trace.key || trace.set !== group) {
+        continue;
+      }
+      var ct = trace.crosstalk || {};
+      var opacity = (trace.opacity || 1) * ct.opacityDim;
+      Plotly.restyle(this.gd, {"opacity": opacity}, i);
+      // Get sorted array of matching indices in trace.key
+      var matches = findMatches(trace.key, keySet);
+      if (matches.length > 0) {
+        trace = subsetArrayAttrs(trace, matches);
+        trace.showlegend = ct.showInLegend;
+        trace.name = "selected";
+        // TODO: make this configurable?
+        trace.hoverinfo = "none";
+        if (ct.color) {
+          trace.marker = trace.marker || this.gd._fullData[i].marker || {};
+          // TODO: why is ct.color an empty array?!?
+          if (typeof(ct.color) == "string") {
+            trace.marker.color = ct.color;
+          }
+          trace.line = trace.line || this.gd._fullData[i].line || {};
+          if (typeof(ct.color) == "string") {
+            trace.line.color = ct.color || trace.line.color;
+          }
+        }
+        traces.push(trace);
+      }
+    }
+    Plotly.addTraces(this.gd, traces, seq_len(traces.length));
+  }
 };
 
 
@@ -450,4 +427,24 @@ function subsetArray(arr, indices) {
     result.push(arr[indices[i]]);
   }
   return result;
+}
+
+// Convenience function for removing plotly's brush 
+function removeBrush() {
+  var outlines = el.querySelectorAll(".select-outline");
+  for (var i = 0; i < outlines.length; i++) {
+    outlines[i].remove();
+  }
+}
+
+// JS 'equivalent' of R's seq_len (but sequence starts at 0, not 1)
+function seq_len(n) {
+  if (n < 0) {
+    throw new Error("Length must be non-negative");
+  }
+  var out = [];
+  for (var i = 0; i < n; i++) {
+    out.push(i);
+  }
+  return out;
 }
