@@ -295,7 +295,7 @@ TraceManager.prototype.updateFilter = function(group, keys) {
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,
   // axis likely will update, changing the pixel -> data mapping, leading 
-  // to a confusing highlight
+  // to a likely mismatch in the brush outline and highlighted marks
   
 };
 
@@ -307,10 +307,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   
   this.groupSelections[group] = keys;
   
+  var nNewTraces = this.gd.data.length - this.origData.length;
+  if (nNewTraces < 0) {
+    throw new Error("Something went wrong. Please file an issue here -> https://github.com/ropensci/plotly/issues");
+  }
   // remove any existing selection traces
   // TODO: add control(s) for persistant selections?
   var tracesToRemove = [];
-  for (var i = this.origData.length; i < this.gd.data.length; i++) {
+  for (var i = 0; i < nNewTraces; i++) {
     tracesToRemove.push(i);
   }
   Plotly.deleteTraces(this.gd, tracesToRemove);
@@ -366,7 +370,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           traces.push(trace);
         }
       }
-      Plotly.addTraces(that.gd, traces);
+      
+      // place these new traces _under_ existing traces to avoid hover conflicts
+      var traceIndicies = [];
+      for (var i = 0; i < traces.length; i++) {
+        traceIndicies.push(i)
+      }
+      
+      Plotly.addTraces(that.gd, traces, traceIndicies);
     }
   }, 10);
   
