@@ -4,8 +4,7 @@ library(crosstalk)
 sd <- SharedData$new(txhousing, ~city)
 
 base <- plot_ly(sd, color = I("black")) %>%
-  group_by(city) %>%
-  crosstalk(on = "plotly_click", off = "plotly_unhover", color = "red")
+  group_by(city)
 
 p1 <- base %>%
   summarise(has = sum(is.na(median))) %>%
@@ -22,4 +21,5 @@ p1 <- base %>%
 p2 <- base %>%
   add_lines(x = ~date, y = ~median, alpha = 0.3)
 
-subplot(p1, p2)
+subplot(p1, p2) %>%
+  crosstalk(on = "plotly_click", off = "plotly_unhover", color = "red")
