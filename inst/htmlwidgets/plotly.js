@@ -230,11 +230,6 @@ HTMLWidgets.widget({
         })();
       }
       
-      // Remove event listeners in the future
-      instance.onNextRender.push(function() {
-        graphDiv.removeListener("plotly_selecting", plotly_selecting);
-        graphDiv.removeListener("plotly_deselect", plotly_deselect);
-      });
     }
   }
 
