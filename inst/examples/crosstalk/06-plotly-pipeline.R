@@ -14,8 +14,8 @@ p1 <- base %>%
   layout(
     barmode = "overlay", 
     xaxis = list(title = "Missing months"),
-    yaxis = list(title = ""),
-    margin = list(l = 120)
+    yaxis = list(title = "", categoryorder = "trace"),
+    margin = list(l = 150)
   ) 
 
 p2 <- base %>%
