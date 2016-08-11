@@ -81,7 +81,8 @@ groups.plotly <- function(x) {
 
 #' @rawNamespace export(ungroup.plotly)
 ungroup.plotly <- function(x) {
-  dplyr::ungroup(plotly_data(x))
+  d <- dplyr::ungroup(plotly_data(x))
+  add_data(x, d)
 }
 
 #' @rawNamespace export(group_by_.plotly)
@@ -105,8 +106,9 @@ summarise_.plotly <- function(.data, ..., .dots) {
 #' @rawNamespace export(mutate_.plotly)
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
+  set <- attr(d, "set")
   d <- dplyr::mutate_(d, .dots = lazyeval::all_dots(.dots, ...))
-  add_data(.data, d)
+  add_data(.data, structure(d, set = set))
 }
 
 #' @rawNamespace export(arrange_.plotly)
