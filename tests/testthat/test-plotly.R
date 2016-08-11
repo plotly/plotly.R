@@ -117,3 +117,23 @@ test_that("Alpha can be applied to both constant and scaled colors", {
   alpha <- sub("\\)", "", sapply(strsplit(rgb, ","), "[[", 4))
   expect_equal("0.4", alpha)
 })
+
+test_that("Factors correctly mapped to a positional axis", {
+  x <- factor(c(1, 2, 4, 8, 16, 32))
+  p <- plot_ly(x = x, y = c(1, 2, 3, 4, 5, 6)) %>% add_markers()
+  l <- expect_traces(p, 1, "factor-axis")
+  expect_equal(l$layout$xaxis$type, "category")
+  expect_equal(l$layout$xaxis$categoryorder, "array")
+  expect_equal(l$layout$xaxis$categoryarray, levels(x))
+})
+
+test_that("Character strings correctly mapped to a positional axis", {
+  # scramble alphabet order
+  letters <- LETTERS[as.numeric(sort(as.character(1:26)))]
+  p <- plot_ly(x = letters, y = seq_along(letters)) %>% 
+    add_bars(color = rep(c("a1", "a2"), length.out = 26))
+  l <- expect_traces(p, 2, "character-axis")
+  expect_equal(l$layout$xaxis$type, "category")
+  expect_equal(l$layout$xaxis$categoryorder, "array")
+  expect_equal(l$layout$xaxis$categoryarray, LETTERS)
+})

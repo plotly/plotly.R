@@ -220,6 +220,39 @@ verify_mode <- function(p) {
   p
 }
 
+# populate categorical axes using categoryorder="array" & categoryarray=[]
+populate_categorical_axes <- function(p) {
+  axes <- p$x$layout[grepl("^xaxis|^yaxis", names(p$x$layout))] %||%
+    list(xaxis = NULL, yaxis = NULL)
+  for (i in seq_along(axes)) {
+    axis <- axes[[i]]
+    axisName <- names(axes)[[i]]
+    axisType <- substr(axisName, 0, 1)
+    # ggplotly() populates these attributes...don't want to clobber that
+    if (!is.null(axis$ticktext) || !is.null(axis$tickvals)) next
+    # collect all the data that goes on this axis
+    d <- lapply(p$x$data, "[[", axisType)
+    isOnThisAxis <- function(tr) {
+      is.null(tr[["geo"]]) && sub("axis", "", axisName) %in% 
+        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType)
+    }
+    d <- d[vapply(p$x$data, isOnThisAxis, logical(1))]
+    if (length(d) == 0) next
+    isDiscrete <- vapply(d, is.discrete, logical(1))
+    if (0 < sum(isDiscrete) & sum(isDiscrete) < length(d)) {
+      stop("Can't display both discrete & non-discrete data on same axis")
+    }
+    if (sum(isDiscrete) == 0) next
+    categories <- lapply(d, function(x) if (is.factor(x)) levels(x) else unique(x))
+    categories <- unique(unlist(categories))
+    if (any(!vapply(d, is.factor, logical(1)))) categories <- sort(categories)
+    p$x$layout[[axisName]]$type <- "category"
+    p$x$layout[[axisName]]$categoryorder <- "array"
+    p$x$layout[[axisName]]$categoryarray <- categories
+  }
+  p
+}
+
 verify_arrays <- function(p) {
   for (i in c("annotations", "shapes")) {
     thing <- p$x$layout[[i]]

@@ -1,3 +1,9 @@
+# 4.2.0 -- 11 August 2016
+
+## CHANGES
+
+* `plot_ly()` now orders the categories of a discrete x/y axis according the level ordering (if a factor) or alphabetical order (if a character string). Fixes #578.
+
 # 4.1.1 -- 8 August 2016
 
 ## CHANGES
