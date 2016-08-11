@@ -49,7 +49,7 @@ subplot(plots[["p"]], nrows = 3, shareX = TRUE)
 # arrange displays by their mean
 means <- summarise(d, mn = mean(cty, na.rm = TRUE))
 means \%>\%
-  left_join(plots) \%>\%
+  dplyr::left_join(plots) \%>\%
   arrange(mn) \%>\%
   .[["p"]] \%>\%
   subplot(nrows = NROW(.), shareX = TRUE)

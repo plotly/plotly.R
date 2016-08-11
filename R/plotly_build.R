@@ -251,6 +251,9 @@ plotly_build.plotly <- function(p) {
   }
   # if crosstalk() hasn't been called on this plot, populate it with defaults
   p$x$crosstalk <- p$x$crosstalk %||% crosstalk_defaults()
+  # ensure we get the order of categories correct 
+  # (plotly.js uses the order in which categories appear by default)
+  p <- populate_categorical_axes(p)
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
