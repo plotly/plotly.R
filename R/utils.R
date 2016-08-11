@@ -244,9 +244,11 @@ populate_categorical_axes <- function(p) {
     }
     if (sum(isDiscrete) == 0) next
     categories <- lapply(d, function(x) if (is.factor(x)) levels(x) else unique(x))
+    categories <- unique(unlist(categories))
+    if (any(!vapply(d, is.factor, logical(1)))) categories <- sort(categories)
     p$x$layout[[axisName]]$type <- "category"
     p$x$layout[[axisName]]$categoryorder <- "array"
-    p$x$layout[[axisName]]$categoryarray <- unique(unlist(categories))
+    p$x$layout[[axisName]]$categoryarray <- categories
   }
   p
 }
