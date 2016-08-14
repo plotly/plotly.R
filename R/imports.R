@@ -7,9 +7,11 @@
 #' @importFrom viridisLite viridis
 #' @importFrom jsonlite toJSON fromJSON
 #' @importFrom httr GET POST PATCH content config add_headers stop_for_status
-#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget
+#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
+#' @importFrom htmltools browsable tagList
+#' @importFrom colourpicker colourWidget
 NULL
 
 # ------------------------------------------------------------------

@@ -22,8 +22,8 @@
 #' 
 
 crosstalk <- function(p, on = "plotly_selected", off = "plotly_deselect", 
-                    color = NULL, dynamic = FALSE, persistent = FALSE,
-                    opacityDim = 0.2, showInLegend = FALSE) {
+                      color = NULL, dynamic = FALSE, persistent = FALSE,
+                      opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {
     stop("Don't know how to modify crosstalk options to objects of class:", class(p))
   }
@@ -32,7 +32,7 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_deselect",
   }
   if (dynamic && length(color) < 2) {
     message("Adding more colors to the selection color palette")
-    color <- c(color, RColorBrewer::brewer.pal(8, "Set2"))
+    color <- c(color, RColorBrewer::brewer.pal(8, "Accent"))
   }
   if (!dynamic) {
     if (length(color) > 1) {
@@ -55,6 +55,23 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_deselect",
       showInLegend = showInLegend
     )
   )
+  if (dynamic) {
+    w <- colourpicker::colourWidget(
+      value = color[1],
+      palette = "limited",
+      allowedCols = color
+    )
+    w <- htmlwidgets::onRender(w, "
+        function(el, x) {
+          var $el = $('#' + el.id);
+          crosstalk.var('selectionColour').set($el.colourpicker('value'));
+          $el.on('change', function() {
+            crosstalk.var('selectionColour').set($el.colourpicker('value'));
+          })
+        }
+    ")
+    p <- htmltools::browsable(htmltools::tagList(w, p))
+  }
   p
 }
 

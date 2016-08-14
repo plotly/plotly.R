@@ -57,6 +57,7 @@ Suggests:
     listviewer
 LazyData: true
 Remotes:
-    rstudio/crosstalk
+    rstudio/crosstalk,
+    daattali/colourpicker
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
