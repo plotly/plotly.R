@@ -20,8 +20,16 @@ p1 <- base %>%
   ) 
 
 p2 <- base %>%
-  add_lines(x = ~date, y = ~median, alpha = 0.3)
+  add_lines(x = ~date, y = ~median, alpha = 0.3) %>%
+  layout(xaxis = list(title = ""))
 
-subplot(p1, p2) %>%
-  layout(margin = list(l = 200)) %>%
-  crosstalk(on = "plotly_click", off = "plotly_unhover", color = "red")
+p <- subplot(p1, p2, titleX = TRUE) %>% layout(margin = list(l = 200)) 
+
+# select individual series on click
+crosstalk(p, on = "plotly_click", off = "plotly_unhover", color = "red")
+
+# compare multiple series
+crosstalk(
+  p, on = "plotly_click", off = "plotly_doubleclick", 
+  dynamic = TRUE, persistent = TRUE
+)
