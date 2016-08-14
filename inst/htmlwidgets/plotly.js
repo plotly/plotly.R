@@ -337,8 +337,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           );
         }
         // this variable set in R/crosstalk.R
-        trace.marker.color = crosstalk.var("selectionColour").get();
-        trace.line.color = crosstalk.var("selectionColour").get();
+        trace.marker.color = crosstalk.var("selectionColour").get() || trace.marker.color;
+        trace.line.color = crosstalk.var("selectionColour").get() || trace.line.color;
         traces.push(trace);
       }
     }
