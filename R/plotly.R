@@ -178,6 +178,7 @@ as_widget <- function(x, ...) {
       defaultHeight = 400
     ),
     preRenderHook = plotly_build,
-    dependencies = crosstalk::crosstalkLibs()
+    dependencies = crosstalk::crosstalkLibs(),
+    elementId = new_id()
   )
 }
