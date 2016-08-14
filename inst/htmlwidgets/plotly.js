@@ -283,8 +283,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   }
   
   // remove any prior selection traces
-  // TODO: add control(s) for persistant selections?
-  if (nNewTraces > 0) {
+  if (nNewTraces > 0 && !this.crosstalk.persistent) {
     Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
   }
   
@@ -318,18 +317,26 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         trace = subsetArrayAttrs(trace, matches);
         trace.showlegend = ct.showInLegend;
         trace.name = "selected";
-        // TODO: make this configurable?
         trace.hoverinfo = "none";
-        if (ct.color) {
-          trace.marker = trace.marker || this.gd._fullData[i].marker || {};
-          // TODO: why is ct.color an empty array?!?
-          if (typeof(ct.color) == "string") {
-            trace.marker.color = ct.color;
-          }
-          trace.line = trace.line || this.gd._fullData[i].line || {};
-          if (typeof(ct.color) == "string") {
-            trace.line.color = ct.color || trace.line.color;
-          }
+        // inherit marker/line attributes from the existing trace
+        trace.marker = this.gd._fullData[i].marker || {};
+        // since we're adding traces _under_ existing traces, if the user doesn't specify color(s), Plotly.addTraces() will change the color. This will prevent that from happening
+        var suppliedMarker = this.gd.data[i].marker || {};
+        if (suppliedMarker.color !== trace.marker.color) {
+          Plotly.restyle(
+            this.gd.id, {'marker.color': this.gd._fullData[i].marker.color}, i
+          );
+        }
+        trace.line = this.gd._fullData[i].line || {};
+        var suppliedLine = this.gd.data[i].line || {};
+        if (suppliedLine.color !== trace.line.color) {
+          Plotly.restyle(
+            this.gd.id, {'line.color': this.gd._fullData[i].line.color}, i
+          );
+        }
+        if (typeof(ct.color) == "string") {
+          trace.marker.color = ct.color;
+          trace.line.color = ct.color;
         }
         traces.push(trace);
       }
