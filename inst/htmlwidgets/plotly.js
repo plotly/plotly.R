@@ -323,21 +323,22 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         // since we're adding traces _under_ existing traces, if the user doesn't specify color(s), Plotly.addTraces() will change the color. This will prevent that from happening
         var suppliedMarker = this.gd.data[i].marker || {};
         if (suppliedMarker.color !== trace.marker.color) {
+          var marker = this.gd._fullData[i].marker || {};
           Plotly.restyle(
-            this.gd.id, {'marker.color': this.gd._fullData[i].marker.color}, i
+            this.gd.id, {'marker.color': marker.color}, i
           );
         }
         trace.line = this.gd._fullData[i].line || {};
         var suppliedLine = this.gd.data[i].line || {};
         if (suppliedLine.color !== trace.line.color) {
+          var line = this.gd._fullData[i].line || {};
           Plotly.restyle(
-            this.gd.id, {'line.color': this.gd._fullData[i].line.color}, i
+            this.gd.id, {'line.color': line.color}, i
           );
         }
-        if (typeof(ct.color) == "string") {
-          trace.marker.color = ct.color;
-          trace.line.color = ct.color;
-        }
+        // this variable set in R/crosstalk.R
+        trace.marker.color = crosstalk.var("selectionColour").get();
+        trace.line.color = crosstalk.var("selectionColour").get();
         traces.push(trace);
       }
     }
