@@ -286,14 +286,15 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     throw new Error("Something went wrong. Please file an issue here -> https://github.com/ropensci/plotly/issues");
   }
   
-  // by default, selections are transient (ie, forget about previous selections)
-  if (nNewTraces > 0 && !this.crosstalk.persistent) {
+  // if selection has been cleared, or if this is transient (not persistent)
+  // selection, delete the "selection traces"
+  if (keys === null || !this.crosstalk.persistent && nNewTraces > 0) {
     Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
   }
   
   if (keys === null) {
     
-    // selection has been cleared...go back to original opacity
+    // go back to original opacity
     for (var i = 0; i < this.origData.length; i++) {
       Plotly.restyle(
         this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
@@ -304,7 +305,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   } else if (keys.length >= 1) {
     
     var keySet = new Set(keys || []);
-    var ct = this.crosstalk;
     
     var traces = [];
     for (var i = 0; i < this.origData.length; i++) {
@@ -316,12 +316,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       var matches = findMatches(trace.key, keySet);
       if (matches.length > 0) {
         trace = subsetArrayAttrs(trace, matches);
-        trace.showlegend = ct.showInLegend;
+        trace.showlegend = this.crosstalk.showInLegend;
         trace.name = "selected";
+        // TODO: allow user to choose selection/original hoverinfo?
         trace.hoverinfo = "none";
         // inherit marker/line attributes from the existing trace
         trace.marker = this.gd._fullData[i].marker || {};
-        // since we're adding traces _under_ existing traces, if the user doesn't specify color(s), Plotly.addTraces() will change the color. This will prevent that from happening
+        // prevent Plotly.addTraces() from changing color of original traces
+        // (happens if user doesn't specify trace color)
         var suppliedMarker = this.gd.data[i].marker || {};
         if (suppliedMarker.color !== trace.marker.color) {
           var marker = this.gd._fullData[i].marker || {};
@@ -337,7 +339,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             this.gd.id, {'line.color': line.color}, i
           );
         }
-        // this variable set in R/crosstalk.R
+        // this variable is set in R/crosstalk.R
         trace.marker.color = crosstalk.var("selectionColour").get() || trace.marker.color;
         trace.line.color = crosstalk.var("selectionColour").get() || trace.line.color;
         traces.push(trace);
@@ -345,10 +347,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     }
     // add "selection traces" *underneath* original traces
     Plotly.addTraces(this.gd, traces, seq_len(traces.length));
-    // reduce opacity of original traces
     if (!this.dimmed) {
+      // reduce opacity of original traces
       for (var i = traces.length; i < traces.length + this.origData.length; i++) {
-        var opacity = (this.gd._fullData[i].opacity) * ct.opacityDim;
+        var opacity = (this.gd._fullData[i].opacity) * this.crosstalk.opacityDim;
         Plotly.restyle(this.gd, {"opacity": opacity}, i);  
       }
       this.dimmed = true;
