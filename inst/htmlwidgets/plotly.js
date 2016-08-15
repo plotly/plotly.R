@@ -234,7 +234,11 @@ function TraceManager(graphDiv, crosstalk) {
   // most recently received selection for that group.
   this.groupSelections = {};
   
+  // selection parameters (e.g., transient versus persistent selection)
   this.crosstalk = crosstalk;
+  
+  // have original traces been dimmed to highlight a selection?
+  this.dimmed = false;
 }
 
 TraceManager.prototype.close = function() {
@@ -282,7 +286,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     throw new Error("Something went wrong. Please file an issue here -> https://github.com/ropensci/plotly/issues");
   }
   
-  // remove any prior selection traces
+  // by default, selections are transient (ie, forget about previous selections)
   if (nNewTraces > 0 && !this.crosstalk.persistent) {
     Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
   }
@@ -291,12 +295,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
     // selection has been cleared...go back to original opacity
     for (var i = 0; i < this.origData.length; i++) {
-      if (this.origData[i].opacity !== this.gd.data[i].opacity) {
-        Plotly.restyle(
-          this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
-        );
-      }
+      Plotly.restyle(
+        this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
+      );
     }
+    this.dimmed = false;
     
   } else if (keys.length >= 1) {
     
@@ -309,8 +312,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      var opacity = (trace.opacity || 1) * ct.opacityDim;
-      Plotly.restyle(this.gd, {"opacity": opacity}, i);
       // Get sorted array of matching indices in trace.key
       var matches = findMatches(trace.key, keySet);
       if (matches.length > 0) {
@@ -342,7 +343,17 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         traces.push(trace);
       }
     }
+    // add "selection traces" *underneath* original traces
     Plotly.addTraces(this.gd, traces, seq_len(traces.length));
+    // reduce opacity of original traces
+    if (!this.dimmed) {
+      for (var i = traces.length; i < traces.length + this.origData.length; i++) {
+        var opacity = (this.gd._fullData[i].opacity) * ct.opacityDim;
+        Plotly.restyle(this.gd, {"opacity": opacity}, i);  
+      }
+      this.dimmed = true;
+    }
+    
   }
 };
 
