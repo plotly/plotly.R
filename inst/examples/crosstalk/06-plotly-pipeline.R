@@ -6,13 +6,19 @@ sd <- SharedData$new(txhousing, ~city)
 base <- plot_ly(sd, color = I("black")) %>%
   group_by(city)
 
+library(plotly)
+library(crosstalk)
+
+sd <- SharedData$new(txhousing, ~city)
+
+base <- plot_ly(sd, color = I("black")) %>%
+  group_by(city)
+
 p1 <- base %>%
   summarise(has = sum(is.na(median))) %>%
   filter(has > 0) %>%
   arrange(has) %>%
-  ungroup() %>%
-  mutate(city = factor(city, levels = city)) %>%
-  add_bars(x = ~has, y = ~city, orientation = "h") %>%
+  add_bars(x = ~has, y = ~factor(city, levels = city), orientation = "h") %>%
   layout(
     barmode = "overlay",
     xaxis = list(title = "Number of months missing"),
