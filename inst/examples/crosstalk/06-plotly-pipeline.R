@@ -6,14 +6,6 @@ sd <- SharedData$new(txhousing, ~city)
 base <- plot_ly(sd, color = I("black")) %>%
   group_by(city)
 
-library(plotly)
-library(crosstalk)
-
-sd <- SharedData$new(txhousing, ~city)
-
-base <- plot_ly(sd, color = I("black")) %>%
-  group_by(city)
-
 p1 <- base %>%
   summarise(has = sum(is.na(median))) %>%
   filter(has > 0) %>%
