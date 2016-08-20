@@ -21,7 +21,7 @@
 #' @export
 #' 
 
-crosstalk <- function(p, on = "plotly_selected", off = "plotly_deselect", 
+crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout", 
                       color = NULL, dynamic = FALSE, persistent = FALSE,
                       opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {
@@ -32,7 +32,7 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_deselect",
   }
   if (dynamic && length(color) < 2) {
     message("Adding more colors to the selection color palette")
-    color <- c(color, RColorBrewer::brewer.pal(8, "Accent"))
+    color <- c(color, RColorBrewer::brewer.pal(4, "Set1"))
   }
   if (!dynamic) {
     if (length(color) > 1) {
