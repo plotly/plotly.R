@@ -27,7 +27,4 @@ p <- subplot(p1, p2, titleX = TRUE) %>% layout(margin = list(l = 200))
 crosstalk(p, on = "plotly_click", off = "plotly_unhover", color = "red")
 
 # compare multiple series
-crosstalk(
-  p, on = "plotly_click", off = "plotly_doubleclick", 
-  dynamic = TRUE, persistent = TRUE
-)
+crosstalk(p, on = "plotly_click", dynamic = TRUE, persistent = TRUE)
