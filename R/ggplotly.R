@@ -693,7 +693,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   l <- list(
     data = setNames(traces, NULL),
-    layout = compact(gglayout)
+    layout = compact(gglayout),
+    # prevent autosize on doubleClick which clears ggplot2 margins
+    config = list(doubleClick = "reset")
   )
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red")))
