@@ -208,8 +208,8 @@ HTMLWidgets.widget({
     // crosstalk selection config passed from R
     var ct = x.crosstalk || {
       on: "plotly_selected",
-      off: "plotly_deselect",
-      color: null,
+      off: "plotly_relayout",
+      color: [],
       dynamic: false,
       persistent: false,
       opacityDim: 0.2,

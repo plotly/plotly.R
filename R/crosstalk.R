@@ -48,7 +48,7 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
     list(
       on = on,
       off = off,
-      color = I(toRGB(color)),
+      color = I(toRGB(color) %||% list()),
       dynamic = dynamic,
       persistent = persistent,
       opacityDim = opacityDim,
@@ -73,8 +73,4 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
     p <- htmltools::browsable(htmltools::tagList(w, p))
   }
   p
-}
-
-crosstalk_defaults <- function() {
-  formals(crosstalk)[-1]
 }
