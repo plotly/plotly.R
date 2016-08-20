@@ -274,7 +274,7 @@ HTMLWidgets.widget({
               // active selection outline box, we need to remove it. Otherwise
               // it could appear like there are two active brushes in one plot
               // group.
-              removeBrush();
+              removeBrush(el);
             }
             // e.value is either null, or an array of newly selected values
             if (e.oldValue !== e.value) {
@@ -421,8 +421,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           );
         }
         // this variable is set in R/crosstalk.R
-        trace.marker.color = crosstalk.var("selectionColour").get() || trace.marker.color;
-        trace.line.color = crosstalk.var("selectionColour").get() || trace.line.color;
+        var selectionColour = crosstalk.var("selectionColour").get() || 
+          this.crosstalk.color[0];
+        trace.marker.color =  selectionColour || trace.marker.color;
+        trace.line.color = selectionColour || trace.line.color;
         traces.push(trace);
       }
     }
@@ -510,7 +512,7 @@ function subsetArray(arr, indices) {
 }
 
 // Convenience function for removing plotly's brush 
-function removeBrush() {
+function removeBrush(el) {
   var outlines = el.querySelectorAll(".select-outline");
   for (var i = 0; i < outlines.length; i++) {
     outlines[i].remove();

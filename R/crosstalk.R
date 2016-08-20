@@ -48,7 +48,7 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
     list(
       on = on,
       off = off,
-      color = toRGB(color),
+      color = I(toRGB(color)),
       dynamic = dynamic,
       persistent = persistent,
       opacityDim = opacityDim,
