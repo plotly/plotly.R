@@ -37,8 +37,9 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' 
 #' @param event The type of plotly event. Currently 'plotly_hover',
 #' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
-#' @param source Which plot should the listener be tied to? This 
-#' (character string) should match the value of \code{source} in \link{plot_ly}.
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{plot_ly}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{

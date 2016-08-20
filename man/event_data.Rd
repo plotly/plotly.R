@@ -11,8 +11,9 @@ event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
 \item{event}{The type of plotly event. Currently 'plotly_hover',
 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.}
 
-\item{source}{Which plot should the listener be tied to? This 
-(character string) should match the value of \code{source} in \link{plot_ly}.}
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{plot_ly}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
 }
 \description{
 This function must be called within a reactive shiny context.

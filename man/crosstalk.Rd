@@ -4,7 +4,7 @@
 \alias{crosstalk}
 \title{Modify crosstalk selection options}
 \usage{
-crosstalk(p, on = "plotly_selected", off = "plotly_deselect",
+crosstalk(p, on = "plotly_selected", off = "plotly_relayout",
   color = NULL, dynamic = FALSE, persistent = FALSE, opacityDim = 0.2,
   showInLegend = FALSE)
 }

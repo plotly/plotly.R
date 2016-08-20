@@ -13,6 +13,9 @@
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
 #' @param originalData should the "original" or "scaled" data be returned?
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
 #' @seealso \link{signup}, \link{plot_ly}
 #' @return a plotly object
@@ -47,14 +50,14 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", originalData = TRUE, ...) {
+                     tooltip = "all", originalData = TRUE, source = "A", ...) {
   UseMethod("ggplotly")
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all",
-                              originalData = TRUE, ...) {
+                              originalData = TRUE, source = "A", ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -100,9 +103,9 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
                             height = NULL, tooltip = "all", 
-                            originalData = TRUE, ...) {
+                            originalData = TRUE, source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
-               originalData = originalData, ...)
+               originalData = originalData, source = source, ...)
   structure(as_widget(l), ggplotly = TRUE)
 }
 
@@ -118,7 +121,7 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
-                    originalData = TRUE, ...) {
+                    originalData = TRUE, source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -695,7 +698,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     data = setNames(traces, NULL),
     layout = compact(gglayout),
     # prevent autosize on doubleClick which clears ggplot2 margins
-    config = list(doubleClick = "reset")
+    config = list(doubleClick = "reset"),
+    source = source
   )
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
   # this is necessary since ggplot_build(qplot(1:10, fill = I("red")))

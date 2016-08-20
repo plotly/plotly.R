@@ -45,6 +45,85 @@ HTMLWidgets.widget({
       var plot = Plotly.newPlot(graphDiv, x.data, x.layout);
     }
     
+    // Attach attributes (e.g., "key", "z") to plotly event data
+    function eventDataWithKey(eventData) {
+      if (eventData === undefined || !eventData.hasOwnProperty("points")) {
+        return null;
+      }
+      return eventData.points.map(function(pt) {
+        var obj = {
+          curveNumber: pt.curveNumber, 
+          pointNumber: pt.pointNumber, 
+          x: pt.x,
+          y: pt.y
+        };
+        /* 
+          TL;DR: (I think) we have to select the graph div (again) to attach keys...
+          
+          Why? Remember that crosstalk will dynamically add/delete traces 
+          (see traceManager.prototype.updateSelection() below)
+          For this reason, we can't simply grab keys from x.data (like we did previously)
+          Moreover, we can't use _fullData, since that doesn't include 
+          unofficial attributes. It's true that click/hover events fire with 
+          pt.data, but drag events don't...
+        */
+        var gd = document.getElementById(el.id);
+        var trace = gd.data[pt.curveNumber];
+        // Add other attributes here, if desired
+        var attrsToAttach = ["key", "z"];
+        for (var i = 0; i < attrsToAttach.length; i++) {
+          var attr = trace[attrsToAttach[i]];
+          if (Array.isArray(attr)) {
+              // pointNumber can be an array (e.g., heatmaps)
+              // TODO: can pointNumber be 3D?
+              obj[attrsToAttach[i]] = typeof pt.pointNumber === "number" ? 
+                attr[pt.pointNumber] : attr[pt.pointNumber[0]][pt.pointNumber[1]];
+          }
+        }
+        return obj;
+      });
+    }
+    
+    // send user input event data to shiny
+    if (shinyMode) {
+      // https://plot.ly/javascript/zoom-events/
+      graphDiv.on('plotly_relayout', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-plotly_relayout-" + x.source, 
+          JSON.stringify(eventDataWithKey(d))
+        );
+      });
+      graphDiv.on('plotly_hover', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-plotly_hover-" + x.source, 
+          JSON.stringify(eventDataWithKey(d))
+        );
+      });
+      graphDiv.on('plotly_click', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-plotly_click-" + x.source, 
+          JSON.stringify(eventDataWithKey(d))
+        );
+      });
+      graphDiv.on('plotly_selected', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-plotly_selected-" + x.source, 
+          JSON.stringify(eventDataWithKey(d))
+        );
+      });
+      graphDiv.on('plotly_unhover', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
+      });
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
+      // 'plotly_deselect' is code for doubleclick when in select mode
+      graphDiv.on('plotly_deselect', function(eventData) {
+        Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
+        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
+    } 
+    
     // # Begin Crosstalk support
     
     // ## Crosstalk point/key translation functions
@@ -207,11 +286,13 @@ HTMLWidgets.widget({
             traceManager.updateFilter(set, e.value);
           });
   
-          // Remove event listeners in the future
+          /* Remove event listeners in the future
+          CPS: for some reason I was getting crosstalk_sel_change is undefined in a shiny app?
           instance.onNextRender.push(function() {
             grp.var("selection").removeListener("change", crosstalk_sel_change);
             grp.var("filter").removeListener("change", crosstalk_filter_change);
           });
+          */
         })();
       }
     }
@@ -345,6 +426,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         traces.push(trace);
       }
     }
+    
     // add "selection traces" *underneath* original traces
     Plotly.addTraces(this.gd, traces, seq_len(traces.length));
     if (!this.dimmed) {
@@ -355,7 +437,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
       this.dimmed = true;
     }
-    
   }
 };
 
@@ -447,3 +528,4 @@ function seq_len(n) {
   }
   return out;
 }
+

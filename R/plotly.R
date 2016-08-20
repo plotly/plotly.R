@@ -31,6 +31,9 @@
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @seealso \code{\link{ggplotly}()}
 #' @author Carson Sievert
 #' @export
@@ -92,7 +95,7 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL) {
+                    width = NULL, height = NULL, source = "A") {
   
   if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
@@ -149,7 +152,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
       margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     config = list(modeBarButtonsToRemove = I("sendDataToCloud")),
-    base_url = get_domain()
+    base_url = get_domain(),
+    source = source
   )
   
   as_widget(p)
@@ -178,7 +182,6 @@ as_widget <- function(x, ...) {
       defaultHeight = 400
     ),
     preRenderHook = plotly_build,
-    dependencies = crosstalk::crosstalkLibs(),
-    elementId = new_id()
+    dependencies = crosstalk::crosstalkLibs()
   )
 }

@@ -5,7 +5,7 @@
 \title{Create plotly graphs using ggplot2 syntax}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  tooltip = "all", originalData = TRUE, ...)
+  tooltip = "all", originalData = TRUE, source = "A", ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -22,6 +22,10 @@ also control the order they appear. For example, use
 colour last.}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
+
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
 
 \item{...}{arguments passed onto methods.}
 }

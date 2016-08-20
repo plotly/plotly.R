@@ -6,7 +6,8 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, group, color,
   colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
-  100), linetype, linetypes = NULL, width = NULL, height = NULL)
+  100), linetype, linetypes = NULL, width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -48,6 +49,10 @@ To avoid scaling, wrap with \code{\link{I}()}, and provide valid
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
+
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
 }
 \description{
 Transform data into a plotly visualization.
