@@ -355,12 +355,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, function(x) {
     x[["color"]] %||% if (has_attr(x$type, "colorscale")) x[["z"]] else NULL
   })
-  nColors <- lengths(color)
-  # if no "top-level" color is present, return traces untouched
-  if (all(nColors == 0)) {
-    return(traces)
-  }
-  isConstant <- vapply(color, function(x) inherits(x, "AsIs"), logical(1))
+  isConstant <- vapply(color, function(x) inherits(x, "AsIs") || is.null(x), logical(1))
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
   isDiscrete <- vapply(color, is.discrete, logical(1)) & !isConstant
   if (any(isNumeric & isDiscrete)) {
