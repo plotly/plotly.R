@@ -1,3 +1,27 @@
+# 4.3.0 -- 22 August 2016
+
+## NEW FEATURES
+
+* The `colors`/`symbols`/`linetypes` arguments now accept _named_ character vectors.
+The names specify the domain (i.e., data values) and the values specify the range
+(i.e., visual encodings). This is mainly useful to ensure a particular 
+(discrete) data value is mapped to a particular visual attribute (yes, this is similar, in spirit, to ggplot2's `scale_*_manual()`).
+
+## CHANGES
+
+* Symbol and linetype palette defaults are now determined by `scales::shape_pal()` and `scales::linetype_pal()`.
+* viridis is the default color scale for ordered factors.
+* When mapping a character string to `color`/`symbol`/`linetype`, domain values are 
+sorted alphabetically before scales are applied. Also, when mapping a factor to `color`/`symbol`/`linetype`, domain values are sorted according to their factor levels before scales are applied. This leads to more consistent (categorical axis ordering behaves similarly) and predictable (compared to having values sorted in the order in which they appear) behavior.
+
+## BUG FIXES
+
+# 4.2.1 -- 22 August 2016
+
+## BUGFIX
+
+* `alpha` is now applied when `color` isn't specified (fixes #658).
+
 # 4.2.0 -- 11 August 2016
 
 ## CHANGES

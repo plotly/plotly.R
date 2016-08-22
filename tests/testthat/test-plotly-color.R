@@ -2,7 +2,7 @@ context("plotly-color")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-", name))
+  L <- save_outputs(p, paste0("plotly-color-", name))
   expect_equal(length(L$data), n.traces)
   L
 }
@@ -21,20 +21,22 @@ test_that("Mapping a factor variable to color works", {
 
 test_that("Custom RColorBrewer pallette works for factor variable", {
   cols <- RColorBrewer::brewer.pal(9, "Set1")
+  # convert hex to rgba spec for comparison's sake
+  colsToCompare <- toRGB(cols)
   # specifying a pallette set should "span the gamut" 
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, 
                colors = "Set1")
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
-  expect_identical(sort(cols[c(1, 5, 9)]), sort(colz))
+  expect_identical(sort(colsToCompare[c(1, 5, 9)]), sort(colz))
   # providing vector of RGB codes should also work
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, 
                colors = cols[1:3])
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom2")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
-  expect_identical(sort(cols[1:3]), sort(colz))
+  expect_identical(sort(colsToCompare[1:3]), sort(colz))
 })
 
 test_that("Passing hex codes to colors argument works", {
@@ -44,7 +46,7 @@ test_that("Passing hex codes to colors argument works", {
                color = ~Category, colors = colz)
   l <- expect_traces(p, 5, "bar-color-factor-custom")
   colz2 <- sapply(l$data, function(x) x[["marker"]][["color"]])
-  expect_identical(sort(colz), sort(colz2))
+  expect_identical(sort(toRGB(colz)), sort(colz2))
 })
 
 test_that("Mapping a numeric variable to color works", {
@@ -76,5 +78,14 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$xaxis$title, "Petal.Length")
   expect_identical(scene$yaxis$title, "Petal.Width")
   expect_identical(scene$zaxis$title, "Sepal.Width")
+})
+
+test_that("Can specify a scale manually", {
+  pal <- c("1" = "red", "0" = "blue")
+  p <- plot_ly(mtcars, x = ~mpg, y = ~disp, color = ~factor(vs), colors = pal)
+  l <- expect_traces(p, 2, "color-manual")
+  markers <- lapply(l$data, "[[", "marker")
+  expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
+  expect_equal(toRGB(expected), sapply(markers, "[[", "color"))
 })
 

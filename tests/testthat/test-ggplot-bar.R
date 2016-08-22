@@ -134,7 +134,7 @@ test_that("geom_bar(position = 'fill') stacks proportions", {
   expect_identical(prop, 1)
 })
 
-d <- head(diamonds, 50)
+d <- diamonds[1:50, ]
 gbar <- ggplot(d, aes(cut, price)) + geom_bar(stat = "identity")
 
 test_that("Using identity with multiple y for a given x works ", {
