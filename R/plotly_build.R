@@ -393,25 +393,15 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasZ <- has_attr(types, "colorscale") &
     any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
 
+  colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
-    if (hasLine[[i]]) {
-      traces[[i]]$line <- modify_list(
-        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
-        traces[[i]]$line
-      )
-    }
-    if (hasMarker[[i]]) {
-      traces[[i]]$marker <- modify_list(
-        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
-        traces[[i]]$marker
-      )
-    }
-    if (hasText[[i]]) {
-      traces[[i]]$textfont <- modify_list(
-        list(color = toRGB(color[[i]], traces[[i]]$alpha %||% 1)),
-        traces[[i]]$textfont
-      )
-    }
+    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L581
+    col <- color[[i]] %||% colorDefaults[[i %% length(colorDefaults)]]
+    alpha <- traces[[i]]$alpha %||% 1
+    rgb <- toRGB(col, alpha)
+    obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
+    traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
+    traces[[i]][[obj]] <- modify_list(list(fillcolor = rgb), traces[[i]][[obj]])
   }
 
   if (any(isNumeric)) {
@@ -501,27 +491,13 @@ map_color <- function(traces, title = "", na.color = "transparent") {
            "When using the color/colors arguments, only one palette is allowed.",
            call. = FALSE)
     }
-
     colScale <- scales::col_factor(palette, levels = lvls, na.color = na.color)
     for (i in which(isDiscrete)) {
-      if (hasLine[[i]]) {
-        traces[[i]]$line <- modify_list(
-          list(color = colScale(color[[i]])),
-          traces[[i]]$line
-        )
-      }
-      if (hasMarker[[i]]) {
-        traces[[i]]$marker <- modify_list(
-          list(color = colScale(color[[i]])),
-          traces[[i]]$marker
-        )
-      }
-      if (hasText[[i]]) {
-        traces[[i]]$textfont <- modify_list(
-          list(color = colScale(color[[i]])),
-          traces[[i]]$textfont
-        )
-      }
+      rgb <- toRGB(colScale(color[[i]]), traces[[i]]$alpha %||% 1)
+      obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
+      traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
+      # match the plotly.js default of half transparency in the fill color
+      traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
     }
   }
 
