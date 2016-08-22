@@ -1,4 +1,4 @@
-# 4.3.0 
+# 4.3.0 -- 22 August 2016
 
 ## NEW FEATURES
 
@@ -9,9 +9,10 @@ The names specify the domain (i.e., data values) and the values specify the rang
 
 ## CHANGES
 
-* When mapping a factor to `color`/`symbol`/`linetype`, trace ordering matches the factor levels (instead of in the order in which they appear). Also, when mapping a character string to `color`/`symbol`/`linetype`, trace ordering is now alphabetical (instead of in the order in which they appear). This behavior is more consistent with categorical axis ordering, not to mention other graphing libraries in R.
 * Symbol and linetype palette defaults are now determined by `scales::shape_pal()` and `scales::linetype_pal()`.
 * viridis is the default color scale for ordered factors.
+* When mapping a character string to `color`/`symbol`/`linetype`, domain values are 
+sorted alphabetically before scales are applied. Also, when mapping a factor to `color`/`symbol`/`linetype`, domain values are sorted according to their factor levels before scales are applied. This leads to more consistent (categorical axis ordering behaves similarly) and predictable (compared to having values sorted in the order in which they appear) behavior.
 
 ## BUG FIXES
 
