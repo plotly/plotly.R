@@ -2,7 +2,7 @@ context("plotly-linetype")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-", name))
+  L <- save_outputs(p, paste0("plotly-linetype-", name))
   expect_equal(length(L$data), n.traces)
   L
 }
