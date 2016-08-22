@@ -3,7 +3,7 @@ library(crosstalk)
 library(plotly)
 
 d <- SharedData$new(mtcars)
-scatterplot <- plot_ly(d, x = ~mpg, y = ~disp)
+scatterplot <- plot_ly(d, x = ~mpg, y = ~disp, color = I("black"))
 
 # add_histogram() does both continuous _and_ discrete binning in the browser,
 # allowing us to perform aggregations on the fly, without 
@@ -17,7 +17,7 @@ p <- subplot(
 layout(p, barmode = "overlay")
 
 subplot(
-  plot_ly(d, y = ~disp) %>% add_boxplot(name = "overall"),
+  plot_ly(d, y = ~disp, color = I("black")) %>% add_boxplot(name = "overall"),
   scatterplot,
   shareY = TRUE
 )

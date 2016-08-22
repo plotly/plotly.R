@@ -21,8 +21,7 @@ server <- function(input, output, session) {
   sd <- mtcars %>%
     mutate(gear = factor(gear)) %>%
     mutate(cyl = factor(cyl)) %>%
-    tibble::rownames_to_column() %>%
-    SharedData$new(~rowname)
+    SharedData$new()
   
   output$p1 <- renderPlotly({
     plot_ly(sd, x = ~wt, y = ~mpg, color = ~gear, height = "100%")

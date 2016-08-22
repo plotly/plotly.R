@@ -54,8 +54,8 @@ crosstalk(p, on = "plotly_hover", persistent = TRUE)
 
 # Sometimes its useful to compare two or more different selection sets. 
 # For example, how do patients with a high response on visit 1 compare to those 
-# with a low response? To make this sort of comparison, we need a way to 
-# control the color of the selection. By setting the dynamic argument to `TRUE` 
+# with a low response? To make this sort of comparison, we can alter the color
+# in multiple persistent selections. By setting the dynamic argument to `TRUE` 
 # a colourpicker htmlwidget (@colourpicker) will appear just above the plotly 
 # visualization. At any given time, the value of this widget controls the 
 # color of new selection(s).
@@ -65,4 +65,4 @@ crosstalk(p, on = "plotly_hover", persistent = TRUE, dynamic = TRUE)
 # colour brewer palette (@RColorBrewer), but any set of valid R colors can 
 # be supplied to the color argument.
 colors <- RColorBrewer::brewer.pal(4, "Dark2")
-crosstalk(p, color = colors, dynamic = TRUE, persistent = TRUE)
+crosstalk(p, on = "plotly_hover", color = colors, dynamic = TRUE, persistent = TRUE)
