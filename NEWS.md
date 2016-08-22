@@ -1,3 +1,20 @@
+# 4.3.0 
+
+## NEW FEATURES
+
+* The `colors`/`symbols`/`linetypes` arguments now accept _named_ character vectors.
+The names specify the domain (i.e., data values) and the values specify the range
+(i.e., visual encodings). This is mainly useful to ensure a particular 
+(discrete) data value is mapped to a particular visual attribute (yes, this is similar, in spirit, to ggplot2's `scale_*_manual()`).
+
+## CHANGES
+
+* When mapping a factor to `color`/`symbol`/`linetype`, trace ordering matches the factor levels (instead of in the order in which they appear). Also, when mapping a character string to `color`/`symbol`/`linetype`, trace ordering is now alphabetical (instead of in the order in which they appear). This behavior is more consistent with categorical axis ordering, not to mention other graphing libraries in R.
+* Symbol and linetype palette defaults are now determined by `scales::shape_pal()` and `scales::linetype_pal()`.
+* viridis is the default color scale for ordered factors.
+
+## BUG FIXES
+
 # 4.2.1 -- 22 August 2016
 
 ## BUGFIX

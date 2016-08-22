@@ -12,7 +12,7 @@ test_that("Mapping a variable to symbol works", {
   l <- expect_traces(p, 3, "scatterplot-symbol")
   markers <- lapply(l$data, "[[", "marker")
   syms <- unlist(lapply(markers, "[[", "symbol"))
-  expect_identical(syms, c("circle", "cross", "diamond"))
+  expect_identical(syms, c("circle", "triangle-up", "square"))
 })
 
 test_that("Can set the symbol range.", {

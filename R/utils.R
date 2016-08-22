@@ -43,6 +43,10 @@ names2 <- function(x) {
   names(x) %||% rep("", length(x))
 }
 
+getLevels <- function(x) {
+  if (is.factor(x)) levels(x) else sort(unique(x))
+}
+
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
   c("color", "symbol", "linetype", "size")

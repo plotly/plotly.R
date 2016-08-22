@@ -458,20 +458,16 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   }
   
   if (any(isDiscrete)) {
+    # unlist() does _not_ preserve order factors
+    isOrdered <- all(vapply(color[isDiscrete], is.ordered, logical(1)))
     allColor <- unlist(color[isDiscrete])
-    lvls <- unique(allColor)
+    lvls <- getLevels(allColor)
     N <- length(lvls)
-    palette <- traces[[1]][["colors"]] %||% 
-      if (is.ordered(allColor)) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
-    if (is.list(palette) && length(palette) > 1) {
-      stop("Multiple numeric color palettes specified (via the colors argument).\n",
-           "When using the color/colors arguments, only one palette is allowed.",
-           call. = FALSE)
-    }
-
-    colScale <- scales::col_factor(palette, levels = lvls, na.color = na.color)
+    pal <- traces[[1]][["colors"]] %||%
+      if (isOrdered) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
+    colScale <- scales::col_factor(pal, levels = names(pal) %||% lvls, na.color = na.color)
     for (i in which(isDiscrete)) {
-      rgb <- toRGB(colScale(color[[i]]), traces[[i]]$alpha %||% 1)
+      rgb <- toRGB(colScale(as.character(color[[i]])), traces[[i]]$alpha %||% 1)
       obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
       traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
       # match the plotly.js default of half transparency in the fill color
@@ -490,30 +486,16 @@ map_symbol <- function(traces) {
     return(traces)
   }
   symbol <- unlist(compact(symbolList))
-  if (!is.null(symbol) && !is.discrete(symbol)) {
-    warning("Coercing the symbol variable to a factor since\n", 
-            "symbols only make sense for discrete variables", call. = FALSE)
-    symbol <- as.factor(symbol)
-  }
-  N <- length(unique(symbol))
-  if (N > 8) {
-    warning("You've mapped a variable with ", N, " different levels to symbol.\n",
-            "It's very difficult to perceive more than 8 different symbols\n",
-            "in a single plot.", call. = FALSE)
-  }
-  # symbol values are duplicated (there is a valid numeric and character string for each symbol)
+  lvls <- getLevels(symbol)
+  # get a sensible default palette (also throws warnings)
+  pal <- setNames(scales::shape_pal()(length(lvls)), lvls)
+  pal <- supplyUserPalette(pal, traces[[1]][["symbols"]])
+  
   validSymbols <- as.character(Schema$traces$scatter$attributes$marker$symbol$values)
-  # give a sensible ordering the valid symbols so that we map 
-  # to a palette that can be easily perceived
-  defaultPalette <- c(
-    'circle', 'cross', 'diamond', 'square', 'triangle-down', 
-    'triangle-left', 'triangle-right', 'triangle-up'
-  )
-  symbols <- traces[[1]]$symbols %||% defaultPalette
-  palette <- setNames(symbols[seq_len(N)], unique(symbol))
+
   for (i in which(nSymbols > 0)) {
     s <- symbolList[[i]]
-    symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(palette[as.character(s)]))
+    symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(pal[as.character(s)]))
     illegalSymbols <- setdiff(symbols, validSymbols)
     if (length(illegalSymbols)) {
       warning(
@@ -523,9 +505,8 @@ map_symbol <- function(traces) {
         paste(validSymbols, collapse = "', '"), call. = FALSE
       )
     }
-    traces[[i]]$marker <- modify_list(
-      list(symbol = symbols), 
-      traces[[i]]$marker
+    traces[[i]][["marker"]] <- modify_list(
+      list(symbol = symbols), traces[[i]][["marker"]]
     )
     # ensure the mode is set so that the symbol is relevant
     if (!grepl("markers", traces[[i]]$mode %||% "")) {
@@ -544,24 +525,16 @@ map_linetype <- function(traces) {
     return(traces)
   }
   linetype <- unlist(compact(linetypeList))
-  if (!is.null(linetype) && !is.discrete(linetype)) {
-    warning("Coercing the linetype variable to a factor since\n", 
-            "linetype only make sense for discrete variables", call. = FALSE)
-    linetype <- as.factor(linetype)
-  }
-  N <- length(unique(linetype))
-  validLinetypes <- as.character(
-    Schema$traces$scatter$attributes$line$dash$values
-  )
-  if (N > length(validLinetypes)) {
-    warning("linetype has ", N, " levels.\n", "plotly.js only has ", 
-            length(validLinetypes), " different line types", call. = TRUE)
-  }
-  linetypes <- unique(unlist(lapply(traces, "[[", "linetypes"))) %||% validLinetypes
-  palette <- setNames(linetypes[seq_len(N)], unique(linetype))
+  lvls <- getLevels(linetype)
+  # get a sensible default palette (also throws warnings)
+  pal <- setNames(scales::linetype_pal()(length(lvls)), lvls)
+  pal <- supplyUserPalette(pal, traces[[1]][["linetypes"]])
+  
+  validLinetypes <- as.character(Schema$traces$scatter$attributes$line$dash$values)
+  
   for (i in which(nLinetypes > 0)) {
     l <- linetypeList[[i]]
-    dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(palette[as.character(l)]))
+    dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(pal[as.character(l)]))
     illegalLinetypes <- setdiff(dashes, validLinetypes)
     if (length(illegalLinetypes)) {
       warning(
@@ -609,4 +582,13 @@ traceify <- function(dat, x = NULL) {
 
 eval_attr <- function(x, data = NULL) {
   if (lazyeval::is_formula(x)) lazyeval::f_eval(x, data) else x
+}
+
+# overwrite defaults with the user defined palette
+supplyUserPalette <- function(default, user) {
+  for (i in seq_along(user)) {
+    idx <- names(user)[i] %||% i
+    default[idx] <- user[i]
+  }
+  default
 }
