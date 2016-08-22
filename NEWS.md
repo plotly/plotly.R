@@ -1,3 +1,9 @@
+# 4.2.1 -- 22 August 2016
+
+## BUGFIX
+
+* `alpha` is now applied when `color` isn't specified (fixes #658).
+
 # 4.2.0 -- 11 August 2016
 
 ## CHANGES

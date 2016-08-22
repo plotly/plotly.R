@@ -98,8 +98,8 @@ test_that("grouping within multiples traces works", {
   l <- expect_traces(add_lines(p), 2, "group-within-trace")
   expect_equal(l$data[[1]]$x, c(1, 2, NA, 1, 2, NA, 1, 2))
   expect_equal(l$data[[2]]$x, c(1, 2, NA, 1, 2, NA, 1, 2))
-  expect_true(l$data[[1]]$line$color == "#FF0000")
-  expect_true(l$data[[2]]$line$color == "#0000FF")
+  expect_true(l$data[[1]]$line$color == toRGB("red"))
+  expect_true(l$data[[2]]$line$color == toRGB("blue"))
 })
 
 test_that("Alpha can be applied to both constant and scaled colors", {
@@ -117,6 +117,15 @@ test_that("Alpha can be applied to both constant and scaled colors", {
   alpha <- sub("\\)", "", sapply(strsplit(rgb, ","), "[[", 4))
   expect_equal("0.4", alpha)
 })
+
+
+test_that("Alpha still applies when no color is applied", {
+  p <- plot_ly(mtcars, x = ~mpg, y = ~disp, alpha = 0.5) 
+  l <- expect_traces(p, 1, "alpha-no-color")
+  # verify the correct alpha for the points
+  expect_equal(l$data[[1]]$marker$color, "rgba(31,119,180,0.5)")
+})
+
 
 test_that("Factors correctly mapped to a positional axis", {
   x <- factor(c(1, 2, 4, 8, 16, 32))
