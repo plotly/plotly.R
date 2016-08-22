@@ -526,11 +526,14 @@ map_linetype <- function(traces) {
   }
   linetype <- unlist(compact(linetypeList))
   lvls <- getLevels(linetype)
-  # get a sensible default palette (also throws warnings)
+  # get a sensible default palette
   pal <- setNames(scales::linetype_pal()(length(lvls)), lvls)
   pal <- supplyUserPalette(pal, traces[[1]][["linetypes"]])
   
   validLinetypes <- as.character(Schema$traces$scatter$attributes$line$dash$values)
+  if (length(pal) > length(validLinetypes)) {
+    warning("plotly.js only supports 6 different linetypes", call. = FALSE)
+  }
   
   for (i in which(nLinetypes > 0)) {
     l <- linetypeList[[i]]
