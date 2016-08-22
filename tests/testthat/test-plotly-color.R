@@ -2,7 +2,7 @@ context("plotly-color")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-", name))
+  L <- save_outputs(p, paste0("plotly-color-", name))
   expect_equal(length(L$data), n.traces)
   L
 }
@@ -78,5 +78,14 @@ test_that("axis titles get attached to scene object for 3D plots", {
   expect_identical(scene$xaxis$title, "Petal.Length")
   expect_identical(scene$yaxis$title, "Petal.Width")
   expect_identical(scene$zaxis$title, "Sepal.Width")
+})
+
+test_that("Can specify a scale manually", {
+  pal <- c("1" = "red", "0" = "blue")
+  p <- plot_ly(mtcars, x = ~mpg, y = ~disp, color = ~factor(vs), colors = pal)
+  l <- expect_traces(p, 2, "color-manual")
+  markers <- lapply(l$data, "[[", "marker")
+  expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
+  expect_equal(toRGB(expected), sapply(markers, "[[", "color"))
 })
 
