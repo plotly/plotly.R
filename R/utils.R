@@ -48,6 +48,12 @@ npscales <- function() {
   c("color", "symbol", "linetype", "size")
 }
 
+# copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
+traceColorDefaults <- function() {
+  c('#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf')
+}
+
 # modifyList turns elements that are data.frames into lists
 # which changes the behavior of toJSON
 as_df <- function(x) {
