@@ -38,7 +38,8 @@ Imports:
     dplyr,
     tibble,
     lazyeval (>= 0.2.0),
-    crosstalk
+    crosstalk,
+    colourpicker
 Suggests:
     maps,
     ggthemes,
