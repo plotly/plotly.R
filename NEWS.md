@@ -1,3 +1,9 @@
+# 4.3.1 -- 23 August 2016
+
+## CHANGES
+
+* Upgraded to plotly.js v1.16.3 -- https://github.com/plotly/plotly.js/releases/tag/v1.16.3
+
 # 4.3.0 -- 22 August 2016
 
 ## NEW FEATURES
