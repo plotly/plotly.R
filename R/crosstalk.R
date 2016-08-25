@@ -35,6 +35,7 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
   if (!is.plotly(p)) {
     stop("Don't know how to modify crosstalk options to objects of class:", class(p))
   }
+  p <- plotly_build(p)
   keys <- unlist(lapply(p$x$data, "[[", "key"))
   if (length(keys) == 0) {
     warning("No 'key' attribute found. \n", 
@@ -69,7 +70,6 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
       showInLegend = showInLegend
     )
   )
-  
   # set some default crosstalk selections, if appropriate
   defaultValues <- defaultValues[defaultValues %in% keys]
   if (length(defaultValues)) {
@@ -84,7 +84,6 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
       ", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
     }
   }
-  
   if (dynamic) {
     w <- colourpicker::colourWidget(
       value = color[1],
@@ -103,4 +102,9 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
     p <- htmltools::browsable(htmltools::tagList(w, p))
   }
   p
+}
+
+
+crosstalk_defaults <- function() {
+  formals(crosstalk)[-1]
 }
