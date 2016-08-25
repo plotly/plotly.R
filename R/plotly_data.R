@@ -7,6 +7,7 @@
 #' @param p a plotly visualization
 #' @param id a character string or number referencing an "attribute layer".
 #' @return returns a data frame
+#' @seealso \link{reexports}
 #' @export
 #' @examples
 #' 
@@ -161,6 +162,31 @@ transmute_.plotly <- function(.data, ..., .dots) {
 }
 
 
+#' @rawNamespace export(gather_.plotly)
+gather_.plotly <- function(data, key_col, value_col, gather_cols, na.rm = FALSE,
+                           convert = FALSE, factor_key = FALSE) {
+  d <- plotly_data(data)
+  set <- attr(d, "set")
+  d <- tidyr::gather_(
+    d, key_col = key_col, value_col = value_col, gather_cols = gather_cols, 
+    na.rm = na.rm, convert = convert, factor_key = factor_key
+  )
+  add_data(data, structure(d, set = set))
+}
+
+#' @importFrom dplyr select_vars
+#' @rawNamespace export(gather_vars.plotly)
+gather_vars.plotly <- function(data, key_col, value_col, ...) {
+  d <- plotly_data(data)
+  if (n_dots(...) == 0) {
+    setdiff(colnames(d), c(key_col, value_col))
+  } else {
+    unname(dplyr::select_vars(colnames(d), ...))
+  }
+}
+
+n_dots <- function(...) nargs()
+
 # Avoid errors when passing a shared data to ggplot2
 # qplot(data = crosstalk::SharedData$new(mtcars), mpg, wt)
 
@@ -172,4 +198,11 @@ fortify.SharedData <- function(model, data, ...) {
   # need a consistent name so we know how to access it ggplotly()
   data[[crosstalk_key()]] <- key
   structure(data, set = set)
+}
+
+# yes, you can feed a plotly object into ggplot %^)
+#' @rawNamespace export(ggplot.plotly)
+ggplot.plotly <- function(data, mapping = aes(), ...,
+                          environment = parent.frame()) {
+  ggplot(plotly_data(data), mapping = mapping, ..., environment = environment)
 }

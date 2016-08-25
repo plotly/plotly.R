@@ -65,4 +65,7 @@ p \%>\% filter(cyl == 4) \%>\% add_markers(name = "four cylinders")
 
 
 }
+\seealso{
+\link{reexports}
+}
 
