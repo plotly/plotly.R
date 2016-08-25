@@ -251,7 +251,8 @@ plotly_build.plotly <- function(p) {
   }
   # if crosstalk() hasn't been called on this plot, populate it with defaults
   if (is.null(p$x$crosstalk)) {
-    p <- crosstalk(p)
+    # crosstalk will throw warning if no key is found
+    p <- suppressWarnings(crosstalk(p))
   }
 
   # ensure we get the order of categories correct

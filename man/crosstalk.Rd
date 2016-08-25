@@ -5,8 +5,8 @@
 \title{Modify crosstalk selection options}
 \usage{
 crosstalk(p, on = "plotly_selected", off = "plotly_relayout",
-  color = NULL, dynamic = FALSE, persistent = FALSE, opacityDim = 0.2,
-  showInLegend = FALSE)
+  dynamic = FALSE, persistent = FALSE, defaultValues = NULL,
+  color = NULL, opacityDim = 0.2, showInLegend = FALSE)
 }
 \arguments{
 \item{p}{a plotly visualization.}
@@ -17,15 +17,18 @@ crosstalk(p, on = "plotly_selected", off = "plotly_relayout",
 \item{off}{turn off a selection on which event(s)? Likely candidates are
 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.}
 
-\item{color}{character string of color(s) to use for 
-highlighting selections. See \code{\link{toRGB}()} for valid color
-specifications. If \code{NULL} (the default), the color of selected marks
-are not altered (only their opacity).}
-
 \item{dynamic}{should UI controls for managing selection aesthetics be 
 included in the output?}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
+
+\item{defaultValues}{a vector of values for setting a "default selection".
+These values should match the key attribute.}
+
+\item{color}{character string of color(s) to use for 
+highlighting selections. See \code{\link{toRGB}()} for valid color
+specifications. If \code{NULL} (the default), the color of selected marks
+are not altered (only their opacity).}
 
 \item{opacityDim}{a number between 0 and 1 used to reduce the
 opacity of non-selected traces (by multiplying with the existing opacity).}
@@ -35,5 +38,13 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 \description{
 Control the visual appearance of selections deriving from a given
 selection set.
+}
+\examples{
+
+d <- crosstalk::SharedData$new(txhousing, ~city)
+p <- qplot(data = d, x = date, y = median, group = city, geom = "line")
+ggplotly(p, tooltip = "city") \%>\%
+  crosstalk(on = "plotly_hover", defaultValues = "Houston", color = "red")
+
 }
 

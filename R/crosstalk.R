@@ -11,6 +11,8 @@
 #' @param dynamic should UI controls for managing selection aesthetics be 
 #' included in the output?
 #' @param persistent should selections persist (i.e., accumulate)?
+#' @param defaultValues a vector of values for setting a "default selection".
+#' These values should match the key attribute.
 #' @param color character string of color(s) to use for 
 #' highlighting selections. See \code{\link{toRGB}()} for valid color
 #' specifications. If \code{NULL} (the default), the color of selected marks
@@ -19,13 +21,25 @@
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param showInLegend populate an additional legend entry for the selection?
 #' @export
+#' @examples
+#' 
+#' d <- crosstalk::SharedData$new(txhousing, ~city)
+#' p <- qplot(data = d, x = date, y = median, group = city, geom = "line")
+#' ggplotly(p, tooltip = "city") %>%
+#'   crosstalk(on = "plotly_hover", defaultValues = "Houston", color = "red")
 #' 
 
 crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout", 
-                      color = NULL, dynamic = FALSE, persistent = FALSE,
-                      opacityDim = 0.2, showInLegend = FALSE) {
+                      dynamic = FALSE, persistent = FALSE, defaultValues = NULL,
+                      color = NULL, opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {
     stop("Don't know how to modify crosstalk options to objects of class:", class(p))
+  }
+  keys <- unlist(lapply(p$x$data, "[[", "key"))
+  if (length(keys) == 0) {
+    warning("No 'key' attribute found. \n", 
+            "Linked interaction(s) aren't possible without a 'key' attribute.",
+            call. = FALSE)
   }
   if (opacityDim < 0 || 1 < opacityDim) {
     stop("opacityDim must be between 0 and 1", call. = FALSE)
@@ -55,6 +69,22 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
       showInLegend = showInLegend
     )
   )
+  
+  # set some default crosstalk selections, if appropriate
+  defaultValues <- defaultValues[defaultValues %in% keys]
+  if (length(defaultValues)) {
+    sets <- lapply(p$x$data, "[[", "set")
+    for (i in seq_along(sets)) {
+      valsInSet <- defaultValues[defaultValues %in% p$x$data[[i]][["key"]]]
+      if (!length(valsInSet)) next
+      p <- htmlwidgets::onRender(p, sprintf("
+          function(el, x) {
+            crosstalk.group('%s').var('selection').set(%s)
+          }
+      ", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
+    }
+  }
+  
   if (dynamic) {
     w <- colourpicker::colourWidget(
       value = color[1],
