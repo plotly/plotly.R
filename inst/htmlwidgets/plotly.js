@@ -215,6 +215,9 @@ HTMLWidgets.widget({
       opacityDim: 0.2,
       showInLegend: false
     };
+    
+    // inform the world about plotly's crosstalk config
+    var ctConfig = crosstalk.var("plotlyCrosstalkOpts").set(ct);
 
     var traceManager = new TraceManager(graphDiv, ct);
 
@@ -421,7 +424,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           );
         }
         // this variable is set in R/crosstalk.R
-        var selectionColour = crosstalk.var("selectionColour").get() || 
+        var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
           this.crosstalk.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;

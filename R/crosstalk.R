@@ -93,9 +93,9 @@ crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout",
     w <- htmlwidgets::onRender(w, "
         function(el, x) {
           var $el = $('#' + el.id);
-          crosstalk.var('selectionColour').set($el.colourpicker('value'));
+          crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
           $el.on('change', function() {
-            crosstalk.var('selectionColour').set($el.colourpicker('value'));
+            crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
           })
         }
     ")
