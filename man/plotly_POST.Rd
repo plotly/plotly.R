@@ -4,7 +4,7 @@
 \alias{plotly_POST}
 \title{Create/Modify plotly graphs}
 \usage{
-plotly_POST(x, filename = NULL, fileopt = "overwrite",
+plotly_POST(x = last_plot(), filename = NULL, fileopt = "overwrite",
   sharing = c("public", "private", "secret"))
 }
 \arguments{
