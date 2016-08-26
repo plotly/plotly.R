@@ -2,10 +2,15 @@ context("Errorbar")
 
 test_that("geom_errorbar gives errorbars", {
 
-  df <- aggregate(mpg~cyl, mtcars, FUN = summary)
+  d <- dplyr::summarise(
+    dplyr::group_by_(mtcars, "cyl"), 
+    q1 = quantile(mpg, 0.25),
+    m = mean(mpg),
+    q3 = quantile(mpg, 0.75)
+  )
 
-  g <- ggplot(df, aes(x = cyl, y = mpg[,'Mean'])) + geom_line() +
-    geom_errorbar(aes(ymin = mpg[,'1st Qu.'], ymax = mpg[,'3rd Qu.']))
+  g <- ggplot(d, aes(x = cyl, y = m)) + geom_line() +
+    geom_errorbar(aes(ymin = q1, ymax = q3))
 
   L <- save_outputs(g, "errorbar")
   
@@ -13,7 +18,8 @@ test_that("geom_errorbar gives errorbars", {
   idx <- vapply(L$data, function(x) is.null(x$error_y), logical(1))
   expect_true(sum(idx) == 1)
   # right data for errorbar ymax
-  expect_equal(L$data[!idx][[1]]$error_y$array, c(3.74, 1.26, 1.15))
+  expect_equal(L$data[!idx][[1]]$error_y$array, d$q3 - d$m)
+  expect_equal(L$data[!idx][[1]]$error_y$arrayminus, d$m - d$q1)
 })
 
 df <- data.frame(
