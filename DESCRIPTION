@@ -59,6 +59,6 @@ Suggests:
 LazyData: true
 Remotes:
     rstudio/crosstalk,
-    hadley/tidyr@carson/feature/gather
+    hadley/tidyr#229
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
