@@ -332,7 +332,7 @@ verify_showlegend <- function(p) {
     return(p)
   }
   show <- unlist(lapply(p$x$data, function(x) x$showlegend %||% TRUE))
-  p$x$layout$showlegend <- sum(show) > 1
+  p$x$layout$showlegend <- sum(show) > 1 || isTRUE(p$x$crosstalk$showInLegend)
   p
 }
 

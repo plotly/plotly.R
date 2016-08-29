@@ -221,12 +221,6 @@ HTMLWidgets.widget({
       ct.color = [];
     }
     
-    // if we need to show a legend on selection, do it now to avoid triggering
-    // of relayout event
-    if (ct.showInLegend && ct.off === "plotly_relayout") {
-      Plotly.relayout(graphDiv, {"showlegend": true});  
-    }
-    
     // inform the world about plotly's crosstalk config
     var ctConfig = crosstalk.var("plotlyCrosstalkOpts").set(ct);
 

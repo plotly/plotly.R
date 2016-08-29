@@ -1,3 +1,9 @@
+# 4.3.2 -- 26 August 2016
+
+## NEW FEATURES
+
+* The function `last_plot()` can now be used to retrieve the most recently _printed_ plotly graph. Thanks to this new feature, when `plotly_POST()` is called with no plotly object supplied, the most recently _printed_ plotly graph is sent to the users plotly account.
+
 # 4.3.1 -- 23 August 2016
 
 ## CHANGES
@@ -81,7 +87,7 @@ sorted alphabetically before scales are applied. Also, when mapping a factor to 
 ## BREAKING CHANGES & IMPROVEMENTS:
 
 * Formulas (instead of plain expressions) are now required when using variable mappings. For example, `plot_ly(mtcars, x = wt, y = mpg, color = vs)` should now be `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~vs)`. This is a major breaking change, but it is necessary to ensure that evaluation is correct in all contexts (as a result, `evaluate` argument is now deprecated as it is no longer needed). It also has the benefit of being easier to program with (i.e., writing your own custom functions that wrap `plot_ly()`) since it preserves [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency). For more details, see the [lazyeval vignette](https://github.com/hadley/lazyeval/blob/master/vignettes/lazyeval.Rmd)
-* The data structure used to represent plotly objects is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, the `last_plot()`/`as.widget()` functions have been deprecated, and [serialization/memory leak problems](https://github.com/rstudio/shiny/issues/1151) are no longer an issue. This change also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `?plotly_data` for examples).
+* The data structure used to represent plotly objects is now an htmlwidget object (instead of a data frame with a special attribute tracking visual mappings). As a result, the `as.widget()` function has deprecated, and [serialization/memory leak problems](https://github.com/rstudio/shiny/issues/1151) are no longer an issue. This change also implies that arbitrary data manipulation functions can no longer be intermingled inside a plot pipeline, but plotly methods for dplyr's data manipulation verbs are now provided (see `?plotly_data` for examples).
 * The `group` variable mapping no longer create multiple traces, but instead defines "gaps" within a trace (fixes #418, #381, #577). Groupings should be declared via the new `group_by()` function (see `help(plotly_data)` for examples) instead of the `group` argument (which is now deprecated).
 * `plot_ly()` now _initializes_ a plotly object (i.e., won't add a scatter trace by default), meaning that something like `plot_ly(x = 1:10, y = 1:10) %>% add_trace(y = 10:1)` creates one trace, instead of two. That being said, if you manually specify a trace type in `plot_ly()`, it will add a layer with that trace type (e.g. `plot_ly(x = 1:10, y = 1:10, type = "scatter") %>% add_trace(y = 10:1)` draws two scatter traces). If no trace type is provided, a sensible type is inferred from the supplied data, and automatically added (i.e., `plot_ly(x = rnorm(100))` now creates a histogram).
 * The `inherit` argument is deprecated. Any arguments/attributes specified in `plot_ly()` will automatically be passed along to additional traces added via `add_trace()` (or any of it's `add_*()` siblings).

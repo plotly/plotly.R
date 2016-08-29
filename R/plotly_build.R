@@ -270,8 +270,11 @@ plotly_build.plotly <- function(p) {
   p <- verify_dragmode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
-  # verfiy showlegend is populated (mainly for crosstalk's ability to dynamically add traces)
-  verify_showlegend(p)
+  # verfiy showlegend is populated (needed for crosstalk's ability to dynamically add traces)
+  p <- verify_showlegend(p)
+  # make this plot retrievable
+  set_last_plot(p)
+  p
 }
 
 # ----------------------------------------------------------------

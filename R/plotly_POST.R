@@ -35,7 +35,7 @@
 #' plotly_POST(p, filename = "mtcars-bar-plot")
 #' }
 
-plotly_POST <- function(x, filename = NULL, fileopt = "overwrite", 
+plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret")) {
   x <- plotly_build(x)
   if (inherits(x, "htmlwidget")) x <- x$x
