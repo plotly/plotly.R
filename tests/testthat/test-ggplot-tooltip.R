@@ -93,5 +93,6 @@ test_that("Hoverinfo is only displayed if no tooltip variables are present", {
   L <- plotly_build(ggplotly(myPlot, tooltip = "label"))[["x"]]
   expect_equal(length(L$data), 2)
   expect_equal(sum(nchar(L$data[[1]]$text)), 0)
-  expect_true(all(grepl("^label:", L$data[[2]]$text)))
+  expect_true(all(grepl("^label[0-9]+$", L$data[[2]]$text)))
 })
+

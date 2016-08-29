@@ -13,7 +13,7 @@ test_that("simple subplot works", {
   s <- expect_traces(subplot(p1, p2), 2, "simple")
   expect_identical(s$data[[2]]$xaxis, s$layout[["yaxis2"]][["anchor"]])
   expect_identical(s$data[[2]]$yaxis, s$layout[["xaxis2"]][["anchor"]])
-  doms <- lapply(s$layout, "[[", "domain")
+  doms <- lapply(s$layout[grepl("^xaxis", names(s$layout))], "[[", "domain")
   expect_true(doms$xaxis[2] <= doms$xaxis2[1])
 })
 
@@ -23,7 +23,7 @@ test_that("nrows argument works", {
   s <- expect_traces(subplot(p1, p2, nrows = 2), 2, "simple2")
   expect_identical(s$data[[2]]$xaxis, s$layout[["yaxis2"]][["anchor"]])
   expect_identical(s$data[[2]]$yaxis, s$layout[["xaxis2"]][["anchor"]])
-  doms <- lapply(s$layout, "[[", "domain")
+  doms <- lapply(s$layout[grepl("^[x-y]axis", names(s$layout))], "[[", "domain")
   expect_true(doms$yaxis[2] > doms$yaxis[1])
   expect_true(doms$yaxis[1] > doms$yaxis2[2])
   expect_true(doms$yaxis2[2] > doms$yaxis2[1])
