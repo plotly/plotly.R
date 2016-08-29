@@ -51,7 +51,7 @@
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
                      tooltip = "all", originalData = TRUE, source = "A", ...) {
-  UseMethod("ggplotly")
+  UseMethod("ggplotly", p)
 }
 
 #' @export
