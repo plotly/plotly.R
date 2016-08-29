@@ -221,6 +221,12 @@ HTMLWidgets.widget({
       ct.color = [];
     }
     
+    // if we need to show a legend on selection, do it now to avoid triggering
+    // of relayout event
+    if (ct.showInLegend && ct.off === "plotly_relayout") {
+      Plotly.relayout(graphDiv, {"showlegend": true});  
+    }
+    
     // inform the world about plotly's crosstalk config
     var ctConfig = crosstalk.var("plotlyCrosstalkOpts").set(ct);
 
@@ -438,7 +444,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     }
     
     // add "selection traces" *underneath* original traces
-    Plotly.addTraces(this.gd, traces, seq_len(traces.length));
+    Plotly.addTraces(this.gd, traces, seq_len(traces.length))
+    
     if (!this.dimmed) {
       // reduce opacity of original traces
       for (var i = traces.length; i < traces.length + this.origData.length; i++) {
