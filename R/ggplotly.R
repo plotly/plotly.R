@@ -117,6 +117,9 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
 #' @param originalData should the "original" or "scaled" data be returned?
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export

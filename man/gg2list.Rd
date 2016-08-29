@@ -20,6 +20,10 @@ tooltip. The default, "all", means show all the aesthetic tooltips
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
 
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
+
 \item{...}{currently not used}
 }
 \value{
