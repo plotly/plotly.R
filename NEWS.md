@@ -1,3 +1,9 @@
+# 4.3.3 -- 29 August 2016
+
+## BUG FIXES
+
+* Bug fix for translation of ggplot2's `geom_text()`.
+
 # 4.3.2 -- 26 August 2016
 
 ## NEW FEATURES
