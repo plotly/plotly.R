@@ -216,6 +216,11 @@ HTMLWidgets.widget({
       showInLegend: false
     };
     
+    // make sure color is an array
+    if (!ct.color) {
+      ct.color = [];
+    }
+    
     // inform the world about plotly's crosstalk config
     var ctConfig = crosstalk.var("plotlyCrosstalkOpts").set(ct);
 
