@@ -118,6 +118,11 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   id <- new_id()
   # avoid weird naming clashes
   plotlyVisDat <- data
+  # automatically namespace source
+  session <- shiny::getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    source <- session$ns(source)
+  }
   p <- list(
     visdat = setNames(list(function() plotlyVisDat), id),
     cur_data = id,
