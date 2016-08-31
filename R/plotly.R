@@ -77,7 +77,8 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, group,
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL, source = "A") {
+                    width = NULL, height = NULL, source = "A", 
+                    session = shiny::getDefaultReactiveDomain()) {
   if (!is.data.frame(data)) {
     stop("First argument, `data`, must be a data frame.", call. = FALSE)
   }
@@ -119,7 +120,6 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   # avoid weird naming clashes
   plotlyVisDat <- data
   # automatically namespace source
-  session <- shiny::getDefaultReactiveDomain()
   if (!is.null(session)) {
     source <- session$ns(source)
   }
