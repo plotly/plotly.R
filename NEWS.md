@@ -1,3 +1,9 @@
+# 4.3.4 -- 31 August 2016
+
+## CHANGES
+
+* Expressions yielding a ggplot2 object can now, once again, be provided to `plotlyOutput()`. In order to make this possible, `ggplotly()` now has a method for plotly objects (the identity function), and `ggplotly()` called on any expression provided to `plotlyOutput()`.
+
 # 4.3.3 -- 29 August 2016
 
 ## BUG FIXES
