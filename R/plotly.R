@@ -74,7 +74,7 @@
 #' 
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = NULL, group,
+plot_ly <- function(data = data.frame(), ..., type = NULL, 
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
                     width = NULL, height = NULL, source = "A") {
@@ -92,7 +92,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   if (!is.null(attrs[["group"]])) {
     warning(
       "The group argument has been deprecated. Use `group_by()` instead.\n",
-      "See `help('plotly-data')` for examples"
+      "See `help('plotly_data')` for examples"
     )
     attrs[["group"]] <- NULL
   }
