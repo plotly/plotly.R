@@ -43,7 +43,7 @@ Suggests:
     testthat,
     knitr,
     devtools,
-    shiny,
+    shiny (>= 0.13.2.9005),
     htmltools,
     curl,
     rmarkdown,
@@ -57,4 +57,4 @@ LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 Remotes:
-  rstudio/shiny#1344
+  rstudio/shiny
