@@ -64,9 +64,6 @@ test_that("plot_ly() handles a simple scatterplot", {
   expect_identical(l$layout$yaxis$title, "Petal.Length")
 })
 
-
-
-
 test_that("type inference + add_data + layering works as expected", {
 p <- plot_ly(iris, x = ~Species) %>% 
   add_trace(opacity = 0.3) %>%
@@ -145,4 +142,22 @@ test_that("Character strings correctly mapped to a positional axis", {
   expect_equal(l$layout$xaxis$type, "category")
   expect_equal(l$layout$xaxis$categoryorder, "array")
   expect_equal(l$layout$xaxis$categoryarray, LETTERS)
+})
+
+test_that("Histogram", {
+  p <- plot_ly(x = rnorm(100))
+  l <- expect_traces(p, 1, "histogram")
+  o <- unlist(lapply(l$data, "[[", "orientation"))
+  types <- unlist(lapply(l$data, "[[", "type"))
+  expect_null(o)
+  expect_equal(unique(types), "histogram")
+})
+
+test_that("Discrete variable mapped to x creates horizontal bar chart", {
+  p <- plot_ly(y = rnorm(100))
+  l <- expect_traces(p, 1, "histogram-vert")
+  o <- unlist(lapply(l$data, "[[", "orientation"))
+  types <- unlist(lapply(l$data, "[[", "type"))
+  expect_equal(unique(o), "h")
+  expect_equal(unique(types), "histogram")
 })

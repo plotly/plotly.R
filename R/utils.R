@@ -203,8 +203,8 @@ relay_type <- function(type) {
 }
 
 verify_orientation <- function(trace) {
-  xNumeric <- !is.discrete(trace[["x"]])
-  yNumeric <- !is.discrete(trace[["y"]])
+  xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]])
+  yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]])
   if (xNumeric && !yNumeric) {
     if (any(c("bar", "box") %in% trace[["type"]])) {
       trace$orientation <- "h"
