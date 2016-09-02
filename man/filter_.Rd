@@ -4,6 +4,6 @@
 \alias{filter_}
 \title{Return rows with matching conditions.}
 \description{
-See \link[dplyr]{filter_asw}.
+See \link[dplyr]{filter_}.
 }
 

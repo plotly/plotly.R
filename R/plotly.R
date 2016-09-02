@@ -23,10 +23,13 @@
 #' Values are scaled and mapped to symbols based on the value of \code{symbols}.
 #' To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
 #' \code{\link{pch}()} values and/or valid plotly symbol(s) as a string
-#' \url{}
-#' @param symbols A character vector of symbol types. For possible values, see \link{schema}.
-#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
-#' @param linetypes A character vector of line types. For possible values, see \link{schema}.
+#' @param symbols A character vector of symbol types. 
+#' Either valid \link{pch} or plotly symbol codes may be supplied.
+#' @param linetype A formula containing a name or expression. 
+#' Values are scaled and mapped to linetypes based on the value of 
+#' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
+#' @param linetypes A character vector of line types. 
+#' Either valid \link{par} (lty) or plotly dash codes may be supplied.
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).

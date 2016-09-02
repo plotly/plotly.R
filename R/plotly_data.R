@@ -67,7 +67,7 @@ groups.plotly <- function(x) {
 }
 
 #' @rawNamespace export(ungroup.plotly)
-ungroup.plotly <- function(x) {
+ungroup.plotly <- function(x, ...) {
   dplyr::ungroup(plotly_data(x))
 }
 

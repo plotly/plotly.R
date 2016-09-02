@@ -4,10 +4,9 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = NULL, group, color,
-  colors = NULL, alpha = 1, symbol, symbols = NULL, size, sizes = c(10,
-  100), linetype, linetypes = NULL, width = NULL, height = NULL,
-  source = "A")
+plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
+  alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
+  linetypes = NULL, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -33,18 +32,21 @@ or a color interpolation function like \code{colorRamp()}.}
 \item{symbol}{A formula containing a name or expression. 
 Values are scaled and mapped to symbols based on the value of \code{symbols}.
 To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
-\code{\link{pch}()} values and/or valid plotly symbol(s) as a string
-\url{}}
+\code{\link{pch}()} values and/or valid plotly symbol(s) as a string}
 
-\item{symbols}{A character vector of symbol types. For possible values, see \link{schema}.}
+\item{symbols}{A character vector of symbol types. 
+Either valid \link{pch} or plotly symbol codes may be supplied.}
 
 \item{size}{A variable name or numeric vector to encode the size of markers.}
 
 \item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
 
-\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
+\item{linetype}{A formula containing a name or expression. 
+Values are scaled and mapped to linetypes based on the value of 
+\code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.}
 
-\item{linetypes}{A character vector of line types. For possible values, see \link{schema}.}
+\item{linetypes}{A character vector of line types. 
+Either valid \link{par} (lty) or plotly dash codes may be supplied.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 

@@ -225,7 +225,7 @@ NULL
 
 #' Return rows with matching conditions.
 #' 
-#' See \link[dplyr]{filter_asw}.
+#' See \link[dplyr]{filter_}.
 #'
 #' @importFrom dplyr filter_
 #' @name filter_
