@@ -151,27 +151,24 @@ verify_type <- function(trace) {
   if (is.null(trace$type)) {
     attrs <- names(trace)
     attrLengths <- lengths(trace)
-    if (all(c("x", "y", "z") %in% attrs)) {
-      trace$type <- if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
+    trace$type <- if (all(c("x", "y", "z") %in% attrs)) {
+       if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
     } else if (all(c("x", "y") %in% attrs)) {
-      if (!is.discrete(trace$x) && !is.discrete(trace$y)) {
-        trace$type <- if (any(attrLengths) > 15000) "scattergl" else "scatter"
-      } else if (!is.discrete(trace$x)) {
-        trace$type <- "bar"
-        trace$orientation <- "h"
-      } else if (!is.discrete(trace$y)) {
-        trace$type <- "bar"
-      } else {
-        trace$type <- "histogram2d"
-      }
+      xNumeric <- !is.discrete(trace[["x"]])
+      yNumeric <- !is.discrete(trace[["y"]])
+      if (xNumeric && yNumeric) {
+        if (any(attrLengths) > 15000) "scattergl" else "scatter"
+      } else if (xNumeric || yNumeric) {
+        "bar" 
+      } else "histogram2d"
     } else if ("y" %in% attrs || "x" %in% attrs) {
-      trace$type <- "histogram"
+      "histogram"
     } else if ("z" %in% attrs) {
-      trace$type <- "heatmap"
+      "heatmap"
     } else {
       warning("No trace type specified and no positional attributes specified", 
               call. = FALSE)
-      trace$type <- "scatter"
+      "scatter"
     }
     relay_type(trace$type)
   }
@@ -203,6 +200,20 @@ relay_type <- function(type) {
     "  Read more about this trace type -> https://plot.ly/r/reference/#", type
   )
   type
+}
+
+verify_orientation <- function(trace) {
+  xNumeric <- !is.discrete(trace[["x"]])
+  yNumeric <- !is.discrete(trace[["y"]])
+  if (xNumeric && !yNumeric) {
+    if (any(c("bar", "box") %in% trace[["type"]])) {
+      trace$orientation <- "h"
+    }
+  }
+  if (yNumeric && "histogram" %in% trace[["type"]]) {
+    trace$orientation <- "h"
+  }
+  trace
 }
 
 verify_mode <- function(p) {
