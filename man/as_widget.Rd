@@ -16,7 +16,8 @@ Convert a list to a plotly htmlwidget object
 }
 \examples{
 
-obj <- list(data = list(x = 1, y = 1), layout = list(title = "my plot"))
+trace <- list(x = 1, y = 1)
+obj <- list(data = list(trace), layout = list(title = "my plot"))
 as_widget(obj)
 
 }
