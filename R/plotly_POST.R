@@ -25,7 +25,7 @@
 #' viewing that page will be able to view the graph. 
 #' You do not need to be logged in to view this plot.
 #' @export
-#' @seealso \link{plot_ly}, \link{signup}
+#' @seealso \code{\link{plot_ly}()}, \code{\link{signup}()}
 #' @return An R object created by mapping the JSON content of the plotly API
 #' response to its R equivalent.
 #' @author Carson Sievert

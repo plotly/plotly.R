@@ -8,8 +8,7 @@
 #' @param data A data frame (optional).
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
-#' @param type A character string describing the type of trace. If \code{NULL}
-#' (the default), the initial trace type is determined by \code{add_trace}
+#' @param type A character string describing the type of trace.
 #' @param color A formula containing a name or expression. 
 #' Values are scaled and mapped to color codes based on the value of 
 #' \code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},

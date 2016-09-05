@@ -37,6 +37,7 @@ Imports:
     hexbin,
     lazyeval (>= 0.2.0)
 Suggests:
+    MASS,
     maps,
     ggthemes,
     GGally,

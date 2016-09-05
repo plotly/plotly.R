@@ -12,222 +12,147 @@
 #' @importFrom tibble as_tibble
 NULL
 
-# ------------------------------------------------------------------
-# Import dplyr generics and re-export them
-# ------------------------------------------------------------------
 
-#' Add new variables.
-#'
-#' See \link[dplyr]{mutate}.
-#'
 #' @importFrom dplyr mutate 
 #' @name mutate
+#' @rdname reexports
 #' @export
-NULL
+dplyr::mutate
 
-#' Add new variables.
-#'
-#' See \link[dplyr]{mutate_}.
-#'
 #' @importFrom dplyr mutate_
 #' @name mutate_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::mutate_
 
-#' Add new variables.
-#'
-#' See \link[dplyr]{transmute}.
-#'
 #' @importFrom dplyr transmute
 #' @name transmute
+#' @rdname reexports
 #' @export
-NULL
+dplyr::transmute
 
-#' Add new variables.
-#'
-#' See \link[dplyr]{transmute_}.
-#'
 #' @importFrom dplyr transmute_
 #' @name transmute_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::transmute_
 
-#' Select/rename variables by name.
-#'
-#' See \link[dplyr]{select}.
-#'
 #' @importFrom dplyr select
 #' @name select
+#' @rdname reexports
 #' @export
-NULL
+dplyr::select
 
-#' Select/rename variables by name.
-#'
-#' See \link[dplyr]{select_}.
-#'
 #' @importFrom dplyr select_
 #' @name select_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::select_
 
-#' Select/rename variables by name.
-#'
-#' See \link[dplyr]{rename}.
-#'
 #' @importFrom dplyr rename
 #' @name rename
+#' @rdname reexports
 #' @export
-NULL
+dplyr::rename
 
-#' Select/rename variables by name.
-#'
-#' See \link[dplyr]{rename_}.
-#'
 #' @importFrom dplyr rename_
 #' @name rename_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::rename_
 
-#' Group a tbl by one or more variables.
-#'
-#' See \link[dplyr]{group_by}.
-#'
 #' @importFrom dplyr group_by 
 #' @name group_by
+#' @rdname reexports
 #' @export
-NULL
+dplyr::group_by
 
-#' Group a tbl by one or more variables.
-#' 
-#' See \link[dplyr]{group_by}.
-#'
 #' @importFrom dplyr group_by_
 #' @name group_by_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::group_by_
 
-#' Get/set the grouping variables for tbl.
-#' 
-#' See \link[dplyr]{groups}.
-#'
 #' @importFrom dplyr groups
 #' @name groups
+#' @rdname reexports
 #' @export
-NULL
+dplyr::groups
 
-#' Get/set the grouping variables for tbl.
-#' 
-#' See \link[dplyr]{ungroup}.
-#'
 #' @importFrom dplyr ungroup
 #' @name ungroup
+#' @rdname reexports
 #' @export
-NULL
+dplyr::ungroup
 
-#' Summarise multiple values to a single value.
-#' 
-#' See \link[dplyr]{summarise}.
-#'
 #' @importFrom dplyr summarise
 #' @name summarise
+#' @rdname reexports
 #' @export
-NULL
+dplyr::summarise
 
-#' Summarise multiple values to a single value.
-#' 
-#' See \link[dplyr]{summarise_}.
-#'
 #' @importFrom dplyr summarise_
 #' @name summarise_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::summarise_
 
-#' Do arbitrary operations on a tbl.
-#' 
-#' See \link[dplyr]{do}.
-#'
 #' @importFrom dplyr do
 #' @name do
+#' @rdname reexports
 #' @export
-NULL
+dplyr::do
 
-#' Do arbitrary operations on a tbl.
-#' 
-#' See \link[dplyr]{do_}.
-#'
 #' @importFrom dplyr do_
 #' @name do_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::do_
 
-#' Arrange rows by variables.
-#' 
-#' See \link[dplyr]{arrange}.
-#'
 #' @importFrom dplyr arrange
 #' @name arrange
+#' @rdname reexports
 #' @export
-NULL
+dplyr::arrange
 
-#' Arrange rows by variables.
-#' 
-#' See \link[dplyr]{arrange_}.
-#'
 #' @importFrom dplyr arrange_
 #' @name arrange_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::arrange_
 
-#' Select distinct/unique rows.
-#' 
-#' See \link[dplyr]{distinct}.
-#'
 #' @importFrom dplyr distinct
 #' @name distinct
+#' @rdname reexports
 #' @export
-NULL
+dplyr::distinct
 
-#' Select distinct/unique rows.
-#' 
-#' See \link[dplyr]{distinct_}.
-#'
 #' @importFrom dplyr distinct_
 #' @name distinct_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::distinct_
 
-#' Select rows by position.
-#' 
-#' See \link[dplyr]{slice}.
-#'
 #' @importFrom dplyr slice
 #' @name slice
+#' @rdname reexports
 #' @export
-NULL
+dplyr::slice
 
-#' Select rows by position.
-#' 
-#' See \link[dplyr]{slice_}.
-#'
 #' @importFrom dplyr slice_
 #' @name slice_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::slice_
 
-#' Return rows with matching conditions.
-#' 
-#' See \link[dplyr]{filter}.
-#'
 #' @importFrom dplyr filter
 #' @name filter
+#' @rdname reexports
 #' @export
-NULL
+dplyr::filter
 
-#' Return rows with matching conditions.
-#' 
-#' See \link[dplyr]{filter_}.
-#'
 #' @importFrom dplyr filter_
 #' @name filter_
+#' @rdname reexports
 #' @export
-NULL
+dplyr::filter_

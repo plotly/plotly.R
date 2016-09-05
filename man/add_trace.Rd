@@ -81,13 +81,19 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 
 \item{y}{the y variable.}
 
+\item{z}{a numeric matrix}
+
 \item{text}{textual labels.}
+
+\item{xend}{"final" x position (in this context, x represents "start")}
+
+\item{yend}{"final" y position (in this context, y represents "start")}
 
 \item{ymin}{a variable used to define the lower boundary of a polygon.}
 
 \item{ymax}{a variable used to define the upper boundary of a polygon.}
 
-\item{alpha}{alpha channel applied to color (on 0-1 scale).}
+\item{geo}{anchor this trace on which geo object?}
 }
 \description{
 Add trace(s) to a plotly visualization

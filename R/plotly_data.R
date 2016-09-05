@@ -6,7 +6,15 @@
 #' 
 #' @param p a plotly visualization
 #' @param id a character string or number referencing an "attribute layer".
-#' @return returns a data frame
+#' @name plotly_data
+#' 
+#' @param .data a plotly visualization
+#' @param x a plotly visualization
+#' @param ... stuff passed onto the relevant method
+#' @param add By default, when add = FALSE, group_by will override existing groups. 
+#' To instead add to the existing groups, use add = TRUE
+#' @param .dots Used to work around non-standard evaluation. See vignette("nse") for details
+#' 
 #' @export
 #' @examples
 #' 
@@ -61,16 +69,19 @@ plotly_data <- function(p, id = p$x$cur_data) {
   data.frame()
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(groups.plotly)
 groups.plotly <- function(x) {
   dplyr::groups(plotly_data(x))
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(ungroup.plotly)
 ungroup.plotly <- function(x, ...) {
   dplyr::ungroup(plotly_data(x))
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(group_by_.plotly)
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
@@ -78,6 +89,7 @@ group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(summarise_.plotly)
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -85,6 +97,7 @@ summarise_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(mutate_.plotly)
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -92,6 +105,7 @@ mutate_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(arrange_.plotly)
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -99,6 +113,7 @@ arrange_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(select_.plotly)
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -106,6 +121,7 @@ select_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(filter_.plotly)
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -113,6 +129,7 @@ filter_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(distinct_.plotly)
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -120,6 +137,7 @@ distinct_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(slice_.plotly)
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -127,6 +145,7 @@ slice_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(rename_.plotly)
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
@@ -134,6 +153,7 @@ rename_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+#' @rdname plotly_data
 #' @rawNamespace export(transmute_.plotly)
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
