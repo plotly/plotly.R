@@ -51,6 +51,6 @@ plotly_POST(p, filename = "mtcars-bar-plot")
 Carson Sievert
 }
 \seealso{
-\link{plot_ly}, \link{signup}
+\code{\link{plot_ly}()}, \code{\link{signup}()}
 }
 

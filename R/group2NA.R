@@ -54,10 +54,11 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   for (i in c(nested, groupNames)) {
     data <- dplyr::group_by_(data, i, add = TRUE)
   }
+  # TODO: this is slow, can it be done with dplyr::slice()?
   d <- if (retrace.first) {
-    dplyr::do(data, rbind(., .[1,], NA))
+    dplyr::do(data, rbind.data.frame(., .[1,], NA))
   } else {
-    dplyr::do(data, rbind(., NA))
+    dplyr::do(data, rbind.data.frame(., NA))
   }
   # TODO: how to drop the NAs separating the nested values? Does it even matter?
   # d <- dplyr::ungroup(d)

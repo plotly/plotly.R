@@ -6,7 +6,15 @@
 #' 
 #' @param p a plotly visualization
 #' @param id a character string or number referencing an "attribute layer".
-#' @return returns a data frame
+#' @name plotly_data
+#' 
+#' @param .data a plotly visualization
+#' @param x a plotly visualization
+#' @param ... stuff passed onto the relevant method
+#' @param add By default, when add = FALSE, group_by will override existing groups. 
+#' To instead add to the existing groups, use add = TRUE
+#' @param .dots Used to work around non-standard evaluation. See vignette("nse") for details
+#' 
 #' @export
 #' @examples
 #' 
@@ -61,80 +69,92 @@ plotly_data <- function(p, id = p$x$cur_data) {
   data.frame()
 }
 
-#' @rawNamespace export(groups.plotly)
+#' @rdname plotly_data
+#' @export
 groups.plotly <- function(x) {
   dplyr::groups(plotly_data(x))
 }
 
-#' @rawNamespace export(ungroup.plotly)
-ungroup.plotly <- function(x) {
+#' @rdname plotly_data
+#' @export
+ungroup.plotly <- function(x, ...) {
   dplyr::ungroup(plotly_data(x))
 }
 
-#' @rawNamespace export(group_by_.plotly)
+#' @rdname plotly_data
+#' @export
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
   d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
   add_data(.data, d)
 }
 
-#' @rawNamespace export(summarise_.plotly)
+#' @rdname plotly_data
+#' @export
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::summarise_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(mutate_.plotly)
+#' @rdname plotly_data
+#' @export
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::mutate_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(arrange_.plotly)
+#' @rdname plotly_data
+#' @export
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::arrange_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(select_.plotly)
+#' @rdname plotly_data
+#' @export
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::select_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(filter_.plotly)
+#' @rdname plotly_data
+#' @export
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::filter_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(distinct_.plotly)
+#' @rdname plotly_data
+#' @export
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::distinct_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(slice_.plotly)
+#' @rdname plotly_data
+#' @export
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::slice_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(rename_.plotly)
+#' @rdname plotly_data
+#' @export
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::rename_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
-#' @rawNamespace export(transmute_.plotly)
+#' @rdname plotly_data
+#' @export
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))

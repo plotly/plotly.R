@@ -24,18 +24,20 @@ add_data <- function(p, data = NULL) {
 #' @param p a plotly or ggplot object.
 #' @param ... These arguments are documented in the references section below.
 #' Note that acceptable arguments depend on the trace type.
-#' @param x the x variable.
-#' @param y the y variable.
-#' @param text textual labels.
-#' @param ymin a variable used to define the lower boundary of a polygon.
-#' @param ymax a variable used to define the upper boundary of a polygon.
 #' @param color Either a variable name or a vector to use for color mapping.
-#' @param alpha alpha channel applied to color (on 0-1 scale).
 #' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
 #' @param data A data frame to associate with this trace (optional). If not 
 #' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
+#' @param z a numeric matrix
+#' @param x the x variable.
+#' @param y the y variable.
+#' @param text textual labels.
+#' @param ymin a variable used to define the lower boundary of a polygon.
+#' @param ymax a variable used to define the upper boundary of a polygon.
+#' @param xend "final" x position (in this context, x represents "start")
+#' @param yend "final" y position (in this context, y represents "start")
 #' @seealso \code{\link{plot_ly}()}
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
@@ -413,6 +415,7 @@ add_surface <- function(p, z = NULL, ...) {
 
 #' @inheritParams add_trace
 #' @rdname add_trace
+#' @param geo anchor this trace on which geo object?
 #' @export
 #' @examples 
 #' plot_ly() %>% add_scattergeo()

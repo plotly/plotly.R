@@ -39,7 +39,8 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param event The type of plotly event. Currently 'plotly_hover',
 #' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
 #' @param source Which plot should the listener be tied to? This 
-#' (character string) should match the value of \code{source} in \link{plot_ly}.
+#' (character string) should match the value of \code{source} in 
+#' \code{\link{plot_ly}()}.
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{

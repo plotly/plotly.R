@@ -8,8 +8,7 @@
 #' @param data A data frame (optional).
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
-#' @param type A character string describing the type of trace. If \code{NULL}
-#' (the default), the initial trace type is determined by \code{add_trace}
+#' @param type A character string describing the type of trace.
 #' @param color A formula containing a name or expression. 
 #' Values are scaled and mapped to color codes based on the value of 
 #' \code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},
@@ -23,10 +22,13 @@
 #' Values are scaled and mapped to symbols based on the value of \code{symbols}.
 #' To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
 #' \code{\link{pch}()} values and/or valid plotly symbol(s) as a string
-#' \url{}
-#' @param symbols A character vector of symbol types. For possible values, see \link{schema}.
-#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
-#' @param linetypes A character vector of line types. For possible values, see \link{schema}.
+#' @param symbols A character vector of symbol types. 
+#' Either valid \link{pch} or plotly symbol codes may be supplied.
+#' @param linetype A formula containing a name or expression. 
+#' Values are scaled and mapped to linetypes based on the value of 
+#' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
+#' @param linetypes A character vector of line types. 
+#' Either valid \link{par} (lty) or plotly dash codes may be supplied.
 #' @param size A variable name or numeric vector to encode the size of markers.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
@@ -55,14 +57,13 @@
 #' economics %>% plot_ly(x = ~date, y = ~unemploy/pop) %>% add_lines()
 #' 
 #' # Attributes defined via plot_ly() set 'global' attributes that 
-#' # are carried onto subsequent traces
-#' plot_ly(economics, x = ~date, line = list(color = "black")) %>%
-#'  add_trace(y = ~uempmed, mode = "markers+lines") %>%
-#'  add_lines(y = ~psavert) %>%
-#'  layout(title = "Setting global trace attributes")
+#' # are carried onto subsequent traces, but those may be over-written
+#' plot_ly(economics, x = ~date, color = I("black")) %>%
+#'  add_lines(y = ~uempmed) %>%
+#'  add_lines(y = ~psavert, color = I("red"))
 #' 
 #' # Attributes are documented in the figure reference -> https://plot.ly/r/reference
-#' # You might notice plot_ly() has named arguments that aren't in the figure
+#' # You might notice plot_ly() has named arguments that aren't in this figure
 #' # reference. These arguments make it easier to map abstract data values to
 #' # visual attributes.
 #' p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
@@ -74,7 +75,7 @@
 #' 
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = NULL, group,
+plot_ly <- function(data = data.frame(), ..., type = NULL, 
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
                     width = NULL, height = NULL, source = "A", 
@@ -93,7 +94,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
   if (!is.null(attrs[["group"]])) {
     warning(
       "The group argument has been deprecated. Use `group_by()` instead.\n",
-      "See `help('plotly-data')` for examples"
+      "See `help('plotly_data')` for examples"
     )
     attrs[["group"]] <- NULL
   }
@@ -145,11 +146,17 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, group,
 }
 
 
-# Convert a list to a plotly htmlwidget object
-# 
-# @param x a plotly object.
-# @param ... other options passed onto \code{htmlwidgets::createWidget}
-# 
+#' Convert a list to a plotly htmlwidget object
+#' 
+#' @param x a plotly object.
+#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @export
+#' @examples 
+#' 
+#' trace <- list(x = 1, y = 1)
+#' obj <- list(data = list(trace), layout = list(title = "my plot"))
+#' as_widget(obj)
+#' 
 
 as_widget <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)

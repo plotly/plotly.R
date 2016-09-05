@@ -19,6 +19,6 @@ plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) \%>\%
   hide_colorbar()
 }
 \seealso{
-\link{hide_legend}
+\code{\link{hide_legend}()}
 }
 

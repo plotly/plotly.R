@@ -53,6 +53,6 @@ ggplotly(viz, tooltip = c("text", "size"))
 Carson Sievert
 }
 \seealso{
-\link{signup}, \link{plot_ly}
+\code{\link{signup}()}, \code{\link{plot_ly}()}
 }
 

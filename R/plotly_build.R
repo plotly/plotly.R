@@ -64,6 +64,8 @@ plotly_build.plotly <- function(p) {
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
+    # verify orientation of boxes/bars
+    trace <- verify_orientation(trace)
     
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
