@@ -141,11 +141,17 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 }
 
 
-# Convert a list to a plotly htmlwidget object
-# 
-# @param x a plotly object.
-# @param ... other options passed onto \code{htmlwidgets::createWidget}
-# 
+#' Convert a list to a plotly htmlwidget object
+#' 
+#' @param x a plotly object.
+#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @export
+#' @examples 
+#' 
+#' trace <- list(x = 1, y = 1)
+#' obj <- list(data = list(trace), layout = list(title = "my plot"))
+#' as_widget(obj)
+#' 
 
 as_widget <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)
