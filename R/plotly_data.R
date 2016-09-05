@@ -70,19 +70,19 @@ plotly_data <- function(p, id = p$x$cur_data) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(groups.plotly)
+#' @export
 groups.plotly <- function(x) {
   dplyr::groups(plotly_data(x))
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(ungroup.plotly)
+#' @export
 ungroup.plotly <- function(x, ...) {
   dplyr::ungroup(plotly_data(x))
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(group_by_.plotly)
+#' @export
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
   d <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
@@ -90,7 +90,7 @@ group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(summarise_.plotly)
+#' @export
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::summarise_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -98,7 +98,7 @@ summarise_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(mutate_.plotly)
+#' @export
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::mutate_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -106,7 +106,7 @@ mutate_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(arrange_.plotly)
+#' @export
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::arrange_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -114,7 +114,7 @@ arrange_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(select_.plotly)
+#' @export
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::select_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -122,7 +122,7 @@ select_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(filter_.plotly)
+#' @export
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::filter_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -130,7 +130,7 @@ filter_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(distinct_.plotly)
+#' @export
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::distinct_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -138,7 +138,7 @@ distinct_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(slice_.plotly)
+#' @export
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::slice_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -146,7 +146,7 @@ slice_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(rename_.plotly)
+#' @export
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::rename_(d, .dots = lazyeval::all_dots(.dots, ...))
@@ -154,7 +154,7 @@ rename_.plotly <- function(.data, ..., .dots) {
 }
 
 #' @rdname plotly_data
-#' @rawNamespace export(transmute_.plotly)
+#' @export
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
   d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))
