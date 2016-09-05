@@ -217,8 +217,8 @@ HTMLWidgets.widget({
     };
     
     // make sure color is an array
-    if (!ct.color) {
-      ct.color = [];
+    if (!Array.isArray(ct.color)) {
+      ct.color = [ct.color];
     }
     
     // inform the world about plotly's crosstalk config
