@@ -81,17 +81,21 @@ verify_attr_names <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    check_attrs(names(thisTrace), c(names(validAttrs), "key", "set", "crosstalk"))
+    check_attrs(
+      names(thisTrace), 
+      c(names(validAttrs), "key", "set", "crosstalk"), 
+      thisTrace$type
+    )
   }
   invisible(p)
 }
 
-check_attrs <- function(proposedAttrs, validAttrs) {
+check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
-    warning("The following attributes don't exist:\n'",
+    warning("'", type, "' traces don't have these attributes: '",
          paste(illegalAttrs, collapse = "', '"), "'\n", 
-         "Valid options include:\n'",
+         "Valid attributes include:\n'",
          paste(validAttrs, collapse = "', '"), "'\n", 
          call. = FALSE)
   }
@@ -152,32 +156,29 @@ verify_box <- function(proposed, schema) {
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
 verify_type <- function(trace) {
-  isNULL <- is.null(trace$type)
-  if (isNULL) {
+  if (is.null(trace$type)) {
     attrs <- names(trace)
     attrLengths <- lengths(trace)
-    if (all(c("x", "y", "z") %in% attrs)) {
-      trace$type <- if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
+    trace$type <- if (all(c("x", "y", "z") %in% attrs)) {
+       if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
     } else if (all(c("x", "y") %in% attrs)) {
-      if (!is.discrete(trace$x) && !is.discrete(trace$y)) {
-        trace$type <- if (any(attrLengths) > 15000) "scattergl" else "scatter"
-      } else if (!is.discrete(trace$x)) {
-        trace$type <- "bar"
-        trace$orientation <- "h"
-      } else if (!is.discrete(trace$y)) {
-        trace$type <- "bar"
-      } else {
-        trace$type <- "histogram2d"
-      }
+      xNumeric <- !is.discrete(trace[["x"]])
+      yNumeric <- !is.discrete(trace[["y"]])
+      if (xNumeric && yNumeric) {
+        if (any(attrLengths) > 15000) "scattergl" else "scatter"
+      } else if (xNumeric || yNumeric) {
+        "bar" 
+      } else "histogram2d"
     } else if ("y" %in% attrs || "x" %in% attrs) {
-      trace$type <- "histogram"
+      "histogram"
     } else if ("z" %in% attrs) {
-      trace$type <- "heatmap"
+      "heatmap"
     } else {
       warning("No trace type specified and no positional attributes specified", 
               call. = FALSE)
-      trace$type <- "scatter"
+      "scatter"
     }
+    relay_type(trace$type)
   }
   if (!is.character(trace$type) || length(trace$type) != 1) {
     stop("The trace type must be a character vector of length 1.\n", 
@@ -189,19 +190,38 @@ verify_type <- function(trace) {
          call. = FALSE)
   }
   # if scatter/scatter3d/scattergl, default to a scatterplot
-  if (grepl("scatter", trace$type)) {
-    trace$mode <- trace$mode %||% "markers"
+  if (grepl("scatter", trace$type) && is.null(trace$mode)) {
+    message(
+      "No ", trace$type, " mode specifed:\n",
+      "  Setting the mode to markers\n",
+      "  Read more about this attribute -> https://plot.ly/r/reference/#scatter-mode"
+    )
+    trace$mode <- "markers"
   }
-  if (isNULL) relay_type(trace$type, trace$mode)
   trace
 }
 
-relay_type <- function(type, mode = NULL) {
+relay_type <- function(type) {
   message(
-    "No trace type specified. Applying `add_", mode %||% type, "()`.\n",
-    "Read more about this trace type here -> https://plot.ly/r/reference/#", type
+    "No trace type specified:\n", 
+    "  Based on info supplied, a '", type, "' trace seems appropriate.\n",
+    "  Read more about this trace type -> https://plot.ly/r/reference/#", type
   )
   type
+}
+
+verify_orientation <- function(trace) {
+  xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]])
+  yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]])
+  if (xNumeric && !yNumeric) {
+    if (any(c("bar", "box") %in% trace[["type"]])) {
+      trace$orientation <- "h"
+    }
+  }
+  if (yNumeric && "histogram" %in% trace[["type"]]) {
+    trace$orientation <- "h"
+  }
+  trace
 }
 
 verify_mode <- function(p) {

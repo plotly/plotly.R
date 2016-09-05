@@ -17,7 +17,7 @@
 #' with the source argument in \code{\link{event_data}()} to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
-#' @seealso \link{signup}, \link{plot_ly}
+#' @seealso \code{\link{signup}()}, \code{\link{plot_ly}()}
 #' @return a plotly object
 #' @export
 #' @author Carson Sievert

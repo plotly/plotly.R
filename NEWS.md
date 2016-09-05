@@ -1,3 +1,19 @@
+# 4.3.5 --
+
+## NEW FEATURES
+
+* The internal `as_widget()` function was exported to make it easier to convert a list
+(adhering to the plotly spec) to a plotly htmlwidget object. This should only be needed when "manually" editing the underlying list object.
+* Warnings about missing attributes now supply information about the relevant trace.
+
+## CHANGES
+
+* vignettes were removed and that documentation will now be hosted at <https://cpsievert.github.io/plotly_book/>
+
+## BUG FIXES
+
+* Get event_data() working with subplots. Fixes #663
+
 # 4.3.4 -- 31 August 2016
 
 ## CHANGES

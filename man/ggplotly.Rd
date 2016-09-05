@@ -70,6 +70,6 @@ SharedData$new(iris, ~id) \%>\%
 Carson Sievert
 }
 \seealso{
-\link{signup}, \link{plot_ly}
+\code{\link{signup}()}, \code{\link{plot_ly}()}
 }
 

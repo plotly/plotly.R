@@ -2,7 +2,7 @@
 #'
 #' @param p a plotly object.
 #' @export
-#' @seealso \link{hide_legend}, \link{hide_colorbar}
+#' @seealso \code{\link{hide_legend}()}, \code{\link{hide_colorbar}()}
 #'
 
 hide_guides <- function(p) {
@@ -14,7 +14,7 @@ hide_guides <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \link{hide_legend}
+#' @seealso \code{\link{hide_legend}()}
 #' @examples
 #' 
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
@@ -38,7 +38,7 @@ hide_colorbar <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \link{hide_legend}
+#' @seealso \code{\link{hide_legend}()}
 #' @examples 
 #' 
 #' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
@@ -76,7 +76,9 @@ toWebGL <- function(p) {
 
 #' Create a complete empty plotly graph.
 #' 
-#' Useful when used with \link{subplot}
+#' Useful when used with \code{\link{subplot}()}
+#' 
+#' @param ... arguments passed onto \code{\link{plot_ly}()}
 #' 
 #' @export
 plotly_empty <- function(...) {

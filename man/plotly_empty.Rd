@@ -6,7 +6,10 @@
 \usage{
 plotly_empty(...)
 }
+\arguments{
+\item{...}{arguments passed onto \code{\link{plot_ly}()}}
+}
 \description{
-Useful when used with \link{subplot}
+Useful when used with \code{\link{subplot}()}
 }
 
