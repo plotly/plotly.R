@@ -80,14 +80,13 @@ add_lines(plot_ly(economics, x = ~date, y = ~unemploy/pop))
 economics \%>\% plot_ly(x = ~date, y = ~unemploy/pop) \%>\% add_lines()
 
 # Attributes defined via plot_ly() set 'global' attributes that 
-# are carried onto subsequent traces
-plot_ly(economics, x = ~date, line = list(color = "black")) \%>\%
- add_trace(y = ~uempmed, mode = "markers+lines") \%>\%
- add_lines(y = ~psavert) \%>\%
- layout(title = "Setting global trace attributes")
+# are carried onto subsequent traces, but those may be over-written
+plot_ly(economics, x = ~date, color = I("black")) \%>\%
+ add_lines(y = ~uempmed) \%>\%
+ add_lines(y = ~psavert, color = I("red"))
 
 # Attributes are documented in the figure reference -> https://plot.ly/r/reference
-# You might notice plot_ly() has named arguments that aren't in the figure
+# You might notice plot_ly() has named arguments that aren't in this figure
 # reference. These arguments make it easier to map abstract data values to
 # visual attributes.
 p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
