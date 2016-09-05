@@ -10,6 +10,10 @@
 
 * vignettes were removed and that documentation will now be hosted at <https://cpsievert.github.io/plotly_book/>
 
+## BUG FIXES
+
+* Get event_data() working with subplots. Fixes #663
+
 # 4.3.4 -- 31 August 2016
 
 ## CHANGES
