@@ -12,7 +12,8 @@ event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.}
 
 \item{source}{Which plot should the listener be tied to? This 
-(character string) should match the value of \code{source} in \link{plot_ly}.}
+(character string) should match the value of \code{source} in 
+\code{\link{plot_ly}()}.}
 }
 \description{
 This function must be called within a reactive shiny context.

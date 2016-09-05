@@ -236,6 +236,11 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modify_list, layouts))
+  sources <- unique(unlist(lapply(plots, "[[", "source")))
+  if (length(sources) > 1) {
+    stop("Can have multiple source values in a single subplot")
+  }
+  p$source <- sources[1]
   as_widget(p)
 }
 

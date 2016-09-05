@@ -15,7 +15,7 @@
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... arguments passed onto methods.
-#' @seealso \link{signup}, \link{plot_ly}
+#' @seealso \code{\link{signup}()}, \code{\link{plot_ly}()}
 #' @return a plotly object
 #' @export
 #' @author Carson Sievert
