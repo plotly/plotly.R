@@ -437,8 +437,13 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
     }
     
-    // add "selection traces" *underneath* original traces
-    Plotly.addTraces(this.gd, traces, seq_len(traces.length))
+    // add selection traces *underneath* original traces, but *on top of*
+    // existing selections
+    tracesToAdd = [];
+    for (var k = nNewTraces; k < traces.length + nNewTraces; k++) {
+      tracesToAdd.push(k);
+    }
+    Plotly.addTraces(this.gd, traces, tracesToAdd);
     
     if (!this.dimmed) {
       // reduce opacity of original traces
