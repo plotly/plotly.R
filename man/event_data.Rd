@@ -5,7 +5,8 @@
 \title{Access plotly user input event data in shiny}
 \usage{
 event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
-  "plotly_relayout"), source = "A")
+  "plotly_relayout"), source = "A",
+  session = shiny::getDefaultReactiveDomain())
 }
 \arguments{
 \item{event}{The type of plotly event. Currently 'plotly_hover',
