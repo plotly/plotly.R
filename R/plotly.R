@@ -119,7 +119,6 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   id <- new_id()
   # avoid weird naming clashes
   plotlyVisDat <- data
-  
   p <- list(
     visdat = setNames(list(function() plotlyVisDat), id),
     cur_data = id,

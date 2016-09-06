@@ -12,9 +12,9 @@ reusableUI <- function(id = NULL) {
   )
 }
 
-viz <- function(input, output, scope, src) {
+viz <- function(input, output, session, src) {
   
-  # if you want, you can define multiple sources here
+  # if you want, you can distinguish between events *within* a module
   src2 <- paste0(src, "2")
   
   output$p1 <- renderPlotly({
