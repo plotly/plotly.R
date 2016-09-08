@@ -31,7 +31,7 @@
 #' @author Carson Sievert
 #' @examples
 #' \dontrun{
-#' p <- plot_ly(mtcars, x = vs, type = "bar")
+#' p <- plot_ly(mtcars, x = ~factor(vs))
 #' plotly_POST(p, filename = "mtcars-bar-plot")
 #' }
 

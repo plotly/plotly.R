@@ -274,8 +274,8 @@ add_area <- function(p, x = NULL, ymax = NULL, ...) {
 add_bars <- function(p, x = NULL, y = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
-  if (is.null(x) && is.null(y)) {
-    stop("Must supply `x` and/or `y` attributes", call. = FALSE)
+  if (is.null(x) || is.null(y)) {
+    stop("Must supply `x` and `y` attributes", call. = FALSE)
   }
   # TODO: provide type checking in plotly_build for this trace type
   add_trace_classed(
