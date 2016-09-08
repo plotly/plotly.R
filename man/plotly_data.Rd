@@ -3,6 +3,7 @@
 \name{plotly_data}
 \alias{arrange_.plotly}
 \alias{distinct_.plotly}
+\alias{do_.plotly}
 \alias{filter_.plotly}
 \alias{gather_.plotly}
 \alias{gather_vars.plotly}
@@ -29,6 +30,8 @@ plotly_data(p, id = p$x$cur_data)
 \method{summarise_}{plotly}(.data, ..., .dots)
 
 \method{mutate_}{plotly}(.data, ..., .dots)
+
+\method{do_}{plotly}(.data, ..., .dots)
 
 \method{arrange_}{plotly}(.data, ..., .dots)
 

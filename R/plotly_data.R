@@ -119,8 +119,23 @@ summarise_.plotly <- function(.data, ..., .dots) {
 #' @export
 mutate_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
+  dotz <- lazyeval::all_dots(.dots, ...)
+  # '.' in a pipeline should really reference the data!!
+  lapply(dotz, function(x) { assign(".", d, x$env) })
   set <- attr(d, "set")
-  d <- dplyr::mutate_(d, .dots = lazyeval::all_dots(.dots, ...))
+  d <- dplyr::mutate_(d, .dots = dotz)
+  add_data(.data, structure(d, set = set))
+}
+
+#' @rdname plotly_data
+#' @export
+do_.plotly <- function(.data, ..., .dots) {
+  d <- plotly_data(.data)
+  dotz <- lazyeval::all_dots(.dots, ...)
+  # '.' in a pipeline should really reference the data!!
+  lapply(dotz, function(x) { assign(".", d, x$env) })
+  set <- attr(d, "set")
+  d <- dplyr::do_(d, .dots = dotz)
   add_data(.data, structure(d, set = set))
 }
 
@@ -180,6 +195,9 @@ transmute_.plotly <- function(.data, ..., .dots) {
   add_data(.data, d)
 }
 
+# ---------------------------------------------------------------------------
+# tidyr methods
+# ---------------------------------------------------------------------------
 
 #' @rdname plotly_data
 #' @export
@@ -207,6 +225,11 @@ gather_vars.plotly <- function(data, key_col, value_col, ...) {
 }
 
 n_dots <- function(...) nargs()
+
+
+# ---------------------------------------------------------------------------
+# miscellanous methods
+# ---------------------------------------------------------------------------
 
 # Avoid errors when passing a shared data to ggplot2
 # qplot(data = crosstalk::SharedData$new(mtcars), mpg, wt)

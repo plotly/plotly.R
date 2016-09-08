@@ -2,6 +2,7 @@
 
 S3method(arrange_,plotly)
 S3method(distinct_,plotly)
+S3method(do_,plotly)
 S3method(filter_,plotly)
 S3method(fortify,SharedData)
 S3method(gather_,plotly)
