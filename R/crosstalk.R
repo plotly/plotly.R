@@ -1,6 +1,6 @@
-#' Modify crosstalk selection options
+#' Highlight graphical elements 
 #' 
-#' Control the visual appearance of selections deriving from a given
+#' Controls the visual appearance of selections deriving from a given
 #' selection set.
 #' 
 #' @param p a plotly visualization.
@@ -24,12 +24,13 @@
 #' @examples
 #' 
 #' d <- crosstalk::SharedData$new(txhousing, ~city)
-#' p <- qplot(data = d, x = date, y = median, group = city, geom = "line")
+#' p <- ggplot(d, aes(date, median, group = city)) +
+#'   geom_line(geom = "line")
 #' ggplotly(p, tooltip = "city") %>%
-#'   crosstalk(on = "plotly_hover", defaultValues = "Houston", color = "red")
+#'   highlight(on = "plotly_hover", color = "red")
 #' 
 
-crosstalk <- function(p, on = "plotly_selected", off = "plotly_relayout", 
+highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
                       dynamic = FALSE, persistent = FALSE, defaultValues = NULL,
                       color = NULL, opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {

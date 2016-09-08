@@ -2,6 +2,7 @@ library(plotly)
 library(crosstalk)
 
 d <- SharedData$new(txhousing, ~city)
-p <- qplot(data = d, x = date, y = median, group = city, geom = "line")
+p <- ggplot(d, aes(date, median, group = city)) +
+  geom_line(geom = "line")
 ggplotly(p, tooltip = "city") %>%
-  crosstalk(on = "plotly_hover", color = "red")
+  highlight(on = "plotly_hover", color = "red")

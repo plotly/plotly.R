@@ -24,7 +24,7 @@ p2 <- base %>%
 p <- subplot(p1, p2, titleX = TRUE) %>% layout(margin = list(l = 200)) 
 
 # select individual series on click
-crosstalk(p, on = "plotly_click", off = "plotly_unhover", color = "red")
+highlight(p, on = "plotly_click", off = "plotly_unhover", color = "red")
 
 # compare multiple series
-crosstalk(p, on = "plotly_click", dynamic = TRUE, persistent = TRUE)
+highligh(p, on = "plotly_click", dynamic = TRUE, persistent = TRUE)
