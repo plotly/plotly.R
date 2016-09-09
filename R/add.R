@@ -451,6 +451,17 @@ add_trace_classed <- function(p, class = "plotly_polygon", ...) {
   p
 }
 
+# retrieve the non-plotly.js attributes for a given trace
+special_attrs <- function(trace) {
+  switch(
+    class(trace)[[1]],
+    plotly_area = c("ymax"),
+    plotly_segment = c("xend", "yend"),
+    plotly_ribbon = c("ymin", "ymax")
+  )
+}
+
+
 
 # #' 
 # #' 
