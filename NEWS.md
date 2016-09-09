@@ -1,4 +1,15 @@
-# 4.3.5 --
+# 4.3.6 -- 9 September 2016
+
+## CHANGES
+
+* Upgraded to plotly.js v1.17.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.17.0
+
+## BUG FIXES
+
+* Fix for error handling in `add_bars()`.
+* More careful logic for inferring data variables. Fixes #712
+
+# 4.3.5 -- 5 September 2016
 
 ## NEW FEATURES
 
