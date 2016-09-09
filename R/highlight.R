@@ -79,10 +79,9 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
       valsInSet <- defaultValues[defaultValues %in% p$x$data[[i]][["key"]]]
       if (!length(valsInSet)) next
       p <- htmlwidgets::onRender(p, sprintf("
-          function(el, x) {
-            crosstalk.group('%s').var('selection').set(%s)
-          }
-      ", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
+        function(el, x) {
+          crosstalk.group('%s').var('selection').set(%s)
+        }", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
     }
   }
   if (dynamic) {
@@ -92,14 +91,13 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
       allowedCols = color
     )
     w <- htmlwidgets::onRender(w, "
-        function(el, x) {
-          var $el = $('#' + el.id);
+      function(el, x) {
+        var $el = $('#' + el.id);
+        crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
+        $el.on('change', function() {
           crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
-          $el.on('change', function() {
-            crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
-          })
-        }
-    ")
+        })
+      }")
     p <- htmltools::browsable(htmltools::tagList(w, p))
   }
   p

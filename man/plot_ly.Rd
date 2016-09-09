@@ -104,14 +104,14 @@ sd <- SharedData$new(mtcars)
 subplot(
   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
-) \%>\% hide_legend() \%>\% crosstalk(color = "red")
+) \%>\% hide_legend() \%>\% highlight(color = "red")
 
 # client-side highlighting
 d <- SharedData$new(txhousing, ~city)
 plot_ly(d, x = ~date, y = ~median, color = I("black")) \%>\%
   group_by(city) \%>\%
   add_lines() \%>\% 
-  crosstalk(on = "plotly_hover", color = "red")
+  highlight(on = "plotly_hover", color = "red")
 }
 
 }
