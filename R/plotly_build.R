@@ -416,6 +416,10 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         colorObj[["showscale"]] <- TRUE
         traces[[i]] <- modify_list(colorObj, traces[[i]])
         traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
+        # sigh, contour colorscale doesn't support alpha
+        if (traces[[i]][["type"]] == "contour") {
+          traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
+        }
         next
       }
       colorObj$color <- color[[i]]
