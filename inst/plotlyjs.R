@@ -41,3 +41,7 @@ update_attributes <- function(path = ".") {
 }
 
 update_attributes()
+
+# For some reason this fails as of plotly.js v1.17.0, probably because
+# Plotly is a global anymore. Anyway, see plotly.js for another hack to 
+# get at the schema.
