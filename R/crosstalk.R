@@ -34,7 +34,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
                       dynamic = FALSE, persistent = FALSE, defaultValues = NULL,
                       color = NULL, opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {
-    stop("Don't know how to modify crosstalk options to objects of class:", class(p))
+    stop("Don't know how to modify highlight options to objects of class:", class(p))
   }
   p <- plotly_build(p)
   keys <- unlist(lapply(p$x$data, "[[", "key"))
@@ -106,6 +106,6 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
 }
 
 
-crosstalk_defaults <- function() {
-  formals(crosstalk)[-1]
+highlight_defaults <- function() {
+  formals(highlight)[-1]
 }

@@ -205,8 +205,8 @@ HTMLWidgets.widget({
       return curves;
     }
     
-    // crosstalk selection config passed from R
-    var ct = x.crosstalk || {
+    // highlight options passed from R
+    var ct = x.highlight || {
       on: "plotly_selected",
       off: "plotly_relayout",
       color: [],
@@ -309,9 +309,9 @@ HTMLWidgets.widget({
 
 /**
  * @param graphDiv The Plotly graph div
- * @param crosstalk An object with options for updating selection(s)
+ * @param highlight An object with options for updating selection(s)
  */
-function TraceManager(graphDiv, crosstalk) {
+function TraceManager(graphDiv, highlight) {
   // The Plotly graph div
   this.gd = graphDiv;
 
@@ -324,7 +324,7 @@ function TraceManager(graphDiv, crosstalk) {
   this.groupSelections = {};
   
   // selection parameters (e.g., transient versus persistent selection)
-  this.crosstalk = crosstalk;
+  this.highlight = highlight;
   
   // have original traces been dimmed to highlight a selection?
   this.dimmed = false;
@@ -377,7 +377,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   
   // if selection has been cleared, or if this is transient (not persistent)
   // selection, delete the "selection traces"
-  if (keys === null || !this.crosstalk.persistent && nNewTraces > 0) {
+  if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
     Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
   }
   
@@ -405,7 +405,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       var matches = findMatches(trace.key, keySet);
       if (matches.length > 0) {
         trace = subsetArrayAttrs(trace, matches);
-        trace.showlegend = this.crosstalk.showInLegend;
+        trace.showlegend = this.highlight.showInLegend;
         trace.name = "selected";
         // TODO: allow user to choose selection/original hoverinfo?
         trace.hoverinfo = "none";
@@ -428,9 +428,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             this.gd.id, {'line.color': line.color}, i
           );
         }
-        // this variable is set in R/crosstalk.R
+        // this variable is set in R/highlight.R
         var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
-          this.crosstalk.color[0];
+          this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
         traces.push(trace);
@@ -448,7 +448,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     if (!this.dimmed) {
       // reduce opacity of original traces
       for (var i = traces.length; i < traces.length + this.origData.length; i++) {
-        var opacity = (this.gd._fullData[i].opacity) * this.crosstalk.opacityDim;
+        var opacity = (this.gd._fullData[i].opacity) * this.highlight.opacityDim;
         Plotly.restyle(this.gd, {"opacity": opacity}, i);  
       }
       this.dimmed = true;

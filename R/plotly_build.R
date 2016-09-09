@@ -252,7 +252,7 @@ plotly_build.plotly <- function(p) {
     }
   }
   # if crosstalk() hasn't been called on this plot, populate it with defaults
-  p$x$crosstalk <- p$x$crosstalk %||% crosstalk_defaults()
+  p$x$highlight <- p$x$highlight %||% highlight_defaults()
 
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)

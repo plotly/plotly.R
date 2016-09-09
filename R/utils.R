@@ -83,7 +83,7 @@ verify_attr_names <- function(p) {
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     check_attrs(
       names(thisTrace), 
-      c(names(validAttrs), "key", "set", "crosstalk"), 
+      c(names(validAttrs), "key", "set", "highlight"), 
       thisTrace$type
     )
   }
@@ -307,7 +307,7 @@ verify_hovermode <- function(p) {
   types <- unlist(lapply(p$x$data, function(tr) tr$type %||% "scatter"))
   modes <- unlist(lapply(p$x$data, function(tr) tr$mode %||% "lines"))
   if (any(grepl("markers", modes) & types == "scatter") ||
-      any(c("plotly_hover", "plotly_click") %in% p$x$crosstalk$on)) {
+      any(c("plotly_hover", "plotly_click") %in% p$x$highlight$on)) {
     p$x$layout$hovermode <- "closest"
   }
   p
@@ -317,14 +317,14 @@ verify_dragmode <- function(p) {
   if (!is.null(p$x$layout$dragmode)) {
     return(p)
   }
-  selecty <- is_crosstalk(p) && "plotly_selected" %in% p$x$crosstalk$on
+  selecty <- has_highlight(p) && "plotly_selected" %in% p$x$highlight$on
   p$x$layout$dragmode <- if (selecty) "lasso" else "zoom"
   p
 }
 
-is_crosstalk <- function(p) {
+has_highlight <- function(p) {
   hasKey <- any(vapply(p$x$data, function(x) length(x[["key"]]), integer(1)) > 1)
-  hasKey && !is.null(p[["x"]][["crosstalk"]])
+  hasKey && !is.null(p[["x"]][["highlight"]])
 }
 
 
@@ -352,7 +352,7 @@ verify_showlegend <- function(p) {
     return(p)
   }
   show <- unlist(lapply(p$x$data, function(x) x$showlegend %||% TRUE))
-  p$x$layout$showlegend <- sum(show) > 1 || isTRUE(p$x$crosstalk$showInLegend)
+  p$x$layout$showlegend <- sum(show) > 1 || isTRUE(p$x$highlight$showInLegend)
   p
 }
 
