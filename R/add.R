@@ -274,8 +274,8 @@ add_area <- function(p, x = NULL, ymax = NULL, ...) {
 add_bars <- function(p, x = NULL, y = NULL, ...) {
   x <- x %||% p$x$attrs[[1]][["x"]]
   y <- y %||% p$x$attrs[[1]][["y"]]
-  if (is.null(x) && is.null(y)) {
-    stop("Must supply `x` and/or `y` attributes", call. = FALSE)
+  if (is.null(x) || is.null(y)) {
+    stop("Must supply `x` and `y` attributes", call. = FALSE)
   }
   # TODO: provide type checking in plotly_build for this trace type
   add_trace_classed(
@@ -450,6 +450,17 @@ add_trace_classed <- function(p, class = "plotly_polygon", ...) {
   p$x$attrs[[nAttrs]] <- prefix_class(p$x$attrs[[nAttrs]], class)
   p
 }
+
+# retrieve the non-plotly.js attributes for a given trace
+special_attrs <- function(trace) {
+  switch(
+    class(trace)[[1]],
+    plotly_area = c("ymax"),
+    plotly_segment = c("xend", "yend"),
+    plotly_ribbon = c("ymin", "ymax")
+  )
+}
+
 
 
 # #' 

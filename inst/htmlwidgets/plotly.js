@@ -4,6 +4,12 @@ HTMLWidgets.widget({
   type: "output",
   
   initialize: function(el, width, height) {
+    // when upgrading plotly.js,
+    // uncomment this console.log(), then do `load_all(); plot_ly()` 
+    // open in chrome, right-click on console output: "save-as" -> "schema.json"
+    // Schema <- jsonlite::fromJSON("~/Downloads/schema.json")
+    // devtools::use_data(Schema, overwrite = T)
+    // console.log(JSON.stringify(Plotly.PlotSchema.get()));
     return {};
   },
   
