@@ -15,6 +15,8 @@ event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
 \item{source}{Which plot should the listener be tied to? This 
 (character string) should match the value of \code{source} in 
 \code{\link{plot_ly}()}.}
+
+\item{session}{a shiny session object (the default should almost always be used).}
 }
 \description{
 This function must be called within a reactive shiny context.

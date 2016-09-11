@@ -41,6 +41,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param source Which plot should the listener be tied to? This 
 #' (character string) should match the value of \code{source} in 
 #' \code{\link{plot_ly}()}.
+#' @param session a shiny session object (the default should almost always be used).
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
