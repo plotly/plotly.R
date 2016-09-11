@@ -98,6 +98,8 @@ plotly_build.plotly <- function(p) {
     })
     dataArrayAttrs <- names(Attrs)[as.logical(isArray)]
     tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs)]
+    # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
+    tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
     builtData <- tibble::as_tibble(tr)
     
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
