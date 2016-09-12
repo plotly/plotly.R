@@ -435,12 +435,12 @@ map_color <- function(traces, title = "", na.color = "transparent") {
           hasMarker[[i]] <- TRUE
         } else {
           # scatter3d supports data arrays for color
-          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
           traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
         }
       }
       if (hasMarker[[i]]) {
-        traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
+        traces[[i]][["marker"]] <- modify_list(colorObj, traces[[i]][["marker"]])
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
       if (hasText[[i]]) {
@@ -487,7 +487,15 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
     }
   }
-
+  
+  # marker.line.color (stroke) inherits from marker.color (color)
+  # TODO: allow users to control via a `stroke`` argument
+  # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color 
+  for (i in seq_along(color)) {
+    traces[[i]]$marker$line$color <- 
+      traces[[i]]$marker$line$color %||% "transparent"
+  }
+  
   traces
 }
 
