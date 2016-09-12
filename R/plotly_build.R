@@ -469,9 +469,17 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
-    if ("scatter3d" %in% unlist(lapply(traces, "[[", "type"))) {
+    # yay for consistency plotly.js
+    if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
       colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+    }
+    if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
+      colorBarTrace$type <- type
+      colorBarTrace$lat <- range(unlist(lapply(traces, "[[", "lat")), na.rm = TRUE)
+      colorBarTrace$lon <- range(unlist(lapply(traces, "[[", "lon")), na.rm = TRUE)
+      colorBarTrace[["x"]] <- NULL
+      colorBarTrace[["y"]] <- NULL
     }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
