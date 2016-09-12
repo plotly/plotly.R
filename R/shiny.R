@@ -41,6 +41,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param source Which plot should the listener be tied to? This 
 #' (character string) should match the value of \code{source} in 
 #' \code{\link{plot_ly}()}.
+#' @param session a shiny session object (the default should almost always be used).
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
@@ -48,12 +49,13 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' }
 
 event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
-                                 "plotly_relayout"), source = "A") {
-  session <- shiny::getDefaultReactiveDomain()
+                                 "plotly_relayout"), source = "A",
+                       session = shiny::getDefaultReactiveDomain()) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
-  val <- session$input[[sprintf(".clientValue-%s-%s", event[1], source)]]
+  src <- sprintf(".clientValue-%s-%s", event[1], source)
+  val <- session$rootScope()$input[[src]]
   if (is.null(val)) val else jsonlite::fromJSON(val)
 }

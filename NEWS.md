@@ -1,3 +1,9 @@
+# 4.3.7 -- 11 September 2016
+
+## BUG FIXES
+
+* `event_data()` now works inside shiny modules (#659). For an example, see <https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyShinyModules>
+
 # 4.3.6 -- 9 September 2016
 
 ## CHANGES
