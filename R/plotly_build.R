@@ -281,13 +281,13 @@ train_data <- function(data, trace) {
   if (inherits(trace, "plotly_segment")) {
     # TODO: this could be faster, more efficient
     data$.plotlyGroupIndex <- seq_len(NROW(data))
-    data <- gather_(
-      gather_(data, "tmp", "x", c("x", "xend")),
-      "tmp", "y", c("y", "yend")
-    )
-    data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
-    data <- dplyr::distinct(data)
-    data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
+    idx <- rep(seq_len(NROW(data)), each = 2)
+    dat <- as.data.frame(data[!grepl("^xend$|^yend", names(data))])
+    dat <- dat[idx, ]
+    idx2 <- seq.int(2, NROW(dat), by = 2)
+    dat[idx2, "x"] <- data[["xend"]]
+    dat[idx2, "y"] <- data[["yend"]]
+    data <- dplyr::group_by_(dat, ".plotlyGroupIndex", add = TRUE)
   }
   # TODO: a lot more geoms!!!
   data
