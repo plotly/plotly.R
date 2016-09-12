@@ -249,6 +249,10 @@ plotly_build.plotly <- function(p) {
     }
   }
 
+  # polar charts don't like null width/height keys 
+  if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
+  if (is.null(p$x$layout[["width"]])) p$x$layout[["width"]] <- NULL
+  
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
