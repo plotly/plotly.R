@@ -439,7 +439,7 @@ add_choropleth <- function(p, z = NULL, ...) {
     stop("Must supply `z` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_choropleth", type = "choropleth", ...
+    p, class = "plotly_choropleth", z = z, type = "choropleth", ...
   )
 }
 
