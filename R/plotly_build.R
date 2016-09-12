@@ -413,7 +413,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       ncol = 2
     )
     colorObj <- list(
-      colorbar = list(title = as.character(title), ticklen = 2),
+      colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
+        list(title = as.character(title), ticklen = 2),
       cmin = rng[1],
       cmax = rng[2],
       colorscale = colorScale,
