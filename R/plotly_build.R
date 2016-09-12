@@ -61,6 +61,7 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
     )
+    
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
@@ -97,7 +98,9 @@ plotly_build.plotly <- function(p) {
       tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
     })
     dataArrayAttrs <- names(Attrs)[as.logical(isArray)]
-    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs)]
+    # for some reason, text isn't listed as a data array attributein some traces
+    # I'm looking at you scattergeo...
+    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
     tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
     builtData <- tibble::as_tibble(tr)
@@ -323,8 +326,6 @@ map_size <- function(traces) {
       scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
     }
     if (hasMarker[[i]]) {
-      # plotly.js
-      sizeI <- rep(sizeI, length.out = max(lengths(traces[[i]])))
       traces[[i]]$marker <- modify_list(
         list(size = sizeI, sizemode = "area"),
         traces[[i]]$marker
