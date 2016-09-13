@@ -61,6 +61,7 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
     )
+    
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
@@ -96,8 +97,11 @@ plotly_build.plotly <- function(p) {
     isArray <- lapply(Attrs, function(x) {
       tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
     })
-    dataArrayAttrs <- names(Attrs)[as.logical(isArray)]
-    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs)]
+    # I don't think we ever want mesh3d's data attrs
+    dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
+    # for some reason, text isn't listed as a data array attributein some traces
+    # I'm looking at you scattergeo...
+    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
     tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
     builtData <- tibble::as_tibble(tr)
@@ -246,6 +250,10 @@ plotly_build.plotly <- function(p) {
     }
   }
 
+  # polar charts don't like null width/height keys 
+  if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
+  if (is.null(p$x$layout[["width"]])) p$x$layout[["width"]] <- NULL
+  
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
@@ -281,13 +289,13 @@ train_data <- function(data, trace) {
   if (inherits(trace, "plotly_segment")) {
     # TODO: this could be faster, more efficient
     data$.plotlyGroupIndex <- seq_len(NROW(data))
-    data <- gather_(
-      gather_(data, "tmp", "x", c("x", "xend")),
-      "tmp", "y", c("y", "yend")
-    )
-    data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
-    data <- dplyr::distinct(data)
-    data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
+    idx <- rep(seq_len(NROW(data)), each = 2)
+    dat <- as.data.frame(data[!grepl("^xend$|^yend", names(data))])
+    dat <- dat[idx, ]
+    idx2 <- seq.int(2, NROW(dat), by = 2)
+    dat[idx2, "x"] <- data[["xend"]]
+    dat[idx2, "y"] <- data[["yend"]]
+    data <- dplyr::group_by_(dat, ".plotlyGroupIndex", add = TRUE)
   }
   # TODO: a lot more geoms!!!
   data
@@ -323,8 +331,6 @@ map_size <- function(traces) {
       scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
     }
     if (hasMarker[[i]]) {
-      # plotly.js
-      sizeI <- rep(sizeI, length.out = max(lengths(traces[[i]])))
       traces[[i]]$marker <- modify_list(
         list(size = sizeI, sizemode = "area"),
         traces[[i]]$marker
@@ -381,8 +387,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
 
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
-    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L581
-    col <- color[[i]] %||% colorDefaults[[i %% length(colorDefaults)]]
+    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
+    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    col <- color[[i]] %||% colorDefaults[[idx]]
     alpha <- traces[[i]]$alpha %||% 1
     rgb <- toRGB(col, alpha)
     obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
@@ -407,7 +414,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       ncol = 2
     )
     colorObj <- list(
-      colorbar = list(title = as.character(title), ticklen = 2),
+      colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
+        list(title = as.character(title), ticklen = 2),
       cmin = rng[1],
       cmax = rng[2],
       colorscale = colorScale,
@@ -434,12 +442,12 @@ map_color <- function(traces, title = "", na.color = "transparent") {
           hasMarker[[i]] <- TRUE
         } else {
           # scatter3d supports data arrays for color
-          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
           traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
         }
       }
       if (hasMarker[[i]]) {
-        traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
+        traces[[i]][["marker"]] <- modify_list(colorObj, traces[[i]][["marker"]])
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
       if (hasText[[i]]) {
@@ -462,9 +470,17 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
-    if ("scatter3d" %in% unlist(lapply(traces, "[[", "type"))) {
+    # yay for consistency plotly.js
+    if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
       colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+    }
+    if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
+      colorBarTrace$type <- type
+      colorBarTrace$lat <- range(unlist(lapply(traces, "[[", "lat")), na.rm = TRUE)
+      colorBarTrace$lon <- range(unlist(lapply(traces, "[[", "lon")), na.rm = TRUE)
+      colorBarTrace[["x"]] <- NULL
+      colorBarTrace[["y"]] <- NULL
     }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
@@ -486,7 +502,22 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
     }
   }
-
+  
+  # marker.line.color (stroke) inherits from marker.color (color)
+  # TODO: allow users to control via a `stroke`` argument
+  # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color 
+  for (i in seq_along(color)) {
+    if (!is.null(traces[[i]]$marker$color)) {
+      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent"
+      for (j in c("error_x", "error_y")) {
+        if (!is.null(traces[[i]][[j]])) {
+          traces[[i]][[j]][["color"]] <- traces[[i]][[j]][["color"]] %||%
+            traces[[i]]$marker[["color"]]
+        }
+      }
+    }
+  }
+  
   traces
 }
 
