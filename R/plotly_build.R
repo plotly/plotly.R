@@ -508,7 +508,13 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color 
   for (i in seq_along(color)) {
     if (!is.null(traces[[i]]$marker$color)) {
-      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent" 
+      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent"
+      for (j in c("error_x", "error_y")) {
+        if (!is.null(traces[[i]][[j]])) {
+          traces[[i]][[j]][["color"]] <- traces[[i]][[j]][["color"]] %||%
+            traces[[i]]$marker[["color"]]
+        }
+      }
     }
   }
   
