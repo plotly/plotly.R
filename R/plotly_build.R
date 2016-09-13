@@ -97,7 +97,8 @@ plotly_build.plotly <- function(p) {
     isArray <- lapply(Attrs, function(x) {
       tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
     })
-    dataArrayAttrs <- names(Attrs)[as.logical(isArray)]
+    # I don't think we ever want mesh3d's data attrs
+    dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
     # for some reason, text isn't listed as a data array attributein some traces
     # I'm looking at you scattergeo...
     tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
