@@ -41,6 +41,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param source a character string of length 1. Match the value of this string 
 #' with the source argument in \code{\link{plot_ly}()} to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
+#' @param session a shiny session object (the default should almost always be used).
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
@@ -48,12 +49,13 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' }
 
 event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
-                                 "plotly_relayout"), source = "A") {
-  session <- shiny::getDefaultReactiveDomain()
+                                 "plotly_relayout"), source = "A",
+                       session = shiny::getDefaultReactiveDomain()) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
-  val <- session$input[[sprintf(".clientValue-%s-%s", event[1], source)]]
+  src <- sprintf(".clientValue-%s-%s", event[1], source)
+  val <- session$rootScope()$input[[src]]
   if (is.null(val)) val else jsonlite::fromJSON(val)
 }

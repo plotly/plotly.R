@@ -67,13 +67,13 @@ plotly_build.plotly <- function(p) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
     }
-
+    
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
     # verify orientation of boxes/bars
     trace <- verify_orientation(trace)
-    
+
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
@@ -88,28 +88,34 @@ plotly_build.plotly <- function(p) {
       }
     }
 
-    # attribute type checking for special trace types
-    if (inherits(trace, c("plotly_heatmap", "plotly_surface", "plotly_contour"))) {
+    if (inherits(trace, c("plotly_surface", "plotly_contour"))) {
+      # TODO: generate matrix for users?
+      # (1) if z is vector, and x/y are null throw error
+      # (2) if x/y/z are vectors and length(x) * length(y) == length(z), convert z to matrix
       if (!is.matrix(trace[["z"]]) || !is.numeric(trace[["z"]])) {
         stop("`z` must be a numeric matrix", call. = FALSE)
       }
     }
 
-    # TODO: if we ever provide some semantics for summary statistics,
-    # it should go here
-
-    # gather the "built" or "evaluated" data
-    nobs <- NROW(dat)
-    attrLengths <- lengths(trace)
-    if (nobs == 0) nobs <- max(attrLengths)
-    # NOTE: it's hard to distinguish variables/constants when there is 1 row.
-    # Fortunately, variable mappings don't make much sense with one observation,
-    # and that is the whole point of "recovering" the built data here, so we just ignore
-    # cases with one row
-    isVar <- (attrLengths > 1 & attrLengths == nobs) &
-      !vapply(trace, is.matrix, logical(1)) &
-      !vapply(trace, is.bare.list, logical(1))
-    builtData <- data.frame(trace[isVar], stringsAsFactors = FALSE)
+    # collect non-positional scales, plotly.js data_arrays, and "special"
+    # array attributes for "data training"
+    Attrs <- Schema$traces[[trace[["type"]]]]$attributes
+    isArray <- lapply(Attrs, function(x) {
+      tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
+    })
+    # I don't think we ever want mesh3d's data attrs
+    dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
+    # for some reason, text isn't listed as a data array attributein some traces
+    # I'm looking at you scattergeo...
+    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
+    # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
+    tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
+    builtData <- tibble::as_tibble(tr)
+    
+    # avoid clobbering I() (i.e., variables that shouldn't be scaled)
+    for (i in seq_along(tr)) {
+      if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
+    }
 
     if (NROW(builtData) > 0) {
       # Build the index used to split one "trace" into multiple traces
@@ -156,8 +162,6 @@ plotly_build.plotly <- function(p) {
         )
       }
       builtData <- train_data(builtData, trace)
-      # TODO: provide a better way to clean up "high-level" attrs
-      trace[c("ymin", "ymax", "yend", "xend")] <- NULL
       trace$.plotlyVariableMapping <- names(builtData)
       # arrange the built data
       arrangeVars <- c(
@@ -172,6 +176,9 @@ plotly_build.plotly <- function(p) {
         trace[[i]] <- builtData[[i]]
       }
     }
+
+    # TODO: provide a better way to clean up "high-level" attrs
+    trace[c("ymin", "ymax", "yend", "xend")] <- NULL
 
     trace[lengths(trace) > 0]
 
@@ -251,9 +258,13 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
+  
   # if crosstalk() hasn't been called on this plot, populate it with defaults
   p$x$highlight <- p$x$highlight %||% highlight_defaults()
-
+  # polar charts don't like null width/height keys 
+  if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
+  if (is.null(p$x$layout[["width"]])) p$x$layout[["width"]] <- NULL
+  
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
@@ -293,13 +304,13 @@ train_data <- function(data, trace) {
   if (inherits(trace, "plotly_segment")) {
     # TODO: this could be faster, more efficient
     data$.plotlyGroupIndex <- seq_len(NROW(data))
-    data <- gather_(
-      gather_(data, "tmp", "x", c("x", "xend")),
-      "tmp", "y", c("y", "yend")
-    )
-    data <- dplyr::arrange_(data[!names(data) %in% "tmp"], ".plotlyGroupIndex")
-    data <- dplyr::distinct(data)
-    data <- dplyr::group_by_(data, ".plotlyGroupIndex", add = TRUE)
+    idx <- rep(seq_len(NROW(data)), each = 2)
+    dat <- as.data.frame(data[!grepl("^xend$|^yend", names(data))])
+    dat <- dat[idx, ]
+    idx2 <- seq.int(2, NROW(dat), by = 2)
+    dat[idx2, "x"] <- data[["xend"]]
+    dat[idx2, "y"] <- data[["yend"]]
+    data <- dplyr::group_by_(dat, ".plotlyGroupIndex", add = TRUE)
   }
   # TODO: a lot more geoms!!!
   data
@@ -335,8 +346,6 @@ map_size <- function(traces) {
       scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
     }
     if (hasMarker[[i]]) {
-      # plotly.js
-      sizeI <- rep(sizeI, length.out = max(lengths(traces[[i]])))
       traces[[i]]$marker <- modify_list(
         list(size = sizeI, sizemode = "area"),
         traces[[i]]$marker
@@ -393,8 +402,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
 
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
-    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L581
-    col <- color[[i]] %||% colorDefaults[[i %% length(colorDefaults)]]
+    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
+    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    col <- color[[i]] %||% colorDefaults[[idx]]
     alpha <- traces[[i]]$alpha %||% 1
     rgb <- toRGB(col, alpha)
     obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
@@ -414,13 +424,13 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     } else {
       c(0, 1)
     }
-
     colorScale <- matrix(
       c(scales::rescale(vals), toRGB(colScale(vals), traces[[1]]$alpha %||% 1)),
       ncol = 2
     )
     colorObj <- list(
-      colorbar = list(title = as.character(title), ticklen = 2),
+      colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
+        list(title = as.character(title), ticklen = 2),
       cmin = rng[1],
       cmax = rng[2],
       colorscale = colorScale,
@@ -432,6 +442,10 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         colorObj[["showscale"]] <- TRUE
         traces[[i]] <- modify_list(colorObj, traces[[i]])
         traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
+        # sigh, contour colorscale doesn't support alpha
+        if (traces[[i]][["type"]] == "contour") {
+          traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
+        }
         next
       }
       colorObj$color <- color[[i]]
@@ -443,12 +457,12 @@ map_color <- function(traces, title = "", na.color = "transparent") {
           hasMarker[[i]] <- TRUE
         } else {
           # scatter3d supports data arrays for color
-          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
           traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
         }
       }
       if (hasMarker[[i]]) {
-        traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
+        traces[[i]][["marker"]] <- modify_list(colorObj, traces[[i]][["marker"]])
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
       if (hasText[[i]]) {
@@ -471,9 +485,17 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
-    if ("scatter3d" %in% unlist(lapply(traces, "[[", "type"))) {
+    # yay for consistency plotly.js
+    if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
       colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+    }
+    if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
+      colorBarTrace$type <- type
+      colorBarTrace$lat <- range(unlist(lapply(traces, "[[", "lat")), na.rm = TRUE)
+      colorBarTrace$lon <- range(unlist(lapply(traces, "[[", "lon")), na.rm = TRUE)
+      colorBarTrace[["x"]] <- NULL
+      colorBarTrace[["y"]] <- NULL
     }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
@@ -495,7 +517,22 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
     }
   }
-
+  
+  # marker.line.color (stroke) inherits from marker.color (color)
+  # TODO: allow users to control via a `stroke`` argument
+  # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color 
+  for (i in seq_along(color)) {
+    if (!is.null(traces[[i]]$marker$color)) {
+      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent"
+      for (j in c("error_x", "error_y")) {
+        if (!is.null(traces[[i]][[j]])) {
+          traces[[i]][[j]][["color"]] <- traces[[i]][[j]][["color"]] %||%
+            traces[[i]]$marker[["color"]]
+        }
+      }
+    }
+  }
+  
   traces
 }
 
@@ -511,7 +548,7 @@ map_symbol <- function(traces) {
   # get a sensible default palette (also throws warnings)
   pal <- setNames(scales::shape_pal()(length(lvls)), lvls)
   pal <- supplyUserPalette(pal, traces[[1]][["symbols"]])
-  
+
   validSymbols <- as.character(Schema$traces$scatter$attributes$marker$symbol$values)
   
   for (i in which(nSymbols > 0)) {
@@ -550,12 +587,12 @@ map_linetype <- function(traces) {
   # get a sensible default palette
   pal <- setNames(scales::linetype_pal()(length(lvls)), lvls)
   pal <- supplyUserPalette(pal, traces[[1]][["linetypes"]])
-  
+
   validLinetypes <- as.character(Schema$traces$scatter$attributes$line$dash$values)
   if (length(pal) > length(validLinetypes)) {
     warning("plotly.js only supports 6 different linetypes", call. = FALSE)
   }
-  
+
   for (i in which(nLinetypes > 0)) {
     l <- linetypeList[[i]]
     dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(pal[as.character(l)]))

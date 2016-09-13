@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.3.5
+Version: 4.4.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = c("aut", "cph"),
@@ -48,7 +48,7 @@ Suggests:
     testthat,
     knitr,
     devtools,
-    shiny,
+    shiny (>= 0.14),
     htmltools,
     curl,
     rmarkdown,

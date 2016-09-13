@@ -5,7 +5,8 @@
 \title{Access plotly user input event data in shiny}
 \usage{
 event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
-  "plotly_relayout"), source = "A")
+  "plotly_relayout"), source = "A",
+  session = shiny::getDefaultReactiveDomain())
 }
 \arguments{
 \item{event}{The type of plotly event. Currently 'plotly_hover',
@@ -14,6 +15,8 @@ event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
 \item{source}{a character string of length 1. Match the value of this string 
 with the source argument in \code{\link{plot_ly}()} to retrieve the 
 event data corresponding to a specific plot (shiny apps can have multiple plots).}
+
+\item{session}{a shiny session object (the default should almost always be used).}
 }
 \description{
 This function must be called within a reactive shiny context.

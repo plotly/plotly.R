@@ -439,7 +439,7 @@ add_choropleth <- function(p, z = NULL, ...) {
     stop("Must supply `z` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_choropleth", type = "choropleth", ...
+    p, class = "plotly_choropleth", z = z, type = "choropleth", ...
   )
 }
 
@@ -450,6 +450,17 @@ add_trace_classed <- function(p, class = "plotly_polygon", ...) {
   p$x$attrs[[nAttrs]] <- prefix_class(p$x$attrs[[nAttrs]], class)
   p
 }
+
+# retrieve the non-plotly.js attributes for a given trace
+special_attrs <- function(trace) {
+  switch(
+    class(trace)[[1]],
+    plotly_area = c("ymax"),
+    plotly_segment = c("xend", "yend"),
+    plotly_ribbon = c("ymin", "ymax")
+  )
+}
+
 
 
 # #' 

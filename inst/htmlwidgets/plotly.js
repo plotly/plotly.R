@@ -18,6 +18,7 @@ HTMLWidgets.widget({
       // registrations.
       onNextRender: []
     };
+    
   },
 
   resize: function(el, width, height, instance) {
