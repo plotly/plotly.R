@@ -506,8 +506,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   # TODO: allow users to control via a `stroke`` argument
   # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color 
   for (i in seq_along(color)) {
-    traces[[i]]$marker$line$color <- 
-      traces[[i]]$marker$line$color %||% "transparent"
+    if (!is.null(traces[[i]]$marker$color)) {
+      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent" 
+    }
   }
   
   traces
