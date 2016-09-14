@@ -1,4 +1,10 @@
-# 4.4.1 -- 13 September 2016
+# 4.4.2 -- 14 September 2016
+
+## BUG FIXES
+
+* Arrange data by trace index _before_ computing groups, fixes #716.
+
+# 4.4.1 -- 14 September 2016
 
 ## BUG FIXES
 
