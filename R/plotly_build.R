@@ -103,7 +103,7 @@ plotly_build.plotly <- function(p) {
     # I'm looking at you scattergeo...
     tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
-    tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
+    tr <- tr[vapply(tr, function(x) is.null(dim(x)) && is.atomic(x), logical(1))]
     builtData <- tibble::as_tibble(tr)
     
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
