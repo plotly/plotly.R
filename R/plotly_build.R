@@ -123,16 +123,14 @@ plotly_build.plotly <- function(p) {
         builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
       }
       # Build the index used to determine grouping (later on, NAs are inserted
-      # via group2NA() to create the groups). This is done in 4 parts:
+      # via group2NA() to create the groups). This is done in 3 parts:
       # 1. Sort data by the trace index since groups are nested within traces.
       # 2. Translate missing values on positional scales to a grouping variable.
       #    If grouping isn't relevant for this trace, a warning is thrown since
       #    NAs are removed.
       # 3. The grouping from (2) and any groups detected via dplyr::groups()
       #    are combined into a single grouping variable, .plotlyGroupIndex
-      builtData <- arrange_safe(
-        builtData, c(".plotlyTraceIndex", if (inherits(trace, "plotly_line")) "x")
-      )
+      builtData <- arrange_safe(builtData, ".plotlyTraceIndex")
       isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
       # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
       hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
@@ -158,11 +156,11 @@ plotly_build.plotly <- function(p) {
           interaction(dat[isComplete, grps, drop = FALSE]),
           builtData$.plotlyGroupIndex %||% ""
         )
-        builtData <- arrange_safe(
-          builtData, c(".plotlyTraceIndex", ".plotlyGroupIndex", if (inherits(trace, "plotly_line")) "x")
-        )
       }
       
+      builtData <- arrange_safe(builtData, 
+        c(".plotlyTraceIndex", ".plotlyGroupIndex", if (inherits(trace, "plotly_line")) "x")
+      )
       builtData <- train_data(builtData, trace)
       trace$.plotlyVariableMapping <- names(builtData)
       
