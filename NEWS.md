@@ -1,3 +1,9 @@
+# 4.4.1 -- 13 September 2016
+
+## BUG FIXES
+
+* Restrict to atomic vectors when gathering data for training; otherwise, formulas referencing variables that don't exist in the data, but reference a function can cause problems.
+
 # 4.4.0 -- 13 September 2016
 
 ## CHANGES 
