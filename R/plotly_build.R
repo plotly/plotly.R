@@ -123,12 +123,16 @@ plotly_build.plotly <- function(p) {
         builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
       }
       # Build the index used to determine grouping (later on, NAs are inserted
-      # via group2NA() to create the groups). This is done in 2 parts:
-      # 1. Translate missing values on positional scales to a grouping variable.
+      # via group2NA() to create the groups). This is done in 4 parts:
+      # 1. Sort data by the trace index since groups are nested within traces.
+      # 2. Translate missing values on positional scales to a grouping variable.
       #    If grouping isn't relevant for this trace, a warning is thrown since
       #    NAs are removed.
-      # 2. The grouping from (1) and any groups detected via dplyr::groups()
+      # 3. The grouping from (2) and any groups detected via dplyr::groups()
       #    are combined into a single grouping variable, .plotlyGroupIndex
+      builtData <- arrange_safe(
+        builtData, c(".plotlyTraceIndex", if (inherits(trace, "plotly_line")) "x")
+      )
       isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
       # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
       hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
@@ -154,17 +158,14 @@ plotly_build.plotly <- function(p) {
           interaction(dat[isComplete, grps, drop = FALSE]),
           builtData$.plotlyGroupIndex %||% ""
         )
+        builtData <- arrange_safe(
+          builtData, c(".plotlyTraceIndex", ".plotlyGroupIndex", if (inherits(trace, "plotly_line")) "x")
+        )
       }
+      
       builtData <- train_data(builtData, trace)
       trace$.plotlyVariableMapping <- names(builtData)
-      # arrange the built data
-      arrangeVars <- c(
-        ".plotlyTraceIndex", "group", if (inherits(trace, "plotly_line")) "x"
-      )
-      arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
-      if (length(arrangeVars)) {
-        builtData <- dplyr::arrange_(builtData, arrangeVars)
-      }
+      
       # copy over to the trace data
       for (i in names(builtData)) {
         trace[[i]] <- builtData[[i]]
