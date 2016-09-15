@@ -35,7 +35,8 @@ Imports:
     dplyr,
     tibble,
     hexbin,
-    lazyeval (>= 0.2.0)
+    lazyeval (>= 0.2.0),
+    purrr
 Suggests:
     MASS,
     maps,

@@ -30,6 +30,7 @@ layout.plotly <- function(p, ..., data = NULL) {
   p
 }
 
+
 #' Set the default configuration for plotly
 #' 
 #' @param p a plotly object

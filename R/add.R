@@ -479,24 +479,92 @@ special_attrs <- function(trace) {
 # }
 
 
-## ------------------------------------------------------------------------
-## Non-trace addition
-## ------------------------------------------------------------------------
-#
-##' @export
-#add_transform <- function(p, ...) {
-#  stop("not yet implemented")
-#}
-#
-#
-##' @export
-#add_shape <- function(p, ...) {
-#  stop("not yet implemented")
-#}
-#
-##' @export
-#add_annotation <- function(p, ...) {
-#  stop("not yet implemented")
-#}
 
 
+
+#' Apply function to plot, without modifying data
+#' 
+#' Useful when you need two or more layers that apply a summary statistic
+#' to the original data.
+#' 
+#' @param p a plotly object.
+#' @param fun a function. Should take a plotly object as input and return a 
+#' modified plotly object.
+#' @export
+#' @examples
+#' 
+#' txhousing %>% 
+#'   group_by(city) %>%
+#'   plot_ly(x = ~date, y = ~median) %>%
+#'   add_lines(alpha = 0.2, name = "Texan Cities") %>%
+#'   add_fun(function(plot) {
+#'     plot %>% filter(city == "Houston") %>% add_lines(name = "Houston")
+#'   }) %>%
+#'   add_fun(function(plot) {
+#'     plot %>% filter(city == "San Antonio") %>% add_lines(name = "San Antonio")
+#'   })
+#'
+#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
+#'   add_markers() %>%
+#'   add_fun(function(p) {
+#'     p %>% slice(which.max(mpg)) %>% 
+#'       add_annotations("Good mileage")
+#'   }) %>%
+#'   add_fun(function(p) {
+#'     p %>% slice(which.min(mpg)) %>% 
+#'       add_annotations(text = "Bad mileage")
+#'   })
+#'
+add_fun <- function(p, fun) {
+  oldDat <- p$x$cur_data
+  p <- fun(p)
+  p$x$cur_data <- oldDat
+  p$x$attrs[length(p$x$attrs)] <- setNames(
+    list(p$x$attrs[[length(p$x$attrs)]]), oldDat
+  )
+  p
+}
+
+
+#' Add an annotation(s) to a plot
+#' 
+#' @param p a plotly object
+#' @param text annotation text (required).
+#' @param ... these arguments are documented at \url{https://plot.ly/r/reference/#layout-annotations}
+#' @param data a data frame.
+#' @author Carson Sievert
+#' @export
+#' @examples
+#' 
+#' # single annotation
+#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
+#'   slice(which.max(mpg)) %>%
+#'   annotation(text = "Good mileage")
+#'   
+#' # multiple annotations
+#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
+#'   filter(gear == 5) %>%
+#'   annotation("five cylinder", ax = 40) 
+#'   
+
+add_annotations <- function(p, text = NULL, ..., data = NULL) {
+  if (is.null(text)) {
+    stop("Must provide text!", call. = FALSE)
+  }
+  p <- add_data(p, data)
+  attrs <- list(text = text, ...)
+  # x/y/text inherit from plot_ly()
+  for (i in c("x", "y", "text")) {
+    attrs[[i]] <- attrs[[i]] %||% p$x$attrs[[1]][[i]]
+  }
+  if (is.null(attrs[["text"]])) {
+    stop("Must supply text to annotation", call. = FALSE)
+  }
+  attrs <- list(annotations = attrs)
+  # similar to layout()
+  p$x$layoutAttrs <- c(
+    p$x$layoutAttrs %||% list(), 
+    setNames(list(attrs), p$x$cur_data)
+  )
+  p
+}

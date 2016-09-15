@@ -4,7 +4,7 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL, tooltip = "all",
+gg2list(p, width = NULL, height = NULL, tooltip = "all", layerData = 1,
   originalData = TRUE, source = "A", ...)
 }
 \arguments{
@@ -17,6 +17,8 @@ gg2list(p, width = NULL, height = NULL, tooltip = "all",
 \item{tooltip}{a character vector specifying which aesthetic tooltips to show in the
 tooltip. The default, "all", means show all the aesthetic tooltips
 (including the unofficial "text" aesthetic).}
+
+\item{layerData}{data from which layer should be returned?}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
 

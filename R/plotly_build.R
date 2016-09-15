@@ -32,19 +32,40 @@ plotly_build.gg <- function(p) {
 #' @export
 plotly_build.plotly <- function(p) {
 
+  # make this plot retrievable
+  set_last_plot(p)
+  
   layouts <- Map(function(x, y) {
 
     d <- plotly_data(p, y)
     x <- rapply(x, eval_attr, data = d, how = "list")
+    
+    # if an annotation attribute is an array, expand into multiple annotations 
+    nAnnotations <- max(lengths(x$annotations) %||% 0)
+    x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
+      as.list(rep(x, length.out = nAnnotations))
+    }))
+    
     x[lengths(x) > 0]
 
   }, p$x$layoutAttrs, names2(p$x$layoutAttrs))
 
-  # get rid of the data -> layout mapping and merge all the layouts
-  # into a single layout (more recent layouts will override older ones)
+  # get rid of the data -> layout mapping 
   p$x$layoutAttrs <- NULL
+  
+  # accumulate, rather than override, annotations.
+  annotations <- Reduce(c, c(
+    if (is.null(names(p$x$layout$annotations))) p$x$layout$annotations else list(p$x$layout$annotations),
+    compact(lapply(layouts, "[", "annotations"))
+  ))
+  # annotations shouldn't have names
+  annotations <- setNames(annotations[[1]], NULL)
+  
+  # merge layouts into a single layout (more recent layouts will override older ones)
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
-
+  p$x$layout$annotations <- annotations
+  
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]])) {
@@ -269,8 +290,6 @@ plotly_build.plotly <- function(p) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
-  # make this plot retrievable
-  set_last_plot(p)
   p
 }
 
