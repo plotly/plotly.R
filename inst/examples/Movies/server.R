@@ -1,6 +1,6 @@
 library(shiny)
 library(plotly)
-library(ggplot2movies) # movies is no longer contained within ggplot2 https://cran.r-project.org/web/packages/ggplot2movies/index.html
+library(ggplot2movies) # movies is no longer contained within ggplot2
 
 minx <- min(movies$rating)
 maxx <- max(movies$rating)
