@@ -12,6 +12,7 @@
 #' also control the order they appear. For example, use
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
+#' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... arguments passed onto methods.
@@ -33,19 +34,21 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", originalData = TRUE, source = "A", ...) {
+                     tooltip = "all", layerData = 1, originalData = TRUE, 
+                     source = "A", ...) {
   UseMethod("ggplotly", p)
 }
 
 #' @export
 ggplotly.plotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                            tooltip = "all", originalData = TRUE, source = "A", ...) {
+                            tooltip = "all", layerData = 1,
+                            originalData = TRUE, source = "A", ...) {
   p
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
-                              height = NULL, tooltip = "all", 
+                              height = NULL, tooltip = "all", layerData = 1,
                               originalData = TRUE, source = "A", ...) {
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
@@ -63,7 +66,12 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
             axis.text.y = element_blank()
           )
       }
-      columnList <- c(columnList, list(ggplotly(thisPlot, tooltip = tooltip)))
+      columnList <- c(
+        columnList, list(ggplotly(
+          thisPlot, tooltip = tooltip, layerData = layerData,
+          originalData = originalData, source = source
+        ))
+      )
     }
     # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
@@ -79,10 +87,11 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
-                            height = NULL, tooltip = "all", originalData = TRUE,
-                            source = "A", ...) {
+                            height = NULL, tooltip = "all", layerData = 1,
+                            originalData = TRUE, source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
-               originalData = originalData, source = source, ...)
+               layerData = layerData, originalData = originalData, 
+               source = source, ...)
   structure(as_widget(l), ggplotly = TRUE)
 }
 
@@ -93,13 +102,14 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
+#' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source Only relevant for \link{event_data}.
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
 gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
-                    originalData = TRUE, source = "A", ...) {
+                    layerData = 1, originalData = TRUE, source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -677,8 +687,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     nms <- names(p$mapping)
     setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
   }
-  # TODO: if exposing "scaled" data, how do we ensure it is "global"?
-  dat <- if (originalData) p$data else data[[1]]
+  dat <- if (originalData) p$data else data[[layerData]]
   if (!is.null(mappingFormulas[["group"]])) {
     dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
   }
