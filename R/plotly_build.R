@@ -55,11 +55,9 @@ plotly_build.plotly <- function(p) {
   
   # accumulate, rather than override, annotations.
   annotations <- Reduce(c, c(
-    if (is.null(names(p$x$layout$annotations))) p$x$layout$annotations else list(p$x$layout$annotations),
-    compact(lapply(layouts, "[", "annotations"))
+    list(p$x$layout$annotations),
+    setNames(compact(lapply(layouts, "[[", "annotations")), NULL)
   ))
-  # annotations shouldn't have names
-  annotations <- setNames(annotations[[1]], NULL)
   
   # merge layouts into a single layout (more recent layouts will override older ones)
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))

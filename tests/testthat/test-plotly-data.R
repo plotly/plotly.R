@@ -19,3 +19,28 @@ test_that("plotly_data preserves groups in data", {
   expect_true(dplyr::groups(d)[[1]] == "vs")
 })
 
+test_that("add_fun can apply two different chunks of data to a plot", {
+  p <- plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
+    add_markers() %>%
+    add_fun(function(p) {
+      p %>% slice(which.max(mpg)) %>% add_annotations("Good mileage")
+    }) %>%
+    add_fun(function(p) {
+      p %>% slice(which.min(mpg)) %>% add_annotations(text = "Bad mileage")
+    })
+  l <- plotly_build(p)[["x"]]
+  expect_equal(length(l$layout$annotations), 2)
+  expect_equal(
+    sort(sapply(l$layout$annotations, "[[", "text")),
+    c("Bad mileage", "Good mileage")
+  )
+  expect_equal(
+    sort(sapply(l$layout$annotations, "[[", "x")),
+    c(1.835, 5.250)
+  )
+  expect_equal(
+    sort(sapply(l$layout$annotations, "[[", "y")),
+    c(10.4, 33.9)
+  )
+})
+

@@ -4,13 +4,15 @@
 \alias{add_fun}
 \title{Apply function to plot, without modifying data}
 \usage{
-add_fun(p, fun)
+add_fun(p, fun, ...)
 }
 \arguments{
 \item{p}{a plotly object.}
 
 \item{fun}{a function. Should take a plotly object as input and return a 
 modified plotly object.}
+
+\item{...}{arguments passed to \code{fun}.}
 }
 \description{
 Useful when you need two or more layers that apply a summary statistic

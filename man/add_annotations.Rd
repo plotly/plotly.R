@@ -23,12 +23,12 @@ Add an annotation(s) to a plot
 # single annotation
 plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
   slice(which.max(mpg)) \%>\%
-  annotation(text = "Good mileage")
+  add_annotations(text = "Good mileage")
   
 # multiple annotations
 plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
   filter(gear == 5) \%>\%
-  annotation("five cylinder", ax = 40) 
+  add_annotations("five cylinder", ax = 40) 
   
 }
 \author{

@@ -490,6 +490,7 @@ special_attrs <- function(trace) {
 #' @param p a plotly object.
 #' @param fun a function. Should take a plotly object as input and return a 
 #' modified plotly object.
+#' @param ... arguments passed to \code{fun}.
 #' @export
 #' @examples
 #' 
@@ -515,9 +516,9 @@ special_attrs <- function(trace) {
 #'       add_annotations(text = "Bad mileage")
 #'   })
 #'
-add_fun <- function(p, fun) {
+add_fun <- function(p, fun, ...) {
   oldDat <- p$x$cur_data
-  p <- fun(p)
+  p <- fun(p, ...)
   p$x$cur_data <- oldDat
   p$x$attrs[length(p$x$attrs)] <- setNames(
     list(p$x$attrs[[length(p$x$attrs)]]), oldDat
@@ -539,12 +540,12 @@ add_fun <- function(p, fun) {
 #' # single annotation
 #' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
 #'   slice(which.max(mpg)) %>%
-#'   annotation(text = "Good mileage")
+#'   add_annotations(text = "Good mileage")
 #'   
 #' # multiple annotations
 #' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
 #'   filter(gear == 5) %>%
-#'   annotation("five cylinder", ax = 40) 
+#'   add_annotations("five cylinder", ax = 40) 
 #'   
 
 add_annotations <- function(p, text = NULL, ..., data = NULL) {
