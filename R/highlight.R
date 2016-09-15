@@ -24,8 +24,7 @@
 #' @examples
 #' 
 #' d <- crosstalk::SharedData$new(txhousing, ~city)
-#' p <- ggplot(d, aes(date, median, group = city)) +
-#'   geom_line(geom = "line")
+#' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' ggplotly(p, tooltip = "city") %>%
 #'   highlight(on = "plotly_hover", color = "red")
 #' 
@@ -59,8 +58,8 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
       color <- color[1] 
     }
   }
-  p$x$crosstalk <- modify_list(
-    p$x$crosstalk,
+  p$x$highlight <- modify_list(
+    p$x$highlight,
     list(
       on = on,
       off = off,
