@@ -1,3 +1,9 @@
+# 4.4.3 -- 14 September 2016
+
+## CHANGES
+
+* Downgrade to plotly.js v1.16.3 (which is proven to be a stable release and avoids #717) -- https://github.com/plotly/plotly.js/releases/tag/v1.17.2
+
 # 4.4.2 -- 14 September 2016
 
 ## BUG FIXES
