@@ -80,6 +80,14 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
     )
+    # if appropriate, tack on a group index
+    grps <- tryCatch(
+      as.character(dplyr::groups(dat)), 
+      error = function(e) character(0)
+    )
+    if (length(grps) && any(lengths(trace) == NROW(dat))) {
+      trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
+    }
     
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
@@ -118,13 +126,16 @@ plotly_build.plotly <- function(p) {
     })
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
-    # for some reason, text isn't listed as a data array attributein some traces
-    # I'm looking at you scattergeo...
-    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
+    allAttrs <- c(
+      dataArrayAttrs, special_attrs(trace), npscales(), ".plotlyGroupIndex", 
+      # for some reason, text isn't listed as a data array in some traces
+      # I'm looking at you scattergeo...
+      "text"
+    )
+    tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
     tr <- tr[vapply(tr, function(x) is.null(dim(x)) && is.atomic(x), logical(1))]
     builtData <- tibble::as_tibble(tr)
-    
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
     for (i in seq_along(tr)) {
       if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
@@ -139,7 +150,7 @@ plotly_build.plotly <- function(p) {
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) paste(x, y, sep = "<br>")
-        builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, builtData[isSplit])
       }
       # Build the index used to determine grouping (later on, NAs are inserted
       # via group2NA() to create the groups). This is done in 3 parts:
@@ -158,30 +169,23 @@ plotly_build.plotly <- function(p) {
       if (any(!isComplete) && !hasGrp) {
         warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
       }
-      builtData$.plotlyGroupIndex <- cumsum(!isComplete)
+      builtData[[".plotlyMissingIndex"]] <- cumsum(!isComplete)
       builtData <- builtData[isComplete, ]
-      grps <- tryCatch(
-        as.character(dplyr::groups(dat)),
-        error = function(e) character(0)
-      )
-      if (length(grps) && hasGrp) {
-        if (isTRUE(trace[["connectgaps"]])) {
-          stop(
-            "Can't use connectgaps=TRUE when data has group(s).",
-            call. = FALSE
-          )
-        }
-        builtData$.plotlyGroupIndex <- interaction(
-          interaction(dat[isComplete, grps, drop = FALSE]),
-          builtData$.plotlyGroupIndex %||% ""
+      if (length(grps) && hasGrp && isTRUE(trace[["connectgaps"]])) {
+        stop(
+          "Can't use connectgaps=TRUE when data has group(s).", call. = FALSE
         )
       }
-      
+      builtData[[".plotlyGroupIndex"]] <- interaction(
+        builtData[[".plotlyGroupIndex"]] %||% "",
+        builtData[[".plotlyMissingIndex"]]
+      )
       builtData <- arrange_safe(builtData, 
-        c(".plotlyTraceIndex", ".plotlyGroupIndex", if (inherits(trace, "plotly_line")) "x")
+        c(".plotlyTraceIndex", ".plotlyGroupIndex", 
+          if (inherits(trace, "plotly_line")) "x")
       )
       builtData <- train_data(builtData, trace)
-      trace$.plotlyVariableMapping <- names(builtData)
+      trace[[".plotlyVariableMapping"]] <- names(builtData)
       
       # copy over to the trace data
       for (i in names(builtData)) {
@@ -191,7 +195,6 @@ plotly_build.plotly <- function(p) {
 
     # TODO: provide a better way to clean up "high-level" attrs
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
-
     trace[lengths(trace) > 0]
 
   }, p$x$attrs, names2(p$x$attrs))
@@ -235,7 +238,8 @@ plotly_build.plotly <- function(p) {
   for (i in seq_along(traces)) {
     mappingAttrs <- c(
       "alpha", npscales(), paste0(npscales(), "s"),
-      ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
+      ".plotlyGroupIndex", ".plotlyMissingIndex", 
+      ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
     for (j in mappingAttrs) {
       traces[[i]][[j]] <- NULL
@@ -245,8 +249,6 @@ plotly_build.plotly <- function(p) {
   # it's possible that the plot object already has some traces
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
-
-
 
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
