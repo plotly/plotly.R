@@ -22,43 +22,53 @@
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-add_trace(p, ..., color, symbol, size, linetype, data = NULL)
+add_trace(p, ..., color, symbol, size, linetype, data = NULL,
+  inherit = TRUE)
 
-add_markers(p, x = NULL, y = NULL, z = NULL, ...)
+add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_text(p, x = NULL, y = NULL, z = NULL, text = NULL, ...)
+add_text(p, x = NULL, y = NULL, z = NULL, text = NULL, ...,
+  data = NULL, inherit = TRUE)
 
-add_paths(p, x = NULL, y = NULL, z = NULL, ...)
+add_paths(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_lines(p, x = NULL, y = NULL, z = NULL, ...)
+add_lines(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...)
+add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
+  data = NULL, inherit = TRUE)
 
-add_polygons(p, x = NULL, y = NULL, ...)
+add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...)
+add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_area(p, x = NULL, ymax = NULL, ...)
+add_area(p, x = NULL, ymax = NULL, ..., data = NULL, inherit = TRUE)
 
-add_bars(p, x = NULL, y = NULL, ...)
+add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram(p, x = NULL, y = NULL, ...)
+add_histogram(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram2d(p, x = NULL, y = NULL, z = NULL, ...)
+add_histogram2d(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_histogram2dcontour(p, x = NULL, y = NULL, z = NULL, ...)
+add_histogram2dcontour(p, x = NULL, y = NULL, z = NULL, ...,
+  data = NULL, inherit = TRUE)
 
-add_heatmap(p, z = NULL, ...)
+add_heatmap(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
 
-add_contour(p, z = NULL, ...)
+add_contour(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_boxplot(p, x = NULL, y = NULL, ...)
+add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_surface(p, z = NULL, ...)
+add_surface(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_scattergeo(p, geo = "geo", ...)
+add_scattergeo(p, geo = NULL, ..., data = NULL, inherit = TRUE)
 
-add_choropleth(p, z = NULL, ...)
+add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -76,6 +86,8 @@ Note that acceptable arguments depend on the trace type.}
 
 \item{data}{A data frame to associate with this trace (optional). If not 
 provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
+
+\item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
 
 \item{x}{the x variable.}
 
@@ -106,9 +118,10 @@ p \%>\% add_markers()
 p \%>\% add_lines()
 p \%>\% add_text(text = ".")
 
-# attributes declared in plot_ly() carry over to downstream traces
-plot_ly(economics, x = ~date, y = ~uempmed) \%>\% 
-  add_lines(line = list(color = "red")) \%>\%
+# attributes declared in plot_ly() carry over to downstream traces,
+# but can be overwritten
+plot_ly(economics, x = ~date, y = ~uempmed, color = I("red")) \%>\% 
+  add_lines() \%>\%
   add_markers(color = ~pop) \%>\%
   layout(showlegend = FALSE)
 

@@ -4,7 +4,7 @@
 \alias{add_annotations}
 \title{Add an annotation(s) to a plot}
 \usage{
-add_annotations(p, text = NULL, ..., data = NULL)
+add_annotations(p, text = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -14,6 +14,8 @@ add_annotations(p, text = NULL, ..., data = NULL)
 \item{...}{these arguments are documented at \url{https://plot.ly/r/reference/#layout-annotations}}
 
 \item{data}{a data frame.}
+
+\item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
 }
 \description{
 Add an annotation(s) to a plot
