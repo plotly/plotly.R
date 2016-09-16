@@ -1,4 +1,13 @@
-# 4.4.3 -- 14 September 2016
+# 4.4.4 -- 15 September 2016
+
+## NEW FEATURES
+
+* Added `inherit` argument for all `add_()` functions to avoid inheriting attributes from `plot_ly()`.
+* Added the `add_fun()` function to add layers to a plot without modifying the original data associated with a plotly object.
+* Added the `add_annotations()` function to make it easier to add annotations.
+* Added the `layerData` argument to `ggplotly()` to make it possible to retrieve the data from a particular __ggplot2__ layer.
+
+# 4.4.3 -- 15 September 2016
 
 ## CHANGES
 
