@@ -149,7 +149,7 @@ plotly_build.plotly <- function(p) {
       isSplit <- names(builtData) %in% "linetype" |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
-        paste2 <- function(x, y) paste(x, y, sep = "<br>")
+        paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
         builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, builtData[isSplit])
       }
       # Build the index used to determine grouping (later on, NAs are inserted
@@ -329,7 +329,7 @@ map_size <- function(traces) {
   }
   allSize <- unlist(compact(sizeList))
   if (!is.null(allSize) && is.discrete(allSize)) {
-    stop("Size must be mapped to a numeric variable",
+    stop("Size must be mapped to a numeric variable\n",
          "symbols only make sense for discrete variables", call. = FALSE)
   }
   sizeRange <- range(allSize, na.rm = TRUE)
