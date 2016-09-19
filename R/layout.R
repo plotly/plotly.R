@@ -32,7 +32,7 @@ layout.plotly <- function(p, ..., data = NULL) {
 
 #' Add a range slider to the x-axis
 #'
-#' @param a plotly object.
+#' @param p plotly object.
 #' @param ... these arguments are documented here 
 #' \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}
 #' @export

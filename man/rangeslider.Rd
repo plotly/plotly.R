@@ -7,10 +7,10 @@
 rangeslider(p, ...)
 }
 \arguments{
+\item{p}{plotly object.}
+
 \item{...}{these arguments are documented here 
 \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}}
-
-\item{a}{plotly object.}
 }
 \description{
 Add a range slider to the x-axis

@@ -490,15 +490,17 @@ add_scattergeo <- function(p, geo = NULL, ..., data = NULL, inherit = TRUE) {
 #' plot_ly(z = ~density) %>% 
 #'   add_choropleth(locations = state.abb, locationmode = 'USA-states') %>%
 #'   layout(geo = list(scope = "usa"))
-add_choropleth <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
+add_choropleth <- function(p, z = NULL, geo = NULL, ..., 
+                           data = NULL, inherit = TRUE) {
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
+    geo <- geo %||% p$x$attrs[[1]][["geo"]] %||% "geo"
   }
   if (is.null(z)) {
     stop("Must supply `z` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_choropleth", z = z, type = "choropleth", 
+    p, class = "plotly_choropleth", z = z, type = "choropleth", geo = geo,
     ..., data = data, inherit = inherit
   )
 }
