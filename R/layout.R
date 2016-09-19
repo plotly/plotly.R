@@ -30,6 +30,27 @@ layout.plotly <- function(p, ..., data = NULL) {
   p
 }
 
+#' Add a range slider to the x-axis
+#'
+#' @param a plotly object.
+#' @param ... these arguments are documented here 
+#' \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}
+#' @export
+#' @author Carson Sievert
+#' @examples 
+#' 
+#' plot_ly(x = time(USAccDeaths), y = USAccDeaths) %>% 
+#'   add_lines() %>%
+#'   rangeslider()
+#' 
+rangeslider <- function(p, ...) {
+  if (sum(grepl("^xaxis", names(p$x$layout))) > 1) {
+    stop("Can only add a rangeslider to a plot with one x-axis", call. = FALSE)
+  }
+  p$x$layout$xaxis$rangeslider <- list(visible = TRUE, ...)
+  p
+}
+
 
 #' Set the default configuration for plotly
 #' 
