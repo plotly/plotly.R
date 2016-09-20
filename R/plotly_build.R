@@ -134,7 +134,8 @@ plotly_build.plotly <- function(p) {
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(), ".plotlyGroupIndex", 
+      dataArrayAttrs, special_attrs(trace), npscales(), 
+      ".plotlyGroupIndex", "key",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
       "text"
