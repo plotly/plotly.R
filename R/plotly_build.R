@@ -32,19 +32,38 @@ plotly_build.gg <- function(p) {
 #' @export
 plotly_build.plotly <- function(p) {
 
+  # make this plot retrievable
+  set_last_plot(p)
+  
   layouts <- Map(function(x, y) {
 
     d <- plotly_data(p, y)
     x <- rapply(x, eval_attr, data = d, how = "list")
+    
+    # if an annotation attribute is an array, expand into multiple annotations 
+    nAnnotations <- max(lengths(x$annotations) %||% 0)
+    x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
+      as.list(rep(x, length.out = nAnnotations))
+    }))
+    
     x[lengths(x) > 0]
 
   }, p$x$layoutAttrs, names2(p$x$layoutAttrs))
 
-  # get rid of the data -> layout mapping and merge all the layouts
-  # into a single layout (more recent layouts will override older ones)
+  # get rid of the data -> layout mapping 
   p$x$layoutAttrs <- NULL
+  
+  # accumulate, rather than override, annotations.
+  annotations <- Reduce(c, c(
+    list(p$x$layout$annotations),
+    setNames(compact(lapply(layouts, "[[", "annotations")), NULL)
+  ))
+  
+  # merge layouts into a single layout (more recent layouts will override older ones)
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
-
+  p$x$layout$annotations <- annotations
+  
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]])) {
@@ -66,6 +85,15 @@ plotly_build.plotly <- function(p) {
     if (crosstalk_key() %in% names(dat)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
+    }
+    
+    # if appropriate, tack on a group index
+    grps <- tryCatch(
+      as.character(dplyr::groups(dat)), 
+      error = function(e) character(0)
+    )
+    if (length(grps) && any(lengths(trace) == NROW(dat))) {
+      trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
     
     # determine trace type (if not specified, can depend on the # of data points)
@@ -105,13 +133,16 @@ plotly_build.plotly <- function(p) {
     })
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
-    # for some reason, text isn't listed as a data array attributein some traces
-    # I'm looking at you scattergeo...
-    tr <- trace[names(trace) %in% c(npscales(), special_attrs(trace), dataArrayAttrs, "text")]
+    allAttrs <- c(
+      dataArrayAttrs, special_attrs(trace), npscales(), ".plotlyGroupIndex", 
+      # for some reason, text isn't listed as a data array in some traces
+      # I'm looking at you scattergeo...
+      "text"
+    )
+    tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
-    tr <- tr[vapply(tr, function(x) is.null(dim(x)), logical(1))]
+    tr <- tr[vapply(tr, function(x) is.null(dim(x)) && is.atomic(x), logical(1))]
     builtData <- tibble::as_tibble(tr)
-    
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
     for (i in seq_along(tr)) {
       if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
@@ -125,16 +156,18 @@ plotly_build.plotly <- function(p) {
       isSplit <- names(builtData) %in% "linetype" |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
-        paste2 <- function(x, y) paste(x, y, sep = "<br>")
-        builtData$.plotlyTraceIndex <- Reduce(paste2, builtData[isSplit])
+        paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, builtData[isSplit])
       }
       # Build the index used to determine grouping (later on, NAs are inserted
-      # via group2NA() to create the groups). This is done in 2 parts:
-      # 1. Translate missing values on positional scales to a grouping variable.
+      # via group2NA() to create the groups). This is done in 3 parts:
+      # 1. Sort data by the trace index since groups are nested within traces.
+      # 2. Translate missing values on positional scales to a grouping variable.
       #    If grouping isn't relevant for this trace, a warning is thrown since
       #    NAs are removed.
-      # 2. The grouping from (1) and any groups detected via dplyr::groups()
+      # 3. The grouping from (2) and any groups detected via dplyr::groups()
       #    are combined into a single grouping variable, .plotlyGroupIndex
+      builtData <- arrange_safe(builtData, ".plotlyTraceIndex")
       isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
       # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
       hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
@@ -143,34 +176,24 @@ plotly_build.plotly <- function(p) {
       if (any(!isComplete) && !hasGrp) {
         warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
       }
-      builtData$.plotlyGroupIndex <- cumsum(!isComplete)
+      builtData[[".plotlyMissingIndex"]] <- cumsum(!isComplete)
       builtData <- builtData[isComplete, ]
-      grps <- tryCatch(
-        as.character(dplyr::groups(dat)),
-        error = function(e) character(0)
-      )
-      if (length(grps) && hasGrp) {
-        if (isTRUE(trace[["connectgaps"]])) {
-          stop(
-            "Can't use connectgaps=TRUE when data has group(s).",
-            call. = FALSE
-          )
-        }
-        builtData$.plotlyGroupIndex <- interaction(
-          interaction(dat[isComplete, grps, drop = FALSE]),
-          builtData$.plotlyGroupIndex %||% ""
+      if (length(grps) && hasGrp && isTRUE(trace[["connectgaps"]])) {
+        stop(
+          "Can't use connectgaps=TRUE when data has group(s).", call. = FALSE
         )
       }
-      builtData <- train_data(builtData, trace)
-      trace$.plotlyVariableMapping <- names(builtData)
-      # arrange the built data
-      arrangeVars <- c(
-        ".plotlyTraceIndex", "group", if (inherits(trace, "plotly_line")) "x"
+      builtData[[".plotlyGroupIndex"]] <- interaction(
+        builtData[[".plotlyGroupIndex"]] %||% "",
+        builtData[[".plotlyMissingIndex"]]
       )
-      arrangeVars <- arrangeVars[arrangeVars %in% names(builtData)]
-      if (length(arrangeVars)) {
-        builtData <- dplyr::arrange_(builtData, arrangeVars)
-      }
+      builtData <- arrange_safe(builtData, 
+        c(".plotlyTraceIndex", ".plotlyGroupIndex", 
+          if (inherits(trace, "plotly_line")) "x")
+      )
+      builtData <- train_data(builtData, trace)
+      trace[[".plotlyVariableMapping"]] <- names(builtData)
+      
       # copy over to the trace data
       for (i in names(builtData)) {
         trace[[i]] <- builtData[[i]]
@@ -179,7 +202,6 @@ plotly_build.plotly <- function(p) {
 
     # TODO: provide a better way to clean up "high-level" attrs
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
-
     trace[lengths(trace) > 0]
 
   }, p$x$attrs, names2(p$x$attrs))
@@ -223,7 +245,8 @@ plotly_build.plotly <- function(p) {
     # remove special mapping attributes
     mappingAttrs <- c(
       "alpha", npscales(), paste0(npscales(), "s"),
-      ".plotlyGroupIndex", ".plotlyTraceIndex", ".plotlyVariableMapping"
+      ".plotlyGroupIndex", ".plotlyMissingIndex", 
+      ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
     for (j in mappingAttrs) {
       traces[[i]][[j]] <- NULL
@@ -285,8 +308,6 @@ plotly_build.plotly <- function(p) {
   p <- verify_webgl(p)
   # verfiy showlegend is populated (needed for crosstalk's ability to dynamically add traces)
   p <- verify_showlegend(p)
-  # make this plot retrievable
-  set_last_plot(p)
   p
 }
 
@@ -326,7 +347,7 @@ map_size <- function(traces) {
   }
   allSize <- unlist(compact(sizeList))
   if (!is.null(allSize) && is.discrete(allSize)) {
-    stop("Size must be mapped to a numeric variable",
+    stop("Size must be mapped to a numeric variable\n",
          "symbols only make sense for discrete variables", call. = FALSE)
   }
   sizeRange <- range(allSize, na.rm = TRUE)

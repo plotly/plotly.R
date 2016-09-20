@@ -12,6 +12,7 @@
 #' @importFrom tibble as_tibble
 #' @importFrom htmltools browsable tagList
 #' @importFrom colourpicker colourWidget
+#' @importFrom purrr transpose
 NULL
 
 

@@ -1,3 +1,28 @@
+#' Modify the colorbar
+#' 
+#' @param p a plotly object
+#' @param ... arguments are documented here 
+#' \url{https://plot.ly/r/reference/#scatter-marker-colorbar}.
+#' @author Carson Sievert
+#' @export
+#' @examples 
+#' 
+#' plot_ly(mpg, x = ~cty, y = ~hwy, color = ~cyl) %>%
+#'   colorbar(len = 0.5)
+#' 
+colorbar <- function(p, ...) {
+  p <- plotly_build(p)
+  isBar <- vapply(p$x$data, is.colorbar, logical(1))
+  if (sum(isBar) != 1) {
+    stop("This function only works with one colorbar")
+  }
+  p$x$data[[which(isBar)]]$marker$colorbar <- modify_list(
+    p$x$data[[which(isBar)]]$marker$colorbar, list(...)
+  ) 
+  p
+}
+
+
 #' Hide guides (legends and colorbars)
 #'
 #' @param p a plotly object.

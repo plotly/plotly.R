@@ -71,6 +71,12 @@ as_df <- function(x) {
   }
 }
 
+# arrange data if the vars exist, don't throw error if they don't
+arrange_safe <- function(data, vars) {
+  vars <- vars[vars %in% names(data)]
+  if (length(vars)) dplyr::arrange_(data, .dots = vars) else data
+}
+
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
@@ -211,8 +217,8 @@ relay_type <- function(type) {
 }
 
 verify_orientation <- function(trace) {
-  xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]])
-  yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]])
+  xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]] %||% NULL)
+  yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]] %||% NULL)
   if (xNumeric && !yNumeric) {
     if (any(c("bar", "box") %in% trace[["type"]])) {
       trace$orientation <- "h"

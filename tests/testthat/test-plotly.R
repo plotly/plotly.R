@@ -161,3 +161,31 @@ test_that("Discrete variable mapped to x creates horizontal bar chart", {
   expect_equal(unique(o), "h")
   expect_equal(unique(types), "histogram")
 })
+
+test_that("Can avoid inheriting attributes", {
+  p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = I("red")) %>%
+    add_histogram(x = ~factor(vs), inherit = FALSE)
+  l <- expect_traces(p, 1, "inherit-FALSE")
+  expect_equal(l$data[[1]][["type"]], "histogram")
+  expect_equal(l$data[[1]][["x"]], factor(mtcars[["vs"]]))
+  expect_null(l$data[[1]][["y"]])
+  expect_true(l$data[[1]][["marker"]][["color"]] != toRGB("red"))
+})
+
+test_that("Complex example works", {
+  # note how median (the variable) doesn't exist in the second layer 
+  p <- txhousing %>%
+    plot_ly(x = ~date, y = ~median) %>%
+    group_by(city) %>%
+    add_lines(alpha = 0.2, name = "Texan Cities", hoverinfo = "none") %>%
+    group_by(date) %>% 
+    summarise(
+      q1 = quantile(median, 0.25, na.rm = TRUE),
+      m = median(median, na.rm = TRUE),
+      q3 = quantile(median, 0.75, na.rm = TRUE)
+    ) %>%
+    add_lines(y = ~m, color = I("red"), name = "median") %>%
+    add_ribbons(ymin = ~q1, ymax = ~q3, color = I("red"), name = "IQR")
+  
+  l <- expect_traces(p, 3, "time-series-summary")
+})

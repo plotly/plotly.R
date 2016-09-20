@@ -1,3 +1,42 @@
+# 4.4.5 -- 19 September 2016
+
+## NEW FEATURES
+
+* Added a `rangeslider()` function to make it easier to add a range slider to the x-axis.
+* Added a `colorbar()` function to make it easier to modify an automatically generated colorbar.
+
+## BUG FIXES
+
+* Bug fix for data arranging (introduced in 4.4.2).
+* If the same (discrete) variable is mapped to two different aesthetics, redundant text is no longer generated in the legend entries (e.g., `plot_ly(mpg, x = ~cty, y = ~hwy, symbol = ~factor(cyl), color = ~factor(cyl))`)
+
+# 4.4.4 -- 15 September 2016
+
+## NEW FEATURES
+
+* Added `inherit` argument for all `add_()` functions to avoid inheriting attributes from `plot_ly()`.
+* Added the `add_fun()` function to add layers to a plot without modifying the original data associated with a plotly object.
+* Added the `add_annotations()` function to make it easier to add annotations.
+* Added the `layerData` argument to `ggplotly()` to make it possible to retrieve the data from a particular __ggplot2__ layer.
+
+# 4.4.3 -- 15 September 2016
+
+## CHANGES
+
+* Downgrade to plotly.js v1.16.3 (which is proven to be a stable release and avoids #717) -- https://github.com/plotly/plotly.js/releases/tag/v1.17.2
+
+# 4.4.2 -- 14 September 2016
+
+## BUG FIXES
+
+* Arrange data by trace index _before_ computing groups, fixes #716.
+
+# 4.4.1 -- 14 September 2016
+
+## BUG FIXES
+
+* Restrict to atomic vectors when gathering data for training; otherwise, formulas referencing variables that don't exist in the data, but reference a function can cause problems.
+
 # 4.4.0 -- 13 September 2016
 
 ## CHANGES 

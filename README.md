@@ -22,7 +22,7 @@ devtools::install_github("ropensci/plotly")
 
 ### Web-based ggplot2 graphics
 
-If you use [ggplot2](http://cran.r-project.org/package=ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provides sensible tooltips, which assists decoding of values encoded as visual properties in the plot.
+If you use [ggplot2](https://github.com/hadley/ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provides sensible tooltips, which assists decoding of values encoded as visual properties in the plot.
 
 ```r
 library(plotly)
