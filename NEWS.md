@@ -1,3 +1,15 @@
+# 4.4.5 -- 19 September 2016
+
+## NEW FEATURES
+
+* Added a `rangeslider()` function to make it easier to add a range slider to the x-axis.
+* Added a `colorbar()` function to make it easier to modify an automatically generated colorbar.
+
+## BUG FIXES
+
+* Bug fix for data arranging (introduced in 4.4.2).
+* If the same (discrete) variable is mapped to two different aesthetics, redundant text is no longer generated in the legend entries (e.g., `plot_ly(mpg, x = ~cty, y = ~hwy, symbol = ~factor(cyl), color = ~factor(cyl))`)
+
 # 4.4.4 -- 15 September 2016
 
 ## NEW FEATURES
