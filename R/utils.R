@@ -70,7 +70,7 @@ as_df <- function(x) {
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
-  if (length(vars)) dplyr::arrange_(data, vars) else data
+  if (length(vars)) dplyr::arrange_(data, .dots = vars) else data
 }
 
 # make sure plot attributes adhere to the plotly.js schema
