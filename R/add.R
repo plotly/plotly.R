@@ -251,7 +251,7 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
   add_trace_classed(
     p, class = c("plotly_ribbon", "plotly_polygon"), 
     x = x, ymin = ymin, ymax = ymax, type = "scatter", mode = "lines",
-    fill = "toself",  ..., data = data, inherit = inherit
+    hoveron = "points", fill = "toself",  ..., data = data, inherit = inherit
   )
 }
 
@@ -275,7 +275,7 @@ add_area <- function(p, x = NULL, ymax = NULL, ...,
   add_trace_classed(
     p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), 
     x = x, ymax = ymax,
-    type = "scatter", fill = "toself", mode = "lines",  
+    type = "scatter", fill = "toself", mode = "lines", hoveron = "points",
     ..., data = data, inherit = inherit
   )
 }
