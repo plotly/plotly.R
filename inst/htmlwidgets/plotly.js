@@ -386,7 +386,13 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   // if selection has been cleared, or if this is transient (not persistent)
   // selection, delete the "selection traces"
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
-    Plotly.deleteTraces(this.gd, seq_len(nNewTraces));
+    var tracesToRemove = [];
+    for (var i = 0; i < this.gd.data.length; i++) {
+      if (this.gd.data[i].hasOwnProperty("crosstalkSelection")) {
+        tracesToRemove.push(i);
+      }
+    }
+    Plotly.deleteTraces(this.gd, tracesToRemove);
   }
   
   if (keys === null) {
@@ -441,6 +447,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
+        // just a flag so we know this is a "selection trace"
+        trace.crosstalkSelection = true;
         traces.push(trace);
       }
     }
@@ -540,16 +548,3 @@ function removeBrush(el) {
     outlines[i].remove();
   }
 }
-
-// JS 'equivalent' of R's seq_len (but sequence starts at 0, not 1)
-function seq_len(n) {
-  if (n < 0) {
-    throw new Error("Length must be non-negative");
-  }
-  var out = [];
-  for (var i = 0; i < n; i++) {
-    out.push(i);
-  }
-  return out;
-}
-
