@@ -22,7 +22,3 @@ subplot(
   shareY = TRUE
 )
 
-
-
-
-tx <- SharedData$new(txhousing, ~city)

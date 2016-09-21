@@ -15,11 +15,10 @@ df <- data.frame(
 # delare the patient variable as the "unit of interest"
 sd <- SharedData$new(df, ~patient)
 
-p <- plot_ly(sd, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
+p <- plot_ly(sd, x = ~visit, y = ~perc, color = I("black"),
+             text = ~paste("Patient:", patient)) %>%
   group_by(patient) %>%
-  add_lines(color = I("orange")) %>% 
-  add_markers(color = I("steelblue"), hoverinfo = "text") %>%
-  hide_legend()
+  add_trace(mode = "markers+lines")
 
 # Since crosstalk's SharedData object was supplied to plot_ly() with a key of
 # patient, it knows to highlight any lines/markers matching the selected patient(s).

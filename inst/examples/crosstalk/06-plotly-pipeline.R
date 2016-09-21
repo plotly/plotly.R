@@ -27,4 +27,4 @@ p <- subplot(p1, p2, titleX = TRUE) %>% layout(margin = list(l = 200))
 highlight(p, on = "plotly_click", off = "plotly_unhover", color = "red")
 
 # compare multiple series
-highligh(p, on = "plotly_click", dynamic = TRUE, persistent = TRUE)
+highlight(p, on = "plotly_click", dynamic = TRUE, persistent = TRUE)
