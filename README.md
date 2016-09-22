@@ -41,7 +41,7 @@ If you'd like to see how `ggplotly()` does in converting different ggplot2 examp
 [plotly.js](https://github.com/plotly/plotly.js) supports some chart types that ggplot2 doesn't (our [cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) provides a nice summary of the available chart types). You can create any of these charts via `plot_ly()`.
 
 ```r
-plot_ly(z = ~volcano)
+plot_ly(z = ~volcano, type = "surface")
 ```
 
 ![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
@@ -59,6 +59,10 @@ We have a number of [vignettes](https://ropensci.github.io/plotly/) which explai
 ![http://104.131.111.111:3838/plotlyLinkedBrush/](http://i.imgur.com/eVqsZma.gif)
 
 You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder to coordinate views between htmlwidgets.
+
+## Learn more
+
+We have lots of examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive review is also available at <https://cpsievert.github.io/plotly_book/>
 
 ## Contributing
 
