@@ -103,6 +103,12 @@ add_paths(p, linetype = ~Species)
 Carson Sievert
 }
 \seealso{
-\code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+\itemize{
+ \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
+ \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
+ \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
+ \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+ \item
+}
 }
 

@@ -34,8 +34,14 @@
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param source Only relevant for \link{event_data}.
-#' @seealso \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
 #' @author Carson Sievert
+#' @seealso \itemize{
+#'  \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
+#'  \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
+#'  \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
+#'  \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+#'  \item
+#' }
 #' @export
 #' @examples
 #' \dontrun{
@@ -153,11 +159,14 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 #' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
 #' Note that x/y can also be used in place of lat/lon.
 #' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_geo}()}, \code{\link{ggplotly}()} 
+#' 
 #' @examples \dontrun{
 #' 
 #' map_data("world", "canada") %>%
 #'   group_by(group) %>%
-#'   mapbox(x = ~lat, y = ~long) %>%
+#'   plot_mapbox(x = ~lat, y = ~long) %>%
 #'   add_polygons() %>%
 #'   layout(
 #'     mapbox = list(
@@ -166,11 +175,12 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 #'   )
 #' }
 #' 
-mapbox <- function(data = data.frame(), ...) {
-  p <- plot_ly(data, ...)
-  p <- config(p, mapboxAccessToken = mapbox_token())
-  p$x$mapType <- "mapbox"
-  p
+plot_mapbox <- function(data = data.frame(), ...) {
+  p <- config(plot_ly(data), mapboxAccessToken = mapbox_token())
+  # not only do we use this for is_mapbox(), but also setting the layout attr
+  # https://plot.ly/r/reference/#layout-mapbox
+  p$x$layout$mapType <- "mapbox"
+  add_trace(p, ...)
 }
 
 #' Initiate a plotly-geo object
@@ -182,17 +192,21 @@ mapbox <- function(data = data.frame(), ...) {
 #' 
 #' @param ... arguments passed along to \code{\link{plot_ly}()}.
 #' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
 #' @examples
 #' 
 #' map_data("world", "canada") %>%
 #'   group_by(group) %>%
-#'   geo(x = ~lat, y = ~long) %>%
+#'   plot_geo(x = ~lat, y = ~long) %>%
 #'   add_polygons()
 #' 
-geo <- function(data = data.frame(), ...) {
-  p <- plot_ly(data, ...)
-  p$x$mapType <- "geo"
-  p
+plot_geo <- function(data = data.frame(), ...) {
+  p <- plot_ly(data)
+  # not only do we use this for is_geo(), but also setting the layout attr
+  # https://plot.ly/r/reference/#layout-geo
+  p$x$layout$mapType <- "geo"
+  add_trace(p, ...)
 }
 
 

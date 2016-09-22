@@ -85,14 +85,14 @@ add_trace <- function(p, ..., color, symbol, size, linetype,
   if (is_mapbox(p) || is_geo(p)) {
     attrs[["x"]] <- attrs[["x"]] %||% attrs[["lat"]]
     attrs[["y"]] <- attrs[["y"]] %||% attrs[["lon"]]
-    if (!grepl("scatter", attrs[["type"]])) {
+    if (!grepl("scatter|choropleth", attrs[["type"]] %||% "scatter")) {
       stop("Cant add a '", attrs[["type"]], "' trace to a map object", call. = FALSE)
     }
     if (is_mapbox(p)) {
       attrs[["type"]] <- "scattermapbox"
     }
     if (is_geo(p)) {
-      attrs[["type"]] <- "scattergeo"
+      attrs[["type"]] <- if (!is.null(attrs[["z"]])) "choropleth" else "scattergeo"
     }
   }
   
@@ -528,7 +528,6 @@ add_mesh <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' 
 add_scattergeo <- function(p, ...) {
   .Deprecated("geo")
   p
@@ -537,24 +536,10 @@ add_scattergeo <- function(p, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' density <- state.x77[, "Population"] / state.x77[, "Area"]
-#' plot_ly(z = ~density) %>% 
-#'   add_choropleth(locations = state.abb, locationmode = 'USA-states') %>%
-#'   layout(geo = list(scope = "usa"))
 add_choropleth <- function(p, z = NULL, geo = NULL, ..., 
                            data = NULL, inherit = TRUE) {
-  if (inherit) {
-    z <- z %||% p$x$attrs[[1]][["z"]]
-    geo <- geo %||% p$x$attrs[[1]][["geo"]] %||% "geo"
-  }
-  if (is.null(z)) {
-    stop("Must supply `z` attribute", call. = FALSE)
-  }
-  add_trace_classed(
-    p, class = "plotly_choropleth", z = z, type = "choropleth", geo = geo,
-    ..., data = data, inherit = inherit
-  )
+  .Deprecated("geo")
+  p
 }
 
 # attach a class to a trace which informs data processing in plotly_build
