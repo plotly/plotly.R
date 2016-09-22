@@ -19,8 +19,8 @@ like \code{\link{add_polygons}()} to work
 
 map_data("world", "canada") \%>\%
   group_by(group) \%>\%
-  plot_geo(x = ~lat, y = ~long) \%>\%
-  add_polygons()
+  plot_geo(x = ~long, y = ~lat) \%>\%
+  add_markers(size = I(1))
 
 }
 \author{

@@ -22,7 +22,7 @@ like \code{\link{add_polygons}()} to work
 
 map_data("world", "canada") \%>\%
   group_by(group) \%>\%
-  plot_mapbox(x = ~lat, y = ~long) \%>\%
+  plot_mapbox(x = ~long, y = ~lat) \%>\%
   add_polygons() \%>\%
   layout(
     mapbox = list(
