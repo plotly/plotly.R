@@ -74,11 +74,11 @@ arrange_safe <- function(data, vars) {
 }
 
 is_mapbox <- function(p) {
-  identical(p$x[["mapType"]], "mapbox")
+  identical(p$x$layout[["mapType"]], "mapbox")
 }
 
 is_geo <- function(p) {
-  identical(p$x[["mapType"]], "geo")
+  identical(p$x$layout[["mapType"]], "geo")
 }
 
 # retrive mapbox token if one is set; otherwise, throw error
@@ -96,12 +96,48 @@ mapbox_token <- function() {
   token
 }
 
+is_subplot <- function(p) {
+  isTRUE(p$x$subplot)
+}
+
+supply_defaults <- function(p) {
+  # no need to supply defaults for subplots
+  if (is_subplot(p)) return(p)
+  # supply trace anchor defaults
+  anchors <- if (is_geo(p)) c("geo" = "geo") else if (is_mapbox(p)) c("subplot" = "mapbox") else c("xaxis" = "x", "yaxis" = "y")
+  
+  p$x$data <- lapply(p$x$data, function(tr) {
+    for (i in seq_along(anchors)) {
+      nm <- names(anchors)[[i]]
+      
+      tr[[nm]] <- unique(tr[[nm]]) %||% anchors[[i]]
+    }
+    tr
+  })
+  # supply domain defaults
+  geoDomain <- list(x = c(0, 1), y = c(0, 1))
+  if (is_geo(p) || is_mapbox(p)) {
+    p$x$layout[grepl("^[x-y]axis", names(p$x$layout))] <- NULL
+    p$x$layout[[p$x$layout$mapType]] <- modify_list(
+      list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
+    )
+  } else {
+    for (axis in c("xaxis", "yaxis")) {
+      p$x$layout[[axis]] <- modify_list(
+        list(domain = c(0, 1)), p$x$layout[[axis]]
+      )
+    }
+  }
+  p
+}
+
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
   check_attrs(
     sub("[0-9]+$", "", names(p$x$layout)),
-    c(names(Schema$layout$layoutAttributes), c("barmode", "bargap"))
+    c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
+    "layout"
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
@@ -114,7 +150,7 @@ verify_attr_names <- function(p) {
 check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
-    warning("'", type, "' traces don't have these attributes: '",
+    warning("'", type, "' objects don't have these attributes: '",
          paste(illegalAttrs, collapse = "', '"), "'\n", 
          "Valid attributes include:\n'",
          paste(validAttrs, collapse = "', '"), "'\n", 
