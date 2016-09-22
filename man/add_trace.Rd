@@ -182,10 +182,6 @@ plot_ly(z = ~volcano) \%>\% add_contour()
 plot_ly(mtcars, x = ~factor(vs), y = ~mpg) \%>\% add_boxplot()
 plot_ly(z = ~volcano) \%>\% add_surface()
 plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) \%>\% add_mesh()
-density <- state.x77[, "Population"] / state.x77[, "Area"]
-plot_ly(z = ~density) \%>\% 
-  add_choropleth(locations = state.abb, locationmode = 'USA-states') \%>\%
-  layout(geo = list(scope = "usa"))
 }
 \author{
 Carson Sievert

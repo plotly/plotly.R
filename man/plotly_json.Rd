@@ -4,7 +4,7 @@
 \alias{plotly_json}
 \title{Inspect JSON sent to plotly.js}
 \usage{
-plotly_json(p = plot_ly(), jsonedit = interactive(), ...)
+plotly_json(p = last_plot(), jsonedit = interactive(), ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
