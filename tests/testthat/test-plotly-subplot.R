@@ -83,7 +83,7 @@ s <- subplot(
 )
 
 test_that("Row/column height/width", {
-  l <- expect_traces(s, 3, "width-height")
+  l <- expect_traces(s, 4, "width-height")
   expect_equal(diff(l$layout$xaxis$domain), 0.8 - 0.005)
   expect_equal(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
   expect_equal(diff(l$layout$yaxis$domain), 0.2 - 0.005)
@@ -145,10 +145,9 @@ test_that("geo+cartesian behaves", {
   )
   # create a map of population density
   density <- state.x77[, "Population"] / state.x77[, "Area"]
-  map <- plot_ly(
-    z = ~density, 
-    text = state.name, locations = state.abb,
-    type = 'choropleth', locationmode = 'USA-states', geo = "geo"
+  map <- plot_geo(
+    z = ~density, text = state.name, 
+    locations = state.abb, locationmode = 'USA-states'
   ) %>% layout(geo = g)
   # create a bunch of horizontal bar charts 
   vars <- colnames(state.x77)
