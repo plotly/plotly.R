@@ -166,7 +166,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 #' 
 #' map_data("world", "canada") %>%
 #'   group_by(group) %>%
-#'   plot_mapbox(x = ~lat, y = ~long) %>%
+#'   plot_mapbox(x = ~long, y = ~lat) %>%
 #'   add_polygons() %>%
 #'   layout(
 #'     mapbox = list(
@@ -176,11 +176,11 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 #' }
 #' 
 plot_mapbox <- function(data = data.frame(), ...) {
-  p <- config(plot_ly(data), mapboxAccessToken = mapbox_token())
+  p <- config(plot_ly(data, ...), mapboxAccessToken = mapbox_token())
   # not only do we use this for is_mapbox(), but also setting the layout attr
   # https://plot.ly/r/reference/#layout-mapbox
   p$x$layout$mapType <- "mapbox"
-  add_trace(p, ...)
+  p
 }
 
 #' Initiate a plotly-geo object
@@ -198,15 +198,15 @@ plot_mapbox <- function(data = data.frame(), ...) {
 #' 
 #' map_data("world", "canada") %>%
 #'   group_by(group) %>%
-#'   plot_geo(x = ~lat, y = ~long) %>%
-#'   add_polygons()
+#'   plot_geo(x = ~long, y = ~lat) %>%
+#'   add_markers(size = I(1))
 #' 
 plot_geo <- function(data = data.frame(), ...) {
-  p <- plot_ly(data)
+  p <- plot_ly(data, ...)
   # not only do we use this for is_geo(), but also setting the layout attr
   # https://plot.ly/r/reference/#layout-geo
   p$x$layout$mapType <- "geo"
-  add_trace(p, ...)
+  p
 }
 
 

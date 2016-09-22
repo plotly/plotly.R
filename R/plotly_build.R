@@ -26,7 +26,8 @@ plotly_build.list <- function(p) {
 
 #' @export
 plotly_build.gg <- function(p) {
-  ggplotly(p)
+  p <- ggplotly(p)
+  supply_defaults(p)
 }
 
 #' @export
@@ -70,6 +71,24 @@ plotly_build.plotly <- function(p) {
     if (length(p$x$attrs) > 1 || isTRUE(attr(p, "ggplotly"))) {
       p$x$attrs[[1]] <- NULL
     }
+  }
+  
+  # trace type checking and renaming for plot objects
+  if (is_mapbox(p) || is_geo(p)) {
+    p$x$attrs <- lapply(p$x$attrs, function(tr) {
+      tr[["x"]] <- tr[["x"]] %||% tr[["lat"]]
+      tr[["y"]] <- tr[["y"]] %||% tr[["lon"]]
+      if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
+        stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
+      }
+      if (is_mapbox(p)) {
+        tr[["type"]] <- "scattermapbox"
+      }
+      if (is_geo(p)) {
+        tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
+      }
+      tr
+    })
   }
 
   dats <- Map(function(x, y) {
@@ -270,16 +289,18 @@ plotly_build.plotly <- function(p) {
     }
   }
   
-  # attribute naming correction for "geo-like" traces
-  if (is_geo(p) || is_mapbox(p)) {
-    p$x$layout[grepl("^[x-y]axis", names(p$x$layout))] <- NULL
-    p$x$data <- lapply(p$x$data, function(tr) {
+  # supply trace anchor and domain information  
+  p <- supply_defaults(p)
+  
+  # attribute naming corrections for "geo-like" traces
+  p$x$data <- lapply(p$x$data, function(tr) {
+    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
       tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
       tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
       tr[c("x", "y")] <- NULL
-      tr
-    })
-  }
+    }
+    tr
+  })
 
   # polar charts don't like null width/height keys 
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL

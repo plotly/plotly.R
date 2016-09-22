@@ -82,20 +82,6 @@ add_trace <- function(p, ..., color, symbol, size, linetype,
     attrs <- modify_list(p$x$attrs[[1]], attrs)
   }
   
-  if (is_mapbox(p) || is_geo(p)) {
-    attrs[["x"]] <- attrs[["x"]] %||% attrs[["lat"]]
-    attrs[["y"]] <- attrs[["y"]] %||% attrs[["lon"]]
-    if (!grepl("scatter|choropleth", attrs[["type"]] %||% "scatter")) {
-      stop("Cant add a '", attrs[["type"]], "' trace to a map object", call. = FALSE)
-    }
-    if (is_mapbox(p)) {
-      attrs[["type"]] <- "scattermapbox"
-    }
-    if (is_geo(p)) {
-      attrs[["type"]] <- if (!is.null(attrs[["z"]])) "choropleth" else "scattergeo"
-    }
-  }
-  
   p$x$attrs <- c(
     p$x$attrs %||% list(), 
     setNames(list(attrs), p$x$cur_data)
