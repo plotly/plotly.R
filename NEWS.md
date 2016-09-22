@@ -2,7 +2,8 @@
 
 ## NEW FEATURES
 
-* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for examples -- <https://cpsievert.github.io/plotly_book/maps.html> 
+* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://cpsievert.github.io/plotly_book/maps.html> 
+* `subplot()` now accepts, and correctly scales mapbox objects.
 * Added the `add_mesh3d()` and `add_pie()` functions as wrappers around the "mesh3d", and "pie" trace types.
 
 ## CHANGES
