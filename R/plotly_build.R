@@ -108,7 +108,7 @@ plotly_build.plotly <- function(p) {
         }
       }
     }
-
+    
     if (inherits(trace, c("plotly_surface", "plotly_contour"))) {
       # TODO: generate matrix for users?
       # (1) if z is vector, and x/y are null throw error
@@ -269,6 +269,17 @@ plotly_build.plotly <- function(p) {
       )
     }
   }
+  
+  # attribute naming correction for "geo-like" traces
+  if (is_geo(p) || is_mapbox(p)) {
+    p$x$layout[grepl("^[x-y]axis", names(p$x$layout))] <- NULL
+    p$x$data <- lapply(p$x$data, function(tr) {
+      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
+      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
+      tr[c("x", "y")] <- NULL
+      tr
+    })
+  }
 
   # polar charts don't like null width/height keys 
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
@@ -298,9 +309,6 @@ plotly_build.plotly <- function(p) {
 # ----------------------------------------------------------------
 
 train_data <- function(data, trace) {
-  if (inherits(trace, "plotly_area")) {
-    data$ymin <- 0
-  }
   if (inherits(trace, "plotly_ribbon")) {
     data <- ribbon_dat(data)
   }

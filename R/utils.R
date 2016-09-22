@@ -73,6 +73,29 @@ arrange_safe <- function(data, vars) {
   if (length(vars)) dplyr::arrange_(data, .dots = vars) else data
 }
 
+is_mapbox <- function(p) {
+  identical(p$x[["mapType"]], "mapbox")
+}
+
+is_geo <- function(p) {
+  identical(p$x[["mapType"]], "geo")
+}
+
+# retrive mapbox token if one is set; otherwise, throw error
+mapbox_token <- function() {
+  token <- Sys.getenv("MAPBOX_TOKEN", NA)
+  if (is.na(token)) {
+    stop(
+      "No mapbox access token found. Obtain a token here\n",
+      "https://www.mapbox.com/help/create-api-access-token/\n",
+      "Once you have a token, assign it to an environment variable \n",
+      "named 'MAPBOX_TOKEN', for example,\n",
+      "Sys.setenv('MAPBOX_TOKEN' = 'secret token')", call. = FALSE
+    )
+  }
+  token
+}
+
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)

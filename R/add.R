@@ -82,6 +82,20 @@ add_trace <- function(p, ..., color, symbol, size, linetype,
     attrs <- modify_list(p$x$attrs[[1]], attrs)
   }
   
+  if (is_mapbox(p) || is_geo(p)) {
+    attrs[["x"]] <- attrs[["x"]] %||% attrs[["lat"]]
+    attrs[["y"]] <- attrs[["y"]] %||% attrs[["lon"]]
+    if (!grepl("scatter", attrs[["type"]])) {
+      stop("Cant add a '", attrs[["type"]], "' trace to a map object", call. = FALSE)
+    }
+    if (is_mapbox(p)) {
+      attrs[["type"]] <- "scattermapbox"
+    }
+    if (is_geo(p)) {
+      attrs[["type"]] <- "scattergeo"
+    }
+  }
+  
   p$x$attrs <- c(
     p$x$attrs %||% list(), 
     setNames(list(attrs), p$x$cur_data)
@@ -255,32 +269,57 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
   )
 }
 
-
 #' @inheritParams add_trace
 #' @rdname add_trace
+#' @param r For polar chart only. Sets the radial coordinates.
+#' @param t For polar chart only. Sets the radial coordinates.
 #' @export
 #' @examples 
-#' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-#' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
-add_area <- function(p, x = NULL, ymax = NULL, ...,
+#' p <- plot_ly(plotly::wind, r = ~r, t = ~t) %>% add_area(color = ~nms)
+#' layout(p, radialaxis = list(ticksuffix = "%"), orientation = 270)
+add_area <- function(p, r = NULL, t = NULL, ...,
                      data = NULL, inherit = TRUE) {
-  
   if (inherit) {
-    x <- x %||% p$x$attrs[[1]][["x"]]
-    ymax <- ymax %||% p$x$attrs[[1]][["ymax"]]
+    r <- t %||% p$x$attrs[[1]][["r"]]
+    t <- t %||% p$x$attrs[[1]][["t"]]
   }
-  if (is.null(x) || is.null(ymax)) {
-    stop("Must supply `x`/`ymax` attributes", call. = FALSE)
+  if (is.null(r) || is.null(t)) {
+    stop("Must supply `r`/`t` attributes", call. = FALSE)
   }
   add_trace_classed(
-    p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), 
-    x = x, ymax = ymax,
-    type = "scatter", fill = "toself", mode = "lines", hoveron = "points",
+    p, class = "plotly_area", r = r, t = t, type = "area",
     ..., data = data, inherit = inherit
   )
 }
 
-
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @param values the value to associated with each slice of the pie.
+#' @param labels the labels (categories) corresponding to \code{values}.
+#' @export
+#' @examples 
+#' ds <- data.frame(
+#'   labels = c("A", "B", "C"),
+#'   values = c(10, 40, 60)
+#' )
+#' 
+#' plot_ly(ds, labels = ~labels, values = ~values) %>%
+#'   add_pie() %>%
+#'   layout(title = "Basic Pie Chart using Plotly")
+add_pie <- function(p, values = NULL, labels = NULL, ...,
+                     data = NULL, inherit = TRUE) {
+  if (inherit) {
+    values <- values %||% p$x$attrs[[1]][["values"]]
+    labels <- labels %||% p$x$attrs[[1]][["labels"]]
+  }
+  if (is.null(values)) {
+    stop("Must supply `values`", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_pie", values = values, labels = labels, type = "pie",
+    ..., data = data, inherit = inherit
+  )
+}
 
 #' @inheritParams add_trace
 #' @rdname add_trace
@@ -464,23 +503,36 @@ add_surface <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   )
 }
 
-
 #' @inheritParams add_trace
 #' @rdname add_trace
-#' @param geo anchor this trace on which geo object?
 #' @export
 #' @examples 
-#' plot_ly() %>% add_scattergeo()
-add_scattergeo <- function(p, geo = NULL, ..., data = NULL, inherit = TRUE) {
+#' plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) %>% add_mesh()
+add_mesh <- function(p, x = NULL, y = NULL, z = NULL, ..., 
+                        data = NULL, inherit = TRUE) {
   if (inherit) {
-    geo <- geo %||% p$x$attrs[[1]][["geo"]] %||% "geo"
+    x <- x %||% p$x$attrs[[1]][["x"]]
+    y <- y %||% p$x$attrs[[1]][["y"]]
+    z <- z %||% p$x$attrs[[1]][["z"]]
+  }
+  if (is.null(x) || is.null(y) || is.null(z)) {
+    stop("Must supply `x`/`y`/`z` attributes", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_scattergeo", type = "scattergeo", geo = geo, 
+    p, class = "plotly_mesh", x = x, y = y, z = z, type = "mesh3d", 
     ..., data = data, inherit = inherit
   )
 }
 
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' 
+add_scattergeo <- function(p, ...) {
+  .Deprecated("geo")
+  p
+}
 
 #' @inheritParams add_trace
 #' @rdname add_trace
@@ -515,12 +567,16 @@ add_trace_classed <- function(p, class = "plotly_polygon", ...) {
 
 # retrieve the non-plotly.js attributes for a given trace
 special_attrs <- function(trace) {
-  switch(
+  attrs <- switch(
     class(trace)[[1]],
-    plotly_area = c("ymax"),
     plotly_segment = c("xend", "yend"),
     plotly_ribbon = c("ymin", "ymax")
   )
+  # for data training, we temporarily rename lat/lon as x/y
+  if (isTRUE(trace[["type"]] %in% c("scattermapbox", "scattergeo"))) {
+    attrs <- c(attrs, c("x", "y"))
+  }
+  attrs
 }
 
 

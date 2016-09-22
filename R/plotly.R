@@ -84,6 +84,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   # "native" plotly arguments
   attrs <- list(...)
+  
   # warn about old arguments that are no longer supported
   for (i in c("filename", "fileopt", "world_readable")) {
     if (is.null(attrs[[i]])) next
@@ -138,6 +139,60 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   )
   
   as_widget(p)
+}
+
+
+#' Initiate a plotly-mapbox object
+#' 
+#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' a plotly-mapbox object. This enforces the entire plot so use
+#' the scattermapbox trace type, and enables higher level geometries
+#' like \code{\link{add_polygons}()} to work
+#' 
+#' @param ... arguments passed along to \code{\link{plot_ly}()}. They should be
+#' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
+#' Note that x/y can also be used in place of lat/lon.
+#' @export
+#' @examples \dontrun{
+#' 
+#' map_data("world", "canada") %>%
+#'   group_by(group) %>%
+#'   mapbox(x = ~lat, y = ~long) %>%
+#'   add_polygons() %>%
+#'   layout(
+#'     mapbox = list(
+#'       center = list(lat = ~median(lat), lon = ~median(long))
+#'     )
+#'   )
+#' }
+#' 
+mapbox <- function(data = data.frame(), ...) {
+  p <- plot_ly(data, ...)
+  p <- config(p, mapboxAccessToken = mapbox_token())
+  p$x$mapType <- "mapbox"
+  p
+}
+
+#' Initiate a plotly-geo object
+#' 
+#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' a plotly-geo object. This enforces the entire plot so use
+#' the scattergeo trace type, and enables higher level geometries
+#' like \code{\link{add_polygons}()} to work
+#' 
+#' @param ... arguments passed along to \code{\link{plot_ly}()}.
+#' @export
+#' @examples
+#' 
+#' map_data("world", "canada") %>%
+#'   group_by(group) %>%
+#'   geo(x = ~lat, y = ~long) %>%
+#'   add_polygons()
+#' 
+geo <- function(data = data.frame(), ...) {
+  p <- plot_ly(data, ...)
+  p$x$mapType <- "geo"
+  p
 }
 
 
