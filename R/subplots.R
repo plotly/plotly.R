@@ -50,7 +50,40 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     dotz <- dotz[[1]]
   }
   # build each plot
-  plots <- lapply(dotz, function(d) plotly_build(d)[["x"]])
+  plotz <- lapply(dotz, function(d) plotly_build(d)[["x"]])
+  
+  # Are any traces referencing "axislike" layout attributes that are missing?
+  # If so, move those traces to a "new plot", and inherit layout attributes,
+  # which makes this sort of thing possible:
+  # https://plot.ly/r/map-subplots-and-small-multiples/
+  plots <- list()
+  for (i in seq_along(plotz)) {
+    p <- plots[[i]] <- plotz[[i]]
+    layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
+    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]]))
+    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]]))
+    missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
+    # move to next iteration if trace references are complete
+    if (!length(missingAttrs)) next
+    # remove each "missing" trace from this plot
+    missingTraces <- xTraceAttrs %in% missingAttrs | yTraceAttrs %in% missingAttrs
+    plots[[i]]$data[missingTraces] <- NULL
+    # move traces with "similar missingness" to a new plot
+    for (j in missingAttrs) {
+      newPlot <- list(
+        data = p$data[xTraceAttrs %in% j | yTraceAttrs %in% j],
+        layout = p$layout
+      )
+      # reset the anchors
+      newPlot$data <- lapply(newPlot$data, function(tr) {
+        for (k in c("mapbox", "geo", "xaxis", "yaxis")) {
+          tr[[k]] <- sub("[0-9]+", "", tr[[k]]) %||% NULL
+        }
+        tr
+      })
+      plots <- c(plots, list(newPlot))
+    }
+  }
   
   # grab main plot objects
   traces <- lapply(plots, "[[", "data")
