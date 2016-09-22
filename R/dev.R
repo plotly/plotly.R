@@ -12,7 +12,7 @@
 #' plotly_json(plot_ly())
 #' plotly_json(plot_ly(), FALSE)
 
-plotly_json <- function(p = plot_ly(), jsonedit = interactive(), ...) {
+plotly_json <- function(p = last_plot(), jsonedit = interactive(), ...) {
   plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = TRUE)
   if (jsonedit) {
     if (system.file(package = "listviewer") == "") {
