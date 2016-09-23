@@ -1,3 +1,37 @@
+# 4.5.2 -- 23 September 2016
+
+## NEW FEATURES
+
+* The new argument, `split`, replaces the old functionality of the now deprecated `group` argument by creating one trace per value.
+
+## BUG FIXES
+
+* Passing plots to `subplot()` without a specified color (once again) match the coloring defaults supplied by plotly.js (see #724).
+
+# 4.5.1 -- 23 September 2016
+
+## NEW FEATURES
+
+* A tibble with a list-column of plotly objects can now be input directly into `subplot()`
+
+## BUG FIXES
+
+* The `colorbar()` function now works on colorbars generated via `z` mapping.
+
+# 4.5.0 -- 22 September 2016
+
+## NEW FEATURES
+
+* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://cpsievert.github.io/plotly_book/maps.html> 
+* `subplot()` now accepts, and correctly scales mapbox objects.
+* Added the `add_mesh3d()` and `add_pie()` functions as wrappers around the "mesh3d", and "pie" trace types.
+
+## CHANGES
+
+* The `add_scattergeo()` and `add_choropleth()` functions have been deprecated in favor of `plot_geo()`. 
+* The `add_area(...)` function changed it's meaning from `add_lines(..., fill = 'tozeroy')` to a wrapper around the area trace <https://plot.ly/r/reference/#area>. This is more consistent with the naming conventions already in place for other `add_()` functions.
+* `add_ribbons()` now shows points (instead of fill) on hover.
+
 # 4.4.5 -- 19 September 2016
 
 ## NEW FEATURES

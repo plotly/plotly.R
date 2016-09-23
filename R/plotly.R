@@ -29,15 +29,26 @@
 #' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
 #' @param linetypes A character vector of line types. 
 #' Either valid \link{par} (lty) or plotly dash codes may be supplied.
-#' @param size A variable name or numeric vector to encode the size of markers.
+#' @param size A formula containing a name or expression yielding a numeric vector. 
+#' Values are scaled according to the range specified in \code{sizes}.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
+#' @param split A formula containing a name or expression. Similar to
+#' \code{\link{group_by}()}, but ensures at least one trace for each unique
+#' value. This replaces the functionality of the (now deprecated)
+#' \code{group} argument.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param source a character string of length 1. Match the value of this string 
 #' with the source argument in \code{\link{event_data}()} to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
-#' @seealso \code{\link{ggplotly}()}
 #' @author Carson Sievert
+#' @seealso \itemize{
+#'  \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
+#'  \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
+#'  \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
+#'  \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+#'  \item
+#' }
 #' @export
 #' @examples
 #' \dontrun{
@@ -94,7 +105,7 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, 
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL, source = "A") {
+                    split, width = NULL, height = NULL, source = "A") {
   
   if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
@@ -102,6 +113,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   
   # "native" plotly arguments
   attrs <- list(...)
+  
   # warn about old arguments that are no longer supported
   for (i in c("filename", "fileopt", "world_readable")) {
     if (is.null(attrs[[i]])) next
@@ -110,7 +122,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   if (!is.null(attrs[["group"]])) {
     warning(
-      "The group argument has been deprecated. Use `group_by()` instead.\n",
+      "The group argument has been deprecated. Use `group_by()` or split instead.\n",
       "See `help('plotly_data')` for examples"
     )
     attrs[["group"]] <- NULL
@@ -125,6 +137,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   attrs$symbol <- if (!missing(symbol)) symbol
   attrs$linetype <- if (!missing(linetype)) linetype
   attrs$size <- if (!missing(size)) size
+  attrs$split <- if (!missing(split)) split
   
   # tack on scale ranges
   attrs$colors <- colors
@@ -156,6 +169,70 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   )
   
   as_widget(p)
+}
+
+
+#' Initiate a plotly-mapbox object
+#' 
+#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' a plotly-mapbox object. This enforces the entire plot so use
+#' the scattermapbox trace type, and enables higher level geometries
+#' like \code{\link{add_polygons}()} to work
+#' 
+#' @param data A data frame (optional).
+#' @param ... arguments passed along to \code{\link{plot_ly}()}. They should be
+#' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
+#' Note that x/y can also be used in place of lat/lon.
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_geo}()}, \code{\link{ggplotly}()} 
+#' 
+#' @examples \dontrun{
+#' 
+#' map_data("world", "canada") %>%
+#'   group_by(group) %>%
+#'   plot_mapbox(x = ~long, y = ~lat) %>%
+#'   add_polygons() %>%
+#'   layout(
+#'     mapbox = list(
+#'       center = list(lat = ~median(lat), lon = ~median(long))
+#'     )
+#'   )
+#' }
+#' 
+plot_mapbox <- function(data = data.frame(), ...) {
+  p <- config(plot_ly(data, ...), mapboxAccessToken = mapbox_token())
+  # not only do we use this for is_mapbox(), but also setting the layout attr
+  # https://plot.ly/r/reference/#layout-mapbox
+  p$x$layout$mapType <- "mapbox"
+  geo2cartesian(p)
+}
+
+#' Initiate a plotly-geo object
+#' 
+#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' a plotly-geo object. This enforces the entire plot so use
+#' the scattergeo trace type, and enables higher level geometries
+#' like \code{\link{add_polygons}()} to work
+#' 
+#' @param data A data frame (optional).
+#' @param ... arguments passed along to \code{\link{plot_ly}()}.
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
+#' @examples
+#' 
+#' map_data("world", "canada") %>%
+#'   group_by(group) %>%
+#'   plot_geo(x = ~long, y = ~lat) %>%
+#'   add_markers(size = I(1))
+#' 
+plot_geo <- function(data = data.frame(), ...) {
+  p <- plot_ly(data, ...)
+  # not only do we use this for is_geo(), but also setting the layout attr
+  # https://plot.ly/r/reference/#layout-geo
+  p$x$layout$mapType <- "geo"
+  geo2cartesian(p)
 }
 
 

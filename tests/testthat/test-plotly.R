@@ -120,7 +120,7 @@ test_that("Alpha still applies when no color is applied", {
   p <- plot_ly(mtcars, x = ~mpg, y = ~disp, alpha = 0.5) 
   l <- expect_traces(p, 1, "alpha-no-color")
   # verify the correct alpha for the points
-  expect_equal(l$data[[1]]$marker$color, "rgba(31,119,180,0.5)")
+  expect_true(l$data[[1]]$marker$color == "rgba(31,119,180,0.5)")
 })
 
 

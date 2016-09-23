@@ -21,15 +21,8 @@ add_data <- function(p, data = NULL) {
 
 #' Add trace(s) to a plotly visualization
 #' 
-#' @param p a plotly or ggplot object.
-#' @param ... These arguments are documented in the references section below.
-#' Note that acceptable arguments depend on the trace type.
-#' @param color Either a variable name or a vector to use for color mapping.
-#' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
-#' @param size A variable name or numeric vector to encode the size of markers.
-#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
-#' @param data A data frame to associate with this trace (optional). If not 
-#' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
+#' @inheritParams plot_ly
+#' @param p a plotly object
 #' @param inherit inherit attributes from \code{\link{plot_ly}()}?
 #' @param z a numeric matrix
 #' @param x the x variable.
@@ -59,20 +52,14 @@ add_data <- function(p, data = NULL) {
 #'   add_markers(color = ~pop) %>%
 #'   layout(showlegend = FALSE)
 #' 
-add_trace <- function(p, ..., color, symbol, size, linetype, 
+add_trace <- function(p, ...,
                       data = NULL, inherit = TRUE) {
   
   # "native" plotly arguments
   attrs <- list(...)
   
-  # tack on "special" arguments
-  attrs$color <- if (!missing(color)) color
-  attrs$symbol <- if (!missing(symbol)) symbol
-  attrs$linetype <- if (!missing(linetype)) linetype
-  attrs$size <- if (!missing(size)) size
-  
   if (!is.null(attrs[["group"]])) {
-    warning("The group argument has been deprecated. Use group_by() instead.")
+    warning("The group argument has been deprecated. Use group_by() or split instead.")
   }
   
   p <- add_data(p, data)
@@ -251,36 +238,61 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
   add_trace_classed(
     p, class = c("plotly_ribbon", "plotly_polygon"), 
     x = x, ymin = ymin, ymax = ymax, type = "scatter", mode = "lines",
-    fill = "toself",  ..., data = data, inherit = inherit
+    hoveron = "points", fill = "toself",  ..., data = data, inherit = inherit
   )
 }
 
-
 #' @inheritParams add_trace
 #' @rdname add_trace
+#' @param r For polar chart only. Sets the radial coordinates.
+#' @param t For polar chart only. Sets the radial coordinates.
 #' @export
 #' @examples 
-#' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-#' plot_ly(huron, x = ~year, ymax = ~level) %>% add_area()
-add_area <- function(p, x = NULL, ymax = NULL, ...,
+#' p <- plot_ly(plotly::wind, r = ~r, t = ~t) %>% add_area(color = ~nms)
+#' layout(p, radialaxis = list(ticksuffix = "%"), orientation = 270)
+add_area <- function(p, r = NULL, t = NULL, ...,
                      data = NULL, inherit = TRUE) {
-  
   if (inherit) {
-    x <- x %||% p$x$attrs[[1]][["x"]]
-    ymax <- ymax %||% p$x$attrs[[1]][["ymax"]]
+    r <- t %||% p$x$attrs[[1]][["r"]]
+    t <- t %||% p$x$attrs[[1]][["t"]]
   }
-  if (is.null(x) || is.null(ymax)) {
-    stop("Must supply `x`/`ymax` attributes", call. = FALSE)
+  if (is.null(r) || is.null(t)) {
+    stop("Must supply `r`/`t` attributes", call. = FALSE)
   }
   add_trace_classed(
-    p, class = c("plotly_area", "plotly_ribbon", "plotly_polygon"), 
-    x = x, ymax = ymax,
-    type = "scatter", fill = "toself", mode = "lines",  
+    p, class = "plotly_area", r = r, t = t, type = "area",
     ..., data = data, inherit = inherit
   )
 }
 
-
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @param values the value to associated with each slice of the pie.
+#' @param labels the labels (categories) corresponding to \code{values}.
+#' @export
+#' @examples 
+#' ds <- data.frame(
+#'   labels = c("A", "B", "C"),
+#'   values = c(10, 40, 60)
+#' )
+#' 
+#' plot_ly(ds, labels = ~labels, values = ~values) %>%
+#'   add_pie() %>%
+#'   layout(title = "Basic Pie Chart using Plotly")
+add_pie <- function(p, values = NULL, labels = NULL, ...,
+                     data = NULL, inherit = TRUE) {
+  if (inherit) {
+    values <- values %||% p$x$attrs[[1]][["values"]]
+    labels <- labels %||% p$x$attrs[[1]][["labels"]]
+  }
+  if (is.null(values)) {
+    stop("Must supply `values`", call. = FALSE)
+  }
+  add_trace_classed(
+    p, class = "plotly_pie", values = values, labels = labels, type = "pie",
+    ..., data = data, inherit = inherit
+  )
+}
 
 #' @inheritParams add_trace
 #' @rdname add_trace
@@ -464,19 +476,23 @@ add_surface <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   )
 }
 
-
 #' @inheritParams add_trace
 #' @rdname add_trace
-#' @param geo anchor this trace on which geo object?
 #' @export
 #' @examples 
-#' plot_ly() %>% add_scattergeo()
-add_scattergeo <- function(p, geo = NULL, ..., data = NULL, inherit = TRUE) {
+#' plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) %>% add_mesh()
+add_mesh <- function(p, x = NULL, y = NULL, z = NULL, ..., 
+                        data = NULL, inherit = TRUE) {
   if (inherit) {
-    geo <- geo %||% p$x$attrs[[1]][["geo"]] %||% "geo"
+    x <- x %||% p$x$attrs[[1]][["x"]]
+    y <- y %||% p$x$attrs[[1]][["y"]]
+    z <- z %||% p$x$attrs[[1]][["z"]]
+  }
+  if (is.null(x) || is.null(y) || is.null(z)) {
+    stop("Must supply `x`/`y`/`z` attributes", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_scattergeo", type = "scattergeo", geo = geo, 
+    p, class = "plotly_mesh", x = x, y = y, z = z, type = "mesh3d", 
     ..., data = data, inherit = inherit
   )
 }
@@ -485,24 +501,18 @@ add_scattergeo <- function(p, geo = NULL, ..., data = NULL, inherit = TRUE) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' density <- state.x77[, "Population"] / state.x77[, "Area"]
-#' plot_ly(z = ~density) %>% 
-#'   add_choropleth(locations = state.abb, locationmode = 'USA-states') %>%
-#'   layout(geo = list(scope = "usa"))
-add_choropleth <- function(p, z = NULL, geo = NULL, ..., 
+add_scattergeo <- function(p, ...) {
+  .Deprecated("geo")
+  p
+}
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+add_choropleth <- function(p, z = NULL, ..., 
                            data = NULL, inherit = TRUE) {
-  if (inherit) {
-    z <- z %||% p$x$attrs[[1]][["z"]]
-    geo <- geo %||% p$x$attrs[[1]][["geo"]] %||% "geo"
-  }
-  if (is.null(z)) {
-    stop("Must supply `z` attribute", call. = FALSE)
-  }
-  add_trace_classed(
-    p, class = "plotly_choropleth", z = z, type = "choropleth", geo = geo,
-    ..., data = data, inherit = inherit
-  )
+  .Deprecated("geo")
+  p
 }
 
 # attach a class to a trace which informs data processing in plotly_build
@@ -515,12 +525,16 @@ add_trace_classed <- function(p, class = "plotly_polygon", ...) {
 
 # retrieve the non-plotly.js attributes for a given trace
 special_attrs <- function(trace) {
-  switch(
+  attrs <- switch(
     class(trace)[[1]],
-    plotly_area = c("ymax"),
     plotly_segment = c("xend", "yend"),
     plotly_ribbon = c("ymin", "ymax")
   )
+  # for data training, we temporarily rename lat/lon as x/y
+  if (isTRUE(trace[["type"]] %in% c("scattermapbox", "scattergeo"))) {
+    attrs <- c(attrs, c("x", "y"))
+  }
+  attrs
 }
 
 

@@ -26,7 +26,8 @@ plotly_build.list <- function(p) {
 
 #' @export
 plotly_build.gg <- function(p) {
-  ggplotly(p)
+  p <- ggplotly(p)
+  supply_defaults(p)
 }
 
 #' @export
@@ -70,6 +71,21 @@ plotly_build.plotly <- function(p) {
     if (length(p$x$attrs) > 1 || isTRUE(attr(p, "ggplotly"))) {
       p$x$attrs[[1]] <- NULL
     }
+  }
+  
+  # trace type checking and renaming for plot objects
+  if (is_mapbox(p) || is_geo(p)) {
+    p <- geo2cartesian(p)
+    p$x$attrs <- lapply(p$x$attrs, function(tr) {
+      if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
+        stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
+      }
+      if (is_mapbox(p)) tr[["type"]] <- "scattermapbox"
+      if (is_geo(p)) {
+        tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
+      }
+      tr
+    })
   }
 
   dats <- Map(function(x, y) {
@@ -115,7 +131,7 @@ plotly_build.plotly <- function(p) {
         }
       }
     }
-
+    
     if (inherits(trace, c("plotly_surface", "plotly_contour"))) {
       # TODO: generate matrix for users?
       # (1) if z is vector, and x/y are null throw error
@@ -134,11 +150,10 @@ plotly_build.plotly <- function(p) {
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(), 
-      ".plotlyGroupIndex", "key",
+      dataArrayAttrs, special_attrs(trace), npscales(),
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      "text"
+      ".plotlyGroupIndex", "text"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -154,7 +169,7 @@ plotly_build.plotly <- function(p) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
        # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% "linetype" |
+      isSplit <- names(builtData) %in% c("split", "linetype") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
@@ -271,7 +286,7 @@ plotly_build.plotly <- function(p) {
       p$x$layout$showlegend <- FALSE
     } else {
       # shrink the colorbar
-      idx <- which(vapply(p$x$data, function(x) inherits(x, "plotly_colorbar"), logical(1)))
+      idx <- which(vapply(p$x$data, inherits, logical(1), "plotly_colorbar"))
       p$x$data[[idx]]$marker$colorbar <- modify_list(
         list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top"),
         p$x$data[[idx]]$marker$colorbar
@@ -285,6 +300,20 @@ plotly_build.plotly <- function(p) {
   
   # if crosstalk() hasn't been called on this plot, populate it with defaults
   p$x$highlight <- p$x$highlight %||% highlight_defaults()
+  
+  # supply trace anchor and domain information  
+  p <- supply_defaults(p)
+  
+  # attribute naming corrections for "geo-like" traces
+  p$x$data <- lapply(p$x$data, function(tr) {
+    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
+      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
+      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
+      tr[c("x", "y")] <- NULL
+    }
+    tr
+  })
+
   # polar charts don't like null width/height keys 
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
   if (is.null(p$x$layout[["width"]])) p$x$layout[["width"]] <- NULL
@@ -317,9 +346,6 @@ plotly_build.plotly <- function(p) {
 # ----------------------------------------------------------------
 
 train_data <- function(data, trace) {
-  if (inherits(trace, "plotly_area")) {
-    data$ymin <- 0
-  }
   if (inherits(trace, "plotly_ribbon")) {
     data <- ribbon_dat(data)
   }
@@ -425,10 +451,13 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    idx <- i %% length(colorDefaults)
+    if (idx == 0) idx <- 10
     col <- color[[i]] %||% colorDefaults[[idx]]
     alpha <- traces[[i]]$alpha %||% 1
     rgb <- toRGB(col, alpha)
+    # we need some way to identify pre-specified defaults in subplot to retrain them
+    if (is.null(color[[i]])) attr(rgb, "defaultAlpha") <- alpha
     obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
     traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
     traces[[i]][[obj]] <- modify_list(list(fillcolor = rgb), traces[[i]][[obj]])
@@ -468,6 +497,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         if (traces[[i]][["type"]] == "contour") {
           traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
         }
+        traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
         next
       }
       colorObj$color <- color[[i]]

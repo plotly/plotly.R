@@ -6,7 +6,7 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, width = NULL, height = NULL, source = "A")
+  linetypes = NULL, split, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
@@ -36,7 +36,8 @@ To avoid scaling, wrap with \code{\link{I}()}, and provide valid
 \item{symbols}{A character vector of symbol types. 
 Either valid \link{pch} or plotly symbol codes may be supplied.}
 
-\item{size}{A variable name or numeric vector to encode the size of markers.}
+\item{size}{A formula containing a name or expression yielding a numeric vector. 
+Values are scaled according to the range specified in \code{sizes}.}
 
 \item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
 
@@ -46,6 +47,11 @@ Values are scaled and mapped to linetypes based on the value of
 
 \item{linetypes}{A character vector of line types. 
 Either valid \link{par} (lty) or plotly dash codes may be supplied.}
+
+\item{split}{A formula containing a name or expression. Similar to
+\code{\link{group_by}()}, but ensures at least one trace for each unique
+value. This replaces the functionality of the (now deprecated)
+\code{group} argument.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
@@ -119,6 +125,12 @@ plot_ly(d, x = ~date, y = ~median, color = I("black")) \%>\%
 Carson Sievert
 }
 \seealso{
-\code{\link{ggplotly}()}
+\itemize{
+ \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
+ \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
+ \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
+ \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+ \item
+}
 }
 

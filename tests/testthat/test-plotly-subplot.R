@@ -145,10 +145,9 @@ test_that("geo+cartesian behaves", {
   )
   # create a map of population density
   density <- state.x77[, "Population"] / state.x77[, "Area"]
-  map <- plot_ly(
-    z = ~density, 
-    text = state.name, locations = state.abb,
-    type = 'choropleth', locationmode = 'USA-states', geo = "geo"
+  map <- plot_geo(
+    z = ~density, text = state.name, 
+    locations = state.abb, locationmode = 'USA-states'
   ) %>% layout(geo = g)
   # create a bunch of horizontal bar charts 
   vars <- colnames(state.x77)

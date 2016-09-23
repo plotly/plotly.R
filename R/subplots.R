@@ -1,6 +1,7 @@
 #' View multiple plots in a single view
 #' 
-#' @param ... any number of plotly objects
+#' @param ... any number of plotly objects. A list of plotly objects or a tibble
+#' with one list-column of plotly objects is also accepted.
 #' @param nrows number of rows for laying out plots in a grid-like structure.
 #' Only used if no domain is already specified.
 #' @param widths relative width of each column on a 0-1 scale. By default all
@@ -32,40 +33,40 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
-  # are the dots a list of plotly objects?
   dotz <- list(...)
+  
   if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
+    # if ... is a list (or a tibble), list(...) is a (length 1) list 
+    # containing a list of plotly objects
     dotz <- dotz[[1]]
   }
+  
+  if (tibble::is_tibble(dotz)) {
+    # if dots is a tibble, search for one column with a list of plotly objects
+    idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
+    if (length(idx) != 1) {
+      stop(
+        "If you supply a tibble to subplot(), \n", 
+        "it must have _one_ column with a list of plotly objects",
+        call. = FALSE
+      )
+    }
+    dotz <- dotz[[idx]]
+  }
+  
   # build each plot
-  plotz <- lapply(dotz, function(d) plotly_build(d)$x)
-  # ensure "axis-reference" trace attributes are properly formatted
-  # TODO: should this go inside plotly_build()?
-  plotz <- lapply(plotz, function(p) {
-    p$data <- lapply(p$data, function(tr) {
-      if (length(tr[["geo"]])) {
-        tr[["geo"]] <- sub("^geo1$", "geo", tr[["geo"]][1]) %||% NULL
-        tr[["xaxis"]] <- NULL
-        tr[["yaxis"]] <- NULL
-      } else {
-        tr[["geo"]] <- NULL
-        tr[["xaxis"]] <- sub("^x1$", "x", tr[["xaxis"]][1] %||% "x") 
-        tr[["yaxis"]] <- sub("^y1$", "y", tr[["yaxis"]][1] %||% "y")
-      }
-      tr
-    })
-    p
-  })
-  # Are any traces referencing "axis-like" layout attributes that are missing?
+  plotz <- lapply(dotz, function(d) plotly_build(d)[["x"]])
+  
+  # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,
   # which makes this sort of thing possible:
   # https://plot.ly/r/map-subplots-and-small-multiples/
   plots <- list()
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]
-    layoutAttrs <- c(names(p$layout), c("geo", "xaxis", "yaxis"))
-    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["xaxis"]]))
-    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["geo"]] %||% tr[["yaxis"]]))
+    layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
+    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]]))
+    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]]))
     missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
     # move to next iteration if trace references are complete
     if (!length(missingAttrs)) next
@@ -80,7 +81,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       )
       # reset the anchors
       newPlot$data <- lapply(newPlot$data, function(tr) {
-        for (k in c("geo", "xaxis", "yaxis")) {
+        for (k in c("mapbox", "geo", "xaxis", "yaxis")) {
           tr[[k]] <- sub("[0-9]+", "", tr[[k]]) %||% NULL
         }
         tr
@@ -88,28 +89,30 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       plots <- c(plots, list(newPlot))
     }
   }
-  # main plot objects
+  
+  # grab main plot objects
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
   shapes <- lapply(layouts, "[[", "shapes")
   annotations <- lapply(layouts, function(x) {
-    # keep non axis title annotations
+    # keep non axis title annotations (for rescaling)
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
-  # collect axis objects (note a _single_ geo object counts a both an x and y)
-  geoDomainDefault <- list(x = c(0, 1), y = c(0, 1))
+  # collect axis objects (note a _single_ geo/mapbox object counts a both an x and y)
   xAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^xaxis", names(lay), value = TRUE) %||% "xaxis"
+    keys <- grep("^geo|^mapbox|^xaxis", names(lay), value = TRUE) %||% "xaxis"
     for (k in keys) {
-      lay[[k]]$domain <- lay[[k]]$domain %||% if (grepl("^geo", k)) geoDomainDefault else c(0, 1)
+      dom <- lay[[k]]$domain %||% c(0, 1)
+      if ("x" %in% names(dom)) dom <- dom[["x"]]
     }
     lay[keys]
   })
   yAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^yaxis", names(lay), value = TRUE) %||% "yaxis"
+    keys <- grep("^geo|^mapbox|^yaxis", names(lay), value = TRUE) %||% "yaxis"
     for (k in keys) {
-      lay[[k]]$domain <- lay[[k]]$domain %||% if (grepl("^geo", k)) geoDomainDefault else c(0, 1)
+      dom <- lay[[k]]$domain %||% c(0, 1)
+      if ("y" %in% names(dom)) dom <- dom[["y"]]
     }
     lay[keys]
   })
@@ -168,17 +171,17 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
     # for cartesian, bump corresponding axis anchor
     for (j in seq_along(xAxes[[i]])) {
-      if (grepl("^geo", names(xAxes[[i]][j]))) next
+      if (grepl("^geo|^mapbox", names(xAxes[[i]][j]))) next
       map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
     }
     for (j in seq_along(yAxes[[i]])) {
-      if (grepl("^geo", names(yAxes[[i]][j]))) next
+      if (grepl("^geo|^mapbox", names(yAxes[[i]][j]))) next
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
     }
     # map trace xaxis/yaxis/geo attributes
-    for (key in c("geo", "xaxis", "yaxis")) {
+    for (key in c("geo", "subplot", "xaxis", "yaxis")) {
       oldAnchors <- unlist(lapply(traces[[i]], "[[", key))
       if (!length(oldAnchors)) next
       axisMap <- if (key == "yaxis") yMap else xMap
@@ -220,13 +223,18 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     data = Reduce(c, traces),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
+  # retrain default coloring
+  p$data <- retrain_color_defaults(p$data)
+  
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
   p$layout$annotations <- Reduce(c, annotations)
   p$layout$shapes <- Reduce(c, shapes)
   # merge non-axis layout stuff
-  layouts <- lapply(layouts, function(x) x[!grepl("^[x-y]axis|^geo", names(x))] %||% list())
+  layouts <- lapply(layouts, function(x) {
+    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes", names(x))] %||% list()
+  })
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
     if (!all(idx <- which_layout %in% seq_along(plots))) {
@@ -240,7 +248,9 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   if (length(sources) > 1) {
     stop("Can have multiple source values in a single subplot")
   }
+  p$config <- Reduce(modify_list, lapply(plots, "[[", "config")) %||% NULL
   p$source <- sources[1]
+  p$subplot <- TRUE
   as_widget(p)
 }
 
@@ -325,4 +335,23 @@ reposition <- function(obj, domains) {
     }
   }
   obj
+}
+
+
+retrain_color_defaults <- function(traces) {
+  colorDefaults <- traceColorDefaults()
+  for (i in seq_along(traces)) {
+    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
+    idx <- i %% length(colorDefaults)
+    if (idx == 0) idx <- 10
+    newDefault <- colorDefaults[[idx]]
+    for (j in c("marker", "line", "text")) {
+      obj <- traces[[i]][[j]]
+      if (!"color" %in% names(obj)) next
+      alpha <- attr(obj[["color"]], "defaultAlpha")
+      if (is.null(alpha)) next
+      traces[[i]][[j]][["color"]] <- toRGB(colorDefaults[[idx]], alpha)
+    }
+  }
+  traces
 }

@@ -12,7 +12,9 @@
 \alias{add_histogram2dcontour}
 \alias{add_lines}
 \alias{add_markers}
+\alias{add_mesh}
 \alias{add_paths}
+\alias{add_pie}
 \alias{add_polygons}
 \alias{add_ribbons}
 \alias{add_scattergeo}
@@ -22,8 +24,7 @@
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-add_trace(p, ..., color, symbol, size, linetype, data = NULL,
-  inherit = TRUE)
+add_trace(p, ..., data = NULL, inherit = TRUE)
 
 add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
   inherit = TRUE)
@@ -45,7 +46,10 @@ add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
   inherit = TRUE)
 
-add_area(p, x = NULL, ymax = NULL, ..., data = NULL, inherit = TRUE)
+add_area(p, r = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
+
+add_pie(p, values = NULL, labels = NULL, ..., data = NULL,
+  inherit = TRUE)
 
 add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
@@ -66,26 +70,20 @@ add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_surface(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_scattergeo(p, geo = NULL, ..., data = NULL, inherit = TRUE)
+add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
+  inherit = TRUE)
+
+add_scattergeo(p, ...)
 
 add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
-\item{p}{a plotly or ggplot object.}
+\item{p}{a plotly object}
 
-\item{...}{These arguments are documented in the references section below.
-Note that acceptable arguments depend on the trace type.}
+\item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
+Note that acceptable arguments depend on the value of \code{type}.}
 
-\item{color}{Either a variable name or a vector to use for color mapping.}
-
-\item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
-
-\item{size}{A variable name or numeric vector to encode the size of markers.}
-
-\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
-
-\item{data}{A data frame to associate with this trace (optional). If not 
-provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
+\item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
 
 \item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
 
@@ -105,7 +103,13 @@ provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()
 
 \item{ymax}{a variable used to define the upper boundary of a polygon.}
 
-\item{geo}{anchor this trace on which geo object?}
+\item{r}{For polar chart only. Sets the radial coordinates.}
+
+\item{t}{For polar chart only. Sets the radial coordinates.}
+
+\item{values}{the value to associated with each slice of the pie.}
+
+\item{labels}{the labels (categories) corresponding to \code{values}.}
 }
 \description{
 Add trace(s) to a plotly visualization
@@ -140,8 +144,16 @@ ggplot2::map_data("world", "canada") \%>\%
 
 plot_ly(economics, x = ~date) \%>\% 
   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
-huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-plot_ly(huron, x = ~year, ymax = ~level) \%>\% add_area()
+p <- plot_ly(plotly::wind, r = ~r, t = ~t) \%>\% add_area(color = ~nms)
+layout(p, radialaxis = list(ticksuffix = "\%"), orientation = 270)
+ds <- data.frame(
+  labels = c("A", "B", "C"),
+  values = c(10, 40, 60)
+)
+
+plot_ly(ds, labels = ~labels, values = ~values) \%>\%
+  add_pie() \%>\%
+  layout(title = "Basic Pie Chart using Plotly")
 library(dplyr)
 mtcars \%>\%
   count(vs) \%>\%
@@ -158,11 +170,7 @@ plot_ly(z = ~volcano) \%>\% add_heatmap()
 plot_ly(z = ~volcano) \%>\% add_contour()
 plot_ly(mtcars, x = ~factor(vs), y = ~mpg) \%>\% add_boxplot()
 plot_ly(z = ~volcano) \%>\% add_surface()
-plot_ly() \%>\% add_scattergeo()
-density <- state.x77[, "Population"] / state.x77[, "Area"]
-plot_ly(z = ~density) \%>\% 
-  add_choropleth(locations = state.abb, locationmode = 'USA-states') \%>\%
-  layout(geo = list(scope = "usa"))
+plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) \%>\% add_mesh()
 }
 \author{
 Carson Sievert

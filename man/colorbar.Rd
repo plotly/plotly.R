@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{colorbar}
 \alias{colorbar}
-\title{Modify colorbar}
+\title{Modify the colorbar}
 \usage{
 colorbar(p, ...)
 }
@@ -13,9 +13,12 @@ colorbar(p, ...)
 \url{https://plot.ly/r/reference/#scatter-marker-colorbar}.}
 }
 \description{
-Modify colorbar
+Modify the colorbar
 }
 \examples{
+
+plot_ly(mpg, x = ~cty, y = ~hwy, color = ~cyl) \%>\%
+  colorbar(len = 0.5)
 
 }
 \author{

@@ -9,7 +9,8 @@ subplot(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02,
   which_layout = "merge")
 }
 \arguments{
-\item{...}{any number of plotly objects}
+\item{...}{any number of plotly objects. A list of plotly objects or a tibble
+with one list-column of plotly objects is also accepted.}
 
 \item{nrows}{number of rows for laying out plots in a grid-like structure.
 Only used if no domain is already specified.}

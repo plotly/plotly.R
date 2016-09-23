@@ -49,7 +49,7 @@ getLevels <- function(x) {
 
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
-  c("color", "symbol", "linetype", "size")
+  c("color", "symbol", "linetype", "size", "split")
 }
 
 # copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
@@ -77,12 +77,81 @@ arrange_safe <- function(data, vars) {
   if (length(vars)) dplyr::arrange_(data, .dots = vars) else data
 }
 
+is_mapbox <- function(p) {
+  identical(p$x$layout[["mapType"]], "mapbox")
+}
+
+is_geo <- function(p) {
+  identical(p$x$layout[["mapType"]], "geo")
+}
+
+# retrive mapbox token if one is set; otherwise, throw error
+mapbox_token <- function() {
+  token <- Sys.getenv("MAPBOX_TOKEN", NA)
+  if (is.na(token)) {
+    stop(
+      "No mapbox access token found. Obtain a token here\n",
+      "https://www.mapbox.com/help/create-api-access-token/\n",
+      "Once you have a token, assign it to an environment variable \n",
+      "named 'MAPBOX_TOKEN', for example,\n",
+      "Sys.setenv('MAPBOX_TOKEN' = 'secret token')", call. = FALSE
+    )
+  }
+  token
+}
+
+# rename attrs (unevaluated arguments) from geo locations (lat/lon) to cartesian
+geo2cartesian <- function(p) {
+  p$x$attrs <- lapply(p$x$attrs, function(tr) {
+    tr[["x"]] <- tr[["x"]] %||% tr[["lat"]]
+    tr[["y"]] <- tr[["y"]] %||% tr[["lon"]]
+    tr
+  })
+  p
+}
+
+is_subplot <- function(p) {
+  isTRUE(p$x$subplot)
+}
+
+supply_defaults <- function(p) {
+  # no need to supply defaults for subplots
+  if (is_subplot(p)) return(p)
+  # supply trace anchor defaults
+  anchors <- if (is_geo(p)) c("geo" = "geo") else if (is_mapbox(p)) c("subplot" = "mapbox") else c("xaxis" = "x", "yaxis" = "y")
+  
+  p$x$data <- lapply(p$x$data, function(tr) {
+    for (i in seq_along(anchors)) {
+      key <- names(anchors)[[i]]
+      if (!has_attr(tr[["type"]] %||% "scatter", key)) next
+      tr[[key]] <- sub("^y1$", "y", sub("^x1$", "x", tr[[key]][1])) %||% anchors[[i]]
+    }
+    tr
+  })
+  # supply domain defaults
+  geoDomain <- list(x = c(0, 1), y = c(0, 1))
+  if (is_geo(p) || is_mapbox(p)) {
+    p$x$layout[grepl("^[x-y]axis", names(p$x$layout))] <- NULL
+    p$x$layout[[p$x$layout$mapType]] <- modify_list(
+      list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
+    )
+  } else {
+    for (axis in c("xaxis", "yaxis")) {
+      p$x$layout[[axis]] <- modify_list(
+        list(domain = c(0, 1)), p$x$layout[[axis]]
+      )
+    }
+  }
+  p
+}
+
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
   check_attrs(
     sub("[0-9]+$", "", names(p$x$layout)),
-    c(names(Schema$layout$layoutAttributes), c("barmode", "bargap"))
+    c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
+    "layout"
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
@@ -99,7 +168,7 @@ verify_attr_names <- function(p) {
 check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
-    warning("'", type, "' traces don't have these attributes: '",
+    warning("'", type, "' objects don't have these attributes: '",
          paste(illegalAttrs, collapse = "', '"), "'\n", 
          "Valid attributes include:\n'",
          paste(validAttrs, collapse = "', '"), "'\n", 
