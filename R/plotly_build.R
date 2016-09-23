@@ -144,10 +144,10 @@ plotly_build.plotly <- function(p) {
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(), ".plotlyGroupIndex", 
+      dataArrayAttrs, special_attrs(trace), npscales(),
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      "text"
+      ".plotlyGroupIndex", "text"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -276,7 +276,7 @@ plotly_build.plotly <- function(p) {
       p$x$layout$showlegend <- FALSE
     } else {
       # shrink the colorbar
-      idx <- which(vapply(p$x$data, function(x) inherits(x, "plotly_colorbar"), logical(1)))
+      idx <- which(vapply(p$x$data, inherits, logical(1), "plotly_colorbar"))
       p$x$data[[idx]]$marker$colorbar <- modify_list(
         list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top"),
         p$x$data[[idx]]$marker$colorbar

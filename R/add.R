@@ -21,15 +21,7 @@ add_data <- function(p, data = NULL) {
 
 #' Add trace(s) to a plotly visualization
 #' 
-#' @param p a plotly or ggplot object.
-#' @param ... These arguments are documented in the references section below.
-#' Note that acceptable arguments depend on the trace type.
-#' @param color Either a variable name or a vector to use for color mapping.
-#' @param symbol Either a variable name or a (discrete) vector to use for symbol encoding.
-#' @param size A variable name or numeric vector to encode the size of markers.
-#' @param linetype Either a variable name or a (discrete) vector to use for linetype encoding.
-#' @param data A data frame to associate with this trace (optional). If not 
-#' provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.
+#' @inheritParams add_trace
 #' @param inherit inherit attributes from \code{\link{plot_ly}()}?
 #' @param z a numeric matrix
 #' @param x the x variable.

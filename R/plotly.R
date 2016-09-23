@@ -29,7 +29,8 @@
 #' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
 #' @param linetypes A character vector of line types. 
 #' Either valid \link{par} (lty) or plotly dash codes may be supplied.
-#' @param size A variable name or numeric vector to encode the size of markers.
+#' @param size A formula containing a name or expression yielding a numeric vector. 
+#' Values are scaled according to the range specified in \code{sizes}.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param split A formula containing a name or expression. Similar to
 #' \code{\link{group_by}()}, but ensures at least one trace for each unique

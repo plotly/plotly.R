@@ -78,22 +78,6 @@ add_scattergeo(p, ...)
 add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
-\item{p}{a plotly or ggplot object.}
-
-\item{...}{These arguments are documented in the references section below.
-Note that acceptable arguments depend on the trace type.}
-
-\item{color}{Either a variable name or a vector to use for color mapping.}
-
-\item{symbol}{Either a variable name or a (discrete) vector to use for symbol encoding.}
-
-\item{size}{A variable name or numeric vector to encode the size of markers.}
-
-\item{linetype}{Either a variable name or a (discrete) vector to use for linetype encoding.}
-
-\item{data}{A data frame to associate with this trace (optional). If not 
-provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
-
 \item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
 
 \item{x}{the x variable.}
