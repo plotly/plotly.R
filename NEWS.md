@@ -1,4 +1,14 @@
-# 4.5.0 -- 21 September 2016
+# 4.5.1 -- 23 September 2016
+
+## NEW FEATURES
+
+* A tibble with a list-column of plotly objects can now be input directly into `subplot()`
+
+## BUG FIXES
+
+* The `colorbar()` function now works on colorbars generated via `z` mapping.
+
+# 4.5.0 -- 22 September 2016
 
 ## NEW FEATURES
 
