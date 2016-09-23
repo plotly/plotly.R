@@ -75,15 +75,12 @@ plotly_build.plotly <- function(p) {
   
   # trace type checking and renaming for plot objects
   if (is_mapbox(p) || is_geo(p)) {
+    p <- geo2cartesian(p)
     p$x$attrs <- lapply(p$x$attrs, function(tr) {
-      tr[["x"]] <- tr[["x"]] %||% tr[["lat"]]
-      tr[["y"]] <- tr[["y"]] %||% tr[["lon"]]
       if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
         stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
       }
-      if (is_mapbox(p)) {
-        tr[["type"]] <- "scattermapbox"
-      }
+      if (is_mapbox(p)) tr[["type"]] <- "scattermapbox"
       if (is_geo(p)) {
         tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
       }
@@ -99,6 +96,7 @@ plotly_build.plotly <- function(p) {
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
     )
+
     # if appropriate, tack on a group index
     grps <- tryCatch(
       as.character(dplyr::groups(dat)), 
@@ -478,6 +476,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         if (traces[[i]][["type"]] == "contour") {
           traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
         }
+        traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
         next
       }
       colorObj$color <- color[[i]]

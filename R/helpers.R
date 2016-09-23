@@ -16,9 +16,16 @@ colorbar <- function(p, ...) {
   if (sum(isBar) != 1) {
     stop("This function only works with one colorbar")
   }
-  p$x$data[[which(isBar)]]$marker$colorbar <- modify_list(
-    p$x$data[[which(isBar)]]$marker$colorbar, list(...)
-  ) 
+  tr <- p$x$data[[which(isBar)]]
+  if (inherits(tr, "zcolor")) {
+    p$x$data[[which(isBar)]][["colorbar"]] <- modify_list(
+      tr[["colorbar"]], list(...)
+    )
+  } else {
+    p$x$data[[which(isBar)]]$marker$colorbar <- modify_list(
+      tr$marker$colorbar, list(...)
+    )
+  }
   p
 }
 

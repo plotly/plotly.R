@@ -96,6 +96,16 @@ mapbox_token <- function() {
   token
 }
 
+# rename attrs (unevaluated arguments) from geo locations (lat/lon) to cartesian
+geo2cartesian <- function(p) {
+  p$x$attrs <- lapply(p$x$attrs, function(tr) {
+    tr[["x"]] <- tr[["x"]] %||% tr[["lat"]]
+    tr[["y"]] <- tr[["y"]] %||% tr[["lon"]]
+    tr
+  })
+  p
+}
+
 is_subplot <- function(p) {
   isTRUE(p$x$subplot)
 }
