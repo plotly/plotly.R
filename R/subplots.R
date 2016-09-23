@@ -342,10 +342,13 @@ retrain_color_defaults <- function(traces) {
   colorDefaults <- traceColorDefaults()
   for (i in seq_along(traces)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    idx <- i %% length(colorDefaults)
+    if (idx == 0) idx <- 10
     newDefault <- colorDefaults[[idx]]
     for (j in c("marker", "line", "text")) {
-      alpha <- attr(traces[[i]][[j]][["color"]], "defaultAlpha")
+      obj <- traces[[i]][[j]]
+      if (!"color" %in% names(obj)) next
+      alpha <- attr(obj[["color"]], "defaultAlpha")
       if (is.null(alpha)) next
       traces[[i]][[j]][["color"]] <- toRGB(colorDefaults[[idx]], alpha)
     }

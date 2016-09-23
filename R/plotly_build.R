@@ -433,7 +433,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    idx <- i %% length(colorDefaults)
+    if (idx == 0) idx <- 10
     col <- color[[i]] %||% colorDefaults[[idx]]
     alpha <- traces[[i]]$alpha %||% 1
     rgb <- toRGB(col, alpha)
