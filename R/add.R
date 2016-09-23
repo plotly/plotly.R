@@ -59,20 +59,14 @@ add_data <- function(p, data = NULL) {
 #'   add_markers(color = ~pop) %>%
 #'   layout(showlegend = FALSE)
 #' 
-add_trace <- function(p, ..., color, symbol, size, linetype, 
+add_trace <- function(p, ...,
                       data = NULL, inherit = TRUE) {
   
   # "native" plotly arguments
   attrs <- list(...)
   
-  # tack on "special" arguments
-  attrs$color <- if (!missing(color)) color
-  attrs$symbol <- if (!missing(symbol)) symbol
-  attrs$linetype <- if (!missing(linetype)) linetype
-  attrs$size <- if (!missing(size)) size
-  
   if (!is.null(attrs[["group"]])) {
-    warning("The group argument has been deprecated. Use group_by() instead.")
+    warning("The group argument has been deprecated. Use group_by() or split instead.")
   }
   
   p <- add_data(p, data)

@@ -6,7 +6,7 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, width = NULL, height = NULL, source = "A")
+  linetypes = NULL, split, width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -46,6 +46,11 @@ Values are scaled and mapped to linetypes based on the value of
 
 \item{linetypes}{A character vector of line types. 
 Either valid \link{par} (lty) or plotly dash codes may be supplied.}
+
+\item{split}{A formula containing a name or expression. Similar to
+\code{\link{group_by}()}, but ensures at least one trace for each unique
+value. This replaces the functionality of the (now deprecated)
+\code{group} argument.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 

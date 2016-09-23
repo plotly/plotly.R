@@ -24,8 +24,7 @@
 \alias{add_trace}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-add_trace(p, ..., color, symbol, size, linetype, data = NULL,
-  inherit = TRUE)
+add_trace(p, ..., data = NULL, inherit = TRUE)
 
 add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
   inherit = TRUE)

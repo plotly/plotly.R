@@ -49,7 +49,7 @@ getLevels <- function(x) {
 
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
-  c("color", "symbol", "linetype", "size")
+  c("color", "symbol", "linetype", "size", "split")
 }
 
 # copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
