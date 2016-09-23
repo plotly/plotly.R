@@ -1,6 +1,7 @@
 #' View multiple plots in a single view
 #' 
-#' @param ... any number of plotly objects
+#' @param ... any number of plotly objects. A list of plotly objects or a tibble
+#' with one list-column of plotly objects is also accepted.
 #' @param nrows number of rows for laying out plots in a grid-like structure.
 #' Only used if no domain is already specified.
 #' @param widths relative width of each column on a 0-1 scale. By default all
