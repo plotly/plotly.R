@@ -118,8 +118,9 @@ supply_defaults <- function(p) {
   
   p$x$data <- lapply(p$x$data, function(tr) {
     for (i in seq_along(anchors)) {
-      nm <- names(anchors)[[i]]
-      tr[[nm]] <- sub("^y1$", "y", sub("^x1$", "x", tr[[nm]][1])) %||% anchors[[i]]
+      key <- names(anchors)[[i]]
+      if (!has_attr(tr[["type"]] %||% "scatter", key)) next
+      tr[[key]] <- sub("^y1$", "y", sub("^x1$", "x", tr[[key]][1])) %||% anchors[[i]]
     }
     tr
   })
