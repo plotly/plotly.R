@@ -76,8 +76,7 @@ add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
 
 add_scattergeo(p, ...)
 
-add_choropleth(p, z = NULL, geo = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}

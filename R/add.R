@@ -522,7 +522,7 @@ add_scattergeo <- function(p, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_choropleth <- function(p, z = NULL, geo = NULL, ..., 
+add_choropleth <- function(p, z = NULL, ..., 
                            data = NULL, inherit = TRUE) {
   .Deprecated("geo")
   p

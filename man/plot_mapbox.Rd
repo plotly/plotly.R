@@ -7,6 +7,8 @@
 plot_mapbox(data = data.frame(), ...)
 }
 \arguments{
+\item{data}{A data frame (optional).}
+
 \item{...}{arguments passed along to \code{\link{plot_ly}()}. They should be
 valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
 Note that x/y can also be used in place of lat/lon.}

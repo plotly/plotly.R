@@ -7,6 +7,8 @@
 plot_geo(data = data.frame(), ...)
 }
 \arguments{
+\item{data}{A data frame (optional).}
+
 \item{...}{arguments passed along to \code{\link{plot_ly}()}.}
 }
 \description{

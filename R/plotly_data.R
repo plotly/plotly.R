@@ -48,7 +48,6 @@
 #' means %>%
 #'   dplyr::left_join(plots) %>%
 #'   arrange(mn) %>%
-#'   .[["p"]] %>%
 #'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
 #' # more dplyr verbs applied to plotly objects

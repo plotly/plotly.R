@@ -155,6 +155,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 #' the scattermapbox trace type, and enables higher level geometries
 #' like \code{\link{add_polygons}()} to work
 #' 
+#' @param data A data frame (optional).
 #' @param ... arguments passed along to \code{\link{plot_ly}()}. They should be
 #' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
 #' Note that x/y can also be used in place of lat/lon.
@@ -180,7 +181,7 @@ plot_mapbox <- function(data = data.frame(), ...) {
   # not only do we use this for is_mapbox(), but also setting the layout attr
   # https://plot.ly/r/reference/#layout-mapbox
   p$x$layout$mapType <- "mapbox"
-  p
+  geo2cartesian(p)
 }
 
 #' Initiate a plotly-geo object
@@ -190,6 +191,7 @@ plot_mapbox <- function(data = data.frame(), ...) {
 #' the scattergeo trace type, and enables higher level geometries
 #' like \code{\link{add_polygons}()} to work
 #' 
+#' @param data A data frame (optional).
 #' @param ... arguments passed along to \code{\link{plot_ly}()}.
 #' @export
 #' @author Carson Sievert
@@ -206,7 +208,7 @@ plot_geo <- function(data = data.frame(), ...) {
   # not only do we use this for is_geo(), but also setting the layout attr
   # https://plot.ly/r/reference/#layout-geo
   p$x$layout$mapType <- "geo"
-  p
+  geo2cartesian(p)
 }
 
 
