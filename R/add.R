@@ -21,7 +21,8 @@ add_data <- function(p, data = NULL) {
 
 #' Add trace(s) to a plotly visualization
 #' 
-#' @inheritParams add_trace
+#' @inheritParams plot_ly
+#' @param p a plotly object
 #' @param inherit inherit attributes from \code{\link{plot_ly}()}?
 #' @param z a numeric matrix
 #' @param x the x variable.

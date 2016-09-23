@@ -78,6 +78,13 @@ add_scattergeo(p, ...)
 add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
+\item{p}{a plotly object}
+
+\item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
+Note that acceptable arguments depend on the value of \code{type}.}
+
+\item{data}{A data frame (optional).}
+
 \item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
 
 \item{x}{the x variable.}
