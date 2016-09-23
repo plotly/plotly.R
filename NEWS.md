@@ -1,3 +1,13 @@
+# 4.5.2 -- 23 September 2016
+
+## NEW FEATURES
+
+* The new argument, `split`, replaces the old functionality of the now deprecated `group` argument by creating one trace per value.
+
+## BUG FIXES
+
+* Passing plots to `subplot()` without a specified color (once again) match the coloring defaults supplied by plotly.js (see #724).
+
 # 4.5.1 -- 23 September 2016
 
 ## NEW FEATURES
