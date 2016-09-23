@@ -223,6 +223,9 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     data = Reduce(c, traces),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
+  # retrain default coloring
+  p$data <- retrain_color_defaults(p$data)
+  
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
@@ -332,4 +335,20 @@ reposition <- function(obj, domains) {
     }
   }
   obj
+}
+
+
+retrain_color_defaults <- function(traces) {
+  colorDefaults <- traceColorDefaults()
+  for (i in seq_along(traces)) {
+    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
+    idx <- i %% length(colorDefaults) + i %/% length(colorDefaults)
+    newDefault <- colorDefaults[[idx]]
+    for (j in c("marker", "line", "text")) {
+      alpha <- attr(traces[[i]][[j]][["color"]], "defaultAlpha")
+      if (is.null(alpha)) next
+      traces[[i]][[j]][["color"]] <- toRGB(colorDefaults[[idx]], alpha)
+    }
+  }
+  traces
 }
