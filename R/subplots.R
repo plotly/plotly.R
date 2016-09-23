@@ -33,6 +33,13 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
   dotz <- list(...)
+  
+  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
+    # if ... is a list (or a tibble), list(...) is a (length 1) list 
+    # containing a list of plotly objects
+    dotz <- dotz[[1]]
+  }
+  
   if (tibble::is_tibble(dotz)) {
     # if dots is a tibble, search for one column with a list of plotly objects
     idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
@@ -44,11 +51,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       )
     }
     dotz <- dotz[[idx]]
-  } else if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
-    # if ... is a list of plotly objects, list(...) is a (length 1) list 
-    # containing a list of plotly objects
-    dotz <- dotz[[1]]
   }
+  
   # build each plot
   plotz <- lapply(dotz, function(d) plotly_build(d)[["x"]])
   
