@@ -49,7 +49,14 @@ getLevels <- function(x) {
 
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
-  c("color", "symbol", "linetype", "size")
+  c("color", "symbol", "linetype", "size", "split", "trellis")
+}
+
+missing_anchor_attrs <- function(p) {
+  layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
+  xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]]))
+  yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]]))
+  setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
 }
 
 # copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
@@ -110,12 +117,16 @@ is_subplot <- function(p) {
   isTRUE(p$x$subplot)
 }
 
+subplot_ids <- function() {
+  # 3D is not yet working in subplot
+  c("xaxis", "yaxis", "geo", "mapbox")
+}
+
 supply_defaults <- function(p) {
   # no need to supply defaults for subplots
   if (is_subplot(p)) return(p)
   # supply trace anchor defaults
   anchors <- if (is_geo(p)) c("geo" = "geo") else if (is_mapbox(p)) c("subplot" = "mapbox") else c("xaxis" = "x", "yaxis" = "y")
-  
   p$x$data <- lapply(p$x$data, function(tr) {
     for (i in seq_along(anchors)) {
       key <- names(anchors)[[i]]

@@ -31,6 +31,11 @@ plotly_build.gg <- function(p) {
 }
 
 #' @export
+plotly_build.built <- function(p) {
+  structure(p, class = setdiff(class(p), "built"))
+}
+
+#' @export
 plotly_build.plotly <- function(p) {
 
   # make this plot retrievable
@@ -144,10 +149,10 @@ plotly_build.plotly <- function(p) {
     # I don't think we ever want mesh3d's data attrs
     dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(), ".plotlyGroupIndex", 
+      dataArrayAttrs, special_attrs(trace), npscales(),
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      "text"
+      ".plotlyGroupIndex", "text"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -157,13 +162,12 @@ plotly_build.plotly <- function(p) {
     for (i in seq_along(tr)) {
       if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
     }
-
     if (NROW(builtData) > 0) {
       # Build the index used to split one "trace" into multiple traces
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
        # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% "linetype" |
+      isSplit <- names(builtData) %in% c("linetype", "split", "trellis") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
@@ -225,6 +229,7 @@ plotly_build.plotly <- function(p) {
     if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
   }
 
+
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
     d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
@@ -250,7 +255,8 @@ plotly_build.plotly <- function(p) {
   traces <- map_size(traces)
   traces <- map_symbol(traces)
   traces <- map_linetype(traces)
-
+  traces <- map_trellis(traces)
+  
   # remove special mapping attributes
   for (i in seq_along(traces)) {
     mappingAttrs <- c(
@@ -275,7 +281,7 @@ plotly_build.plotly <- function(p) {
       p$x$layout$showlegend <- FALSE
     } else {
       # shrink the colorbar
-      idx <- which(vapply(p$x$data, function(x) inherits(x, "plotly_colorbar"), logical(1)))
+      idx <- which(vapply(p$x$data, inherits, logical(1), "plotly_colorbar"))
       p$x$data[[idx]]$marker$colorbar <- modify_list(
         list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top"),
         p$x$data[[idx]]$marker$colorbar
@@ -320,7 +326,7 @@ plotly_build.plotly <- function(p) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
-  p
+  if (length(missing_anchor_attrs(p$x))) subplot(prefix_class(p, "built")) else p
 }
 
 # ----------------------------------------------------------------
@@ -643,6 +649,26 @@ map_linetype <- function(traces) {
     if (!grepl("lines", traces[[i]]$mode %||% "")) {
       message("Adding lines to mode; otherwise linetype would have no effect.")
       traces[[i]][["mode"]] <- paste0(traces[[i]][["mode"]], "+lines")
+    }
+  }
+  traces
+}
+
+# map the trellis variable to a sensible trace ID
+map_trellis <- function(traces) {
+  anchors <- c("xaxis" = "x",  "geo" = "geo", "subplot" = "mapbox")
+  domain <- unique(unlist(lapply(traces, "[[", "trellis")))
+  for (i in seq_along(traces)) {
+    if (is.null(traces[[i]][["trellis"]])) next
+    for (j in seq_along(anchors)) {
+      key <- names(anchors)[[j]]
+      if (!has_attr(traces[[i]][["type"]], key)) next
+      range <- paste0(
+        rep(anchors[[j]], length(domain)), sub("^1$", "", seq_along(domain))
+      )
+      map <- setNames(range, domain)
+      traces[[i]][[key]] <- 
+        setNames(map[as.character(traces[[i]][["trellis"]])], NULL)
     }
   }
   traces

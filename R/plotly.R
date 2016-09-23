@@ -29,8 +29,15 @@
 #' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
 #' @param linetypes A character vector of line types. 
 #' Either valid \link{par} (lty) or plotly dash codes may be supplied.
-#' @param size A variable name or numeric vector to encode the size of markers.
+#' @param size A formula containing a name or expression yielding a numeric vector. 
+#' Values are scaled according to the range specified in \code{sizes}.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
+#' @param split A formula containing a name or expression. Similar to
+#' \code{\link{group_by}()}, but ensures at least one trace for each unique
+#' value. This replaces the functionality of the (now deprecated)
+#' \code{group} argument.
+#' @param trellis A formula containing a name or expression. The result is
+#' used as a conditioning variable for generating trellis displays.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param source Only relevant for \link{event_data}.
@@ -84,7 +91,7 @@
 plot_ly <- function(data = data.frame(), ..., type = NULL, 
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    width = NULL, height = NULL, source = "A") {
+                    split, trellis, width = NULL, height = NULL, source = "A") {
   if (!is.data.frame(data)) {
     stop("First argument, `data`, must be a data frame.", call. = FALSE)
   }
@@ -99,7 +106,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   if (!is.null(attrs[["group"]])) {
     warning(
-      "The group argument has been deprecated. Use `group_by()` instead.\n",
+      "The group argument has been deprecated. Use `group_by()` or split instead.\n",
       "See `help('plotly_data')` for examples"
     )
     attrs[["group"]] <- NULL
@@ -114,6 +121,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   attrs$symbol <- if (!missing(symbol)) symbol
   attrs$linetype <- if (!missing(linetype)) linetype
   attrs$size <- if (!missing(size)) size
+  attrs$split <- if (!missing(split)) split
+  attrs$trellis <- if (!missing(trellis)) trellis
   
   attrs$colors <- colors
   attrs$alpha <- alpha

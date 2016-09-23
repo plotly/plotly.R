@@ -6,7 +6,8 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, width = NULL, height = NULL, source = "A")
+  linetypes = NULL, split, trellis, width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -36,7 +37,8 @@ To avoid scaling, wrap with \code{\link{I}()}, and provide valid
 \item{symbols}{A character vector of symbol types. 
 Either valid \link{pch} or plotly symbol codes may be supplied.}
 
-\item{size}{A variable name or numeric vector to encode the size of markers.}
+\item{size}{A formula containing a name or expression yielding a numeric vector. 
+Values are scaled according to the range specified in \code{sizes}.}
 
 \item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
 
@@ -46,6 +48,14 @@ Values are scaled and mapped to linetypes based on the value of
 
 \item{linetypes}{A character vector of line types. 
 Either valid \link{par} (lty) or plotly dash codes may be supplied.}
+
+\item{split}{A formula containing a name or expression. Similar to
+\code{\link{group_by}()}, but ensures at least one trace for each unique
+value. This replaces the functionality of the (now deprecated)
+\code{group} argument.}
+
+\item{trellis}{A formula containing a name or expression. The result is
+used as a conditioning variable for generating trellis displays.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
