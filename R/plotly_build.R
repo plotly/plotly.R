@@ -163,8 +163,7 @@ plotly_build.plotly <- function(p) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
        # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% "split"
-        names(builtData) %in% "linetype" |
+      isSplit <- names(builtData) %in% c("split", "linetype") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
