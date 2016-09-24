@@ -1,7 +1,11 @@
 #' View multiple plots in a single view
 #' 
-#' @param ... any number of plotly objects. A list of plotly objects or a tibble
-#' with one list-column of plotly objects is also accepted.
+#' @param ... One of the following 
+#' \itemize{
+#'  \item any number of plotly/ggplot2 objects.
+#'  \item a list of plotly/ggplot2 objects.
+#'  \item a tibble with one list-column of plotly/ggplot2 objects.
+#' }
 #' @param nrows number of rows for laying out plots in a grid-like structure.
 #' Only used if no domain is already specified.
 #' @param widths relative width of each column on a 0-1 scale. By default all
@@ -24,11 +28,28 @@
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
-#' @examples \dontrun{
-#' p1 <- plot_ly(economics, x = date, y = uempmed, showlegend = F)
-#' p2 <- plot_ly(economics, x = date, y = unemploy, showlegend = F)
-#' subplot(p1, p2, p1, p2, nrows = 2)
-#' }
+#' @examples 
+#' 
+#' # pass any number of plotly objects to subplot()
+#' p1 <- plot_ly(economics, x = ~date, y = ~uempmed)
+#' p2 <- plot_ly(economics, x = ~date, y = ~unemploy)
+#' subplot(p1, p2, p1, p2, nrows = 2, margin = 0.05)
+#' 
+#' # or pass a list
+#' library(purrr)
+#' economics_long %>%
+#'   split(.$variable) %>%
+#'   map(~ plot_ly(., x = ~date, y = ~value)) %>%
+#'   subplot(nrows = NROW(.), shareX = T)
+#'   
+#' # or pass a tibble with a list-column of plotly objects
+#' economics_long %>%
+#'   group_by(variable) %>%
+#'   do(p = plot_ly(., x = ~date, y = ~value)) %>%
+#'   subplot(nrows = NROW(.), shareX = T)
+#'   
+#' # learn more at https://cpsievert.github.io/plotly_book/subplot.html
+#' 
 
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
