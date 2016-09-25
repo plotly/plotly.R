@@ -62,13 +62,13 @@ library(purrr)
 economics_long \%>\%
   split(.$variable) \%>\%
   map(~ plot_ly(., x = ~date, y = ~value)) \%>\%
-  subplot(nrows = NROW(.), shareX = T)
+  subplot(nrows = NROW(.), shareX = TRUE)
   
 # or pass a tibble with a list-column of plotly objects
 economics_long \%>\%
   group_by(variable) \%>\%
   do(p = plot_ly(., x = ~date, y = ~value)) \%>\%
-  subplot(nrows = NROW(.), shareX = T)
+  subplot(nrows = NROW(.), shareX = TRUE)
   
 # learn more at https://cpsievert.github.io/plotly_book/subplot.html
 
