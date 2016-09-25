@@ -5,9 +5,6 @@ output: html_document
 
 Welcome to the GitHub Pages site for [plotly's R package](https://github.com/ropensci/plotly). We currently use this site to host a [plotly version of the ggplot2 docs](http://ropensci.github.io/plotly/ggplot2/), which is convenient for assessing the parity of `ggplotly()` and static ggplot2. To reduce load times, these pages have static png versions of the interactive result produced by `ggplotly()`, but you can click on the png to view the interactive version. 
 
-We also host the official package vignettes here in GitHub pages:
-
-* <http://ropensci.github.io/plotly/vignettes/intro.html>
-* <http://ropensci.github.io/plotly/vignettes/subplot.html>
+We used to host package vignettes here as well, but these have been replaced by the [plotly book](http://cpsievert.github.io/plotly_book)
 
 For more resources and documentation, visit [plotly's official R home page](https://plot.ly/r/)
