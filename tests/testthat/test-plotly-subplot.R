@@ -45,10 +45,13 @@ test_that("group + [x/y]axis works", {
   expect_true(all(1 >= xdom[[3]] & xdom[[3]] > 2/3))
 })
 
-test_that("shareX produces one x-axis", {
+test_that("shareX produces one x-axis and a legend", {
   s <- subplot(plot_ly(x = 1), plot_ly(x = 1), nrows = 2, shareX = TRUE)
   l <- expect_traces(s, 2, "shareX")
   expect_true(sum(grepl("^xaxis", names(l$layout))) == 1)
+  expect_true(l$data[[1]]$showlegend %||% TRUE)
+  expect_true(l$data[[2]]$showlegend %||% TRUE)
+  expect_true(l$layout$showlegend %||% TRUE)
 })
 
 test_that("shareY produces one y-axis", {
