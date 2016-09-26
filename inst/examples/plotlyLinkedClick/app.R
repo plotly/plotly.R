@@ -19,7 +19,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   output$heat <- renderPlotly({
     plot_ly(x = nms, y = nms, z = correlation, 
-            key = correlation, type = "heatmap") %>%
+            key = correlation, type = "heatmap", source="heatplot") %>%
       layout(xaxis = list(title = ""), 
              yaxis = list(title = ""))
   })
@@ -35,7 +35,7 @@ server <- function(input, output, session) {
   })
   
   output$scatterplot <- renderPlotly({
-    s <- event_data("plotly_click")
+    s <- event_data("plotly_click", source="heatplot")
     if (length(s)) {
       vars <- c(s[["x"]], s[["y"]])
       d <- setNames(mtcars[vars], c("x", "y"))
