@@ -56,7 +56,7 @@ HTMLWidgets.widget({
           var tr = x.data[pt.curveNumber];
           // add on additional trace info, if it exists
           attachKey = function(keyName) {
-            if (tr.hasOwnProperty(keyName) && tr[keyName] !== null) {
+            if (tr !== undefined && tr.hasOwnProperty(keyName) && tr[keyName] !== null) {
               if (typeof pt.pointNumber === "number") {
                 obj[keyName] = tr[keyName][pt.pointNumber];
               } else {
