@@ -413,7 +413,7 @@ map_size <- function(traces) {
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 map_color <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, function(x) {
-    x[["color"]] %||% if (has_attr(x$type, "colorscale")) x[["z"]] else NULL
+    x[["color"]] %||% if (identical("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["z"]] else NULL
   })
   isConstant <- vapply(color, function(x) inherits(x, "AsIs") || is.null(x), logical(1))
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
@@ -428,7 +428,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
   hasZ <- has_attr(types, "colorscale") &
-    any(vapply(traces, function(tr) !is.null(tr$z), logical(1)))
+    any(vapply(traces, function(tr) {
+      !is.null(tr[["z"]]) || identical("histogram2d", tr[["type"]])
+      }, logical(1)))
 
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
