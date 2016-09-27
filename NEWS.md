@@ -1,3 +1,9 @@
+# 4.5.4 -- 27 September 2016
+
+## BUG FIX
+
+* Only insert missing values to differentiate groups when it's relevant.
+
 # 4.5.3 -- 27 September 2016
 
 ## NEW FEATURES

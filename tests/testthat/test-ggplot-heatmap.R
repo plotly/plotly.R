@@ -46,7 +46,7 @@ test_that("geom_tile() scale_fill_gradient2()", {
 })
 
 tidy_cor <- function(x) {
-  co <- as.data.frame(cor(x))
+  co <- as.data.frame(cor(x[vapply(x, is.numeric, logical(1))]))
   co$var1 <- row.names(co)
   tidyr::gather(co, var2, cor, -var1)
 }

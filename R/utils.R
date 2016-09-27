@@ -47,6 +47,12 @@ getLevels <- function(x) {
   if (is.factor(x)) levels(x) else sort(unique(x))
 }
 
+# is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
+has_group <- function(trace) {
+  inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
+    (grepl("scatter", trace[["type"]]) && grepl("lines", trace[["mode"]]))
+}
+
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
   c("color", "symbol", "linetype", "size", "split")
