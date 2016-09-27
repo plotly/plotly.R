@@ -441,6 +441,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     # we need some way to identify pre-specified defaults in subplot to retrain them
     if (is.null(color[[i]])) attr(rgb, "defaultAlpha") <- alpha
     obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
+    if (is.null(obj)) next
     traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
     traces[[i]][[obj]] <- modify_list(list(fillcolor = rgb), traces[[i]][[obj]])
   }
