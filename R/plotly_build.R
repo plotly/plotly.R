@@ -179,16 +179,13 @@ plotly_build.plotly <- function(p) {
       #    are combined into a single grouping variable, .plotlyGroupIndex
       builtData <- arrange_safe(builtData, ".plotlyTraceIndex")
       isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
-      # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
-      hasGrp <- inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
-        (grepl("scatter", trace[["type"]]) && grepl("lines", trace[["mode"]]))
       # warn about missing values if groups aren't relevant for this trace type
-      if (any(!isComplete) && !hasGrp) {
+      if (any(!isComplete) && !has_group(trace)) {
         warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
       }
       builtData[[".plotlyMissingIndex"]] <- cumsum(!isComplete)
       builtData <- builtData[isComplete, ]
-      if (length(grps) && hasGrp && isTRUE(trace[["connectgaps"]])) {
+      if (length(grps) && has_group(trace) && isTRUE(trace[["connectgaps"]])) {
         stop(
           "Can't use connectgaps=TRUE when data has group(s).", call. = FALSE
         )
@@ -229,7 +226,8 @@ plotly_build.plotly <- function(p) {
   traces <- lapply(traces, function(x) {
     d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
     d <- group2NA(
-      d, ".plotlyGroupIndex", ordered = if (inherits(x, "plotly_line")) "x",
+      d, if (has_group(x)) ".plotlyGroupIndex", 
+      ordered = if (inherits(x, "plotly_line")) "x",
       retrace.first = inherits(x, "plotly_polygon")
     )
     for (i in x$.plotlyVariableMapping) {

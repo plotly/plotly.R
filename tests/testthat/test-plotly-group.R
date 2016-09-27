@@ -52,3 +52,16 @@ test_that("Missing values are preserved for lines within a color variable", {
   # connectgaps makes sense in this case
   l <- expect_traces(add_lines(p3, connectgaps = TRUE), 5, "NAs-within-color2")
 })
+
+m <- mtcars
+m$rowname <- rownames(mtcars)
+p <- m %>% 
+  dplyr::group_by_("rowname") %>%
+  plot_ly(x = ~wt, y = ~mpg) %>% 
+  add_markers()
+
+test_that("Groups are ignored if grouping is irrelevant for the geom", {
+  l <- expect_traces(p, 1, "no-NAs-for-irrelevant-group")
+  expect_length(l$data[[1]][["x"]], 32)
+  expect_length(l$data[[1]][["y"]], 32)
+})
