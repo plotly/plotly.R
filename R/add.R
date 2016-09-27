@@ -409,9 +409,7 @@ add_heatmap <- function(p, x = NULL, y = NULL, z = NULL, ...,
     z <- z %||% p$x$attrs[[1]][["z"]]
   }
   if (is.null(z)) {
-    if (is.null(x) || is.null(y)) {
-      stop("Must supply both `x` and `y` attributes if `z` is NULL", call. = FALSE)
-    }
+    stop("Must supply `z` attribute", call. = FALSE)
   }
   add_trace_classed(
     p, class = "plotly_heatmap", z = z,

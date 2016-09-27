@@ -14,9 +14,9 @@ Hide color bar(s)
 }
 \examples{
 
-plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) \%>\%
-  add_markers() \%>\%
-  hide_colorbar()
+p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~cyl)
+hide_colorbar(p)
+  
 }
 \seealso{
 \code{\link{hide_legend}()}

@@ -14,11 +14,10 @@ Hide legend
 }
 \examples{
 
-plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) \%>\%
-  add_markers() \%>\%
-  hide_colorbar()
+p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
+hide_legend(p)
 }
 \seealso{
-\code{\link{hide_legend}()}
+\code{\link{hide_colorbat}()}
 }
 

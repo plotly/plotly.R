@@ -1,3 +1,14 @@
+# 4.5.3 -- 27 September 2016
+
+## NEW FEATURES
+
+* The `colorbar()` function gains a new `limits` arguments for controlling the colorscale
+limits.
+
+## BUG FIX
+
+* The `z` is now required in `add_heatmap()`. If you want a `z` to be computed, use `add_histogram()`.
+
 # 4.5.2 -- 23 September 2016
 
 ## NEW FEATURES

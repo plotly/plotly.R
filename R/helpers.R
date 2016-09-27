@@ -3,21 +3,64 @@
 #' @param p a plotly object
 #' @param ... arguments are documented here 
 #' \url{https://plot.ly/r/reference/#scatter-marker-colorbar}.
+#' @param limits numeric vector of length 2. Set the extent of the colorbar scale.
 #' @author Carson Sievert
 #' @export
 #' @examples 
 #' 
-#' plot_ly(mpg, x = ~cty, y = ~hwy, color = ~cyl) %>%
-#'   colorbar(len = 0.5)
+#' p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~cyl)
 #' 
-colorbar <- function(p, ...) {
+#' # pass any colorbar attribute -- 
+#' # https://plot.ly/r/reference/#scatter-marker-colorbar
+#' colorbar(p, len = 0.5)
+#' 
+#' # Expand the limits of the colorbar
+#' colorbar(p, limits = c(0, 20))
+#' # values outside the colorbar limits are considered "missing"
+#' colorbar(p, limits = c(5, 6))
+#' 
+#' # also works on colorbars generated via a z value
+#' corr <- cor(diamonds[vapply(diamonds, is.numeric, logical(1))])
+#' plot_ly(x = rownames(corr), y = colnames(corr), z = corr) %>%
+#'  add_heatmap() %>%
+#'  colorbar(limits = c(-1, 1))
+
+colorbar <- function(p, ..., limits = NULL) {
   p <- plotly_build(p)
   isBar <- vapply(p$x$data, is.colorbar, logical(1))
   if (sum(isBar) != 1) {
     stop("This function only works with one colorbar")
   }
   tr <- p$x$data[[which(isBar)]]
-  if (inherits(tr, "zcolor")) {
+  hasZcolor <- inherits(tr, "zcolor")
+  
+  # retrain limits of the colorscale
+  if (!is.null(limits)) {
+    limits <- sort(limits)
+    if (hasZcolor) {
+      z <- p$x$data[[which(isBar)]][["z"]]
+      if (!is.null(dz <- dim(z))) {
+        z <- c(z)
+      }
+      z[z < limits[1] | limits[2] < z] <- NA
+      if (!is.null(dz)) dim(z) <- dz
+      p$x$data[[which(isBar)]]$z <- z
+      p$x$data[[which(isBar)]]$zmin <- limits[1]
+      p$x$data[[which(isBar)]]$zmax <- limits[2]
+    } else {
+      # since the colorscale is in a different trace, retrain all traces
+      p$x$data <- lapply(p$x$data, function(x) {
+        col <- x$marker[["color"]]
+        x$marker[["color"]][col < limits[1] | limits[2] < col] <- NA
+        x$marker[["cmin"]] <- limits[1]
+        x$marker[["cmax"]] <- limits[2]
+        x
+      })
+    }
+  }
+  
+  # pass along ... to the colorbar
+  if (hasZcolor) {
     p$x$data[[which(isBar)]][["colorbar"]] <- modify_list(
       tr[["colorbar"]], list(...)
     )
@@ -49,9 +92,9 @@ hide_guides <- function(p) {
 #' @seealso \code{\link{hide_legend}()}
 #' @examples
 #' 
-#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
-#'   add_markers() %>%
-#'   hide_colorbar()
+#' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~cyl)
+#' hide_colorbar(p)
+#'   
 hide_colorbar <- function(p) {
   p <- plotly_build(p)
   for (i in seq_along(p$x$data)) {
@@ -70,12 +113,11 @@ hide_colorbar <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \code{\link{hide_legend}()}
+#' @seealso \code{\link{hide_colorbat}()}
 #' @examples 
 #' 
-#' plot_ly(economics, x = ~date, y = ~unemploy / pop, color = ~pop) %>%
-#'   add_markers() %>%
-#'   hide_colorbar()
+#' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
+#' hide_legend(p)
 
 hide_legend <- function(p) {
   p <- plotly_build(p)
