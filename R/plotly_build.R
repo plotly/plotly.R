@@ -153,7 +153,7 @@ plotly_build.plotly <- function(p) {
       dataArrayAttrs, special_attrs(trace), npscales(),
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text"
+      ".plotlyGroupIndex", "text", "key"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
