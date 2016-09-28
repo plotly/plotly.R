@@ -185,7 +185,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- by_layer(function(l, d) l$compute_geom_1(d))
   
   # Apply position adjustments
-  data <- by_layer(function(l, d) l$compute_position(d, plot))
+  data <- by_layer(function(l, d) l$compute_position(d, layout))
   
   # Reset position scales, then re-train and map.  This ensures that facets
   # have control over the range of a plot: is it generated from what's
