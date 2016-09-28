@@ -411,7 +411,7 @@ map_size <- function(traces) {
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
 map_color <- function(traces, title = "", na.color = "transparent") {
   color <- lapply(traces, function(x) {
-    x[["color"]] %||% if (identical("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["z"]] else NULL
+    x[["color"]] %||% if (grepl("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["z"]] else NULL
   })
   isConstant <- vapply(color, function(x) inherits(x, "AsIs") || is.null(x), logical(1))
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
@@ -427,7 +427,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasText <- has_text(types, modes)
   hasZ <- has_attr(types, "colorscale") &
     any(vapply(traces, function(tr) {
-      !is.null(tr[["z"]]) || identical("histogram2d", tr[["type"]])
+      !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
       }, logical(1)))
 
   colorDefaults <- traceColorDefaults()
@@ -477,7 +477,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         traces[[i]] <- modify_list(colorObj, traces[[i]])
         traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
         # sigh, contour colorscale doesn't support alpha
-        if (traces[[i]][["type"]] == "contour") {
+        if (grepl("contour", traces[[i]][["type"]])) {
           traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
         }
         traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
