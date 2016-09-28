@@ -57,7 +57,5 @@ Suggests:
     listviewer
 LazyData: true
 Remotes:
-    rstudio/crosstalk,
-    hadley/tidyr#229,
     hadley/ggplot2
 RoxygenNote: 5.0.1
