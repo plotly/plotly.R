@@ -1,3 +1,13 @@
+# 4.5.5 -- 28 September 2016
+
+## NEW FEATURES
+
+* histogram2d/histogram2dcontour traces now respect the `colors` argument.
+
+## BUG FIX
+
+* Don't traceify by non-existant levels, fixes #735.
+
 # 4.5.4 -- 27 September 2016
 
 ## BUG FIX
