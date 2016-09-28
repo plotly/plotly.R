@@ -147,11 +147,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # ------------------------------------------------------------------------
   
   # add a key aesthetic if one doesn't already exist and crosstalk key is detected
-  has_crosstalk_key <- is.null(p$mapping[["key"]]) && 
-    crosstalk_key() %in% names(p$data)
-  if (has_crosstalk_key) {
-    p$mapping <- c(p$mapping, key = as.symbol(crosstalk_key()))
-  }
+  #has_crosstalk_key <- is.null(p$mapping[["key"]]) && 
+  #  crosstalk_key() %in% names(p$data)
+  #if (has_crosstalk_key) {
+  #  p$mapping <- c(p$mapping, key = as.symbol(crosstalk_key()))
+  #}
   
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
@@ -180,11 +180,23 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- layout$map(data)
   
   # save the domain of the group for display in tooltips
+  # you can have many keys inside a group, but only one group inside a key
+  tryNULL <- function(expr) {
+    tryCatch(expr, error = function(e) NULL)
+  }
+  
   groupDomains <- Map(function(x, y) {
-    tryCatch(
-      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x), 
-      error = function(e) NULL
+    grp <- tryNULL(
+      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x)
     )
+    key <- y$data[[crosstalk_key()]] %||% x[[crosstalk_key()]] %||% NULL
+    if (is.null(grp) && is.null(key)) return(NULL)
+    if (is.null(grp)) return(tibble::tibble(group = ggfun("NO_GROUP"), key = key))
+    # mimic the behavoir in compute_aesthetics while retaining the domain
+    # note that we don't consider the key since add_group would consider it a group var
+    tbl <- ggfun("add_group")(tibble::tibble(group = grp, group_plotlyDomain = grp))
+    if (length(key) == NROW(tbl)) tbl[["key"]] <- key
+    unique(tbl)
   }, data, p$layers)
   
   # Compute aesthetics to produce data with generalised variable names
@@ -338,7 +350,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # layers -> plotly.js traces
   p$tooltip <- tooltip
   data <- Map(function(x, y) {
-    tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
+    tryNULL(dplyr::left_join(x, y, by = "group")) %||% x
   }, data, groupDomains)
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   
