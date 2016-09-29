@@ -147,8 +147,8 @@ plotly_build.plotly <- function(p) {
     isArray <- lapply(Attrs, function(x) {
       tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
     })
-    # I don't think we ever want mesh3d's data attrs
-    dataArrayAttrs <- if (identical(trace[["type"]], "mesh3d")) NULL else names(Attrs)[as.logical(isArray)]
+    # "non-tidy" traces allow x/y of different lengths, so ignore those
+    dataArrayAttrs <- if (is_tidy(trace)) names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
       dataArrayAttrs, special_attrs(trace), npscales(),
       # for some reason, text isn't listed as a data array in some traces

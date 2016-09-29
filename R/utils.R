@@ -47,6 +47,15 @@ getLevels <- function(x) {
   if (is.factor(x)) levels(x) else sort(unique(x))
 }
 
+# Don't attempt to do "tidy" data training on these trace types
+is_tidy <- function(trace) {
+  type <- trace[["type"]] %||% "scatter"
+  !type %in% c(
+    "mesh3d", "heatmap", "histogram2d", 
+    "histogram2dcontour", "contour", "surface"
+  )
+}
+
 # is grouping relevant for this geometry? (e.g., grouping doesn't effect a scatterplot)
 has_group <- function(trace) {
   inherits(trace, paste0("plotly_", c("segment", "path", "line", "polygon"))) ||
