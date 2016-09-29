@@ -348,7 +348,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   layout$panel_layout$y_max <- sapply(layout$panel_ranges, function(z) max(z$y.range))
   
   # layers -> plotly.js traces
-  p$tooltip <- tooltip
+  plot$tooltip <- tooltip
   data <- Map(function(x, y) {
     tryNULL(dplyr::left_join(x, y, by = "group")) %||% x
   }, data, groupDomains)
