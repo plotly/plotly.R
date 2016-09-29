@@ -114,6 +114,19 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
+  
+  # create a viewport so we can convert relative sizes correctly
+  # if height/width not specified, it is estimated from current viewport (npc)
+  width <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  height <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  # assume 96 dots per inch...mm2pixels also does this....
+  vp <- grid::viewport(
+    width = grid::unit(width * 72.27 / 96, "points"), 
+    height = grid::unit(height  * 72.27 / 96, "points")
+  )
+  grid::pushViewport(vp, recording = FALSE)
+  
+  
   p <- ggfun("plot_clone")(p)
   if (length(p$layers) == 0) {
     p <- p + geom_blank()
@@ -667,6 +680,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   gglayout$width <- width
   gglayout$height <- height
+  
+  grid::popViewport()
   
   l <- list(
     data = setNames(traces, NULL),
