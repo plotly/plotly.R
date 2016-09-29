@@ -165,6 +165,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   layers <- plot$layers
   layer_data <- lapply(layers, function(y) y$layer_data(plot$data))
   
+  # add crosstalk key to layer mapping (effectively adding it as a group)
+  layers <- Map(function(x, y) {
+    if (!crosstalk_key() %in% names(y)) return(x)
+    x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+    x
+  }, layers, layer_data)
+  
   # save crosstalk sets before this attribute gets squashed
   sets <- lapply(layer_data, function(y) attr(y, "set"))
   
@@ -185,24 +192,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- layout$map(data)
   
   # save the domain of the group for display in tooltips
-  # you can have many keys inside a group, but only one group inside a key
-  tryNULL <- function(expr) {
-    tryCatch(expr, error = function(e) NULL)
-  }
   
   groupDomains <- Map(function(x, y) {
-    grp <- tryNULL(
-      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x)
+    tryCatch(
+      eval(y$mapping[["group"]] %||% plot$mapping[["group"]], x), 
+      error = function(e) NULL
     )
-    key <- y$data[[crosstalk_key()]] %||% x[[crosstalk_key()]] %||% NULL
-    if (is.null(grp) && is.null(key)) return(NULL)
-    if (is.null(grp)) return(tibble::tibble(group = ggfun("NO_GROUP"), key = key))
-    # mimic the behavoir in compute_aesthetics while retaining the domain
-    # note that we don't consider the key since add_group would consider it a group var
-    tbl <- ggfun("add_group")(tibble::tibble(group = grp, group_plotlyDomain = grp))
-    if (length(key) == NROW(tbl)) tbl[["key"]] <- key
-    unique(tbl)
-  }, data, p$layers)
+  }, data, layers)
   
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
@@ -230,7 +226,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # we also now provide the option to return one of these two
   prestats_data <- data
   data <- by_layer(function(l, d) l$compute_statistic(d, layout))
-  data <- by_layer(function(l, d) l$map_statistic(d, p))
+  data <- by_layer(function(l, d) l$map_statistic(d, plot))
   
   # Make sure missing (but required) aesthetics are added
   ggfun("scales_add_missing")(plot, c("x", "y"), plot$plot_env)
@@ -239,7 +235,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- by_layer(function(l, d) l$compute_geom_1(d))
   
   # Apply position adjustments
-  data <- by_layer(function(l, d) l$compute_position(d, p))
+  data <- by_layer(function(l, d) l$compute_position(d, layout))
   
   # Reset position scales, then re-train and map.  This ensures that facets
   # have control over the range of a plot: is it generated from what's
@@ -283,7 +279,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # end of ggplot_build()
   # ------------------------------------------------------------------------
   # initiate plotly.js layout with some plot-wide theming stuff
-  theme <- ggfun("plot_theme")(p)
+  theme <- ggfun("plot_theme")(plot)
   elements <- names(which(sapply(theme, inherits, "element")))
   for (i in elements) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
@@ -297,8 +293,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     font = text2font(theme$text)
   )
   # main plot title
-  if (nchar(p$labels$title %||% "") > 0) {
-    gglayout$title <- faced(p$labels$title, theme$plot.title$face)
+  if (nchar(plot$labels$title %||% "") > 0) {
+    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
     gglayout$titlefont <- text2font(theme$plot.title)
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
@@ -307,10 +303,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   gglayout$margin$t <- gglayout$margin$t + 16
   
   # important stuff like layout$panel_ranges is already flipped, but
-  # p$scales/p$labels/data aren't. We flip x/y trace data at the very end
+  # plot$scales/plot$labels/data aren't. We flip x/y trace data at the very end
   # and scales in the axis loop below.
-  if (inherits(p$coordinates, "CoordFlip")) {
-    p$labels[c("x", "y")] <- p$labels[c("y", "x")]
+  if (inherits(plot$coordinates, "CoordFlip")) {
+    plot$labels[c("x", "y")] <- plot$labels[c("y", "x")]
   }
   
   # important panel summary stats
@@ -355,7 +351,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
   data <- Map(function(x, y) {
-    tryNULL(dplyr::left_join(x, y, by = "group")) %||% x
+    tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   
@@ -445,7 +441,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- layout$panel_ranges[[i]]
       # stuff like layout$panel_ranges is already flipped, but scales aren't
-      sc <- if (inherits(p$coordinates, "CoordFlip")) {
+      sc <- if (inherits(plot$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
       } else {
         scales$get_scales(xy)
@@ -453,7 +449,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
       # get axis title
-      axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
+      axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
       if (is_blank(axisTitle)) axisTitleText <- ""
       # https://plot.ly/r/reference/#layout-xaxis
       axisObj <- list(
@@ -522,7 +518,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         
         # add space for exterior facet strips in `layout.margin`
         
-        if (has_facet(p)) {
+        if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
           if (xy == "x") {
             gglayout$margin$t <- gglayout$margin$t + stripSize
@@ -551,7 +547,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
           }
         }
       }
-      if (has_facet(p)) gglayout[[axisName]]$title <- ""
+      if (has_facet(plot)) gglayout[[axisName]]$title <- ""
     } # end of axis loop
     
     # theme(panel.border = ) -> plotly rect shape
