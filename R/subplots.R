@@ -270,7 +270,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     stop("Can have multiple source values in a single subplot")
   }
   p$source <- sources[1]
-  p$highlight <- Reduce(modify_list, lapply(p, "[[", "source"))
+  p$highlight <- Reduce(modify_list, lapply(plots, "[[", "highlight"))
   p$config <- Reduce(modify_list, lapply(plots, "[[", "config")) %||% NULL
   p$subplot <- TRUE
   as_widget(p)
