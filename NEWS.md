@@ -1,3 +1,21 @@
+# 4.5.5.9000
+
+## BUG FIXES
+
+* When `height`/`width` are specified in `ggplotly()`, relative sizes are now translated correctly. Fixes #489 and #510.
+* More careful handling of font when expanding annotation arrays. Fixes #738.
+* Ignore data arrays of non-tidy traces. Fixes #737.
+
+# 4.5.5 -- 28 September 2016
+
+## NEW FEATURES
+
+* histogram2d/histogram2dcontour traces now respect the `colors` argument.
+
+## BUG FIX
+
+* Don't traceify by non-existant levels, fixes #735.
+
 # 4.5.4 -- 27 September 2016
 
 ## BUG FIX

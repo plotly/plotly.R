@@ -681,6 +681,7 @@ map_linetype <- function(traces) {
 traceify <- function(dat, x = NULL) {
   if (length(x) == 0) return(list(dat))
   lvls <- if (is.factor(x)) levels(x) else unique(x)
+  lvls <- lvls[lvls %in% x]
   # the order of lvls determines the order in which traces are drawn
   # for ordered factors at least, it makes sense to draw the highest level first
   # since that _should_ be the darkest color in a sequential pallette

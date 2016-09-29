@@ -146,13 +146,18 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
   
-  # add a key aesthetic if one doesn't already exist and crosstalk key is detected
-  #has_crosstalk_key <- is.null(p$mapping[["key"]]) && 
-  #  crosstalk_key() %in% names(p$data)
-  #if (has_crosstalk_key) {
-  #  p$mapping <- c(p$mapping, key = as.symbol(crosstalk_key()))
-  #}
+  # create a viewport so we can convert relative sizes correctly
+  # if height/width not specified, it is estimated from current viewport (npc)
+  widthVP <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  heightVP <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  # assume 96 dots per inch...mm2pixels also does this....
+  vp <- grid::viewport(
+    width = grid::unit(widthVP * 72.27 / 96, "points"), 
+    height = grid::unit(heightVP  * 72.27 / 96, "points")
+  )
+  grid::pushViewport(vp, recording = FALSE)
   
+  # start the build process
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
     plot <- plot + geom_blank()
@@ -539,6 +544,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
                 xanchor = if (xy == "x") "center" else "right", 
                 yanchor = if (xy == "x") "bottom" else "center", 
+                yanchor = if (xy == "x") "top" else "center", 
                 annotationType = "axis"
               )
             )
@@ -770,6 +776,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   gglayout$width <- width
   gglayout$height <- height
+  
+  grid::popViewport()
   
   l <- list(
     data = setNames(traces, NULL),
