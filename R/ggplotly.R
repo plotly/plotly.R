@@ -117,12 +117,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # create a viewport so we can convert relative sizes correctly
   # if height/width not specified, it is estimated from current viewport (npc)
-  width <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
-  height <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  widthVP <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  heightVP <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
   # assume 96 dots per inch...mm2pixels also does this....
   vp <- grid::viewport(
-    width = grid::unit(width * 72.27 / 96, "points"), 
-    height = grid::unit(height  * 72.27 / 96, "points")
+    width = grid::unit(widthVP * 72.27 / 96, "points"), 
+    height = grid::unit(heightVP  * 72.27 / 96, "points")
   )
   grid::pushViewport(vp, recording = FALSE)
   
