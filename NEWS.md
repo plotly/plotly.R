@@ -1,3 +1,11 @@
+# 4.5.5.9000
+
+## BUG FIXES
+
+* More careful handling of font when expanding annotation arrays. Fixes #738.
+* Ignore data arrays of non-tidy traces. Fixes #737
+
+
 # 4.5.5 -- 28 September 2016
 
 ## NEW FEATURES
