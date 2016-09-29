@@ -115,16 +115,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
   
-  # create a viewport so we can convert relative sizes correctly
-  # if height/width not specified, it is estimated from current viewport (npc)
-  widthVP <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
-  heightVP <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
-  # assume 96 dots per inch...mm2pixels also does this....
-  vp <- grid::viewport(
-    width = grid::unit(widthVP * 72.27 / 96, "points"), 
-    height = grid::unit(heightVP  * 72.27 / 96, "points")
-  )
-  grid::pushViewport(vp, recording = FALSE)
+  # open a new graphics device, so we can convert relative sizes correctly
+  # if height/width is not specified, estimate it from the current device
+  deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  tmpPlotFile <- tempfile(fileext = ".png")
+  grDevices::png(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
   
   p <- ggfun("plot_clone")(p)
@@ -682,7 +678,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   gglayout$width <- width
   gglayout$height <- height
   
-  grid::popViewport()
+  # we're now done with converting units, turn off the device,
+  # and remove the temporary file
+  grDevices::dev.off()
+  unlink(tmpPlotFile)
   
   l <- list(
     data = setNames(traces, NULL),
