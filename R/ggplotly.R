@@ -446,14 +446,15 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
             # multiplying the offset by 2 seems to work, but this is a terrible hack
-            offset <- 1.75 * offset
             x <- if (xy == "x") 0.5 else offset
             y <- if (xy == "x") offset else 0.5
             gglayout$annotations <- c(
               gglayout$annotations,
               make_label(
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = "center", yanchor = "middle", annotationType = "axis"
+                xanchor = if (xy == "x") "center" else "right", 
+                yanchor = if (xy == "x") "bottom" else "center", 
+                annotationType = "axis"
               )
             )
           }
