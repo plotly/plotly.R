@@ -17,7 +17,7 @@ Set the default configuration for plotly
 }
 \examples{
 \dontrun{
-config(plot_ly(), displaylogo = FALSE, modeBarButtonsToRemove = list('sendDataToCloud'))
+config(plot_ly(), displaylogo = FALSE)
 }
 }
 \author{
