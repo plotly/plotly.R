@@ -172,6 +172,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   sets <- lapply(layer_data, function(y) attr(y, "set"))
   
   scales <- plot$scales
+
   # Apply function to layer and matching data
   by_layer <- function(f) {
     out <- vector("list", length(data))
@@ -270,7 +271,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # Let Layout modify data before rendering
   data <- layout$finish_data(data)
   
-  
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
@@ -349,7 +349,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- Map(function(x, y) {
     tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
+<<<<<<< HEAD
   data <- Map(function(x, y) structure(x, set = y), data, sets)
+=======
+>>>>>>> master
   
   traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
