@@ -349,10 +349,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- Map(function(x, y) {
     tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
-<<<<<<< HEAD
+  
+  # reattach crosstalk group
   data <- Map(function(x, y) structure(x, set = y), data, sets)
-=======
->>>>>>> master
   
   traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
