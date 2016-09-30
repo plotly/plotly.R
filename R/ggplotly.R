@@ -115,6 +115,14 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
   
+  # open a new graphics device, so we can convert relative sizes correctly
+  # if height/width is not specified, estimate it from the current device
+  deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
+  deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  tmpPlotFile <- tempfile(fileext = ".png")
+  grDevices::png(tmpPlotFile, width = deviceWidth, height = deviceHeight)
+  
+
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
     plot <- plot + geom_blank()
@@ -480,14 +488,15 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
             # multiplying the offset by 2 seems to work, but this is a terrible hack
-            offset <- 1.75 * offset
             x <- if (xy == "x") 0.5 else offset
             y <- if (xy == "x") offset else 0.5
             gglayout$annotations <- c(
               gglayout$annotations,
               make_label(
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = "center", yanchor = "middle", annotationType = "axis"
+                xanchor = if (xy == "x") "center" else "right", 
+                yanchor = if (xy == "x") "top" else "center", 
+                annotationType = "axis"
               )
             )
           }
@@ -718,6 +727,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   gglayout$width <- width
   gglayout$height <- height
+  
+  # we're now done with converting units, turn off the device,
+  # and remove the temporary file
+  grDevices::dev.off()
+  unlink(tmpPlotFile)
   
   l <- list(
     data = setNames(traces, NULL),
