@@ -36,10 +36,9 @@
 #' subplot(p1, p2, p1, p2, nrows = 2, margin = 0.05)
 #' 
 #' # or pass a list
-#' library(purrr)
 #' economics_long %>%
 #'   split(.$variable) %>%
-#'   map(~ plot_ly(., x = ~date, y = ~value)) %>%
+#'   lapply(function(d) plot_ly(d, x = ~date, y = ~value)) %>%
 #'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
 #' # or pass a tibble with a list-column of plotly objects
@@ -54,29 +53,9 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
-  dotz <- list(...)
-  
-  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
-    # if ... is a list (or a tibble), list(...) is a (length 1) list 
-    # containing a list of plotly objects
-    dotz <- dotz[[1]]
-  }
-  
-  if (tibble::is_tibble(dotz)) {
-    # if dots is a tibble, search for one column with a list of plotly objects
-    idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
-    if (length(idx) != 1) {
-      stop(
-        "If you supply a tibble to subplot(), \n", 
-        "it must have _one_ column with a list of plotly objects",
-        call. = FALSE
-      )
-    }
-    dotz <- dotz[[idx]]
-  }
-  
+ 
   # build each plot
-  plotz <- lapply(dotz, function(d) plotly_build(d)[["x"]])
+  plotz <- lapply(dots2plots(...), function(d) plotly_build(d)[["x"]])
   
   # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,

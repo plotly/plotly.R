@@ -40,6 +40,10 @@ HTMLWidgets.widget({
       var plot = Plotly.newPlot(graphDiv, x.data, x.layout);
     }
     
+    if (x.frames) {
+      Plotly.animate(graphDiv, x.frames, x.animationOpts);
+    }
+    
     sendEventData = function(eventType) {
       return function(eventData) {
         if (eventData === undefined || !eventData.hasOwnProperty("points")) {
