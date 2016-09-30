@@ -1,5 +1,9 @@
 # 4.5.5.9000
 
+## CHANGES
+
+* Now requires  a version of __ggplot2__ higher than 2.1.0 because the new ggproto faceting infrastructure introduced breaking changes.
+
 ## BUG FIXES
 
 * When `height`/`width` are specified in `ggplotly()`, relative sizes are now translated correctly. Fixes #489 and #510.
