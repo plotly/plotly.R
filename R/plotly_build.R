@@ -341,6 +341,9 @@ plotly_build.plotly <- function(p) {
   p <- verify_webgl(p)
   # verfiy showlegend is populated (needed for crosstalk's ability to dynamically add traces)
   p <- verify_showlegend(p)
+  # populate R's non-default config
+  p <- config(p)
+  p$x$base_url <- get_domain()
   p
 }
 
