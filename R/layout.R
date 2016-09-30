@@ -70,11 +70,13 @@ config <- function(p, ...) {
     p$x$config[["modeBarButtonsToRemove"]] %||% 'sendDataToCloud',
     attrs[["modeBarButtonsToRemove"]]
   )
+  # include the plotly book collaboration link?
+  removeCollab <- "Collaborate" %in% p$x$config[["modeBarButtonsToRemove"]]
   if (length(p$x$config[["modeBarButtonsToRemove"]])) {
     p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
   }
   p$x$config[["modeBarButtonsToAdd"]] <- c(
-    list(sharingButton()),
+    if (!removeCollab) list(sharingButton()),
     attrs[["modeBarButtonsToAdd"]]
   )
   attrs <- attrs[grepl("modeBarButtonsTo", names(attrs))]
