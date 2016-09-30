@@ -60,10 +60,24 @@ rangeslider <- function(p, ...) {
 #' @author Carson Sievert
 #' @export
 #' @examples \dontrun{
-#' config(plot_ly(), displaylogo = FALSE, modeBarButtonsToRemove = list('sendDataToCloud'))
+#' config(plot_ly(), displaylogo = FALSE)
 #' }
 
 config <- function(p, ...) {
-  p$x$config <- modify_list(p$x$config, list(...))
+  attrs <- list(...)
+  # accumulate these attributes
+  p$x$config[["modeBarButtonsToRemove"]] <- c(
+    p$x$config[["modeBarButtonsToRemove"]] %||% 'sendDataToCloud',
+    attrs[["modeBarButtonsToRemove"]]
+  )
+  if (length(p$x$config[["modeBarButtonsToRemove"]])) {
+    p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
+  }
+  p$x$config[["modeBarButtonsToAdd"]] <- c(
+    list(sharingButton()),
+    attrs[["modeBarButtonsToAdd"]]
+  )
+  attrs <- attrs[grepl("modeBarButtonsTo", names(attrs))]
+  p$x$config <- modify_list(p$x$config, attrs)
   p
 }

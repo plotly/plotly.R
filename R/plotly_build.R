@@ -323,15 +323,9 @@ plotly_build.plotly <- function(p) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
-  
-  
-  # TODO: avoid overwritting user specified args
-  p <- config(p,
-              modeBarButtonsToRemove = I("sendDataToCloud"),
-              modeBarButtonsToAdd = list(sharingButton())
-  )
+  # populate R's non-default config
+  p <- config(p)
   p$x$base_url <- get_domain()
-  
   p
 }
 
