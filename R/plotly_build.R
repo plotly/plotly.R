@@ -43,13 +43,15 @@ plotly_build.plotly <- function(p) {
     
     # if an annotation attribute is an array, expand into multiple annotations 
     nAnnotations <- max(lengths(x$annotations) %||% 0)
-    # font is the only list object, so store it, and attach after transposing
-    font <- x$annotations[["font"]]
-    x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
-      as.list(rep(x, length.out = nAnnotations))
-    }))
-    for (i in seq_len(nAnnotations)) {
-      x$annotations[[i]][["font"]] <- font
+    if (!is.null(names(x$annotations))) {
+      # font is the only list object, so store it, and attach after transposing
+      font <- x$annotations[["font"]]
+      x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
+        as.list(rep(x, length.out = nAnnotations))
+      }))
+      for (i in seq_len(nAnnotations)) {
+        x$annotations[[i]][["font"]] <- font
+      }
     }
     
     x[lengths(x) > 0]
@@ -323,6 +325,9 @@ plotly_build.plotly <- function(p) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
+  # populate R's non-default config
+  p <- config(p)
+  p$x$base_url <- get_domain()
   p
 }
 

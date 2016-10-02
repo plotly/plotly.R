@@ -122,14 +122,20 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   tmpPlotFile <- tempfile(fileext = ".png")
   grDevices::png(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
-  
-  p <- ggfun("plot_clone")(p)
-  if (length(p$layers) == 0) {
-    p <- p + geom_blank()
+
+  plot <- ggfun("plot_clone")(p)
+  if (length(plot$layers) == 0) {
+    plot <- plot + geom_blank()
   }
-  layers <- p$layers
-  layer_data <- lapply(layers, function(y) y$layer_data(p$data))
-  scales <- p$scales
+  layers <- plot$layers
+  layer_data <- lapply(layers, function(y) y$layer_data(plot$data))
+  
+  # save crosstalk sets before this attribute gets squashed
+  sets <- lapply(layer_data, function(y) attr(y, "set"))
+  
+  scales <- plot$scales
+  
+  # Apply function to layer and matching data
   by_layer <- function(f) {
     out <- vector("list", length(data))
     for (i in seq_along(data)) {
@@ -137,21 +143,34 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }
     out
   }
-  panel <- ggfun("new_panel")()
-  panel <- ggfun("train_layout")(panel, p$facet, layer_data, p$data)
-  data <- ggfun("map_layout")(panel, p$facet, layer_data)
+  
+  # Initialise panels, add extra data for margins & missing facetting
+  # variables, and add on a PANEL variable to data
+  layout <- ggfun("create_layout")(plot$facet)
+  data <- layout$setup(layer_data, plot$data, plot$plot_env, plot$coordinates)
+  data <- layout$map(data)
+  
   # save the domain of the group for display in tooltips
   groupDomains <- Map(function(x, y) {
     tryCatch(
-      eval(y$mapping[["group"]] %||% p$mapping[["group"]], x), 
+      eval(y$mapping[["group"]] %||% plot$mapping[["group"]], x), 
       error = function(e) NULL
     )
-  }, data, p$layers)
-  data <- by_layer(function(l, d) l$compute_aesthetics(d, p))
+  }, data, layers)
+  
+  # Compute aesthetics to produce data with generalised variable names
+  data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
+  
+  # Transform all scales
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
+  
+  # Map and train positions so that statistics have access to ranges
+  # and all positions are numeric
   scale_x <- function() scales$get_scales("x")
   scale_y <- function() scales$get_scales("y")
-  panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
+  
+  layout$train_position(data, scale_x(), scale_y())
+  
   # Before mapping x/y position, save the domain (for discrete scales)
   # to display in tooltip.
   data <- lapply(data, function(d) {
@@ -159,17 +178,31 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
     d
   })
-  data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
+  data <- layout$map_position(data)
+  
   # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
+  # we also now provide the option to return one of these two
   prestats_data <- data
-  data <- by_layer(function(l, d) l$compute_statistic(d, panel))
-  data <- by_layer(function(l, d) l$map_statistic(d, p))
-  ggfun("scales_add_missing")(p, c("x", "y"), p$plot_env)
+  data <- by_layer(function(l, d) l$compute_statistic(d, layout))
+  data <- by_layer(function(l, d) l$map_statistic(d, plot))
+  
+  # Make sure missing (but required) aesthetics are added
+  ggfun("scales_add_missing")(plot, c("x", "y"), plot$plot_env)
+  
+  # Reparameterise geoms from (e.g.) y and width to ymin and ymax
   data <- by_layer(function(l, d) l$compute_geom_1(d))
-  data <- by_layer(function(l, d) l$compute_position(d, p))
-  ggfun("reset_scales")(panel)
-  panel <- ggfun("train_position")(panel, data, scale_x(), scale_y())
-  data <- ggfun("map_position")(panel, data, scale_x(), scale_y())
+  
+  # Apply position adjustments
+  data <- by_layer(function(l, d) l$compute_position(d, layout))
+  
+  # Reset position scales, then re-train and map.  This ensures that facets
+  # have control over the range of a plot: is it generated from what's
+  # displayed, or does it include the range of underlying data
+  layout$reset_scales()
+  layout$train_position(data, scale_x(), scale_y())
+  data <- layout$map_position(data)
+  
+  # Train and map non-position scales
   npscales <- scales$non_position_scales()
   if (npscales$n() > 0) {
     lapply(data, ggfun("scales_train_df"), scales = npscales)
@@ -186,13 +219,24 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }
     data <- lapply(data, ggfun("scales_map_df"), scales = npscales)
   }
-  panel <- ggfun("train_ranges")(panel, p$coordinates)
+  
+  # Train coordinate system
+  layout$train_ranges(plot$coordinates)
+  
+  # Fill in defaults etc.
   data <- by_layer(function(l, d) l$compute_geom_2(d))
+  
+  # Let layer stat have a final say before rendering
+  data <- by_layer(function(l, d) l$finish_statistics(d))
+  
+  # Let Layout modify data before rendering
+  data <- layout$finish_data(data)
+  
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
   # initiate plotly.js layout with some plot-wide theming stuff
-  theme <- ggfun("plot_theme")(p)
+  theme <- ggfun("plot_theme")(plot)
   elements <- names(which(sapply(theme, inherits, "element")))
   for (i in elements) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
@@ -206,8 +250,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     font = text2font(theme$text)
   )
   # main plot title
-  if (nchar(p$labels$title %||% "") > 0) {
-    gglayout$title <- faced(p$labels$title, theme$plot.title$face)
+  if (nchar(plot$labels$title %||% "") > 0) {
+    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
     gglayout$titlefont <- text2font(theme$plot.title)
     gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
   }
@@ -215,58 +259,59 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   gglayout$margin$t <- gglayout$margin$t + 16
   
-  # important stuff like panel$ranges is already flipped, but
-  # p$scales/p$labels/data aren't. We flip x/y trace data at the very end
+  # important stuff like layout$panel_ranges is already flipped, but
+  # plot$scales/plot$labels/data aren't. We flip x/y trace data at the very end
   # and scales in the axis loop below.
-  if (inherits(p$coordinates, "CoordFlip")) {
-    p$labels[c("x", "y")] <- p$labels[c("y", "x")]
+  if (inherits(plot$coordinates, "CoordFlip")) {
+    plot$labels[c("x", "y")] <- plot$labels[c("y", "x")]
   }
   
   # important panel summary stats
-  nPanels <- nrow(panel$layout)
-  nRows <- max(panel$layout$ROW)
-  nCols <- max(panel$layout$COL)
+  nPanels <- nrow(layout$panel_layout)
+  nRows <- max(layout$panel_layout$ROW)
+  nCols <- max(layout$panel_layout$COL)
   
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  panel$layout$xaxis <- panel$layout$COL
-  panel$layout$yaxis <- panel$layout$ROW
-  panel$layout$xanchor <- nRows
-  panel$layout$yanchor <- 1
-  if (inherits(p$facet, "wrap")) {
-    if (p$facet$free$x) {
-      panel$layout$xaxis <- panel$layout$PANEL
-      panel$layout$xanchor <- panel$layout$ROW
+  layout$panel_layout$xaxis <- layout$panel_layout$COL
+  layout$panel_layout$yaxis <- layout$panel_layout$ROW
+  layout$panel_layout$xanchor <- nRows
+  layout$panel_layout$yanchor <- 1
+  if (inherits(plot$facet, "FacetWrap")) {
+    if (plot$facet$params$free$x) {
+      layout$panel_layout$xaxis <- layout$panel_layout$PANEL
+      layout$panel_layout$xanchor <- layout$panel_layout$ROW
     }
-    if (p$facet$free$y) {
-      panel$layout$yaxis <- panel$layout$PANEL
-      panel$layout$yanchor <- panel$layout$COL
-      panel$layout$xanchor <- nPanels
+    if (plot$facet$params$free$y) {
+      layout$panel_layout$yaxis <- layout$panel_layout$PANEL
+      layout$panel_layout$yanchor <- layout$panel_layout$COL
+      layout$panel_layout$xanchor <- nPanels
     }
-    if (p$facet$free$x && p$facet$free$y) {
-      panel$layout$xaxis <- panel$layout$PANEL
-      panel$layout$yaxis <- panel$layout$PANEL
-      panel$layout$xanchor <- panel$layout$PANEL
-      panel$layout$yanchor <- panel$layout$PANEL
+    if (plot$facet$params$free$x && plot$facet$params$free$y) {
+      layout$panel_layout$xaxis <- layout$panel_layout$PANEL
+      layout$panel_layout$yaxis <- layout$panel_layout$PANEL
+      layout$panel_layout$xanchor <- layout$panel_layout$PANEL
+      layout$panel_layout$yanchor <- layout$panel_layout$PANEL
     }
   }
   # format the axis/anchor to a format plotly.js respects
-  panel$layout$xaxis <- paste0("xaxis", sub("^1$", "", panel$layout$xaxis))
-  panel$layout$yaxis <- paste0("yaxis", sub("^1$", "", panel$layout$yaxis))
-  panel$layout$xanchor <- paste0("y", sub("^1$", "", panel$layout$xanchor))
-  panel$layout$yanchor <- paste0("x", sub("^1$", "", panel$layout$yanchor))
+  layout$panel_layout$xaxis <- paste0("xaxis", sub("^1$", "", layout$panel_layout$xaxis))
+  layout$panel_layout$yaxis <- paste0("yaxis", sub("^1$", "", layout$panel_layout$yaxis))
+  layout$panel_layout$xanchor <- paste0("y", sub("^1$", "", layout$panel_layout$xanchor))
+  layout$panel_layout$yanchor <- paste0("x", sub("^1$", "", layout$panel_layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  panel$layout$x_min <- sapply(panel$ranges, function(z) min(z$x.range))
-  panel$layout$x_max <- sapply(panel$ranges, function(z) max(z$x.range))
-  panel$layout$y_min <- sapply(panel$ranges, function(z) min(z$y.range))
-  panel$layout$y_max <- sapply(panel$ranges, function(z) max(z$y.range))
+  layout$panel_layout$x_min <- sapply(layout$panel_ranges, function(z) min(z$x.range))
+  layout$panel_layout$x_max <- sapply(layout$panel_ranges, function(z) max(z$x.range))
+  layout$panel_layout$y_min <- sapply(layout$panel_ranges, function(z) min(z$y.range))
+  layout$panel_layout$y_max <- sapply(layout$panel_ranges, function(z) max(z$y.range))
   
   # layers -> plotly.js traces
-  p$tooltip <- tooltip
+  plot$tooltip <- tooltip
   data <- Map(function(x, y) {
     tryCatch({x$group_plotlyDomain <- y; x}, error = function(e) x)
   }, data, groupDomains)
-  traces <- layers2traces(data, prestats_data, panel$layout, p)
+  
+  traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
@@ -296,33 +341,33 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     "npc", "height"
   )
   # space for _interior_ facet strips
-  if (inherits(p$facet, "wrap")) {
+  if (inherits(plot$facet, "FacetWrap")) {
     stripSize <- unitConvert(
       theme[["strip.text.x"]] %||% theme[["strip.text"]],
       "npc", "height"
     )
     panelMarginY <- panelMarginY + stripSize
     # space for ticks/text in free scales
-    if (p$facet$free$x) {
+    if (plot$facet$params$free$x) {
       axisTicksX <- unitConvert(
         theme[["axis.ticks.x"]] %||% theme[["axis.ticks"]],
         "npc", "height"
       )
       # allocate enough space for the _longest_ text label
       axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(panel$ranges, "[[", "x.labels"))
+      labz <- unlist(lapply(layout$panel_ranges, "[[", "x.labels"))
       lab <- labz[which.max(nchar(labz))]
       panelMarginY <- panelMarginY + axisTicksX +
         bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))[["height"]]
     }
-    if (p$facet$free$y) {
+    if (plot$facet$params$free$y) {
       axisTicksY <- unitConvert(
         theme[["axis.ticks.y"]] %||% theme[["axis.ticks"]],
         "npc", "width"
       )
       # allocate enough space for the _longest_ text label
       axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(panel$ranges, "[[", "y.labels"))
+      labz <- unlist(lapply(layout$panel_ranges, "[[", "y.labels"))
       lab <- labz[which.max(nchar(labz))]
       panelMarginX <- panelMarginX + axisTicksY +
         bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))[["width"]]
@@ -335,7 +380,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   doms <- get_domains(nPanels, nRows, margins)
   
   for (i in seq_len(nPanels)) {
-    lay <- panel$layout[i, ]
+    lay <- layout$panel_layout[i, ]
     for (xy in c("x", "y")) {
       # find axis specific theme elements that inherit from their parent
       theme_el <- function(el) {
@@ -350,9 +395,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
-      rng <- panel$ranges[[i]]
-      # stuff like panel$ranges is already flipped, but scales aren't
-      sc <- if (inherits(p$coordinates, "CoordFlip")) {
+      rng <- layout$panel_ranges[[i]]
+      # stuff like layout$panel_ranges is already flipped, but scales aren't
+      sc <- if (inherits(plot$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
       } else {
         scales$get_scales(xy)
@@ -360,7 +405,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
       # get axis title
-      axisTitleText <- sc$name %||% p$labels[[xy]] %||% ""
+      axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
       if (is_blank(axisTitle)) axisTitleText <- ""
       # https://plot.ly/r/reference/#layout-xaxis
       axisObj <- list(
@@ -428,12 +473,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         }
         
         # add space for exterior facet strips in `layout.margin`
-        if (has_facet(p)) {
+        
+        if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
           if (xy == "x") {
             gglayout$margin$t <- gglayout$margin$t + stripSize
           }
-          if (xy == "y" && inherits(p$facet, "grid")) {
+          if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
           # facets have multiple axis objects, but only one title for the plot,
@@ -456,7 +502,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
           }
         }
       }
-      if (has_facet(p)) gglayout[[axisName]]$title <- ""
+      if (has_facet(plot)) gglayout[[axisName]]$title <- ""
     } # end of axis loop
     
     # theme(panel.border = ) -> plotly rect shape
@@ -466,13 +512,15 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     gglayout$shapes <- c(gglayout$shapes, border)
     
     # facet strips -> plotly annotations
-    if (has_facet(p)) {
-      col_vars <- ifelse(inherits(p$facet, "wrap"), "facets", "cols")
+    if (has_facet(plot)) {
+      col_vars <- ifelse(inherits(plot$facet, "FacetWrap"), "facets", "cols")
       col_txt <- paste(
-        p$facet$labeller(lay[names(p$facet[[col_vars]])]), collapse = "<br>"
+        plot$facet$params$labeller(
+          lay[names(plot$facet$params[[col_vars]])]
+        ), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
-      if (inherits(p$facet, "grid") && lay$ROW != 1) col_txt <- ""
+      if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
       if (nchar(col_txt) > 0) {
         col_lab <- make_label(
           col_txt, x = mean(xdom), y = max(ydom),
@@ -484,10 +532,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         gglayout$shapes <- c(gglayout$shapes, strip)
       }
       row_txt <- paste(
-        p$facet$labeller(lay[names(p$facet$rows)]), collapse = "<br>"
+        plot$facet$params$labeller(
+          lay[names(plot$facet$params$rows)]
+        ), collapse = "<br>"
       )
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
-      if (inherits(p$facet, "grid") && lay$COL != nCols) row_txt <- ""
+      if (inherits(plot$facet, "FacetGrid") && lay$COL != nCols) row_txt <- ""
       if (nchar(row_txt) > 0) {
         row_lab <- make_label(
           row_txt, x = max(xdom), y = mean(ydom),
@@ -543,10 +593,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
-    gdefs <- ggfun("guides_train")(scales, theme, p$guides, p$labels)
+    gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
     if (length(gdefs) > 0) {
       gdefs <- ggfun("guides_merge")(gdefs)
-      gdefs <- ggfun("guides_geom")(gdefs, layers, p$mapping)
+      gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
     }
     
     # colourbar -> plotly.js colorbar
@@ -609,7 +659,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }
     # note: ggplot2 doesn't flip x/y scales when the coord is flipped
     # (i.e., at this point, y should be the count/density)
-    is_hist <- inherits(p$scales$get_scales("x"), "ScaleContinuous")
+    is_hist <- inherits(plot$scales$get_scales("x"), "ScaleContinuous")
     # TODO: get rid of this and use explicit width for bars
     # https://github.com/plotly/plotly.js/issues/80
     if (position == "dodge" || is_hist) {
@@ -619,7 +669,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # flip x/y in traces for flipped coordinates
   # (we've already done appropriate flipping for axis objects)
-  if (inherits(p$coordinates, "CoordFlip")) {
+  if (inherits(plot$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
       traces[[i]][c("x", "y")] <- tr[c("y", "x")]
@@ -697,12 +747,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # translate "plot-wide" aesthetic mappings to formulas so plotly_build() 
   # understands them
   mappingFormulas <- if (originalData) {
-    lapply(p$mapping, lazyeval::f_new)
+    lapply(plot$mapping, lazyeval::f_new)
   } else {
-    nms <- names(p$mapping)
+    nms <- names(plot$mapping)
     setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
   }
-  dat <- if (originalData) p$data else data[[layerData]]
+  dat <- if (originalData) plot$data else data[[layerData]]
   if (!is.null(mappingFormulas[["group"]])) {
     dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
   }
@@ -802,7 +852,7 @@ make_label <- function(txt = "", x, y, el = ggplot2::element_text(), ...) {
 }
 
 has_facet <- function(x) {
-  inherits(x$facet, c("grid", "wrap"))
+  inherits(x$facet, c("FacetGrid", "FacetWrap"))
 }
 
 #' Estimate bounding box of a rotated string

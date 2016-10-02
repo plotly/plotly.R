@@ -1,5 +1,14 @@
 # 4.5.5.9000
 
+## NEW FEATURES
+
+* Added support for the `timezone` argument in __ggplot2__'s `scale_datetime()`. Fixes (#743, thanks @earowang).
+
+## CHANGES
+
+* Now requires  a version of __ggplot2__ higher than 2.1.0 because the new ggproto faceting infrastructure introduced breaking changes.
+* A book icon is added to the mode bar, by default, which links to the plotly book. If you want to remove this icon from a plot `p`, do `config(p, modeBarButtonsToRemove = "Collaborate")`
+
 ## BUG FIXES
 
 * When `height`/`width` are specified in `ggplotly()`, relative sizes are now translated correctly. Fixes #489 and #510.
