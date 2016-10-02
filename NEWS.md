@@ -1,5 +1,9 @@
 # 4.5.5.9000
 
+## NEW FEATURES
+
+* Added support for the `timezone` argument in __ggplot2__'s `scale_datetime()`. Fixes (#743, thanks @earowang).
+
 ## CHANGES
 
 * Now requires  a version of __ggplot2__ higher than 2.1.0 because the new ggproto faceting infrastructure introduced breaking changes.
