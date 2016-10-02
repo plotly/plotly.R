@@ -43,13 +43,15 @@ plotly_build.plotly <- function(p) {
     
     # if an annotation attribute is an array, expand into multiple annotations 
     nAnnotations <- max(lengths(x$annotations) %||% 0)
-    # font is the only list object, so store it, and attach after transposing
-    font <- x$annotations[["font"]]
-    x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
-      as.list(rep(x, length.out = nAnnotations))
-    }))
-    for (i in seq_len(nAnnotations)) {
-      x$annotations[[i]][["font"]] <- font
+    if (nAnnotations > 1 && !is.null(names(x$annotations))) {
+      # font is the only list object, so store it, and attach after transposing
+      font <- x$annotations[["font"]]
+      x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
+        as.list(rep(x, length.out = nAnnotations))
+      }))
+      for (i in seq_len(nAnnotations)) {
+        x$annotations[[i]][["font"]] <- font
+      }
     }
     
     x[lengths(x) > 0]
