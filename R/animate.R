@@ -32,7 +32,33 @@ animate <- function(..., options = animationOpts()) {
   plotz <- lapply(dots2plots(...), function(d) plotly_build(d)[["x"]])
   nPlots <- length(plotz)
   
-  # can only animate scatter traces currently
+  # animate assumes everything provided to ... lives on the same set of axes
+  # first, check to make sure there aren't too many axes
+  layoutAttrs <- unique(unlist(lapply(plotz, function(p) { names(p$layout) })))
+  if (length(grep("^xaxis", layoutAttrs)) > 1) {
+    stop("Can't have more than one xaxis in a single animation", call. = FALSE)
+  }
+  if (length(grep("^yaxis", layoutAttrs)) > 1) {
+    stop("Can't have more than one yaxis in a single animation", call. = FALSE)
+  }
+  if (length(grep("^geo", layoutAttrs)) > 1) {
+    stop("Can't have more than one geo layout in a single animation", call. = FALSE)
+  }
+  if (length(grep("^mapbox", layoutAttrs)) > 1) {
+    stop("Can't have more than one mapbox layout in a single animation", call. = FALSE)
+  }
+  # anchor references also have to be complete
+  anchors <- lapply(plotz, function(p) {
+    lapply(p$data, function(tr) {
+      compact(tr[c("xaxis", "yaxis", "geo", "subplot")])
+    })
+  })
+  anchorz <- unique(sub("^x$", "xaxis", sub("^y$", "yaxis", unlist(anchors))))
+  if (length(setdiff(anchorz, layoutAttrs))) {
+    stop("Trace anchors are referencing layout attributes that don't exist", call. = FALSE)
+  }
+  
+  # animations only work on scatter traces
   for (i in seq_len(nPlots)) {
     p <- plotz[[i]]
     types <- vapply(p$data, function(tr) tr["type"][[1]] %||% "scatter", character(1))
@@ -46,6 +72,8 @@ animate <- function(..., options = animationOpts()) {
   frames <- lapply(frames, function(p) {
     p <- p[c("data", "layout")]
     p[["name"]] <- new_id()
+    p$data <- lapply(p$data, function(tr) { tr$frame <- TRUE; tr })
+    p$layout$frame <- TRUE
     p
   })
   
@@ -53,11 +81,50 @@ animate <- function(..., options = animationOpts()) {
     data = plotz[[1]][["data"]], 
     layout = plotz[[1]][["layout"]],
     frames = setNames(frames, NULL),
-    animationOpts = options
+    animationOpts = options,
+    source = ensure_one(plotz, "source"),
+    config = ensure_one(plotz, "config")
   )
-  as_widget(p)
+  
+  config(
+    as_widget(p), 
+    modeBarButtonsToAdd = list(play_button(), pause_button())
+  )
 }
 
+play_button <- function() {
+  list(
+    name = "Play",
+    icon = list(
+      width = 500,
+      ascent = 500,
+      descent = -50,
+      path = 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26'
+    ),
+    click = htmlwidgets::JS(
+      "function(gd) {    
+        Plotly.animate(gd, null);
+      }"
+    )
+  )
+}
+
+pause_button <- function() {
+  list(
+    name = "Pause",
+    icon = list(
+      width = 1500,
+      ascent = 850,
+      descent = -150,
+      path = 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26'
+    ),
+    click = htmlwidgets::JS(
+      "function(gd) {    
+        Plotly.animate(gd, []);
+      }"
+    )
+  )
+}
 
 
 #' Animation options

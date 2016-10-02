@@ -33,15 +33,15 @@ HTMLWidgets.widget({
     
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      var plot = Plotly.plot(graphDiv, x.data, x.layout, x.config);
+      var plot = Plotly.plot(graphDiv, x.data, x.layout, x.config).then(function() {
+        Plotly.addFrames(graphDiv, x.frames);
+      });
       instance.plotly = true;
       instance.autosize = x.layout.autosize;
     } else {
-      var plot = Plotly.newPlot(graphDiv, x.data, x.layout);
-    }
-    
-    if (x.frames) {
-      Plotly.animate(graphDiv, x.frames, x.animationOpts);
+      var plot = Plotly.newPlot(graphDiv, x.data, x.layout).then(function() {
+        Plotly.addFrames(graphDiv, x.frames);
+      });
     }
     
     sendEventData = function(eventType) {
