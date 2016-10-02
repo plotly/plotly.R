@@ -79,7 +79,7 @@ config <- function(p, ...) {
     if (!removeCollab) list(sharingButton()),
     attrs[["modeBarButtonsToAdd"]]
   )
-  attrs <- attrs[grepl("modeBarButtonsTo", names(attrs))]
+  attrs <- attrs[!grepl("modeBarButtonsTo", names(attrs))]
   p$x$config <- modify_list(p$x$config, attrs)
   p
 }
