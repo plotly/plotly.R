@@ -47,13 +47,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
       if (identical("group", unique(varName, aesName))) next
       # by default assume the values don't need any formatting
       forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
+      sc <- p$scales$get_scales(aesName)
       if (isTRUE(aesName %in% c("x", "y"))) {
-        scaleName <- p$scales$get_scales(aesName)$scale_name
         # convert "milliseconds from the UNIX epoch" to a date/datetime
         # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% scaleName) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01")
+        if ("datetime" %in% sc$scale_name) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01", tz = sc$timezone)
         # convert "days from the UNIX epoch" to a date/datetime
-        if ("date" %in% scaleName) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01"))
+        if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
       }
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
