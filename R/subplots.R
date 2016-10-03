@@ -90,6 +90,14 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
   }
   
+  # consider frame traces to be regular traces for the moment 
+  # so their anchors get bumped
+  plotz <- lapply(plotz, function(p) {
+    p$data <- c(p$data %||% list(), Reduce(c, lapply(p$frames, "[[", "data")))
+    p
+  })
+  
+  
   # grab main plot objects
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
@@ -219,10 +227,16 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     })
   }
   # start merging the plots into a single subplot
-  p <- list(
-    data = Reduce(c, traces),
-    layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
-  )
+  p <- list()
+  for (i in seq_along(traces)) {
+    for (j in seq_along(traces[[i]])) {
+      if (isTRUE(traces[[i]][[j]]$frame)) {
+        # TODO: implement
+      } else {
+        p$data <- c(p$data %||% list(), traces[[i]][j])
+      }
+    }
+  }
   # retrain default coloring
   p$data <- retrain_color_defaults(p$data)
   
@@ -244,14 +258,24 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     layouts <- layouts[which_layout]
   }
   p$layout <- c(p$layout, Reduce(modify_list, layouts))
-  sources <- unique(unlist(lapply(plots, "[[", "source")))
-  if (length(sources) > 1) {
-    stop("Can have multiple source values in a single subplot")
-  }
-  p$config <- Reduce(modify_list, lapply(plots, "[[", "config")) %||% NULL
-  p$source <- sources[1]
+  p$source <- ensure_one(plots, "source")
+  p$config <- ensure_one(plots, "config")
+  p$animationOpts <- ensure_one(plots, "animationOpts")
   p$subplot <- TRUE
   as_widget(p)
+}
+
+# helper function that warns if more than one plot-level attribute 
+# has been specified in a list of plots (and returning that attribute)
+ensure_one <- function(plots, attr) {
+  attrs <- lapply(plots, "[", attr)
+  for (i in seq_along(attrs)) {
+    if (!identical(attrs[[1]], attrs[[i]])) {
+      warning("Can only have one: ", attr, call. = FALSE)
+      break
+    }
+  }
+  attrs[[length(attrs)]][[1]]
 }
 
 
