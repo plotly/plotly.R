@@ -79,7 +79,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     subplotList <- c(subplotList, list(s))
   }
   s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
-  if (nchar(p$title) > 0) {
+  if (nchar(p$title %||% "") > 0) {
     s <- layout(s, title = p$title)
   }
   s
