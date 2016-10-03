@@ -65,20 +65,29 @@ rangeslider <- function(p, ...) {
 
 config <- function(p, ...) {
   attrs <- list(...)
-  # accumulate these attributes
-  p$x$config[["modeBarButtonsToRemove"]] <- c(
-    p$x$config[["modeBarButtonsToRemove"]] %||% 'sendDataToCloud',
-    attrs[["modeBarButtonsToRemove"]]
-  )
-  # include the plotly book collaboration link?
-  removeCollab <- "Collaborate" %in% p$x$config[["modeBarButtonsToRemove"]]
-  if (length(p$x$config[["modeBarButtonsToRemove"]])) {
-    p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
-  }
+  # make sure we have the right defaults
+  p$x$config <- p$x$config %||% list()
+  p$x$config[["modeBarButtonsToRemove"]] <- 
+    p$x$config[["modeBarButtonsToRemove"]] %||% 'sendDataToCloud'
+  p$x$config[["modeBarButtonsToAdd"]] <- 
+    p$x$config[["modeBarButtonsToAdd"]] %||% list(sharingButton())
+  
+  # now accumulate
   p$x$config[["modeBarButtonsToAdd"]] <- c(
-    if (!removeCollab) list(sharingButton()),
+    p$x$config[["modeBarButtonsToAdd"]], 
     attrs[["modeBarButtonsToAdd"]]
   )
+  p$x$config[["modeBarButtonsToRemove"]] <- c(
+    p$x$config[["modeBarButtonsToRemove"]], 
+    attrs[["modeBarButtonsToRemove"]]
+  )
+  
+  # ensure array
+  if (length(p$x$config[["modeBarButtonsToRemove"]]) == 1) {
+    p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
+  }
+  
+  # overwrite the other arguments
   attrs <- attrs[!grepl("modeBarButtonsTo", names(attrs))]
   p$x$config <- modify_list(p$x$config, attrs)
   p
