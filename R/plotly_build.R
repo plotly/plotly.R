@@ -30,7 +30,7 @@ plotly_build.list <- function(p, registerFrames = TRUE) {
 }
 
 #' @export
-plotly_build.gg <- function(p) {
+plotly_build.gg <- function(p, registerFrames = TRUE) {
   p <- ggplotly(p)
   p <- supply_defaults(p)
   if (registerFrames) {
