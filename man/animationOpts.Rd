@@ -4,10 +4,12 @@
 \alias{animationOpts}
 \title{Animation options}
 \usage{
-animationOpts(frameDuration = 500, transitionDuration = 500,
-  easing = "cubic-in-out", redraw = FALSE)
+animationOpts(p, frameDuration = 500, transitionDuration = 500,
+  easing = "cubic-in-out", redraw = FALSE, mode = "afterall")
 }
 \arguments{
+\item{p}{a plotly object.}
+
 \item{frameDuration}{The duration each frame is shown (in milliseconds).}
 
 \item{transitionDuration}{The duration of the transition (in milliseconds).}
@@ -18,14 +20,53 @@ animationOpts(frameDuration = 500, transitionDuration = 500,
 \item{redraw}{Trigger a redraw of the plot at completion of the transition?
 A redraw may significantly impact performance, but may be necessary to 
 update plot attributes that can't be transitioned.}
+
+\item{mode}{Describes how a new animate call interacts with currently-running
+animations. If `immediate`, current animations are interrupted and
+the new animation is started. If `next`, the current frame is allowed
+to complete, after which the new animation is started. If `afterall`
+all existing frames are animated to completion before the new animation
+is started.}
 }
 \description{
 Animation options
 }
+\examples{
+
+
+#' # map a 
+df <- data.frame(
+  x = c(1, 2, 2, 1, 1, 2),
+  y = c(1, 2, 2, 1, 1, 2),
+  z = c(1, 1, 2, 2, 3, 3)
+)
+plot_ly(df) \%>\% 
+  add_markers(x = 1.5, y = 1.5) \%>\%
+  add_markers(x = ~x, y = ~y, frame = ~z)
+
+# works in subplots
+subplot(
+  plot_ly(df, x = ~x, y = ~y, frame = ~z),
+  plot_ly(df, x = ~x, y = ~y, frame = ~z)
+)
+
+# set the range in plot_ly()
+plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
+  layout(
+    xaxis = ~list(range = range(wt)), 
+    yaxis = ~list(range = range(mpg))
+ )
+ 
+# works the same way with ggplotly
+
+data(gapminder, package = "gapminder")
+p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, color = continent, frame = year)) +
+  geom_point() +
+  scale_x_log10()
+ggplotly(p)
+
+}
 \author{
 Carson Sievert
-}
-\seealso{
-\code{\link{animate}()}
 }
 

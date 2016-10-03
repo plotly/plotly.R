@@ -6,7 +6,8 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, split, width = NULL, height = NULL, source = "A")
+  linetypes = NULL, split, frame, width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional).}
@@ -52,6 +53,9 @@ Either valid \link{par} (lty) or plotly dash codes may be supplied.}
 \code{\link{group_by}()}, but ensures at least one trace for each unique
 value. This replaces the functionality of the (now deprecated)
 \code{group} argument.}
+
+\item{frame}{A formula containing a name or expression. The resulting value 
+is used to split data into frames, and then animated.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 

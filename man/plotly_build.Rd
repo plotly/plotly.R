@@ -4,10 +4,12 @@
 \alias{plotly_build}
 \title{'Build' (i.e., evaluate) a plotly object}
 \usage{
-plotly_build(p)
+plotly_build(p, registerFrames = TRUE)
 }
 \arguments{
 \item{p}{a ggplot object, or a plotly object, or a list.}
+
+\item{registerFrames}{should a frame trace attribute be interpreted as frames in an animation?}
 }
 \description{
 This generic function creates the list object sent to plotly.js

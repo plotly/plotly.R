@@ -6,6 +6,7 @@
 #' errors.
 #'
 #' @param p a ggplot object, or a plotly object, or a list.
+#' @param registerFrames should a frame trace attribute be interpreted as frames in an animation?
 #' @export
 #' @examples
 #'
@@ -15,23 +16,31 @@
 #' # the evaluated data
 #' str(plotly_build(p)$x$data)
 #'
-plotly_build <- function(p) {
+plotly_build <- function(p, registerFrames = TRUE) {
   UseMethod("plotly_build")
 }
 
 #' @export
-plotly_build.list <- function(p) {
-  as_widget(p)
+plotly_build.list <- function(p, registerFrames = TRUE) {
+  p <- as_widget(p)
+  if (registerFrames) {
+    p <- registerFrames(p)
+  }
+  p
 }
 
 #' @export
 plotly_build.gg <- function(p) {
   p <- ggplotly(p)
-  supply_defaults(p)
+  p <- supply_defaults(p)
+  if (registerFrames) {
+    p <- registerFrames(p)
+  }
+  p
 }
 
 #' @export
-plotly_build.plotly <- function(p) {
+plotly_build.plotly <- function(p, registerFrames = TRUE) {
 
   # make this plot retrievable
   set_last_plot(p)
@@ -151,7 +160,7 @@ plotly_build.plotly <- function(p) {
     # "non-tidy" traces allow x/y of different lengths, so ignore those
     dataArrayAttrs <- if (is_tidy(trace)) names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(),
+      dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
       ".plotlyGroupIndex", "text"
@@ -170,7 +179,7 @@ plotly_build.plotly <- function(p) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
        # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
@@ -328,12 +337,42 @@ plotly_build.plotly <- function(p) {
   # populate R's non-default config
   p <- config(p)
   p$x$base_url <- get_domain()
+  if (registerFrames) {
+    p <- registerFrames(p)
+  }
   p
 }
 
 # ----------------------------------------------------------------
 # Functions used solely within plotly_build
 # ----------------------------------------------------------------
+
+registerFrames <- function(p) {
+  frameNames <- unique(unlist(lapply(p$x$data, "[[", "frame")))
+  nFrames <- length(frameNames)
+  if (nFrames > 1) {
+    # ensure one frame value per trace
+    p$x$data <- lapply(p$x$data, function(tr) { 
+      tr[["frame"]] <- tr[["frame"]][[1]]
+      tr
+    })
+    for (i in seq.int(2, nFrames)) {
+      idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[i]), logical(1))
+      p$x$frames[[i - 1]] <- list(
+        name = frameNames[[i]],
+        data = retrain_color_defaults(p$x$data[idx])
+      )
+    }
+    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
+    p$x$data[idx] <- NULL
+    nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
+    if (!play_button()[["name"]] %in% nms) {
+      p <- config(p, modeBarButtonsToAdd = list(play_button(), pause_button()))
+    }
+  }
+  p
+}
+
 
 train_data <- function(data, trace) {
   if (inherits(trace, "plotly_ribbon")) {

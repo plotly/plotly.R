@@ -1,3 +1,34 @@
+play_button <- function(click = "Plotly.animate(gd, null);") {
+  list(
+    name = "Play",
+    icon = list(
+      width = 500,
+      ascent = 500,
+      descent = -50,
+      path = 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26'
+    ),
+    click = htmlwidgets::JS(sprintf("function(gd) { %s }", click))
+  )
+}
+
+pause_button <- function() {
+  list(
+    name = "Pause",
+    icon = list(
+      width = 1500,
+      ascent = 850,
+      descent = -150,
+      path = 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26'
+    ),
+    click = htmlwidgets::JS(
+      "function(gd) {    
+        Plotly.animate(gd, []);
+      }"
+    )
+    )
+}
+
+
 sharingButton <- function() {
   url <- 'https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html'
   list(

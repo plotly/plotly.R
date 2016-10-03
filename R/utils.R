@@ -167,7 +167,7 @@ verify_attr_names <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    check_attrs(names(thisTrace), c(names(validAttrs), "key"), thisTrace$type)
+    check_attrs(names(thisTrace), c(names(validAttrs), "key", "frame"), thisTrace$type)
   }
   invisible(p)
 }

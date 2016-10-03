@@ -322,6 +322,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
   traces <- Map(function(x, y) {
+    if (!is.null(x[["frame"]])) return(x)
     x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))

@@ -55,7 +55,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
                     titleY = shareY, which_layout = "merge") {
  
   # build each plot
-  plotz <- lapply(dots2plots(...), function(d) plotly_build(d)[["x"]])
+  plotz <- lapply(dots2plots(...), function(d) plotly_build(d, registerFrames = FALSE)[["x"]])
   
   # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,
@@ -89,14 +89,6 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       plots <- c(plots, list(newPlot))
     }
   }
-  
-  # consider frame traces to be regular traces for the moment 
-  # so their anchors get bumped
-  plotz <- lapply(plotz, function(p) {
-    p$data <- c(p$data %||% list(), Reduce(c, lapply(p$frames, "[[", "data")))
-    p
-  })
-  
   
   # grab main plot objects
   traces <- lapply(plots, "[[", "data")
@@ -226,17 +218,11 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       ax
     })
   }
-  # start merging the plots into a single subplot
-  p <- list()
-  for (i in seq_along(traces)) {
-    for (j in seq_along(traces[[i]])) {
-      if (isTRUE(traces[[i]][[j]]$frame)) {
-        # TODO: implement
-      } else {
-        p$data <- c(p$data %||% list(), traces[[i]][j])
-      }
-    }
-  }
+  
+  p <- list(
+    data = Reduce(c, traces),
+    layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
+  )
   # retrain default coloring
   p$data <- retrain_color_defaults(p$data)
   
@@ -264,6 +250,38 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   p$subplot <- TRUE
   as_widget(p)
 }
+
+# ----------------------------------------------------------------
+# Functions used solely within subplot()
+# ----------------------------------------------------------------
+
+# take a "collection" of plots and 
+dots2plots <- function(...) {
+  dotz <- list(...)
+  
+  # if ... is a list (or a tibble), list(...) is a (length 1) list 
+  # containing a list of plotly objects
+  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
+    dotz <- dotz[[1]]
+  }
+  
+  if (tibble::is_tibble(dotz)) {
+    # if dots is a tibble, search for one column with a list of plotly objects
+    idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
+    if (length(idx) != 1) {
+      stop(
+        "If you supply a tibble to subplot(), \n", 
+        "it must have _one_ column with a list of plotly objects",
+        call. = FALSE
+      )
+    }
+    dotz <- dotz[[idx]]
+  }
+  
+  dotz
+}
+
+
 
 # helper function that warns if more than one plot-level attribute 
 # has been specified in a list of plots (and returning that attribute)
