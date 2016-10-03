@@ -59,11 +59,13 @@ plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
  
 # works the same way with ggplotly
 
+\dontrun{
 data(gapminder, package = "gapminder")
 p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, color = continent, frame = year)) +
   geom_point() +
   scale_x_log10()
 ggplotly(p)
+}
 
 }
 \author{
