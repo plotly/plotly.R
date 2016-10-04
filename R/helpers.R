@@ -164,4 +164,21 @@ plotly_empty <- function(...) {
   layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
 }
 
-
+#' #' Convenience function for running examples 
+#' #' 
+#' #' @ex 
+#' 
+#' run_example <- function(ex = "plotlyEvents") {
+#'   ex_dir <- system.file("examples", package = "plotly")
+#'   rmd_files <- dir(ex_dir, "\\.Rmd$", recursive = TRUE)
+#'   r_files <- dir(ex_dir, "\\.R$", recursive = TRUE)
+#'   #ex <- match.arg(ex, unique(dirname(c(rmd_files, r_files))))
+#'   if (ex %in% dirname(rmd_files)) {
+#'     dirName <- filepath(ex_dir, ex)
+#'     owd <- setwd(dirName)
+#'     on.exit(setwd(owd))
+#'     rmarkdown::render(dirName)
+#'     return(invisible())
+#'   }
+#'   
+#' }
