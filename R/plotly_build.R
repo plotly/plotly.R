@@ -357,18 +357,27 @@ registerFrames <- function(p) {
   frameNames <- frameAttrs[!is.na(frameAttrs)]
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
-  for (i in seq.int(2, nFrames)) {
-    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[i]), logical(1))
-    p$x$frames[[i - 1]] <- list(
-      name = frameNames[[i]],
-      data = retrain_color_defaults(p$x$data[idx]),
-      # which trace is the animated trace? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
-      traces = I(which(cumsum(!is.na(frameAttrs)) == 1) - 1)
+  frameNames <- sort(frameNames)
+  # copy over "frame traces" over to the frames key (required by plotly.js API)
+  for (i in seq_along(frameNames)) {
+    frame <- frameNames[i]
+    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frame), logical(1))
+    p$x$frames[[i]] <- list(
+      name = frame,
+      # try to keep the coloring consistent, if relevant
+      data = retrain_color_defaults(p$x$data[idx])
     )
   }
-  # remove every "frame trace", except for the first one
+  # remove "frame traces", except for the first one
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
+  # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
+  p$x$frames <- lapply(p$x$frames, function(f) {
+    f[["traces"]] <- which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1
+    f
+  })
+  
+  
   # add play/pause controls if they don't already exist
   nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
   if (!play_button()[["name"]] %in% nms) {

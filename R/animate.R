@@ -46,10 +46,26 @@
 #' 
 #' \dontrun{
 #' data(gapminder, package = "gapminder")
-#' p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, color = continent, frame = year)) +
+#' p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, 
+#'   color = continent, frame = year)) +
 #'   geom_point() +
 #'   scale_x_log10()
 #' ggplotly(p)
+#' 
+#' txt <- with(gapminder, data.frame(
+#'   yr = unique(year),
+#'   x = median(gdpPercap),
+#'   y = max(lifeExp)
+#' ))
+#' 
+#' p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+#'   geom_point(aes(size = pop), alpha = 0.5) +
+#'   geom_point(aes(size = pop, frame = year), color = "red") +
+#'   geom_text(data = txt, aes(label = yr, x = x, y = y, frame = yr)) +
+#'   scale_x_log10()
+#' ggplotly(p2) %>% animationOpts(redraw = TRUE)
+#' 
+#' 
 #' }
 #' 
 animationOpts <- function(p, frameDuration = 500, transitionDuration = 500, 
