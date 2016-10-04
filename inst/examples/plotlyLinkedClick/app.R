@@ -25,7 +25,7 @@ server <- function(input, output, session) {
   })
   
   output$selection <- renderPrint({
-    s <- event_data("plotly_click")
+    s <- event_data("plotly_click", source = "heatplot")
     if (length(s) == 0) {
       "Click on a cell in the heatmap to display a scatterplot"
     } else {

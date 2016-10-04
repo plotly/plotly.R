@@ -348,27 +348,31 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
 # ----------------------------------------------------------------
 
 registerFrames <- function(p) {
-  frameNames <- unique(unlist(lapply(p$x$data, "[[", "frame")))
+  # ensure one frame value per trace, and if its missing, insert NA
+  p$x$data <- lapply(p$x$data, function(tr) { 
+    tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
+    tr
+  })
+  frameAttrs <- unique(unlist(lapply(p$x$data, "[[", "frame")))
+  frameNames <- frameAttrs[!is.na(frameAttrs)]
   nFrames <- length(frameNames)
-  if (nFrames > 1) {
-    # ensure one frame value per trace
-    p$x$data <- lapply(p$x$data, function(tr) { 
-      tr[["frame"]] <- tr[["frame"]][[1]]
-      tr
-    })
-    for (i in seq.int(2, nFrames)) {
-      idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[i]), logical(1))
-      p$x$frames[[i - 1]] <- list(
-        name = frameNames[[i]],
-        data = retrain_color_defaults(p$x$data[idx])
-      )
-    }
-    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
-    p$x$data[idx] <- NULL
-    nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
-    if (!play_button()[["name"]] %in% nms) {
-      p <- config(p, modeBarButtonsToAdd = list(play_button(), pause_button()))
-    }
+  if (nFrames < 2) return(p)
+  for (i in seq.int(2, nFrames)) {
+    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[i]), logical(1))
+    p$x$frames[[i - 1]] <- list(
+      name = frameNames[[i]],
+      data = retrain_color_defaults(p$x$data[idx]),
+      # which trace is the animated trace? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
+      traces = I(which(cumsum(!is.na(frameAttrs)) == 1) - 1)
+    )
+  }
+  # remove every "frame trace", except for the first one
+  idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
+  p$x$data[idx] <- NULL
+  # add play/pause controls if they don't already exist
+  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
+  if (!play_button()[["name"]] %in% nms) {
+    p <- config(p, modeBarButtonsToAdd = list(play_button(), pause_button()))
   }
   p
 }
