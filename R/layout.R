@@ -57,38 +57,48 @@ rangeslider <- function(p, ...) {
 #' @param p a plotly object
 #' @param ... these arguments are documented at 
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}
+#' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
+#' @param cloud include the send data to cloud button?
 #' @author Carson Sievert
 #' @export
-#' @examples \dontrun{
-#' config(plot_ly(), displaylogo = FALSE)
-#' }
+#' @examples
+#' 
+#' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+#' 
 
-config <- function(p, ...) {
-  attrs <- list(...)
-  # make sure we have the right defaults
-  p$x$config <- p$x$config %||% list()
-  p$x$config[["modeBarButtonsToRemove"]] <- 
-    p$x$config[["modeBarButtonsToRemove"]] %||% 'sendDataToCloud'
-  p$x$config[["modeBarButtonsToAdd"]] <- 
-    p$x$config[["modeBarButtonsToAdd"]] %||% list(sharingButton())
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
   
-  # now accumulate
-  p$x$config[["modeBarButtonsToAdd"]] <- c(
-    p$x$config[["modeBarButtonsToAdd"]], 
-    attrs[["modeBarButtonsToAdd"]]
-  )
-  p$x$config[["modeBarButtonsToRemove"]] <- c(
-    p$x$config[["modeBarButtonsToRemove"]], 
-    attrs[["modeBarButtonsToRemove"]]
-  )
+  # make sure config is a list
+  p$x$config <- p$x$config %||% list()
+  
+  nms <- sapply(p$x$config[["modeBarButtonsToAdd"]], "[[", "name")
+  hasCollab <- sharingButton()[["name"]] %in% nms
+  
+  if (collaborate && !hasCollab) {
+    nAdd <- length(p$x$config[["modeBarButtonsToAdd"]])
+    p$x$config[["modeBarButtonsToAdd"]][[nAdd + 1]] <- sharingButton()
+  }
+  if (!collaborate) {
+    p$x$config[["modeBarButtonsToAdd"]][nms %in% sharingButton()[["name"]]] <- NULL
+  }
+
+  hasCloud <- !'sendDataToCloud' %in% p$x$config[["modeBarButtonsToRemove"]]
+  if (!cloud) {
+    p$x$config[["modeBarButtonsToRemove"]] <- c(
+      p$x$config[["modeBarButtonsToRemove"]], 'sendDataToCloud'
+    )
+  }
+  if (cloud) {
+    b <- p$x$config[["modeBarButtonsToRemove"]]
+    p$x$config[["modeBarButtonsToRemove"]] <- b[!b %in% 'sendDataToCloud']
+  }
   
   # ensure array
   if (length(p$x$config[["modeBarButtonsToRemove"]]) == 1) {
     p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
   }
   
-  # overwrite the other arguments
-  attrs <- attrs[!grepl("modeBarButtonsTo", names(attrs))]
-  p$x$config <- modify_list(p$x$config, attrs)
+  
+  p$x$config <- modify_list(p$x$config, list(...))
   p
 }
