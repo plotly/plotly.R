@@ -164,6 +164,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     )
     grDevices::dev.new
   }
+  tmpPlotFile <- tempfile(fileext = ".png")
   dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
   # start the build process
