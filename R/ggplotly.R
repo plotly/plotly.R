@@ -119,8 +119,21 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # if height/width is not specified, estimate it from the current device
   deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
   deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
-  tmpPlotFile <- tempfile(fileext = ".png")
-  grDevices::png(tmpPlotFile, width = deviceWidth, height = deviceHeight)
+  # try to find a bitmap device (measured in pixels), 
+  # if none available, use default device and throw warning
+  dev_fun <- if (capabilities("png")) {
+    grDevices::png
+  } else if (capabilities("jpeg")) {
+    grDevices::jpeg 
+  } else {
+    warning(
+      "Couldn't find a bitmap device (e.g. png or jpeg).",
+      "To ensure sizes are converted correctly please",
+      "compile R to use a bitmap device", call. = FALSE
+    )
+    grDevices::dev.new
+  }
+  dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
 
   plot <- ggfun("plot_clone")(p)
