@@ -1,5 +1,4 @@
 library(GGally)
-iris$id <- seq_len(nrow(iris))
-d <- SharedData$new(iris, ~id)
-p <- ggpairs(d, aes(colour = Species), columns = 1:4)
-ggplotly(p, c("x", "y", "colour"))
+d <- SharedData$new(iris)
+p <- GGally::ggpairs(d, aes(colour = Species), columns = 1:5)
+ggplotly(p) %>% layout(dragmode = "select")
