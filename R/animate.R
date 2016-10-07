@@ -70,7 +70,7 @@
 #' 
 animationOpts <- function(p, frameDuration = 500, transitionDuration = 500, 
                           easing = "cubic-in-out", redraw = FALSE, 
-                          mode = "afterall") {
+                          mode = "immediate") {
   if (frameDuration < 0) {
     stop("frameDuration must be non-negative.", call. = FALSE)
   }
@@ -92,7 +92,16 @@ animationOpts <- function(p, frameDuration = 500, transitionDuration = 500,
   click <- sprintf(
     "Plotly.animate(gd, null, %s);", to_JSON(opts)
   )
-  config(p, modeBarButtonsToAdd = list(play_button(click), pause_button()))
+  b <- play_button(click)
+  # insanity...modeBarButtonsToAdd is an array of objects....
+  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
+  if (idx <- b[["name"]] %in% nms) {
+    # overwrite the existing play button
+    p$x$config$modeBarButtonsToAdd[[which(idx)]]$click <- b[["click"]]
+  } else {
+    p$x$config$modeBarButtonsToAdd <- list(play_button(click), pause_button())
+  }
+  p
 }
 
 easingOpts <- function() {

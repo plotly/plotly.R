@@ -301,6 +301,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
   }
   
+  # supply animation trigger if it doesn't already exist 
+  # (note, animation defaults are different than plotly.js)
+  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
+  if (!play_button()[["name"]] %in% nms) {
+    p <- animationOpts(p)
+  }
+  
   # supply trace anchor and domain information  
   p <- supply_defaults(p)
   
@@ -376,12 +383,6 @@ registerFrames <- function(p) {
     f
   })
   
-  
-  # add play/pause controls if they don't already exist
-  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
-  if (!play_button()[["name"]] %in% nms) {
-    p <- config(p, modeBarButtonsToAdd = list(play_button(), pause_button()))
-  }
   p
 }
 
