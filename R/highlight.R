@@ -93,6 +93,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     }
   }
   
+  # attach selectize dependencies/payloads to plot object and add selectize divs
   if (selectize) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
     sets <- unlist(lapply(p$x$data, "[[", "set"))
@@ -103,12 +104,10 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
       if (is.null(k)) next
       k <- k[!is.null(k)]
       id <- new_id()
-      # selectize payload(s)
       p$x$selectize[[id]] <- list(
-        # TODO: do we need a mode like crosstalk?
         items = data.frame(value = k, label = k), group = i
       )
-      d <- selectizeDIV(id, multiple = persistent, keys = k, group = i)
+      d <- selectizeDIV(id, multiple = persistent, label = i)
       p <- htmltools::tagList(p, d)
     }
   }
@@ -140,27 +139,13 @@ highlight_defaults <- function() {
 
 
 # Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
-selectizeDIV <- function(id, multiple = TRUE, keys = "", group = "A") {
+selectizeDIV <- function(id, multiple = TRUE, label = NULL) {
   tags$div(
     id = id, 
     class = "form-group crosstalk-input-plotly-highlight",
-    tags$label(class = "control-label", `for` = id, group),
+    tags$label(class = "control-label", `for` = id, label),
     tags$div(
-      tags$select(
-        multiple = if (multiple) NA else NULL
-      ),
-      tags$script(
-        type = "application/json",
-        `data-for` = id,
-        jsonlite::toJSON(
-          list(
-            items = data.frame(value = keys, label = keys), 
-            group = group
-          ), 
-          dataframe = "columns", 
-          pretty = TRUE
-        )
-      )
+      tags$select(multiple = if (multiple) NA else NULL)
     )
   )
 }

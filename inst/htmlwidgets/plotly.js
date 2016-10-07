@@ -296,7 +296,8 @@ HTMLWidgets.widget({
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;
             selectize.on("change", function() {
-              grp.var("selection").set(selectize.items);
+              // TODO: updateSelection() should really work when we *remove* items...
+              traceManager.updateSelection(set, selectize.items);
             });
           }
           
@@ -309,6 +310,7 @@ HTMLWidgets.widget({
               // group.
               removeBrush(el);
             }
+            
             // e.value is either null, or an array of newly selected values
             if (e.oldValue !== e.value) {
               traceManager.updateSelection(set, e.value);
