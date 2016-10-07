@@ -79,7 +79,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     subplotList <- c(subplotList, list(s))
   }
   s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
-  if (nchar(p$title) > 0) {
+  if (nchar(p$title %||% "") > 0) {
     s <- layout(s, title = p$title)
   }
   s
@@ -119,8 +119,22 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # if height/width is not specified, estimate it from the current device
   deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
   deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
+  # try to find a bitmap device (measured in pixels), 
+  # if none available, use default device and throw warning
+  dev_fun <- if (capabilities("png")) {
+    grDevices::png
+  } else if (capabilities("jpeg")) {
+    grDevices::jpeg 
+  } else {
+    warning(
+      "Couldn't find a bitmap device (e.g. png or jpeg).",
+      "To ensure sizes are converted correctly please",
+      "compile R to use a bitmap device", call. = FALSE
+    )
+    grDevices::dev.new
+  }
   tmpPlotFile <- tempfile(fileext = ".png")
-  grDevices::png(tmpPlotFile, width = deviceWidth, height = deviceHeight)
+  dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
 
   plot <- ggfun("plot_clone")(p)
@@ -334,11 +348,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # panel margins must be computed before panel/axis loops
   # (in order to use get_domains())
   panelMarginX <- unitConvert(
-    theme[["panel.margin.x"]] %||% theme[["panel.margin"]],
+    theme[["panel.spacing.x"]] %||% theme[["panel.spacing"]],
     "npc", "width"
   )
   panelMarginY <- unitConvert(
-    theme[["panel.margin.y"]] %||% theme[["panel.margin"]],
+    theme[["panel.spacing.y"]] %||% theme[["panel.spacing"]],
     "npc", "height"
   )
   # space for _interior_ facet strips

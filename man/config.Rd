@@ -4,21 +4,25 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ...)
+config(p, ..., collaborate = TRUE, cloud = FALSE)
 }
 \arguments{
 \item{p}{a plotly object}
 
 \item{...}{these arguments are documented at 
 \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}}
+
+\item{collaborate}{include the collaborate mode bar button (unique to the R pkg)?}
+
+\item{cloud}{include the send data to cloud button?}
 }
 \description{
 Set the default configuration for plotly
 }
 \examples{
-\dontrun{
-config(plot_ly(), displaylogo = FALSE)
-}
+
+config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+
 }
 \author{
 Carson Sievert
