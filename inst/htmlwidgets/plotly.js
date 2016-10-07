@@ -320,6 +320,7 @@ HTMLWidgets.widget({
                 selectize.clear(true);
               } else {
                 selectize.addItem(e.value, true);
+                selectize.close();
               }
               
             }
