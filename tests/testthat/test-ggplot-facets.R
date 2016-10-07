@@ -5,7 +5,7 @@ test_that("6 facets becomes 6 panels", {
   gg <- qplot(yield, variety, data = barley, 
               color = year, facets = site ~ ., pch = I(1))+
     theme_bw() +
-    theme(panel.margin = grid::unit(0, "cm"))
+    theme(panel.spacing = grid::unit(0, "cm"))
   info <- save_outputs(gg, "barley")
   # two legend entries, but two groups
   expect_equal(sum(sapply(info$data, "[[", "showlegend")), 2)
@@ -25,7 +25,7 @@ test_that("3 facets becomes 3 panels", {
   )
   gg <- qplot(x, y, data = df, facets = z ~ ., pch = I(1)) +
     theme_bw() +
-    theme(panel.margin = grid::unit(0, "cm"))
+    theme(panel.spacing = grid::unit(0, "cm"))
   info <- save_outputs(gg, "3-panels")
   yaxes <- sapply(info$data, "[[", "yaxis")
   xaxes <- sapply(info$data, "[[", "xaxis")
