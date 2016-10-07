@@ -68,8 +68,7 @@ rangeslider <- function(p, ...) {
 
 config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
   
-  # make sure config is a list
-  p$x$config <- p$x$config %||% list()
+  p$x$config <- modify_list(p$x$config, list(...))
   
   nms <- sapply(p$x$config[["modeBarButtonsToAdd"]], "[[", "name")
   hasCollab <- sharingButton()[["name"]] %in% nms
@@ -97,7 +96,6 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
   if (length(p$x$config[["modeBarButtonsToRemove"]]) == 1) {
     p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
   }
-  
-  p$x$config <- modify_list(p$x$config, list(...))
+
   p
 }
