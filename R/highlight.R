@@ -108,7 +108,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
         items = data.frame(value = k, label = k), group = i
       )
       d <- selectizeDIV(id, multiple = persistent, label = i)
-      p <- htmltools::tagList(p, d)
+      p <- htmltools::tagList(d, p)
     }
   }
   
