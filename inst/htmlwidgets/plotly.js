@@ -290,6 +290,7 @@ HTMLWidgets.widget({
             var first = [{value: "", label: "(All)"}];
             var opts = {
               options: first.concat(items),
+              searchField: "label",
               valueField: "value",
               labelField: "label"
             };

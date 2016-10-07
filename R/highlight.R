@@ -140,18 +140,18 @@ highlight_defaults <- function() {
 
 # Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
 selectizeDIV <- function(id, multiple = TRUE, label = NULL) {
-  tags$div(
+  htmltools::tags$div(
     id = id, 
     class = "form-group crosstalk-input-plotly-highlight",
-    tags$label(class = "control-label", `for` = id, label),
-    tags$div(
-      tags$select(multiple = if (multiple) NA else NULL)
+    htmltools::tags$label(class = "control-label", `for` = id, label),
+    htmltools::tags$div(
+      htmltools::tags$select(multiple = if (multiple) NA else NULL)
     )
   )
 }
 
 selectizeLib <- function(bootstrap = TRUE) {
-  htmlDependency(
+  htmltools::htmlDependency(
     "selectize", "0.12.0", depPath("selectize"),
     stylesheet = if (bootstrap) "selectize.bootstrap3.css",
     script = "selectize.min.js"
