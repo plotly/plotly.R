@@ -1,16 +1,18 @@
-#' Highlight graphical elements 
+#' Highlight graphical elements in multiple linked views
 #' 
-#' Controls the visual appearance of selections deriving from a given
-#' selection set.
+#' For documentation and examples, see 
+#' \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
 #' 'plotly_hover', 'plotly_click', 'plotly_selected'.
 #' @param off turn off a selection on which event(s)? Likely candidates are
 #' 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.
-#' @param dynamic should UI controls for managing selection aesthetics be 
-#' included in the output?
 #' @param persistent should selections persist (i.e., accumulate)?
+#' @param dynamic should UI controls for changing selection colors be 
+#' included in the output?
+#' @param selectize provide a selectize.js widget for selecting keys? Note that 
+#' the label used for this widget derives from the groupName of the SharedData object.
 #' @param defaultValues a vector of values for setting a "default selection".
 #' These values should match the key attribute.
 #' @param color character string of color(s) to use for 
@@ -27,11 +29,18 @@
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' ggplotly(p, tooltip = "city") %>%
 #'   highlight(on = "plotly_hover", color = "red")
+#'   
+#' # The group name is currently used to populate a title for the selectize widget
+#' sd <- SharedData$new(txhousing, ~city, "Choose a city")
+#' plot_ly(sd, x = ~date, y = ~median) %>%
+#'   add_lines(text = ~city, hoverinfo = "text") %>%
+#'   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 #' 
 
 highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
-                      dynamic = FALSE, persistent = FALSE, defaultValues = NULL,
-                      color = NULL, opacityDim = 0.2, showInLegend = FALSE) {
+                      persistent = FALSE, dynamic = FALSE, color = NULL,
+                      selectize = FALSE, defaultValues = NULL,
+                      opacityDim = 0.2, showInLegend = FALSE) {
   if (!is.plotly(p)) {
     stop("Don't know how to modify highlight options to objects of class:", class(p))
   }
@@ -83,6 +92,27 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
         }", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
     }
   }
+  
+  if (selectize) {
+    p$dependencies <- c(p$dependencies, list(selectizeLib()))
+    sets <- unlist(lapply(p$x$data, "[[", "set"))
+    keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
+    uniqueSets <- unique(sets)
+    for (i in uniqueSets) {
+      k <- unique(keys[[i]])
+      if (is.null(k)) next
+      k <- k[!is.null(k)]
+      id <- new_id()
+      # selectize payload(s)
+      p$x$selectize[[id]] <- list(
+        # TODO: do we need a mode like crosstalk?
+        items = data.frame(value = k, label = k), group = i
+      )
+      d <- selectizeDIV(id, multiple = persistent, keys = k, group = i)
+      p <- htmltools::tagList(p, d)
+    }
+  }
+  
   if (dynamic) {
     w <- colourpicker::colourWidget(
       value = color[1],
@@ -97,12 +127,52 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
           crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
         })
       }")
-    p <- htmltools::browsable(htmltools::tagList(w, p))
+    p <- htmltools::tagList(w, p)
   }
-  p
+  
+  htmltools::browsable(p)
 }
 
 
 highlight_defaults <- function() {
   formals(highlight)[-1]
+}
+
+
+# Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
+selectizeDIV <- function(id, multiple = TRUE, keys = "", group = "A") {
+  tags$div(
+    id = id, 
+    class = "form-group crosstalk-input-plotly-highlight",
+    tags$label(class = "control-label", `for` = id, group),
+    tags$div(
+      tags$select(
+        multiple = if (multiple) NA else NULL
+      ),
+      tags$script(
+        type = "application/json",
+        `data-for` = id,
+        jsonlite::toJSON(
+          list(
+            items = data.frame(value = keys, label = keys), 
+            group = group
+          ), 
+          dataframe = "columns", 
+          pretty = TRUE
+        )
+      )
+    )
+  )
+}
+
+selectizeLib <- function(bootstrap = TRUE) {
+  htmlDependency(
+    "selectize", "0.12.0", depPath("selectize"),
+    stylesheet = if (bootstrap) "selectize.bootstrap3.css",
+    script = "selectize.min.js"
+  )
+}
+
+depPath <- function(...) {
+  system.file('htmlwidgets', 'lib', ..., package = 'plotly')
 }

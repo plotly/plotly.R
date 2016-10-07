@@ -284,7 +284,7 @@ plotly_build.plotly <- function(p) {
   p$x$data <- setNames(c(p$x$data, traces), NULL)
 
   # get rid of data -> vis mapping stuff
-  p$x[c("visdat", "cur_data", "attrs")] <- NULL
+  #p$x[c("visdat", "cur_data", "attrs")] <- NULL
 
   if (has_colorbar(p) && has_legend(p)) {
     if (length(p$x$data) <= 2) {
