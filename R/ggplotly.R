@@ -389,11 +389,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # panel margins must be computed before panel/axis loops
   # (in order to use get_domains())
   panelMarginX <- unitConvert(
-    theme[["panel.margin.x"]] %||% theme[["panel.margin"]],
+    theme[["panel.spacing.x"]] %||% theme[["panel.spacing"]],
     "npc", "width"
   )
   panelMarginY <- unitConvert(
-    theme[["panel.margin.y"]] %||% theme[["panel.margin"]],
+    theme[["panel.spacing.y"]] %||% theme[["panel.spacing"]],
     "npc", "height"
   )
   # space for _interior_ facet strips
