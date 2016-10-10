@@ -52,6 +52,7 @@
 #'   scale_x_log10()
 #' ggplotly(p)
 #' 
+#' # data for showing the selected year
 #' txt <- with(gapminder, data.frame(
 #'   yr = unique(year),
 #'   x = median(gdpPercap),
@@ -60,11 +61,11 @@
 #' 
 #' p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
 #'   geom_point(aes(size = pop), alpha = 0.5) +
+#'   # animations can be specified on the layer level
 #'   geom_point(aes(size = pop, frame = year), color = "red") +
 #'   geom_text(data = txt, aes(label = yr, x = x, y = y, frame = yr)) +
 #'   scale_x_log10()
-#' ggplotly(p2) %>% animationOpts(redraw = TRUE)
-#' 
+#' ggplotly(p2)
 #' 
 #' }
 #' 
@@ -92,14 +93,13 @@ animationOpts <- function(p, frameDuration = 500, transitionDuration = 500,
   click <- sprintf(
     "Plotly.animate(gd, null, %s);", to_JSON(opts)
   )
-  b <- play_button(click)
   # insanity...modeBarButtonsToAdd is an array of objects....
   nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
-  if (idx <- b[["name"]] %in% nms) {
+  if (idx <- play_button()[["name"]] %in% nms) {
     # overwrite the existing play button
-    p$x$config$modeBarButtonsToAdd[[which(idx)]]$click <- b[["click"]]
+    p$x$config$modeBarButtonsToAdd[[which(idx)]]$click <- click
   } else {
-    p$x$config$modeBarButtonsToAdd <- list(play_button(click), pause_button())
+    p$x$config$modeBarButtonsToAdd <- list(play_button(click))
   }
   p
 }

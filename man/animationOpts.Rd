@@ -5,7 +5,7 @@
 \title{Animation options}
 \usage{
 animationOpts(p, frameDuration = 500, transitionDuration = 500,
-  easing = "cubic-in-out", redraw = FALSE, mode = "afterall")
+  easing = "cubic-in-out", redraw = FALSE, mode = "immediate")
 }
 \arguments{
 \item{p}{a plotly object.}
@@ -79,8 +79,6 @@ p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
   geom_text(data = txt, aes(label = yr, x = x, y = y, frame = yr)) +
   scale_x_log10()
 ggplotly(p2) \%>\% animationOpts(redraw = TRUE)
-
-
 }
 
 }

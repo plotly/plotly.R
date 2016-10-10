@@ -135,7 +135,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   }
   tmpPlotFile <- tempfile(fileext = ".png")
   dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
-  
 
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
