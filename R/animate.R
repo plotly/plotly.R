@@ -16,6 +16,7 @@
 #' is started.
 #' @export
 #' @author Carson Sievert
+#' @seealso \code{\link{animationSlider}()}, \code{\link{animationButton}()}
 #' @examples 
 #' 
 #' 
@@ -52,21 +53,12 @@
 #'   scale_x_log10()
 #' ggplotly(p)
 #' 
-#' # data for showing the selected year
-#' txt <- with(gapminder, data.frame(
-#'   yr = unique(year),
-#'   x = median(gdpPercap),
-#'   y = max(lifeExp)
-#' ))
-#' 
 #' p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
 #'   geom_point(aes(size = pop), alpha = 0.5) +
 #'   # animations can be specified on the layer level
 #'   geom_point(aes(size = pop, frame = year), color = "red") +
-#'   geom_text(data = txt, aes(label = yr, x = x, y = y, frame = yr)) +
 #'   scale_x_log10()
 #' ggplotly(p2)
-#' 
 #' }
 #' 
 animationOpts <- function(p, frameDuration = 500, transitionDuration = 500, 
@@ -89,20 +81,128 @@ animationOpts <- function(p, frameDuration = 500, transitionDuration = 500,
     ),
     mode = match.arg(mode, c('immediate', 'next', 'afterall'))
   )
-  # TODO: add argument to restrict frames?
-  click <- sprintf(
-    "Plotly.animate(gd, null, %s);", to_JSON(opts)
-  )
-  # insanity...modeBarButtonsToAdd is an array of objects....
-  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
-  if (idx <- play_button()[["name"]] %in% nms) {
-    # overwrite the existing play button
-    p$x$config$modeBarButtonsToAdd[[which(idx)]]$click <- click
-  } else {
-    p$x$config$modeBarButtonsToAdd <- list(play_button(click))
+  
+  # build step will ensure we can access the animation frames
+  # (required to fill the steps in correctly)
+  p <- plotly_build(p)
+  
+  # overwrite the animation options in the slider/button spec
+  supply_ani_slider(supply_ani_button(p, opts))
+}
+
+#' Hide or customize the animation button
+#' 
+#' @param p a plotly object
+#' @param hide remove the animation slider?
+#' @param ... attributes passed to the sliders object which controls the animation
+#' slider \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{animationOpts}()}, \code{\link{animationButton}()}
+#' 
+
+animationSlider <- function(p, hide = FALSE, ...) {
+  
+  p <- plotly_build(p)
+  isAniSlider <- vapply(p$x$layout$slider, is_ani_slider, logical(1))
+  if (hide) {
+    p$x$layout$slider[isAniSlider] <- NULL
+    return(p)
   }
+  p$x$layout$slider[[which(isAniSlider)]] <- modify_list(
+    p$x$layout$slider[[which(isAniSlider)]], list(...)
+  )
+  p
+  
+}
+
+#' Hide or customize the animation button
+#' 
+#' @param p a plotly object
+#' @param ... arguments passed to the updatemenus which controls the play/pause
+#' button \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{animationOpts}()}, \code{\link{animationButton}()}
+#' 
+
+animationButton <- function(p, ...) {
+  
+  p <- plotly_build(p)
+  isAniButton <- vapply(p$x$layout$updatemenus, is_ani_button, logical(1))
+  p$x$layout$updatemenus[[which(isAniButton)]] <- modify_list(
+    p$x$layout$updatemenus[[which(isAniButton)]], list(...)
+  )
   p
 }
+
+
+# supply an animation button if it doesn't exist, 
+# and _replace_ an existing animation button
+supply_ani_button <- function(p, opts = NULL) {
+  nmenus <- length(p$x$layout$updatemenus)
+  isAniButton <- vapply(p$x$layout$updatemenus, is_ani_button, logical(1))
+  idx <- if (sum(isAniButton) == 1) which(isAniButton) else nmenus + 1
+  p$x$layout$updatemenus[[idx]] <- create_ani_button(opts)
+  p
+}
+
+create_ani_button <- function(opts) {
+  button <- list(
+    type = 'buttons',
+    direction = 'right',
+    y = 1,
+    x = 0,
+    yanchor = 'bottom',
+    xanchor = 'left',
+    pad = list(b = 10, l = 10),
+    buttons = list(list(
+      label = 'Play',
+      method = 'animate',
+      args = list(list())
+    ), list(
+      label = 'Pause',
+      method = 'animate',
+      args = list(list(), list(mode = "next"))
+    ))
+  )
+  structure(button, class = "aniButton")
+}
+
+is_ani_button <- function(obj) {
+  class(obj) %in% "aniButton"
+}
+
+# supply an animation slider if it doesn't exist, 
+# and _replace_ an existing animation slider
+supply_ani_slider <- function(p, opts = NULL, ...) {
+  nsliders <- length(p$x$layout$sliders)
+  isAniSlider <- vapply(p$x$layout$sliders, is_ani_slider, logical(1))
+  idx <- if (sum(isAniSlider) == 1) which(isAniSlider) else nsliders + 1
+  p$x$layout$sliders[[idx]] <- create_ani_slider(p$x$frames, opts, ...)
+  p
+}
+
+create_ani_slider <- function(frames, opts = NULL, ...) {
+  steps <- lapply(frames, function(f) {
+    nm <- as.character(f[["name"]])
+    args <- list(list(nm))
+    args[[2]] <- opts
+    list(method = "animate", args = args, label = nm)
+  })
+  
+  slider <- list(...)
+  slider$visible <- TRUE
+  slider$steps <- slider[["steps"]] %||% steps
+  slider$pad$t <- slider$pad[["t"]] %||% 40
+  structure(slider, class = "aniSlider")
+}
+
+is_ani_slider <- function(obj) {
+  class(obj) %in% "aniSlider"
+}
+
+
 
 easingOpts <- function() {
   c('linear', 'quad', 'cubic', 'sin', 'exp', 'circle', 'elastic', 'back', 

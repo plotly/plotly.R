@@ -21,22 +21,15 @@ plotly_build <- function(p, registerFrames = TRUE) {
 }
 
 #' @export
-plotly_build.list <- function(p, registerFrames = TRUE) {
-  p <- as_widget(p)
-  if (registerFrames) {
-    p <- registerFrames(p)
-  }
-  p
+plotly_build.list <- function(p) {
+  as_widget(p)
 }
 
 #' @export
-plotly_build.gg <- function(p, registerFrames = TRUE) {
-  p <- ggplotly(p)
-  p <- supply_defaults(p)
-  if (registerFrames) {
-    p <- registerFrames(p)
-  }
-  p
+plotly_build.gg <- function(p) {
+  # note: since preRenderHook = plotly_build in as_widget(), 
+  # plotly_build.plotly() will be called on gg objects as well
+  ggplotly(p)
 }
 
 #' @export
@@ -80,6 +73,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
   p$x$layout$annotations <- annotations
   
+  # keep frame mapping for populating layout.slider.currentvalue in animations
+  frameMapping <- unique(unlist(
+    lapply(p$x$attrs, function(x) deparse2(x[["frame"]])), 
+    use.names = FALSE
+  ))
   
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
@@ -280,7 +278,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # it's possible that the plot object already has some traces
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
-
+  
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
 
@@ -299,13 +297,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         p$x$layout$legend
       )
     }
-  }
-  
-  # supply animation trigger if it doesn't already exist 
-  # (note, animation defaults are different than plotly.js)
-  nms <- vapply(p$x$config$modeBarButtonsToAdd, function(x) x[["name"]] %||% "", character(1))
-  if (!play_button()[["name"]] %in% nms) {
-    p <- animationOpts(p)
   }
   
   # supply trace anchor and domain information  
@@ -344,7 +335,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   if (registerFrames) {
-    p <- registerFrames(p)
+    p <- registerFrames(p, frameMapping)
   }
   p
 }
@@ -353,7 +344,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
 # Functions used solely within plotly_build
 # ----------------------------------------------------------------
 
-registerFrames <- function(p) {
+registerFrames <- function(p, frameMapping = NULL) {
   # ensure one frame value per trace, and if its missing, insert NA
   p$x$data <- lapply(p$x$data, function(tr) { 
     tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
@@ -383,7 +374,20 @@ registerFrames <- function(p) {
     f
   })
   
-  p
+  # populate layout.sliders.currentvalue with a sensible default
+  defaultvalue <- if (length(frameMapping) == 1) {
+    list(
+      prefix = paste0(frameMapping, ": "),
+      xanchor = 'right',
+      font = list(
+        size = 16,
+        color = toRGB("gray80")
+      )
+    )
+  } else NULL
+  
+  # _always_ display an animation button and slider by default
+  supply_ani_button(supply_ani_slider(p, currentvalue = defaultvalue))
 }
 
 
