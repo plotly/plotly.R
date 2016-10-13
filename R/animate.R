@@ -159,7 +159,7 @@ create_ani_button <- function(opts) {
     buttons = list(list(
       label = 'Play',
       method = 'animate',
-      args = list(list())
+      args = list(list(), opts)
     ), list(
       label = 'Pause',
       method = 'animate',
@@ -185,10 +185,10 @@ supply_ani_slider <- function(p, opts = NULL, ...) {
 
 create_ani_slider <- function(frames, opts = NULL, ...) {
   steps <- lapply(frames, function(f) {
-    nm <- as.character(f[["name"]])
+    nm <- f[["name"]]
     args <- list(list(nm))
     args[[2]] <- opts
-    list(method = "animate", args = args, label = nm)
+    list(method = "animate", args = args, label = format(nm), value = nm)
   })
   
   slider <- list(...)

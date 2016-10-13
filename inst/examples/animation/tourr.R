@@ -39,6 +39,9 @@ ax <- list(
   zeroline = FALSE
 )
 
+# for nicely formatted slider labels
+options(digits = 2)
+
 proj_dat %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("gray80")) %>%
   add_segments(xend = 0, yend = 0) %>%
@@ -46,4 +49,4 @@ proj_dat %>%
   add_markers(color = ~species, data = tour_dat) %>%
   hide_legend() %>%
   layout(xaxis = ax, yaxis = ax) %>%
-  animationOpts(15, 1000)
+  animationOpts(15, 100)
