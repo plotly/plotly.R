@@ -58,6 +58,13 @@ plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
  )
  
 # works the same way with ggplotly
+p <- ggplot(txhousing, aes(month, median)) + 
+  geom_smooth() +
+  geom_line(aes(frame = year, ids = month)) + 
+  facet_wrap(~ city)
+ 
+ggplotly(p, width = 1000, height = 500) \%>\% 
+  animationSlider(hide = TRUE)
 
 \dontrun{
 data(gapminder, package = "gapminder")

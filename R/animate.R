@@ -44,6 +44,13 @@
 #'  )
 #'  
 #' # works the same way with ggplotly
+#' p <- ggplot(txhousing, aes(month, median)) + 
+#'   geom_smooth() +
+#'   geom_line(aes(frame = year, ids = month)) + 
+#'   facet_wrap(~ city)
+#'  
+#' ggplotly(p, width = 1000, height = 500) %>% 
+#'   animationSlider(hide = TRUE)
 #' 
 #' \dontrun{
 #' data(gapminder, package = "gapminder")
@@ -104,13 +111,13 @@ animationOpts <- function(p, frameDuration = 500, transitionDuration = 500,
 animationSlider <- function(p, hide = FALSE, ...) {
   
   p <- plotly_build(p)
-  isAniSlider <- vapply(p$x$layout$slider, is_ani_slider, logical(1))
+  isAniSlider <- vapply(p$x$layout$sliders, is_ani_slider, logical(1))
   if (hide) {
-    p$x$layout$slider[isAniSlider] <- NULL
+    p$x$layout$sliders[isAniSlider] <- NULL
     return(p)
   }
-  p$x$layout$slider[[which(isAniSlider)]] <- modify_list(
-    p$x$layout$slider[[which(isAniSlider)]], list(...)
+  p$x$layout$sliders[[which(isAniSlider)]] <- modify_list(
+    p$x$layout$sliders[[which(isAniSlider)]], list(...)
   )
   p
   
@@ -155,7 +162,7 @@ create_ani_button <- function(opts) {
     x = 0,
     yanchor = 'bottom',
     xanchor = 'left',
-    pad = list(b = 10, l = 10),
+    pad = list(b = 40, l = 10),
     buttons = list(list(
       label = 'Play',
       method = 'animate',

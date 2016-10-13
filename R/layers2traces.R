@@ -432,9 +432,10 @@ geom2trace.GeomPath <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
-    frame = data$frame,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -460,9 +461,10 @@ geom2trace.GeomPoint <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
-    frame = data$frame,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -494,9 +496,10 @@ geom2trace.GeomBar <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
-    frame = data$frame,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -519,9 +522,10 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
-    frame = data$frame,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     line = list(
@@ -582,9 +586,10 @@ geom2trace.GeomText <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data$label,
-    key = data$key,
-    frame = data$frame,
+    text = data[["label"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
@@ -618,7 +623,8 @@ geom2trace.GeomTile <- function(data, params, p) {
   list(
     x = x,
     y = y,
-    frame = data$frame,
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
     text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
     colorscale = setNames(colScale, NULL),
@@ -704,8 +710,9 @@ make_error <- function(data, params, xy = "x") {
   e <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    frame = data$frame,
+    text = uniq(data[["hovertext"]]),
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),
