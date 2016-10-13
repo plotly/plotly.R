@@ -370,7 +370,7 @@ registerFrames <- function(p, frameMapping = NULL) {
   p$x$data[idx] <- NULL
   # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
   p$x$frames <- lapply(p$x$frames, function(f) {
-    f[["traces"]] <- which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1
+    f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
     f
   })
   
