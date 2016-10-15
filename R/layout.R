@@ -19,6 +19,15 @@ layout.matrix <- function(p, ..., data = NULL) {
 }
 
 #' @export
+layout.shiny.tag.list <- function(p, ..., data = NULL) {
+  idx <- which(vapply(p, is.plotly, logical(1)))
+  for (i in idx) {
+    p[[i]] <- layout.plotly(p[[i]], ..., data = NULL)
+  }
+  p
+}
+
+#' @export
 layout.plotly <- function(p, ..., data = NULL) {
   p <- add_data(p, data)
   attrs <- list(...)
