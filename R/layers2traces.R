@@ -100,7 +100,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
-    split_by <- c(split_legend, "PANEL", split_on(d))
+    split_by <- c(split_legend, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
     split_vars <- intersect(split_by, names(d))
@@ -433,9 +433,11 @@ geom2trace.GeomPath <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
     set = set,
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -461,9 +463,11 @@ geom2trace.GeomPoint <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
     set = attr(data, "set"),
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -495,8 +499,10 @@ geom2trace.GeomBar <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -519,8 +525,10 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     line = list(
@@ -550,6 +558,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
+    frame = data$frame,
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -580,8 +589,10 @@ geom2trace.GeomText <- function(data, params, p) {
   list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data$label,
-    key = data$key,
+    text = data[["label"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
@@ -615,6 +626,8 @@ geom2trace.GeomTile <- function(data, params, p) {
   list(
     x = x,
     y = y,
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
     text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
     colorscale = setNames(colScale, NULL),
@@ -700,7 +713,9 @@ make_error <- function(data, params, xy = "x") {
   e <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
+    text = uniq(data[["hovertext"]]),
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),

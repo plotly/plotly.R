@@ -47,6 +47,8 @@ getLevels <- function(x) {
   if (is.factor(x)) levels(x) else sort(unique(x))
 }
 
+tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
+
 # Don't attempt to do "tidy" data training on these trace types
 is_tidy <- function(trace) {
   type <- trace[["type"]] %||% "scatter"
@@ -173,7 +175,7 @@ verify_attr_names <- function(p) {
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     check_attrs(
       names(thisTrace), 
-      c(names(validAttrs), "key", "set", "highlight"), 
+      c(names(validAttrs), "key", "set", "highlight", "frame"), 
       thisTrace$type
     )
   }
@@ -208,6 +210,8 @@ verify_boxed <- function(p) {
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
   }
+  p$x$layout$updatemenus
+  
   p
 }
 
