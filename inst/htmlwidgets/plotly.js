@@ -316,16 +316,16 @@ HTMLWidgets.widget({
             if (e.oldValue !== e.value) {
               traceManager.updateSelection(set, e.value);
               // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
-              if (e.value === null) {
-                selectize.clear(true);
-              } else {
-                selectize.addItem(e.value, true);
-                selectize.close();
+              if (x.selectize) {
+                if (e.value === null) {
+                  selectize.clear(true);
+                } else {
+                  selectize.addItem(e.value, true);
+                  selectize.close();
+                }
               }
               
             }
-            
-            
           });
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
