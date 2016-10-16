@@ -250,7 +250,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' 
 
 as_widget <- function(x, ...) {
-  if (inherits(x, "htmlwidget")) return(x)
+  if (inherits(x, "htmlwidget")) x <- x[["x"]]
   # add plotly class mainly for printing method
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
