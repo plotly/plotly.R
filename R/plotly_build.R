@@ -72,18 +72,22 @@ plotly_build.plotly <- function(p) {
   p$x$layout$annotations <- annotations
   
   
+  
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
-  if (is.null(p$x$attrs[[1]][["type"]])) {
-    if (length(p$x$attrs) > 1 || isTRUE(attr(p, "ggplotly"))) {
-      p$x$attrs[[1]] <- NULL
-    }
+  if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
+    p$x$attrs[[1]] <- NULL
   }
+  
+  # have the attributes already been evaluated?
+  is.evaled <- function(x) inherits(x, "plotly_eval")
+  attrsToEval <- p$x$attrs[!vapply(p$x$attrs, is.evaled, logical(1))]
   
   # trace type checking and renaming for plot objects
   if (is_mapbox(p) || is_geo(p)) {
     p <- geo2cartesian(p)
-    p$x$attrs <- lapply(p$x$attrs, function(tr) {
+    attrsToEval <- lapply(attrsToEval, function(tr) {
       if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
         stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
       }
@@ -218,7 +222,9 @@ plotly_build.plotly <- function(p) {
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
     trace[lengths(trace) > 0]
 
-  }, p$x$attrs, names2(p$x$attrs))
+  }, attrsToEval, names2(attrsToEval))
+  
+  p$x$attrs <- lapply(p$x$attrs, function(x) structure(x, class = "plotly_eval"))
 
   # traceify by the interaction of discrete variables
   traces <- list()
