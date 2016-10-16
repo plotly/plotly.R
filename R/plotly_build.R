@@ -334,10 +334,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_webgl(p)
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
+  
+  # register animation frames
   if (registerFrames) {
     p <- registerFrames(p, frameMapping)
   }
-  p
+  
+  as_widget(p)
 }
 
 # ----------------------------------------------------------------
