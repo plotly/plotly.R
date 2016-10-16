@@ -8,9 +8,11 @@
 
 * Now requires  a version of __ggplot2__ higher than 2.1.0 because the new ggproto faceting infrastructure introduced breaking changes.
 * A book icon is added to the mode bar, by default, which links to the plotly book. If you want to remove this icon from a plot `p`, do `config(p, modeBarButtonsToRemove = "Collaborate")`
+* The `ggplotly()` function now preserves all information about the layer mapping. This makes it possible to access input/output data from any layer.
 
 ## BUG FIXES
 
+* HTMLwidget.resize() used to ignore specified `layout.width`/`layout.height`.
 * When `height`/`width` are specified in `ggplotly()`, relative sizes are now translated correctly. Fixes #489 and #510.
 * More careful handling of font when expanding annotation arrays. Fixes #738.
 * Ignore data arrays of non-tidy traces. Fixes #737.
