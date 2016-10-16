@@ -14,9 +14,9 @@ HTMLWidgets.widget({
   },
   
   resize: function(el, width, height, instance) {
-    if (instance.autosize) {
-      Plotly.relayout(el.id, {width: width, height: height});
-    }
+    var width = instance.width || width;
+    var height = instance.height || height;
+    Plotly.relayout(el.id, {width: width, height: height});
   },  
   
   renderValue: function(el, x, instance) {
@@ -30,14 +30,16 @@ HTMLWidgets.widget({
     }
     
     var graphDiv = document.getElementById(el.id);
+    var layout = x.layout || {};
     
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      var plot = Plotly.plot(graphDiv, x.data, x.layout, x.config);
+      var plot = Plotly.plot(graphDiv, x.data, layout, x.config);
       instance.plotly = true;
-      instance.autosize = x.layout.autosize;
+      instance.height = layout.height;
+      instance.width = layout.width;
     } else {
-      var plot = Plotly.newPlot(graphDiv, x.data, x.layout);
+      var plot = Plotly.newPlot(graphDiv, x.data, layout);
     }
     
     sendEventData = function(eventType) {

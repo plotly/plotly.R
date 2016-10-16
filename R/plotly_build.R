@@ -327,7 +327,8 @@ plotly_build.plotly <- function(p) {
   p <- verify_webgl(p)
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
-  p
+  
+  as_widget(p)
 }
 
 # ----------------------------------------------------------------
