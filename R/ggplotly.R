@@ -757,23 +757,33 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # returns list element with their 'AsIs' class,
   # which conflicts with our JSON unboxing strategy.
   l <- rm_asis(l)
-  l$cur_data <- new_id()
-  # translate "plot-wide" aesthetic mappings to formulas so plotly_build() 
-  # understands them
-  mappingFormulas <- if (originalData) {
-    lapply(plot$mapping, lazyeval::f_new)
-  } else {
-    nms <- names(plot$mapping)
-    setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
-  }
-  dat <- if (originalData) plot$data else data[[layerData]]
-  if (!is.null(mappingFormulas[["group"]])) {
-    dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
-  }
+  
+  # start build a plotly object with meta information about the ggplot
+  ids <- lapply(seq_along(data), function(x) new_id())
+  l$cur_data <- ids[[layerData]]
+  l$visdat <- if (originalData) lapply(layer_data, function(x) function(y) x) else lapply(data, function(x) function(y) x)
+  l$visdat <- setNames(l$visdat, ids)
+  
+  # translate layer mappings -> plotly attrs
+  mappingFormulas <- lapply(layers, function(x) {
+    mappings <- c(x$mapping, if (isTRUE(x$inherit.aes)) plot$mapping)
+    if (originalData) {
+      lapply(mappings, lazyeval::f_new)
+    } else {
+      nms <- names(mappings)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+    }
+  })
+  #if (!is.null(mappingFormulas[["group"]])) {
+  #  dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
+  #}
   # don't need to add group as an attribute anymore
-  mappingFormulas <- mappingFormulas[!grepl("^group$", names(mappingFormulas))]
-  l$attrs <- setNames(list(mappingFormulas), l$cur_data)
-  l$visdat <- setNames(list(function() dat), l$cur_data)
+  # mappingFormulas <- mappingFormulas[!grepl("^group$", names(mappingFormulas))]
+  l$attrs <- setNames(mappingFormulas, ids)
+  l$attrs <- lapply(l$attrs, function(x) structure(x, class = "plotly_eval"))
+  # the build step remove the first attrs if no type exists
+  l$attrs[[1]][["type"]] <- "ggplotly"
+  
   l
 }
 
