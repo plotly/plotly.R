@@ -64,9 +64,9 @@ add_trace <- function(p, ...,
   
   p <- add_data(p, data)
   
-  # inherit attributes from the "first layer"
+  # inherit attributes from the "first layer" (except the plotly_eval class)
   if (inherit) {
-    attrs <- modify_list(p$x$attrs[[1]], attrs)
+    attrs <- modify_list(unclass(p$x$attrs[[1]]), attrs)
   }
   
   p$x$attrs <- c(

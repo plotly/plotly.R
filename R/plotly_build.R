@@ -79,18 +79,24 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     use.names = FALSE
   ))
   
+  
+  
+  
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
-  if (is.null(p$x$attrs[[1]][["type"]])) {
-    if (length(p$x$attrs) > 1 || isTRUE(attr(p, "ggplotly"))) {
-      p$x$attrs[[1]] <- NULL
-    }
+  if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
+    p$x$attrs[[1]] <- NULL
   }
+  
+  # have the attributes already been evaluated?
+  is.evaled <- function(x) inherits(x, "plotly_eval")
+  attrsToEval <- p$x$attrs[!vapply(p$x$attrs, is.evaled, logical(1))]
   
   # trace type checking and renaming for plot objects
   if (is_mapbox(p) || is_geo(p)) {
     p <- geo2cartesian(p)
-    p$x$attrs <- lapply(p$x$attrs, function(tr) {
+    attrsToEval <- lapply(attrsToEval, function(tr) {
       if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
         stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
       }
@@ -231,7 +237,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
     trace[lengths(trace) > 0]
 
-  }, p$x$attrs, names2(p$x$attrs))
+  }, attrsToEval, names2(attrsToEval))
+  
+  p$x$attrs <- lapply(p$x$attrs, function(x) structure(x, class = "plotly_eval"))
 
   # traceify by the interaction of discrete variables
   traces <- list()
@@ -378,12 +386,13 @@ registerFrames <- function(p, frameMapping = NULL) {
   frameNames <- sort(frameNames)
   # copy over "frame traces" over to the frames key (required by plotly.js API)
   for (i in seq_along(frameNames)) {
-    frame <- frameNames[i]
-    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frame), logical(1))
+    thisFrame <- vapply(p$x$data, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))
+    isNotAFrame <- vapply(p$x$data, function(tr) is.na(tr[["frame"]]), logical(1))
+    # retrain colors on each frame (including other data that isn't animated)
+    frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
     p$x$frames[[i]] <- list(
-      name = frame,
-      # try to keep the coloring consistent, if relevant
-      data = retrain_color_defaults(p$x$data[idx])
+      name = frameNames[i],
+      data = frameDat[vapply(frameDat, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))]
     )
   }
   # remove "frame traces", except for the first one

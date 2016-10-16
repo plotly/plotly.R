@@ -803,23 +803,39 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # returns list element with their 'AsIs' class,
   # which conflicts with our JSON unboxing strategy.
   l <- rm_asis(l)
-  l$cur_data <- new_id()
-  # translate "plot-wide" aesthetic mappings to formulas so plotly_build() 
-  # understands them
-  mappingFormulas <- if (originalData) {
-    lapply(plot$mapping, lazyeval::f_new)
-  } else {
-    nms <- names(plot$mapping)
-    setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
-  }
-  dat <- if (originalData) plot$data else data[[layerData]]
-  if (!is.null(mappingFormulas[["group"]])) {
-    dat <- dplyr::group_by_(dat, mappingFormulas[["group"]])
-  }
+  
+  # start build a plotly object with meta information about the ggplot
+  # first, translate layer mappings -> plotly attrs
+  mappingFormulas <- lapply(layers, function(x) {
+    mappings <- c(x$mapping, if (isTRUE(x$inherit.aes)) plot$mapping)
+    if (originalData) {
+      lapply(mappings, lazyeval::f_new)
+    } else {
+      nms <- names(mappings)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+    }
+  })
+  
+  return_dat <- if (originalData) layer_data else data
+  
+  # translate group aesthetics to data attributes
+  return_dat <- Map(function(x, y) {
+    if (is.null(y[["group"]])) return(x)
+    dplyr::group_by_(x, y[["group"]])
+  }, return_dat, mappingFormulas)
+  
   # don't need to add group as an attribute anymore
-  mappingFormulas <- mappingFormulas[!grepl("^group$", names(mappingFormulas))]
-  l$attrs <- setNames(list(mappingFormulas), l$cur_data)
-  l$visdat <- setNames(list(function() dat), l$cur_data)
+  mappingFormulas <- lapply(mappingFormulas, function(x) x[!grepl("^group$", names(x))])
+  
+  ids <- lapply(seq_along(data), function(x) new_id())
+  l$attrs <- setNames(mappingFormulas, ids)
+  l$attrs <- lapply(l$attrs, function(x) structure(x, class = "plotly_eval"))
+  # the build step removes the first attrs if no type exists
+  l$attrs[[1]][["type"]] <- "ggplotly"
+  
+  l$cur_data <- ids[[layerData]]
+  l$visdat <- setNames(lapply(return_dat, function(x) function(y) x), ids)
+
   l
 }
 

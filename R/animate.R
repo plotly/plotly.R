@@ -52,20 +52,20 @@
 #' ggplotly(p, width = 1000, height = 500) %>% 
 #'   animationSlider(hide = TRUE)
 #' 
-#' \dontrun{
-#' data(gapminder, package = "gapminder")
-#' p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, 
-#'   color = continent, frame = year)) +
-#'   geom_point() +
-#'   scale_x_log10()
-#' ggplotly(p)
-#' 
-#' p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
-#'   geom_point(aes(size = pop), alpha = 0.5) +
-#'   # animations can be specified on the layer level
-#'   geom_point(aes(size = pop, frame = year), color = "red") +
-#'   scale_x_log10()
-#' ggplotly(p2)
+#' # use the ids attribute to ensure object constancy
+#' if (require("gapminder")) {
+#'   p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, 
+#'     color = continent, frame = year, ids = country)) +
+#'     geom_point() +
+#'     scale_x_log10()
+#'   ggplotly(p)
+#'   
+#'   p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+#'     geom_point(aes(size = pop), alpha = 0.5) +
+#'     # animations can be specified on the layer level
+#'     geom_point(aes(size = pop, frame = year, ids = country), color = "red") +
+#'     scale_x_log10()
+#'   ggplotly(p2)
 #' }
 #' 
 animationOpts <- function(p, frameDuration = 500, transitionDuration = 500, 
