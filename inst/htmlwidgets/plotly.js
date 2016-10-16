@@ -47,7 +47,7 @@ HTMLWidgets.widget({
 
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      var plot = Plotly.plot(graphDiv, x.data, xlayout, x.config).then(function() {
+      var plot = Plotly.plot(graphDiv, x.data, layout, x.config).then(function() {
         Plotly.addFrames(graphDiv, x.frames);
       });
       instance.plotly = true;
