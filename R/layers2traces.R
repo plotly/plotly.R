@@ -451,7 +451,7 @@ geom2trace.GeomPath <- function(data, params, p) {
     hoveron = hover_on(data)
   )
   if (inherits(data, "GeomStep")) L$line$shape <- params$direction %||% "hv"
-  L
+  compact(L)
 }
 
 #' @export
@@ -485,7 +485,7 @@ geom2trace.GeomPoint <- function(data, params, p) {
   if (any(idx <- pch %in% 21:25)) {
     L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
   }
-  L
+  compact(L)
 }
 
 #' @export
@@ -493,7 +493,7 @@ geom2trace.GeomBar <- function(data, params, p) {
   data[["y"]] <- data[["ymax"]] - data[["ymin"]]
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths
   # https://github.com/plotly/plotly.js/issues/80
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
@@ -512,7 +512,7 @@ geom2trace.GeomBar <- function(data, params, p) {
         color = aes2plotly(data, params, "colour")
       )
     )
-  )
+  ))
 }
 
 #' @export
@@ -546,13 +546,13 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   if (inherits(data, "GeomSmooth")) {
     L$hoverinfo <- "x+y"
   }
-  L
+  compact(L)
   
 }
 
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
     frame = data$frame,
@@ -577,13 +577,13 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       color = aes2plotly(data, params, "colour"),
       width = aes2plotly(data, params, "size")
     )
-  )
+  ))
 }
 
 
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
     text = data[["label"]],
@@ -601,7 +601,7 @@ geom2trace.GeomText <- function(data, params, p) {
     type = "scatter",
     mode = "text",
     hoveron = hover_on(data)
-  )
+  ))
 }
 
 #' @export
@@ -620,7 +620,7 @@ geom2trace.GeomTile <- function(data, params, p) {
   # colorscale goes crazy if there are NAs
   colScale <- colScale[stats::complete.cases(colScale), ]
   colScale <- colScale[order(colScale$fill_plotlyDomain), ]
-  list(
+  compact(list(
     x = x,
     y = y,
     frame = data[["frame"]],
@@ -631,7 +631,7 @@ geom2trace.GeomTile <- function(data, params, p) {
     type = "heatmap",
     showscale = FALSE,
     autocolorscale = FALSE
-  )
+  ))
 }
 
 #' @export
@@ -726,7 +726,7 @@ make_error <- function(data, params, xy = "x") {
     symmetric = FALSE,
     color = color
   )
-  e
+  compact(e)
 }
 
 # function to transform geom_ribbon data into format plotly likes
