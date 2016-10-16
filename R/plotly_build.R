@@ -360,12 +360,13 @@ registerFrames <- function(p, frameMapping = NULL) {
   frameNames <- sort(frameNames)
   # copy over "frame traces" over to the frames key (required by plotly.js API)
   for (i in seq_along(frameNames)) {
-    frame <- frameNames[i]
-    idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frame), logical(1))
+    thisFrame <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[i]), logical(1))
+    isNotAFrame <- vapply(p$x$data, function(tr) is.na(tr[["frame"]]), logical(1))
+    # retrain colors on each frame (including other data that isn't animated)
+    frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
     p$x$frames[[i]] <- list(
-      name = frame,
-      # try to keep the coloring consistent, if relevant
-      data = retrain_color_defaults(p$x$data[idx])
+      name = frameNames[i],
+      data = frameDat[!vapply(frameDat, function(tr) is.na(tr[["frame"]]), logical(1))]
     )
   }
   # remove "frame traces", except for the first one
