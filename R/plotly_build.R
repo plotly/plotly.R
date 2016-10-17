@@ -21,12 +21,12 @@ plotly_build <- function(p, registerFrames = TRUE) {
 }
 
 #' @export
-plotly_build.list <- function(p) {
+plotly_build.list <- function(p, registerFrames = TRUE) {
   as_widget(p)
 }
 
 #' @export
-plotly_build.gg <- function(p) {
+plotly_build.gg <- function(p, registerFrames = TRUE) {
   # note: since preRenderHook = plotly_build in as_widget(), 
   # plotly_build.plotly() will be called on gg objects as well
   ggplotly(p)
