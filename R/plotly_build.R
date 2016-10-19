@@ -6,6 +6,7 @@
 #' errors.
 #'
 #' @param p a ggplot object, or a plotly object, or a list.
+#' @param registerFrames should a frame trace attribute be interpreted as frames in an animation?
 #' @export
 #' @examples
 #'
@@ -15,7 +16,7 @@
 #' # the evaluated data
 #' str(plotly_build(p)$x$data)
 #'
-plotly_build <- function(p) {
+plotly_build <- function(p, registerFrames = TRUE) {
   UseMethod("plotly_build")
 }
 
@@ -26,12 +27,13 @@ plotly_build.list <- function(p) {
 
 #' @export
 plotly_build.gg <- function(p) {
-  p <- ggplotly(p)
-  supply_defaults(p)
+  # note: since preRenderHook = plotly_build in as_widget(), 
+  # plotly_build.plotly() will be called on gg objects as well
+  ggplotly(p)
 }
 
 #' @export
-plotly_build.plotly <- function(p) {
+plotly_build.plotly <- function(p, registerFrames = TRUE) {
 
   # make this plot retrievable
   set_last_plot(p)
@@ -70,6 +72,13 @@ plotly_build.plotly <- function(p) {
   # merge layouts into a single layout (more recent layouts will override older ones)
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
   p$x$layout$annotations <- annotations
+  
+  # keep frame mapping for populating layout.slider.currentvalue in animations
+  frameMapping <- unique(unlist(
+    lapply(p$x$attrs, function(x) deparse2(x[["frame"]])), 
+    use.names = FALSE
+  ))
+  
   
   
   
@@ -155,7 +164,7 @@ plotly_build.plotly <- function(p) {
     # "non-tidy" traces allow x/y of different lengths, so ignore those
     dataArrayAttrs <- if (is_tidy(trace)) names(Attrs)[as.logical(isArray)]
     allAttrs <- c(
-      dataArrayAttrs, special_attrs(trace), npscales(),
+      dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
       ".plotlyGroupIndex", "text"
@@ -174,7 +183,7 @@ plotly_build.plotly <- function(p) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
        # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
@@ -277,7 +286,7 @@ plotly_build.plotly <- function(p) {
   # it's possible that the plot object already has some traces
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
-
+  
   # get rid of data -> vis mapping stuff
   p$x[c("visdat", "cur_data", "attrs")] <- NULL
 
@@ -334,12 +343,65 @@ plotly_build.plotly <- function(p) {
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   
+  # register animation frames
+  if (registerFrames) {
+    p <- registerFrames(p, frameMapping)
+  }
+  
   as_widget(p)
 }
 
 # ----------------------------------------------------------------
 # Functions used solely within plotly_build
 # ----------------------------------------------------------------
+
+registerFrames <- function(p, frameMapping = NULL) {
+  # ensure one frame value per trace, and if its missing, insert NA
+  p$x$data <- lapply(p$x$data, function(tr) { 
+    tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
+    tr
+  })
+  frameAttrs <- unique(unlist(lapply(p$x$data, "[[", "frame")))
+  frameNames <- frameAttrs[!is.na(frameAttrs)]
+  nFrames <- length(frameNames)
+  if (nFrames < 2) return(p)
+  frameNames <- sort(frameNames)
+  # copy over "frame traces" over to the frames key (required by plotly.js API)
+  for (i in seq_along(frameNames)) {
+    thisFrame <- vapply(p$x$data, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))
+    isNotAFrame <- vapply(p$x$data, function(tr) is.na(tr[["frame"]]), logical(1))
+    # retrain colors on each frame (including other data that isn't animated)
+    frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
+    p$x$frames[[i]] <- list(
+      name = frameNames[i],
+      data = frameDat[vapply(frameDat, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))]
+    )
+  }
+  # remove "frame traces", except for the first one
+  idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
+  p$x$data[idx] <- NULL
+  # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
+  p$x$frames <- lapply(p$x$frames, function(f) {
+    f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
+    f
+  })
+  
+  # populate layout.sliders.currentvalue with a sensible default
+  defaultvalue <- if (length(frameMapping) == 1) {
+    list(
+      prefix = paste0(frameMapping, ": "),
+      xanchor = 'right',
+      font = list(
+        size = 16,
+        color = toRGB("gray80")
+      )
+    )
+  } else NULL
+  
+  # _always_ display an animation button and slider by default
+  supply_ani_button(supply_ani_slider(p, currentvalue = defaultvalue))
+}
+
 
 train_data <- function(data, trace) {
   if (inherits(trace, "plotly_ribbon")) {

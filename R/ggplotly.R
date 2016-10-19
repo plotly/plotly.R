@@ -135,7 +135,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   }
   tmpPlotFile <- tempfile(fileext = ".png")
   dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
-  
 
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
@@ -336,6 +335,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
   traces <- Map(function(x, y) {
+    if (!is.null(x[["frame"]])) return(x)
     x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))
@@ -789,7 +789,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   l$cur_data <- ids[[layerData]]
   l$visdat <- setNames(lapply(return_dat, function(x) function(y) x), ids)
-  
+
   l
 }
 

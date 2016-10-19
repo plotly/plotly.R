@@ -58,10 +58,9 @@ p2 <- plot_ly(economics, x = ~date, y = ~unemploy)
 subplot(p1, p2, p1, p2, nrows = 2, margin = 0.05)
 
 # or pass a list
-library(purrr)
 economics_long \%>\%
   split(.$variable) \%>\%
-  map(~ plot_ly(., x = ~date, y = ~value)) \%>\%
+  lapply(function(d) plot_ly(d, x = ~date, y = ~value)) \%>\%
   subplot(nrows = NROW(.), shareX = TRUE)
   
 # or pass a tibble with a list-column of plotly objects

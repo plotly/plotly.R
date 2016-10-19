@@ -34,12 +34,16 @@ HTMLWidgets.widget({
     
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      var plot = Plotly.plot(graphDiv, x.data, layout, x.config);
+      var plot = Plotly.plot(graphDiv, x.data, layout, x.config).then(function() {
+        Plotly.addFrames(graphDiv, x.frames);
+      });
       instance.plotly = true;
       instance.height = layout.height;
       instance.width = layout.width;
     } else {
-      var plot = Plotly.newPlot(graphDiv, x.data, layout);
+      var plot = Plotly.newPlot(graphDiv, x.data, layout).then(function() {
+        Plotly.addFrames(graphDiv, x.frames);
+      });
     }
     
     sendEventData = function(eventType) {
