@@ -82,7 +82,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
   if (nchar(p$title %||% "") > 0) {
     s <- layout(s, title = p$title)
   }
-  s
+  config(s)
 }
 
 #' @export
@@ -92,7 +92,7 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
                layerData = layerData, originalData = originalData, 
                source = source, ...)
-  structure(as_widget(l), ggplotly = TRUE)
+  config(as_widget(l))
 }
 
 #' Convert a ggplot to a list.

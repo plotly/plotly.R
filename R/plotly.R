@@ -146,8 +146,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
     ),
     source = source
   )
-  
-  as_widget(p)
+  # ensure the collab button is shown (and the save/edit button is hidden) by default
+  config(as_widget(p))
 }
 
 
