@@ -47,7 +47,8 @@ ax <- list(
 pcp <- as.data.frame(m) %>%
   mutate(city = colnames(tsobj)) %>%
   gather(variable, value, -city) %>%
-  SharedData$new(~city, "Texan City") %>%
+  # TODO: need to implement frame updating in TraceManager.updateSelection()
+  #SharedData$new(~city, "Texan City") %>%
   plot_ly(x = ~variable, y = ~value, color = I("black")) %>%
   group_by(city) %>%
   add_lines() %>%
@@ -55,12 +56,12 @@ pcp <- as.data.frame(m) %>%
   layout(xaxis = list(title = ""), showlegend = F)
   
 tour <- tour_dat %>%
-  SharedData$new(~city, "Texan City") %>%
+  #SharedData$new(~city, "Texan City") %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("black")) %>%
   add_markers(text = ~city, hoverinfo = "text") %>%
   hide_legend() %>%
   layout(xaxis = ax, yaxis = ax) %>%
-  animationOpts(30, 1000)
+  animationOpts(33, 0)
 
 # TODO: throw warning/error if trying to do animations in a subplot?
 # subplot(pcp, tour)
