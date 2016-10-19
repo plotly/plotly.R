@@ -65,8 +65,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]
     layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
-    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]]))
-    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]]))
+    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]] %||% "x"))
+    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]] %||% "y"))
     missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
     # move to next iteration if trace references are complete
     if (!length(missingAttrs)) next

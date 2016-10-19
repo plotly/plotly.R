@@ -79,10 +79,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     use.names = FALSE
   ))
   
-  
-  
-  
-  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
