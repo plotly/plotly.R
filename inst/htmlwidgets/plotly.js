@@ -221,23 +221,12 @@ HTMLWidgets.widget({
       return curves;
     }
     
-    // highlight options passed from R
-    var ct = x.highlight || {
-      on: "plotly_selected",
-      off: "plotly_relayout",
-      color: [],
-      dynamic: false,
-      persistent: false,
-      opacityDim: 0.2,
-      showInLegend: false
-    };
-    
-    // make sure color is an array
-    if (!Array.isArray(ct.color)) {
-      ct.color = [ct.color];
+    // make sure highlight color is an array
+    if (!Array.isArray(x.highlight.color)) {
+      x.highlight.color = [x.highlight.color];
     }
 
-    var traceManager = new TraceManager(graphDiv, ct);
+    var traceManager = new TraceManager(graphDiv, x.highlight);
 
     // Gather all sets.
     var crosstalkGroups = {};
@@ -255,7 +244,7 @@ HTMLWidgets.widget({
     if (allSets.length > 0) {
       
       // On plotly event, update crosstalk variable selection value
-      graphDiv.on(ct.on, function turnOn(e) {
+      graphDiv.on(x.highlight.on, function turnOn(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
           // Keys are group names, values are array of selected keys from group.
@@ -276,7 +265,7 @@ HTMLWidgets.widget({
       });
       
       // On a plotly "clear" event, set crosstalk variable value to null
-      graphDiv.on(ct.off, function turnOff(e) {
+      graphDiv.on(x.highlight.off, function turnOff(e) {
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
