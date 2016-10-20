@@ -412,7 +412,7 @@ add_heatmap <- function(p, x = NULL, y = NULL, z = NULL, ...,
     stop("Must supply `z` attribute", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_heatmap", z = z,
+    p, class = "plotly_heatmap", z = z, x = x, y = y,
     type = "heatmap",  ..., data = data, inherit = inherit
   )
 }
