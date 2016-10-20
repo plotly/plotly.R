@@ -8,7 +8,7 @@
 #' @examples \dontrun{
 #' export(plot_ly(economics, x = ~date, y = ~pce))
 #' }
-export <- function(p, file = "plotly.png", ...) {
+export <- function(p = last_plot(), file = "plotly.png", ...) {
   if (system.file(package = "webshot") == "") {
     stop(
       'Please install the webshot package ',

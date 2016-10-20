@@ -362,7 +362,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     p <- registerFrames(p, frameMapping)
   }
   
-  as_widget(p)
+  p
 }
 
 # ----------------------------------------------------------------

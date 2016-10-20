@@ -161,15 +161,15 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
     # we always deal with a _list_ of traces and _list_ of layouts 
     # since they can each have different data
     layout = list(
-      width = width, 
-      height = height,
-      # sane margin defaults (mainly for RStudio)
-      margin = list(b = 40, l = 60, t = 25, r = 10)
+        width = width, 
+        height = height,
+        # sane margin defaults (mainly for RStudio)
+        margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     source = source
   )
-  
-  as_widget(p)
+  # ensure the collab button is shown (and the save/edit button is hidden) by default
+  config(as_widget(p))
 }
 
 
@@ -250,7 +250,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' 
 
 as_widget <- function(x, ...) {
-  if (inherits(x, "htmlwidget")) x <- x[["x"]]
+  if (inherits(x, "htmlwidget")) return(x)
   # add plotly class mainly for printing method
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON

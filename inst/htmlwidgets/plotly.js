@@ -22,9 +22,9 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
-    var width = instance.width || width;
-    var height = instance.height || height;
-    Plotly.relayout(el.id, {width: width, height: height});
+    if (instance.autosize) {
+      Plotly.relayout(el.id, {width: width, height: height});
+    }
   },  
   
   renderValue: function(el, x, instance) {
@@ -43,20 +43,22 @@ HTMLWidgets.widget({
     }
 
     var graphDiv = document.getElementById(el.id);
-    var layout = x.layout || {};
-
+    
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
-      var plot = Plotly.plot(graphDiv, x.data, layout, x.config).then(function() {
+      
+      var plot = Plotly.plot(graphDiv, x.data, x.layout, x.config).then(function() {
         Plotly.addFrames(graphDiv, x.frames);
       });
       instance.plotly = true;
-      instance.height = layout.height;
-      instance.width = layout.width;
+      instance.autosize = x.layout.autosize;
+      
     } else {
-      var plot = Plotly.newPlot(graphDiv, x.data, layout).then(function() {
+      
+      var plot = Plotly.newPlot(graphDiv, x.data, x.layout).then(function() {
         Plotly.addFrames(graphDiv, x.frames);
       });
+      
     }
     
     // Attach attributes (e.g., "key", "z") to plotly event data
