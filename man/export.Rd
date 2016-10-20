@@ -4,7 +4,7 @@
 \alias{export}
 \title{Export a plotly graph to a static file}
 \usage{
-export(p, file = "plotly.png", ...)
+export(p = last_plot(), file = "plotly.png", ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
