@@ -236,9 +236,6 @@ HTMLWidgets.widget({
     if (!Array.isArray(ct.color)) {
       ct.color = [ct.color];
     }
-    
-    // inform the world about plotly's crosstalk config
-    var ctConfig = crosstalk.var("plotlyCrosstalkOpts").set(ct);
 
     var traceManager = new TraceManager(graphDiv, ct);
 

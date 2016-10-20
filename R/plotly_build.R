@@ -314,8 +314,15 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
   }
   
-  # if crosstalk() hasn't been called on this plot, populate it with defaults
-  p$x$highlight <- p$x$highlight %||% highlight_defaults()
+  # if highlight() hasn't been called on this plot, populate it with defaults
+  hd <- highlight_defaults()
+  p$x$highlight <- p$x$highlight %||% hd
+  
+  # inform the world about plotly's crosstalk config
+  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
+  p <- htmlwidgets::onRender(p, sprintf("function(el, x) { 
+    var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); 
+  }", jsonlite::toJSON(ctOpts, auto_unbox = TRUE)))
   
   # supply trace anchor and domain information  
   p <- supply_defaults(p)
