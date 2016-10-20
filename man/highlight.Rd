@@ -6,7 +6,8 @@
 \usage{
 highlight(p, on = "plotly_selected", off = "plotly_relayout",
   persistent = FALSE, dynamic = FALSE, color = NULL, selectize = FALSE,
-  defaultValues = NULL, opacityDim = 0.2, showInLegend = FALSE)
+  defaultValues = NULL, opacityDim = 0.2, hoverinfo = "none",
+  showInLegend = FALSE)
 }
 \arguments{
 \item{p}{a plotly visualization.}
@@ -35,6 +36,8 @@ These values should match the key attribute.}
 
 \item{opacityDim}{a number between 0 and 1 used to reduce the
 opacity of non-selected traces (by multiplying with the existing opacity).}
+
+\item{hoverinfo}{hoverinfo attributes for the non-selected traces.}
 
 \item{showInLegend}{populate an additional legend entry for the selection?}
 }

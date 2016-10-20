@@ -411,10 +411,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   // selection, delete the "selection traces"
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
     var tracesToRemove = [];
-    for (var i = 0; i < this.gd.data.length; i++) {
-      if (this.gd.data[i].hasOwnProperty("crosstalkSelection")) {
-        tracesToRemove.push(i);
-      }
+    for (var i = this.origData.length; i < this.origData.length + nNewTraces; i++) {
+      tracesToRemove.push(i);
     }
     Plotly.deleteTraces(this.gd, tracesToRemove);
   }
@@ -431,6 +429,17 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
   } else if (keys.length >= 1) {
     
+    // if necessary, reduce opacity of original traces
+    if (!this.dimmed) {
+      for (var i = 0; i < this.origData.length; i++) {
+        var opacity = (this.origData[i].opacity || 1) * this.highlight.opacityDim;
+        Plotly.restyle(this.gd, {"opacity": opacity}, i);
+        Plotly.restyle(this.gd, {"hoverinfo": this.highlight.hoverinfo}, i);
+      }
+      this.dimmed = true;
+    }
+    
+    
     var keySet = new Set(keys || []);
     
     var traces = [];
@@ -445,8 +454,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         trace = subsetArrayAttrs(trace, matches);
         trace.showlegend = this.highlight.showInLegend;
         trace.name = "selected";
-        // TODO: allow user to choose selection/original hoverinfo?
-        trace.hoverinfo = "none";
         // inherit marker/line attributes from the existing trace
         trace.marker = this.gd._fullData[i].marker || {};
         // prevent Plotly.addTraces() from changing color of original traces
@@ -477,22 +484,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
     }
     
-    // add selection traces *underneath* original traces, but *on top of*
-    // existing selections
-    tracesToAdd = [];
-    for (var k = nNewTraces; k < traces.length + nNewTraces; k++) {
-      tracesToAdd.push(k);
+    if (traces.length > 0) {
+      Plotly.addTraces(this.gd, traces);
     }
-    Plotly.addTraces(this.gd, traces, tracesToAdd);
     
-    if (!this.dimmed) {
-      // reduce opacity of original traces
-      for (var i = traces.length; i < traces.length + this.origData.length; i++) {
-        var opacity = (this.gd._fullData[i].opacity) * this.highlight.opacityDim;
-        Plotly.restyle(this.gd, {"opacity": opacity}, i);  
-      }
-      this.dimmed = true;
-    }
   }
 };
 
