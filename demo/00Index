@@ -1,0 +1,8 @@
+highlight-intro           An introduction to linked views
+highlight-subplot         Basic scatterplot brushing with subplot()
+highlight-ggplotly        Linking ggplot2 plots
+highlight-leaflet         Linking to leaflet
+highlight-ggpairs         Brushing a scatterplot matrix via ggpairs
+highlight-pipeline        Aggregating SharedData
+highlight-binned-target   Let plotly.js dynamically bin the raw data
+highlight-epl             An example of linked facets
