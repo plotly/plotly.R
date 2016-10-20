@@ -22,6 +22,10 @@ layout.matrix <- function(p, ..., data = NULL) {
 layout.plotly <- function(p, ..., data = NULL) {
   p <- add_data(p, data)
   attrs <- list(...)
+  if (!is.null(attrs[["height"]]) || !is.null(attrs[["width"]])) {
+    warning("Specifying width/height in layout() is now deprecated.\n", 
+            "Please specify in ggplotly() or plot_ly()", call. = FALSE)
+  }
   # similar to add_trace()
   p$x$layoutAttrs <- c(
     p$x$layoutAttrs %||% list(), 
