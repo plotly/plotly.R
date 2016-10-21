@@ -221,6 +221,7 @@ HTMLWidgets.widget({
       return curves;
     }
     
+    x.highlight.color = x.highlight.color || [];
     // make sure highlight color is an array
     if (!Array.isArray(x.highlight.color)) {
       x.highlight.color = [x.highlight.color];

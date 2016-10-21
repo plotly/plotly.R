@@ -24,10 +24,9 @@ c2 <- list(color = toRGB("orange", 0.5))
 
 # The color mapping is used only to generate multiple traces 
 # (which makes it easier to highlight lines on the JS side)
-# TODO: maybe provide a split_by() function to avoid this sort of hack?
 df %>%
   plot_ly(
-    x = ~visit, y = ~fev1_perc, color = ~factor(uin), marker = c1, line = c2
+    x = ~visit, y = ~fev1_perc, split = ~factor(uin), marker = c1, line = c2
   ) %>% 
   layout(hovermode = "closest", showlegend = FALSE) %>%
   onRender('
