@@ -8,7 +8,6 @@ library(tourr)
 #princomp(tsobj, na.action = na.omit)
 
 
-
 # tour of tscognostics...why does the scale explode?
 
 # transform tidy data into a multivariate timeseries object
@@ -29,7 +28,7 @@ tour_dat <- function(step_size) {
   data.frame(x = proj[,1], y = proj[,2], city = colnames(tsobj))
 }
 
-steps <- c(0, rep(1/15, 200))
+steps <- c(0, rep(1/15, 500))
 stepz <- cumsum(steps)
 
 # tidy version of tour data
@@ -43,12 +42,13 @@ ax <- list(
   zeroline = FALSE
 )
 
+options(digits = 3)
 
 pcp <- as.data.frame(m) %>%
   mutate(city = colnames(tsobj)) %>%
   gather(variable, value, -city) %>%
   # TODO: need to implement frame updating in TraceManager.updateSelection()
-  #SharedData$new(~city, "Texan City") %>%
+  SharedData$new(~city, "Texan City") %>%
   plot_ly(x = ~variable, y = ~value, color = I("black")) %>%
   group_by(city) %>%
   add_lines() %>%
@@ -56,7 +56,7 @@ pcp <- as.data.frame(m) %>%
   layout(xaxis = list(title = ""), showlegend = F)
   
 tour <- tour_dat %>%
-  #SharedData$new(~city, "Texan City") %>%
+  SharedData$new(~city, "Texan City") %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("black")) %>%
   add_markers(text = ~city, hoverinfo = "text") %>%
   hide_legend() %>%

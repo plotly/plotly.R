@@ -26,5 +26,5 @@ p <- ggplot(sd, aes(x = gameno, y = cumpts)) +
 
 gg <- ggplotly(p, tooltip = "colour")
 # TODO: why is this crashing?
-highlight(gg, "plotly_hover")
+highlight(gg, "plotly_click")
 

@@ -351,6 +351,11 @@ function TraceManager(graphDiv, highlight) {
   // Preserve the original data. We'll subset based off of this whenever
   // filtering is (re)applied.
   this.origData = JSON.parse(JSON.stringify(graphDiv.data));
+  
+  // supply defaults for opacity
+  for (var i = 0; i < this.origData.length; i++) {
+    this.origData[i].opacity = this.origData[i].opacity || 1;
+  }
 
   // key: group name, value: null or array of keys representing the
   // most recently received selection for that group.
@@ -422,9 +427,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
     // go back to original opacity
     for (var i = 0; i < this.origData.length; i++) {
-      Plotly.restyle(
-        this.gd, {"opacity": (this.origData[i].opacity || 1)}, i
-      );
+      Plotly.restyle(this.gd, {"opacity": this.origData[i].opacity}, i);
     }
     this.dimmed = false;
     
@@ -433,9 +436,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // if necessary, reduce opacity of original traces
     if (!this.dimmed) {
       for (var i = 0; i < this.origData.length; i++) {
-        var opacity = (this.origData[i].opacity || 1) * this.highlight.opacityDim;
+        var opacity = this.origData[i].opacity * this.highlight.opacityDim;
         Plotly.restyle(this.gd, {"opacity": opacity}, i);
-        Plotly.restyle(this.gd, {"hoverinfo": this.highlight.hoverinfo}, i);
       }
       this.dimmed = true;
     }
@@ -452,7 +454,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       var matches = findMatches(trace.key, keySet);
       if (matches.length > 0) {
         trace = subsetArrayAttrs(trace, matches);
+        // opacity in this.gd.data is dimmed...
+        trace.opacity = this.origData[i].opacity;
         trace.showlegend = this.highlight.showInLegend;
+        trace.hoverinfo = this.highlight.hoverinfo;
         trace.name = "selected";
         // inherit marker/line attributes from the existing trace
         trace.marker = this.gd._fullData[i].marker || {};
@@ -474,8 +479,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
-        // opacity in this.gd.data is dimmed...
-        trace.opacity = this.origData[i].opacity || 1;
         traces.push(trace);
       }
     }
