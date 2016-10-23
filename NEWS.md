@@ -8,6 +8,7 @@
 
 * Now requires  a version of __ggplot2__ higher than 2.1.0 because the new ggproto faceting infrastructure introduced breaking changes.
 * A book icon is added to the mode bar, by default, which links to the plotly book. If you want to remove this icon from a plot `p`, do `config(p, modeBarButtonsToRemove = "Collaborate")`
+* Specifying height/width in `layout()` is now deprecated. Specify in `ggplotly()` or `plot_ly()`.
 * The `ggplotly()` function now preserves all information about the layer mapping. This makes it possible to access input/output data from any layer.
 
 ## BUG FIXES
