@@ -440,12 +440,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       this.dimmed = true;
     }
     
-    
     var keySet = new Set(keys || []);
-    
     var traces = [];
+    
     for (var i = 0; i < this.origData.length; i++) {
-      var trace = this.origData[i];
+      var trace = this.gd.data[i];
       if (!trace.key || trace.set !== group) {
         continue;
       }
@@ -475,6 +474,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
+        // opacity in this.gd.data is dimmed...
+        trace.opacity = this.origData[i].opacity || 1;
         traces.push(trace);
       }
     }
@@ -498,7 +499,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         var matches = findMatches(trace.key, keySet);
         if (matches.length > 0) {
           var newTrace = subsetArrayAttrs(trace, matches);
-          frames[i].data[j].opacity = 0.2;
           frames[i].data.push(newTrace);
         }
       }
