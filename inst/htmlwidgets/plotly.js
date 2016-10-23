@@ -462,31 +462,60 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         var suppliedMarker = this.gd.data[i].marker || {};
         if (suppliedMarker.color !== trace.marker.color) {
           var marker = this.gd._fullData[i].marker || {};
-          Plotly.restyle(
-            this.gd.id, {'marker.color': marker.color}, i
-          );
+          Plotly.restyle(this.gd.id, {'marker.color': marker.color}, i);
         }
         trace.line = this.gd._fullData[i].line || {};
         var suppliedLine = this.gd.data[i].line || {};
         if (suppliedLine.color !== trace.line.color) {
           var line = this.gd._fullData[i].line || {};
-          Plotly.restyle(
-            this.gd.id, {'line.color': line.color}, i
-          );
+          Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
         }
         // this variable is set in R/highlight.R
         var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
           this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
-        // just a flag so we know this is a "selection trace"
-        trace.crosstalkSelection = true;
         traces.push(trace);
       }
     }
     
     if (traces.length > 0) {
       Plotly.addTraces(this.gd, traces);
+    }
+    
+    // add selection traces to frames
+    var frames = this.gd._transitionData._frames || [];
+    for (var i = 0; i < frames.length; i++) {
+      var frame = frames[i];
+      var nTraces = frame.data.length;
+      
+      for (var j = 0; j < nTraces; j++) {
+        var trace = frame.data[j];
+        if (!trace.key || trace.set !== group) {
+          continue;
+        }
+        // Get sorted array of matching indices in trace.key
+        var matches = findMatches(trace.key, keySet);
+        if (matches.length > 0) {
+          var newTrace = subsetArrayAttrs(trace, matches);
+          frames[i].data[j].opacity = 0.2;
+          frames[i].data.push(newTrace);
+        }
+      }
+      
+      for (var j = this.origData.length; j < this.gd._fullData.length; j++) {
+        frames[i].traces.push(j);
+      }
+      
+    }
+    
+    // modify the original frames...idea came from source of Plotly.deleteFrames
+    ops = [];
+    for (var i = 0; i < frames.length; i++) {
+      ops.push({type: "replace", index: i, value: frames[i]});
+    }
+    if (ops.length > 0) {
+      Plotly.Plots.modifyFrames(this.gd, ops);
     }
     
   }
