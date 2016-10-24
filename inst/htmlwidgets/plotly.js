@@ -355,6 +355,7 @@ function TraceManager(graphDiv, highlight) {
   // supply defaults for opacity
   for (var i = 0; i < this.origData.length; i++) {
     this.origData[i].opacity = this.origData[i].opacity || 1;
+    this.gd.data[i].dimmed = false;
   }
 
   // key: group name, value: null or array of keys representing the
@@ -363,9 +364,6 @@ function TraceManager(graphDiv, highlight) {
   
   // selection parameters (e.g., transient versus persistent selection)
   this.highlight = highlight;
-  
-  // have original traces been dimmed to highlight a selection?
-  this.dimmed = false;
 }
 
 TraceManager.prototype.close = function() {
@@ -428,19 +426,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // go back to original opacity
     for (var i = 0; i < this.origData.length; i++) {
       Plotly.restyle(this.gd, {"opacity": this.origData[i].opacity}, i);
+      this.gd.data[i].dimmed = false;
     }
-    this.dimmed = false;
     
   } else if (keys.length >= 1) {
-    
-    // if necessary, reduce opacity of original traces
-    if (!this.dimmed) {
-      for (var i = 0; i < this.origData.length; i++) {
-        var opacity = this.origData[i].opacity * this.highlight.opacityDim;
-        Plotly.restyle(this.gd, {"opacity": opacity}, i);
-      }
-      this.dimmed = true;
-    }
     
     var keySet = new Set(keys || []);
     var traces = [];
@@ -480,6 +469,12 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
         traces.push(trace);
+        // dim opacity of original traces (if they aren't already)
+        if (!trace.dimmed) {
+          var opacity = this.origData[i].opacity * this.highlight.opacityDim;
+          Plotly.restyle(this.gd, {"opacity": opacity}, i);
+          this.gd.data[i].dimmed = true;
+        }
       }
     }
     
