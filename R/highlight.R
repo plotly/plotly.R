@@ -21,7 +21,8 @@
 #' are not altered (only their opacity).
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
-#' @param hoverinfo hoverinfo attributes for the selected traces.
+#' @param hoverinfo hoverinfo attributes for the selected traces. The default,
+#' \code{NULL}, means to inherit the hoverinfo attribute from the non-selected traces.
 #' @param showInLegend populate an additional legend entry for the selection?
 #' @export
 #' @examples
@@ -42,7 +43,7 @@
 highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
                       persistent = FALSE, dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
-                      opacityDim = 0.2, hoverinfo = "all", showInLegend = FALSE) {
+                      opacityDim = 0.2, hoverinfo = NULL, showInLegend = FALSE) {
   if (!is.plotly(p)) {
     stop("Don't know how to modify highlight options to objects of class:", class(p))
   }

@@ -47,7 +47,6 @@ options(digits = 3)
 pcp <- as.data.frame(m) %>%
   mutate(city = colnames(tsobj)) %>%
   gather(variable, value, -city) %>%
-  # TODO: need to implement frame updating in TraceManager.updateSelection()
   SharedData$new(~city, "Texan City") %>%
   plot_ly(x = ~variable, y = ~value, color = I("black")) %>%
   group_by(city) %>%

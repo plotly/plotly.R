@@ -434,6 +434,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     var keySet = new Set(keys || []);
     var traces = [];
     
+    // this variable is set in R/highlight.R
+    var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
+      this.highlight.color[0];
+    
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.gd.data[i];
       if (!trace.key || trace.set !== group) {
@@ -446,7 +450,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         // opacity in this.gd.data is dimmed...
         trace.opacity = this.origData[i].opacity;
         trace.showlegend = this.highlight.showInLegend;
-        trace.hoverinfo = this.highlight.hoverinfo;
+        trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
         trace.name = "selected";
         // inherit marker/line attributes from the existing trace
         trace.marker = this.gd._fullData[i].marker || {};
@@ -463,9 +467,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           var line = this.gd._fullData[i].line || {};
           Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
         }
-        // this variable is set in R/highlight.R
-        var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
-          this.highlight.color[0];
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
         traces.push(trace);
@@ -496,8 +497,12 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         // Get sorted array of matching indices in trace.key
         var matches = findMatches(trace.key, keySet);
         if (matches.length > 0) {
-          var newTrace = subsetArrayAttrs(trace, matches);
-          frames[i].data.push(newTrace);
+          trace = subsetArrayAttrs(trace, matches);
+          trace.marker = this.gd._fullData[j].marker || {};
+          trace.line = this.gd._fullData[j].line || {};
+          trace.marker.color =  selectionColour || trace.marker.color;
+          trace.line.color = selectionColour || trace.line.color;
+          frames[i].data.push(trace);
         }
       }
       
