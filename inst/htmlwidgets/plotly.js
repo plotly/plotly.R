@@ -480,45 +480,47 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     }
     
     if (traces.length > 0) {
-      Plotly.addTraces(this.gd, traces);
-    }
-    
-    // add selection traces to frames
-    var frames = this.gd._transitionData._frames || [];
-    for (var i = 0; i < frames.length; i++) {
-      var frame = frames[i];
-      var nTraces = frame.data.length;
-      
-      for (var j = 0; j < nTraces; j++) {
-        var trace = frame.data[j];
-        if (!trace.key || trace.set !== group) {
-          continue;
+      Plotly.addTraces(this.gd, traces).then(function() {
+        // add selection traces to frames
+        var frames = this.gd._transitionData._frames || [];
+        for (var i = 0; i < frames.length; i++) {
+          var frame = frames[i];
+          var nTraces = frame.data.length;
+          
+          for (var j = 0; j < nTraces; j++) {
+            var trace = frame.data[j];
+            if (!trace.key || trace.set !== group) {
+              continue;
+            }
+            // Get sorted array of matching indices in trace.key
+            var matches = findMatches(trace.key, keySet);
+            if (matches.length > 0) {
+              trace = subsetArrayAttrs(trace, matches);
+              trace.marker = this.gd._fullData[j].marker || {};
+              trace.line = this.gd._fullData[j].line || {};
+              trace.marker.color =  selectionColour || trace.marker.color;
+              trace.line.color = selectionColour || trace.line.color;
+              trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
+              frames[i].data.push(trace);
+            }
+          }
+          
+          for (var j = this.origData.length; j < this.gd._fullData.length; j++) {
+            frames[i].traces.push(j);
+          }
+          
         }
-        // Get sorted array of matching indices in trace.key
-        var matches = findMatches(trace.key, keySet);
-        if (matches.length > 0) {
-          trace = subsetArrayAttrs(trace, matches);
-          trace.marker = this.gd._fullData[j].marker || {};
-          trace.line = this.gd._fullData[j].line || {};
-          trace.marker.color =  selectionColour || trace.marker.color;
-          trace.line.color = selectionColour || trace.line.color;
-          frames[i].data.push(trace);
+        
+      // modify the original frames...idea came from source of Plotly.deleteFrames
+        ops = [];
+        for (var i = 0; i < frames.length; i++) {
+          ops.push({type: "replace", index: i, value: frames[i]});
         }
-      }
-      
-      for (var j = this.origData.length; j < this.gd._fullData.length; j++) {
-        frames[i].traces.push(j);
-      }
-      
-    }
-    
-    // modify the original frames...idea came from source of Plotly.deleteFrames
-    ops = [];
-    for (var i = 0; i < frames.length; i++) {
-      ops.push({type: "replace", index: i, value: frames[i]});
-    }
-    if (ops.length > 0) {
-      Plotly.Plots.modifyFrames(this.gd, ops);
+        if (ops.length > 0) {
+          Plotly.Plots.modifyFrames(this.gd, ops);
+        }
+        
+      });
     }
     
   }
