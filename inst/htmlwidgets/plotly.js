@@ -506,8 +506,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
       }
       
+      var targetTraces = frames[i].traces;
       for (var j = this.origData.length; j < this.gd._fullData.length; j++) {
-        frames[i].traces.push(j);
+        if (targetTraces.indexOf(j) === -1) {
+          targetTraces.push(j);
+        }
       }
       
     }
