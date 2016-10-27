@@ -161,7 +161,7 @@ create_ani_button <- function(opts) {
     x = 0,
     yanchor = 'bottom',
     xanchor = 'left',
-    pad = list(b = 40, l = 10),
+    pad = list(b = 20, l = 10),
     buttons = list(list(
       label = 'Play',
       method = 'animate',
