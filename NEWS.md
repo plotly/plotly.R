@@ -17,6 +17,7 @@
 * When `height`/`width` are specified in `ggplotly()`, relative sizes are now translated correctly. Fixes #489 and #510.
 * More careful handling of font when expanding annotation arrays. Fixes #738.
 * Ignore data arrays of non-tidy traces. Fixes #737.
+* When using `ggplotly()` on a plot with `geom_line` and `group` aesthetic wrong tooltip information was shown. Fixes #774.
 
 # 4.5.5 -- 28 September 2016
 
