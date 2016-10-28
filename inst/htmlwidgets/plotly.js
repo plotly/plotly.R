@@ -168,8 +168,14 @@ HTMLWidgets.widget({
       if (!curveObj.key || !curveObj.set) {
         continue;
       }
-      for (var pointIdx = 0; pointIdx < curveObj.key.length; pointIdx++) {
-        keyCache[joinSetAndKey(curveObj.set, curveObj.key[pointIdx])] =
+      var key = [];
+      if (typeof(curveObj.key) === "object") {
+        key.push(Object.keys(curveObj.key));
+      } else {
+        key.push(curveObj.key);
+      }
+      for (var pointIdx = 0; pointIdx < key.length; pointIdx++) {
+        keyCache[joinSetAndKey(curveObj.set, key[pointIdx])] =
           {curveNumber: curve, pointNumber: pointIdx};
       }
     }
@@ -426,7 +432,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
   } else if (keys.length >= 1) {
     
-    var keySet = new Set(keys || []);
+    //var keySet = new Set(keys || []);
     var traces = [];
     
     // this variable is set in R/highlight.R
@@ -439,7 +445,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         continue;
       }
       // Get sorted array of matching indices in trace.key
-      var matches = findMatches(trace.key, keySet);
+      var matches = findNestedMatches(trace.key, keys);
       if (matches.length > 0) {
         trace = subsetArrayAttrs(trace, matches);
         // opacity in this.gd.data is dimmed...
@@ -462,15 +468,16 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           var line = this.gd._fullData[i].line || {};
           Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
         }
-        trace.text = this.gd._fullData[i].text || {};
-        var suppliedText = this.gd.data[i].text || {};
-        if (suppliedText.color !== trace.text.color) {
-          var text = this.gd._fullData[i].text || {};
-          Plotly.restyle(this.gd.id, {'text.color': text.color}, i);
-        } 
+        //trace.text = this.gd._fullData[i].text || {};
+        //var suppliedText = this.gd.data[i].text || {};
+        //if (suppliedText.color !== trace.text.color) {
+        //  var text = this.gd._fullData[i].text || {};
+        //  Plotly.restyle(this.gd.id, {'text.color': text.color}, i);
+        //} 
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
-        trace.text.color = selectionColour || trace.text.color;
+        trace.textfont = trace.textfont || {};
+        trace.textfont.color = selectionColour || textfont.color;
         traces.push(trace);
         // dim opacity of original traces (if they aren't already)
         if (!trace.dimmed) {
@@ -510,7 +517,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             continue;
           }
           // Get sorted array of matching indices in trace.key
-          var matches = findMatches(trace.key, keySet);
+          var matches = findNestedMatches(trace.key, keys);
           if (matches.length > 0) {
             trace = subsetArrayAttrs(trace, matches);
             trace.marker = this.gd._fullData[newTracesIndex[0]].marker || {};
@@ -530,10 +537,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         Plotly.Plots.modifyFrames(this.gd, ops);
       }
       
-      
     }
-    
-    
     
   }
 };
@@ -565,6 +569,37 @@ function findMatches(haystack, needleSet) {
       matches.push(i);
     }
   });
+  return matches;
+}
+
+// find matches for nested keys
+function findNestedMatches(haystack, needleSet) {
+  var matches = [];
+  // ensure both haystack and needleset are an array of an arrays
+  for (var i = 0; i < haystack.length; i++) {
+    if (!Array.isArray(haystack[i])) {
+      haystack[i] = [haystack[i]];
+    }
+  }
+  for (var i = 0; i < needleSet.length; i++) {
+     if (!Array.isArray(needleSet[i])) {
+      needleSet[i] = [needleSet[i]];
+    }
+  }
+  // return a match if a haystack element is a subset of a
+  for (var i = 0; i < haystack.length; i++) {
+    var hay = haystack[i];
+    for (var j = 0; j < needleSet.length; j++) {
+      // have we already found a match?
+      if (matches.indexOf(i) >= 0) {
+        continue;
+      }
+      var match = hay.every(function(val) { return needleSet[j].indexOf(val) >= 0; });
+      if (match) {
+        matches.push(i);
+      }
+    }
+  }
   return matches;
 }
 
