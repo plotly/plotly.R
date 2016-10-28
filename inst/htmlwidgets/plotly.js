@@ -462,8 +462,15 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           var line = this.gd._fullData[i].line || {};
           Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
         }
+        trace.text = this.gd._fullData[i].text || {};
+        var suppliedText = this.gd.data[i].text || {};
+        if (suppliedText.color !== trace.text.color) {
+          var text = this.gd._fullData[i].text || {};
+          Plotly.restyle(this.gd.id, {'text.color': text.color}, i);
+        } 
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
+        trace.text.color = selectionColour || trace.text.color;
         traces.push(trace);
         // dim opacity of original traces (if they aren't already)
         if (!trace.dimmed) {
