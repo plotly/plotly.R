@@ -57,7 +57,8 @@ Suggests:
     RSclient,
     broom,
     webshot,
-    listviewer
+    listviewer,
+    dendextend
 LazyData: true
 Remotes:
     rstudio/crosstalk,

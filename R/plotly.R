@@ -237,6 +237,109 @@ plot_geo <- function(data = data.frame(), ...) {
 }
 
 
+#' Plot an interactive dendrogram
+#' 
+#' This function takes advantage of nested key selections to implement an 
+#' interactive dendrogram. Selecting a node selects all the labels (i.e. leafs)
+#' under that node.
+#' 
+#' @param d a dendrogram object
+#' @param set defines a crosstalk group
+#' @param width width
+#' @param height height
+#' @param ... currently unused
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
+#' @examples
+#' 
+#' hc <- hclust(dist(USArrests), "ave")
+#' dend1 <- as.dendrogram(hc)
+#' plot_dendro(dend1)
+#' 
+
+plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
+  # get x/y locations of every node in the tree
+  allXY <- get_xy(d)
+  # get non-zero heights so we can split on them and find the relevant labels
+  non0 <- allXY[["y"]][allXY[["y"]] > 0]
+  # splitting on the minimum height would generate all terminal nodes anyway
+  split <- non0[min(non0) < non0]
+  # label is a list-column since non-zero heights have multiple labels
+  # for now, we just have access to terminal node labels
+  labs <- labels(d)
+  allXY$label <- vector("list", nrow(allXY))
+  allXY$label[[1]] <- labs
+  allXY$label[allXY$y == 0] <- labs
+  
+  # collect all the *unique* non-trivial nodes
+  nodes <- list()
+  for (i in split) {
+    dsub <- cut(d, i)$lower
+    for (j in seq_along(dsub)) {
+      s <- dsub[[j]]
+      if (is.leaf(s)) next
+      if (any(vapply(nodes, function(x) identical(x, s), logical(1)))) next
+      nodes[[length(nodes) + 1]] <- s
+    }
+  }
+  
+  heights <- sapply(nodes, function(x) attr(x, "height"))
+  labs <- lapply(nodes, labels)
+  
+  # NOTE: this won't support nodes that have the same height 
+  # but that isn't possible, right?
+  for (i in seq_along(heights)) {
+    allXY$label[[which(allXY$y == heights[i])]] <- labs[[i]]
+  }
+  
+  tidy_segments <- as.ggdend(d)$segments
+  
+  p1 <- allXY %>% 
+    filter(y > 0) %>%
+    plot_ly(x = ~y, y = ~x, color = I("black"), hoverinfo = "none",
+            height = height, width = width) %>%
+    add_markers(key = ~label, set = set) %>%
+    add_segments(
+      data = tidy_segments, xend = ~yend, yend = ~xend
+    ) %>%
+    layout(
+      dragmode = "select", 
+      yaxis = list(
+        range = extendrange(allXY[["x"]])
+      )
+    )
+  
+  blank_axis <- list(
+    title = "",
+    showticklabels = FALSE,
+    zeroline = FALSE
+  )
+  
+  p2 <- allXY %>%
+    filter(y == 0) %>%
+    plot_ly(color = I("black")) %>%
+    add_text(x = 0, y = ~x, text = ~label, key = ~label, set = set,
+             hoverinfo = "none", textposition = "middle left") %>%
+    layout(
+      xaxis = c(blank_axis, list(range = c(-10, 0))),
+      yaxis = c(blank_axis, range = extendrange(allXY[["x"]]))
+    )
+  
+  subplot(p2, p1, shareY = TRUE, margin = 0.001) %>%
+    hide_legend() %>%
+    highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
+}
+
+get_xy <- function(node) {
+  setNames(
+    tibble::as_tibble(dendextend::get_nodes_xy(node)), 
+    c("x", "y")
+  )
+}
+
+
+
 #' Convert a list to a plotly htmlwidget object
 #' 
 #' @param x a plotly object.
