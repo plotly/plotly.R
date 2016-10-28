@@ -230,15 +230,10 @@ HTMLWidgets.widget({
     var traceManager = new TraceManager(graphDiv, x.highlight);
 
     // Gather all sets.
-    var crosstalkGroups = {};
     var allSets = [];
     for (var curveIdx = 0; curveIdx < x.data.length; curveIdx++) {
       if (x.data[curveIdx].set) {
-        if (!crosstalkGroups[x.data[curveIdx].set]) {
-          allSets.push(x.data[curveIdx].set);
-          crosstalkGroups[x.data[curveIdx].set] = [];
-        }
-        crosstalkGroups[x.data[curveIdx].set].push(curveIdx);
+        allSets.push(x.data[curveIdx].set);
       }
     }
 
