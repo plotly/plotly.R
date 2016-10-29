@@ -192,8 +192,10 @@ HTMLWidgets.widget({
         }
         // Look up the keys
         var key = curveObj.key[points[i].pointNumber];
+
         keysBySet[curveObj.set] = keysBySet[curveObj.set] || [];
         keysBySet[curveObj.set].push(key);
+        
       }
       return keysBySet;
     }
@@ -378,14 +380,13 @@ TraceManager.prototype.updateFilter = function(group, keys) {
   if (typeof(keys) === "undefined" || keys === null) {
     this.gd.data = JSON.parse(JSON.stringify(this.origData));
   } else {
-    var keySet = new Set(keys);
   
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.origData[i];
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      var matches = findMatches(trace.key, keySet);
+      var matches = findNestedMatches(trace.key, keys);
       // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
       this.gd.data[i] = subsetArrayAttrs(trace, matches);
     }
@@ -432,12 +433,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
   } else if (keys.length >= 1) {
     
-    //var keySet = new Set(keys || []);
-    var traces = [];
-    
     // this variable is set in R/highlight.R
     var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
       this.highlight.color[0];
+    var traces = [];
     
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.gd.data[i];
@@ -468,16 +467,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           var line = this.gd._fullData[i].line || {};
           Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
         }
-        //trace.text = this.gd._fullData[i].text || {};
-        //var suppliedText = this.gd.data[i].text || {};
-        //if (suppliedText.color !== trace.text.color) {
-        //  var text = this.gd._fullData[i].text || {};
-        //  Plotly.restyle(this.gd.id, {'text.color': text.color}, i);
-        //} 
         trace.marker.color =  selectionColour || trace.marker.color;
         trace.line.color = selectionColour || trace.line.color;
         trace.textfont = trace.textfont || {};
-        trace.textfont.color = selectionColour || textfont.color;
+        trace.textfont.color = selectionColour || trace.textfont.color;
         traces.push(trace);
         // dim opacity of original traces (if they aren't already)
         if (!trace.dimmed) {
@@ -543,35 +536,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
 };
 
 
-function Set(contents /* optional */) {
-  this._map = {};
-  if (contents) {
-    contents.forEach(this.add, this);
-  }
-}
-
-Set.prototype.has = function(val) {
-  return !!this._map[val];
-};
-
-Set.prototype.add = function(val) {
-  this._map[val] = true;
-};
-
-Set.prototype.remove = function(val) {
-  delete this._map[val];
-};
-
-function findMatches(haystack, needleSet) {
-  var matches = [];
-  haystack.forEach(function(obj, i) {
-    if (needleSet.has(obj) || obj === null) {
-      matches.push(i);
-    }
-  });
-  return matches;
-}
-
 // find matches for nested keys
 function findNestedMatches(haystack, needleSet) {
   var matches = [];
@@ -606,10 +570,10 @@ function findNestedMatches(haystack, needleSet) {
 }
 
 function isPlainObject(obj) {
-    return (
-        Object.prototype.toString.call(obj) === '[object Object]' &&
-        Object.getPrototypeOf(obj) === Object.prototype
-    );
+  return (
+    Object.prototype.toString.call(obj) === '[object Object]' &&
+    Object.getPrototypeOf(obj) === Object.prototype
+  );
 }
 
 function subsetArrayAttrs(obj, indices) {
