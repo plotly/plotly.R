@@ -394,7 +394,7 @@ registerFrames <- function(p, frameMapping = NULL) {
     # retrain colors on each frame (including other data that isn't animated)
     frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
     p$x$frames[[i]] <- list(
-      name = frameNames[i],
+      name = as.character(frameNames[i]),
       data = frameDat[vapply(frameDat, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))]
     )
   }
