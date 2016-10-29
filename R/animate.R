@@ -165,7 +165,7 @@ create_ani_button <- function(opts) {
     buttons = list(list(
       label = 'Play',
       method = 'animate',
-      args = list(list(), opts)
+      args = list(list(), modify_list(list(fromcurrent = TRUE, mode = "immediate"), opts))
     ), list(
       label = 'Pause',
       method = 'animate',
