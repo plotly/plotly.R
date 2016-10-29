@@ -247,7 +247,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' @param set defines a crosstalk group
 #' @param width width
 #' @param height height
-#' @param ... currently unused
+#' @param ... arguments supplied to \code{\link{subplot}()}
 #' @export
 #' @author Carson Sievert
 #' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
@@ -255,7 +255,9 @@ plot_geo <- function(data = data.frame(), ...) {
 #' 
 #' hc <- hclust(dist(USArrests), "ave")
 #' dend1 <- as.dendrogram(hc)
-#' plot_dendro(dend1)
+#' plot_dendro(dend1, height = 600) %>% 
+#'   hide_legend() %>% 
+#'   highlight(off = "plotly_deselect", persistent = T, dynamic = T)
 #' 
 
 plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
@@ -326,9 +328,11 @@ plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
       yaxis = c(blank_axis, range = extendrange(allXY[["x"]]))
     )
   
-  subplot(p2, p1, shareY = TRUE, margin = 0.001) %>%
-    hide_legend() %>%
-    highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
+  subplot_args <- modify_list(
+    list(shareY = TRUE, widths = c(0.25, 0.75), margin = 0.001), list(...)
+  )
+  
+  do.call("subplot", c(list(p2, p1), subplot_args))
 }
 
 get_xy <- function(node) {

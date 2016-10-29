@@ -15,7 +15,7 @@ plot_dendro(d, set = "A", height = 500, width = 500, ...)
 
 \item{width}{width}
 
-\item{...}{currently unused}
+\item{...}{arguments supplied to \code{\link{subplot}()}}
 }
 \description{
 This function takes advantage of nested key selections to implement an 
@@ -26,7 +26,9 @@ under that node.
 
 hc <- hclust(dist(USArrests), "ave")
 dend1 <- as.dendrogram(hc)
-plot_dendro(dend1)
+plot_dendro(dend1, height = 600) \%>\% 
+  hide_legend() \%>\% 
+  highlight(off = "plotly_deselect", persistent = T, dynamic = T)
 
 }
 \author{
