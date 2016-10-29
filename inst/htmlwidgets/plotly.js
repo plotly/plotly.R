@@ -594,7 +594,9 @@ function findNestedMatches(haystack, needleSet) {
       if (matches.indexOf(i) >= 0) {
         continue;
       }
-      var match = hay.every(function(val) { return needleSet[j].indexOf(val) >= 0; });
+      var match = hay.every(function(val) { 
+        return val === null || needleSet[j].indexOf(val) >= 0; 
+      });
       if (match) {
         matches.push(i);
       }
