@@ -75,7 +75,8 @@ plotly_data <- function(p, id = p$x$cur_data) {
     set <- dat$groupName()
     dat <- dat$origData()
     dat[[crosstalk_key()]] <- key
-    dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
+    # not allowed for list-columns!
+    #dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
     dat <- structure(dat, set = set)
   }
   if (is.data.frame(dat)) tibble::as_tibble(dat) else dat
