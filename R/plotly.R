@@ -295,22 +295,9 @@ plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
     allXY$label[[which(allXY$y == heights[i])]] <- labs[[i]]
   }
   
-  tidy_segments <- as.ggdend(d)$segments
+  tidy_segments <- dendextend::as.ggdend(d)$segments
   
-  p1 <- allXY %>% 
-    filter(y > 0) %>%
-    plot_ly(x = ~y, y = ~x, color = I("black"), hoverinfo = "none",
-            height = height, width = width) %>%
-    add_markers(key = ~label, set = set) %>%
-    add_segments(
-      data = tidy_segments, xend = ~yend, yend = ~xend
-    ) %>%
-    layout(
-      dragmode = "select", 
-      yaxis = list(
-        range = extendrange(allXY[["x"]])
-      )
-    )
+  allTXT <- allXY[allXY$y == 0, ]
   
   blank_axis <- list(
     title = "",
@@ -318,21 +305,23 @@ plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
     zeroline = FALSE
   )
   
-  p2 <- allXY %>%
-    filter(y == 0) %>%
-    plot_ly(color = I("black")) %>%
-    add_text(x = 0, y = ~x, text = ~label, key = ~label, set = set,
-             hoverinfo = "none", textposition = "middle left") %>%
+  allXY %>% 
+    filter(y > 0) %>%
+    plot_ly(x = ~y, y = ~x, color = I("black"), hoverinfo = "none",
+            height = height, width = width) %>%
+    add_markers(key = ~label, set = set, name = "nodes") %>%
+    add_segments(
+      data = tidy_segments, xend = ~yend, yend = ~xend, showlegend = FALSE
+    ) %>%
+    add_text(
+      data = allTXT, x = 0, y = ~x, text = ~label, key = ~label, set = set,
+      hoverinfo = "none", textposition = "middle left", name = "labels"
+    ) %>%
     layout(
-      xaxis = c(blank_axis, list(range = c(-10, 0))),
-      yaxis = c(blank_axis, range = extendrange(allXY[["x"]]))
+      dragmode = "select", 
+      xaxis = c(blank_axis, list(range = c(-100, max(allXY[["y"]])))),
+      yaxis = c(blank_axis, list(range = extendrange(allXY[["x"]])))
     )
-  
-  subplot_args <- modify_list(
-    list(shareY = TRUE, widths = c(0.25, 0.75), margin = 0.001), list(...)
-  )
-  
-  do.call("subplot", c(list(p2, p1), subplot_args))
 }
 
 get_xy <- function(node) {
