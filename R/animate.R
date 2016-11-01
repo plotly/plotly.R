@@ -70,6 +70,10 @@ animation_opts <- function(p, frameDuration = 500, transitionDuration = frameDur
   if (transitionDuration < 0) {
     stop("frameDuration must be non-negative.", call. = FALSE)
   }
+  if (frameDuration < transitionDuration) {
+    stop("frameDuration must be larger than transitionDuration", call. = FALSE)
+  }
+  
   opts <- list(
     transition = list(
       duration = transitionDuration,
@@ -207,7 +211,6 @@ create_ani_slider <- function(p, opts = NULL, ...) {
 is_ani_slider <- function(obj) {
   class(obj) %in% "aniSlider"
 }
-
 
 
 easingOpts <- function() {
