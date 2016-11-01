@@ -245,6 +245,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' 
 #' @param d a dendrogram object
 #' @param set defines a crosstalk group
+#' @param xmin minimum of the range of the x-scale
 #' @param width width
 #' @param height height
 #' @param ... arguments supplied to \code{\link{subplot}()}
@@ -260,7 +261,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #'   highlight(off = "plotly_deselect", persistent = T, dynamic = T)
 #' 
 
-plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
+plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {
   # get x/y locations of every node in the tree
   allXY <- get_xy(d)
   # get non-zero heights so we can split on them and find the relevant labels
@@ -319,7 +320,7 @@ plot_dendro <- function(d, set = "A", height = 500, width = 500, ...) {
     ) %>%
     layout(
       dragmode = "select", 
-      xaxis = c(blank_axis, list(range = c(-100, max(allXY[["y"]])))),
+      xaxis = c(blank_axis, list(range = c(xmin, extendrange(allXY[["y"]])[2]))),
       yaxis = c(blank_axis, list(range = extendrange(allXY[["x"]])))
     )
 }
