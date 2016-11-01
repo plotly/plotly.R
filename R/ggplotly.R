@@ -213,7 +213,19 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
-  
+
+  # The computed aesthetic codes the groups as integers
+  # Here we build a map each of the integer values to the group label
+  group_maps <- Map(function(x, y) {
+    tryCatch({
+      x_group <- x[["group"]]
+      names(x_group) <- y
+      x_group <- x_group[!duplicated(x_group)]
+      x_group
+    }, error = function(e) NULL
+    )
+  }, data, groupDomains)
+
   # Transform all scales
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
   
@@ -244,7 +256,17 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # Reparameterise geoms from (e.g.) y and width to ymin and ymax
   data <- by_layer(function(l, d) l$compute_geom_1(d))
-  
+
+  # compute_geom_1 can reorder the rows from `data`, making groupDomains
+  # invalid. We rebuild groupDomains based on the current `data` and the
+  # group map we built before.
+  groupDomains <- Map(function(x, y) {
+    tryCatch({
+      names(y)[match(x$group, y)]
+    }, error = function(e) NULL
+    )
+  }, data, group_maps)
+
   # Apply position adjustments
   data <- by_layer(function(l, d) l$compute_position(d, layout))
   
