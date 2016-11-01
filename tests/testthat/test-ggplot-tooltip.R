@@ -69,6 +69,27 @@ test_that("group domain is included in hovertext", {
   expect_true(all(grepl(pattern, txt)))
 })
 
+test_that("tooltip elements are not crossed", {
+  # Tooltips with y == 10 should belong to Sample2 in this example
+  mydata <- data.frame(id = paste0("Sample", rep(1:2, times = 4)),
+                       x = rep(1:4, each = 2),
+                       y = rep(c(1, 10), times = 4),
+                       stringsAsFactors = FALSE)
+  #        id x  y
+  # 1 Sample1 1  1
+  # 2 Sample2 1 10
+  # 3 Sample1 2  1
+  # 4 Sample2 2 10
+  # 5 Sample1 3  1
+  # 6 Sample2 3 10
+  # 7 Sample1 4  1
+  # 8 Sample2 4 10
+  gplt <- ggplot(mydata) + geom_line(aes(x=x, y = y, group = id))
+  pltly <- plotly::ggplotly(gplt)
+  y_equal_ten <- grepl("y: 10", pltly$x$data[[1]]$text)
+  sample_2 <- grepl("id: Sample2", pltly$x$data[[1]]$text)
+  expect_equal(y_equal_ten, sample_2)
+})
 
 labelDF <- data.frame(
   label = paste0(("label"), c(1:10)), 
