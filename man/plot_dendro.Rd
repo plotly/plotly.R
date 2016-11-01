@@ -4,12 +4,14 @@
 \alias{plot_dendro}
 \title{Plot an interactive dendrogram}
 \usage{
-plot_dendro(d, set = "A", height = 500, width = 500, ...)
+plot_dendro(d, set = "A", xmin = -50, height = 500, width = 500, ...)
 }
 \arguments{
 \item{d}{a dendrogram object}
 
 \item{set}{defines a crosstalk group}
+
+\item{xmin}{minimum of the range of the x-scale}
 
 \item{height}{height}
 

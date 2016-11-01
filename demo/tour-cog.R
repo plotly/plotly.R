@@ -60,7 +60,7 @@ tour <- tour_dat %>%
   add_markers(text = ~city, hoverinfo = "text") %>%
   hide_legend() %>%
   layout(xaxis = ax, yaxis = ax) %>%
-  animationOpts(33, 0)
+  animation_opts(33, 33)
 
 # TODO: throw warning/error if trying to do animations in a subplot?
 # subplot(pcp, tour)

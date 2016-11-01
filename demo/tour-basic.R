@@ -49,4 +49,4 @@ proj_dat %>%
   add_markers(color = ~species, data = tour_dat) %>%
   hide_legend() %>%
   layout(xaxis = ax, yaxis = ax) %>%
-  animationOpts(33, 0)
+  animation_opts(33, 33)

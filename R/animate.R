@@ -1,8 +1,10 @@
 #' Animation options
 #' 
 #' @param p a plotly object.
-#' @param frameDuration The duration each frame is shown (in milliseconds).
-#' @param transitionDuration The duration of the transition (in milliseconds).
+#' @param frameDuration The amount of time between frames (in milliseconds).
+#' Note that this amount should include the \code{transitionDuration}.
+#' @param transitionDuration The duration of the smooth transition between
+#' frames (in milliseconds).
 #' @param easing The type of transition easing. See the list of options here
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js}
 #' @param redraw Trigger a redraw of the plot at completion of the transition?
@@ -16,7 +18,7 @@
 #' is started.
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{animationSlider}()}, \code{\link{animationButton}()}
+#' @seealso \code{\link{animation_slider}()}, \code{\link{animation_button}()}
 #' @examples 
 #' 
 #' 
@@ -29,18 +31,11 @@
 #'   add_markers(x = 1.5, y = 1.5) %>%
 #'   add_markers(x = ~x, y = ~y, frame = ~z)
 #' 
-#' # works in subplots
-#' subplot(
-#'   plot_ly(df, x = ~x, y = ~y, frame = ~z),
-#'   plot_ly(df, x = ~x, y = ~y, frame = ~z)
-#' )
 #' 
-#' # set the range in plot_ly()
+#' # it's a good idea to remove smooth transitions when there is 
+#' # no relationship between objects in each view
 #' plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) %>%
-#'   layout(
-#'     xaxis = ~list(range = range(wt)), 
-#'     yaxis = ~list(range = range(mpg))
-#'  )
+#'   animation_opts(transitionDuration = 0)
 #'  
 #' # works the same way with ggplotly
 #' p <- ggplot(txhousing, aes(month, median)) + 
@@ -49,7 +44,7 @@
 #'   facet_wrap(~ city)
 #'  
 #' ggplotly(p, width = 1000, height = 500) %>% 
-#'   animationSlider(hide = TRUE)
+#'   animation_slider(hide = TRUE)
 #' 
 #' # use the ids attribute to ensure object constancy
 #' if (require("gapminder")) {
@@ -67,9 +62,8 @@
 #'   ggplotly(p2)
 #' }
 #' 
-animationOpts <- function(p, frameDuration = 500, transitionDuration = 500, 
-                          easing = "cubic-in-out", redraw = FALSE, 
-                          mode = "immediate") {
+animation_opts <- function(p, frameDuration = 500, transitionDuration = frameDuration, 
+                          easing = "cubic-in-out", redraw = FALSE, mode = "immediate") {
   if (frameDuration < 0) {
     stop("frameDuration must be non-negative.", call. = FALSE)
   }
@@ -104,10 +98,10 @@ animationOpts <- function(p, frameDuration = 500, transitionDuration = 500,
 #' slider \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{animationOpts}()}, \code{\link{animationButton}()}
+#' @seealso \code{\link{animation_opts}()}, \code{\link{animation_button}()}
 #' 
 
-animationSlider <- function(p, hide = FALSE, ...) {
+animation_slider <- function(p, hide = FALSE, ...) {
   
   p <- plotly_build(p)
   isAniSlider <- vapply(p$x$layout$sliders, is_ani_slider, logical(1))
@@ -129,10 +123,10 @@ animationSlider <- function(p, hide = FALSE, ...) {
 #' button \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{animationOpts}()}, \code{\link{animationButton}()}
+#' @seealso \code{\link{animation_opts}()}, \code{\link{animation_button}()}
 #' 
 
-animationButton <- function(p, ...) {
+animation_button <- function(p, ...) {
   
   p <- plotly_build(p)
   isAniButton <- vapply(p$x$layout$updatemenus, is_ani_button, logical(1))
@@ -169,7 +163,7 @@ create_ani_button <- function(opts) {
     ), list(
       label = 'Pause',
       method = 'animate',
-      args = list(list(), list(mode = "next"))
+      args = list(list(), list(mode = "immediate"))
     ))
   )
   structure(button, class = "aniButton")
@@ -184,20 +178,26 @@ is_ani_button <- function(obj) {
 supply_ani_slider <- function(p, opts = NULL, ...) {
   nsliders <- length(p$x$layout$sliders)
   isAniSlider <- vapply(p$x$layout$sliders, is_ani_slider, logical(1))
-  idx <- if (sum(isAniSlider) == 1) which(isAniSlider) else nsliders + 1
-  p$x$layout$sliders[[idx]] <- create_ani_slider(p$x$frames, opts, ...)
+  hasAniSlider <- sum(isAniSlider) == 1
+  idx <- if (hasAniSlider) which(isAniSlider) else nsliders + 1
+  p$x$layout$sliders[[idx]] <- create_ani_slider(p, opts, ...)
   p
 }
 
-create_ani_slider <- function(frames, opts = NULL, ...) {
-  steps <- lapply(frames, function(f) {
+
+create_ani_slider <- function(p, opts = NULL, ...) {
+  steps <- lapply(p$x$frames, function(f) {
+    # frame names should already be formatted
     nm <- f[["name"]]
     args <- list(list(nm))
     args[[2]] <- opts
-    list(method = "animate", args = args, label = format(nm), value = nm)
+    list(method = "animate", args = args, label = nm, value = nm)
   })
   
-  slider <- list(...)
+  # inherit defaults from any existing slider
+  slider <- modify_list(
+    p$x$layout$sliders[[vapply(p$x$layout$sliders, is_ani_slider, logical(1))]], list(...)
+  )
   slider$visible <- TRUE
   slider$steps <- slider[["steps"]] %||% steps
   slider$pad$t <- slider$pad[["t"]] %||% 40

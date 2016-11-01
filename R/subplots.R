@@ -247,7 +247,6 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   p$source <- ensure_one(plots, "source")
   p$config <- ensure_one(plots, "config")
   p$highlight <- ensure_one(plots, "highlight")
-  p$animationOpts <- ensure_one(plots, "animationOpts")
   p$subplot <- TRUE
   as_widget(p)
 }
