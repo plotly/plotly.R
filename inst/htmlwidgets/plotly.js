@@ -237,11 +237,14 @@ HTMLWidgets.widget({
 
     var traceManager = new TraceManager(graphDiv, x.highlight);
 
-    // Gather all sets.
+    // Gather all *unique* sets.
     var allSets = [];
     for (var curveIdx = 0; curveIdx < x.data.length; curveIdx++) {
-      if (x.data[curveIdx].set) {
-        allSets.push(x.data[curveIdx].set);
+      var newSet = x.data[curveIdx].set;
+      if (newSet) {
+        if (allSets.indexOf(newSet) === -1) {
+          allSets.push(newSet);
+        }
       }
     }
 
