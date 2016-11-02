@@ -456,24 +456,21 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
         trace.name = "selected";
         // inherit marker/line attributes from the existing trace
-        trace.marker = this.gd._fullData[i].marker || {};
-        // prevent Plotly.addTraces() from changing color of original traces
-        // (happens if user doesn't specify trace color)
-        var suppliedMarker = this.gd.data[i].marker || {};
-        if (suppliedMarker.color !== trace.marker.color) {
-          var marker = this.gd._fullData[i].marker || {};
-          Plotly.restyle(this.gd.id, {'marker.color': marker.color}, i);
+        var d = this.gd._fullData[i];
+        if (d.marker) {
+          trace.marker = d.marker;
+          trace.marker.color =  selectionColour || trace.marker.color;
         }
-        trace.line = this.gd._fullData[i].line || {};
-        var suppliedLine = this.gd.data[i].line || {};
-        if (suppliedLine.color !== trace.line.color) {
-          var line = this.gd._fullData[i].line || {};
-          Plotly.restyle(this.gd.id, {'line.color': line.color}, i);
+        if (d.line) {
+          trace.line = d.line;
+          trace.line.color =  selectionColour || trace.line.color;
         }
-        trace.marker.color =  selectionColour || trace.marker.color;
-        trace.line.color = selectionColour || trace.line.color;
-        trace.textfont = trace.textfont || {};
-        trace.textfont.color = selectionColour || trace.textfont.color;
+        if (d.textfont) {
+          trace.textfont = d.textfont;
+          trace.textfont.color =  selectionColour || trace.textfont.color;
+        }
+        
+        trace._crosstalkIndex = i;
         traces.push(trace);
         // dim opacity of original traces (if they aren't already)
         if (!trace.dimmed) {
