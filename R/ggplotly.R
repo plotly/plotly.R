@@ -662,7 +662,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         y = gglayout$legend$y %||% 1,
         theme$legend.title,
         xanchor = "left",
-        yanchor = "top",
+        yanchor = "bottom",
         # just so the R client knows this is a title
         legendTitle = TRUE
       )
