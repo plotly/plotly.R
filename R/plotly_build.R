@@ -379,23 +379,17 @@ registerFrames <- function(p, frameMapping = NULL) {
     tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
     tr
   })
-  
+
   # the ordering of this object determines the ordering of the frames
   frameAttrs <- getLevels(unlist(lapply(p$x$data, "[[", "frame")))
-  
+  frameNames <- frameAttrs[!is.na(frameAttrs)]
+  p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
+
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
   traceNames <- strsplit(as.character(traceNames), "<br />")
   p$x$data <- Map(function(x, y) { x$name <- y[!y %in% frameAttrs]; x }, p$x$data, traceNames)
-  
-  # non-character string frame names cause problems...format them now
-  frameAttrs <- as.character(format(frameAttrs))
-  frameAttrs[frameAttrs %in% "NA"] <- NA # really format()?
-  # copy over to the trace attributes since we use them to extract out frames later
-  p$x$data <- Map(function(x, y) { x$frame <- y; x }, p$x$data, frameAttrs)
-  
-  frameNames <- frameAttrs[!is.na(frameAttrs)]
-  
+
   # exit in trivial cases
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
@@ -422,21 +416,21 @@ registerFrames <- function(p, frameMapping = NULL) {
 
   # copy over "frame traces" over to the frames key (required by plotly.js API)
   for (i in seq_along(frameNames)) {
-    thisFrame <- vapply(p$x$data, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))
+    thisFrame <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))
     isNotAFrame <- vapply(p$x$data, function(tr) is.na(tr[["frame"]]), logical(1))
     # retrain colors on each frame (including other data that isn't animated)
     frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
     p$x$frames[[i]] <- list(
       name = as.character(format(frameNames[i])),
-      data = frameDat[vapply(frameDat, function(tr) tr[["frame"]] %in% frameNames[i], logical(1))]
+      data = frameDat[vapply(frameDat, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))]
     )
   }
-  
+
   # remove "frame traces", except for the first one
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
   # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
-  
+
   p$x$frames <- lapply(p$x$frames, function(f) {
     f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
     f
