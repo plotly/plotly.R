@@ -4,16 +4,16 @@
 \alias{animation_opts}
 \title{Animation options}
 \usage{
-animation_opts(p, frameDuration = 500, transitionDuration = frameDuration,
-  easing = "cubic-in-out", redraw = FALSE, mode = "immediate")
+animation_opts(p, frame = 500, transition = frame, easing = "linear",
+  redraw = FALSE, mode = "immediate")
 }
 \arguments{
 \item{p}{a plotly object.}
 
-\item{frameDuration}{The amount of time between frames (in milliseconds).
-Note that this amount should include the \code{transitionDuration}.}
+\item{frame}{The amount of time between frames (in milliseconds).
+Note that this amount should include the \code{transition}.}
 
-\item{transitionDuration}{The duration of the smooth transition between
+\item{transition}{The duration of the smooth transition between
 frames (in milliseconds).}
 
 \item{easing}{The type of transition easing. See the list of options here
@@ -49,7 +49,7 @@ plot_ly(df) \%>\%
 # it's a good idea to remove smooth transitions when there is 
 # no relationship between objects in each view
 plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
-  animation_opts(transitionDuration = 0)
+  animation_opts(transition = 0)
  
 # works the same way with ggplotly
 p <- ggplot(txhousing, aes(month, median)) + 

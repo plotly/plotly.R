@@ -1,9 +1,9 @@
 #' Animation options
 #' 
 #' @param p a plotly object.
-#' @param frameDuration The amount of time between frames (in milliseconds).
-#' Note that this amount should include the \code{transitionDuration}.
-#' @param transitionDuration The duration of the smooth transition between
+#' @param frame The amount of time between frames (in milliseconds).
+#' Note that this amount should include the \code{transition}.
+#' @param transition The duration of the smooth transition between
 #' frames (in milliseconds).
 #' @param easing The type of transition easing. See the list of options here
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js}
@@ -35,7 +35,7 @@
 #' # it's a good idea to remove smooth transitions when there is 
 #' # no relationship between objects in each view
 #' plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) %>%
-#'   animation_opts(transitionDuration = 0)
+#'   animation_opts(transition = 0)
 #'  
 #' # works the same way with ggplotly
 #' p <- ggplot(txhousing, aes(month, median)) + 
@@ -62,25 +62,25 @@
 #'   ggplotly(p2)
 #' }
 #' 
-animation_opts <- function(p, frameDuration = 500, transitionDuration = frameDuration, 
-                          easing = "cubic-in-out", redraw = FALSE, mode = "immediate") {
-  if (frameDuration < 0) {
-    stop("frameDuration must be non-negative.", call. = FALSE)
+animation_opts <- function(p, frame = 500, transition = frame, easing = "linear",
+                           redraw = FALSE, mode = "immediate") {
+  if (frame < 0) {
+    stop("frame must be non-negative.", call. = FALSE)
   }
-  if (transitionDuration < 0) {
-    stop("frameDuration must be non-negative.", call. = FALSE)
+  if (transition < 0) {
+    stop("frame must be non-negative.", call. = FALSE)
   }
-  if (frameDuration < transitionDuration) {
-    stop("frameDuration must be larger than transitionDuration", call. = FALSE)
+  if (frame < transition) {
+    stop("frame must be larger than transition", call. = FALSE)
   }
   
   opts <- list(
     transition = list(
-      duration = transitionDuration,
+      duration = transition,
       easing = match.arg(easing, easingOpts())
     ),
     frame = list(
-      duration = frameDuration,
+      duration = frame,
       redraw = redraw
     ),
     mode = match.arg(mode, c('immediate', 'next', 'afterall'))
