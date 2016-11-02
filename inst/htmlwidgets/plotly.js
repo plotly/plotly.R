@@ -481,54 +481,56 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
     }
     
-    // trace indices for the new traces
-    var newTracesIndex = [];
-    for (var k = this.gd.data.length; k < this.gd.data.length + traces.length; k++) {
-      newTracesIndex.push(k);
-    }
+    
     
     if (traces.length > 0) {
       
-      // add the new traces
-      Plotly.addTraces(this.gd, traces, newTracesIndex);
+      var nOrigTraces = this.origData.length;
+      var nCurrentTraces = this.gd._fullData.length;
       
-      // add selection traces to frames
-      var frames = this.gd._transitionData._frames || [];
-      for (var i = 0; i < frames.length; i++) {
-        
-        // add the new trace indices
-        for (var k = 0; k < newTracesIndex.length; k++) {
-          frames[i].traces.push(newTracesIndex[k]);
-        }
-        
-        // append the new traces 
-        var frame = frames[i];
-        var nTraces = frame.data.length;
-        for (var j = 0; j < nTraces; j++) {
-          var trace = frame.data[j];
-          if (!trace.key || trace.set !== group) {
-            continue;
-          }
-          // Get sorted array of matching indices in trace.key
-          var matches = findNestedMatches(trace.key, keys);
-          if (matches.length > 0) {
-            trace = subsetArrayAttrs(trace, matches);
-            trace.marker = this.gd._fullData[newTracesIndex[0]].marker || {};
-            trace.line = this.gd._fullData[newTracesIndex[0]].line || {};
-            frames[i].data.push(trace);
-          }
-        }
-        
+      // trace indices for _all_ the new traces
+      var newTracesIndex = [];
+      for (var k = nCurrentTraces; k < nCurrentTraces + traces.length; k++) {
+        newTracesIndex.push(k);
       }
       
-      // modify the original frames...idea came from source of Plotly.deleteFrames
-      ops = [];
-      for (var i = 0; i < frames.length; i++) {
-        ops.push({type: "replace", index: i, value: frames[i]});
-      }
-      if (ops.length > 0) {
-        Plotly.Plots.modifyFrames(this.gd, ops);
-      }
+      Plotly.addTraces(this.gd, traces, newTracesIndex).then(function(gd) {
+        // add selection traces to frames
+        // (this is heavily inspired by Plotly.Plots.modifyFrames() 
+        // in src/plots/plots.js)
+        var _hash = gd._transitionData._frameHash;
+        var _frames = gd._transitionData._frames || [];
+        
+        for (var i = 0; i < _frames.length; i++) {
+          var ctr = 0;
+          
+          for (var j = 0; j < nOrigTraces; j++) {
+            var frameTrace = _frames[i].data[j];
+            if (!frameTrace.key || frameTrace.set !== group) {
+              continue;
+            }
+            // Get sorted array of matching indices in trace.key
+            var matches = findNestedMatches(frameTrace.key, keys);
+            if (matches.length > 0) {
+              frameTrace = subsetArrayAttrs(frameTrace, matches);
+              frameTrace.marker = gd._fullData[newTracesIndex[ctr]].marker;
+              frameTrace.line = gd._fullData[newTracesIndex[ctr]].line;
+              _frames[i].data.push(frameTrace);
+              ctr += ctr;
+            }
+          }
+          
+          // add the new trace indices (if necessary)
+          for (var k = 0; k < newTracesIndex.length; k++) {
+            if (_frames[i].traces.indexOf(newTracesIndex[k]) === -1) {
+              _frames[i].traces.push(newTracesIndex[k]);
+            }
+          }
+          // update the _frameHash
+          _hash[_frames[i].name] = _frames[i];
+        }
+      
+      });
       
     }
     
