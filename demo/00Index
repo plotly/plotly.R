@@ -6,3 +6,5 @@ highlight-ggpairs         Brushing a scatterplot matrix via ggpairs
 highlight-pipeline        Aggregating SharedData
 highlight-binned-target   Let plotly.js dynamically bin the raw data
 highlight-epl             An example of linked facets
+tour-basic                A basic example of a grand tour
+tour-USArrests           Linking a dendrogram to a tour

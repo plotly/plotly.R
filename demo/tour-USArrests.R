@@ -58,5 +58,5 @@ p2 <- USArrests %>%
 
 subplot(p1, p2, shareY = FALSE) %>%
   hide_legend() %>%
-  animation_opts(33, easing = "cubic-in-out") %>%
+  animation_opts(33, easing = "linear", mode = "next") %>%
   highlight("plotly_click", NULL, dynamic = T, persistent = T)
