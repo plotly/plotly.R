@@ -488,24 +488,35 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       var nOrigTraces = this.origData.length;
       var nCurrentTraces = this.gd._fullData.length;
       
-      // trace indices for _all_ the new traces
-      var newTracesIndex = [];
-      for (var k = nCurrentTraces; k < nCurrentTraces + traces.length; k++) {
-        newTracesIndex.push(k);
-      }
-      
-      Plotly.addTraces(this.gd, traces, newTracesIndex).then(function(gd) {
-        // add selection traces to frames
+      Plotly.addTraces(this.gd, traces).then(function(gd) {
+        // incrementally add selection traces to frames
         // (this is heavily inspired by Plotly.Plots.modifyFrames() 
         // in src/plots/plots.js)
         var _hash = gd._transitionData._frameHash;
         var _frames = gd._transitionData._frames || [];
         
         for (var i = 0; i < _frames.length; i++) {
-          var ctr = 0;
           
-          for (var j = 0; j < nOrigTraces; j++) {
-            var frameTrace = _frames[i].data[j];
+          // create a lookup table mapping trace index of *selected* traces 
+          // and their *original* index
+          var origIdx = [];
+          var newIdx = [];
+          for (var j = 0; j < traces.length; j++) {
+            var idx = traces[j]._crosstalkIndex;
+            if (_frames[i].traces.indexOf(idx) > -1) {
+              origIdx.push(idx);
+              newIdx.push(nCurrentTraces + j);
+              _frames[i].traces.push(nCurrentTraces + j);
+            }
+          }
+          
+          // nothing to do...
+          if (origIdx.length === 0) {
+            continue
+          }
+          
+          for (var j = 0; j < origIdx.length; j++) {
+            var frameTrace = _frames[i].data[origIdx[j]];
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
@@ -513,20 +524,21 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             var matches = findNestedMatches(frameTrace.key, keys);
             if (matches.length > 0) {
               frameTrace = subsetArrayAttrs(frameTrace, matches);
-              frameTrace.marker = gd._fullData[newTracesIndex[ctr]].marker;
-              frameTrace.line = gd._fullData[newTracesIndex[ctr]].line;
+              var d = gd._fullData[newIdx[j]];
+              if (d.marker) {
+                frameTrace.marker = d.marker;
+              }
+              if (d.line) {
+                frameTrace.line = d.line;
+              }
+              if (d.textfont) {
+                frameTrace.textfont = d.textfont;
+              }
               _frames[i].data.push(frameTrace);
-              ctr += ctr;
             }
           }
           
-          // add the new trace indices (if necessary)
-          for (var k = 0; k < newTracesIndex.length; k++) {
-            if (_frames[i].traces.indexOf(newTracesIndex[k]) === -1) {
-              _frames[i].traces.push(newTracesIndex[k]);
-            }
-          }
-          // update the _frameHash
+          // update gd._transitionData._frameHash
           _hash[_frames[i].name] = _frames[i];
         }
       
