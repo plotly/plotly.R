@@ -243,6 +243,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
     layouts <- layouts[which_layout]
   }
+  p$attrs <- Reduce(c, lapply(plots, "[[", "attrs"))
   p$layout <- modify_list(p$layout, Reduce(modify_list, layouts))
   p$source <- ensure_one(plots, "source")
   p$config <- ensure_one(plots, "config")
