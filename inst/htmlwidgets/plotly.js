@@ -23,6 +23,8 @@ HTMLWidgets.widget({
 
   resize: function(el, width, height, instance) {
     if (instance.autosize) {
+      var width = instance.width || width;
+      var height = instance.height || height;
       Plotly.relayout(el.id, {width: width, height: height});
     }
   },  
@@ -51,7 +53,9 @@ HTMLWidgets.widget({
         Plotly.addFrames(graphDiv, x.frames);
       });
       instance.plotly = true;
-      instance.autosize = x.layout.autosize;
+      instance.autosize = x.layout.autosize || true;
+      instance.width = x.layout.width;
+      instance.height = x.layout.height;
       
     } else {
       
