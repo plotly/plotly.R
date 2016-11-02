@@ -371,7 +371,7 @@ populate_categorical_axes <- function(p) {
       stop("Can't display both discrete & non-discrete data on same axis")
     }
     if (sum(isDiscrete) == 0) next
-    categories <- lapply(d, function(x) if (is.factor(x)) levels(x) else unique(x))
+    categories <- lapply(d, getLevels)
     categories <- unique(unlist(categories))
     if (any(!vapply(d, is.factor, logical(1)))) categories <- sort(categories)
     p$x$layout[[axisName]]$type <- 
