@@ -469,7 +469,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           trace.textfont = d.textfont;
           trace.textfont.color =  selectionColour || trace.textfont.color;
         }
-        
         trace._crosstalkIndex = i;
         traces.push(trace);
         // dim opacity of original traces (if they aren't already)
@@ -481,11 +480,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
     }
     
-    
-    
     if (traces.length > 0) {
       
-      var nOrigTraces = this.origData.length;
       var nCurrentTraces = this.gd._fullData.length;
       
       Plotly.addTraces(this.gd, traces).then(function(gd) {
@@ -512,11 +508,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           
           // nothing to do...
           if (origIdx.length === 0) {
-            continue
+            continue;
           }
           
           for (var j = 0; j < origIdx.length; j++) {
-            var frameTrace = _frames[i].data[origIdx[j]];
+            var frameTrace = _frames[i].data[j];
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
