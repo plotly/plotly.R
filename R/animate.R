@@ -39,12 +39,13 @@
 #'
 #' # works the same way with ggplotly
 #' p <- ggplot(txhousing, aes(month, median)) +
+#'   geom_line(aes(group = year), alpha = 0.3) +
 #'   geom_smooth() +
-#'   geom_line(aes(frame = year, ids = month)) +
+#'   geom_line(aes(frame = year, ids = month), color = "red") +
 #'   facet_wrap(~ city)
 #'
-#' ggplotly(p, width = 1000, height = 500) %>%
-#'   animation_slider(hide = TRUE)
+#' ggplotly(p, width = 1200, height = 900) %>%
+#'   animation_opts(1000)
 #'
 #' # use the ids attribute to ensure object constancy
 #' if (require("gapminder")) {
@@ -123,7 +124,7 @@ animation_slider <- function(p, hide = FALSE, ...) {
 #' Hide or customize the animation button
 #'
 #' @param p a plotly object
-#' @param ... arguments passed to the updatemenus which controls the play/pause
+#' @param ... arguments passed to the updatemenus which controls the play
 #' button \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
 #' @export
 #' @author Carson Sievert
@@ -155,19 +156,15 @@ create_ani_button <- function(opts) {
   button <- list(
     type = 'buttons',
     direction = 'right',
-    y = 1,
+    y = 0,
     x = 0,
-    yanchor = 'bottom',
-    xanchor = 'left',
-    pad = list(b = 20, l = 10),
+    yanchor = 'top',
+    xanchor = 'right',
+    pad = list(t = 60, r = 5),
     buttons = list(list(
       label = 'Play',
       method = 'animate',
       args = list(list(), modify_list(list(fromcurrent = TRUE, mode = "immediate"), opts))
-    ), list(
-      label = 'Pause',
-      method = 'animate',
-      args = list(list(), list(mode = "immediate"))
     ))
   )
   structure(button, class = "aniButton")

@@ -39,7 +39,7 @@ ax <- list(
 )
 
 # for nicely formatted slider labels
-options(digits = 2)
+options(digits = 3)
 
 tour_dat <- crosstalk::SharedData$new(tour_dat, ~state, group = "A")
 
@@ -54,9 +54,9 @@ p2 <- USArrests %>%
   dist() %>% 
   hclust() %>%
   as.dendrogram() %>%
-  plot_dendro(set = "A", xmin = -100, height = 600, width = 1000)
+  plot_dendro(set = "A", xmin = -100, height = 700, width = 1100)
 
-subplot(p1, p2, shareY = FALSE) %>%
+subplot(p1, p2, shareY = FALSE, margin = 0) %>%
   hide_legend() %>%
-  animation_opts(33, easing = "linear", mode = "next") %>%
-  highlight("plotly_click", NULL, dynamic = T, persistent = T)
+  animation_opts(33, mode = "next") %>%
+  highlight("plotly_click", NULL, dynamic = T)
