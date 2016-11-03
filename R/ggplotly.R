@@ -574,7 +574,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
               make_label(
                 faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
                 xanchor = if (xy == "x") "center" else "right", 
-                yanchor = if (xy == "x") "bottom" else "center", 
                 yanchor = if (xy == "x") "top" else "center", 
                 annotationType = "axis"
               )
