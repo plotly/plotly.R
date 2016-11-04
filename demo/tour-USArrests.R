@@ -43,20 +43,33 @@ options(digits = 3)
 
 tour_dat <- crosstalk::SharedData$new(tour_dat, ~state, group = "A")
 
-p1 <- proj_dat %>%
+tour <- proj_dat %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("black")) %>%
   add_segments(xend = 0, yend = 0, color = I("gray80")) %>%
   add_text(text = ~state) %>%
   add_markers(data = tour_dat, text = ~state, hoverinfo = "text") %>%
   layout(xaxis = ax, yaxis = ax)
 
-p2 <- USArrests %>% 
+dend <- USArrests %>% 
   dist() %>% 
   hclust() %>%
   as.dendrogram() %>%
-  plot_dendro(set = "A", xmin = -100, height = 700, width = 1100)
+  plot_dendro(set = "A", xmin = -100, height = 900, width = 1100)
 
-subplot(p1, p2, shareY = FALSE, margin = 0) %>%
+USArrests$state <- rownames(USArrests)
+USArrests$abb <- setNames(state.abb, state.name)[USArrests$state]
+
+map <- plot_geo(USArrests, color = I("black")) %>% 
+  add_trace(locations = ~abb, locationmode = "USA-states",
+            key = ~state, set = "A") %>% 
+  layout(geo = list(
+    scope = 'usa',
+    projection = list(type = 'albers usa'),
+    lakecolor = toRGB('white')
+  ))
+
+subplot(tour, map, nrows = 2, margin = 0) %>%
+  subplot(dend, shareY = FALSE, margin = 0) %>%
   hide_legend() %>%
   animation_opts(33, mode = "next") %>%
-  highlight("plotly_click", NULL, dynamic = T)
+  highlight("plotly_click", NULL, persistent = T, dynamic = T)
