@@ -61,6 +61,7 @@ Suggests:
     dendextend
 LazyData: true
 Remotes:
+    ramnathv/htmlwidgets#237,
     rstudio/crosstalk,
     hadley/tidyr#229,
     hadley/ggplot2
