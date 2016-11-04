@@ -5,6 +5,12 @@ library(shiny)
 library(crosstalk)
 library(dplyr)
 
+# Prepare mtcars
+sd <- mtcars %>%
+  mutate(gear = factor(gear)) %>%
+  mutate(cyl = factor(cyl)) %>%
+  SharedData$new(group = "A")
+
 ui <- fluidPage(
   fillRow(height = 500,
     plotlyOutput("p1"),
@@ -17,11 +23,11 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  # Prepare mtcars
+  # TODO: why it is necessary to create `sd` *again* in the server?
   sd <- mtcars %>%
     mutate(gear = factor(gear)) %>%
     mutate(cyl = factor(cyl)) %>%
-    SharedData$new()
+    SharedData$new(group = "A")
   
   output$p1 <- renderPlotly({
     plot_ly(sd, x = ~wt, y = ~mpg, color = ~gear, height = "100%")
