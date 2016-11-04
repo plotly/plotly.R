@@ -512,7 +512,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           }
           
           for (var j = 0; j < origIdx.length; j++) {
-            var frameTrace = _frames[i].data[j];
+            var frameTrace = _frames[i].data[origIdx[j]];
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
