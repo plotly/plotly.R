@@ -176,8 +176,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   layer_data <- lapply(layers, function(y) y$layer_data(plot$data))
   
   # add crosstalk key to layer mapping (effectively adding it as a group)
+  # there are cases where we don't want this!!
+  # e.g., GGally::ggpairs(sd)
   layers <- Map(function(x, y) {
-    if (!crosstalk_key() %in% names(y)) return(x)
+    if (!crosstalk_key() %in% names(y) || !inherits(x[["stat"]], "StatIdentity")) return(x)
     x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
     x
   }, layers, layer_data)
