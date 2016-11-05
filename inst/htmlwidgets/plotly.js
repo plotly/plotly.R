@@ -358,10 +358,10 @@ function TraceManager(graphDiv, highlight) {
   // filtering is (re)applied.
   this.origData = JSON.parse(JSON.stringify(graphDiv.data));
   
-  // supply defaults for opacity
+  // to avoid doing this over and over
+  this.origOpacity = [];
   for (var i = 0; i < this.origData.length; i++) {
-    this.origData[i].opacity = this.origData[i].opacity || 1;
-    this.gd.data[i].dimmed = false;
+    this.origOpacity[i] = this.origData[i].opacity || 1;
   }
 
   // key: group name, value: null or array of keys representing the
@@ -411,16 +411,12 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   
   this.groupSelections[group] = keys;
   
-  var nNewTraces = this.gd.data.length - this.origData.length;
-  if (nNewTraces < 0) {
-    throw new Error("Something went wrong. Please file an issue here -> https://github.com/ropensci/plotly/issues");
-  }
-  
   // if selection has been cleared, or if this is transient (not persistent)
   // selection, delete the "selection traces"
+  var nNewTraces = this.gd.data.length - this.origData.length;
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
     var tracesToRemove = [];
-    for (var i = this.origData.length; i < this.origData.length + nNewTraces; i++) {
+    for (var i = this.origData.length; i < this.gd.data.length; i++) {
       tracesToRemove.push(i);
     }
     Plotly.deleteTraces(this.gd, tracesToRemove);
@@ -429,10 +425,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   if (keys === null) {
     
     // go back to original opacity
-    for (var i = 0; i < this.origData.length; i++) {
-      Plotly.restyle(this.gd, {"opacity": this.origData[i].opacity}, i);
-      this.gd.data[i].dimmed = false;
-    }
+    Plotly.restyle(this.gd, {"opacity": this.origOpacity});
     
   } else if (keys.length >= 1) {
     
@@ -471,16 +464,28 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
         trace._crosstalkIndex = i;
         traces.push(trace);
-        // dim opacity of original traces (if they aren't already)
-        if (!trace.dimmed) {
-          var opacity = this.origData[i].opacity * this.highlight.opacityDim;
-          Plotly.restyle(this.gd, {"opacity": opacity}, i);
-          this.gd.data[i].dimmed = true;
-        }
       }
     }
     
     if (traces.length > 0) {
+      
+      // dim original traces that have a set matching the set of selection sets
+      var sets = Object.keys(this.groupSelections);
+      for (var i = 0; i < this.origData.length; i++) {
+        // have we already dimmed this trace?
+        if (this.origOpacity[i] !== this.gd._fullData[i].opacity) {
+          continue;
+        }
+        // is this worth doing?
+        if (this.highlight.opacityDim === 1) {
+          continue;
+        }
+        var matches = findNestedMatches(sets, [this.origData[i].set]);
+        if (matches.length) {
+          var opacity = this.origOpacity[i] * this.highlight.opacityDim;
+          Plotly.restyle(this.gd, {"opacity": opacity}, i);
+        }
+      }
       
       var nCurrentTraces = this.gd._fullData.length;
       
