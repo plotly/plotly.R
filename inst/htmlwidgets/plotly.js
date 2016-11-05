@@ -498,26 +498,27 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         
         for (var i = 0; i < _frames.length; i++) {
           
-          // create a lookup table mapping trace index of *selected* traces 
-          // and their *original* index
-          var origIdx = [];
+          
+          // add to _frames[i].traces *if* this frame references selected trace(s)
           var newIdx = [];
           for (var j = 0; j < traces.length; j++) {
             var idx = traces[j]._crosstalkIndex;
             if (_frames[i].traces.indexOf(idx) > -1) {
-              origIdx.push(idx);
               newIdx.push(nCurrentTraces + j);
               _frames[i].traces.push(nCurrentTraces + j);
             }
           }
           
           // nothing to do...
-          if (origIdx.length === 0) {
+          if (newIdx.length === 0) {
             continue;
           }
           
-          for (var j = 0; j < origIdx.length; j++) {
-            var frameTrace = _frames[i].data[origIdx[j]];
+          var ctr = 0;
+          var nFrameTraces = _frames[i].data.length;
+          
+          for (var j = 0; j < nFrameTraces; j++) {
+            var frameTrace = _frames[i].data[j];
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
@@ -525,7 +526,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             var matches = findNestedMatches(frameTrace.key, keys);
             if (matches.length > 0) {
               frameTrace = subsetArrayAttrs(frameTrace, matches);
-              var d = gd._fullData[newIdx[j]];
+              var d = gd._fullData[newIdx[ctr]];
               if (d.marker) {
                 frameTrace.marker = d.marker;
               }
@@ -535,6 +536,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
               if (d.textfont) {
                 frameTrace.textfont = d.textfont;
               }
+              ctr = ctr + 1;
               _frames[i].data.push(frameTrace);
             }
           }
