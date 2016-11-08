@@ -402,6 +402,20 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 }
 
 #' @export
+to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
+  if (identical(params$binaxis, "y")) {
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
+    data$size <- grid::convertHeight(grid::unit(dotdia / 2, "npc"), "mm")
+    data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
+  } else {
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
+    data$size <- grid::convertWidth(grid::unit(dotdia / 2, "npc"), "mm")
+    data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
+  }
+  prefix_class(data, "GeomPoint")
+}
+
+#' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
@@ -485,7 +499,7 @@ geom2trace.GeomPoint <- function(data, params, p) {
   )
   # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(idx <- pch %in% 21:25)) {
+  if (any(idx <- pch %in% 21:25) || any(idx <- !is.null(data[["fill_plotlyDomain"]]))) {
     L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
   }
   compact(L)
