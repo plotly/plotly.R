@@ -20,7 +20,7 @@ frames (in milliseconds).}
 \url{https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js}}
 
 \item{redraw}{Trigger a redraw of the plot at completion of the transition?
-A redraw may significantly impact performance, but may be necessary to 
+A redraw may significantly impact performance, but may be necessary to
 update plot attributes that can't be transitioned.}
 
 \item{mode}{Describes how a new animate call interacts with currently-running
@@ -41,33 +41,34 @@ df <- data.frame(
   y = c(1, 2, 2, 1, 1, 2),
   z = c(1, 1, 2, 2, 3, 3)
 )
-plot_ly(df) \%>\% 
+plot_ly(df) \%>\%
   add_markers(x = 1.5, y = 1.5) \%>\%
   add_markers(x = ~x, y = ~y, frame = ~z)
 
 
-# it's a good idea to remove smooth transitions when there is 
+# it's a good idea to remove smooth transitions when there is
 # no relationship between objects in each view
 plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
   animation_opts(transition = 0)
- 
+
 # works the same way with ggplotly
-p <- ggplot(txhousing, aes(month, median)) + 
+p <- ggplot(txhousing, aes(month, median)) +
+  geom_line(aes(group = year), alpha = 0.3) +
   geom_smooth() +
-  geom_line(aes(frame = year, ids = month)) + 
+  geom_line(aes(frame = year, ids = month), color = "red") +
   facet_wrap(~ city)
- 
-ggplotly(p, width = 1000, height = 500) \%>\% 
-  animation_slider(hide = TRUE)
+
+ggplotly(p, width = 1200, height = 900) \%>\%
+  animation_opts(1000)
 
 # use the ids attribute to ensure object constancy
 if (require("gapminder")) {
-  p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, 
+  p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop,
     color = continent, frame = year, ids = country)) +
     geom_point() +
     scale_x_log10()
   ggplotly(p)
-  
+
   p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
     geom_point(aes(size = pop), alpha = 0.5) +
     # animations can be specified on the layer level

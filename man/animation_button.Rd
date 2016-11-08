@@ -9,7 +9,7 @@ animation_button(p, ...)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{arguments passed to the updatemenus which controls the play/pause
+\item{...}{arguments passed to the updatemenus which controls the play
 button \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}}
 }
 \description{
