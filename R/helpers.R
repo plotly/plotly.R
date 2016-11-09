@@ -113,7 +113,7 @@ hide_colorbar <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \code{\link{hide_colorbat}()}
+#' @seealso \code{\link{hide_colorbar}()}
 #' @examples 
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))

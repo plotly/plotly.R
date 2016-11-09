@@ -9,3 +9,6 @@ todo.R
 inst/examples/*/*.html
 inst/examples/*/rsconnect/*
 .Rproj.user
+Untitled*
+rsconnect/
+revdep/
