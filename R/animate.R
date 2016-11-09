@@ -156,6 +156,7 @@ create_ani_button <- function(opts) {
   button <- list(
     type = 'buttons',
     direction = 'right',
+    showactive = FALSE,
     y = 0,
     x = 0,
     yanchor = 'top',
