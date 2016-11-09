@@ -8,3 +8,6 @@ build_site.R
 todo.R
 .github/
 inst/examples/flexdashboard
+Untitled*
+rsconnect/
+revdep/
