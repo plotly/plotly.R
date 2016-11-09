@@ -85,11 +85,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
+    set <- attr(data[[i]], "set")
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
+    d <- structure(d, set = set)
     if (is.data.frame(d)) d <- list(d)
     for (j in seq_along(d)) {
       datz <- c(datz, d[j])
-      paramz <- c(paramz, params[j])
+      paramz <- c(paramz, params[i])
     }
   }
   # now to the actual layer -> trace conversion
@@ -114,6 +116,14 @@ layers2traces <- function(data, prestats_data, layout, p) {
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i], list(p))
+    # attach some special attributes that aren't specific to geom rendering
+    trs <- Map(function(x, y) {
+      x$set <- attr(y, "set")
+      x$key <- y[["key"]]
+      x$frame <- y[["frame"]]
+      x$ids <- y[["ids"]]
+      x
+    }, trs, dl)
     # if we need a legend, set name/legendgroup/showlegend
     # note: this allows us to control multiple traces from one legend entry
     if (any(split_legend %in% names(d))) {
@@ -183,17 +193,15 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
-  set <- attr(data, "set")
   aez <- names(GeomBoxplot$default_aes)
   for (i in aez) {
     prestats_data[[i]] <- NULL
   }
   vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
-  dat <- prefix_class(
+  prefix_class(
     merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
-  structure(dat, set = set)
 }
 
 #' @export
@@ -443,16 +451,11 @@ geom2trace.GeomBlank <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPath <- function(data, params, p) {
-  set <- attr(data, "set")
   data <- group2NA(data)
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
-    key = data[["key"]],
-    set = set,
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -479,10 +482,6 @@ geom2trace.GeomPoint <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
-    key = data[["key"]],
-    set = attr(data, "set"),
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -515,9 +514,6 @@ geom2trace.GeomBar <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
-    key = data[["key"]],
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -535,17 +531,11 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
-  set <- attr(data, "set")
   data <- group2NA(data)
-  
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
-    key = data[["key"]],
-    set = set,
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     line = list(
@@ -575,9 +565,6 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    frame = data[["frame"]],
-    key = data[["key"]],
-    set = attr(data, "set"),
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -609,9 +596,6 @@ geom2trace.GeomText <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = data[["label"]],
-    key = data[["key"]],
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
@@ -645,8 +629,6 @@ geom2trace.GeomTile <- function(data, params, p) {
   compact(list(
     x = x,
     y = y,
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
     text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
     colorscale = setNames(colScale, NULL),
@@ -733,8 +715,6 @@ make_error <- function(data, params, xy = "x") {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
-    frame = data[["frame"]],
-    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),
@@ -754,7 +734,6 @@ make_error <- function(data, params, xy = "x") {
 # function to transform geom_ribbon data into format plotly likes
 # (note this function is also used for geom_smooth)
 ribbon_dat <- function(dat) {
-  set <- attr(dat, "set")
   n <- nrow(dat)
   o <- order(dat[["x"]])
   o2 <- order(dat[["x"]], decreasing = TRUE)
@@ -769,7 +748,7 @@ ribbon_dat <- function(dat) {
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
   dat2 <- cbind(x = tmp2[["x"]], y = tmp2[["ymax"]], others2)
-  structure(rbind(dat1, dat2), class = oldClass(dat), set = set)
+  structure(rbind(dat1, dat2), class = oldClass(dat))
 }
 
 aes2plotly <- function(data, params, aes = "size") {

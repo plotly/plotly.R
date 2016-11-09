@@ -211,9 +211,17 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # build a mapping between group and key
   # if there are multiple keys within a group, the key is a list-column
+  
   keysByGroup <- Map(function(x, y) { 
-    keys <- split(y[[crosstalk_key()]] %||% list(), x[["group"]])
-    tibble::tibble(group = unique(x[["group"]]), key = keys)
+    key <- y[[crosstalk_key()]]
+    if (is.null(key)) return(NULL)
+    keys <- split(key, with(x, paste(group, PANEL, sep = "-")))
+    for (i in seq_along(keys)) {
+      keys[[i]] <- unique(keys[[i]])
+    }
+    primaryKey <- unique(x[c("group", "PANEL")])
+    primaryKey$key <- keys
+    primaryKey
   }, data, layer_data)
 
   # The computed aesthetic codes the groups as integers
@@ -317,8 +325,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # end of ggplot_build()
   # ------------------------------------------------------------------------
   
-  # attach key
-  data <- Map(function(x, y) { dplyr::left_join(x, y, by = "group") }, data, keysByGroup)
+  # if necessary, attach key
+  data <- Map(function(x, y) { 
+    if (!length(y)) return(x)
+    dplyr::left_join(x, y, by = c("group", "PANEL")) 
+  }, data, keysByGroup)
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
