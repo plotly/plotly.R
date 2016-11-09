@@ -54,8 +54,24 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
  
-  # build each plot
-  plotz <- lapply(dots2plots(...), function(d) plotly_build(d, registerFrames = FALSE)[["x"]])
+  
+  plots <- dots2plots(...)
+  
+  # some plotly functions call plotly_build()...subplot() doesn't like that
+  for (i in seq_along(plots)) {
+    if (!is.null(plots[[i]][["frames"]])) {
+      warning(
+        sprintf("`subplot()` detected plot #%s was 'pre-built' and already has registered\n", i),
+        "animation frames. This can cause problems and may happen by calling a \n", 
+        "function like `animation_opts()` or `highlight()` (which returns a 'built' plot)\n",
+        "_before_ `subplot()`. Consider using such functions _after_ `subplot()`.",
+        call. = FALSE
+      )
+    }
+  }
+  
+  # build all the plots without registering frames
+  plotz <- lapply(plots, function(d) plotly_build(d, registerFrames = FALSE)[["x"]])
   
   # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,
