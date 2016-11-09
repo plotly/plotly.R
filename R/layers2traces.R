@@ -32,7 +32,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }, data, p$layers)
   
   hoverTextAes <- lapply(params, "[[", "hoverTextAes")
-  
   # attach a new column (hovertext) to each layer of data
   # (mapped to the text trace property)
   data <- Map(function(x, y) {
@@ -184,15 +183,17 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
+  set <- attr(data, "set")
   aez <- names(GeomBoxplot$default_aes)
   for (i in aez) {
     prestats_data[[i]] <- NULL
   }
-  vars <- c("PANEL", "group", aez, grep("_plotlyDomain$", names(data), value = T))
-  prefix_class(
+  vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
+  dat <- prefix_class(
     merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
+  structure(dat, set = set)
 }
 
 #' @export
@@ -534,6 +535,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
+  set <- attr(data, "set")
   data <- group2NA(data)
   
   L <- list(
@@ -541,6 +543,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
     key = data[["key"]],
+    set = set,
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "scatter",
@@ -572,7 +575,9 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    frame = data$frame,
+    frame = data[["frame"]],
+    key = data[["key"]],
+    set = attr(data, "set"),
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -749,6 +754,7 @@ make_error <- function(data, params, xy = "x") {
 # function to transform geom_ribbon data into format plotly likes
 # (note this function is also used for geom_smooth)
 ribbon_dat <- function(dat) {
+  set <- attr(dat, "set")
   n <- nrow(dat)
   o <- order(dat[["x"]])
   o2 <- order(dat[["x"]], decreasing = TRUE)
@@ -763,7 +769,7 @@ ribbon_dat <- function(dat) {
   tmp2 <- dat[o2, ]
   others2 <- tmp2[not_used]
   dat2 <- cbind(x = tmp2[["x"]], y = tmp2[["ymax"]], others2)
-  structure(rbind(dat1, dat2), class = oldClass(dat))
+  structure(rbind(dat1, dat2), class = oldClass(dat), set = set)
 }
 
 aes2plotly <- function(data, params, aes = "size") {

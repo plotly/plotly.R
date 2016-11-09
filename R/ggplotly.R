@@ -175,14 +175,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   layers <- plot$layers
   layer_data <- lapply(layers, function(y) y$layer_data(plot$data))
   
-  # add crosstalk key to layer mapping (effectively adding it as a group)
-  # there are cases where we don't want this!!
-  # e.g., GGally::ggpairs(sd)
-  layers <- Map(function(x, y) {
-    if (!crosstalk_key() %in% names(y) || !inherits(x[["stat"]], "StatIdentity")) return(x)
-    x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
-    x
-  }, layers, layer_data)
   
   # save crosstalk sets before this attribute gets squashed
   sets <- lapply(layer_data, function(y) attr(y, "set"))
@@ -213,8 +205,16 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     )
   }, data, layers)
   
+  
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
+  
+  # build a mapping between group and key
+  # if there are multiple keys within a group, the key is a list-column
+  keysByGroup <- Map(function(x, y) { 
+    keys <- split(y[[crosstalk_key()]] %||% list(), x[["group"]])
+    tibble::tibble(group = unique(x[["group"]]), key = keys)
+  }, data, layer_data)
 
   # The computed aesthetic codes the groups as integers
   # Here we build a map each of the integer values to the group label
@@ -268,6 +268,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }, error = function(e) NULL
     )
   }, data, group_maps)
+  
+  # there are some geoms (e.g. geom_dotplot()) where attaching the key 
+  # before applying the statistic can cause problems, but there is still a 
+  # 1-to-1 corresponding between graphical marks and 
 
   # Apply position adjustments
   data <- by_layer(function(l, d) l$compute_position(d, layout))
@@ -312,6 +316,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
+  
+  # attach key
+  data <- Map(function(x, y) { dplyr::left_join(x, y, by = "group") }, data, keysByGroup)
+  
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
   elements <- names(which(sapply(theme, inherits, "element")))
@@ -390,7 +398,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # reattach crosstalk group
   data <- Map(function(x, y) structure(x, set = y), data, sets)
-  
   traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
   # default to just the text in hover info, mainly because of this
