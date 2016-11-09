@@ -18,6 +18,6 @@ p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
 hide_legend(p)
 }
 \seealso{
-\code{\link{hide_colorbat}()}
+\code{\link{hide_colorbar}()}
 }
 
