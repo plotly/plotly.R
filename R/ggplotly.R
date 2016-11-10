@@ -205,25 +205,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     )
   }, data, layers)
   
-  
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
   
-  # build a mapping between group and key
-  # if there are multiple keys within a group, the key is a list-column
-  
-  keysByGroup <- Map(function(x, y) { 
-    key <- y[[crosstalk_key()]]
-    if (is.null(key)) return(NULL)
-    keys <- split(key, with(x, paste(group, PANEL, sep = "-")))
-    for (i in seq_along(keys)) {
-      keys[[i]] <- unique(keys[[i]])
-    }
-    primaryKey <- unique(x[c("group", "PANEL")])
-    primaryKey$key <- keys
-    primaryKey
-  }, data, layer_data)
-
   # The computed aesthetic codes the groups as integers
   # Here we build a map each of the integer values to the group label
   group_maps <- Map(function(x, y) {
@@ -254,6 +238,24 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     d
   })
   data <- layout$map_position(data)
+  
+  # build a mapping between group and key
+  # if there are multiple keys within a group, the key is a list-column
+  keysByGroup <- Map(function(x, y, z) { 
+    key <- y[[crosstalk_key()]]
+    if (is.null(key)) return(NULL)
+    if ("GeomDotplot" %in% class(z$geom)) {
+      x[["group"]] <- do.call("order", x[c("x", "group", "PANEL")])
+    }
+    byCols <- c("group", "PANEL")
+    keys <- split(key, Reduce(paste, x[byCols]))
+    for (i in seq_along(keys)) {
+      keys[[i]] <- unique(keys[[i]])
+    }
+    primaryKey <- unique(x[byCols])
+    primaryKey$key <- keys
+    primaryKey
+  }, data, layer_data, layers)
   
   # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
   # we also now provide the option to return one of these two
@@ -324,12 +326,14 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
-  
   # if necessary, attach key
-  data <- Map(function(x, y) { 
+  data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
-    dplyr::left_join(x, y, by = c("group", "PANEL")) 
-  }, data, keysByGroup)
+    if ("GeomDotplot" %in% class(z$geom)) {
+      x[["group"]] <- do.call("order", x[c("x", "group", "PANEL")])
+    }
+    dplyr::left_join(x, y)
+  }, data, keysByGroup, layers)
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)

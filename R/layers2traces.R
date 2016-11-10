@@ -414,11 +414,11 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
   if (identical(params$binaxis, "y")) {
     dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
-    data$size <- grid::convertHeight(grid::unit(dotdia / 2, "npc"), "mm")
+    data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
     data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
   } else {
     dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
-    data$size <- grid::convertWidth(grid::unit(dotdia / 2, "npc"), "mm")
+    data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
   }
   prefix_class(data, "GeomPoint")
@@ -481,7 +481,7 @@ geom2trace.GeomPoint <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data[["hovertext"]]),
+    text = if (inherits(data, "GeomDotplot")) data[["key"]] else uniq(data[["hovertext"]]),
     type = "scatter",
     mode = "markers",
     marker = list(
