@@ -429,10 +429,18 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
   } else if (keys.length >= 1) {
     
+    // placeholder for new "selection traces"
+    var traces = [];
     // this variable is set in R/highlight.R
     var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
       this.highlight.color[0];
-    var traces = [];
+    
+    // TODO: think about how we could set a mode in the dynamic brush to just highlight 
+    // (i.e., this mode would preserve coloring of existing selections and simply dim opacity)
+    //if (selectionColour === "transparent") {
+    //  selectionColour = null;
+    //}
+    
     
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.gd.data[i];
