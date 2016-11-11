@@ -67,6 +67,12 @@ ggplotly.plotly <- function(p = ggplot2::last_plot(), width = NULL, height = NUL
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", layerData = 1,
                               originalData = TRUE, source = "A", ...) {
+  dots <- list(...)
+  # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
+  if (!crosstalk_key() %in% names(p$data)) {
+    p$data[[crosstalk_key()]] <- p$data[[".rownames"]] %||% seq_len(nrow(p$data))
+    attr(p$data, "set") <- dots[["set"]] %||% new_id()
+  }
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
