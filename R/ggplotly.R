@@ -181,7 +181,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   layers <- plot$layers
   layer_data <- lapply(layers, function(y) y$layer_data(plot$data))
   
-  
   # save crosstalk sets before this attribute gets squashed
   sets <- lapply(layer_data, function(y) attr(y, "set"))
   
@@ -203,13 +202,23 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   data <- layout$map(data)
   
   # save the domain of the group for display in tooltips
-  
   groupDomains <- Map(function(x, y) {
     tryCatch(
       eval(y$mapping[["group"]] %||% plot$mapping[["group"]], x), 
       error = function(e) NULL
     )
   }, data, layers)
+  
+  # for simple (StatIdentity) geoms, add crosstalk key to aes mapping
+  # (effectively adding it as a group)
+  # later on, for more complicated geoms (w/ non-trivial summary statistics),
+  # we construct a nested key mapping (within group)
+  layers <- Map(function(x, y) {
+    if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
+      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+    }
+    x
+  }, layers, layer_data)
   
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
@@ -247,20 +256,29 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   # build a mapping between group and key
   # if there are multiple keys within a group, the key is a list-column
-  keysByGroup <- Map(function(x, y, z) { 
+  reComputeGroup <- function(x, layer = NULL) {
+    # 1-to-1 link between data & visual marks -- group == key
+    if ("GeomDotplot" %in% class(layer$geom)) {
+      x <- split(x, x[["PANEL"]])
+      x <- lapply(x, function(d) { 
+        d[["group"]] <- do.call("order", d[c("x", "group")]) 
+        d 
+      })
+      x <- dplyr::bind_rows(x)
+    }
+    x
+  }
+  #browser()
+  nestedKeys <- Map(function(x, y, z) { 
     key <- y[[crosstalk_key()]]
-    if (is.null(key)) return(NULL)
-    if ("GeomDotplot" %in% class(z$geom)) {
-      x[["group"]] <- do.call("order", x[c("x", "group", "PANEL")])
-    }
-    byCols <- c("group", "PANEL")
-    keys <- split(key, Reduce(paste, x[byCols]))
-    for (i in seq_along(keys)) {
-      keys[[i]] <- unique(keys[[i]])
-    }
-    primaryKey <- unique(x[byCols])
-    primaryKey$key <- keys
-    primaryKey
+    if (is.null(key) || inherits(z[["stat"]], "StatIdentity")) return(NULL)
+    x <- reComputeGroup(x, z)
+    tib <- tibble::as_tibble(x[c("PANEL", "group")])
+    tib[["key"]] <- key
+    nested <- tidyr::nest(tib, key, .key = key)
+    # reduce the dimensions of list column elements from 2 to 1
+    nested$key <- lapply(nested$key, function(x) x[[1]])
+    nested
   }, data, layer_data, layers)
   
   # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
@@ -335,11 +353,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # if necessary, attach key
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
-    if ("GeomDotplot" %in% class(z$geom)) {
-      x[["group"]] <- do.call("order", x[c("x", "group", "PANEL")])
-    }
-    dplyr::left_join(x, y)
-  }, data, keysByGroup, layers)
+    x <- reComputeGroup(x, z)
+    suppressMessages(dplyr::left_join(x, y))
+  }, data, nestedKeys, layers)
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
@@ -417,7 +433,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
   
-  # reattach crosstalk group
+  # reattach crosstalk key-set attribute
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
