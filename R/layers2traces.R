@@ -116,14 +116,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i], list(p))
-    # attach some special attributes that aren't specific to geom rendering
-    trs <- Map(function(x, y) {
-      x$set <- attr(y, "set")
-      x$key <- y[["key"]]
-      x$frame <- y[["frame"]]
-      x$ids <- y[["ids"]]
-      x
-    }, trs, dl)
+    # attach the crosstalk group/set
+    trs <- Map(function(x, y) { x$set <- attr(y, "set"); x}, trs, dl)
     # if we need a legend, set name/legendgroup/showlegend
     # note: this allows us to control multiple traces from one legend entry
     if (any(split_legend %in% names(d))) {
@@ -457,6 +451,9 @@ geom2trace.GeomPath <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -484,6 +481,9 @@ geom2trace.GeomPoint <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = if (isDotPlot) data[["key"]] else uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -516,6 +516,9 @@ geom2trace.GeomBar <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -538,6 +541,9 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     line = list(
@@ -567,6 +573,9 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -598,6 +607,9 @@ geom2trace.GeomText <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = data[["label"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
@@ -633,6 +645,9 @@ geom2trace.GeomTile <- function(data, params, p) {
     y = y,
     z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
     text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     colorscale = setNames(colScale, NULL),
     type = "heatmap",
     showscale = FALSE,
@@ -717,6 +732,9 @@ make_error <- function(data, params, xy = "x") {
     x = data[["x"]],
     y = data[["y"]],
     text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),
