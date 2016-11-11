@@ -59,7 +59,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
   }
   if (dynamic && length(color) < 2) {
     message("Adding more colors to the selection color palette")
-    color <- c(color, RColorBrewer::brewer.pal(4, "Set1"))
+    color <- c(color, c(RColorBrewer::brewer.pal(4, "Set1"), "transparent"))
   }
   if (!dynamic) {
     if (length(color) > 1) {
@@ -120,7 +120,8 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     w <- colourpicker::colourWidget(
       value = color[1],
       palette = "limited",
-      allowedCols = color
+      allowedCols = color,
+      width = "100px"
     )
     w <- htmlwidgets::onRender(w, "
       function(el, x) {
