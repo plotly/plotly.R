@@ -199,7 +199,7 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
   }
   vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
   prefix_class(
-    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
+    merge(prestats_data, data[names(data) %in% vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
 }
@@ -415,11 +415,12 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
   if (identical(params$binaxis, "y")) {
     dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
     data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
-    data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
+    data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   } else {
     dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
     data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
-    data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 2)
+    # TODO: why times 6?!?!
+    data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   }
   prefix_class(data, "GeomPoint")
 }
@@ -478,10 +479,11 @@ geom2trace.GeomPath <- function(data, params, p) {
 geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
   color <- aes2plotly(data, params, "colour")
+  isDotPlot <- inherits(data, "GeomDotplot")
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = if (inherits(data, "GeomDotplot")) data[["key"]] else uniq(data[["hovertext"]]),
+    text = if (isDotPlot) data[["key"]] else uniq(data[["hovertext"]]),
     type = "scatter",
     mode = "markers",
     marker = list(
