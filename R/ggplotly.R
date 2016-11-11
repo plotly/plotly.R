@@ -223,6 +223,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
   
+  # add frame to group if it exists
+  data <- lapply(data, function(d) { 
+    if (!"frame" %in% names(d)) return(d)
+    d$group <- with(d, paste(group, frame, sep = "-"))
+    d
+  })
+  
   # The computed aesthetic codes the groups as integers
   # Here we build a map each of the integer values to the group label
   group_maps <- Map(function(x, y) {
