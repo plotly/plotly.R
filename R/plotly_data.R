@@ -100,8 +100,8 @@ ungroup.plotly <- function(x, ...) {
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
   d2 <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
-  # _always_ preserve the crosstalk key
-  if (crosstalk_key() %in% as.character(dplyr::groups(d))) {
+  # _always_ preserve the crosstalk key (to enable examples like demos/highlight-pipeline.R)
+  if (crosstalk_key() %in% names(d)) {
     d2 <- dplyr::group_by_(d2, crosstalk_key(), add = TRUE)
   }
   add_data(.data, d2)

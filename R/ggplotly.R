@@ -34,6 +34,10 @@
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 #' ggplotly(viz, tooltip = c("text", "size"))
 #' 
+#' 
+#' # highlighting lines
+#' demo("highlight-ggplotly", package = "plotly")
+#' 
 #' # client-side linked brushing
 #' library(crosstalk)
 #' d <- SharedData$new(mtcars)
@@ -43,10 +47,8 @@
 #' )
 #' 
 #' # client-side linked brushing in a scatterplot matrix
-#' library(GGally)
-#' iris$id <- seq_len(nrow(iris))
-#' SharedData$new(iris, ~id) %>%
-#'   ggpairs(aes(colour = Species), columns = 1:4) %>%
+#' SharedData$new(iris) %>%
+#'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
 #'   ggplotly(tooltip = c("x", "y", "colour"))
 #' }
 #'
