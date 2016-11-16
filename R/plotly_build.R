@@ -356,7 +356,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_dragmode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
-  # verfiy showlegend is populated (needed for crosstalk's ability to dynamically add traces)
+  # crosstalk dynamically adds traces, meaning that a legend could be dynamically
+  # added, which is confusing. 
   p <- verify_showlegend(p)
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()

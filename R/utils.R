@@ -132,8 +132,6 @@ is_subplot <- function(p) {
 }
 
 supply_defaults <- function(p) {
-  # no need to supply defaults for subplots
-  if (is_subplot(p)) return(p)
   # supply trace anchor defaults
   anchors <- if (is_geo(p)) c("geo" = "geo") else if (is_mapbox(p)) c("subplot" = "mapbox") else c("xaxis" = "x", "yaxis" = "y")
   
@@ -442,7 +440,7 @@ verify_webgl <- function(p) {
 }
 
 verify_showlegend <- function(p) {
-  if (!is.null(p$x$layout$showlegend)) {
+  if (!is.null(p$x$layout$showlegend) && !is_subplot(p)) {
     return(p)
   }
   show <- unlist(lapply(p$x$data, function(x) x$showlegend %||% TRUE))
