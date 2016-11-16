@@ -132,6 +132,8 @@ is_subplot <- function(p) {
 }
 
 supply_defaults <- function(p) {
+  # no need to supply defaults for subplots
+  if (is_subplot(p)) return(p)
   # supply trace anchor defaults
   anchors <- if (is_geo(p)) c("geo" = "geo") else if (is_mapbox(p)) c("subplot" = "mapbox") else c("xaxis" = "x", "yaxis" = "y")
   
@@ -207,6 +209,9 @@ verify_boxed <- function(p) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
+    # prevent these objects from sending null keys
+    p$x$data[[tr]][["xaxis"]] <- p$x$data[[tr]][["xaxis"]] %||% NULL
+    p$x$data[[tr]][["yaxis"]] <- p$x$data[[tr]][["yaxis"]] %||% NULL
   }
   p$x$layout$updatemenus
   
