@@ -563,19 +563,28 @@ TraceManager.prototype.updateSelection = function(group, keys) {
 
 // find matches for nested keys
 function findNestedMatches(haystack, needleSet) {
+  
+  // ensure haystack is an array of an arrays
+  if (!Array.isArray(haystack)) {  
+    haystack = [haystack]; 
+    for (var i = 0; i < haystack.length; i++) {
+      if (!Array.isArray(haystack[i])) {
+        haystack[i] = [haystack[i]];
+      }
+    }
+  }
+  // ensure needleSet is an array of an arrays
+  if (!Array.isArray(needleSet)) {  
+    needleSet = [needleSet]; 
+    for (var i = 0; i < needleSet.length; i++) {
+       if (!Array.isArray(needleSet[i])) {
+        needleSet[i] = [needleSet[i]];
+      }
+    }
+  }
+  
+  // return a match if a haystack array is a superset of a needleset array
   var matches = [];
-  // ensure both haystack and needleset are an array of an arrays
-  for (var i = 0; i < haystack.length; i++) {
-    if (!Array.isArray(haystack[i])) {
-      haystack[i] = [haystack[i]];
-    }
-  }
-  for (var i = 0; i < needleSet.length; i++) {
-     if (!Array.isArray(needleSet[i])) {
-      needleSet[i] = [needleSet[i]];
-    }
-  }
-  // return a match if a haystack element is a subset of a
   for (var i = 0; i < haystack.length; i++) {
     var hay = haystack[i];
     for (var j = 0; j < needleSet.length; j++) {
