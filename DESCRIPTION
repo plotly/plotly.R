@@ -31,7 +31,7 @@ Imports:
     viridisLite,
     base64enc,
     htmltools,
-    htmlwidgets,
+    htmlwidgets (>= 0.8),
     tidyr,
     hexbin,
     RColorBrewer,
@@ -61,8 +61,6 @@ Suggests:
     dendextend
 LazyData: true
 Remotes:
-    ramnathv/htmlwidgets#237,
     rstudio/crosstalk,
-    hadley/tidyr#229,
-    hadley/ggplot2
+    hadley/tidyr#229
 RoxygenNote: 5.0.1
