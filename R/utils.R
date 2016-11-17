@@ -18,6 +18,20 @@ is.bare.list <- function(x) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
 
+# kind of like %||%, but only respects user-defined defaults
+# (instead of defaults provided in the build step)
+"%|D|%" <- function(x, y) {
+  if (!is.default(x)) x %||% y else y
+}
+
+is.default <- function(x) {
+  inherits(x, "plotly_default")
+}
+
+default <- function(x) {
+  structure(x, class = "plotly_default")
+}
+
 compact <- function(x) {
   Filter(Negate(is.null), x)
 }
@@ -447,12 +461,8 @@ verify_webgl <- function(p) {
 verify_showlegend <- function(p) {
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
   # respect only _user-specified_ defaults 
-  showlegend <- p$x$layout$showlegend
-  if (!is.null(attr(showlegend, "plotly_default"))) {
-    showlegend <- NULL
-  }
-  p$x$layout$showlegend <- showlegend %||%
-    structure(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend), plotly_default = T)
+  p$x$layout$showlegend <- p$x$layout$showlegend %|D|%
+    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend))
   p
 }
 
@@ -460,7 +470,7 @@ verify_guides <- function(p) {
   
   # since colorbars are implemented as "invisible" traces, prevent a "trivial" legend
   if (has_colorbar(p) && has_legend(p) && length(p$x$data) <= 2) {
-    p$x$layout$showlegend <- FALSE
+    p$x$layout$showlegend <- default(FALSE)
   }
   
   isVisibleBar <- function(tr) {
@@ -515,7 +525,7 @@ has_legend <- function(p) {
     tr$showlegend %||% TRUE
   }
   any(vapply(p$x$data, showLegend, logical(1))) && 
-    isTRUE(p$x$layout$showlegend %||% TRUE)
+    isTRUE(p$x$layout$showlegend %|D|% TRUE)
 }
 
 has_colorbar <- function(p) {
