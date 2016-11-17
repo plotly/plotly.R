@@ -197,34 +197,35 @@ transmute_.plotly <- function(.data, ..., .dots) {
 
 # ---------------------------------------------------------------------------
 # tidyr methods
+# waiting on https://github.com/tidyverse/tidyr/pull/229
 # ---------------------------------------------------------------------------
 
-#' @rdname plotly_data
-#' @export
-gather_.plotly <- function(data, key_col, value_col, gather_cols, na.rm = FALSE,
-                           convert = FALSE, factor_key = FALSE) {
-  d <- plotly_data(data)
-  set <- attr(d, "set")
-  d <- tidyr::gather_(
-    d, key_col = key_col, value_col = value_col, gather_cols = gather_cols, 
-    na.rm = na.rm, convert = convert, factor_key = factor_key
-  )
-  add_data(data, structure(d, set = set))
-}
-
-#' @importFrom dplyr select_vars
-#' @rdname plotly_data
-#' @export
-gather_vars.plotly <- function(data, key_col, value_col, ...) {
-  d <- plotly_data(data)
-  if (n_dots(...) == 0) {
-    setdiff(colnames(d), c(key_col, value_col))
-  } else {
-    unname(dplyr::select_vars(colnames(d), ...))
-  }
-}
-
-n_dots <- function(...) nargs()
+# #' @rdname plotly_data
+# #' @export
+# gather_.plotly <- function(data, key_col, value_col, gather_cols, na.rm = FALSE,
+#                            convert = FALSE, factor_key = FALSE) {
+#   d <- plotly_data(data)
+#   set <- attr(d, "set")
+#   d <- tidyr::gather_(
+#     d, key_col = key_col, value_col = value_col, gather_cols = gather_cols, 
+#     na.rm = na.rm, convert = convert, factor_key = factor_key
+#   )
+#   add_data(data, structure(d, set = set))
+# }
+# 
+# #' @importFrom dplyr select_vars
+# #' @rdname plotly_data
+# #' @export
+# gather_vars.plotly <- function(data, key_col, value_col, ...) {
+#   d <- plotly_data(data)
+#   if (n_dots(...) == 0) {
+#     setdiff(colnames(d), c(key_col, value_col))
+#   } else {
+#     unname(dplyr::select_vars(colnames(d), ...))
+#   }
+# }
+# 
+# n_dots <- function(...) nargs()
 
 
 # ---------------------------------------------------------------------------

@@ -5,8 +5,6 @@
 \alias{distinct_.plotly}
 \alias{do_.plotly}
 \alias{filter_.plotly}
-\alias{gather_.plotly}
-\alias{gather_vars.plotly}
 \alias{group_by_.plotly}
 \alias{groups.plotly}
 \alias{mutate_.plotly}
@@ -46,11 +44,6 @@ plotly_data(p, id = p$x$cur_data)
 \method{rename_}{plotly}(.data, ..., .dots)
 
 \method{transmute_}{plotly}(.data, ..., .dots)
-
-\method{gather_}{plotly}(data, key_col, value_col, gather_cols, na.rm = FALSE,
-  convert = FALSE, factor_key = FALSE)
-
-gather_vars.plotly(data, key_col, value_col, ...)
 }
 \arguments{
 \item{p}{a plotly visualization}

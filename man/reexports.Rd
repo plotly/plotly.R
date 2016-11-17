@@ -11,8 +11,6 @@
 \alias{do_}
 \alias{filter}
 \alias{filter_}
-\alias{gather}
-\alias{gather_}
 \alias{group_by}
 \alias{group_by_}
 \alias{groups}
@@ -39,8 +37,6 @@ below to see their documentation.
   \item{dplyr}{\code{\link[dplyr]{mutate}}, \code{\link[dplyr]{mutate_}}, \code{\link[dplyr]{transmute}}, \code{\link[dplyr]{transmute_}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{select_}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{rename_}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{group_by_}}, \code{\link[dplyr]{groups}}, \code{\link[dplyr]{ungroup}}, \code{\link[dplyr]{summarise}}, \code{\link[dplyr]{summarise_}}, \code{\link[dplyr]{do}}, \code{\link[dplyr]{do_}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr]{arrange_}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr]{distinct_}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{slice_}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{filter_}}}
 
   \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
-
-  \item{tidyr}{\code{\link[tidyr]{gather}}, \code{\link[tidyr]{gather_}}}
 }}
 \keyword{internal}
 
