@@ -294,23 +294,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
 
-  if (has_colorbar(p) && has_legend(p)) {
-    if (length(p$x$data) <= 2) {
-      p$x$layout$showlegend <- FALSE
-    } else {
-      # shrink the colorbar
-      idx <- which(vapply(p$x$data, inherits, logical(1), "plotly_colorbar"))
-      p$x$data[[idx]]$marker$colorbar <- modify_list(
-        list(len = 1/2, lenmode = "fraction", y = 1, yanchor = "top"),
-        p$x$data[[idx]]$marker$colorbar
-      )
-      p$x$layout$legend <- modify_list(
-        list(y = 1/2, yanchor = "top"),
-        p$x$layout$legend
-      )
-    }
-  }
-
   # if highlight() hasn't been called on this plot, populate it with defaults
   hd <- highlight_defaults()
   p$x$highlight <- p$x$highlight %||% hd
@@ -359,14 +342,15 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
   # added, which is confusing. 
   p <- verify_showlegend(p)
+  
+  if (registerFrames) {
+    p <- registerFrames(p, frameMapping = frameMapping)
+  }
+  
+  p <- verify_guides(p)
+  
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
-
-  # register animation frames
-  if (registerFrames) {
-    p <- registerFrames(p, frameMapping)
-  }
-
   p
 }
 

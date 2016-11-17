@@ -186,10 +186,10 @@ check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
-         paste(illegalAttrs, collapse = "', '"), "'\n", 
-         "Valid attributes include:\n'",
-         paste(validAttrs, collapse = "', '"), "'\n", 
-         call. = FALSE)
+            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            "Valid attributes include:\n'",
+            paste(validAttrs, collapse = "', '"), "'\n", 
+            call. = FALSE)
   }
   invisible(proposedAttrs)
 }
@@ -257,7 +257,7 @@ verify_type <- function(trace) {
     attrs <- names(trace)
     attrLengths <- lengths(trace)
     trace$type <- if (all(c("x", "y", "z") %in% attrs)) {
-       if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
+      if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
     } else if (all(c("x", "y") %in% attrs)) {
       xNumeric <- !is.discrete(trace[["x"]])
       yNumeric <- !is.discrete(trace[["y"]])
@@ -445,11 +445,48 @@ verify_webgl <- function(p) {
 }
 
 verify_showlegend <- function(p) {
-  if (!is.null(p$x$layout$showlegend) && !is_subplot(p)) {
-    return(p)
+  show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
+  # respect only _user-specified_ defaults 
+  showlegend <- p$x$layout$showlegend
+  if (!is.null(attr(showlegend, "plotly_default"))) {
+    showlegend <- NULL
   }
-  show <- unlist(lapply(p$x$data, function(x) x$showlegend %||% TRUE))
-  p$x$layout$showlegend <- sum(show) > 1 || isTRUE(p$x$highlight$showInLegend)
+  p$x$layout$showlegend <- showlegend %||%
+    structure(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend), plotly_default = T)
+  p
+}
+
+verify_guides <- function(p) {
+  
+  # since colorbars are implemented as "invisible" traces, prevent a "trivial" legend
+  if (has_colorbar(p) && has_legend(p) && length(p$x$data) <= 2) {
+    p$x$layout$showlegend <- FALSE
+  }
+  
+  isVisibleBar <- function(tr) {
+    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
+  }
+  isBar <- vapply(p$x$data, isVisibleBar, logical(1))
+  nGuides <- sum(isBar) + has_legend(p)
+  
+  if (nGuides > 1) {
+    
+    # place legend at bottom since its scrolly
+    p$x$layout$legend <- modify_list(
+      list(y = 1 - ((nGuides - 1) / nGuides), yanchor = "top"),
+      p$x$layout$legend
+    )
+    
+    idx <- which(isBar)
+    for (i in seq_along(idx)) {
+      p <- colorbar_built(
+        p, which = i, len = 1 / nGuides, y = 1 - ((i - 1) / nGuides), 
+        lenmode = "fraction",  yanchor = "top"
+      )
+    }
+    
+  }
+  
   p
 }
 
