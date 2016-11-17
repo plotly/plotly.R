@@ -316,7 +316,7 @@ plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...
       data = tidy_segments, xend = ~yend, yend = ~xend, showlegend = FALSE
     ) %>%
     add_markers(
-      data = filter(allXY, y > 0), key = ~label, set = set, name = "nodes", 
+      data = allXY[allXY$y > 0, ], key = ~label, set = set, name = "nodes", 
       text = ~paste0("members: ", members), hoverinfo = "text"
     ) %>%
     add_text(

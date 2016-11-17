@@ -57,8 +57,6 @@ rules specified by \code{\link{animation_opts}()}.
 }
 \examples{
 
-# for more, see https://cpsievert.github.io/plotly_book/key-frame-animations.html
-
 df <- data.frame(
   x = c(1, 2, 2, 1, 1, 2),
   y = c(1, 2, 2, 1, 1, 2),
@@ -74,31 +72,19 @@ plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl) \%>\%
   animation_opts(transition = 0)
 
 # works the same way with ggplotly
-p <- ggplot(txhousing, aes(month, median)) +
-  geom_line(aes(group = year), alpha = 0.3) +
-  geom_smooth() +
-  geom_line(aes(frame = year, ids = month), color = "red") +
-  facet_wrap(~ city)
-
-ggplotly(p, width = 1200, height = 900) \%>\%
-  animation_opts(1000)
-
-if (system.file(package = "gapminder") != "") {
-
-  # use the ids attribute to ensure object constancy
-  p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop,
-    color = continent, frame = year, ids = country)) +
-    geom_point() +
-    scale_x_log10()
-  ggplotly(p)
-
-  p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
-    geom_point(aes(size = pop), alpha = 0.5) +
-    # animations can be specified on the layer level
-    geom_point(aes(size = pop, frame = year, ids = country), color = "red") +
-    scale_x_log10()
-  ggplotly(p2)
+if (interactive()) {
+  p <- ggplot(txhousing, aes(month, median)) +
+    geom_line(aes(group = year), alpha = 0.3) +
+    geom_smooth() +
+    geom_line(aes(frame = year, ids = month), color = "red") +
+    facet_wrap(~ city)
+ 
+  ggplotly(p, width = 1200, height = 900) \%>\%
+    animation_opts(1000)
 }
+
+  
+#' # for more, see https://cpsievert.github.io/plotly_book/key-frame-animations.html
 
 }
 \author{
