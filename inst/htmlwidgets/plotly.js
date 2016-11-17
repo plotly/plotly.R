@@ -573,20 +573,20 @@ function findNestedMatches(haystack, needleSet) {
   
   // ensure haystack is an array of an arrays
   if (!Array.isArray(haystack)) {  
-    haystack = [haystack]; 
-    for (var i = 0; i < haystack.length; i++) {
-      if (!Array.isArray(haystack[i])) {
-        haystack[i] = [haystack[i]];
-      }
+    haystack = [haystack];
+  }
+  for (var i = 0; i < haystack.length; i++) {
+    if (!Array.isArray(haystack[i])) {
+      haystack[i] = [haystack[i]];
     }
   }
   // ensure needleSet is an array of an arrays
   if (!Array.isArray(needleSet)) {  
     needleSet = [needleSet]; 
-    for (var i = 0; i < needleSet.length; i++) {
-       if (!Array.isArray(needleSet[i])) {
-        needleSet[i] = [needleSet[i]];
-      }
+  }
+  for (var i = 0; i < needleSet.length; i++) {
+    if (!Array.isArray(needleSet[i])) {
+      needleSet[i] = [needleSet[i]];
     }
   }
   
