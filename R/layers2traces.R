@@ -10,16 +10,16 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     # by default, show all user-specified and generated aesthetics in hovertext
-    map <- c(
-      as.character(y$mapping),
-      grep("^\\.\\.", as.character(y$stat$default_aes), value = TRUE)
-    )
+    stat_aes <- y$stat$default_aes
+    map <- c(y$mapping, stat_aes[grepl("^\\.\\.", as.character(stat_aes))])
     # add on plot-level mappings, if they're inherited
-    if (isTRUE(y$inherit.aes)) map <- c(map, as.character(p$mapping))
+    if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
     # "hidden" names should be taken verbatim
     idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
-    hiddenMap <- sub("^\\.\\.", "", sub("\\.\\.$", "", map))
-    map[idx] <- setNames(hiddenMap[idx], hiddenMap[idx])
+    map <- setNames(
+      sub("^\\.\\.", "", sub("\\.\\.$", "", as.character(map))),
+      names(map)
+    )
     if (!identical(p$tooltip, "all")) {
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
@@ -32,7 +32,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }, data, p$layers)
   
   hoverTextAes <- lapply(params, "[[", "hoverTextAes")
-  
   # attach a new column (hovertext) to each layer of data
   # (mapped to the text trace property)
   data <- Map(function(x, y) {
@@ -86,11 +85,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
+    set <- attr(data[[i]], "set")
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
+    d <- structure(d, set = set)
     if (is.data.frame(d)) d <- list(d)
     for (j in seq_along(d)) {
       datz <- c(datz, d[j])
-      paramz <- c(paramz, params[j])
+      paramz <- c(paramz, params[i])
     }
   }
   # now to the actual layer -> trace conversion
@@ -100,7 +101,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
-    split_by <- c(split_legend, "PANEL", split_on(d))
+    split_by <- c(split_legend, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
     split_vars <- intersect(split_by, names(d))
@@ -115,6 +116,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
     dl <- split(d, fac, drop = TRUE)
     # list of traces for this layer
     trs <- Map(geom2trace, dl, paramz[i], list(p))
+    # attach the crosstalk group/set
+    trs <- Map(function(x, y) { x$set <- attr(y, "set"); x}, trs, dl)
     # if we need a legend, set name/legendgroup/showlegend
     # note: this allows us to control multiple traces from one legend entry
     if (any(split_legend %in% names(d))) {
@@ -188,9 +191,9 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
   for (i in aez) {
     prestats_data[[i]] <- NULL
   }
-  vars <- c("PANEL", "group", aez, grep("_plotlyDomain$", names(data), value = T))
+  vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
   prefix_class(
-    merge(prestats_data, data[vars], by = c("PANEL", "group"), sort = FALSE),
+    merge(prestats_data, data[names(data) %in% vars], by = c("PANEL", "group"), sort = FALSE),
     "GeomBoxplot"
   )
 }
@@ -402,6 +405,21 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 }
 
 #' @export
+to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
+  if (identical(params$binaxis, "y")) {
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
+    data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
+    data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
+  } else {
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
+    data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
+    # TODO: why times 6?!?!
+    data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
+  }
+  prefix_class(data, "GeomPoint")
+}
+
+#' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
@@ -432,8 +450,10 @@ geom2trace.GeomPath <- function(data, params, p) {
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     name = if (inherits(data, "GeomSmooth")) "fitted values",
@@ -449,18 +469,21 @@ geom2trace.GeomPath <- function(data, params, p) {
     hoveron = hover_on(data)
   )
   if (inherits(data, "GeomStep")) L$line$shape <- params$direction %||% "hv"
-  L
+  compact(L)
 }
 
 #' @export
 geom2trace.GeomPoint <- function(data, params, p) {
   shape <- aes2plotly(data, params, "shape")
   color <- aes2plotly(data, params, "colour")
+  isDotPlot <- inherits(data, "GeomDotplot")
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = if (isDotPlot) data[["key"]] else uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "markers",
     marker = list(
@@ -478,10 +501,10 @@ geom2trace.GeomPoint <- function(data, params, p) {
   )
   # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
-  if (any(idx <- pch %in% 21:25)) {
+  if (any(idx <- pch %in% 21:25) || any(idx <- !is.null(data[["fill_plotlyDomain"]]))) {
     L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
   }
-  L
+  compact(L)
 }
 
 #' @export
@@ -489,11 +512,13 @@ geom2trace.GeomBar <- function(data, params, p) {
   data[["y"]] <- data[["ymax"]] - data[["ymin"]]
   # TODO: use xmin/xmax once plotly.js allows explicit bar widths
   # https://github.com/plotly/plotly.js/issues/80
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "bar",
     marker = list(
       autocolorscale = FALSE,
@@ -506,18 +531,19 @@ geom2trace.GeomBar <- function(data, params, p) {
         color = aes2plotly(data, params, "colour")
       )
     )
-  )
+  ))
 }
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
   data <- group2NA(data)
-  
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
-    key = data$key,
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     line = list(
@@ -538,15 +564,18 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   if (inherits(data, "GeomSmooth")) {
     L$hoverinfo <- "x+y"
   }
-  L
+  compact(L)
   
 }
 
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "box",
     hoverinfo = "y",
     fillcolor = toRGB(
@@ -568,17 +597,19 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       color = aes2plotly(data, params, "colour"),
       width = aes2plotly(data, params, "size")
     )
-  )
+  ))
 }
 
 
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
-  list(
+  compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data$label,
-    key = data$key,
+    text = data[["label"]],
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
@@ -590,7 +621,7 @@ geom2trace.GeomText <- function(data, params, p) {
     type = "scatter",
     mode = "text",
     hoveron = hover_on(data)
-  )
+  ))
 }
 
 #' @export
@@ -609,16 +640,19 @@ geom2trace.GeomTile <- function(data, params, p) {
   # colorscale goes crazy if there are NAs
   colScale <- colScale[stats::complete.cases(colScale), ]
   colScale <- colScale[order(colScale$fill_plotlyDomain), ]
-  list(
+  compact(list(
     x = x,
     y = y,
     z = matrix(g$fill_plotlyDomain, nrow = length(y), ncol = length(x), byrow = TRUE),
     text = matrix(g$hovertext, nrow = length(y), ncol = length(x), byrow = TRUE),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     colorscale = setNames(colScale, NULL),
     type = "heatmap",
     showscale = FALSE,
     autocolorscale = FALSE
-  )
+  ))
 }
 
 #' @export
@@ -697,7 +731,10 @@ make_error <- function(data, params, xy = "x") {
   e <- list(
     x = data[["x"]],
     y = data[["y"]],
-    text = uniq(data$hovertext),
+    text = uniq(data[["hovertext"]]),
+    key = data[["key"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
     type = "scatter",
     mode = "lines",
     opacity = aes2plotly(data, params, "alpha"),
@@ -711,7 +748,7 @@ make_error <- function(data, params, xy = "x") {
     symmetric = FALSE,
     color = color
   )
-  e
+  compact(e)
 }
 
 # function to transform geom_ribbon data into format plotly likes

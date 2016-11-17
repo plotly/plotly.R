@@ -3,6 +3,7 @@
 \name{plotly_data}
 \alias{arrange_.plotly}
 \alias{distinct_.plotly}
+\alias{do_.plotly}
 \alias{filter_.plotly}
 \alias{group_by_.plotly}
 \alias{groups.plotly}
@@ -27,6 +28,8 @@ plotly_data(p, id = p$x$cur_data)
 \method{summarise_}{plotly}(.data, ..., .dots)
 
 \method{mutate_}{plotly}(.data, ..., .dots)
+
+\method{do_}{plotly}(.data, ..., .dots)
 
 \method{arrange_}{plotly}(.data, ..., .dots)
 

@@ -1,11 +1,11 @@
 #' Initiate a plotly visualization
 #'
 #' Transform data into a plotly visualization.
-#' 
-#' There are a number of "visual properties" that aren't included in the officical 
-#' Reference section (see below). 
-#' 
-#' @param data A data frame (optional).
+#'
+#' There are a number of "visual properties" that aren't included in the official
+#' Reference section (see below).
+#'
+#' @param data A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
 #' Note that acceptable arguments depend on the value of \code{type}.
 #' @param type A character string describing the type of trace.
@@ -36,9 +36,13 @@
 #' \code{\link{group_by}()}, but ensures at least one trace for each unique
 #' value. This replaces the functionality of the (now deprecated)
 #' \code{group} argument.
+#' @param frame A formula containing a name or expression. The resulting value 
+#' is used to split data into frames, and then animated.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
-#' @param source Only relevant for \link{event_data}.
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @author Carson Sievert
 #' @seealso \itemize{
 #'  \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
@@ -84,15 +88,31 @@
 #' add_markers(p, symbol = ~Species)
 #' add_paths(p, linetype = ~Species)
 #' 
+#' # client-side linked brushing
+#' library(crosstalk)
+#' sd <- SharedData$new(mtcars)
+#' subplot(
+#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
+#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
+#' ) %>% hide_legend() %>% highlight(color = "red")
+#' 
+#' # client-side highlighting
+#' d <- SharedData$new(txhousing, ~city)
+#' plot_ly(d, x = ~date, y = ~median, color = I("black")) %>%
+#'   group_by(city) %>%
+#'   add_lines() %>% 
+#'   highlight(on = "plotly_hover", color = "red")
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL, 
                     color, colors = NULL, alpha = 1, symbol, symbols = NULL, 
                     size, sizes = c(10, 100), linetype, linetypes = NULL,
-                    split, width = NULL, height = NULL, source = "A") {
-  if (!is.data.frame(data)) {
-    stop("First argument, `data`, must be a data frame.", call. = FALSE)
+                    split, frame, width = NULL, height = NULL, source = "A") {
+  
+  if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
+    stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
   }
+  
   # "native" plotly arguments
   attrs <- list(...)
   
@@ -114,13 +134,15 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
     attrs[["inherit"]] <- NULL
   }
   
-  # tack on "special" arguments
+  # tack on variable mappings
   attrs$color <- if (!missing(color)) color
   attrs$symbol <- if (!missing(symbol)) symbol
   attrs$linetype <- if (!missing(linetype)) linetype
   attrs$size <- if (!missing(size)) size
   attrs$split <- if (!missing(split)) split
+  attrs$frame <- if (!missing(frame)) frame
   
+  # tack on scale ranges
   attrs$colors <- colors
   attrs$alpha <- alpha
   attrs$symbols <- symbols
@@ -215,6 +237,108 @@ plot_geo <- function(data = data.frame(), ...) {
 }
 
 
+#' Plot an interactive dendrogram
+#' 
+#' This function takes advantage of nested key selections to implement an 
+#' interactive dendrogram. Selecting a node selects all the labels (i.e. leafs)
+#' under that node.
+#' 
+#' @param d a dendrogram object
+#' @param set defines a crosstalk group
+#' @param xmin minimum of the range of the x-scale
+#' @param width width
+#' @param height height
+#' @param ... arguments supplied to \code{\link{subplot}()}
+#' @export
+#' @author Carson Sievert
+#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
+#' @examples
+#' 
+#' hc <- hclust(dist(USArrests), "ave")
+#' dend1 <- as.dendrogram(hc)
+#' plot_dendro(dend1, height = 600) %>% 
+#'   hide_legend() %>% 
+#'   highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
+#' 
+
+plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {
+  # get x/y locations of every node in the tree
+  allXY <- get_xy(d)
+  # get non-zero heights so we can split on them and find the relevant labels
+  non0 <- allXY[["y"]][allXY[["y"]] > 0]
+  # splitting on the minimum height would generate all terminal nodes anyway
+  split <- non0[min(non0) < non0]
+  # label is a list-column since non-zero heights have multiple labels
+  # for now, we just have access to terminal node labels
+  labs <- labels(d)
+  allXY$label <- vector("list", nrow(allXY))
+  allXY$label[[1]] <- labs
+  allXY$label[allXY$y == 0] <- labs
+  
+  # collect all the *unique* non-trivial nodes
+  nodes <- list()
+  for (i in split) {
+    dsub <- cut(d, i)$lower
+    for (j in seq_along(dsub)) {
+      s <- dsub[[j]]
+      if (is.leaf(s)) next
+      if (any(vapply(nodes, function(x) identical(x, s), logical(1)))) next
+      nodes[[length(nodes) + 1]] <- s
+    }
+  }
+  
+  heights <- sapply(nodes, function(x) attr(x, "height"))
+  labs <- lapply(nodes, labels)
+  
+  # NOTE: this won't support nodes that have the same height 
+  # but that isn't possible, right?
+  for (i in seq_along(heights)) {
+    allXY$label[[which(allXY$y == heights[i])]] <- labs[[i]]
+  }
+  
+  tidy_segments <- dendextend::as.ggdend(d)$segments
+  
+  allTXT <- allXY[allXY$y == 0, ]
+  
+  blank_axis <- list(
+    title = "",
+    showticklabels = FALSE,
+    zeroline = FALSE
+  )
+  
+  allXY$members <- sapply(allXY$label, length)
+  
+  
+  allXY %>% 
+    plot_ly(x = ~y, y = ~x, color = I("black"), hoverinfo = "none",
+            height = height, width = width) %>%
+    add_segments(
+      data = tidy_segments, xend = ~yend, yend = ~xend, showlegend = FALSE
+    ) %>%
+    add_markers(
+      data = allXY[allXY$y > 0, ], key = ~label, set = set, name = "nodes", 
+      text = ~paste0("members: ", members), hoverinfo = "text"
+    ) %>%
+    add_text(
+      data = allTXT, x = 0, y = ~x, text = ~label, key = ~label, set = set,
+      textposition = "middle left", name = "labels"
+    ) %>%
+    layout(
+      dragmode = "select", 
+      xaxis = c(blank_axis, list(range = c(xmin, extendrange(allXY[["y"]])[2]))),
+      yaxis = c(blank_axis, list(range = extendrange(allXY[["x"]])))
+    )
+}
+
+get_xy <- function(node) {
+  setNames(
+    tibble::as_tibble(dendextend::get_nodes_xy(node)), 
+    c("x", "y")
+  )
+}
+
+
+
 #' Convert a list to a plotly htmlwidget object
 #' 
 #' @param x a plotly object.
@@ -242,6 +366,7 @@ as_widget <- function(x, ...) {
       defaultWidth = '100%',
       defaultHeight = 400
     ),
-    preRenderHook = plotly_build
+    preRenderHook = plotly_build,
+    dependencies = crosstalk::crosstalkLibs()
   )
 }

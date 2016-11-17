@@ -14,7 +14,9 @@
 #' colour last.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
-#' @param source Only relevant for \link{event_data}.
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
 #' @seealso \code{\link{signup}()}, \code{\link{plot_ly}()}
 #' @return a plotly object
@@ -31,6 +33,23 @@
 #'   coord_equal() +
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 #' ggplotly(viz, tooltip = c("text", "size"))
+#' 
+#' 
+#' # highlighting lines
+#' demo("highlight-ggplotly", package = "plotly")
+#' 
+#' # client-side linked brushing
+#' library(crosstalk)
+#' d <- SharedData$new(mtcars)
+#' subplot(
+#'  qplot(data = d, x = mpg, y = wt),
+#'  qplot(data = d, x = mpg, y = vs)
+#' )
+#' 
+#' # client-side linked brushing in a scatterplot matrix
+#' SharedData$new(iris) %>%
+#'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
+#'   ggplotly(tooltip = c("x", "y", "colour"))
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
@@ -50,6 +69,12 @@ ggplotly.plotly <- function(p = ggplot2::last_plot(), width = NULL, height = NUL
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", layerData = 1,
                               originalData = TRUE, source = "A", ...) {
+  dots <- list(...)
+  # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
+  if (!crosstalk_key() %in% names(p$data)) {
+    p$data[[crosstalk_key()]] <- p$data[[".rownames"]] %||% seq_len(nrow(p$data))
+    attr(p$data, "set") <- dots[["set"]] %||% new_id()
+  }
   subplotList <- list()
   for (i in seq_len(p$ncol)) {
     columnList <- list()
@@ -75,13 +100,25 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     }
     # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
-    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE, titleY = TRUE)
+    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, 
+                 shareX = TRUE, titleY = TRUE) %>% hide_legend()
     subplotList <- c(subplotList, list(s))
   }
   s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
   if (nchar(p$title %||% "") > 0) {
     s <- layout(s, title = p$title)
   }
+  for (i in seq_along(p$xAxisLabels)) {
+    s$x$layout[[sub("^xaxis1$", "xaxis", paste0("xaxis", i))]]$title <- p$xAxisLabels[[i]]
+  }
+  for (i in seq_along(p$yAxisLabels)) {
+    s$x$layout[[sub("^yaxis1$", "yaxis", paste0("yaxis", i))]]$title <- rev(p$yAxisLabels)[[i]]
+  }
+  # TODO: make this more correct
+  if (length(p$yAxisLabels)) {
+    s$x$layout$margin$l <- s$x$layout$margin$l + 20
+  }
+  
   config(s)
 }
 
@@ -104,7 +141,9 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' (including the unofficial "text" aesthetic).
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
-#' @param source Only relevant for \link{event_data}.
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
@@ -136,7 +175,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   tmpPlotFile <- tempfile(fileext = ".png")
   dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   
-
+  # start the build process
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
     plot <- plot + geom_blank()
@@ -148,7 +187,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   sets <- lapply(layer_data, function(y) attr(y, "set"))
   
   scales <- plot$scales
-  
+
   # Apply function to layer and matching data
   by_layer <- function(f) {
     out <- vector("list", length(data))
@@ -172,9 +211,27 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     )
   }, data, layers)
   
+  # for simple (StatIdentity) geoms, add crosstalk key to aes mapping
+  # (effectively adding it as a group)
+  # later on, for more complicated geoms (w/ non-trivial summary statistics),
+  # we construct a nested key mapping (within group)
+  layers <- Map(function(x, y) {
+    if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
+      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+    }
+    x
+  }, layers, layer_data)
+  
   # Compute aesthetics to produce data with generalised variable names
   data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
-
+  
+  # add frame to group if it exists
+  data <- lapply(data, function(d) { 
+    if (!"frame" %in% names(d)) return(d)
+    d$group <- with(d, paste(group, frame, sep = "-"))
+    d
+  })
+  
   # The computed aesthetic codes the groups as integers
   # Here we build a map each of the integer values to the group label
   group_maps <- Map(function(x, y) {
@@ -206,6 +263,33 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   })
   data <- layout$map_position(data)
   
+  # build a mapping between group and key
+  # if there are multiple keys within a group, the key is a list-column
+  reComputeGroup <- function(x, layer = NULL) {
+    # 1-to-1 link between data & visual marks -- group == key
+    if ("GeomDotplot" %in% class(layer$geom)) {
+      x <- split(x, x[["PANEL"]])
+      x <- lapply(x, function(d) { 
+        d[["group"]] <- do.call("order", d[c("x", "group")]) 
+        d 
+      })
+      x <- dplyr::bind_rows(x)
+    }
+    x
+  }
+  #browser()
+  nestedKeys <- Map(function(x, y, z) { 
+    key <- y[[crosstalk_key()]]
+    if (is.null(key) || inherits(z[["stat"]], "StatIdentity")) return(NULL)
+    x <- reComputeGroup(x, z)
+    tib <- tibble::as_tibble(x[c("PANEL", "group")])
+    tib[["key"]] <- key
+    nested <- tidyr::nest(tib, key, .key = key)
+    # reduce the dimensions of list column elements from 2 to 1
+    nested$key <- lapply(nested$key, function(x) x[[1]])
+    nested
+  }, data, layer_data, layers)
+  
   # for some geoms (e.g. boxplots) plotly.js needs the "pre-statistics" data
   # we also now provide the option to return one of these two
   prestats_data <- data
@@ -227,6 +311,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }, error = function(e) NULL
     )
   }, data, group_maps)
+  
+  # there are some geoms (e.g. geom_dotplot()) where attaching the key 
+  # before applying the statistic can cause problems, but there is still a 
+  # 1-to-1 corresponding between graphical marks and 
 
   # Apply position adjustments
   data <- by_layer(function(l, d) l$compute_position(d, layout))
@@ -271,6 +359,13 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # ------------------------------------------------------------------------
   # end of ggplot_build()
   # ------------------------------------------------------------------------
+  # if necessary, attach key
+  data <- Map(function(x, y, z) { 
+    if (!length(y)) return(x)
+    x <- reComputeGroup(x, z)
+    suppressMessages(dplyr::left_join(x, y))
+  }, data, nestedKeys, layers)
+  
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
   elements <- names(which(sapply(theme, inherits, "element")))
@@ -344,9 +439,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
   data <- Map(function(x, y) {
-    tryCatch({x$group_plotlyDomain <- y; x}, error = function(e) x)
+    tryCatch({ x$group_plotlyDomain <- y; x }, error = function(e) x)
   }, data, groupDomains)
   
+  # reattach crosstalk key-set attribute
+  data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, layout$panel_layout, plot)
   
   # default to just the text in hover info, mainly because of this
@@ -358,6 +455,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # show only one legend entry per legendgroup
   grps <- sapply(traces, "[[", "legendgroup")
   traces <- Map(function(x, y) {
+    if (!is.null(x[["frame"]])) return(x)
     x$showlegend <- isTRUE(x$showlegend) && y
     x
   }, traces, !duplicated(grps))
@@ -772,6 +870,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   l <- list(
     data = setNames(traces, NULL),
     layout = compact(gglayout),
+    # prevent autosize on doubleClick which clears ggplot2 margins
+    config = list(doubleClick = "reset"),
     source = source
   )
   # strip any existing 'AsIs' list elements of their 'AsIs' status.
@@ -811,7 +911,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   l$cur_data <- ids[[layerData]]
   l$visdat <- setNames(lapply(return_dat, function(x) function(y) x), ids)
-  
+
   l
 }
 

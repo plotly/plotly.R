@@ -18,6 +18,20 @@ is.bare.list <- function(x) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
 
+# kind of like %||%, but only respects user-defined defaults
+# (instead of defaults provided in the build step)
+"%|D|%" <- function(x, y) {
+  if (!is.default(x)) x %||% y else y
+}
+
+is.default <- function(x) {
+  inherits(x, "plotly_default")
+}
+
+default <- function(x) {
+  structure(x, class = "plotly_default")
+}
+
 compact <- function(x) {
   Filter(Negate(is.null), x)
 }
@@ -47,6 +61,8 @@ getLevels <- function(x) {
   if (is.factor(x)) levels(x) else sort(unique(x))
 }
 
+tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
+
 # Don't attempt to do "tidy" data training on these trace types
 is_tidy <- function(trace) {
   type <- trace[["type"]] %||% "scatter"
@@ -72,6 +88,10 @@ traceColorDefaults <- function() {
   c('#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
     '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf')
 }
+
+# column name for crosstalk key
+# TODO: make this more unique?
+crosstalk_key <- function() ".crossTalkKey"
 
 # modifyList turns elements that are data.frames into lists
 # which changes the behavior of toJSON
@@ -167,7 +187,11 @@ verify_attr_names <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    check_attrs(names(thisTrace), c(names(validAttrs), "key"), thisTrace$type)
+    check_attrs(
+      names(thisTrace), 
+      c(names(validAttrs), "key", "set", "highlight", "frame"), 
+      thisTrace$type
+    )
   }
   invisible(p)
 }
@@ -176,10 +200,10 @@ check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
-         paste(illegalAttrs, collapse = "', '"), "'\n", 
-         "Valid attributes include:\n'",
-         paste(validAttrs, collapse = "', '"), "'\n", 
-         call. = FALSE)
+            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            "Valid attributes include:\n'",
+            paste(validAttrs, collapse = "', '"), "'\n", 
+            call. = FALSE)
   }
   invisible(proposedAttrs)
 }
@@ -199,7 +223,12 @@ verify_boxed <- function(p) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
+    # prevent these objects from sending null keys
+    p$x$data[[tr]][["xaxis"]] <- p$x$data[[tr]][["xaxis"]] %||% NULL
+    p$x$data[[tr]][["yaxis"]] <- p$x$data[[tr]][["yaxis"]] %||% NULL
   }
+  p$x$layout$updatemenus
+  
   p
 }
 
@@ -242,7 +271,7 @@ verify_type <- function(trace) {
     attrs <- names(trace)
     attrLengths <- lengths(trace)
     trace$type <- if (all(c("x", "y", "z") %in% attrs)) {
-       if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
+      if (all(c("i", "j", "k") %in% attrs)) "mesh3d" else "scatter3d"
     } else if (all(c("x", "y") %in% attrs)) {
       xNumeric <- !is.discrete(trace[["x"]])
       yNumeric <- !is.discrete(trace[["y"]])
@@ -359,7 +388,7 @@ populate_categorical_axes <- function(p) {
       stop("Can't display both discrete & non-discrete data on same axis")
     }
     if (sum(isDiscrete) == 0) next
-    categories <- lapply(d, function(x) if (is.factor(x)) levels(x) else unique(x))
+    categories <- lapply(d, getLevels)
     categories <- unique(unlist(categories))
     if (any(!vapply(d, is.factor, logical(1)))) categories <- sort(categories)
     p$x$layout[[axisName]]$type <- 
@@ -388,11 +417,27 @@ verify_hovermode <- function(p) {
   }
   types <- unlist(lapply(p$x$data, function(tr) tr$type %||% "scatter"))
   modes <- unlist(lapply(p$x$data, function(tr) tr$mode %||% "lines"))
-  if (any(grepl("markers", modes) & types == "scatter")) {
+  if (any(grepl("markers", modes) & types == "scatter") ||
+      any(c("plotly_hover", "plotly_click") %in% p$x$highlight$on)) {
     p$x$layout$hovermode <- "closest"
   }
   p
 }
+
+verify_dragmode <- function(p) {
+  if (!is.null(p$x$layout$dragmode)) {
+    return(p)
+  }
+  selecty <- has_highlight(p) && "plotly_selected" %in% p$x$highlight$on
+  p$x$layout$dragmode <- if (selecty) "lasso" else "zoom"
+  p
+}
+
+has_highlight <- function(p) {
+  hasKey <- any(vapply(p$x$data, function(x) length(x[["key"]]), integer(1)) > 1)
+  hasKey && !is.null(p[["x"]][["highlight"]])
+}
+
 
 verify_webgl <- function(p) {
   # see toWebGL
@@ -410,6 +455,48 @@ verify_webgl <- function(p) {
   for (i in which(idx)) {
     p$x$data[[i]]$type <- paste0(p$x$data[[i]]$type, "gl")
   }
+  p
+}
+
+verify_showlegend <- function(p) {
+  show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
+  # respect only _user-specified_ defaults 
+  p$x$layout$showlegend <- p$x$layout$showlegend %|D|%
+    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend))
+  p
+}
+
+verify_guides <- function(p) {
+  
+  # since colorbars are implemented as "invisible" traces, prevent a "trivial" legend
+  if (has_colorbar(p) && has_legend(p) && length(p$x$data) <= 2) {
+    p$x$layout$showlegend <- default(FALSE)
+  }
+  
+  isVisibleBar <- function(tr) {
+    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
+  }
+  isBar <- vapply(p$x$data, isVisibleBar, logical(1))
+  nGuides <- sum(isBar) + has_legend(p)
+  
+  if (nGuides > 1) {
+    
+    # place legend at bottom since its scrolly
+    p$x$layout$legend <- modify_list(
+      list(y = 1 - ((nGuides - 1) / nGuides), yanchor = "top"),
+      p$x$layout$legend
+    )
+    
+    idx <- which(isBar)
+    for (i in seq_along(idx)) {
+      p <- colorbar_built(
+        p, which = i, len = 1 / nGuides, y = 1 - ((i - 1) / nGuides), 
+        lenmode = "fraction",  yanchor = "top"
+      )
+    }
+    
+  }
+  
   p
 }
 
@@ -438,7 +525,7 @@ has_legend <- function(p) {
     tr$showlegend %||% TRUE
   }
   any(vapply(p$x$data, showLegend, logical(1))) && 
-    isTRUE(p$x$layout$showlegend %||% TRUE)
+    isTRUE(p$x$layout$showlegend %|D|% TRUE)
 }
 
 has_colorbar <- function(p) {

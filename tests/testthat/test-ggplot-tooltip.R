@@ -116,3 +116,4 @@ test_that("Hoverinfo is only displayed if no tooltip variables are present", {
   expect_equal(sum(nchar(L$data[[1]]$text)), 0)
   expect_true(all(grepl("^label", L$data[[2]]$text)))
 })
+

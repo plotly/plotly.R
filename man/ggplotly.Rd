@@ -26,7 +26,9 @@ colour last.}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
 
-\item{source}{Only relevant for \link{event_data}.}
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
 
 \item{...}{arguments passed onto methods.}
 }
@@ -49,6 +51,23 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
   coord_equal() +
   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 ggplotly(viz, tooltip = c("text", "size"))
+
+
+# highlighting lines
+demo("highlight-ggplotly", package = "plotly")
+
+# client-side linked brushing
+library(crosstalk)
+d <- SharedData$new(mtcars)
+subplot(
+ qplot(data = d, x = mpg, y = wt),
+ qplot(data = d, x = mpg, y = vs)
+)
+
+# client-side linked brushing in a scatterplot matrix
+SharedData$new(iris) \%>\%
+  GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
+  ggplotly(tooltip = c("x", "y", "colour"))
 }
 
 }

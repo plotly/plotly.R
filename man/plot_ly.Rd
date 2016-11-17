@@ -6,10 +6,11 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = 1, symbol, symbols = NULL, size, sizes = c(10, 100), linetype,
-  linetypes = NULL, split, width = NULL, height = NULL, source = "A")
+  linetypes = NULL, split, frame, width = NULL, height = NULL,
+  source = "A")
 }
 \arguments{
-\item{data}{A data frame (optional).}
+\item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
 
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
@@ -53,17 +54,22 @@ Either valid \link{par} (lty) or plotly dash codes may be supplied.}
 value. This replaces the functionality of the (now deprecated)
 \code{group} argument.}
 
+\item{frame}{A formula containing a name or expression. The resulting value 
+is used to split data into frames, and then animated.}
+
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
 
-\item{source}{Only relevant for \link{event_data}.}
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
 }
 \description{
 Transform data into a plotly visualization.
 }
 \details{
-There are a number of "visual properties" that aren't included in the officical 
+There are a number of "visual properties" that aren't included in the official
 Reference section (see below).
 }
 \examples{
@@ -102,6 +108,20 @@ add_markers(p, color = ~Species, colors = "Set1")
 add_markers(p, symbol = ~Species)
 add_paths(p, linetype = ~Species)
 
+# client-side linked brushing
+library(crosstalk)
+sd <- SharedData$new(mtcars)
+subplot(
+  plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
+  plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
+) \%>\% hide_legend() \%>\% highlight(color = "red")
+
+# client-side highlighting
+d <- SharedData$new(txhousing, ~city)
+plot_ly(d, x = ~date, y = ~median, color = I("black")) \%>\%
+  group_by(city) \%>\%
+  add_lines() \%>\% 
+  highlight(on = "plotly_hover", color = "red")
 }
 
 }

@@ -85,7 +85,7 @@ test_that("legend is created with discrete mapping regardless of unique values",
 test_that("can hide legend", {
   info <- expect_traces(hide_legend(p), 1, "hide-legend")
   expect_false(info$layout$showlegend)
-  expect_null(info$layout$annotations)
+  expect_null(info$layout$annotations %||% NULL)
 })
 
 

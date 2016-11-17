@@ -1,15 +1,17 @@
 #' @import ggplot2
-#' @importFrom grDevices col2rgb
+#' @importFrom grDevices col2rgb extendrange
 #' @importFrom graphics layout
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
-#' @importFrom stats setNames complete.cases quantile
-#' @importFrom tidyr gather gather_ unnest
+#' @importFrom stats setNames complete.cases quantile is.leaf
+#' @importFrom tidyr unnest
 #' @importFrom viridisLite viridis
 #' @importFrom jsonlite toJSON fromJSON
 #' @importFrom httr GET POST PATCH content config add_headers stop_for_status
-#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget
+#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
+#' @importFrom htmltools browsable tagList
+#' @importFrom colourpicker colourWidget
 #' @importFrom purrr transpose
 NULL
 
@@ -157,3 +159,17 @@ dplyr::filter
 #' @rdname reexports
 #' @export
 dplyr::filter_
+
+# waiting on https://github.com/tidyverse/tidyr/pull/229
+#
+# #' @importFrom tidyr gather
+# #' @name gather
+# #' @rdname reexports
+# #' @export
+# tidyr::gather
+# 
+# #' @importFrom tidyr gather_
+# #' @name gather_
+# #' @rdname reexports
+# #' @export
+# tidyr::gather_

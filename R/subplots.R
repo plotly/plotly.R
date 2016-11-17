@@ -36,10 +36,9 @@
 #' subplot(p1, p2, p1, p2, nrows = 2, margin = 0.05)
 #' 
 #' # or pass a list
-#' library(purrr)
 #' economics_long %>%
 #'   split(.$variable) %>%
-#'   map(~ plot_ly(., x = ~date, y = ~value)) %>%
+#'   lapply(function(d) plot_ly(d, x = ~date, y = ~value)) %>%
 #'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
 #' # or pass a tibble with a list-column of plotly objects
@@ -54,29 +53,25 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
-  dotz <- list(...)
+ 
   
-  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
-    # if ... is a list (or a tibble), list(...) is a (length 1) list 
-    # containing a list of plotly objects
-    dotz <- dotz[[1]]
-  }
+  plots <- dots2plots(...)
   
-  if (tibble::is_tibble(dotz)) {
-    # if dots is a tibble, search for one column with a list of plotly objects
-    idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
-    if (length(idx) != 1) {
-      stop(
-        "If you supply a tibble to subplot(), \n", 
-        "it must have _one_ column with a list of plotly objects",
+  # some plotly functions call plotly_build()...subplot() doesn't like that
+  for (i in seq_along(plots)) {
+    if (!is.null(plots[[i]][["frames"]])) {
+      warning(
+        sprintf("`subplot()` detected plot #%s was 'pre-built' and already has registered\n", i),
+        "animation frames. This can cause problems and may happen by calling a \n", 
+        "function like `animation_opts()` or `highlight()` (which returns a 'built' plot)\n",
+        "_before_ `subplot()`. Consider using such functions _after_ `subplot()`.",
         call. = FALSE
       )
     }
-    dotz <- dotz[[idx]]
   }
   
-  # build each plot
-  plotz <- lapply(dotz, function(d) plotly_build(d)[["x"]])
+  # build all the plots without registering frames
+  plotz <- lapply(plots, function(d) plotly_build(d, registerFrames = FALSE)[["x"]])
   
   # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,
@@ -86,8 +81,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]
     layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
-    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]]))
-    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]]))
+    xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]] %||% "x"))
+    yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]] %||% "y"))
     missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
     # move to next iteration if trace references are complete
     if (!length(missingAttrs)) next
@@ -239,7 +234,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       ax
     })
   }
-  # start merging the plots into a single subplot
+  
   p <- list(
     data = Reduce(c, traces),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
@@ -264,15 +259,58 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
     layouts <- layouts[which_layout]
   }
-  p$layout <- c(p$layout, Reduce(modify_list, layouts))
-  sources <- unique(unlist(lapply(plots, "[[", "source")))
-  if (length(sources) > 1) {
-    stop("Can have multiple source values in a single subplot")
-  }
-  p$config <- Reduce(modify_list, lapply(plots, "[[", "config")) %||% NULL
-  p$source <- sources[1]
+  p$attrs <- Reduce(c, lapply(plots, "[[", "attrs"))
+  p$layout <- modify_list(p$layout, Reduce(modify_list, layouts))
+  p$source <- ensure_one(plots, "source")
+  p$config <- ensure_one(plots, "config")
+  p$highlight <- ensure_one(plots, "highlight")
   p$subplot <- TRUE
   as_widget(p)
+}
+
+# ----------------------------------------------------------------
+# Functions used solely within subplot()
+# ----------------------------------------------------------------
+
+# take a "collection" of plots and 
+dots2plots <- function(...) {
+  dotz <- list(...)
+  
+  # if ... is a list (or a tibble), list(...) is a (length 1) list 
+  # containing a list of plotly objects
+  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
+    dotz <- dotz[[1]]
+  }
+  
+  if (tibble::is_tibble(dotz)) {
+    # if dots is a tibble, search for one column with a list of plotly objects
+    idx <- which(vapply(dotz, function(x) is.plotly(x[[1]]), logical(1)))
+    if (length(idx) != 1) {
+      stop(
+        "If you supply a tibble to subplot(), \n", 
+        "it must have _one_ column with a list of plotly objects",
+        call. = FALSE
+      )
+    }
+    dotz <- dotz[[idx]]
+  }
+  
+  dotz
+}
+
+
+
+# helper function that warns if more than one plot-level attribute 
+# has been specified in a list of plots (and returning that attribute)
+ensure_one <- function(plots, attr) {
+  attrs <- lapply(plots, "[", attr)
+  for (i in seq_along(attrs)) {
+    if (!identical(attrs[[1]], attrs[[i]])) {
+      warning("Can only have one: ", attr, call. = FALSE)
+      break
+    }
+  }
+  attrs[[length(attrs)]][[1]]
 }
 
 

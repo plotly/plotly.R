@@ -1,3 +1,19 @@
+# 4.5.6.9000
+
+## NEW FEATURES
+
+* Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html>
+* Added the `highlight()` function for configuring selection modes/sequences.
+* Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
+* Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
+* Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
+* Added some basic support for translating the `GeomDotplot` **ggplot2** geom.
+* Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
+
+## CHANGES
+
+* Upgraded to plotly.js v1.20.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.20.0
+
 # 4.5.6
 
 ## NEW FEATURES
