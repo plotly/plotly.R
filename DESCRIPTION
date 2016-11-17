@@ -50,7 +50,6 @@ Suggests:
     knitr,
     devtools,
     shiny (>= 0.14),
-    htmltools,
     curl,
     rmarkdown,
     Rserve,

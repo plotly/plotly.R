@@ -258,7 +258,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' dend1 <- as.dendrogram(hc)
 #' plot_dendro(dend1, height = 600) %>% 
 #'   hide_legend() %>% 
-#'   highlight(off = "plotly_deselect", persistent = T, dynamic = T)
+#'   highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
 #' 
 
 plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {

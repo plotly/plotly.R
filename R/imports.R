@@ -1,8 +1,8 @@
 #' @import ggplot2
-#' @importFrom grDevices col2rgb
+#' @importFrom grDevices col2rgb extendrange
 #' @importFrom graphics layout
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
-#' @importFrom stats setNames complete.cases quantile
+#' @importFrom stats setNames complete.cases quantile is.leaf
 #' @importFrom tidyr unnest
 #' @importFrom viridisLite viridis
 #' @importFrom jsonlite toJSON fromJSON

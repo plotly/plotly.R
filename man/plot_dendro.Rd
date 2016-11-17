@@ -30,7 +30,7 @@ hc <- hclust(dist(USArrests), "ave")
 dend1 <- as.dendrogram(hc)
 plot_dendro(dend1, height = 600) \%>\% 
   hide_legend() \%>\% 
-  highlight(off = "plotly_deselect", persistent = T, dynamic = T)
+  highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
 
 }
 \author{

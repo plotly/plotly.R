@@ -1,4 +1,12 @@
-#' Animation options
+#' Animation configuration options
+#' 
+#' Animations can be created by either using the \code{frame} argument in 
+#' \code{\link{plot_ly}()} or the (unofficial) \code{frame} ggplot2 aesthetic in 
+#' \code{\link{ggplotly}()}. By default, animations populate a play button
+#' and slider component for controlling the state of the animation
+#' (to pause an animation, click on a relevant location on the slider bar). 
+#' Both the play button and slider component transition between frames according 
+#' rules specified by \code{\link{animation_opts}()}. 
 #'
 #' @param p a plotly object.
 #' @param frame The amount of time between frames (in milliseconds).
@@ -17,11 +25,12 @@
 #' all existing frames are animated to completion before the new animation
 #' is started.
 #' @export
+#' @rdname animation
 #' @author Carson Sievert
-#' @seealso \code{\link{animation_slider}()}, \code{\link{animation_button}()}
 #' @examples
 #'
-#'
+#' # for more, see https://cpsievert.github.io/plotly_book/key-frame-animations.html
+#' 
 #' df <- data.frame(
 #'   x = c(1, 2, 2, 1, 1, 2),
 #'   y = c(1, 2, 2, 1, 1, 2),
@@ -30,7 +39,6 @@
 #' plot_ly(df) %>%
 #'   add_markers(x = 1.5, y = 1.5) %>%
 #'   add_markers(x = ~x, y = ~y, frame = ~z)
-#'
 #'
 #' # it's a good idea to remove smooth transitions when there is
 #' # no relationship between objects in each view
@@ -47,8 +55,9 @@
 #' ggplotly(p, width = 1200, height = 900) %>%
 #'   animation_opts(1000)
 #'
-#' # use the ids attribute to ensure object constancy
-#' if (require("gapminder")) {
+#' if (system.file(package = "gapminder") != "") {
+#' 
+#'   # use the ids attribute to ensure object constancy
 #'   p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop,
 #'     color = continent, frame = year, ids = country)) +
 #'     geom_point() +
@@ -95,17 +104,18 @@ animation_opts <- function(p, frame = 500, transition = frame, easing = "linear"
   supply_ani_slider(supply_ani_button(p, opts = opts), opts = opts)
 }
 
-#' Hide or customize the animation button
-#'
-#' @param p a plotly object
-#' @param hide remove the animation slider?
-#' @param ... attributes passed to the sliders object which controls the animation
-#' slider \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
-#' @export
-#' @author Carson Sievert
-#' @seealso \code{\link{animation_opts}()}, \code{\link{animation_button}()}
-#'
 
+#' @inheritParams animation_opts
+#' @param hide remove the animation slider?
+#' @param ... for \code{animation_slider}, attributes are passed to a special
+#' layout.sliders object tied to the animation frames. 
+#' The definition of these attributes may be found here 
+#' \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
+#' For \code{animation_button}, arguments are passed to a special 
+#' layout.updatemenus button object tied to the animation
+#' \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
+#' @export
+#' @rdname animation
 animation_slider <- function(p, hide = FALSE, ...) {
 
   p <- plotly_build(p)
@@ -121,16 +131,10 @@ animation_slider <- function(p, hide = FALSE, ...) {
 
 }
 
-#' Hide or customize the animation button
-#'
-#' @param p a plotly object
-#' @param ... arguments passed to the updatemenus which controls the play
-#' button \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
-#' @export
-#' @author Carson Sievert
-#' @seealso \code{\link{animation_opts}()}, \code{\link{animation_button}()}
-#'
 
+#' @inheritParams animation_slider
+#' @export
+#' @rdname animation
 animation_button <- function(p, ...) {
 
   p <- plotly_build(p)

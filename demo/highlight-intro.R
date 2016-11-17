@@ -1,5 +1,3 @@
-# IDEA: this should maybe go in a chapter/paper titled: "Interactive parallel coordinate plots"
-
 library(plotly)
 library(crosstalk)
 
