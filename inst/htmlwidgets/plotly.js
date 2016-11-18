@@ -301,11 +301,12 @@ function TraceManager(graphDiv, highlight) {
   // The Plotly graph div
   this.gd = graphDiv;
 
-  // Preserve the original data. We'll subset based off of this whenever
-  // filtering is (re)applied.
+  // Preserve the original data.
+  // TODO: try using Lib.extendFlat() as done in  
+  // https://github.com/plotly/plotly.js/pull/1136 
   this.origData = JSON.parse(JSON.stringify(graphDiv.data));
   
-  // to avoid doing this over and over
+  // avoid doing this over and over
   this.origOpacity = [];
   for (var i = 0; i < this.origData.length; i++) {
     this.origOpacity[i] = this.origData[i].opacity || 1;
@@ -323,13 +324,12 @@ TraceManager.prototype.close = function() {
   // TODO: Unhook all event handlers
 };
 
-// TODO: should filters support nested/simple keys?
 TraceManager.prototype.updateFilter = function(group, keys) {
-  // Be sure NOT to modify origData (or trace, which is a reference to
-  // a child of origData).
 
   if (typeof(keys) === "undefined" || keys === null) {
+    
     this.gd.data = JSON.parse(JSON.stringify(this.origData));
+    
   } else {
   
     for (var i = 0; i < this.origData.length; i++) {
@@ -337,10 +337,16 @@ TraceManager.prototype.updateFilter = function(group, keys) {
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      var matches = findMatches(trace.key, keys);
-      // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
-      this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      var matchFunc = getMatchFunc(trace);
+      var matches = matchFunc(trace.key, keys);
+      
+      if (matches.length > 0 && !trace._isSimpleKey) {
+        // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+        this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      }
+      
     }
+    
   }
 
   Plotly.redraw(this.gd);
@@ -372,7 +378,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   
   if (keys === null) {
     
-    // go back to original opacity
     Plotly.restyle(this.gd, {"opacity": this.origOpacity});
     
   } else if (keys.length >= 1) {
@@ -382,11 +387,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // this variable is set in R/highlight.R
     var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
       this.highlight.color[0];
-    
-    // TODO: think about how we could set a mode in the dynamic brush to just highlight 
-    // (i.e., this mode would preserve coloring of existing selections and simply dim opacity)
-    
+
     for (var i = 0; i < this.origData.length; i++) {
+      // TODO: try using Lib.extendFlat() as done in  
+      // https://github.com/plotly/plotly.js/pull/1136 
       var trace = JSON.parse(JSON.stringify(this.gd.data[i]));
       if (!trace.key || trace.set !== group) {
         continue;
