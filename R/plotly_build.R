@@ -348,6 +348,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   }
   
   p <- verify_guides(p)
+  p <- verify_key_type(p)
   
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()

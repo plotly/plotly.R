@@ -307,7 +307,7 @@ plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...
   )
   
   allXY$members <- sapply(allXY$label, length)
-  
+  allTXT$label <- as.character(allTXT$label)
   
   allXY %>% 
     plot_ly(x = ~y, y = ~x, color = I("black"), hoverinfo = "none",
