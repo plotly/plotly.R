@@ -464,7 +464,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             }
             
             var matchFunc = getMatchFunc(frameTrace);
-            var matches = matchFunc(trace.key, keys);
+            var matches = matchFunc(frameTrace.key, keys);
             
             if (matches.length > 0) {
               if (!trace._isSimpleKey) {
