@@ -392,15 +392,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         continue;
       }
       // Get sorted array of matching indices in trace.key
-      var matchFun = (trace._isNestedKey) ? findNestedMatches : (trace._isSimpleKey) ? findSimpleMatches : findMatches;
-      var matches = matchFun(trace.key, keys);
+      var matchFunc = getMatchFunc(trace);
+      var matches = matchFunc(trace.key, keys);
       
       if (matches.length > 0) {
         // If this is a "simple" key, that means select the entire trace
         if (!trace._isSimpleKey) {
           trace = subsetArrayAttrs(trace, matches);
         }
-        trace.uid = undefined;
         trace.opacity = this.origOpacity[i];
         trace.showlegend = this.highlight.showInLegend;
         trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
@@ -427,9 +426,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     
     if (traces.length > 0) {
       
-      this.gd.data = this.gd.data.concat(traces);
-      
-      Plotly.redraw(this.gd).then(function(gd) {
+      Plotly.addTraces(this.gd, traces).then(function(gd) {
         // incrementally add selection traces to frames
         // (this is heavily inspired by Plotly.Plots.modifyFrames() 
         // in src/plots/plots.js)
@@ -461,10 +458,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
-            // Get sorted array of matching indices in trace.key
-            var matches = findNestedMatches(frameTrace.key, keys);
+            
+            var matchFunc = getMatchFunc(frameTrace);
+            var matches = matchFunc(trace.key, keys);
+            
             if (matches.length > 0) {
-              frameTrace = subsetArrayAttrs(frameTrace, matches);
+              if (!trace._isSimpleKey) {
+                frameTrace = subsetArrayAttrs(frameTrace, matches);
+              }
               var d = gd._fullData[newIndices[ctr]];
               if (d.marker) {
                 frameTrace.marker = d.marker;
@@ -522,6 +523,11 @@ findMatches() does the usual thing you'd expect for
 linked brushing on a scatterplot matrix. findSimpleMatches() returns a match iff 
 haystack is a subset of the needleSet. findNestedMatches() returns 
 */
+
+function getMatchFunc(trace) {
+  return (trace._isNestedKey) ? findNestedMatches : 
+    (trace._isSimpleKey) ? findSimpleMatches : findMatches;
+}
 
 // find matches for "flat" keys
 function findMatches(haystack, needleSet) {
