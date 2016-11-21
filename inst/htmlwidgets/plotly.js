@@ -140,94 +140,47 @@ HTMLWidgets.widget({
       });
     } 
     
-    // # Begin Crosstalk support
-    
-    // ## Crosstalk point/key translation functions
-    //
-    // Plotly.js uses curveNumber/pointNumber addressing to refer
-    // to data points (i.e. when plotly_selected is received). We
-    // prefer to let the R user use key-based addressing, where
-    // a string is used that uniquely identifies a data point (we
-    // can also use row numbers in a pinch).
-    //
-    // The pointsToKeys and keysToPoints functions let you convert
-    // between the two schemes.
-    
-    // Combine the name of a set and key into a single string, suitable for
-    // using as a keyCache key.
-    function joinSetAndKey(set, key) {
-      return set + "\n" + key;
-    }
-    
-    // To allow translation from sets+keys to points in O(1) time, we
-    // make a cache that lets us map keys to objects with
-    // {curveNumber, pointNumber} properties.
-    var keyCache = {};
-    for (var curve = 0; curve < x.data.length; curve++) {
-      var curveObj = x.data[curve];
-      if (!curveObj.key || !curveObj.set) {
-        continue;
-      }
-      var key = [];
-      if (typeof(curveObj.key) === "object") {
-        key.push(Object.keys(curveObj.key));
-      } else {
-        key.push(curveObj.key);
-      }
-      for (var pointIdx = 0; pointIdx < key.length; pointIdx++) {
-        keyCache[joinSetAndKey(curveObj.set, key[pointIdx])] =
-          {curveNumber: curve, pointNumber: pointIdx};
-      }
-    }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
-    // return a hash of {[set1]: [key1, key2, ...], [set2]: [key3, key4, ...]}
+    // return a hash of {
+    //   set1: {value: [key1, key2, ...], _isSimpleKey: false}, 
+    //   set2: {value: [key3, key4, ...], _isSimpleKey: false}
+    // }
     function pointsToKeys(points) {
       var keysBySet = {};
       for (var i = 0; i < points.length; i++) {
-        var curveObj = graphDiv.data[points[i].curveNumber];
-        if (!curveObj.key || !curveObj.set) {
-          // If this curve isn't mapped to a set, ignore this point.
+        
+        var trace = graphDiv.data[points[i].curveNumber];
+        if (!trace.key || !trace.set) {
           continue;
         }
-        // Look up the keys
-        var key = curveObj.key[points[i].pointNumber];
-
-        keysBySet[curveObj.set] = keysBySet[curveObj.set] || [];
-        keysBySet[curveObj.set].push(key);
+        
+        // selecting a point of a "simple" trace means: select the 
+        // entire key attached to this trace, which is useful for,
+        // say clicking on a fitted line to select corresponding observations 
+        if (trace._isSimpleKey) {
+          keysBySet[trace.set] = {value: trace.key, _isSimpleKey: true};
+          // TODO: could this be made more efficient by looping at the trace level first?
+          continue;
+        }
+        
+        // set defaults for this key set
+        keysBySet[trace.set] = keysBySet[trace.set] || 
+          {value: [], _isSimpleKey: false};
+        
+        // the key for this point (could be "nested" -- i.e. a 2D array)
+        var key = trace.key[points[i].pointNumber];
+        if (trace._isNestedKey) {
+          // TODO: is this faster than pushing?
+          keysBySet[trace.set].value = keysBySet[trace.set].value.concat(key);
+        } else {
+          keysBySet[trace.set].value.push(key);
+        }
         
       }
       return keysBySet;
     }
     
-    // Given an array of strings, return an object that hierarchically
-    // represents the corresponding curves/points.
-    //
-    // For example, the following data:
-    //
-    // [
-    //   {curveNumber: 0, pointNumber: 1},
-    //   {curveNumber: 0, pointNumber: 2},
-    //   {curveNumber: 2, pointNumber: 1}
-    // ]
-    //
-    // would be returned as:
-    // {
-    //   "0": [1, 2],
-    //   "2": [1]
-    // }
-    function keysToPoints(set, keys) {
-      var curves = {};
-      for (var i = 0; i < keys.length; i++) {
-        var pt = keyCache[joinSetAndKey(set, keys[i])];
-        if (!pt) {
-          throw new Error("Unknown key " + keys[i]);
-        }
-        curves[pt.curveNumber] = curves[pt.curveNumber] || [];
-        curves[pt.curveNumber].push(pt.pointNumber);
-      }
-      return curves;
-    }
     
     x.highlight.color = x.highlight.color || [];
     // make sure highlight color is an array
@@ -258,15 +211,7 @@ HTMLWidgets.widget({
           for (var set in selectedKeys) {
             if (selectedKeys.hasOwnProperty(set)) {
               crosstalk.group(set).var("selection")
-                .set(selectedKeys[set], {sender: el});
-            }
-          }
-          
-          // Any groups that weren't represented in the selection, should be
-          // treated as if zero points were selected.
-          for (var i = 0; i < allSets.length; i++) {
-            if (!selectedKeys[allSets[i]]) {
-              crosstalk.group(allSets[i]).var("selection").set([], {sender: el});
+                .set(selectedKeys[set].value, {sender: el});
             }
           }
           
@@ -356,11 +301,12 @@ function TraceManager(graphDiv, highlight) {
   // The Plotly graph div
   this.gd = graphDiv;
 
-  // Preserve the original data. We'll subset based off of this whenever
-  // filtering is (re)applied.
+  // Preserve the original data.
+  // TODO: try using Lib.extendFlat() as done in  
+  // https://github.com/plotly/plotly.js/pull/1136 
   this.origData = JSON.parse(JSON.stringify(graphDiv.data));
   
-  // to avoid doing this over and over
+  // avoid doing this over and over
   this.origOpacity = [];
   for (var i = 0; i < this.origData.length; i++) {
     this.origOpacity[i] = this.origData[i].opacity || 1;
@@ -379,11 +325,11 @@ TraceManager.prototype.close = function() {
 };
 
 TraceManager.prototype.updateFilter = function(group, keys) {
-  // Be sure NOT to modify origData (or trace, which is a reference to
-  // a child of origData).
 
   if (typeof(keys) === "undefined" || keys === null) {
+    
     this.gd.data = JSON.parse(JSON.stringify(this.origData));
+    
   } else {
   
     for (var i = 0; i < this.origData.length; i++) {
@@ -391,10 +337,16 @@ TraceManager.prototype.updateFilter = function(group, keys) {
       if (!trace.key || trace.set !== group) {
         continue;
       }
-      var matches = findNestedMatches(trace.key, keys);
-      // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
-      this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      var matchFunc = getMatchFunc(trace);
+      var matches = matchFunc(trace.key, keys);
+      
+      if (matches.length > 0 && !trace._isSimpleKey) {
+        // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+        this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      }
+      
     }
+    
   }
 
   Plotly.redraw(this.gd);
@@ -426,7 +378,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   
   if (keys === null) {
     
-    // go back to original opacity
     Plotly.restyle(this.gd, {"opacity": this.origOpacity});
     
   } else if (keys.length >= 1) {
@@ -436,31 +387,28 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // this variable is set in R/highlight.R
     var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
       this.highlight.color[0];
-    
-    // TODO: think about how we could set a mode in the dynamic brush to just highlight 
-    // (i.e., this mode would preserve coloring of existing selections and simply dim opacity)
-    var isTransparent = selectionColour === "transparent";
-    if (isTransparent) {
-      selectionColour = null;
-    }
-    
-    
+
     for (var i = 0; i < this.origData.length; i++) {
-      var trace = this.gd.data[i];
+      // TODO: try using Lib.extendFlat() as done in  
+      // https://github.com/plotly/plotly.js/pull/1136 
+      var trace = JSON.parse(JSON.stringify(this.gd.data[i]));
       if (!trace.key || trace.set !== group) {
         continue;
       }
       // Get sorted array of matching indices in trace.key
-      var matches = findNestedMatches(trace.key, keys);
+      var matchFunc = getMatchFunc(trace);
+      var matches = matchFunc(trace.key, keys);
+      
       if (matches.length > 0) {
-        trace = subsetArrayAttrs(trace, matches);
+        // If this is a "simple" key, that means select the entire trace
+        if (!trace._isSimpleKey) {
+          trace = subsetArrayAttrs(trace, matches);
+        }
         trace.opacity = this.origOpacity[i];
         trace.showlegend = this.highlight.showInLegend;
         trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
         trace.name = "selected";
-        // inherit marker/line attributes from the existing trace
-        var idx = (isTransparent) ? trace._newIndex || i : i
-        var d = this.gd._fullData[idx];
+        var d = this.gd._fullData[i];
         if (d.marker) {
           trace.marker = d.marker;
           trace.marker.color =  selectionColour || trace.marker.color;
@@ -476,34 +424,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         // keep track of mapping between this new trace and the trace it targets
         trace._originalIndex = i;
         trace._newIndex = this.gd._fullData.length + traces.length;
-        //this.gd.data[i]._newIndex = this.gd._fullData.length + traces.length;
         traces.push(trace);
       }
     }
     
     if (traces.length > 0) {
-      
-      // dim original traces that have a set matching the set of selection sets
-      var sets = Object.keys(this.groupSelections);
-      // transparent selections also allow for dimming of selection sets
-      var n = isTransparent ? this.gd.data.length : this.origData.length;
-      for (var i = 0; i < n; i++) {
-        var opacity = this.origOpacity[i] || 1;
-        // have we already dimmed this trace?
-        //if (opacity !== this.gd._fullData[i].opacity && selectionColour !== "transparent") {
-        //  continue;
-        //}
-        // is this worth doing?
-        if (this.highlight.opacityDim === 1) {
-          continue;
-        }
-        var matches = findNestedMatches(sets, [this.gd.data[i].set]);
-        if (matches.length) {
-          Plotly.restyle(this.gd, {"opacity": opacity * this.highlight.opacityDim}, i);
-        }
-      }
-      
-      var nCurrentTraces = this.gd._fullData.length;
       
       Plotly.addTraces(this.gd, traces).then(function(gd) {
         // incrementally add selection traces to frames
@@ -537,10 +462,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
             if (!frameTrace.key || frameTrace.set !== group) {
               continue;
             }
-            // Get sorted array of matching indices in trace.key
-            var matches = findNestedMatches(frameTrace.key, keys);
+            
+            var matchFunc = getMatchFunc(frameTrace);
+            var matches = matchFunc(frameTrace.key, keys);
+            
             if (matches.length > 0) {
-              frameTrace = subsetArrayAttrs(frameTrace, matches);
+              if (!trace._isSimpleKey) {
+                frameTrace = subsetArrayAttrs(frameTrace, matches);
+              }
               var d = gd._fullData[newIndices[ctr]];
               if (d.marker) {
                 frameTrace.marker = d.marker;
@@ -562,49 +491,79 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       
       });
       
+      // dim traces that have a set matching the set of selection sets
+      var tracesToDim = [],
+          opacities = [],
+          sets = Object.keys(this.groupSelections),
+          n = this.origData.length;
+          
+      for (var i = 0; i < n; i++) {
+        var opacity = this.origOpacity[i] || 1;
+        // have we already dimmed this trace? Or is this even worth doing?
+        if (opacity !== this.gd._fullData[i].opacity || this.highlight.opacityDim === 1) {
+          continue;
+        }
+        // is this set an element of the set of selection sets?
+        var matches = findMatches(sets, [this.gd.data[i].set]);
+        if (matches.length) {
+          tracesToDim.push(i);
+          opacities.push(opacity * this.highlight.opacityDim);
+        }
+      }
+      
+      if (tracesToDim.length > 0) {
+        Plotly.restyle(this.gd, {"opacity": opacities}, tracesToDim);
+      }
+      
     }
     
   }
 };
 
+/* 
+Note: in all of these match functions, we assume needleSet (i.e. the selected keys)
+is a 1D (or flat) array. The real difference is the meaning of haystack.
+findMatches() does the usual thing you'd expect for 
+linked brushing on a scatterplot matrix. findSimpleMatches() returns a match iff 
+haystack is a subset of the needleSet. findNestedMatches() returns 
+*/
 
-// find matches for nested keys
+function getMatchFunc(trace) {
+  return (trace._isNestedKey) ? findNestedMatches : 
+    (trace._isSimpleKey) ? findSimpleMatches : findMatches;
+}
+
+// find matches for "flat" keys
+function findMatches(haystack, needleSet) {
+  var matches = [];
+  haystack.forEach(function(obj, i) {
+    if (obj === null || needleSet.indexOf(obj) >= 0) {
+      matches.push(i);
+    }
+  });
+  return matches;
+}
+
+// find matches for "simple" keys
+function findSimpleMatches(haystack, needleSet) {
+  var match = haystack.every(function(val) {
+    return val === null || needleSet.indexOf(val) >= 0;
+  });
+  // yes, this doesn't make much sense other than conforming 
+  // to the output type of the other match functions
+  return (match) ? [0] : []
+}
+
+// find matches for a "nested" haystack (2D arrays)
 function findNestedMatches(haystack, needleSet) {
-  
-  // ensure haystack is an array of an arrays
-  if (!Array.isArray(haystack)) {  
-    haystack = [haystack];
-  }
-  for (var i = 0; i < haystack.length; i++) {
-    if (!Array.isArray(haystack[i])) {
-      haystack[i] = [haystack[i]];
-    }
-  }
-  // ensure needleSet is an array of an arrays
-  if (!Array.isArray(needleSet)) {  
-    needleSet = [needleSet]; 
-  }
-  for (var i = 0; i < needleSet.length; i++) {
-    if (!Array.isArray(needleSet[i])) {
-      needleSet[i] = [needleSet[i]];
-    }
-  }
-  
-  // return a match if a haystack array is a superset of a needleset array
   var matches = [];
   for (var i = 0; i < haystack.length; i++) {
     var hay = haystack[i];
-    for (var j = 0; j < needleSet.length; j++) {
-      // have we already found a match?
-      if (matches.indexOf(i) >= 0) {
-        continue;
-      }
-      var match = hay.every(function(val) { 
-        return val === null || needleSet[j].indexOf(val) >= 0; 
-      });
-      if (match) {
-        matches.push(i);
-      }
+    var match = hay.every(function(val) { 
+      return val === null || needleSet.indexOf(val) >= 0; 
+    });
+    if (match) {
+      matches.push(i);
     }
   }
   return matches;
@@ -656,3 +615,70 @@ function removeBrush(el) {
     outlines[i].remove();
   }
 }
+
+/* Currently not used
+
+// Given an array of strings, return an object that hierarchically
+// represents the corresponding curves/points.
+//
+// For example, the following data:
+//
+// [
+//   {curveNumber: 0, pointNumber: 1},
+//   {curveNumber: 0, pointNumber: 2},
+//   {curveNumber: 2, pointNumber: 1}
+// ]
+//
+// would be returned as:
+// {
+//   "0": [1, 2],
+//   "2": [1]
+// }
+
+// # Begin Crosstalk support
+    
+// ## Crosstalk point/key translation functions
+//
+// Plotly.js uses curveNumber/pointNumber addressing to refer
+// to data points (i.e. when plotly_selected is received). We
+// prefer to let the R user use key-based addressing, where
+// a string is used that uniquely identifies a data point (we
+// can also use row numbers in a pinch).
+//
+// The pointsToKeys and keysToPoints functions let you convert
+// between the two schemes.
+
+// Combine the name of a set and key into a single string, suitable for
+// using as a keyCache key.
+function joinSetAndKey(set, key) {
+  return set + "\n" + key;
+}
+
+// To allow translation from sets+keys to points in O(1) time, we
+// make a cache that lets us map keys to objects with
+// {curveNumber, pointNumber} properties.
+var keyCache = {};
+for (var i = 0; i < x.data.length; i++) {
+  var trace = x.data[i];
+  if (!trace.key || !trace.set) {
+    continue;
+  }
+  for (var j = 0; j < trace.key.length; j++) {
+    var nm = joinSetAndKey(trace.set, trace.key[j]);
+    keyCache[nm] = {curveNumber: i, pointNumber: j};
+  }
+}
+
+function keysToPoints(set, keys) {
+  var curves = {};
+  for (var i = 0; i < keys.length; i++) {
+    var pt = keyCache[joinSetAndKey(set, keys[i])];
+    if (!pt) {
+      throw new Error("Unknown key " + keys[i]);
+    }
+    curves[pt.curveNumber] = curves[pt.curveNumber] || [];
+    curves[pt.curveNumber].push(pt.pointNumber);
+  }
+  return curves;
+}
+*/

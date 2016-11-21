@@ -25,6 +25,6 @@ p <- ggplot(sd, aes(x = gameno, y = cumpts)) +
   xlab("Game in Season") + ylab("Cumulative Points") 
 
 gg <- ggplotly(p, tooltip = "colour")
-# TODO: why is this crashing?
-highlight(gg, "plotly_click")
+
+highlight(gg, "plotly_click", opacityDim = 0.05)
 
