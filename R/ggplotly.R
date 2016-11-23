@@ -261,8 +261,10 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
     d
   })
+
   data <- layout$map_position(data)
   
+
   # build a mapping between group and key
   # if there are multiple keys within a group, the key is a list-column
   reComputeGroup <- function(x, layer = NULL) {
@@ -861,8 +863,17 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   
   gglayout$width <- width
   gglayout$height <- height
-  
-  # we're now done with converting units, turn off the device,
+
+
+  ## If scales are top or right, move them
+  x_scale <- scales$get_scales("x")
+  if (!is.null(x_scale) && !is.null(x_scale$position) && x_scale$position == "top") 
+    gglayout$xaxis$side <- "top"
+  y_scale <- scales$get_scales("y")
+  if (!is.null(y_scale) && !is.null(y_scale$position) && y_scale$position == "right") 
+    gglayout$yaxis$side <- "right"
+
+  #we're now done with converting units, turn off the device,
   # and remove the temporary file
   grDevices::dev.off()
   unlink(tmpPlotFile)
