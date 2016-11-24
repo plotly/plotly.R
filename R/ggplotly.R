@@ -866,11 +866,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
 
 
   ## If scales are top or right, move them
-  x_scale <- scales$get_scales("x")
-  if (!is.null(x_scale) && !is.null(x_scale$position) && x_scale$position == "top") 
+  if (!is.null(scale_x()) && !is.null(scale_x()$position) && scale_x()$position == "top") 
     gglayout$xaxis$side <- "top"
-  y_scale <- scales$get_scales("y")
-  if (!is.null(y_scale) && !is.null(y_scale$position) && y_scale$position == "right") 
+  if (!is.null(scale_y()) && !is.null(scale_y()$position) && scale_y()$position == "right") 
     gglayout$yaxis$side <- "right"
 
   #we're now done with converting units, turn off the device,
