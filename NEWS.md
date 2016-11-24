@@ -12,7 +12,7 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.20.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.20.0
+* Upgraded to plotly.js v1.20.5 -- https://github.com/plotly/plotly.js/releases/tag/v1.20.5
 
 # 4.5.6
 
