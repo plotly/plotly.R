@@ -528,7 +528,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
-      
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- layout$panel_ranges[[i]]
@@ -550,6 +549,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         tickmode = "array",
         range = rng[[paste0(xy, ".range")]],
         ticktext = rng[[paste0(xy, ".labels")]],
+        side = scales$get_scales(xy)$position,
         # TODO: implement minor grid lines with another axis object
         # and _always_ hide ticks/text?
         tickvals = rng[[paste0(xy, ".major")]],
@@ -860,16 +860,9 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
-  
+
   gglayout$width <- width
   gglayout$height <- height
-
-
-  ## If scales are top or right, move them
-  if (!is.null(scale_x()) && !is.null(scale_x()$position) && scale_x()$position == "top") 
-    gglayout$xaxis$side <- "top"
-  if (!is.null(scale_y()) && !is.null(scale_y()$position) && scale_y()$position == "right") 
-    gglayout$yaxis$side <- "right"
 
   #we're now done with converting units, turn off the device,
   # and remove the temporary file
