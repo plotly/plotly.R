@@ -19,7 +19,7 @@ p <- ggplot(mtcars, aes(x=mpg, y=wt)) +
 
 
 test_that("Axis positions move to top and right", {
-  info <- save_outputs(p, "axis_position")
+  info <- save_outputs(p, "axis_move")
   expect_equal(length(info$data), 1)
   expect_identical(info$layout$xaxis$side, "top")
   expect_identical(info$layout$yaxis$side, "right")
@@ -31,7 +31,7 @@ p <- ggplot(mtcars, aes(x=mpg, y=wt)) +
 	geom_point()
 
 test_that("Axis positions stay at bottom and left", {
-  info <- save_outputs(p, "axis_position")
+  info <- save_outputs(p, "axis_stay")
   expect_equal(length(info$data), 1)
   expect_identical(info$layout$xaxis$side, "bottom")
   expect_identical(info$layout$yaxis$side, "left")
