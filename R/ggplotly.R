@@ -543,13 +543,16 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
       if (is_blank(axisTitle)) axisTitleText <- ""
       # https://plot.ly/r/reference/#layout-xaxis
+
+      default_axis <- switch(xy, "x" = "bottom", "y" = "left")
+
       axisObj <- list(
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
         range = rng[[paste0(xy, ".range")]],
         ticktext = rng[[paste0(xy, ".labels")]],
-        side = scales$get_scales(xy)$position,
+        side = scales$get_scales(xy)$position %||% default_axis,
         # TODO: implement minor grid lines with another axis object
         # and _always_ hide ticks/text?
         tickvals = rng[[paste0(xy, ".major")]],
