@@ -25,3 +25,15 @@ test_that("Axis positions move to top and right", {
   expect_identical(info$layout$yaxis$side, "right")
   expect_traces(p, 1, "traces")
 })
+
+
+p <- ggplot(mtcars, aes(x=mpg, y=wt)) + 
+	geom_point()
+
+test_that("Axis positions stay at bottom and left", {
+  info <- save_outputs(p, "axis_position")
+  expect_equal(length(info$data), 1)
+  expect_identical(info$layout$xaxis$side, "bottom")
+  expect_identical(info$layout$yaxis$side, "left")
+  expect_traces(p, 1, "traces")
+})
