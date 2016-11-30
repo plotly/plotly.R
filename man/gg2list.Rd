@@ -4,8 +4,9 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL, tooltip = "all", layerData = 1,
-  originalData = TRUE, source = "A", ...)
+gg2list(p, width = NULL, height = NULL, tooltip = "all",
+  dynamicTicks = FALSE, layerData = 1, originalData = TRUE,
+  source = "A", ...)
 }
 \arguments{
 \item{p}{ggplot2 plot.}
@@ -17,6 +18,11 @@ gg2list(p, width = NULL, height = NULL, tooltip = "all", layerData = 1,
 \item{tooltip}{a character vector specifying which aesthetic tooltips to show in the
 tooltip. The default, "all", means show all the aesthetic tooltips
 (including the unofficial "text" aesthetic).}
+
+\item{dynamicTicks}{should plotly.js dynamically generate axis tick labels? 
+Dynamic ticks are useful for updating ticks in response to zoom/pan
+interactions; however, they can not always reproduce labels as they 
+would appear in the static ggplot2 image.}
 
 \item{layerData}{data from which layer should be returned?}
 

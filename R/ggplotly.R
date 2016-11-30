@@ -12,6 +12,10 @@
 #' also control the order they appear. For example, use
 #' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
 #' colour last.
+#' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
+#' Dynamic ticks are useful for updating ticks in response to zoom/pan
+#' interactions; however, they can not always reproduce labels as they 
+#' would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
@@ -53,22 +57,22 @@
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                     tooltip = "all", layerData = 1, originalData = TRUE, 
-                     source = "A", ...) {
+                     tooltip = "all", dynamicTicks = FALSE, 
+                     layerData = 1, originalData = TRUE, source = "A", ...) {
   UseMethod("ggplotly", p)
 }
 
 #' @export
 ggplotly.plotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
-                            tooltip = "all", layerData = 1,
-                            originalData = TRUE, source = "A", ...) {
+                            tooltip = "all", dynamicTicks = FALSE, 
+                            layerData = 1, originalData = TRUE, source = "A", ...) {
   p
 }
 
 #' @export
 ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
-                              height = NULL, tooltip = "all", layerData = 1,
-                              originalData = TRUE, source = "A", ...) {
+                              height = NULL, tooltip = "all", dynamicTicks = FALSE, 
+                              layerData = 1, originalData = TRUE, source = "A", ...) {
   dots <- list(...)
   # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
   if (!crosstalk_key() %in% names(p$data)) {
@@ -93,8 +97,8 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
       }
       columnList <- c(
         columnList, list(ggplotly(
-          thisPlot, tooltip = tooltip, layerData = layerData,
-          originalData = originalData, source = source
+          thisPlot, tooltip = tooltip, dynamicTicks = dynamicTicks, 
+          layerData = layerData, originalData = originalData, source = source
         ))
       )
     }
@@ -124,11 +128,11 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 
 #' @export
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
-                            height = NULL, tooltip = "all", layerData = 1,
-                            originalData = TRUE, source = "A", ...) {
+                            height = NULL, tooltip = "all", dynamicTicks = FALSE,  
+                            layerData = 1, originalData = TRUE, source = "A", ...) {
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
-               layerData = layerData, originalData = originalData, 
-               source = source, ...)
+               dynamicTicks = dynamicTicks, layerData = layerData, 
+               originalData = originalData, source = source, ...)
   config(as_widget(l))
 }
 
@@ -139,6 +143,10 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
+#' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
+#' Dynamic ticks are useful for updating ticks in response to zoom/pan
+#' interactions; however, they can not always reproduce labels as they 
+#' would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
@@ -147,7 +155,8 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
 #' @export
-gg2list <- function(p, width = NULL, height = NULL, tooltip = "all", 
+gg2list <- function(p, width = NULL, height = NULL, 
+                    tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
@@ -277,7 +286,7 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }
     x
   }
-  #browser()
+  
   nestedKeys <- Map(function(x, y, z) { 
     key <- y[[crosstalk_key()]]
     if (is.null(key) || inherits(z[["stat"]], "StatIdentity")) return(NULL)
@@ -583,6 +592,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
+      
+      # clear out tickvals/ticktext if dynamic ticks are requested
+      if (dynamicTicks) {
+        axisObj[c("tickvals", "ticktext")] <- NULL
+      }
+      
       # attach axis object to the layout
       gglayout[[axisName]] <- axisObj
       
