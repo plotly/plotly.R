@@ -266,9 +266,9 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
                   y = ifelse(ymin == -Inf, layout$x_min, ymin), others),
             cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
                   y = ifelse(ymax == Inf, layout$x_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$y_max, xmax),
+            cbind(x = ifelse(xmax == Inf, layout$y_max, xmax),
                   y = ifelse(ymax == Inf, layout$x_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$y_max, xmax),
+            cbind(x = ifelse(xmax == Inf, layout$y_max, xmax),
                   y = ifelse(ymin == -Inf, layout$x_min, ymin), others))
     })
   } else {
@@ -277,9 +277,9 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
                   y = ifelse(ymin == -Inf, layout$y_min, ymin), others),
             cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
                   y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+            cbind(x = ifelse(xmax == Inf, layout$x_max, xmax),
                   y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+            cbind(x = ifelse(xmax == Inf, layout$x_max, xmax),
                   y = ifelse(ymin == -Inf, layout$y_min, ymin), others))
     })
   }
