@@ -627,20 +627,20 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
   text <- as.character(data[["label"]])
+  text <- ifelse(
+    grepl("bold", text),
+    paste0("<b>", text, "</b>"),
+    text
+  )
+  text <- ifelse(
+    grepl("italic", text),
+    paste0("<i>", text, "</i>"),
+    text
+  )
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    text = ifelse(
-      grepl("bold", data[["fontface"]]),
-      paste0("<b>",
-             ifelse(
-               grepl("italic", data[["fontface"]]),
-               paste0("<i>", text, "</i>"),
-               text
-             ),
-             "</b>"),
-      text
-    ),
+    text = text,
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
