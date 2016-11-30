@@ -260,18 +260,7 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
           cbind(x = xmax, y = ymax, others),
           cbind(x = xmax, y = ymin, others))
   })
-  if (layout$xanchor == "x") {
-    dat <- with(data, {
-      rbind(cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
-                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others),
-            cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
-                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
-                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
-                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others))
-    })
-  } else {
+  if (inherits(p$coordinates, "CoordFlip")) {
     dat <- with(data, {
       rbind(cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
                   y = ifelse(ymin == -Inf, layout$x_min, ymin), others),
@@ -281,6 +270,17 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
                   y = ifelse(ymax == Inf, layout$x_max, ymax), others),
             cbind(x = ifelse(xmax == -Inf, layout$y_max, xmax),
                   y = ifelse(ymin == -Inf, layout$x_min, ymin), others))
+    })
+  } else {
+    dat <- with(data, {
+      rbind(cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
+                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others),
+            cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
+                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others))
     })
   }
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
