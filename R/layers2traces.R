@@ -72,7 +72,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # draw legends only for discrete scales
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
-    if (sc$is_discrete()) {
+    if (sc$is_discrete() && sc$guide != "none") {
       discreteScales[[sc$aesthetics]] <- sc
     }
   }

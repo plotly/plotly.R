@@ -702,7 +702,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   )
   
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
-  npscales$scales <- Filter(function(x) x$guide != "none", npscales$scales)
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
   } else {
