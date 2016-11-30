@@ -254,35 +254,27 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
-  dat <- with(data, {
-    rbind(cbind(x = xmin, y = ymin, others),
-          cbind(x = xmin, y = ymax, others),
-          cbind(x = xmax, y = ymax, others),
-          cbind(x = xmax, y = ymin, others))
-  })
   if (inherits(p$coordinates, "CoordFlip")) {
-    dat <- with(data, {
-      rbind(cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
-                  y = ifelse(ymin == -Inf, layout$x_min, ymin), others),
-            cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
-                  y = ifelse(ymax == Inf, layout$x_max, ymax), others),
-            cbind(x = ifelse(xmax == Inf, layout$y_max, xmax),
-                  y = ifelse(ymax == Inf, layout$x_max, ymax), others),
-            cbind(x = ifelse(xmax == Inf, layout$y_max, xmax),
-                  y = ifelse(ymin == -Inf, layout$x_min, ymin), others))
-    })
+    x_min <- layout$y_min
+    x_max <- layout$y_max
+    y_min <- layout$x_min
+    y_max <- layout$x_max
   } else {
-    dat <- with(data, {
-      rbind(cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
-                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others),
-            cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
-                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == Inf, layout$x_max, xmax),
-                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
-            cbind(x = ifelse(xmax == Inf, layout$x_max, xmax),
-                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others))
-    })
+    x_min <- layout$x_min
+    x_max <- layout$x_max
+    y_min <- layout$y_min
+    y_max <- layout$y_max
   }
+  dat <- with(data, {
+    rbind(cbind(x = ifelse(xmin == -Inf, x_min, xmin),
+                y = ifelse(ymin == -Inf, y_min, ymin), others),
+          cbind(x = ifelse(xmin == -Inf, x_min, xmin),
+                y = ifelse(ymax == Inf, y_max, ymax), others),
+          cbind(x = ifelse(xmax == Inf, x_max, xmax),
+                y = ifelse(ymax == Inf, y_max, ymax), others),
+          cbind(x = ifelse(xmax == Inf, x_max, xmax),
+                y = ifelse(ymin == -Inf, y_min, ymin), others))
+  })
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
