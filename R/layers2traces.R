@@ -260,6 +260,29 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
           cbind(x = xmax, y = ymax, others),
           cbind(x = xmax, y = ymin, others))
   })
+  if (layout$xanchor == "x") {
+    dat <- with(data, {
+      rbind(cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
+                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others),
+            cbind(x = ifelse(xmin == -Inf, layout$x_min, xmin),
+                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+                  y = ifelse(ymax == Inf, layout$y_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$x_max, xmax),
+                  y = ifelse(ymin == -Inf, layout$y_min, ymin), others))
+    })
+  } else {
+    dat <- with(data, {
+      rbind(cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
+                  y = ifelse(ymin == -Inf, layout$x_min, ymin), others),
+            cbind(x = ifelse(xmin == -Inf, layout$y_min, xmin),
+                  y = ifelse(ymax == Inf, layout$x_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$y_max, xmax),
+                  y = ifelse(ymax == Inf, layout$x_max, ymax), others),
+            cbind(x = ifelse(xmax == -Inf, layout$y_max, xmax),
+                  y = ifelse(ymin == -Inf, layout$x_min, ymin), others))
+    })
+  }
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
@@ -603,10 +626,21 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
+  text <- as.character(data[["label"]])
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data[["label"]],
+    text = ifelse(
+      grepl("bold", data[["fontface"]]),
+      paste0("<b>",
+             ifelse(
+               grepl("italic", data[["fontface"]]),
+               paste0("<i>", text, "</i>"),
+               text
+             ),
+             "</b>"),
+      text
+    ),
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
@@ -616,6 +650,14 @@ geom2trace.GeomText <- function(data, params, p) {
       color = toRGB(
         aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
+      )
+    ),
+    textposition = paste0(
+      ifelse(data[["vjust"]] < 0.5, "top ",
+             ifelse(data[["vjust"]] > 0.5, "bottom ", "")
+      ),
+      ifelse(data[["hjust"]] < 0.5, "right ",
+             ifelse(data[["vjust"]] > 0.5, "left ", "center")
       )
     ),
     type = "scatter",
