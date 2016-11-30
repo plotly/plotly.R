@@ -72,7 +72,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # draw legends only for discrete scales
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
-    if (sc$is_discrete() && sc$guide != "none") {
+    if (sc$is_discrete()) {
       discreteScales[[sc$aesthetics]] <- sc
     }
   }
@@ -100,6 +100,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     d <- datz[[i]]
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    show_legend <- paste0(names(Filter(function(x) x$guide != "none", discreteScales)), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
     split_by <- c(split_legend, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
@@ -120,7 +121,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     trs <- Map(function(x, y) { x$set <- attr(y, "set"); x}, trs, dl)
     # if we need a legend, set name/legendgroup/showlegend
     # note: this allows us to control multiple traces from one legend entry
-    if (any(split_legend %in% names(d))) {
+    if (any(show_legend %in% names(d))) {
       nms <- strsplit(names(trs), separator, fixed = TRUE)
       nms <- vapply(nms, function(x) {
         y <- unique(x[seq_along(split_legend)])
