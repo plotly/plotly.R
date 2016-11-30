@@ -656,8 +656,8 @@ geom2trace.GeomText <- function(data, params, p) {
       ifelse(data[["vjust"]] < 0.5, "top ",
              ifelse(data[["vjust"]] > 0.5, "bottom ", "")
       ),
-      ifelse(data[["hjust"]] < 0.5, "right ",
-             ifelse(data[["vjust"]] > 0.5, "left ", "center")
+      ifelse(data[["hjust"]] < 0.5, "right",
+             ifelse(data[["vjust"]] > 0.5, "left", "center")
       )
     ),
     type = "scatter",
