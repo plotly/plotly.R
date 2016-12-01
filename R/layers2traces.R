@@ -148,7 +148,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
     }
     # also need to set `layout.legend.traceorder='reversed'`
-    if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
+    if (inherits(d, "GeomBar")) {
       trs <- rev(trs)
     }
     trace.list <- c(trace.list, trs)
@@ -173,6 +173,11 @@ layers2traces <- function(data, prestats_data, layout, p) {
 #' @export
 to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
+}
+
+#' @export
+to_basic.GeomCol <- function(data, prestats_data, layout, params, p, ...) {
+  prefix_class(data, "GeomBar")
 }
 
 #' @export
