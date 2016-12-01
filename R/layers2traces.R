@@ -63,6 +63,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
         forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
         error = function(e) ""
       )
+      # put the height of the bar in the tooltip
+      if (inherits(x, "GeomBar") && identical(aesName, "y")) {
+        suffix <- x[["ymax"]] - x[["ymin"]]
+      }
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
     x$hovertext <- x$hovertext %||% ""
