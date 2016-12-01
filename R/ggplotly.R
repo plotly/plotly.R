@@ -789,21 +789,23 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # geom_bar() hacks
   geoms <- sapply(layers, ggtype, "geom")
-  if (any(idx <- geoms %in% "bar")) {
+  if (any(idx <- geoms %in% c("bar", "col"))) {
+    # traces were reversed in layers2traces()
+    gglayout$legend$traceorder <- "reversed"
     # since `layout.barmode` is plot-specific, we can't support multiple bar
     # geoms with different positions
     positions <- sapply(layers, ggtype, "position")
-    position <- unique(positions[geoms %in% "bar"])
+    position <- unique(positions[idx])
     if (length(position) > 1) {
       warning("plotly doesn't support multiple positions\n",
               "across geom_bar() layers", call. = FALSE)
       position <- position[1]
     }
     # hacks for position_identity()
-    if (position == "identity") {
+    if ("identity" %in% position) {
       gglayout$barmode <- "overlay"
-      gglayout$legend$traceorder <- "reversed"
     } else {
+      # yes, this should work even for position_dodge()
       gglayout$barmode <- "stack"
     }
     # note: ggplot2 doesn't flip x/y scales when the coord is flipped
