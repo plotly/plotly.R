@@ -152,10 +152,11 @@ create_ani_button <- function(opts) {
     yanchor = 'top',
     xanchor = 'right',
     pad = list(t = 60, r = 5),
+    # https://github.com/plotly/plotly.js/issues/1221#issuecomment-264870980
     buttons = list(list(
       label = 'Play',
       method = 'animate',
-      args = list(list(), modify_list(list(fromcurrent = TRUE, mode = "immediate"), opts))
+      args = list(NULL, modify_list(list(fromcurrent = TRUE, mode = "immediate"), opts))
     ))
   )
   structure(button, class = "aniButton")

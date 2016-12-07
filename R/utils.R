@@ -438,19 +438,25 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
-    p$x$data[[i]]$`_isNestedKey` <- !lazyeval::is_atomic(k)
     uk <- unique(k)
     if (length(uk) == 1) {
       # i.e., the key for this trace has one value. In this case, 
       # we don't have iterate through the entire key, so instead, 
       # we provide a flag to inform client side logic to match the _entire_
       # trace if this one key value is a match
-      p$x$data[[i]]$key <- I(uk[[1]])
+      p$x$data[[i]]$key <- uk[[1]]
       p$x$data[[i]]$`_isSimpleKey` <- TRUE
       p$x$data[[i]]$`_isNestedKey` <- FALSE
     }
-    # ensure keys are always passed to the client as an array
-    p$x$data[[i]]$key <- setNames(p$x$data[[i]]$key, NULL)
+    p$x$data[[i]]$`_isNestedKey` <- !lazyeval::is_atomic(k)
+    # key values should always be strings
+    if (p$x$data[[i]]$`_isNestedKey`) {
+      p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, as.character)
+    } else {
+      p$x$data[[i]]$key <- as.character(p$x$data[[i]]$key)
+    }
+    # keys should always be an array
+    p$x$data[[i]]$key <- I(p$x$data[[i]]$key)
   }
   p 
 }
