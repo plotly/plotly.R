@@ -448,7 +448,7 @@ verify_key_type <- function(p) {
       p$x$data[[i]]$`_isSimpleKey` <- TRUE
       p$x$data[[i]]$`_isNestedKey` <- FALSE
     }
-    p$x$data[[i]]$`_isNestedKey` <- !lazyeval::is_atomic(k)
+    p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !lazyeval::is_atomic(k)
     # key values should always be strings
     if (p$x$data[[i]]$`_isNestedKey`) {
       p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, as.character)
