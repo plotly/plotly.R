@@ -104,7 +104,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
     uniqueSets <- unique(sets)
     for (i in uniqueSets) {
-      k <- unique(keys[[i]])
+      k <- unique(unlist(keys[names(keys) %in% i]))
       if (is.null(k)) next
       k <- k[!is.null(k)]
       id <- new_id()
