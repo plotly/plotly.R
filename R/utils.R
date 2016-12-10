@@ -451,12 +451,11 @@ verify_key_type <- function(p) {
     p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !lazyeval::is_atomic(k)
     # key values should always be strings
     if (p$x$data[[i]]$`_isNestedKey`) {
-      p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, as.character)
+      p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, function(x) I(as.character(x)))
+      p$x$data[[i]]$key <- setNames(p$x$data[[i]]$key, NULL)
     } else {
-      p$x$data[[i]]$key <- as.character(p$x$data[[i]]$key)
+      p$x$data[[i]]$key <- I(as.character(p$x$data[[i]]$key))
     }
-    # keys should always be an array
-    p$x$data[[i]]$key <- I(p$x$data[[i]]$key)
   }
   p 
 }
