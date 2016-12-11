@@ -85,11 +85,12 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
     for (j in seq_len(p$nrow)) {
       thisPlot <- p[j, i]
       if (i == 1) {
-        if (p$showYAxisPlotLabels) thisPlot <- thisPlot + ylab(p$yAxisLabels[j])
+        # should the first column contain axis labels?
+        if (p$showYAxisPlotLabels %||% TRUE) thisPlot <- thisPlot + ylab(p$yAxisLabels[j])
       } else {
         # y-axes are never drawn on the interior, and diagonal plots are densities,
         # so it doesn't make sense to synch zoom actions on y
-        thisPlot <- thisPlot +
+        thisPlot <- thisPlot + ylab(NULL) +
           theme(
             axis.ticks.y = element_blank(),
             axis.text.y = element_blank()
@@ -98,29 +99,29 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
       columnList <- c(
         columnList, list(ggplotly(
           thisPlot, tooltip = tooltip, dynamicTicks = dynamicTicks, 
-          layerData = layerData, originalData = originalData, source = source
+          layerData = layerData, originalData = originalData, source = source,
+          width = width, height = height
         ))
       )
     }
     # conditioned on a column in a ggmatrix, the x-axis should be on the
     # same scale.
-    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, 
-                 shareX = TRUE, titleY = TRUE) %>% hide_legend()
+    s <- subplot(columnList, nrows = p$nrow, margin = 0.01, shareX = TRUE,
+                 titleY = TRUE, titleX = TRUE)
     subplotList <- c(subplotList, list(s))
   }
-  s <- layout(subplot(subplotList, nrows = 1), width = width, height = height)
+  s <- subplot(subplotList, nrows = 1, margin = 0.01, 
+               titleY = TRUE, titleX = TRUE) %>% 
+    hide_legend() %>%
+    layout(dragmode = "select")
   if (nchar(p$title %||% "") > 0) {
     s <- layout(s, title = p$title)
   }
   for (i in seq_along(p$xAxisLabels)) {
     s$x$layout[[sub("^xaxis1$", "xaxis", paste0("xaxis", i))]]$title <- p$xAxisLabels[[i]]
   }
-  for (i in seq_along(p$yAxisLabels)) {
-    s$x$layout[[sub("^yaxis1$", "yaxis", paste0("yaxis", i))]]$title <- rev(p$yAxisLabels)[[i]]
-  }
-  # TODO: make this more correct
   if (length(p$yAxisLabels)) {
-    s$x$layout$margin$l <- s$x$layout$margin$l + 20
+    s$x$layout$margin$l <- s$x$layout$margin$l + 50
   }
   
   config(s)
