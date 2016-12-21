@@ -664,7 +664,7 @@ get_domain <- function(type = "") {
 
 # plotly's special keyword arguments in POST body
 get_kwargs <- function() {
-  c("filename", "fileopt", "style", "traces", "layout", "world_readable")
+  c("filename", "fileopt", "style", "traces", "layout", "frames", "world_readable")
 }
 
 # POST header fields

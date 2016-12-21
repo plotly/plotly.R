@@ -13,10 +13,12 @@ highlight(p, on = "plotly_selected", off = "plotly_relayout",
 \item{p}{a plotly visualization.}
 
 \item{on}{turn on a selection on which event(s)? Likely candidates are
-'plotly_hover', 'plotly_click', 'plotly_selected'.}
+'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
+altogether, use \code{NULL}.}
 
 \item{off}{turn off a selection on which event(s)? Likely candidates are
-'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.}
+'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
+events altogether, use \code{NULL}.}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
@@ -42,6 +44,12 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{showInLegend}{populate an additional legend entry for the selection?}
 }
+\value{
+If \code{dynamic} or \code{selectize} are \code{TRUE}, 
+a \link[htmltools]{browsable} \link[htmltools]{tagList} (otherwise, plotly object). 
+Note that other plotly functions may not be used to modify tagList objects, 
+so best practice is to use this function immediately before printing.
+}
 \description{
 For documentation and examples, see 
 \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
@@ -60,5 +68,8 @@ plot_ly(sd, x = ~date, y = ~median) \%>\%
   add_lines(text = ~city, hoverinfo = "text") \%>\%
   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 
+}
+\author{
+Carson Sievert
 }
 

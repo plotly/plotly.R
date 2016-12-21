@@ -5,9 +5,11 @@
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
-#' 'plotly_hover', 'plotly_click', 'plotly_selected'.
+#' 'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
+#' altogether, use \code{NULL}.
 #' @param off turn off a selection on which event(s)? Likely candidates are
-#' 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.
+#' 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
+#' events altogether, use \code{NULL}.
 #' @param persistent should selections persist (i.e., accumulate)?
 #' @param dynamic should UI controls for changing selection colors be 
 #' included in the output?
@@ -25,6 +27,11 @@
 #' \code{NULL}, means to inherit the hoverinfo attribute from the non-selected traces.
 #' @param showInLegend populate an additional legend entry for the selection?
 #' @export
+#' @author Carson Sievert
+#' @return If \code{dynamic} or \code{selectize} are \code{TRUE}, 
+#' a \link[htmltools]{browsable} \link[htmltools]{tagList} (otherwise, plotly object). 
+#' Note that other plotly functions may not be used to modify tagList objects, 
+#' so best practice is to use this function immediately before printing.
 #' @examples
 #' 
 #' library(crosstalk)
@@ -73,8 +80,8 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
   p$x$highlight <- modify_list(
     p$x$highlight,
     list(
-      on = on,
-      off = off,
+      on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
+      off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
       color = toRGB(color),
       dynamic = dynamic,
       persistent = persistent,
