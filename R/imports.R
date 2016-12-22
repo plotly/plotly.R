@@ -160,16 +160,14 @@ dplyr::filter
 #' @export
 dplyr::filter_
 
-# waiting on https://github.com/tidyverse/tidyr/pull/229
-#
-# #' @importFrom tidyr gather
-# #' @name gather
-# #' @rdname reexports
-# #' @export
-# tidyr::gather
-# 
-# #' @importFrom tidyr gather_
-# #' @name gather_
-# #' @rdname reexports
-# #' @export
-# tidyr::gather_
+#' @importFrom tidyr gather
+#' @name gather
+#' @rdname reexports
+#' @export
+tidyr::gather
+
+#' @importFrom tidyr gather_
+#' @name gather_
+#' @rdname reexports
+#' @export
+tidyr::gather_

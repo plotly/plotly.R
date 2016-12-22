@@ -60,5 +60,6 @@ Suggests:
     dendextend
 LazyData: true
 Remotes:
-    rstudio/crosstalk
+    rstudio/crosstalk,
+    tidyverse/tidyr#229
 RoxygenNote: 5.0.1
