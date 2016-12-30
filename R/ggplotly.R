@@ -159,33 +159,22 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 gg2list <- function(p, width = NULL, height = NULL, 
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
+  
+  # In order to convert relative sizes correctly, we use grid::convertHeight(),
+  # which opens a new device (if none is currently open). It's undesirable to 
+  # leave this new device open, so if required, we open it now, and close on exit 
+  devList <- grDevices::dev.list()
+  deviceSize <- grDevices::dev.size("px")
+  # did grDevices::dev.size() open a new graphics device?
+  if (length(grDevices::dev.list()) > length(devList)) {
+    on.exit(grDevices::dev.off(), add = TRUE)
+  }
+  
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
   # ------------------------------------------------------------------------
   
-  # open a new graphics device, so we can convert relative sizes correctly
-  # if height/width is not specified, estimate it from the current device
-  deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), "pixels", "width")
-  deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), "pixels", "height")
-  # try to find a bitmap device (measured in pixels), 
-  # if none available, use default device and throw warning
-  dev_fun <- if (capabilities("png")) {
-    grDevices::png
-  } else if (capabilities("jpeg")) {
-    grDevices::jpeg 
-  } else {
-    warning(
-      "Couldn't find a bitmap device (e.g. png or jpeg).",
-      "To ensure sizes are converted correctly please",
-      "compile R to use a bitmap device", call. = FALSE
-    )
-    grDevices::dev.new
-  }
-  tmpPlotFile <- tempfile(fileext = ".png")
-  dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
-  
-  # start the build process
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
     plot <- plot + geom_blank()
@@ -879,11 +868,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   gglayout$width <- width
   gglayout$height <- height
-  
-  # we're now done with converting units, turn off the device,
-  # and remove the temporary file
-  grDevices::dev.off()
-  unlink(tmpPlotFile)
   
   l <- list(
     data = setNames(traces, NULL),

@@ -399,8 +399,6 @@ typedArrayPolyfill <- function() {
 #' file.info(t1)$size
 #' htmlwidgets::saveWidget(p2, t1)
 #' file.info(t1)$size
-#' 
-#' 
 
 remove_typedarray_polyfill <- function(p) {
   isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))
