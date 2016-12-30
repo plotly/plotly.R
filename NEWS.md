@@ -18,6 +18,8 @@
 ## CHANGES
 
 * Upgraded to plotly.js v1.20.5 -- https://github.com/plotly/plotly.js/releases/tag/v1.20.5
+* A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824.
+* `ggplotly()` will now open/close a Cairo graphics device (instead of, in some cases, the default graphics device). This will ensure that a *screen* device is never opened by `ggplotly()`. Fixes #829.
 
 # 4.5.6
 
