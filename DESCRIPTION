@@ -40,7 +40,8 @@ Imports:
     lazyeval (>= 0.2.0),
     crosstalk,
     colourpicker,
-    purrr
+    purrr,
+    Cairo
 Suggests:
     MASS,
     maps,

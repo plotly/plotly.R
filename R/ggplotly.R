@@ -160,13 +160,14 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
-  # In order to convert relative sizes correctly, we use grid::convertHeight(),
-  # which opens a new device (if none is currently open). It's undesirable to 
-  # leave this new device open, so if required, we open it now, and close on exit 
-  devList <- grDevices::dev.list()
-  deviceSize <- grDevices::dev.size("px")
-  # did grDevices::dev.size() open a new graphics device?
-  if (length(grDevices::dev.list()) > length(devList)) {
+  # To convert relative sizes correctly, we use grid::convertHeight(),
+  # which may open a new *screen* device, if none is currently open. 
+  # It is undesirable to both open a *screen* device and leave a new device
+  # open, so if required, we open a non-screen device now, and close on exit 
+  # see https://github.com/att/rcloud.htmlwidgets/issues/2
+  if (is.null(grDevices::dev.list())) {
+    tmp <- tempfile(fileext = ".png")
+    Cairo::Cairo(file = tmp)
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
