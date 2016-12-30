@@ -59,6 +59,4 @@ Suggests:
     listviewer,
     dendextend
 LazyData: true
-Remotes:
-    rstudio/crosstalk
 RoxygenNote: 5.0.1
