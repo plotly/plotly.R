@@ -367,6 +367,43 @@ as_widget <- function(x, ...) {
       defaultHeight = 400
     ),
     preRenderHook = plotly_build,
-    dependencies = crosstalk::crosstalkLibs()
+    dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill()))
   )
+}
+
+typedArrayPolyfill <- function() {
+  htmltools::htmlDependency(
+    "typedarray", 0.1,
+    src = system.file("htmlwidgets", "lib", "typedarray", package = "plotly"),
+    script = "typedarray.min.js"
+  )
+}
+
+#' Remove TypedArray polyfill
+#'
+#' By default, plotly.js' TypedArray polyfill is included as a dependency, so
+#' printing "just works" in any context. Many users won't need this polyfill,
+#' so this function may be used to remove it and thus reduce the size of the page. 
+#' 
+#' @details The polyfill seems to be only relevant for those rendering plots 
+#' via phantomjs and RStudio on some Windows platforms.
+#'
+#' @param a plotly object
+#' @export
+#' @examples 
+#' 
+#' p1 <- plot_ly()
+#' p2 <- remove_typedarray_polyfill(p1)
+#' t1 <- tempfile(fileext = ".html")
+#' htmlwidgets::saveWidget(p1, t1)
+#' file.info(t1)$size
+#' htmlwidgets::saveWidget(p2, t1)
+#' file.info(t1)$size
+#' 
+#' 
+
+remove_typedarray_polyfill <- function(p) {
+  isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))
+  p$dependencies <- p$dependencies[!isTA]
+  p
 }
