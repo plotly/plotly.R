@@ -1,7 +1,12 @@
-#' Create plotly graphs using ggplot2 syntax
+#' Convert ggplot2 to plotly
 #'
-#' See up-to-date documentation and examples at
-#' \url{https://plot.ly/ggplot2}
+#' This function converts a \code{\link[ggplot2]{ggplot}()} object to a 
+#' plotly object. 
+#' 
+#' @details Conversion of relative sizes depends on the size of the current 
+#' graphics device (if no device is open, width/height of a new (off-screen) 
+#' device defaults to 640/480). In other words, \code{height} and
+#' \code{width} must be specified at runtime to ensure sizing is correct.
 #'
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
@@ -22,10 +27,10 @@
 #' with the source argument in \code{\link{event_data}()} to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
-#' @seealso \code{\link{signup}()}, \code{\link{plot_ly}()}
-#' @return a plotly object
 #' @export
 #' @author Carson Sievert
+#' @references \url{https://plot.ly/ggplot2}
+#' @seealso \code{\link{plot_ly}()}
 #' @examples \dontrun{
 #' # simple example
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
@@ -166,8 +171,23 @@ gg2list <- function(p, width = NULL, height = NULL,
   # open, so if required, we open a non-screen device now, and close on exit 
   # see https://github.com/att/rcloud.htmlwidgets/issues/2
   if (is.null(grDevices::dev.list())) {
-    tmp <- tempfile(fileext = ".png")
-    Cairo::Cairo(file = tmp)
+    dev_fun <- if (system.file(package = "Cairo") != "") {
+      Cairo::Cairo
+    } else if (capabilities("png")) {
+      grDevices::png
+    } else if (capabilities("jpeg")) {
+      grDevices::jpeg 
+    } else {
+      stop(
+        "No graphics device is currently open and no cairo or bitmap device is available.\n", 
+        "To ensure sizes are converted correctly, you have three options:",
+        "  (1) Open a graphics device (with the desired size) b4 using ggplotly()",
+        "  (2) install.packages('Cairo')",
+        "  (3) compile R to use a bitmap device",
+        call. = FALSE
+      )
+    }
+    dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   

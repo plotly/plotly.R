@@ -40,8 +40,7 @@ Imports:
     lazyeval (>= 0.2.0),
     crosstalk,
     colourpicker,
-    purrr,
-    Cairo
+    purrr
 Suggests:
     MASS,
     maps,
@@ -55,6 +54,7 @@ Suggests:
     rmarkdown,
     Rserve,
     RSclient,
+    Cairo,
     broom,
     webshot,
     listviewer,
