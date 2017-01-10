@@ -57,8 +57,9 @@ HTMLWidgets.widget({
       
     } else {
       
-      // using Plotly.newPlot creates new WebGL context, Plotly.redraw just redraws.
-      graphDiv.data = x.data; graphDiv.layout = x.layout; 
+      // using Plotly.newPlot may create new WebGL context, so just redraw.
+      // https://github.com/plotly/plotly.js/issues/337
+      graphDiv.data = x.data; graphDiv.layout = x.layout; graphDiv._frames = x.frames;
       var plot = Plotly.redraw(graphDiv);
       
     }

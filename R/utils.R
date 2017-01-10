@@ -667,29 +667,22 @@ get_kwargs <- function() {
   c("filename", "fileopt", "style", "traces", "layout", "frames", "world_readable")
 }
 
-# POST header fields
-#' @importFrom base64enc base64encode
-plotly_headers <- function(type = "main") {
-  usr <- verify("username")
-  key <- verify("api_key")
+# "common" POST header fields
+api_headers <- function() {
   v <- as.character(packageVersion("plotly"))
-  h <- if (type == "v2") {
-    auth <- base64enc::base64encode(charToRaw(paste(usr, key, sep = ":")))
-    c(
-      "authorization" = paste("Basic", auth),
-      "plotly-client-platform" = paste("R", v),
-      "plotly_version" = v,
-      "content-type" = "application/json"
-    )
-  } else {
-    c(
-      "plotly-username" = usr,
-      "plotly-apikey" = key,
-      "plotly-version" = v,
-      "plotly-platform" = "R"
-    )
-  }
-  httr::add_headers(.headers = h)
+  httr::add_headers(
+    plotly_version = v,
+    `Plotly-Client-Platform` = paste("R", v),
+    `Content-Type` = "application/json",
+    Accept = "*/*"
+  )
+}
+
+api_auth <- function() {
+  httr::authenticate(
+    verify("username"),
+    verify("api_key")
+  )
 }
 
 

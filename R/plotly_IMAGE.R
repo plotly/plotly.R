@@ -1,6 +1,6 @@
-#' Create/Modify plotly images
+#' Create a static image
 #'
-#' The images endpoint turn a plot (which may be given in multiple forms) 
+#' The images endpoint turns a plot (which may be given in multiple forms) 
 #' into an image of the desired format.
 #'
 #' @param x either a plotly object or a list.
@@ -22,7 +22,8 @@
 
 plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
                          scale = 1, out_file, ...) {
-  x <- plotly_build(x)
+  
+  x <- plotly_build(x)[["x"]]
   
   bod <- list(
     figure = x[c("data", "layout")],
@@ -30,12 +31,15 @@ plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png",
     height = height,
     format = format,
     scale = scale,
-    encoded = FALSE
+    encoded = FALSE,
+    filename = Sys.time()
   )
   base_url <- file.path(get_domain("api"), "v2", "images")
-  resp <- httr::POST(base_url, plotly_headers("v2"), body = to_JSON(bod), 
-                     if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE), 
-                     ...)
-  con <- process(append_class(resp, "image"))
+  resp <- httr::POST(
+    base_url, body = to_JSON(bod), api_headers(), api_auth(),
+    if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE), 
+    ...
+  )
+  con <- process(append_class(resp, "api_image"))
   invisible(con)
 }

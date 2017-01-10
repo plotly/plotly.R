@@ -22,11 +22,11 @@ export <- function(p = last_plot(), file = "plotly.png", ...) {
 }
 
 
-#library(htmlwidgets)
-#plot_ly(economics, x = ~date, y = ~uempmed) %>%
-#  onRender(
-#    "function(el, x) {
-#       var gd = document.getElementById(el.id);
-#      Plotly.downloadImage(gd, {format: 'jpeg', height: 300, width: 300, filename: 'plotly_download'})
-#    }"
-#  )
+#'library(htmlwidgets)
+#'plot_ly(economics, x = ~date, y = ~uempmed) %>%
+#'  onRender(
+#'    "function(el, x) {
+#'       var gd = document.getElementById(el.id);
+#'      Plotly.downloadImage(gd, {format: 'jpeg', height: 300, width: 300, filename: 'plotly_download'})
+#'    }"
+#'  )

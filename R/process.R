@@ -6,40 +6,34 @@ process <- function(resp) {
   UseMethod("process")
 }
 
-process.clientresp <- function(resp) {
-  httr::stop_for_status(resp)
-  con <- from_JSON(httr::content(resp, as = "text"))
-  # make sure that we always return a HTTPS link
-  con$url <- sub("^http[s]?:", "https:", con$url)
-  if (nchar(con$error) > 0) stop(con$error, call. = FALSE)
-  if (nchar(con$warning) > 0) warning(con$warning, call. = FALSE)
-  if (nchar(con$message) > 0) message(con$message, call. = FALSE)
-  con
+process.default <- function(resp) {
+  json_content(relay_error(resp))
 }
 
-process.image <- function(resp) {
-  httr::stop_for_status(resp)
+process.api_image <- function(resp) {
+  relay_error(resp)
   # httr (should) know to call png::readPNG() which returns raster array
   tryCatch(httr::content(resp, as = "parsed"), 
            error = function(e) httr::content(resp, as = "raw"))
 }
 
-process.plotly_figure <- function(resp) {
-  httr::stop_for_status(resp)
-  con <- from_JSON(content(resp, as = "text"))
-  fig <- con$payload$figure
-  fig$url <- sub("apigetfile/", "~", resp$url)
-  # make sure that we always return a HTTPS link
-  con$url <- sub("^http[s]?:", "https:", con$url)
-  fig <- verify_boxed(fig)
-  as_widget(fig)
+
+# the default for httr::content() doesn't simplify vectors apparently...
+json_content <- function(resp) {
+  from_JSON(
+    httr::content(resp, as = "text")
+  )
 }
 
-process.signup <- function(resp) {
-  httr::stop_for_status(resp)
-  con <- from_JSON(content(resp, as = "text"))
-  if (nchar(con[["error"]]) > 0) stop(con$error, call. = FALSE)
-  # Relaying a message with a private key probably isn't a great idea --
-  # https://github.com/ropensci/plotly/pull/217#issuecomment-100381166
-  con
+relay_error <- function(resp) {
+  if (!httr::http_error(resp)) {
+    return(resp)
+  }
+  # HTTP error message
+  msg <- httr::http_status(resp)[["message"]]
+  # Custom plotly server error message(s)
+  con <- httr::content(resp)
+  msgs <- lapply(con$errors, "[[", "message")
+  stop(msg, "\n\t", paste(msgs, collapse = "\n\t"), call. = FALSE)
+  invisible(resp)
 }

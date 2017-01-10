@@ -1,10 +1,11 @@
-#' Print a plotly figure object
+#' Print a plot on plotly's platform
 #'
 #' @param x a plotly figure object
 #' @param ... additional arguments (currently ignored)
 #' @export
-print.plotly_figure <- function(x, ...) {
-  utils::browseURL(x$url)
+print.api_plot <- function(x, ...) {
+  utils::browseURL(api_plot_url(x))
+  x
 }
 
 #' Embed a plotly figure as an iframe in a knitr doc
@@ -14,18 +15,81 @@ print.plotly_figure <- function(x, ...) {
 #' @param ... placeholder.
 #' @export
 #' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
-knit_print.plotly_figure <- function(x, options, ...) {
+knit_print.api_plot <- function(x, options, ...) {
   if (!requireNamespace("knitr")) {
     warning("Please install.packages('knitr')")
     return(x)
   }
-  w <- if (is.null(options[["width"]])) "800" else options[["width"]]
-  h <- if (is.null(options[["height"]])) "600" else options[["height"]]
-  iframe <- plotly_iframe(x$url, w, h)
+  iframe <- plotly_iframe(
+    api_plot_url(x, embed = TRUE), 
+    options[["width"]] %||% "800", 
+    options[["height"]] %||% "600"
+  )
   knitr::asis_output(iframe)
 }
 
-#' Embed a plotly figure as an iframe into a Jupyter Notebook
+api_plot_url <- function(x, embed = FALSE) {
+  url <- if (embed) x$embed_url %||% x$file$embed_url else x$web_url %||% x$file$web_url
+  secret <- x$share_key_enabled %||% x$file$share_key_enabled %||% FALSE
+  key <- x$share_key %||% x$file$share_key
+  if (secret) paste0(url, "?share_key=", key) else url
+}
+
+#' Print a plotly grid object
+#'
+#' @param x a plotly grid object
+#' @param ... additional arguments (currently ignored)
+#' @export
+print.api_grid <- function(x, ...) {
+  utils::browseURL(api_grid_url(x))
+  x
+}
+
+#' Embed a plotly grid as an iframe in a knitr doc
+#'
+#' @param x a plotly grid object
+#' @param options knitr options.
+#' @param ... placeholder.
+#' @export
+#' @references https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
+knit_print.plotly_grid <- function(x, options, ...) {
+  if (!requireNamespace("knitr")) {
+    warning("Please install.packages('knitr')")
+    return(x)
+  }
+  iframe <- plotly_iframe(
+    api_grid_url(x, embed = TRUE), 
+    options[["width"]] %||% "800", 
+    options[["height"]] %||% "600"
+  )
+  knitr::asis_output(iframe)
+}
+
+
+api_grid_url <- function(x, embed = FALSE) {
+  fid <- x$fid %||% x$file$fid
+  secret <- x$share_key_enabled %||% x$file$share_key_enabled %||% FALSE
+  key <- x$share_key %||% x$file$share_key
+  if (embed) {
+    paste0(x$embed_url %||% x$file$embed_url, if (secret) paste0("?share_key=", key))
+  } else {
+    # encourage people to use the create platform
+    paste0("https://plot.ly/create/?fid=", fid, if (secret) paste0("&share_key=", key))
+  }
+}
+
+#' Print a plotly grid object
+#'
+#' @param x a plotly grid object
+#' @param ... additional arguments (currently ignored)
+#' @export
+print.api_grid_local <- function(x, ...) {
+  res <- tryCatch(tibble::as_tibble(x$preview), error = function(e) x$preview)
+  print(res)
+}
+
+
+#' Embed a plot as an iframe into a Jupyter Notebook
 #' @param x a plotly object
 #' @param width attribute of the iframe. If \code{NULL}, the width in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.

@@ -29,7 +29,6 @@ Imports:
     magrittr,
     digest,
     viridisLite,
-    base64enc,
     htmltools,
     htmlwidgets (>= 0.8),
     tidyr,

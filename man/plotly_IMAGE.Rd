@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotly_IMAGE.R
 \name{plotly_IMAGE}
 \alias{plotly_IMAGE}
-\title{Create/Modify plotly images}
+\title{Create a static image}
 \usage{
 plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 1,
   out_file, ...)
@@ -23,7 +23,7 @@ plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 1,
 \item{...}{arguments passed onto \code{httr::POST}}
 }
 \description{
-The images endpoint turn a plot (which may be given in multiple forms) 
+The images endpoint turns a plot (which may be given in multiple forms) 
 into an image of the desired format.
 }
 \examples{
