@@ -388,7 +388,7 @@ typedArrayPolyfill <- function() {
 #' @details The polyfill seems to be only relevant for those rendering plots 
 #' via phantomjs and RStudio on some Windows platforms.
 #'
-#' @param a plotly object
+#' @param p a plotly object
 #' @export
 #' @examples 
 #' 

@@ -7,7 +7,7 @@
 remove_typedarray_polyfill(p)
 }
 \arguments{
-\item{a}{plotly object}
+\item{p}{a plotly object}
 }
 \description{
 By default, plotly.js' TypedArray polyfill is included as a dependency, so

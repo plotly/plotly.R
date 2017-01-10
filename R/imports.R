@@ -13,7 +13,6 @@
 #' @importFrom htmltools browsable tagList
 #' @importFrom colourpicker colourWidget
 #' @importFrom purrr transpose
-#' @importFrom Cairo Cairo
 NULL
 
 
