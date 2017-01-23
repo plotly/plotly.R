@@ -4,8 +4,7 @@
 \alias{embed_notebook}
 \title{Embed a plotly figure as an iframe into a Jupyter Notebook}
 \usage{
-embed_notebook(x, width = NULL, height = NULL,
-  file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html"))
+embed_notebook(x, width = NULL, height = NULL)
 }
 \arguments{
 \item{x}{a plotly object}
@@ -15,9 +14,6 @@ embed_notebook(x, width = NULL, height = NULL,
 
 \item{height}{attribute of the iframe. If \code{NULL}, the height in
 \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.}
-
-\item{file}{a filename for saving the standalone HTML
-(only used if x is a non-figure object)}
 }
 \description{
 Embed a plotly figure as an iframe into a Jupyter Notebook
