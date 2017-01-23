@@ -324,6 +324,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
+  # translate '\n' to '<br />' in text strings
+  p <- translate_linebreaks(p)
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate

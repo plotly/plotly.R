@@ -327,6 +327,29 @@ relay_type <- function(type) {
   type
 }
 
+# Searches a list for character strings and translates R linebreaks to HTML 
+# linebreaks (i.e., '\n' -> '<br />'). JavaScript function definitions created 
+# via `htmlwidgets::JS()` are ignored
+translate_linebreaks <- function(p) {
+  # maintain trace classes (important for colorbars)... 
+  # is there a more general way maintain list element classes?
+  cl <- lapply(p$x$data, class)
+  recurse <- function(a) {
+    typ <- typeof(a)
+    if (typ == "list") {
+      lapply(a, recurse)
+    } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
+      b <- gsub("\n", "<br />", a, fixed = TRUE)
+      attributes(b) <- attributes(a)
+      b
+    } else a
+  }
+  p$x$data <- lapply(p$x$data, recurse)
+  p$x$data <- Map(function(x, y) structure(x, class = y), p$x$data, cl)
+  p$x$layout <- lapply(p$x$layout, recurse)
+  p
+}
+
 verify_orientation <- function(trace) {
   xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]] %||% NULL)
   yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]] %||% NULL)
