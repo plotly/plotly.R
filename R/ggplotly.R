@@ -930,7 +930,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   l$attrs <- setNames(mappingFormulas, ids)
   l$attrs <- lapply(l$attrs, function(x) structure(x, class = "plotly_eval"))
   # the build step removes the first attrs if no type exists
-  l$attrs[[1]][["type"]] <- "ggplotly"
+  l$attrs[[1]][["type"]] <- l$data[[1]][["type"]] %||% "scatter"
   
   l$cur_data <- ids[[layerData]]
   l$visdat <- setNames(lapply(return_dat, function(x) function(y) x), ids)
