@@ -185,7 +185,7 @@ test_that("geom_hline -> 2 more traces", {
   info <- expect_traces(temp, 4, "scatter-facet-hline")
   
   expect_true(info$layout$showlegend)
-  has.name <- sapply(info$data, function(tr) nchar(tr$name) > 0)
+  has.name <- sapply(info$data, function(tr) isTRUE(nchar(tr$name) > 0))
   expect_equal(sum(has.name), 2)
 })
 
