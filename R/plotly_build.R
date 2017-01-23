@@ -22,14 +22,14 @@ plotly_build <- function(p, registerFrames = TRUE) {
 
 #' @export
 plotly_build.list <- function(p, registerFrames = TRUE) {
-  as_widget(p)
+  plotly_build(as_widget(p))
 }
 
 #' @export
 plotly_build.gg <- function(p, registerFrames = TRUE) {
   # note: since preRenderHook = plotly_build in as_widget(),
   # plotly_build.plotly() will be called on gg objects as well
-  ggplotly(p)
+  plotly_build(ggplotly(p))
 }
 
 #' @export
@@ -78,6 +78,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     lapply(p$x$attrs, function(x) deparse2(x[["frame"]])),
     use.names = FALSE
   ))
+  
+  # Attributes should be NULL if none exist (rather than an empty list)
+  if (length(p$x$attrs) == 0) p$x$attrs <- NULL
 
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces

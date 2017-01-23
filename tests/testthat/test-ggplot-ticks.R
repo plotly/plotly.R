@@ -173,3 +173,19 @@ test_that("The breaks can be spaced unevenly", {
     scale_y_continuous(breaks = c(4, 4.25, 4.5, 5, 6, 8))
   info <- expect_traces(no.breaks, 1, "uneven")
 })
+
+test_that("R line breaks are translated to HTML line breaks", {
+  df_x <- data.frame(
+    x = "this is very loooooooooooong text to illustrate",
+    y = 100
+  )
+  p <- ggplot(aes(x = x, y = y), data = df_x) +
+    geom_bar(stat = "identity") +
+    scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
+  info <- expect_traces(p, 1, "line-breaks")
+  expect_length(
+    strsplit(info$layout$xaxis$ticktext, "<br />", fixed = T)[[1]], 5
+  )
+})
+
+
