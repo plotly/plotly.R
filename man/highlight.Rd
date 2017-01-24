@@ -22,8 +22,7 @@ events altogether, use \code{NULL}.}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
-\item{dynamic}{should UI controls for changing selection colors be 
-included in the output?}
+\item{dynamic}{should a widget for changing selection colors be included?}
 
 \item{color}{character string of color(s) to use for 
 highlighting selections. See \code{\link{toRGB}()} for valid color

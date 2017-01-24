@@ -11,16 +11,15 @@
 #' 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
 #' events altogether, use \code{NULL}.
 #' @param persistent should selections persist (i.e., accumulate)?
-#' @param dynamic should UI controls for changing selection colors be 
-#' included in the output?
-#' @param selectize provide a selectize.js widget for selecting keys? Note that 
-#' the label used for this widget derives from the groupName of the SharedData object.
-#' @param defaultValues a vector of values for setting a "default selection".
-#' These values should match the key attribute.
+#' @param dynamic should a widget for changing selection colors be included? 
 #' @param color character string of color(s) to use for 
 #' highlighting selections. See \code{\link{toRGB}()} for valid color
 #' specifications. If \code{NULL} (the default), the color of selected marks
 #' are not altered (only their opacity).
+#' @param selectize provide a selectize.js widget for selecting keys? Note that 
+#' the label used for this widget derives from the groupName of the SharedData object.
+#' @param defaultValues a vector of values for setting a "default selection".
+#' These values should match the key attribute.
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param hoverinfo hoverinfo attributes for the selected traces. The default,
@@ -104,41 +103,35 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     }
   }
   
-  # attach selectize dependencies/payloads to plot object and add selectize divs
-  if (selectize) {
-    p$dependencies <- c(p$dependencies, list(selectizeLib()))
-    sets <- unlist(lapply(p$x$data, "[[", "set"))
-    keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-    uniqueSets <- unique(sets)
-    for (i in uniqueSets) {
-      k <- unique(unlist(keys[names(keys) %in% i]))
-      if (is.null(k)) next
-      k <- k[!is.null(k)]
+  # if necessary, include one colourwidget and/or selectize dropdown
+  # per SharedData layer
+  sets <- unlist(lapply(p$x$data, "[[", "set"))
+  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
+  uniqueSets <- unique(sets)
+  for (i in uniqueSets) {
+    k <- unique(unlist(keys[names(keys) %in% i]))
+    if (is.null(k)) next
+    k <- k[!is.null(k)]
+    
+    # in either case we return a tagList
+    if (selectize || dynamic) {
+      # have to attach this info to the plot JSON so we can initialize properly
       id <- new_id()
-      p$x$selectize[[id]] <- list(
-        items = data.frame(value = k, label = k), group = i
+      if (selectize) {
+        p$x$selectize[[id]] <- list(
+          items = data.frame(value = k, label = k), group = i
+        )
+      }
+      # flexbox with other tags/widgets
+      p <- htmltools::tagList(
+        htmltools::tags$div(
+          style = "display: flex; flex-wrap: wrap",
+          if (dynamic) colour_widget(color, i, width = "90px", height = "60px"),
+          if (selectize) selectizeDIV(id, multiple = persistent, label = i),
+          p
+        )
       )
-      d <- selectizeDIV(id, multiple = persistent, label = i)
-      p <- htmltools::tagList(d, p)
     }
-  }
-  
-  if (dynamic) {
-    w <- colourpicker::colourWidget(
-      value = color[1],
-      palette = "limited",
-      allowedCols = color,
-      width = "100px"
-    )
-    w <- htmlwidgets::onRender(w, "
-      function(el, x) {
-        var $el = $('#' + el.id);
-        crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
-        $el.on('change', function() {
-          crosstalk.var('plotlySelectionColour').set($el.colourpicker('value'));
-        })
-      }")
-    p <- htmltools::tagList(w, p)
   }
   
   htmltools::browsable(p)
@@ -150,15 +143,41 @@ highlight_defaults <- function() {
 }
 
 
+# set argument relates to the "crosstalk group"
+colour_widget <- function(colors, set = new_id(), ...) {
+  
+  w <- colourpicker::colourWidget(
+    value = colors[1],
+    palette = "limited",
+    allowedCols = colors,
+    ...
+  )
+  
+  # inform crosstalk when the value of colour widget changes
+  htmlwidgets::onRender(w, sprintf("
+    function(el, x) {
+      var $el = $('#' + el.id);
+      var grp = crosstalk.group('%s').var('plotlySelectionColour')
+      grp.set($el.colourpicker('value'));
+      $el.on('change', function() {
+        crosstalk.group('%s').var('plotlySelectionColour').set($el.colourpicker('value'));
+      })
+    }", set, set))
+  
+}
+
+
 # Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
-selectizeDIV <- function(id, multiple = TRUE, label = NULL) {
+selectizeDIV <- function(id, multiple = TRUE, label = NULL, width = "80%") {
   htmltools::tags$div(
     id = id, 
+    style = sprintf("width: %s", width),
     class = "form-group crosstalk-input-plotly-highlight",
     htmltools::tags$label(class = "control-label", `for` = id, label),
     htmltools::tags$div(
       htmltools::tags$select(multiple = if (multiple) NA else NULL)
-    )
+    ),
+    selectizeLib()
   )
 }
 

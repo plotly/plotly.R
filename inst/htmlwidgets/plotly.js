@@ -398,7 +398,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // placeholder for new "selection traces"
     var traces = [];
     // this variable is set in R/highlight.R
-    var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
+    var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
     for (var i = 0; i < this.origData.length; i++) {
