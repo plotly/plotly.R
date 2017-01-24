@@ -247,7 +247,7 @@ HTMLWidgets.widget({
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;
             selectize.on("change", function() {
-              var currentItems = traceManager.groupSelections[set];
+              var currentItems = traceManager.groupSelections[set] || [];
               var newItems = selectize.items.filter(function(idx) { 
                 return currentItems.indexOf(idx) < 0;
               });
