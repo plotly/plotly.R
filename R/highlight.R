@@ -103,6 +103,10 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     }
   }
   
+  if (selectize) {
+    p$dependencies <- c(p$dependencies, list(selectizeLib()))
+  }
+  
   # if necessary, include one colourwidget and/or selectize dropdown
   # per SharedData layer
   sets <- unlist(lapply(p$x$data, "[[", "set"))
@@ -176,8 +180,7 @@ selectizeDIV <- function(id, multiple = TRUE, label = NULL, width = "80%") {
     htmltools::tags$label(class = "control-label", `for` = id, label),
     htmltools::tags$div(
       htmltools::tags$select(multiple = if (multiple) NA else NULL)
-    ),
-    selectizeLib()
+    )
   )
 }
 
