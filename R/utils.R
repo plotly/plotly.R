@@ -336,7 +336,7 @@ translate_linebreaks <- function(p) {
   cl <- lapply(p$x$data, class)
   recurse <- function(a) {
     typ <- typeof(a)
-    if (typ == "list") {
+    if (typ == "list" && !is_ani_slider(a)) {
       lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
       b <- gsub("\n", "<br />", a, fixed = TRUE)
