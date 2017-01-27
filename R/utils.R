@@ -331,22 +331,20 @@ relay_type <- function(type) {
 # linebreaks (i.e., '\n' -> '<br />'). JavaScript function definitions created 
 # via `htmlwidgets::JS()` are ignored
 translate_linebreaks <- function(p) {
-  # maintain trace classes (important for colorbars)... 
-  # is there a more general way maintain list element classes?
-  cl <- lapply(p$x$data, class)
   recurse <- function(a) {
     typ <- typeof(a)
-    if (typ == "list" && !is_ani_slider(a)) {
-      lapply(a, recurse)
+    if (typ == "list") {
+      # retain the class of list elements 
+      # which important for many things, such as colorbars
+      a[] <- lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
-      b <- gsub("\n", "<br />", a, fixed = TRUE)
-      attributes(b) <- attributes(a)
-      b
-    } else a
+      attrs <- attributes(a)
+      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      attributes(a) <- attrs
+    }
+    a
   }
-  p$x$data <- lapply(p$x$data, recurse)
-  p$x$data <- Map(function(x, y) structure(x, class = y), p$x$data, cl)
-  p$x$layout <- lapply(p$x$layout, recurse)
+  p$x[] <- lapply(p$x, recurse)
   p
 }
 
