@@ -64,6 +64,7 @@ ggplotly(p, tooltip = "city") \%>\%
 # The group name is currently used to populate a title for the selectize widget
 sd <- SharedData$new(txhousing, ~city, "Choose a city")
 plot_ly(sd, x = ~date, y = ~median) \%>\%
+  group_by(city) \%>\%
   add_lines(text = ~city, hoverinfo = "text") \%>\%
   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 
