@@ -51,9 +51,6 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
                       persistent = FALSE, dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
                       opacityDim = 0.2, hoverinfo = NULL, showInLegend = FALSE) {
-  if (!is.plotly(p)) {
-    stop("Don't know how to modify highlight options to objects of class:", class(p))
-  }
   p <- plotly_build(p)
   keys <- unlist(lapply(p$x$data, "[[", "key"))
   if (length(keys) == 0) {
