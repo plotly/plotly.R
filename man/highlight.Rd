@@ -43,12 +43,6 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{showInLegend}{populate an additional legend entry for the selection?}
 }
-\value{
-If \code{dynamic} or \code{selectize} are \code{TRUE}, 
-a \link[htmltools]{browsable} \link[htmltools]{tagList} (otherwise, plotly object). 
-Note that other plotly functions may not be used to modify tagList objects, 
-so best practice is to use this function immediately before printing.
-}
 \description{
 For documentation and examples, see 
 \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}

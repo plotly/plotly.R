@@ -27,10 +27,6 @@
 #' @param showInLegend populate an additional legend entry for the selection?
 #' @export
 #' @author Carson Sievert
-#' @return If \code{dynamic} or \code{selectize} are \code{TRUE}, 
-#' a \link[htmltools]{browsable} \link[htmltools]{tagList} (otherwise, plotly object). 
-#' Note that other plotly functions may not be used to modify tagList objects, 
-#' so best practice is to use this function immediately before printing.
 #' @examples
 #' 
 #' library(crosstalk)
@@ -115,25 +111,24 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     if (is.null(k)) next
     k <- k[!is.null(k)]
     
-    # in either case we return a tagList
-    if (selectize || dynamic) {
+    id <- new_id()
+    
+    if (selectize) {
       # have to attach this info to the plot JSON so we can initialize properly
-      id <- new_id()
-      if (selectize) {
-        p$x$selectize[[id]] <- list(
-          items = data.frame(value = k, label = k), group = i
-        )
-      }
-      # flexbox with other tags/widgets
-      p <- htmltools::tagList(
-        htmltools::tags$div(
-          style = "display: flex; flex-wrap: wrap",
-          if (dynamic) colour_widget(color, i, width = "90px", height = "60px"),
-          if (selectize) selectizeDIV(id, multiple = persistent, label = i),
-          p
-        )
+      p$x$selectize[[id]] <- list(
+        items = data.frame(value = k, label = k), group = i
       )
     }
+    
+    panel <- htmltools::tags$div(
+      class = "plotly-crosstalk-control-panel",
+      style = "display: flex; flex-wrap: wrap",
+      if (dynamic) colour_widget(color, i, width = "90px", height = "60px"),
+      if (selectize) selectizeDIV(id, multiple = persistent, label = i)
+    )
+    
+    p <- htmlwidgets::prependContent(p, panel)
+    
   }
   
   htmltools::browsable(p)

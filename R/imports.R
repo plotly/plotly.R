@@ -1,3 +1,7 @@
+# https://blog.rstudio.org/2017/02/01/roxygen2-6-0-0/
+#' @keywords internal
+"_PACKAGE"
+
 #' @import ggplot2
 #' @importFrom grDevices col2rgb extendrange dev.list dev.off
 #' @importFrom graphics layout
@@ -7,7 +11,7 @@
 #' @importFrom viridisLite viridis
 #' @importFrom jsonlite toJSON fromJSON
 #' @importFrom httr GET POST PATCH content config add_headers stop_for_status
-#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender
+#' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender prependContent
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
 #' @importFrom htmltools browsable tagList tags
