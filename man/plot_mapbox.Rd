@@ -34,10 +34,9 @@ map_data("world", "canada") \%>\%
 }
 
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{plot_geo}()}, \code{\link{ggplotly}()}
 }
-
+\author{
+Carson Sievert
+}

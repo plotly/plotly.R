@@ -72,4 +72,3 @@ plot_ly(sd, x = ~date, y = ~median) \%>\%
 \author{
 Carson Sievert
 }
-

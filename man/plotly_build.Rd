@@ -26,4 +26,3 @@ str(p)
 str(plotly_build(p)$x$data)
 
 }
-

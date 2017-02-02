@@ -20,4 +20,3 @@ hide_legend(p)
 \seealso{
 \code{\link{hide_colorbar}()}
 }
-

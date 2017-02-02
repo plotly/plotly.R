@@ -27,4 +27,3 @@ config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
 \author{
 Carson Sievert
 }
-

@@ -20,4 +20,3 @@ Estimate bounding box of a rotated string
 \references{
 https://www.dropbox.com/s/nc6968prgw8ne4w/bbox.pdf?dl=0
 }
-

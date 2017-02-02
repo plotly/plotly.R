@@ -19,4 +19,3 @@ Embed a plotly figure as an iframe in a knitr doc
 \references{
 https://github.com/yihui/knitr/blob/master/vignettes/knit_print.Rmd
 }
-

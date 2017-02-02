@@ -21,4 +21,3 @@ Modify the layout of a plotly visualization
 \author{
 Carson Sievert
 }
-

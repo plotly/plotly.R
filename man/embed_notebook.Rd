@@ -22,4 +22,3 @@ embed_notebook(x, width = NULL, height = NULL,
 \description{
 Embed a plotly figure as an iframe into a Jupyter Notebook
 }
-
