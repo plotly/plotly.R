@@ -345,15 +345,18 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
-  # added, which is confusing. 
+  # added, which is confusing. So here we populate a sensible default.
   p <- verify_showlegend(p)
+  
+  # NOTE: this needs to occur *before* registering frames so simple/nested key
+  # flags get passed onto frame data.
+  p <- verify_key_type(p)
   
   if (registerFrames) {
     p <- registerFrames(p, frameMapping = frameMapping)
   }
   
   p <- verify_guides(p)
-  p <- verify_key_type(p)
   
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
