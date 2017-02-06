@@ -120,14 +120,26 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
       )
     }
     
-    panel <- htmltools::tags$div(
-      class = "plotly-crosstalk-control-panel",
-      style = "display: flex; flex-wrap: wrap",
-      if (dynamic) colour_widget(color, i, width = "90px", height = "60px"),
-      if (selectize) selectizeDIV(id, multiple = persistent, label = i)
-    )
+    if (dynamic || selectize) {
+      
+      if (is.null(p$height)) {
+        warning(
+          "It's recommended you specify a height (in plot_ly or ggplotly)\n",
+          "when using selectize and/or dynamic", call. = FALSE
+        )
+      }
+      
+      panel <- htmltools::tags$div(
+        class = "plotly-crosstalk-control-panel",
+        style = "display: flex; flex-wrap: wrap",
+        if (dynamic) colour_widget(color, i, width = "85px", height = "60px"),
+        if (selectize) selectizeDIV(id, multiple = persistent, label = i)
+      )
+      
+      p <- htmlwidgets::prependContent(p, panel)
+      
+    }
     
-    p <- htmlwidgets::prependContent(p, panel)
     
   }
   
@@ -165,10 +177,10 @@ colour_widget <- function(colors, set = new_id(), ...) {
 
 
 # Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
-selectizeDIV <- function(id, multiple = TRUE, label = NULL, width = "80%") {
+selectizeDIV <- function(id, multiple = TRUE, label = NULL, width = "80%", height = "10%") {
   htmltools::tags$div(
     id = id, 
-    style = sprintf("width: %s", width),
+    style = sprintf("width: %s; height: '%s'", width, height),
     class = "form-group crosstalk-input-plotly-highlight",
     htmltools::tags$label(class = "control-label", `for` = id, label),
     htmltools::tags$div(
