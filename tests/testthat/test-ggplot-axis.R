@@ -35,5 +35,5 @@ test_that("Axis positions stay at bottom and left", {
   expect_equal(length(info$data), 1)
   expect_identical(info$layout$xaxis$side, "bottom")
   expect_identical(info$layout$yaxis$side, "left")
-  expect_traces(p, 1, "move")
+  expect_traces(p, 1, "stay")
 })

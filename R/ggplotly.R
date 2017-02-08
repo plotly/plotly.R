@@ -866,11 +866,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
 
   gglayout$width <- width
   gglayout$height <- height
-
-  #we're now done with converting units, turn off the device,
-  # and remove the temporary file
-  grDevices::dev.off()
-  unlink(tmpPlotFile)
   
   l <- list(
     data = setNames(traces, NULL),
