@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
+[![codecov.io](https://codecov.io/github/ropensci/plotly/coverage.svg?branch=master)](https://codecov.io/github/ropensci/plotly?branch=master)
 
 # plotly
 
