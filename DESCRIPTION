@@ -60,4 +60,6 @@ Suggests:
     listviewer,
     dendextend
 LazyData: true
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1
+Remotes:
+  tidyverse/ggplot2
