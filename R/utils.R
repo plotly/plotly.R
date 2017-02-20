@@ -116,9 +116,9 @@ is_geo <- function(p) {
   identical(p$x$layout[["mapType"]], "geo")
 }
 
-is_ternary <- function(p) {
+is_type <- function(p, type) {
   types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
-  all(types %in% "scatterternary")
+  all(types %in% type)
 }
 
 # retrive mapbox token if one is set; otherwise, throw error
@@ -172,7 +172,13 @@ supply_defaults <- function(p) {
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
   } else {
-    axes <- if (is_ternary(p)) c("aaxis", "baxis", "caxis") else c("xaxis", "yaxis")
+    axes <- if (is_type(p, "scatterternary"))  {
+      c("aaxis", "baxis", "caxis") 
+    } else if (is_type(p, "pie")) {
+      NULL
+    } else {
+      c("xaxis", "yaxis")
+    }
     for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
         list(domain = c(0, 1)), p$x$layout[[axis]]
