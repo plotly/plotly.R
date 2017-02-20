@@ -448,10 +448,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range))
+  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
+  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
+  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
+  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -461,7 +461,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # reattach crosstalk key-set attribute
   data <- Map(function(x, y) structure(x, set = y), data, sets)
-  traces <- layers2traces(data, prestats_data, layout$layout, plot)
+  traces <- layers2traces(data, prestats_data, layout, plot)
   
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
@@ -547,6 +547,60 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- layout$panel_params[[i]]
+      
+      # panel_params is quite different for "CoordSf"
+      if ("CoordSf" %in% class(p$coordinates)) {
+        # see CoordSf$render_axis_v
+        direction <- if (xy == "x") "E" else "N"
+        idx <- rng$graticule$type == direction & !is.na(rng$graticule$degree_label)
+        tickData <- rng$graticule[idx, ]
+        # TODO: how to convert a language object to unicode character string?
+        rng[[paste0(xy, ".labels")]] <- as.character(tickData[["degree_label"]])
+        rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
+        
+        # If it doesn't already exist (for this panel), 
+        # generate graticule (as done in, CoordSf$render_bg)
+        isGrill <- vapply(traces, function(tr) {
+          identical(tr$xaxis, lay$xaxis) && 
+            identical(tr$yaxis, lay$yaxis) &&
+            isTRUE(tr$`_isGraticule`)
+        }, logical(1))
+        
+        if (sum(isGrill) == 0) {
+          d <- expand(rng$graticule)
+          d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
+          d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
+          params <- list(
+            colour = theme$panel.grid.major$colour,
+            size = theme$panel.grid.major$size,
+            linetype = theme$panel.grid.major$linetype
+          )
+          grill <- geom2trace.GeomPath(d, params)
+          grill$hoverinfo <- "none"
+          grill$showlegend <- FALSE
+          grill$`_isGraticule` <- TRUE
+          grill$xaxis <- lay$xaxis
+          grill$yaxis <- lay$yaxis
+          
+          traces <- c(list(grill), traces)
+        }
+        
+        # if labels are empty, don't show axis ticks
+        emptyTicks <- all(with(
+          rng$graticule, sapply(degree_label, is.na) | sapply(degree_label, nchar) == 0
+        ))
+        if (emptyTicks) {
+          theme$axis.ticks.length <- 0
+        } else{
+          # convert the special *degree expression in plotmath to HTML entity
+          # TODO: can this be done more generally for all ?
+          rng[[paste0(xy, ".labels")]] <- sub("\\*\\s+degree\\s+\\*", "&#176;", 
+              as.character(rng$graticule$degree_label)
+          )
+        }
+        
+      }
+      
       # stuff like layout$panel_params is already flipped, but scales aren't
       sc <- if (inherits(plot$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
@@ -563,11 +617,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         type = "linear",
         autorange = FALSE,
         tickmode = "array",
-        range = rng[[paste0(xy, ".range")]],
-        ticktext = rng[[paste0(xy, ".labels")]],
-        # TODO: implement minor grid lines with another axis object
-        # and _always_ hide ticks/text?
-        tickvals = rng[[paste0(xy, ".major")]],
+        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
+        ticktext = rng[[paste0(xy, ".labels")]] %||% rep("", 5),
+        tickvals = rng[[paste0(xy, ".major")]] %||% seq(0, 1, length.out = 5),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
@@ -578,7 +630,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
         linewidth = unitConvert(axisLine, "pixels", type),
-        showgrid = !is_blank(panelGrid),
+        # TODO: always `showgrid=FALSE` and implement our own using traces
+        showgrid = !is_blank(panelGrid) && !"CoordSf" %in% class(p$coordinates),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
         gridwidth = unitConvert(panelGrid, "pixels", type),
@@ -707,6 +760,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       }
     }
   } # end of panel loop
+  
   
   # ------------------------------------------------------------------------
   # guide conversion
@@ -863,10 +917,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     mergedTraces <- vector("list", nhashes)
     for (i in unique(hashes)) {
       idx <- which(hashes %in% i)
-      # for now we just merge markers and lines -- I can't imagine text being worthwhile
-      if (all(modes[idx] %in% c("lines", "markers"))) {
+      if (all(modes[idx] %in% c("lines", "markers", "text"))) {
         mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
-        mergedTraces[[i]]$mode <- "markers+lines"
+        mergedTraces[[i]]$mode <- paste(
+          unique(vapply(traces[idx], function(x) x$mode %||% "", character(1))), 
+          collapse = "+"
+        )
         if (any(sapply(traces[idx], "[[", "showlegend"))) {
           mergedTraces[[i]]$showlegend <- TRUE
         }

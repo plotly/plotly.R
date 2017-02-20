@@ -58,7 +58,8 @@ Suggests:
     broom,
     webshot,
     listviewer,
-    dendextend
+    dendextend,
+    sf
 LazyData: true
 RoxygenNote: 6.0.1
 Remotes:

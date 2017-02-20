@@ -9,6 +9,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
       position = ggtype(y, "position")
     )
+    
     # by default, show all user-specified and generated aesthetics in hovertext
     stat_aes <- y$stat$default_aes
     map <- c(y$mapping, stat_aes[grepl("^\\.\\.", as.character(stat_aes))])
@@ -26,6 +27,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # throw out positional coordinates if we're hovering on fill
     if (identical("fills", hover_on(x))) {
       map <- map[!names(map) %in% c("x", "xmin", "xmax", "y", "ymin", "ymax")]
+    }
+    # disregard geometry mapping in hovertext for GeomSf
+    if ("GeomSf" %in% class(y$geom)) {
+      map <- map[!names(map) %in% "geometry"]
     }
     param[["hoverTextAes"]] <- map
     param
@@ -144,8 +149,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # each trace is with respect to which axis?
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
-      trs[[j]]$xaxis <-  sub("axis", "", layout[panel, "xaxis"])
-      trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
+      trs[[j]]$xaxis <-  sub("axis", "", layout$layout[panel, "xaxis"])
+      trs[[j]]$yaxis <-  sub("axis", "", layout$layout[panel, "yaxis"])
     }
     # also need to set `layout.legend.traceorder='reversed'`
     if (inherits(d, "GeomBar") && paramz[[i]]$position != "fill") {
@@ -272,6 +277,32 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
+#' @export 
+to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
+  
+  data <- expand(data)
+  
+  # determine the type of simple feature for each row
+  # recode the simple feature with the type of geometry used to render it
+  data[[".plotlySfType"]] <- sapply(data$geometry, function(x) class(x)[2])
+  dat <- dplyr::mutate(
+    data, .plotlySfType = dplyr::recode(.plotlySfType,
+      MULTIPOLYGON = "GeomPolygon",
+      MULTILINESTRING = "GeomLine",
+      MULTIPOINT = "GeomPoint",
+      POLYGON = "GeomPolygon",
+      LINESTRING = "GeomLine",
+      POINT = "GeomPoint"
+  ))
+  
+  # return a list of data frames...one for every geometry (a la, GeomSmooth)
+  d <- split(dat, dat[[".plotlySfType"]])
+  for (i in seq_along(d)) {
+    d[[i]] <- prefix_class(d[[i]], names(d)[[i]])
+  }
+  if (length(d) == 1) d[[1]] else d
+}
+
 #' @export
 to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
   common <- intersect(data$map_id, params$map$id)
@@ -342,7 +373,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
   prefix_class(data, "GeomPath")
@@ -354,7 +385,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- data$yintercept
   prefix_class(data, "GeomPath")
@@ -366,7 +397,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data[["x"]] <- data$xintercept
   prefix_class(data, "GeomPath")
@@ -382,7 +413,7 @@ to_basic.GeomJitter <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
   # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
-  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
   data$width <- (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
@@ -392,7 +423,7 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) {
   # height for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
-  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
   data$width <- (data[["ymax"]] - data[["y"]]) / (data[["y_max"]] - data[["y_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbarh")
@@ -416,11 +447,11 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 #' @export
 to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
   if (identical(params$binaxis, "y")) {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$y_max - layout$layout$y_min)
     data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
     data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   } else {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$x_max - layout$layout$x_min)
     data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
     # TODO: why times 6?!?!
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
@@ -545,7 +576,9 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
+  
   data <- group2NA(data)
+  
   L <- list(
     x = data[["x"]],
     y = data[["y"]],

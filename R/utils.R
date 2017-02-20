@@ -195,7 +195,7 @@ verify_attr_names <- function(p) {
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
     check_attrs(
       names(thisTrace), 
-      c(names(validAttrs), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
+      c(names(validAttrs), "key", "set", "frame", "_isNestedKey", "_isSimpleKey", "_isGraticule"), 
       thisTrace$type
     )
   }
