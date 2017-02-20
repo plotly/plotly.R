@@ -27,15 +27,16 @@ env:
 before_script:
   - git config --global user.email "cpsievert1@gmail.com"
   - git config --global user.name "cpsievert"
-  - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
+  - echo "options(repos = c(CRAN = 'https://cran.rstudio.com')); Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - "wget -q -O - https://github.com/yihui/crandalf/raw/master/inst/scripts/install-pandoc | bash"
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
-  - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com") }'
-  - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
-  - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
+  - Rscript -e 'install.packages("Rserve", type = "source", configure.args = "--enable-R-shlib")'
+  - Rscript -e 'if (require(devtools)) { install.packages("devtools") }'
+  - Rscript -e 'devtools::update_packages("devtools")'
+  - Rscript -e 'devtools::install_deps(dependencies = TRUE)'
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
   - R CMD INSTALL ${R_PKG}_*.tar.gz
 
