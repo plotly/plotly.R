@@ -15,7 +15,7 @@ test_that("SharedData produces key/set in plot_ly", {
 
 test_that("SharedData produces key/set in ggplotly", {
   p <- ggplot(m, aes(x = wt, y = mpg)) + geom_point()
-  l <- plotly_build(p)$x$data[[1]]
+  tr <- plotly_build(p)$x$data[[1]]
   
   expect_true(all(tr$key == m$key()))
   expect_type(tr$set, "character")
@@ -25,7 +25,7 @@ test_that("SharedData produces key/set in ggplotly", {
 })
 
 test_that("SharedData produces key/set in ggpairs", {
-  p <- ggpairs(m, columns = 1:3)
+  p <- GGally::ggpairs(m, columns = 1:3)
   l <- plotly_build(p)$x
   
   for (i in seq_along(l$data)) {

@@ -222,7 +222,7 @@ killed <- data.frame(date=c("2014-12-24",
 
 test_that("datetime binning for class POSIXt works in histograms", {
   kP <- killed
-  kP$date <- as.POSIXlt(kP$date)
+  kP$date <- as.POSIXct(kP$date)
   histP <- ggplot(kP, aes(x = date)) + geom_histogram(binwidth = 2592000)
   info <- expect_traces(histP, 1, "POSIXt-bins")
 })
