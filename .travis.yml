@@ -11,6 +11,9 @@ addons:
       - r-base-dev
       - r-recommended
 
+r_binary_packages:
+  - r-cran-rserve
+
 r:
   - oldrel
   - release
@@ -18,7 +21,7 @@ r:
 
 env:
   global:
-    - NOT_CRAN=true R_PKG="$(basename $TRAVIS_REPO_SLUG)"
+    - R_PKG="$(basename $TRAVIS_REPO_SLUG)"
     # plotly_api_key (for posting to plot.ly)
     - secure: "jlIAFoBGaDWUQDh6oGNb2BgU31/80iioM4y4xwx35yWkGKkNIID1eMEuiIn+/ipLvOVHkPTDS6DYnOtD8EIBpROgAKHFY33gM1h7P6NRxVszzC6WLP2ASnq95DWq36DAC2Oevy05V7nwSRFilPwSt6JLppYUInG+WdaZ+QOSRi4="
     # GITHUB_PAT (for pushing to plotly-test-table)
@@ -33,7 +36,6 @@ before_script:
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
-  - Rscript -e 'install.packages("Rserve", type = "source", configure.args = "--enable-R-shlib")'
   - Rscript -e 'if (require(devtools)) { install.packages("devtools") }'
   - Rscript -e 'devtools::update_packages("devtools")'
   - Rscript -e 'devtools::install_deps(dependencies = TRUE)'
