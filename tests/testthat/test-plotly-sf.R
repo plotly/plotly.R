@@ -4,6 +4,8 @@ nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 p <- ggplot(nc) + geom_sf()
 
 test_that("geom_sf() basic polygons.", {
+  skip_if_not_installed("sf")
+  
   l <- save_outputs(p, "sf")
   # one trace is for the graticule
   expect_length(l$data, 2)
@@ -19,6 +21,8 @@ test_that("geom_sf() basic polygons.", {
 p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME))
 
 test_that("geom_sf() polygons with fill/text.", {
+  skip_if_not_installed("sf")
+  
   l <- save_outputs(p, "sf-fill-text")
   # one trace for graticule, one for colorbar, and one for each row
   expect_length(l$data, nrow(nc) + 2)
@@ -34,6 +38,8 @@ p <- ggplot(nc) +
   theme(panel.grid.major = element_line(colour = "red"))
 
 test_that("geom_sf() with basic polygons and points.", {
+  skip_if_not_installed("sf")
+  
   l <- save_outputs(p, "sf-points")
   # one trace for graticule, one for point, and one polygons
   expect_length(l$data, 3)

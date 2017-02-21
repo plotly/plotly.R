@@ -10,7 +10,7 @@ r:
 
 env:
   global:
-    - R_PKG="$(basename $TRAVIS_REPO_SLUG)"
+    - _R_CHECK_FORCE_SUGGESTS_=false R_PKG="$(basename $TRAVIS_REPO_SLUG)"
     # plotly_api_key (for posting to plot.ly)
     - secure: "jlIAFoBGaDWUQDh6oGNb2BgU31/80iioM4y4xwx35yWkGKkNIID1eMEuiIn+/ipLvOVHkPTDS6DYnOtD8EIBpROgAKHFY33gM1h7P6NRxVszzC6WLP2ASnq95DWq36DAC2Oevy05V7nwSRFilPwSt6JLppYUInG+WdaZ+QOSRi4="
     # GITHUB_PAT (for pushing to plotly-test-table)
@@ -31,7 +31,6 @@ before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 
 before_script:
-  - Rscript -e 'devtools::install(dependencies = TRUE)'
   - git config --global user.email "cpsievert1@gmail.com"
   - git config --global user.name "cpsievert"
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
