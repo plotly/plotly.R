@@ -27,6 +27,7 @@ r_github_packages:
   - tidyverse/ggplot2
 
 before_install:
+  - RScript -e "print(packageVersion('ggplot2'))"
   # mainly for installing sf (which requires units/rgeos/rgdal)
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
