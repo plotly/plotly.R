@@ -47,10 +47,9 @@ p <- plot_ly(mtcars, x = ~factor(vs))
 plotly_POST(p, filename = "mtcars-bar-plot")
 }
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{signup}()}
 }
-
+\author{
+Carson Sievert
+}

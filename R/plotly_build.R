@@ -22,14 +22,14 @@ plotly_build <- function(p, registerFrames = TRUE) {
 
 #' @export
 plotly_build.list <- function(p, registerFrames = TRUE) {
-  as_widget(p)
+  plotly_build(as_widget(p))
 }
 
 #' @export
 plotly_build.gg <- function(p, registerFrames = TRUE) {
   # note: since preRenderHook = plotly_build in as_widget(),
   # plotly_build.plotly() will be called on gg objects as well
-  ggplotly(p)
+  plotly_build(ggplotly(p))
 }
 
 #' @export
@@ -78,6 +78,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     lapply(p$x$attrs, function(x) deparse2(x[["frame"]])),
     use.names = FALSE
   ))
+  
+  # Attributes should be NULL if none exist (rather than an empty list)
+  if (length(p$x$attrs) == 0) p$x$attrs <- NULL
 
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
@@ -324,6 +327,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
+  # translate '\n' to '<br />' in text strings
+  p <- translate_linebreaks(p)
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
@@ -340,15 +345,18 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
-  # added, which is confusing. 
+  # added, which is confusing. So here we populate a sensible default.
   p <- verify_showlegend(p)
+  
+  # NOTE: this needs to occur *before* registering frames so simple/nested key
+  # flags get passed onto frame data.
+  p <- verify_key_type(p)
   
   if (registerFrames) {
     p <- registerFrames(p, frameMapping = frameMapping)
   }
   
   p <- verify_guides(p)
-  p <- verify_key_type(p)
   
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()

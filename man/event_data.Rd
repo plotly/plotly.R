@@ -29,4 +29,3 @@ shiny::runApp(system.file("examples", "plotlyEvents", package = "plotly"))
 \author{
 Carson Sievert
 }
-

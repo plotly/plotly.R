@@ -63,6 +63,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
         forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
         error = function(e) ""
       )
+      # put the height of the bar in the tooltip
+      if (inherits(x, "GeomBar") && identical(aesName, "y")) {
+        suffix <- format(x[["ymax"]] - x[["ymin"]])
+      }
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
     x$hovertext <- x$hovertext %||% ""
@@ -144,7 +148,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
     }
     # also need to set `layout.legend.traceorder='reversed'`
-    if (inherits(d, "GeomBar") && paramz[[i]]$position == "identity") {
+    if (inherits(d, "GeomBar") && paramz[[i]]$position != "fill") {
       trs <- rev(trs)
     }
     trace.list <- c(trace.list, trs)
@@ -169,6 +173,11 @@ layers2traces <- function(data, prestats_data, layout, p) {
 #' @export
 to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
+}
+
+#' @export
+to_basic.GeomCol <- function(data, prestats_data, layout, params, p, ...) {
+  prefix_class(data, "GeomBar")
 }
 
 #' @export

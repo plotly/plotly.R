@@ -36,4 +36,3 @@ Pdf <- plotly_IMAGE(p, format = "pdf",  out_file = "plotly-test-image.pdf")
 }
 
 }
-

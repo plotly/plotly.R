@@ -19,4 +19,3 @@ toWebGL(qplot(1:10))
 toWebGL(qplot(1:10, 1:10))
 
 }
-

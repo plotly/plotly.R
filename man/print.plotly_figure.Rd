@@ -14,4 +14,3 @@
 \description{
 Print a plotly figure object
 }
-

@@ -27,4 +27,3 @@ they overwrite the already existing plotly object
 \references{
 https://plot.ly/rest/
 }
-

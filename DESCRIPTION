@@ -21,7 +21,7 @@ URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     R (>= 3.2.0),
-    ggplot2 (> 2.1.0)
+    ggplot2 (> 2.1.1)
 Imports:
     scales,
     httr,
@@ -54,11 +54,12 @@ Suggests:
     rmarkdown,
     Rserve,
     RSclient,
+    Cairo,
     broom,
     webshot,
     listviewer,
     dendextend
 LazyData: true
+RoxygenNote: 6.0.1
 Remotes:
-    rstudio/crosstalk
-RoxygenNote: 5.0.1
+  tidyverse/ggplot2

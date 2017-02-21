@@ -13,15 +13,16 @@ highlight(p, on = "plotly_selected", off = "plotly_relayout",
 \item{p}{a plotly visualization.}
 
 \item{on}{turn on a selection on which event(s)? Likely candidates are
-'plotly_hover', 'plotly_click', 'plotly_selected'.}
+'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
+altogether, use \code{NULL}.}
 
 \item{off}{turn off a selection on which event(s)? Likely candidates are
-'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'.}
+'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
+events altogether, use \code{NULL}.}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
-\item{dynamic}{should UI controls for changing selection colors be 
-included in the output?}
+\item{dynamic}{should a widget for changing selection colors be included?}
 
 \item{color}{character string of color(s) to use for 
 highlighting selections. See \code{\link{toRGB}()} for valid color
@@ -57,8 +58,11 @@ ggplotly(p, tooltip = "city") \%>\%
 # The group name is currently used to populate a title for the selectize widget
 sd <- SharedData$new(txhousing, ~city, "Choose a city")
 plot_ly(sd, x = ~date, y = ~median) \%>\%
+  group_by(city) \%>\%
   add_lines(text = ~city, hoverinfo = "text") \%>\%
   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 
 }
-
+\author{
+Carson Sievert
+}

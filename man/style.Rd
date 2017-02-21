@@ -24,10 +24,9 @@ p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
 style(p, hoverinfo = "none", traces = c(2, 3))
 
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \code{\link{get_figure}()}
 }
-
+\author{
+Carson Sievert
+}

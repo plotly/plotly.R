@@ -57,7 +57,12 @@ HTMLWidgets.widget({
       
     } else {
       
-      var plot = Plotly.newPlot(graphDiv, x);
+      // using Plotly.newPlot creates new WebGL context, Plotly.redraw just redraws.
+      graphDiv.data = x.data; 
+      graphDiv.layout = x.layout; 
+      Plotly.redraw(graphDiv).then(function () {
+        return Plotly.addFrames(graphDiv, x.frames);
+      });
       
     }
     
@@ -245,8 +250,18 @@ HTMLWidgets.widget({
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;
             selectize.on("change", function() {
-              // TODO: updateSelection() should really work when we *remove* items...
-              traceManager.updateSelection(set, selectize.items);
+              var currentItems = traceManager.groupSelections[set] || [];
+              var newItems = selectize.items.filter(function(idx) { 
+                return currentItems.indexOf(idx) < 0;
+              });
+              if (newItems.length > 0) {
+                traceManager.updateSelection(set, newItems);
+              } else {
+                // Item has been removed...
+                // TODO: this logic won't work for dynamically changing palette 
+                traceManager.updateSelection(set, null);
+                traceManager.updateSelection(set, selectize.items);
+              }
             });
           }
           
@@ -280,13 +295,6 @@ HTMLWidgets.widget({
             traceManager.updateFilter(set, e.value);
           });
   
-          /* Remove event listeners in the future
-          CPS: for some reason I was getting crosstalk_sel_change is undefined in a shiny app?
-          instance.onNextRender.push(function() {
-            grp.var("selection").removeListener("change", crosstalk_sel_change);
-            grp.var("filter").removeListener("change", crosstalk_filter_change);
-          });
-          */
         })();
       }
     }
@@ -363,9 +371,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     throw new Error("Invalid keys argument; null or array expected");
   }
   
-  this.groupSelections[group] = keys;
-  
-  // if selection has been cleared, or if this is transient (not persistent)
+  // if selection has been cleared, or if this is transient
   // selection, delete the "selection traces"
   var nNewTraces = this.gd.data.length - this.origData.length;
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
@@ -374,6 +380,16 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       tracesToRemove.push(i);
     }
     Plotly.deleteTraces(this.gd, tracesToRemove);
+    this.groupSelections[group] = keys;
+  } else {
+    // add to the groupSelection, rather than overwriting it
+    this.groupSelections[group] = this.groupSelections[group] || [];
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (this.groupSelections[group].indexOf(k) < 0) {
+        this.groupSelections[group].push(k);
+      }
+    }
   }
   
   if (keys === null) {
@@ -385,7 +401,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // placeholder for new "selection traces"
     var traces = [];
     // this variable is set in R/highlight.R
-    var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
+    var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
     for (var i = 0; i < this.origData.length; i++) {

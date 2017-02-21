@@ -2,33 +2,34 @@
 % Please edit documentation in R/imports.R, R/pipe.R
 \docType{import}
 \name{mutate}
-\alias{\%>\%}
+\alias{mutate}
+\alias{mutate_}
+\alias{transmute}
+\alias{transmute_}
+\alias{select}
+\alias{select_}
+\alias{rename}
+\alias{rename_}
+\alias{group_by}
+\alias{group_by_}
+\alias{groups}
+\alias{ungroup}
+\alias{summarise}
+\alias{summarise_}
+\alias{do}
+\alias{do_}
 \alias{arrange}
 \alias{arrange_}
 \alias{distinct}
 \alias{distinct_}
-\alias{do}
-\alias{do_}
-\alias{filter}
-\alias{filter_}
-\alias{group_by}
-\alias{group_by_}
-\alias{groups}
-\alias{mutate}
-\alias{mutate_}
-\alias{reexports}
-\alias{rename}
-\alias{rename_}
-\alias{select}
-\alias{select_}
 \alias{slice}
 \alias{slice_}
-\alias{summarise}
-\alias{summarise_}
-\alias{transmute}
-\alias{transmute_}
-\alias{ungroup}
+\alias{filter}
+\alias{filter_}
+\alias{reexports}
+\alias{\%>\%}
 \title{Objects exported from other packages}
+\keyword{internal}
 \description{
 These objects are imported from other packages. Follow the links
 below to see their documentation.
@@ -38,5 +39,4 @@ below to see their documentation.
 
   \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
 }}
-\keyword{internal}
 

@@ -33,10 +33,9 @@ plot_dendro(dend1, height = 600) \%>\%
   highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
 
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()}
 }
-
+\author{
+Carson Sievert
+}

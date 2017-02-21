@@ -13,4 +13,3 @@ default values (if any), and min/max values (if applicable).
 \examples{
 schema()
 }
-

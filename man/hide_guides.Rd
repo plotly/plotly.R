@@ -15,4 +15,3 @@ Hide guides (legends and colorbars)
 \seealso{
 \code{\link{hide_legend}()}, \code{\link{hide_colorbar}()}
 }
-

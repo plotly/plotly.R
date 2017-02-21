@@ -22,4 +22,3 @@ Export a plotly graph to a static file
 export(plot_ly(economics, x = ~date, y = ~pce))
 }
 }
-

@@ -116,6 +116,11 @@ is_geo <- function(p) {
   identical(p$x$layout[["mapType"]], "geo")
 }
 
+is_type <- function(p, type) {
+  types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+  all(types %in% type)
+}
+
 # retrive mapbox token if one is set; otherwise, throw error
 mapbox_token <- function() {
   token <- Sys.getenv("MAPBOX_TOKEN", NA)
@@ -167,7 +172,14 @@ supply_defaults <- function(p) {
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
   } else {
-    for (axis in c("xaxis", "yaxis")) {
+    axes <- if (is_type(p, "scatterternary"))  {
+      c("aaxis", "baxis", "caxis") 
+    } else if (is_type(p, "pie")) {
+      NULL
+    } else {
+      c("xaxis", "yaxis")
+    }
+    for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
         list(domain = c(0, 1)), p$x$layout[[axis]]
       )
@@ -321,6 +333,27 @@ relay_type <- function(type) {
   type
 }
 
+# Searches a list for character strings and translates R linebreaks to HTML 
+# linebreaks (i.e., '\n' -> '<br />'). JavaScript function definitions created 
+# via `htmlwidgets::JS()` are ignored
+translate_linebreaks <- function(p) {
+  recurse <- function(a) {
+    typ <- typeof(a)
+    if (typ == "list") {
+      # retain the class of list elements 
+      # which important for many things, such as colorbars
+      a[] <- lapply(a, recurse)
+    } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
+      attrs <- attributes(a)
+      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      attributes(a) <- attrs
+    }
+    a
+  }
+  p$x[] <- lapply(p$x, recurse)
+  p
+}
+
 verify_orientation <- function(trace) {
   xNumeric <- !is.discrete(trace[["x"]]) && !is.null(trace[["x"]] %||% NULL)
   yNumeric <- !is.discrete(trace[["y"]]) && !is.null(trace[["y"]] %||% NULL)
@@ -438,19 +471,24 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
-    p$x$data[[i]]$`_isNestedKey` <- !lazyeval::is_atomic(k)
     uk <- unique(k)
     if (length(uk) == 1) {
       # i.e., the key for this trace has one value. In this case, 
       # we don't have iterate through the entire key, so instead, 
       # we provide a flag to inform client side logic to match the _entire_
       # trace if this one key value is a match
-      p$x$data[[i]]$key <- I(uk[[1]])
+      p$x$data[[i]]$key <- uk[[1]]
       p$x$data[[i]]$`_isSimpleKey` <- TRUE
       p$x$data[[i]]$`_isNestedKey` <- FALSE
     }
-    # ensure keys are always passed to the client as an array
-    p$x$data[[i]]$key <- setNames(p$x$data[[i]]$key, NULL)
+    p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !lazyeval::is_atomic(k)
+    # key values should always be strings
+    if (p$x$data[[i]]$`_isNestedKey`) {
+      p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, function(x) I(as.character(x)))
+      p$x$data[[i]]$key <- setNames(p$x$data[[i]]$key, NULL)
+    } else {
+      p$x$data[[i]]$key <- I(as.character(p$x$data[[i]]$key))
+    }
   }
   p 
 }
@@ -659,7 +697,7 @@ get_domain <- function(type = "") {
 
 # plotly's special keyword arguments in POST body
 get_kwargs <- function() {
-  c("filename", "fileopt", "style", "traces", "layout", "world_readable")
+  c("filename", "fileopt", "style", "traces", "layout", "frames", "world_readable")
 }
 
 # POST header fields

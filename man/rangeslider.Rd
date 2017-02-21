@@ -25,4 +25,3 @@ plot_ly(x = time(USAccDeaths), y = USAccDeaths) \%>\%
 \author{
 Carson Sievert
 }
-
