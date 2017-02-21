@@ -593,8 +593,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
 
-      ## Move axis and change anchor if necessary
       non_default_side <- isTRUE(scales$get_scales(xy)[["position"]] != default_axis)
+      
+      ## Move axis and change anchor if necessary
       if (has_facet(plot)) {
         if (non_default_side) {
           if (xy == "x") {
@@ -606,6 +607,7 @@ gg2list <- function(p, width = NULL, height = NULL,
             } 
           } else if (xy == "y" && nCols > 1) {
             axisObj[["anchor"]] <- paste0("x", nCols)
+            axisTitle[["angle"]] <- 270
           }
         }
       }
@@ -681,6 +683,7 @@ gg2list <- function(p, width = NULL, height = NULL,
 
             x <- if (xy == "x") 0.5 else axisTitleLocation
             y <- if (xy == "x") axisTitleLocation else 0.5
+
             gglayout$annotations <- c(
               gglayout$annotations,
               make_label(
