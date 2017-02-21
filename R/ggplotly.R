@@ -575,6 +575,16 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
         title = axisTitleText,
         titlefont = text2font(axisTitle)
       )
+
+      ## Move axis and change anchor if necessary
+      if (isTRUE(scales$get_scales(xy)[["position"]] != default_axis)) {
+        if (xy == "x" && nRows > 1) {
+          axisObj[["anchor"]] <- "y"
+        } else if (xy == "y" && nCols > 1) {
+          axisObj[["anchor"]] <- paste0("x", nCols)
+        }
+      }
+
       # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
       # this way both dates/datetimes are on same scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
@@ -866,6 +876,11 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
 
   gglayout$width <- width
   gglayout$height <- height
+
+  #we're now done with converting units, turn off the device,
+  # and remove the temporary file
+  grDevices::dev.off()
+  unlink(tmpPlotFile)
   
   l <- list(
     data = setNames(traces, NULL),
@@ -1083,8 +1098,8 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   if ("top" %in% side) {
     rekt$x0 <- xdom[1]
     rekt$x1 <- xdom[2]
-    rekt$y0 <- ydom[2]
-    rekt$y1 <- ydom[2] + yTextSize
+    rekt$y0 <- ydom[2] + 0.020927 
+    rekt$y1 <- ydom[2] + 0.020927 + yTextSize
   }
   list(rekt)
 }
