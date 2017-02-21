@@ -279,7 +279,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
     }
     x
   }
-  #browser()
   nestedKeys <- Map(function(x, y, z) { 
     key <- y[[crosstalk_key()]]
     if (is.null(key) || inherits(z[["stat"]], "StatIdentity")) return(NULL)
@@ -577,11 +576,19 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
       )
 
       ## Move axis and change anchor if necessary
-      if (isTRUE(scales$get_scales(xy)[["position"]] != default_axis)) {
-        if (xy == "x" && nRows > 1) {
-          axisObj[["anchor"]] <- "y"
-        } else if (xy == "y" && nCols > 1) {
-          axisObj[["anchor"]] <- paste0("x", nCols)
+      non_default_side <- isTRUE(scales$get_scales(xy)[["position"]] != default_axis)
+      if (has_facet(plot)) {
+        if (non_default_side) {
+          if (xy == "x") {
+            ## Facet labels are always on top, I hope???
+            axisObj[["ticklen"]] <- axisObj[["ticklen"]] + 
+              (unitConvert(stripText, "pixels", type) * 2.5)
+            if (nRows > 1) {
+              axisObj[["anchor"]] <- "y"
+            } 
+          } else if (xy == "y" && nCols > 1) {
+            axisObj[["anchor"]] <- paste0("x", nCols)
+          }
         }
       }
 
@@ -619,17 +626,24 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
                bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
                bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
                unitConvert(theme$axis.ticks.length, "npc", type))
+          ## Need extra room for striptext
+          if (xy == "x" & non_default_side) {
+            offset <- offset - (unitConvert(stripText, "npc", type) * 4)
+          }
         }
         
         # add space for exterior facet strips in `layout.margin`
-        
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
+          ## Increasing padding when non-standard side, especially for strip
+          padding_amount <- stripSize
+          ## 4 is a magic number to ensure annotation is onscreen...
+          if (non_default_side) padding_amount <- (stripSize * 4)
           if (xy == "x") {
-            gglayout$margin$t <- gglayout$margin$t + stripSize
+            gglayout$margin$t <- gglayout$margin$t + padding_amount
           }
-          if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
-            gglayout$margin$r <- gglayout$margin$r + stripSize
+          if (xy == "y" && (inherits(plot$facet, "FacetGrid") | non_default_side)) {
+            gglayout$margin$r <- gglayout$margin$r + padding_amount
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
@@ -637,8 +651,12 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
             # multiplying the offset by 2 seems to work, but this is a terrible hack
-            x <- if (xy == "x") 0.5 else offset
-            y <- if (xy == "x") offset else 0.5
+            if (non_default_side) {
+              axisTitleLocation <- (1 - offset)
+            } else axisTitleLocation <- offset
+
+            x <- if (xy == "x") 0.5 else axisTitleLocation
+            y <- if (xy == "x") axisTitleLocation else 0.5
             gglayout$annotations <- c(
               gglayout$annotations,
               make_label(
@@ -694,8 +712,8 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
           xanchor = "left", yanchor = "middle"
         )
         gglayout$annotations <- c(gglayout$annotations, row_lab)
-        strip <- make_strip_rect(xdom, ydom, theme, "right")
-        gglayout$shapes <- c(gglayout$shapes, strip)
+        # strip <- make_strip_rect(xdom, ydom, theme, "right")
+        # gglayout$shapes <- c(gglayout$shapes, strip)
       }
     }
   } # end of panel loop
@@ -881,7 +899,6 @@ gg2list <- function(p, width = NULL, height = NULL, tooltip = "all",
   # and remove the temporary file
   grDevices::dev.off()
   unlink(tmpPlotFile)
-  
   l <- list(
     data = setNames(traces, NULL),
     layout = compact(gglayout),
@@ -1098,8 +1115,8 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   if ("top" %in% side) {
     rekt$x0 <- xdom[1]
     rekt$x1 <- xdom[2]
-    rekt$y0 <- ydom[2] + 0.020927 
-    rekt$y1 <- ydom[2] + 0.020927 + yTextSize
+    rekt$y0 <- ydom[2]
+    rekt$y1 <- ydom[2] + yTextSize
   }
   list(rekt)
 }
