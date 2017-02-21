@@ -31,12 +31,12 @@ before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 
 before_script:
+  - Rscript -e 'devtools::install(dependencies = TRUE)'
   - git config --global user.email "cpsievert1@gmail.com"
   - git config --global user.name "cpsievert"
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
-  - Rscript -e 'devtools::install(dependencies = TRUE)'
 
 script:
   # run R CMD check on the non-pull request build
