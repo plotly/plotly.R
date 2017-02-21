@@ -3,18 +3,6 @@ cache: packages
 sudo: true
 dist: trusty
 
-addons:
-  apt:
-    sources:
-      - r-packages-precise
-    packages:
-      - r-base-dev
-      - r-recommended
-
-# installing from source requires non-standard R build (--enable-R-shlib) 
-r_binary_packages:
-  - rserve
-
 r:
   - oldrel
   - release
@@ -28,7 +16,15 @@ env:
     # GITHUB_PAT (for pushing to plotly-test-table)
     - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
 
+# installing Rserve from source requires non-standard R build (--enable-R-shlib) 
+r_binary_packages:
+  - rserve
+
+r_packages:
+  - devtools
+
 before_install:
+  # mainly for installing sf (which requires units/rgeos/rgdal)
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
@@ -40,6 +36,7 @@ before_script:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
+  - Rscript -e 'devtools::install(dependencies = TRUE)'
 
 script:
   # run R CMD check on the non-pull request build
