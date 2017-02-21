@@ -12,7 +12,7 @@ addons:
       - r-recommended
 
 r_binary_packages:
-  - r-cran-rserve
+  - rserve
 
 r:
   - oldrel
