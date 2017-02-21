@@ -22,6 +22,9 @@ r_binary_packages:
 
 r_packages:
   - devtools
+  
+r_github_packages:
+  - tidyverse/ggplot2
 
 before_install:
   # mainly for installing sf (which requires units/rgeos/rgdal)
