@@ -298,7 +298,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     x
   }
-
   nestedKeys <- Map(function(x, y, z) { 
     key <- y[[crosstalk_key()]]
     if (is.null(key) || inherits(z[["stat"]], "StatIdentity")) return(NULL)
@@ -674,9 +673,8 @@ gg2list <- function(p, width = NULL, height = NULL,
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
           if (nchar(axisTitleText) > 0) {
-            # npc is on a 0-1 scale of the _entire_ device,
-            # but these units _should_ be wrt to the plotting region
-            # multiplying the offset by 2 seems to work, but this is a terrible hack
+
+            ## If axis is moved, need to move axis title as well
             if (non_default_side) {
               axisTitleLocation <- (1 - offset)
             } else axisTitleLocation <- offset
@@ -684,6 +682,9 @@ gg2list <- function(p, width = NULL, height = NULL,
             x <- if (xy == "x") 0.5 else axisTitleLocation
             y <- if (xy == "x") axisTitleLocation else 0.5
 
+            # npc is on a 0-1 scale of the _entire_ device,
+            # but these units _should_ be wrt to the plotting region
+            # multiplying the offset by 2 seems to work, but this is a terrible hack
             gglayout$annotations <- c(
               gglayout$annotations,
               make_label(
@@ -739,8 +740,8 @@ gg2list <- function(p, width = NULL, height = NULL,
           xanchor = "left", yanchor = "middle"
         )
         gglayout$annotations <- c(gglayout$annotations, row_lab)
-        # strip <- make_strip_rect(xdom, ydom, theme, "right")
-        # gglayout$shapes <- c(gglayout$shapes, strip)
+        strip <- make_strip_rect(xdom, ydom, theme, "right")
+        gglayout$shapes <- c(gglayout$shapes, strip)
       }
     }
   } # end of panel loop
