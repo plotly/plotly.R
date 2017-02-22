@@ -38,7 +38,7 @@ test_that("Axis position moves to top (facets)", {
 
   info <- save_outputs(p, "axis_move_top_facet")
   expect_equal(length(info$data), 6)
-  expect_equal(info$data$layout$xaxis$anchor, "y1")
+  expect_equal(info$layout$xaxis$anchor, "y1")
   expect_identical(info$layout$xaxis$side, "top")
 })
 
@@ -49,7 +49,7 @@ test_that("Axis position moves to top (facets)", {
   
   expect_equal(length(info$data), 6)
 
-  expect_equal(info$data$layout$yaxis$anchor, "x3")
+  expect_equal(info$layout$yaxis$anchor, "x3")
   expect_identical(info$layout$yaxis$side, "right")
 })
 
@@ -70,12 +70,12 @@ test_that("Axis positions stay at bottom and left (facet)", {
   p <- p + facet_wrap(~carb)
   info <- save_outputs(p, "axis_stay_facet")
   
-  expect_equal(length(info$data), 1)
+  expect_equal(length(info$data), 6)
   
   expect_identical(info$layout$xaxis$side, "bottom")
   expect_identical(info$layout$yaxis$side, "left")
 
-  expect_equal(info$layout$xaxis$anchor, "y")
+  expect_equal(info$layout$xaxis$anchor, "y2")
   expect_equal(info$layout$yaxis$anchor, "x")
 })
 
