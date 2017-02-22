@@ -38,7 +38,7 @@ test_that("Axis position moves to top (facets)", {
 
   info <- save_outputs(p, "axis_move_top_facet")
   expect_equal(length(info$data), 6)
-  expect_equal(info$layout$xaxis$anchor, "y1")
+  expect_equal(info$layout$xaxis$anchor, "y")
   expect_identical(info$layout$xaxis$side, "top")
 })
 
