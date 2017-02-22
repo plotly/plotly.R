@@ -18,7 +18,7 @@ p <- ggplot(mtcars, aes(x=mpg, y=wt)) +
 # p3 <- p + facet_wrap(~carb)
 
 test_that("Axis position moves to top", {
-	p <- p + scale_x_continuous(position="top"))
+	p <- p + scale_x_continuous(position="top")
   
   info <- save_outputs(p, "axis_move_top")
   expect_equal(length(info$data), 1)
@@ -34,7 +34,7 @@ test_that("Axis position moves to right", {
 })
 
 test_that("Axis position moves to top (facets)", {
-  p <- p + scale_x_continuous(position="top")) + facet_wrap(~carb)
+  p <- p + scale_x_continuous(position="top") + facet_wrap(~carb)
 
   info <- save_outputs(p, "axis_move_top_facet")
   expect_equal(length(info$data), 1)
@@ -43,7 +43,7 @@ test_that("Axis position moves to top (facets)", {
 })
 
 test_that("Axis position moves to top (facets)", {
-  p <- p + scale_y_continuous(position="right")) + facet_wrap(~carb)
+  p <- p + scale_y_continuous(position="right") + facet_wrap(~carb)
 
   info <- save_outputs(p, "axis_move_right_facet")
   
