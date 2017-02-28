@@ -249,8 +249,16 @@ HTMLWidgets.widget({
             };
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;
+            // NOTE: this callback is triggered when *directly* altering 
+            // dropdown items
             selectize.on("change", function() {
               var currentItems = traceManager.groupSelections[set] || [];
+              if (!x.highlight.persistent) {
+                removeBrush(el);
+                for (var i = 0; i < currentItems.length; i++) {
+                  selectize.removeItem(currentItems[i], true);
+                }
+              }
               var newItems = selectize.items.filter(function(idx) { 
                 return currentItems.indexOf(idx) < 0;
               });
@@ -280,12 +288,11 @@ HTMLWidgets.widget({
               traceManager.updateSelection(set, e.value);
               // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
               if (x.selectize) {
-                if (e.value === null) {
+                if (!x.highlight.persistent || e.value === null) {
                   selectize.clear(true);
-                } else {
-                  selectize.addItem(e.value, true);
-                  selectize.close();
                 }
+                selectize.addItems(e.value, true);
+                selectize.close();
               }
               
             }
