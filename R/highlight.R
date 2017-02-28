@@ -133,7 +133,7 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
         class = "plotly-crosstalk-control-panel",
         style = "display: flex; flex-wrap: wrap",
         if (dynamic) colour_widget(color, i, width = "85px", height = "60px"),
-        if (selectize) selectizeDIV(id, multiple = persistent, label = i)
+        if (selectize) selectizeDIV(id, label = i)
       )
       
       p <- htmlwidgets::prependContent(p, panel)
