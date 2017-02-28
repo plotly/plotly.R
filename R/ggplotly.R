@@ -389,7 +389,16 @@ gg2list <- function(p, width = NULL, height = NULL,
   for (i in elements) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
   }
-  # Translate plot wide theme elements to plotly.js layout
+  # ensure element_text() sizes are interpreted as "points" and defaults to 
+  # "Helvetica" familyfont
+  isTextElement <- vapply(theme, inherits, logical(1), "element_text")
+  textElements <- names(isTextElement)[isTextElement]
+  for (i in textElements) {
+    theme[[i]]$size <- grid::unit(theme[[i]]$size, "points")
+    if (identical(theme[[i]]$family, "")) theme[[i]]$family <- "Helvetica"
+  }
+  
+  # Translate plot-wide theme elements to plotly.js layout
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
     margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
@@ -397,12 +406,52 @@ gg2list <- function(p, width = NULL, height = NULL,
     paper_bgcolor = toRGB(theme$plot.background$fill),
     font = text2font(theme$text)
   )
-  # main plot title
-  if (nchar(plot$labels$title %||% "") > 0) {
-    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
-    gglayout$titlefont <- text2font(theme$plot.title)
-    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
+  
+  # Render plot-wide labels 
+  hasSubtitle <- nchar(plot$labels$subtitle %||% "") > 0
+  hasTitle <- nchar(plot$labels$title %||% "") > 0
+  hasCaption <- nchar(plot$labels$caption %||% "") > 0
+  
+  if (hasSubtitle) {
+    gglayout$annotations <- c(
+      gglayout$annotations, 
+      make_label(
+        faced(plot$labels$subtitle, theme$plot.subtitle$face), 
+        0, 1, el = theme$plot.subtitle, bordercolor = "black",
+        annotationType = "subtitle"
+      )
+    )
+    gglayout$margin$t <- gglayout$margin$t + 
+      unitConvert(theme$plot.subtitle$size, "pixels", "height") * nLineBreaks(plot$labels$subtitle)
   }
+  
+  if (hasTitle) {
+    gglayout$annotations <- c(
+      gglayout$annotations, 
+      make_label(
+        faced(plot$labels$title, theme$plot.title$face), 
+        # TODO: this shouldn't need to be times 2...
+        0, 1 + 2 * unitConvert(theme$plot.subtitle$size, "npc", "height"), 
+        el = theme$plot.title,
+        annotationType = "title"
+      ))
+    
+    gglayout$margin$t <- gglayout$margin$t + 
+      unitConvert(theme$plot.title$size, "pixels", "height") * nLineBreaks(plot$labels$title)
+  }
+  if (hasCaption) {
+    
+    gglayout$annotations <- c(
+      gglayout$annotations, 
+      make_label(
+        faced(plot$labels$caption, theme$plot.caption$face), 
+        0, 0, el = theme$plot.caption,
+        annotationType = "caption"
+      ))
+    gglayout$margin$b <- gglayout$margin$b + 
+      unitConvert(theme$plot.caption$size, "pixels", "height") * nLineBreaks(plot$labels$caption)
+  }
+  
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   gglayout$margin$t <- gglayout$margin$t + 16
@@ -690,6 +739,7 @@ gg2list <- function(p, width = NULL, height = NULL,
             gglayout$margin$t <- gglayout$margin$t + stripSize
           }
           if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
+            
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
           # facets have multiple axis objects, but only one title for the plot,
@@ -829,15 +879,17 @@ gg2list <- function(p, width = NULL, height = NULL,
     
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
     if (isTRUE(gglayout$showlegend)) {
-      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = "<br>")
+      idx <- which(vapply(gdefs, inherits, logical(1), "legend"))
+      if (length(idx) != 1) warning("Expected one legend definition", call. = FALSE)
+      legendLines <- strsplit(gdefs[[idx]]$title, "\n", fixed = TRUE)[[1]]
+      legendTitle <- paste(legendLines, collapse = "<br>")
       titleAnnotation <- make_label(
         legendTitle,
         x = gglayout$legend$x %||% 1.02,
         y = gglayout$legend$y %||% 1,
         theme$legend.title,
         xanchor = "left",
-        yanchor = "bottom",
+        yanchor = "top",
         # just so the R client knows this is a title
         legendTitle = TRUE
       )
@@ -845,7 +897,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       # adjust the height of the legend to accomodate for the title
       # this assumes the legend always appears below colorbars
       gglayout$legend$y <- (gglayout$legend$y %||% 1) -
-        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+        length(legendLines) * unitConvert(theme$legend.title$size, "npc", "height")
     }
   }
   
@@ -939,6 +991,19 @@ gg2list <- function(p, width = NULL, height = NULL,
   }
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
+  
+  # a fixed height/width is required for aspect ratios at runtime...
+  # hopefully plotly.js will eventually support aspect ratios "natively"
+  # so that you can resize and maintain aspect ratio
+  # https://github.com/plotly/plotly.js/issues/272
+  
+  if (inherits(p$coordinates, c("CoordFixed", "CoordSf"))) {
+    warning(
+      "Fixed coordinates currently require a fixed height/width,\n",
+      "meaning that window resizing won't effect the size of the graph",
+      call. = FALSE
+    )
+  }
   
   gglayout$width <- width
   gglayout$height <- height
@@ -1058,25 +1123,42 @@ is_blank <- function(x) {
 
 # given text, and x/y coordinates on 0-1 scale,
 # convert ggplot2::element_text() to plotly annotation
-make_label <- function(txt = "", x, y, el = ggplot2::element_text(), ...) {
+make_label <- function(txt = "", x, y, xanchor = "left", yanchor = "bottom", 
+                       el = ggplot2::element_text(), ...) {
   if (is_blank(el) || is.null(txt) || nchar(txt) == 0 || length(txt) == 0) {
     return(NULL)
   }
-  angle <- el$angle %||% 0
+  x <- x + el$hjust
+  # vertical adjustment is only relevant when margins exist?
+  #y <- y + el$vjust
+  y <- y + unitConvert(el$margin, "npc", "height")[3]
+  #if (el$hjust == 1) browser()
   list(list(
     text = txt,
-    x = x,
+    x = x, 
     y = y,
-    showarrow = FALSE,
-    # TODO: hjust/vjust?
+    xanchor = xanchor, 
+    yanchor = yanchor, 
+    # approximate [0, 1] -> {1, 2, 3} -> {"left", "middle", "right"}
+    align = switch(round(el$hjust * 2, 0) + 1, "left", "middle", "right"),
     ax = 0,
     ay = 0,
+    showarrow = FALSE,
     font = text2font(el),
     xref = "paper",
     yref = "paper",
-    textangle = -angle,
+    textangle = - (el$angle %||% 0),
     ...
   ))
+}
+
+# assumes line breaks are specified via '\n'...
+nLineBreaks <- function(txt) {
+  if (length(txt) == 0) return(0)
+  if (!is.character(txt) && length(txt) != 1) {
+    stop("Must be a character string of length 1", call. = FALSE)
+  }
+  length(strsplit(txt, "\n", fixed = TRUE)[[1]])
 }
 
 has_facet <- function(x) {
@@ -1115,7 +1197,7 @@ text2font <- function(x = ggplot2::element_text(), type = "height") {
     color = toRGB(x$colour),
     family = x$family,
     # TODO: what about the size of vertical text?
-    size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", type)
+    size = unitConvert(grid::unit(x$size %||% 0, "pt"), "pixels", type)
   )
 }
 

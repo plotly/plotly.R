@@ -5,6 +5,7 @@ test_that("ggtitle is translated correctly", {
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ggtitle("My amazing plot!")
   info <- save_outputs(ggiris, "labels-ggtitle")
+  # TODO: change me to annotation to support justification
   expect_identical(info$layout$title, "My amazing plot!")
 })
 
