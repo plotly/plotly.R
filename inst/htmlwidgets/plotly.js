@@ -310,6 +310,7 @@ HTMLWidgets.widget({
       
       // On a plotly "clear" event, set crosstalk variable value to null
       graphDiv.on(x.highlight.off, function turnOff(e) {
+        removeBrush(el);
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
