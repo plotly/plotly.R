@@ -46,6 +46,86 @@ HTMLWidgets.widget({
 
     var graphDiv = document.getElementById(el.id);
     
+    // inject a "control panel" holding selectize/dynamic color widget(s)
+    if (x.selectize || x.highlight.dynamic) {
+      var flex = document.createElement("div");
+      flex.class = "plotly-crosstalk-control-panel";
+      flex.style = "display: flex; flex-wrap: wrap";
+      
+      // inject the colourpicker HTML container into the flexbox
+      if (x.highlight.dynamic) {
+        var pickerDiv = document.createElement("div");
+        
+        var pickerInput = document.createElement("input");
+        pickerInput.id = el.id + "-colourpicker";
+        pickerInput.placeholder = "asdasd";
+        
+        var pickerLabel = document.createElement("label");
+        pickerLabel.for = pickerInput.id;
+        pickerLabel.innerHTML = "Brush color&nbsp;&nbsp;";
+        
+        pickerDiv.appendChild(pickerLabel);
+        pickerDiv.appendChild(pickerInput);
+        flex.appendChild(pickerDiv);
+      }
+      
+      // inject selectize HTML containers (one for every crosstalk group)
+      if (x.selectize) {
+        var ids = Object.keys(x.selectize);
+        
+        for (var i = 0; i < ids.length; i++) {
+          var container = document.createElement("div");
+          container.id = ids[i];
+          container.style = "width: 80%; height: 10%";
+          container.class = "form-group crosstalk-input-plotly-highlight";
+          
+          var label = document.createElement("label");
+          label.for = ids[i];
+          label.innerHTML = x.selectize[ids[i]].group;
+          label.class = "control-label";
+          
+          var selectDiv = document.createElement("div");
+          var select = document.createElement("select");
+          select.multiple = true;
+          
+          selectDiv.appendChild(select);
+          container.appendChild(label);
+          container.appendChild(selectDiv);
+          flex.appendChild(container);
+        }
+      }
+      
+      // finally, insert the flexbox inside the htmlwidget container,
+      // but before the plotly graph div
+      graphDiv.parentElement.insertBefore(flex, graphDiv);
+      
+      if (x.highlight.dynamic) {
+        var picker = $("#" + pickerInput.id);
+        var colors = x.highlight.color || [];
+        // TODO: let users specify options?
+        var opts = {
+          value: colors[0],
+          showColour: "both",
+          palette: "limited",
+          allowedCols: colors.join(" "),
+          width: "20%",
+          height: "10%"
+        };
+        picker.colourpicker({changeDelay: 0});
+        picker.colourpicker("settings", opts);
+        // inform crosstalk about a change in the current selection colour
+        var grps = x.highlight.ctGroups || [];
+        picker.on("change", function() {
+          for (var i = 0; i < grps.length; i++) {
+            crosstalk.group(grps[i]).var('plotlySelectionColour')
+              .set(picker.colourpicker('value'));
+          }
+        })
+      }
+      
+      
+    }
+    
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
       
@@ -245,7 +325,8 @@ HTMLWidgets.widget({
               options: first.concat(items),
               searchField: "label",
               valueField: "value",
-              labelField: "label"
+              labelField: "label",
+              maxItems: 50
             };
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;

@@ -374,7 +374,7 @@ as_widget <- function(x, ...) {
 typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
     "typedarray", 0.1,
-    src = system.file("htmlwidgets", "lib", "typedarray", package = "plotly"),
+    src = depPath("typedarray"),
     script = "typedarray.min.js"
   )
 }
