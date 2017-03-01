@@ -86,11 +86,12 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     # NULL may be used to disable on/off events
     on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
     off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
+    persistent = persistent,
+    dynamic = dynamic,
     # TODO: convert to hex...see colourpicker:::formatHEX()
     color = toRGB(color),
-    dynamic = dynamic,
-    persistent = persistent,
     selectize = selectize,
+    defaultValues = defaultValues,
     opacityDim = opacityDim,
     hoverinfo = hoverinfo,
     showInLegend = showInLegend

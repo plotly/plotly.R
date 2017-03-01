@@ -201,8 +201,8 @@ supply_highlight_attrs <- function(p) {
   
   # use "global" options as the default, but override with non-default options
   # specified via highlight()
+  p$x$highlight <- p$x$highlight %||% hd
   for (opt in names(ctOpts)) {
-    p$x$highlight[[opt]] <- p$x$highlight[[opt]] %||% hd[[opt]]
     isDefault <- identical(p$x$highlight[[opt]], hd[[opt]])
     if (isDefault) p$x$highlight[[opt]] <- ctOpts[[opt]]
   }
