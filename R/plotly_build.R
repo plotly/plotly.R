@@ -34,15 +34,15 @@ plotly_build.gg <- function(p, registerFrames = TRUE) {
 
 #' @export
 plotly_build.plotly <- function(p, registerFrames = TRUE) {
-
+  
   # make this plot retrievable
   set_last_plot(p)
-
+  
   layouts <- Map(function(x, y) {
-
+    
     d <- plotly_data(p, y)
     x <- rapply(x, eval_attr, data = d, how = "list")
-
+    
     # if an annotation attribute is an array, expand into multiple annotations
     nAnnotations <- max(lengths(x$annotations) %||% 0)
     if (!is.null(names(x$annotations))) {
@@ -55,24 +55,24 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         x$annotations[[i]][["font"]] <- font
       }
     }
-
+    
     x[lengths(x) > 0]
-
+    
   }, p$x$layoutAttrs, names2(p$x$layoutAttrs))
-
+  
   # get rid of the data -> layout mapping
   p$x$layoutAttrs <- NULL
-
+  
   # accumulate, rather than override, annotations.
   annotations <- Reduce(c, c(
     list(p$x$layout$annotations),
     setNames(compact(lapply(layouts, "[[", "annotations")), NULL)
   ))
-
+  
   # merge layouts into a single layout (more recent layouts will override older ones)
   p$x$layout <- modify_list(p$x$layout, Reduce(modify_list, layouts))
   p$x$layout$annotations <- annotations
-
+  
   # keep frame mapping for populating layout.slider.currentvalue in animations
   frameMapping <- unique(unlist(
     lapply(p$x$attrs, function(x) deparse2(x[["frame"]])),
@@ -81,17 +81,17 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # Attributes should be NULL if none exist (rather than an empty list)
   if (length(p$x$attrs) == 0) p$x$attrs <- NULL
-
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
     p$x$attrs[[1]] <- NULL
   }
-
+  
   # have the attributes already been evaluated?
   is.evaled <- function(x) inherits(x, "plotly_eval")
   attrsToEval <- p$x$attrs[!vapply(p$x$attrs, is.evaled, logical(1))]
-
+  
   # trace type checking and renaming for plot objects
   if (is_mapbox(p) || is_geo(p)) {
     p <- geo2cartesian(p)
@@ -106,22 +106,22 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       tr
     })
   }
-
+  
   dats <- Map(function(x, y) {
-
+    
     # perform the evaluation
     dat <- plotly_data(p, y)
     trace <- structure(
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
     )
-
+    
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
     }
-
+    
     # if appropriate, tack on a group index
     grps <- tryCatch(
       as.character(dplyr::groups(dat)),
@@ -130,13 +130,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
-
+    
     # determine trace type (if not specified, can depend on the # of data points)
     # note that this should also determine a sensible mode, if appropriate
     trace <- verify_type(trace)
     # verify orientation of boxes/bars
     trace <- verify_orientation(trace)
-
+    
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
       nm <- paste0(i, "axis")
@@ -150,7 +150,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         }
       }
     }
-
+    
     if (inherits(trace, c("plotly_surface", "plotly_contour"))) {
       # TODO: generate matrix for users?
       # (1) if z is vector, and x/y are null throw error
@@ -159,7 +159,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         stop("`z` must be a numeric matrix", call. = FALSE)
       }
     }
-
+    
     # collect non-positional scales, plotly.js data_arrays, and "special"
     # array attributes for "data training"
     Attrs <- Schema$traces[[trace[["type"]]]]$attributes
@@ -182,12 +182,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     for (i in seq_along(tr)) {
       if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
     }
-
+    
     if (NROW(builtData) > 0) {
       # Build the index used to split one "trace" into multiple traces
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
-       # note: can only have one linetype per trace
+      # note: can only have one linetype per trace
       isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
@@ -220,26 +220,26 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         builtData[[".plotlyMissingIndex"]]
       )
       builtData <- arrange_safe(builtData,
-        c(".plotlyTraceIndex", ".plotlyGroupIndex",
-          if (inherits(trace, "plotly_line")) "x")
+                                c(".plotlyTraceIndex", ".plotlyGroupIndex",
+                                  if (inherits(trace, "plotly_line")) "x")
       )
       builtData <- train_data(builtData, trace)
       trace[[".plotlyVariableMapping"]] <- names(builtData)
-
+      
       # copy over to the trace data
       for (i in names(builtData)) {
         trace[[i]] <- builtData[[i]]
       }
     }
-
+    
     # TODO: provide a better way to clean up "high-level" attrs
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
     trace[lengths(trace) > 0]
-
+    
   }, attrsToEval, names2(attrsToEval))
-
+  
   p$x$attrs <- lapply(p$x$attrs, function(x) structure(x, class = "plotly_eval"))
-
+  
   # traceify by the interaction of discrete variables
   traces <- list()
   for (i in seq_along(dats)) {
@@ -248,7 +248,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     traces <- c(traces, traceify(d[!scaleAttrs], d$.plotlyTraceIndex))
     if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
   }
-
+  
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
     d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
@@ -275,7 +275,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   traces <- map_size(traces)
   traces <- map_symbol(traces)
   traces <- map_linetype(traces)
-
+  
   for (i in seq_along(traces)) {
     # remove special mapping attributes
     mappingAttrs <- c(
@@ -287,29 +287,22 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       traces[[i]][[j]] <- NULL
     }
   }
-
+  
   # .crossTalkKey -> key
   traces <- lapply(traces, function(x) {
     setNames(x, sub(crosstalk_key(), "key", names(x), fixed = TRUE))
   })
-
+  
   # it's possible that the plot object already has some traces
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
-
-  # if highlight() hasn't been called on this plot, populate it with defaults
-  hd <- highlight_defaults()
-  p$x$highlight <- p$x$highlight %||% hd
-
-  # inform the world about plotly's crosstalk config
-  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
-  p <- htmlwidgets::onRender(p, sprintf("function(el, x) {
-    var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s);
-  }", jsonlite::toJSON(ctOpts, auto_unbox = TRUE)))
-
+  
+  # supply linked highlighting options/features
+  p <- supply_highlight_attrs(p)
+  
   # supply trace anchor and domain information
   p <- supply_defaults(p)
-
+  
   # attribute naming corrections for "geo-like" traces
   p$x$data <- lapply(p$x$data, function(tr) {
     if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
@@ -319,11 +312,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     tr
   })
-
+  
   # polar charts don't like null width/height keys
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
   if (is.null(p$x$layout[["width"]])) p$x$layout[["width"]] <- NULL
-
+  
   # ensure we get the order of categories correct
   # (plotly.js uses the order in which categories appear by default)
   p <- populate_categorical_axes(p)
@@ -373,21 +366,21 @@ registerFrames <- function(p, frameMapping = NULL) {
     tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
     tr
   })
-
+  
   # the ordering of this object determines the ordering of the frames
   frameAttrs <- getLevels(unlist(lapply(p$x$data, "[[", "frame")))
   frameNames <- frameAttrs[!is.na(frameAttrs)]
   p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
-
+  
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
   traceNames <- strsplit(as.character(traceNames), "<br />")
   p$x$data <- Map(function(x, y) { x$name <- y[!y %in% frameAttrs]; x }, p$x$data, traceNames)
-
+  
   # exit in trivial cases
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
-
+  
   # set a "global" range of x/y (TODO: handle multiple axes?)
   x <- unlist(lapply(p$x$data, function(x) x[["x"]]))
   if (is.numeric(x)) {
@@ -407,7 +400,7 @@ registerFrames <- function(p, frameMapping = NULL) {
     }
     p$x$layout$yaxis$range <- p$x$layout$yaxis$range %||% extendrange(rng)
   }
-
+  
   # copy over "frame traces" over to the frames key (required by plotly.js API)
   for (i in seq_along(frameNames)) {
     thisFrame <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))
@@ -419,17 +412,17 @@ registerFrames <- function(p, frameMapping = NULL) {
       data = frameDat[vapply(frameDat, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))]
     )
   }
-
+  
   # remove "frame traces", except for the first one
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
   # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
-
+  
   p$x$frames <- lapply(p$x$frames, function(f) {
     f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
     f
   })
-
+  
   # populate layout.sliders.currentvalue with a sensible default
   defaultvalue <- if (length(frameMapping) == 1) {
     list(
@@ -441,7 +434,7 @@ registerFrames <- function(p, frameMapping = NULL) {
       )
     )
   } else NULL
-
+  
   # _always_ display an animation button and slider by default
   supply_ani_button(supply_ani_slider(p, currentvalue = defaultvalue))
 }
@@ -480,13 +473,13 @@ map_size <- function(traces) {
          "symbols only make sense for discrete variables", call. = FALSE)
   }
   sizeRange <- range(allSize, na.rm = TRUE)
-
+  
   types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
   modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasText <- has_text(types, modes)
-
+  
   for (i in which(nSizes > 0)) {
     s <- sizeList[[i]]
     isConstant <- inherits(s, "AsIs")
@@ -550,8 +543,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   hasZ <- has_attr(types, "colorscale") &
     any(vapply(traces, function(tr) {
       !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
-      }, logical(1)))
-
+    }, logical(1)))
+  
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
@@ -567,7 +560,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
     traces[[i]][[obj]] <- modify_list(list(fillcolor = rgb), traces[[i]][[obj]])
   }
-
+  
   if (any(isNumeric)) {
     palette <- traces[[1]][["colors"]] %||% viridisLite::viridis(10)
     # TODO: use ggstat::frange() when it's on CRAN?
@@ -656,7 +649,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
-
+  
   if (any(isDiscrete)) {
     # unlist() does _not_ preserve order factors
     isOrdered <- all(vapply(color[isDiscrete], is.ordered, logical(1)))
@@ -674,7 +667,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
     }
   }
-
+  
   # marker.line.color (stroke) inherits from marker.color (color)
   # TODO: allow users to control via a `stroke`` argument
   # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color
@@ -689,7 +682,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       }
     }
   }
-
+  
   traces
 }
 
@@ -705,9 +698,9 @@ map_symbol <- function(traces) {
   # get a sensible default palette (also throws warnings)
   pal <- setNames(scales::shape_pal()(length(lvls)), lvls)
   pal <- supplyUserPalette(pal, traces[[1]][["symbols"]])
-
+  
   validSymbols <- as.character(Schema$traces$scatter$attributes$marker$symbol$values)
-
+  
   for (i in which(nSymbols > 0)) {
     s <- symbolList[[i]]
     symbols <- pch2symbol(if (inherits(s, "AsIs")) s else as.character(pal[as.character(s)]))
@@ -744,12 +737,12 @@ map_linetype <- function(traces) {
   # get a sensible default palette
   pal <- setNames(scales::linetype_pal()(length(lvls)), lvls)
   pal <- supplyUserPalette(pal, traces[[1]][["linetypes"]])
-
+  
   validLinetypes <- as.character(Schema$traces$scatter$attributes$line$dash$values)
   if (length(pal) > length(validLinetypes)) {
     warning("plotly.js only supports 6 different linetypes", call. = FALSE)
   }
-
+  
   for (i in which(nLinetypes > 0)) {
     l <- linetypeList[[i]]
     dashes <- lty2dash(if (inherits(l, "AsIs")) l else as.character(pal[as.character(l)]))

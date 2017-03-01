@@ -1,7 +1,13 @@
 #' Highlight graphical elements in multiple linked views
 #' 
-#' For documentation and examples, see 
-#' \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+#' This function sets a variety of options for brushing (i.e., highlighting)
+#' plotly graphs. Use this function to set options (or populate widgets) 
+#' for a \emph{single} plot. When linking multiple plots, use 
+#' \code{\link{options}()} to set "global" options, where the option name 
+#' matches the relevant argument name. For instance, 
+#' to link multiple plots with \code{persistent} selection, set
+#' \code{options(persistent = TRUE)}. To see an example linking plotly to 
+#' leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
@@ -27,6 +33,7 @@
 #' @param showInLegend populate an additional legend entry for the selection?
 #' @export
 #' @author Carson Sievert
+#' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
 #' @examples
 #' 
 #' library(crosstalk)
@@ -47,13 +54,6 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
                       persistent = FALSE, dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
                       opacityDim = 0.2, hoverinfo = NULL, showInLegend = FALSE) {
-  p <- plotly_build(p)
-  keys <- unlist(lapply(p$x$data, "[[", "key"))
-  if (length(keys) == 0) {
-    warning("No 'key' attribute found. \n", 
-            "Linked interaction(s) aren't possible without a 'key' attribute.",
-            call. = FALSE)
-  }
   if (opacityDim < 0 || 1 < opacityDim) {
     stop("opacityDim must be between 0 and 1", call. = FALSE)
   }
@@ -82,48 +82,19 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
   }
   
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
-  p$x$highlight <- modify_list(
-    p$x$highlight,
-    list(
-      on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
-      off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
-      # TODO: convert to hex...see colourpicker:::formatHEX()
-      color = toRGB(color),
-      dynamic = dynamic,
-      persistent = persistent,
-      opacityDim = opacityDim,
-      hoverinfo = hoverinfo,
-      showInLegend = showInLegend
-    )
+  p$x$highlight <- list(
+    # NULL may be used to disable on/off events
+    on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
+    off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
+    # TODO: convert to hex...see colourpicker:::formatHEX()
+    color = toRGB(color),
+    dynamic = dynamic,
+    persistent = persistent,
+    selectize = selectize,
+    opacityDim = opacityDim,
+    hoverinfo = hoverinfo,
+    showInLegend = showInLegend
   )
-  
-  sets <- unlist(lapply(p$x$data, "[[", "set"))
-  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  p$x$highlight$ctGroups <- I(unique(sets))
-  
-  for (i in p$x$highlight$ctGroups) {
-    k <- unique(unlist(keys[names(keys) %in% i]))
-    if (is.null(k)) next
-    k <- k[!is.null(k)]
-    
-    # include one selectize dropdown per "valid" SharedData layer
-    if (selectize) {
-      p$x$selectize[[new_id()]] <- list(
-        items = data.frame(value = k, label = k), group = i
-      )
-    }
-    
-    # set default values via crosstalk api
-    vals <- defaultValues[defaultValues %in% k]
-    if (length(vals)) {
-      p <- htmlwidgets::onRender(
-        p, sprintf(
-          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
-          i, jsonlite::toJSON(vals, auto_unbox = FALSE)
-        )
-      )
-    }
-  }
   
   p
 }

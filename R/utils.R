@@ -188,6 +188,60 @@ supply_defaults <- function(p) {
   p
 }
 
+supply_highlight_attrs <- function(p) {
+  # set "global" options via crosstalk variable
+  hd <- highlight_defaults()
+  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
+  p <- htmlwidgets::onRender(
+    p, sprintf(
+      "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
+      jsonlite::toJSON(ctOpts, auto_unbox = TRUE)
+    )
+  )
+  
+  # use "global" options as the default, but override with non-default options
+  # specified via highlight()
+  for (opt in names(ctOpts)) {
+    p$x$highlight[[opt]] <- p$x$highlight[[opt]] %||% hd[[opt]]
+    isDefault <- identical(p$x$highlight[[opt]], hd[[opt]])
+    if (isDefault) p$x$highlight[[opt]] <- ctOpts[[opt]]
+  }
+  
+  # defaults are now populated, allowing us to populate some other 
+  # attributes such as the selectize widget definition
+  sets <- unlist(lapply(p$x$data, "[[", "set"))
+  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
+  p$x$highlight$ctGroups <- I(unique(sets))
+  
+  # TODO: throw warning if we don't detect valid keys?
+  for (i in p$x$highlight$ctGroups) {
+    k <- unique(unlist(keys[names(keys) %in% i]))
+    if (is.null(k)) next
+    k <- k[!is.null(k)]
+    
+    # include one selectize dropdown per "valid" SharedData layer
+    if (isTRUE(p$x$highlight$selectize)) {
+      p$x$selectize[[new_id()]] <- list(
+        items = data.frame(value = k, label = k), group = i
+      )
+    }
+    
+    # set default values via crosstalk api
+    vals <- p$x$highlight$defaultValues[p$x$highlight$defaultValues %in% k]
+    if (length(vals)) {
+      p <- htmlwidgets::onRender(
+        p, sprintf(
+          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
+          i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+        )
+      )
+    }
+  }
+  
+  p
+}
+
+
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
