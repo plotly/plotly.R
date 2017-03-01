@@ -113,14 +113,19 @@ HTMLWidgets.widget({
         };
         picker.colourpicker({changeDelay: 0});
         picker.colourpicker("settings", opts);
+        picker.colourpicker("value", opts.value);
         // inform crosstalk about a change in the current selection colour
         var grps = x.highlight.ctGroups || [];
+        for (var i = 0; i < grps.length; i++) {
+          crosstalk.group(grps[i]).var('plotlySelectionColour')
+            .set(picker.colourpicker('value'));
+        }
         picker.on("change", function() {
           for (var i = 0; i < grps.length; i++) {
             crosstalk.group(grps[i]).var('plotlySelectionColour')
               .set(picker.colourpicker('value'));
           }
-        })
+        });
       }
       
       
