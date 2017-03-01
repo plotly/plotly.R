@@ -39,7 +39,6 @@ Imports:
     tibble,
     lazyeval (>= 0.2.0),
     crosstalk,
-    colourpicker,
     purrr
 Suggests:
     MASS,
