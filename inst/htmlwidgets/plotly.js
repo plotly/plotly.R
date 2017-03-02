@@ -47,7 +47,7 @@ HTMLWidgets.widget({
     var graphDiv = document.getElementById(el.id);
     
     // inject a "control panel" holding selectize/dynamic color widget(s)
-    if (x.selectize || x.highlight.dynamic) {
+    if (x.selectize || x.highlight.dynamic && !instance.plotly) {
       var flex = document.createElement("div");
       flex.class = "plotly-crosstalk-control-panel";
       flex.style = "display: flex; flex-wrap: wrap";
