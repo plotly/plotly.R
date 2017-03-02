@@ -595,6 +595,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (i == 1) {
           traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
         }
+        axisObj$type <- "date"
       }
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
