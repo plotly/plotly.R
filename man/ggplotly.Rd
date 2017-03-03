@@ -79,13 +79,12 @@ SharedData$new(iris) \%>\%
 }
 
 }
-\author{
-Carson Sievert
-}
 \references{
 \url{https://plot.ly/ggplot2}
 }
 \seealso{
 \code{\link{plot_ly}()}
 }
-
+\author{
+Carson Sievert
+}

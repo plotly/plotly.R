@@ -22,4 +22,3 @@ embed_notebook(x, width = NULL, height = NULL,
 \description{
 Embed a plot as an iframe into a Jupyter Notebook
 }
-

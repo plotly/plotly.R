@@ -25,10 +25,9 @@ map_data("world", "canada") \%>\%
   add_markers(size = I(1))
 
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()}
 }
-
+\author{
+Carson Sievert
+}

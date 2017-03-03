@@ -14,4 +14,3 @@
 \description{
 Print a plotly grid object
 }
-

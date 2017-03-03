@@ -9,6 +9,7 @@
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Added support for the `GeomCol` and `GeomDotplot` **ggplot2** geoms.
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
+* R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
 
 ## BUG FIXES
@@ -17,7 +18,7 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.20.5 -- https://github.com/plotly/plotly.js/releases/tag/v1.20.5
+* Upgraded to plotly.js v1.22.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.22.0
 * `HTMLwidgets.renderValue()` now calls `Plotly.redraw()` instead of `Plotly.newPlot()`. (thanks @AleksandrIanevski)
 * A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824.
 * If no graphics device is already open, `ggplotly()` now tries to open/close a Cairo graphics device, then a bitmap (png/jpeg) device. If neither is available, it errors. This helps to ensure that a *screen* device is never opened by `ggplotly()` (which fixes #829). Furthermore, if `width`/`height` is not specified *and* no graphics device is currently open, a default of 640/480 is used for width/height of the device. 

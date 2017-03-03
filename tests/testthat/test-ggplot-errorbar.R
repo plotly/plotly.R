@@ -35,8 +35,8 @@ g <- p + geom_errorbar(aes(ymin = lower, ymax = upper))
 
 test_that("geom_errorbar boxes an array of length 1", {
   L <- save_outputs(g, "errorbar-unique-groups")
-  expect_equal(L$data[[1]]$error_y$array, 0.1)
-  expect_equal(L$data[[1]]$error_y$arrayminus, 0.2)
+  expect_equal(L$data[[1]]$error_y$array, I(0.1))
+  expect_equal(L$data[[1]]$error_y$arrayminus, I(0.2))
 })
 
 # TODO fix and add a test for width of errorbars

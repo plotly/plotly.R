@@ -16,4 +16,3 @@ This function was deprecated in  4.0.0,
 as plotly objects are now htmlwidget objects,
 so there is no need to convert them.
 }
-

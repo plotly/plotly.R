@@ -40,4 +40,3 @@ a 'built' plotly object (list with names "data" and "layout").
 \description{
 Convert a ggplot to a list.
 }
-

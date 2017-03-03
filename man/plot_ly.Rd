@@ -125,9 +125,6 @@ plot_ly(d, x = ~date, y = ~median, color = I("black")) \%>\%
 }
 
 }
-\author{
-Carson Sievert
-}
 \seealso{
 \itemize{
  \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
@@ -137,4 +134,6 @@ Carson Sievert
  \item
 }
 }
-
+\author{
+Carson Sievert
+}

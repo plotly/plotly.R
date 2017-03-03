@@ -14,4 +14,3 @@ get_figure(username, id)
 \description{
 Deprecated: see \link{plots_get}.
 }
-

@@ -22,4 +22,3 @@ sent to plotly.js.
 plotly_json(plot_ly())
 plotly_json(plot_ly(), FALSE)
 }
-

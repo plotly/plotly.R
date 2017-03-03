@@ -116,6 +116,11 @@ is_geo <- function(p) {
   identical(p$x$layout[["mapType"]], "geo")
 }
 
+is_type <- function(p, type) {
+  types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+  all(types %in% type)
+}
+
 # retrive mapbox token if one is set; otherwise, throw error
 mapbox_token <- function() {
   token <- Sys.getenv("MAPBOX_TOKEN", NA)
@@ -167,7 +172,14 @@ supply_defaults <- function(p) {
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
   } else {
-    for (axis in c("xaxis", "yaxis")) {
+    axes <- if (is_type(p, "scatterternary"))  {
+      c("aaxis", "baxis", "caxis") 
+    } else if (is_type(p, "pie")) {
+      NULL
+    } else {
+      c("xaxis", "yaxis")
+    }
+    for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
         list(domain = c(0, 1)), p$x$layout[[axis]]
       )
@@ -175,6 +187,60 @@ supply_defaults <- function(p) {
   }
   p
 }
+
+supply_highlight_attrs <- function(p) {
+  # set "global" options via crosstalk variable
+  hd <- highlight_defaults()
+  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
+  p <- htmlwidgets::onRender(
+    p, sprintf(
+      "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
+      jsonlite::toJSON(ctOpts, auto_unbox = TRUE)
+    )
+  )
+  
+  # use "global" options as the default, but override with non-default options
+  # specified via highlight()
+  p$x$highlight <- p$x$highlight %||% hd
+  for (opt in names(ctOpts)) {
+    isDefault <- identical(p$x$highlight[[opt]], hd[[opt]])
+    if (isDefault) p$x$highlight[[opt]] <- ctOpts[[opt]]
+  }
+  
+  # defaults are now populated, allowing us to populate some other 
+  # attributes such as the selectize widget definition
+  sets <- unlist(lapply(p$x$data, "[[", "set"))
+  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
+  p$x$highlight$ctGroups <- I(unique(sets))
+  
+  # TODO: throw warning if we don't detect valid keys?
+  for (i in p$x$highlight$ctGroups) {
+    k <- unique(unlist(keys[names(keys) %in% i]))
+    if (is.null(k)) next
+    k <- k[!is.null(k)]
+    
+    # include one selectize dropdown per "valid" SharedData layer
+    if (isTRUE(p$x$highlight$selectize)) {
+      p$x$selectize[[new_id()]] <- list(
+        items = data.frame(value = k, label = k), group = i
+      )
+    }
+    
+    # set default values via crosstalk api
+    vals <- p$x$highlight$defaultValues[p$x$highlight$defaultValues %in% k]
+    if (length(vals)) {
+      p <- htmlwidgets::onRender(
+        p, sprintf(
+          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
+          i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+        )
+      )
+    }
+  }
+  
+  p
+}
+
 
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
@@ -319,6 +385,27 @@ relay_type <- function(type) {
     "  Read more about this trace type -> https://plot.ly/r/reference/#", type
   )
   type
+}
+
+# Searches a list for character strings and translates R linebreaks to HTML 
+# linebreaks (i.e., '\n' -> '<br />'). JavaScript function definitions created 
+# via `htmlwidgets::JS()` are ignored
+translate_linebreaks <- function(p) {
+  recurse <- function(a) {
+    typ <- typeof(a)
+    if (typ == "list") {
+      # retain the class of list elements 
+      # which important for many things, such as colorbars
+      a[] <- lapply(a, recurse)
+    } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
+      attrs <- attributes(a)
+      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      attributes(a) <- attrs
+    }
+    a
+  }
+  p$x[] <- lapply(p$x, recurse)
+  p
 }
 
 verify_orientation <- function(trace) {

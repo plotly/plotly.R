@@ -22,7 +22,6 @@
 
 plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
                          scale = 1, out_file, ...) {
-  
   x <- plotly_build(x)[["x"]]
   
   bod <- list(

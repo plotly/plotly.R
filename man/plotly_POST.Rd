@@ -39,4 +39,3 @@ Deprecated: see \link{plots_create}.
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{signup}()}
 }
-

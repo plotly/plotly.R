@@ -14,4 +14,3 @@
 \description{
 Print a plot on plotly's platform
 }
-

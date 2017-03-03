@@ -36,4 +36,3 @@ plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
 \author{
 Carson Sievert
 }
-

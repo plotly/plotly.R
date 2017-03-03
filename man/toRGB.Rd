@@ -17,4 +17,3 @@ hexadecimal colour value (if is.na(x), return "transparent" for compatibility wi
 \description{
 Convert R colours to RGBA hexadecimal colour values
 }
-
