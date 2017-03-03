@@ -15,7 +15,6 @@
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
 #' @importFrom htmltools browsable tagList tags
-#' @importFrom colourpicker colourWidget
 #' @importFrom purrr transpose
 NULL
 
