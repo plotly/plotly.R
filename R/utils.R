@@ -215,7 +215,7 @@ supply_highlight_attrs <- function(p) {
   
   # TODO: throw warning if we don't detect valid keys?
   for (i in p$x$highlight$ctGroups) {
-    k <- unique(unlist(keys[names(keys) %in% i]))
+    k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
     if (is.null(k)) next
     k <- k[!is.null(k)]
     
