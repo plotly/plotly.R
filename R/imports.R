@@ -16,6 +16,7 @@
 #' @importFrom tibble as_tibble
 #' @importFrom htmltools browsable tagList tags
 #' @importFrom purrr transpose
+#' @importFrom tools file_ext file_path_sans_ext
 NULL
 
 

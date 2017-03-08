@@ -23,6 +23,7 @@ Depends:
     R (>= 3.2.0),
     ggplot2 (> 2.1.1)
 Imports:
+    tools,
     scales,
     httr,
     jsonlite,
@@ -57,7 +58,8 @@ Suggests:
     broom,
     webshot,
     listviewer,
-    dendextend
+    dendextend,
+    RSelenium
 LazyData: true
 RoxygenNote: 6.0.1
 Remotes:

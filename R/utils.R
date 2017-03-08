@@ -14,6 +14,16 @@ is.bare.list <- function(x) {
   is.list(x) && !is.data.frame(x)
 }
 
+is.evaled <- function(p) {
+  all(vapply(p$x$attrs, function(attr) inherits(attr, "plotly_eval"), logical(1)))
+}
+
+is.webgl <- function(p) {
+  if (!is.evaled(p)) p <- plotly_build(p)
+  types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+  any(types %in% c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud"))
+}
+
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
