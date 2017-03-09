@@ -15,8 +15,6 @@ expect_traces <- function(gg, n.traces, name){
 p <- ggplot(mtcars, aes(x=mpg, y=wt)) + 
 	geom_point()
 
-# p3 <- p + facet_wrap(~carb)
-
 test_that("Axis position moves to top", {
 	p <- p + scale_x_continuous(position="top")
   

@@ -595,19 +595,15 @@ gg2list <- function(p, width = NULL, height = NULL,
       non_default_side <- isTRUE(scales$get_scales(xy)[["position"]] != default_axis)
       
       ## Move axis and change anchor if necessary
-      if (has_facet(plot)) {
-        if (non_default_side) {
-          if (xy == "x") {
-            ## Facet labels are always on top, I hope???
-            axisObj[["ticklen"]] <- axisObj[["ticklen"]] + 
-              (unitConvert(stripText, "pixels", type) * 2.5)
-            if (nRows > 1) {
-              axisObj[["anchor"]] <- "y"
-            } 
-          } else if (xy == "y" && nCols > 1) {
-            axisObj[["anchor"]] <- paste0("x", nCols)
-            axisTitle[["angle"]] <- 270
-          }
+      if (has_facet(plot) & non_default_side) {
+        if (xy == "x") {
+          ## Facet labels are always on top, so add tick length to move past them
+          axisObj[["ticklen"]] <- axisObj[["ticklen"]] + 
+            (unitConvert(stripText, "pixels", type) * 2.5)
+          axisObj[["anchor"]] <- "y" 
+        } else if (xy == "y" && nCols > 1) {
+          axisObj[["anchor"]] <- paste0("x", nCols)
+          axisTitle[["angle"]] <- 270
         }
       }
 
@@ -636,7 +632,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
-        side <- if (xy == "x") "b" else "l"
+        if (non_default_side) {
+          side <- if (xy == "x") "t" else "r"
+        } else {
+          side <- if (xy == "x") "b" else "l"
+        }
         # account for axis ticks, ticks text, and titles in plot margins
         # (apparently ggplot2 doesn't support axis.title/axis.text margins)
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
