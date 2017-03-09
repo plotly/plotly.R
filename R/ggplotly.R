@@ -599,7 +599,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (xy == "x") {
           ## Facet labels are always on top, so add tick length to move past them
           axisObj[["ticklen"]] <- axisObj[["ticklen"]] + 
-            (unitConvert(stripText, "pixels", type) * 2.5)
+            (unitConvert(stripText, "pixels", type) * 3)
+
           axisObj[["anchor"]] <- "y" 
         } else if (xy == "y" && nCols > 1) {
           axisObj[["anchor"]] <- paste0("x", nCols)
