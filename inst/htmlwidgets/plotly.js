@@ -148,6 +148,8 @@ HTMLWidgets.widget({
       
       // TODO: restore crosstalk selections?
       Plotly.purge(graphDiv);
+      // TODO: why is this necessary to get crosstalk working?
+      graphDiv.data = x.data;
       var plot = Plotly.plot(graphDiv, x);
       
     }
