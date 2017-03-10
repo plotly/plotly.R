@@ -476,7 +476,9 @@ populate_categorical_axes <- function(p) {
     d <- lapply(p$x$data, "[[", axisType)
     isOnThisAxis <- function(tr) {
       is.null(tr[["geo"]]) && sub("axis", "", axisName) %in% 
-        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType)
+        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType) &&
+        # avoid reordering matrices (see #863)
+        !is.matrix(tr[["z"]])
     }
     d <- d[vapply(p$x$data, isOnThisAxis, logical(1))]
     if (length(d) == 0) next

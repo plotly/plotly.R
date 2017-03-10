@@ -315,7 +315,7 @@ sorted alphabetically before scales are applied. Also, when mapping a factor to 
 * Misspecified trace/layout attributes produce a warning.
 * New `plotly_data()` function for returning/inspecting data frame(s) associated with a plotly object.
 * New `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
-* `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
+* `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics::layout()` (fixes #464).
 
 ## OTHER CHANGES:
 
