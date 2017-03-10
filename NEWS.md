@@ -12,6 +12,7 @@
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
 * The `export()` function now tries it's best to export WebGL plots (via **RSelenium**). It also gains a `delay` argument.
+* The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
 
 ## CHANGES
 

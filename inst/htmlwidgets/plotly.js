@@ -146,6 +146,7 @@ HTMLWidgets.widget({
       // a new webgl context
       // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
       
+      // TODO: restore crosstalk selections?
       Plotly.purge(graphDiv);
       var plot = Plotly.plot(graphDiv, x);
       
