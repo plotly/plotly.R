@@ -6,7 +6,7 @@
 \alias{renderPlotly}
 \title{Shiny bindings for plotly}
 \usage{
-plotlyOutput(outputId, width = "100\%", height = "400px")
+plotlyOutput(outputId, width = "100\%", height = "400px", inline = FALSE)
 
 renderPlotly(expr, env = parent.frame(), quoted = FALSE)
 }
@@ -16,6 +16,9 @@ renderPlotly(expr, env = parent.frame(), quoted = FALSE)
 \item{width, height}{Must be a valid CSS unit (like \code{"100\%"},
 \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
 string and have \code{"px"} appended.}
+
+\item{inline}{use an inline (\code{span()}) or block container 
+(\code{div()}) for the output}
 
 \item{expr}{An expression that generates a plotly}
 
