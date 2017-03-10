@@ -584,7 +584,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = axisTitleText,
+        title = faced(axisTitleText, axisTitle$face),
         titlefont = text2font(axisTitle)
       )
       # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
