@@ -1,0 +1,8 @@
+Title: Passing plotly selections to shiny via crosstalk
+Author: Plotly, Inc.
+AuthorUrl: https://plot.ly/r/
+License: MIT
+DisplayMode: Showcase
+Tags: plotly, crosstalk, shiny
+Type: Shiny
+

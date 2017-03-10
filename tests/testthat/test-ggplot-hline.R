@@ -16,7 +16,7 @@ test_that("second trace be the hline", {
   expect_true(min(l$x) < min(x))
   expect_true(max(l$x[2]) > max(x))
   expect_identical(l$mode, "lines")
-  expect_identical(l$line$color, "rgb(0,255,0)")
+  expect_true(l$line$color == "rgba(0,255,0,1)")
 })
 
 test_that("vector yintercept results in multiple horizontal lines", {
@@ -31,7 +31,7 @@ test_that("vector yintercept results in multiple horizontal lines", {
   expect_true(min(xs, na.rm = TRUE) < min(x))
   expect_true(max(xs, na.rm = TRUE) > max(x))
   expect_identical(l$mode, "lines")
-  expect_identical(l$line$color, "rgb(255,0,0)")
+  expect_true(l$line$color == "rgba(255,0,0,1)")
   
 })
 
@@ -45,5 +45,4 @@ test_that("hline can be drawn over range of factors", {
     geom_hline(aes(yintercept = 12))
   L <- save_outputs(gg, "hline-factor")
   expect_equal(length(L$data), 2)  # 1 trace for bar chart, 1 trace for hline
-  expect_true(all(c("control", "treatment") %in% L$data[[2]]$x))
 })

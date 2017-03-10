@@ -35,7 +35,37 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
+  # this makes it possible to pass a ggplot2 object to renderPlotly()
   # https://github.com/ramnathv/htmlwidgets/issues/166#issuecomment-153000306
-  expr <- call("as.widget", expr)
+  expr <- as.call(list(call("::", quote("plotly"), quote("ggplotly")), expr))
   shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+}
+
+
+#' Access plotly user input event data in shiny
+#' 
+#' This function must be called within a reactive shiny context.
+#' 
+#' @param event The type of plotly event. Currently 'plotly_hover',
+#' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
+#' @param source a character string of length 1. Match the value of this string 
+#' with the source argument in \code{\link{plot_ly}()} to retrieve the 
+#' event data corresponding to a specific plot (shiny apps can have multiple plots).
+#' @param session a shiny session object (the default should almost always be used).
+#' @export
+#' @author Carson Sievert
+#' @examples \dontrun{
+#' shiny::runApp(system.file("examples", "plotlyEvents", package = "plotly"))
+#' }
+
+event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
+                                 "plotly_relayout"), source = "A",
+                       session = shiny::getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("No reactive domain detected. This function can only be called \n",
+         "from within a reactive shiny context.")
+  }
+  src <- sprintf(".clientValue-%s-%s", event[1], source)
+  val <- session$rootScope()$input[[src]]
+  if (is.null(val)) val else jsonlite::fromJSON(val)
 }

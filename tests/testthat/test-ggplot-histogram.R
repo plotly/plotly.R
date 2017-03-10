@@ -1,7 +1,6 @@
 context("Histogram")
 
 expect_traces <- function(gg, n.traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("histogram-", name))
   all.traces <- L$data
@@ -10,7 +9,7 @@ expect_traces <- function(gg, n.traces, name) {
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data = has.data, layout = L$layout)
 }
 
 base <- ggplot(mtcars, aes(wt))
@@ -18,7 +17,7 @@ base <- ggplot(mtcars, aes(wt))
 test_that("geom_histogram() is a bar chart of counts with no bargap", { 
   info <- expect_traces(base + geom_histogram(), 1, "counts")
   expect_identical(info$layout$bargap, 0)
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_identical(tr$type, "bar")
   expect_equal(sum(tr$y), nrow(mtcars))
 })
@@ -26,7 +25,7 @@ test_that("geom_histogram() is a bar chart of counts with no bargap", {
 test_that("geom_histogram(aes(y = ..density..)) displays a density", { 
   info <- expect_traces(base + geom_histogram(aes(y=..density..)), 1, "density")
   expect_identical(info$layout$bargap, 0)
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   expect_identical(tr$type, "bar")
   #default binwidth
   bw <- (max(tr$x) - min(tr$x))/30
@@ -38,10 +37,11 @@ test_that("geom_histogram(aes(y = ..density..)) displays a density", {
 
 test_that("geom_histogram(aes(fill = ..count..)) works", {
   info <- expect_traces(base + geom_histogram(aes(fill = ..count..)), 6, "fill")
-  tr <- info$traces
+  # grab just the bar traces (there should also be a colorbar)
+  bars <- info$data[sapply(info$data, "[[", "type") == "bar"]
   # each traces should have the same value of y
-  for (i in seq_along(tr)) {
-    ys <- tr[[i]]$y
+  for (i in seq_along(bars)) {
+    ys <- bars[[i]]$y
     expect_equal(length(unique(ys)), 1)
   }
 })
@@ -49,15 +49,15 @@ test_that("geom_histogram(aes(fill = ..count..)) works", {
 test_that("Histogram with fixed colour/fill works", {
   gg <- base + geom_histogram(colour = "darkgreen", fill = "white")
   info <- expect_traces(gg, 1, "fixed-fill-color")
-  tr <- info$traces[[1]]
-  expect_identical(tr$marker$color, "rgb(255,255,255)")
-  expect_identical(tr$marker$line$color, "rgb(0,100,0)")
+  tr <- info$data[[1]]
+  expect_true(tr$marker$color == "rgba(255,255,255,1)")
+  expect_true(tr$marker$line$color == "rgba(0,100,0,1)")
 })
 
 test_that("Specify histogram binwidth", {
   gg <- base + geom_histogram(aes(y=..density..), binwidth = 0.3)
   info <- expect_traces(gg, 1, "density-binwidth")
-  tr <- info$traces[[1]]
+  tr <- info$data[[1]]
   area <- sum(tr$y) * 0.3
   expect_equal(area, 1, 0.1)
 })
@@ -65,80 +65,58 @@ test_that("Specify histogram binwidth", {
 test_that("geom_histogram(aes(fill = factor(...))) is a stacked by default", {
   gg <- base + geom_histogram(aes(fill = factor(vs)))
   info <- expect_traces(gg, 2, "fill-factor")
-  trs <- info$traces
-  type <- unique(sapply(trs, "[[", "type"))
-  gap <- unique(sapply(trs, "[[", "bargap"))
-  barmode <- unique(sapply(trs, "[[", "barmode"))
-  expect_identical(type, "bar")
-  expect_equal(gap, 0)
-  expect_equal(barmode, "stack")
+  expect_equal(info$layout$bargap, 0)
+  expect_equal(info$layout$barmode, "stack")
 })
 
 test_that("geom_histogram(aes(fill = factor(...))) respects position_identity()", {
   gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3,
                               position = "identity")
   info <- expect_traces(gg, 2, "fill-factor-identity")
-  trs <- info$traces
-  type <- unique(sapply(trs, "[[", "type"))
-  gap <- unique(sapply(trs, "[[", "bargap"))
-  barmode <- unique(sapply(trs, "[[", "barmode"))
-  expect_identical(type, "bar")
-  expect_equal(gap, 0)
-  expect_equal(barmode, "overlay")
+  expect_equal(info$layout$bargap, 0)
+  expect_equal(info$layout$barmode, "overlay")
 })
 
 test_that("geom_histogram(aes(fill = factor(...))) respects position_dodge()", {
   gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3,
                               position = "dodge")
   info <- expect_traces(gg, 2, "fill-factor-dodge")
-  trs <- info$traces
-  type <- unique(sapply(trs, "[[", "type"))
-  gap <- unique(sapply(trs, "[[", "bargap"))
-  barmode <- unique(sapply(trs, "[[", "barmode"))
-  expect_identical(type, "bar")
-  expect_equal(gap, 0)
-  expect_equal(barmode, "group")
+  expect_equal(info$layout$bargap, 0)
+  expect_equal(info$layout$barmode, "stack")
 })
 
 test_that("geom_histogram() with facets", {
   gg <- base + geom_histogram(aes(fill = factor(vs)), alpha = 0.3) + 
     facet_wrap(~am)
   info <- expect_traces(gg, 4, "fill-factor-facets")
-  trs <- info$traces
+  trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))
   gap <- unique(sapply(trs, "[[", "bargap"))
   barmode <- unique(sapply(trs, "[[", "barmode"))
   expect_identical(type, "bar")
-  expect_equal(gap, 0)
-  expect_equal(barmode, "stack")
+  expect_equal(info$layout$bargap, 0)
+  expect_equal(info$layout$barmode, "stack")
 })
 
 test_that("vline overlaid histogram", {
   gg <- base + geom_histogram() +
     geom_vline(aes(xintercept=mean(wt)), color="red", linetype="dashed", size=1)
   info <- expect_traces(gg, 2, "vline")
-  trs <- info$traces
+  trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))
   expect_identical(sort(type), c("bar", "scatter"))
 })
 
-
-
-
 # Non-numeric (date) data
-noram <- data.frame(month=c("2012-01-01", "2012-02-01", "2012-01-01",
-                            "2012-01-01", "2012-03-01", "2012-02-01"))
+noram <- data.frame(
+  month = c("2012-01-01", "2012-02-01", "2012-01-01", "2012-01-01", 
+            "2012-03-01", "2012-02-01")
+)
 noram$month <- as.Date(noram$month)
 
 test_that("dates work well with histograms", {
   hist <- ggplot(noram, aes(month)) + geom_histogram()
   info <- expect_traces(hist, 1, "dates")
-  expect_identical(info$layout$xaxis$type, "date")
-  #test <- with(info[[1]], setNames(y, x))
-  #true <- table(noram$month)
-  # these are off by 1 day, not sure why, but I don't think it's worth
-  # worrying about
-  #expect_identical(test[test > 0], true)
 })
 
 # Non-numeric (date) data, specifying binwidth
@@ -244,16 +222,14 @@ killed <- data.frame(date=c("2014-12-24",
 
 test_that("datetime binning for class POSIXt works in histograms", {
   kP <- killed
-  kP$date <- as.POSIXlt(kP$date)
-  histP <- ggplot(kP, aes(x=date)) + geom_histogram(binwidth=2592000)
+  kP$date <- as.POSIXct(kP$date)
+  histP <- ggplot(kP, aes(x = date)) + geom_histogram(binwidth = 2592000)
   info <- expect_traces(histP, 1, "POSIXt-bins")
-  expect_identical(info$layout$xaxis$type, "date")
 })
 
 test_that("datetime binning for class Date works in histograms", {
   kD <- killed
   kD$date <- as.Date(kD$date)
-  histD <- ggplot(kD, aes(x=date)) + geom_histogram(binwidth=30)
+  histD <- ggplot(kD, aes(x = date)) + geom_histogram(binwidth = 30)
   info <- expect_traces(histD, 1, "Date-bins")
-  expect_identical(info$layout$xaxis$type, "date")
 })

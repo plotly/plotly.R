@@ -4,7 +4,7 @@
 \alias{plotly_IMAGE}
 \title{Create/Modify plotly images}
 \usage{
-plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 4,
+plotly_IMAGE(x, width = 1000, height = 500, format = "png", scale = 1,
   out_file, ...)
 }
 \arguments{
@@ -36,4 +36,3 @@ Pdf <- plotly_IMAGE(p, format = "pdf",  out_file = "plotly-test-image.pdf")
 }
 
 }
-

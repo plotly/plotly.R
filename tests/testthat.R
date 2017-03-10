@@ -12,9 +12,11 @@ if (report_diffs || build_table) {
   message("Spinning up an independent R session with plotly's master branch installed")
   Rserve::Rserve(args = "--vanilla --RS-enable-remote")
   conn <- RSconnect()
-  # master version should _always_ depend on the CRAN version of ggplot2
-  RSeval(conn, "library(methods); options(repos = c(CRAN = 'https://cran.rstudio.com/'))")
-  RSeval(conn, "install.packages('ggplot2')")
+  # ensure the seed is the same for randomized tests
+  set.seed(1)
+  RSeval(conn, "set.seed(1)")
+  # we don't make assumptions about ggplot2 versioning,
+  # but it is _strongly_ recommended to use the CRAN version (of ggplot2)
   RSeval(conn, "devtools::install_github('ropensci/plotly')")
   RSeval(conn, "library(plotly)")
   if (report_diffs) {
@@ -25,6 +27,19 @@ if (report_diffs || build_table) {
     master_hash <- substr(master_hash, 1, 7)
     # plotly-test-table repo hosts the diff pages & keeps track of previous versions
     table_dir <- normalizePath("../../plotly-test-table", mustWork = T)
+    # Make sure we have appropriate versions of plotlyjs
+    # (see plotly-test-table/template/template/index.html)
+    file.copy(
+      file.path("..", "inst", "htmlwidgets", "lib", "plotlyjs", "plotly-latest.min.js"),
+      file.path(table_dir, "template", "New.min.js"),
+      overwrite = TRUE
+    )
+    download.file(
+      "https://raw.githubusercontent.com/ropensci/plotly/master/inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", 
+      file.path(table_dir, "template", "Old.min.js"),
+      method = "curl"
+    )
+    # directory for placing test differences
     this_dir <- file.path(table_dir, this_hash)
     if (dir.exists(this_dir)) {
       message("Tests were already run on this commit. Nuking the old results...")
@@ -42,12 +57,23 @@ if (report_diffs || build_table) {
   }
 }
 
+# Some tests make plot.ly HTTP requests and require a valid user account
+# (see test-plotly-filename.R). For security reasons, these tests should be 
+# skipped on pull requests (the .travis.yml file uses encrypted credentials
+# & encrypted environment vars cannot be accessed on pull request builds)
+skip_on_pull_request <- function() {
+  if (!grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))) {
+    return(invisible(TRUE))
+  }
+  skip("Can't test plot.ly API calls on a pull request")
+}
+
 # This function is called within testthat/test-*.R files.
 # It takes a ggplot or plotly object as input, and it returns a figure
 # object (aka the data behind the plot).
 save_outputs <- function(gg, name) {
   print(paste("Running test:", name))
-  p <- plotly_build(gg)
+  p <- plotly_build(gg)$x[c("data", "layout")]
   has_diff <- if (report_diffs) {
     # save a hash of the R object
     plot_hash <- digest::digest(p)
@@ -58,14 +84,8 @@ save_outputs <- function(gg, name) {
     !isTRUE(plot_hash == test_info$hash)
   } else FALSE
   if (has_diff || build_table) {
-    # hack to transfer workspace to the other R session
-    rs_assign <- function(obj, name) RSassign(conn, obj, name)
-    res <- mapply(rs_assign, mget(ls()), ls())
-    # also need to transfer over the plotly environment to enable NSE
-    res <- RSassign(conn, plotly:::plotlyEnv, "plotlyEnv")
-    res <- RSeval(conn, "unlockBinding('plotlyEnv', asNamespace('plotly'))")
-    res <- RSeval(conn, "assign('plotlyEnv', plotlyEnv, pos = asNamespace('plotly'))")
-    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg), error = function(e) 'plotly build error')")
+    RSassign(conn, gg)
+    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg)$x[c('data', 'layout')], error = function(e) e$message)")
     if (build_table) {
       # save pngs of ggplot
       filename <- paste0(gsub("\\s+", "-", name), ".png")
@@ -104,9 +124,7 @@ save_outputs <- function(gg, name) {
       dir.create(test_dir, recursive = T)
       # copy over diffing template
       file.copy(
-        file.path(table_dir, "template", "template", "index.html"), 
-        test_dir, 
-        recursive = T
+        dir(file.path(table_dir, "template", "template"), full.names = TRUE), test_dir
       )
       # overwrite the default JSON
       writeLines(

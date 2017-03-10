@@ -21,8 +21,8 @@
 #' 
 
 plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
-                         scale = 4, out_file, ...) {
-  x <- plotly_build(x)
+                         scale = 1, out_file, ...) {
+  x <- plotly_build(x)[["x"]]
   
   bod <- list(
     figure = x[c("data", "layout")],
@@ -32,10 +32,10 @@ plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png",
     scale = scale,
     encoded = FALSE
   )
-  base_url <- paste0(get_domain("v2"), "images")
+  base_url <- file.path(get_domain("api"), "v2", "images")
   resp <- httr::POST(base_url, plotly_headers("v2"), body = to_JSON(bod), 
-                     if (!missing(out_file)) write_disk(out_file, overwrite = TRUE), 
+                     if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE), 
                      ...)
-  con <- process(struct(resp, "image"))
+  con <- process(append_class(resp, "image"))
   invisible(con)
 }

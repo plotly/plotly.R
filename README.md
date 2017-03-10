@@ -2,7 +2,7 @@
 
 # plotly
 
-An R package for creating interactive web-based graphs via [plotly](https://plot.ly/)'s JavaScript graphing library. 
+An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
 
 ## Installation
 
@@ -18,43 +18,51 @@ Or install the latest development version (on GitHub) via devtools:
 devtools::install_github("ropensci/plotly")
 ```
 
-## Introduction
+## Getting Started
 
-If you use [ggplot2](http://cran.r-project.org/package=ggplot2), use `ggplotly()` to convert your ggplot to an interactive, web-based version!
+### Web-based ggplot2 graphics
+
+If you use [ggplot2](https://github.com/hadley/ggplot2), `ggplotly()` converts your plots to an interactive, web-based version! It also provides sensible tooltips, which assists decoding of values encoded as visual properties in the plot.
 
 ```r
 library(plotly)
-set.seed(100)
-d <- diamonds[sample(nrow(diamonds), 1000), ]
-p <- ggplot(data = d, aes(x = carat, y = price)) + 
-  geom_point(aes(text = paste("Clarity:", clarity))) +
-  geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
-(gg <- ggplotly(p))
+g <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon") + 
+  xlim(1, 6) + ylim(40, 100)
+ggplotly(g)
 ```
 
-![https://plot.ly/~agvd/1153](http://i.imgur.com/tbKybEb.png)
+![https://plot.ly/~cpsievert/9836](http://i.imgur.com/6G4zv7b.png)
 
-[Click here](https://plot.ly/~agvd/1153) to interact with the resulting graph (notice the custom hover text!)
+If you'd like to see how `ggplotly()` does in converting different ggplot2 examples, we host a [plotly version](http://ropensci.github.io/plotly/ggplot2/) of the [official ggplot2 documentation](http://docs.ggplot2.org). We also have some of our own examples [here](https://plot.ly/ggplot2/).
 
-__plotly__ also supports certain chart types that ggplot2 doesn't support (such as 3D [surface](https://plot.ly/r/3d-surface-plots/), [point](https://plot.ly/r/3d-scatter-plots/), and [line](https://plot.ly/r/3d-line-plots/) plots). You can easily create these (or any other plotly) charts using the high-level interface. 
+### plotly's custom R interface
+
+[plotly.js](https://github.com/plotly/plotly.js) supports some chart types that ggplot2 doesn't (our [cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) provides a nice summary of the available chart types). You can create any of these charts via `plot_ly()`.
 
 ```r
-plot_ly(z = volcano, type = "surface")
+plot_ly(z = ~volcano, type = "surface")
 ```
 
 ![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
 
-The `ggplotly()` function converts a ggplot object to a plotly object, so if you like, you may 'post-process' your ggplot graphs to add custom plotly features, for example:
+We have a number of [vignettes](https://ropensci.github.io/plotly/) which explain the `plot_ly()` interface in depth as well as numerous examples on the [plotly website](https://plot.ly/r/#basic-charts) and [bundled with the package](https://github.com/ropensci/plotly/tree/master/inst/examples).
 
-```r
-layout(gg, hovermode = "closest")
-```
+### Capturing plotly events
 
-## Documentation
+[plotly.js](https://github.com/plotly/plotly.js) exposes a number of 'standard' events that work consistently across plot types. It's easy to hook into these events using the `event_data()` function in shiny apps, as these examples demonstrate:
 
-* [An introduction to plotly's R API](https://cran.r-project.org/web/packages/plotly/vignettes/intro.html)
-* Examples and vignettes on plotly's R homepage - <https://plot.ly/r>
-* The complete figure reference guide - <https://plot.ly/r/reference>
+1. [2D events](http://104.131.111.111:3838/plotlyEvents/) ([source](https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyEvents))
+2. [Linked Clicks](http://104.131.111.111:3838/plotlyLinkedClick/) ([source](https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyLinkedClick))
+3. [Linked Brush](http://104.131.111.111:3838/plotlyLinkedBrush/) ([source](https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyLinkedBrush))
+
+![http://104.131.111.111:3838/plotlyLinkedBrush/](http://i.imgur.com/eVqsZma.gif)
+
+You can also hook into these events without shiny using `htmlwidgets::onRender()` ([example](https://github.com/ropensci/plotly/tree/master/inst/examples/onRenderHover)). This, however, requires JavaScript knowledge and makes it much harder to coordinate views between htmlwidgets.
+
+## Learn more
+
+We have lots of examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive review is also available at <https://cpsievert.github.io/plotly_book/>
 
 ## Contributing
 

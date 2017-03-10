@@ -1,7 +1,6 @@
 context("Probability density")
 
 expect_traces <- function(gg, n.traces, name) {
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("density-", name))
   all.traces <- L$data
@@ -20,17 +19,20 @@ test_that("geom_density() is translated to area chart", {
   info <- expect_traces(base + geom_density(), 1, "simple")
   tr <- info$data[[1]]
   expect_identical(tr$type, "scatter")
-  expect_identical(tr$fill, "tozeroy")
+  expect_identical(tr$mode, "lines")
+  expect_identical(tr$fill, "toself")
 })
 
 test_that("geom_density() respects fill aesthetic", {
-  gg <- base + geom_density(aes(fill=factor(vs)), alpha = 0.3)
+  gg <- base + geom_density(aes(fill = factor(vs)), alpha = 0.3)
   info <- expect_traces(gg, 2, "fill")
   trs <- info$data
-  type <- unique(sapply(trs, "[[", "type"))
-  fill <- unique(sapply(trs, "[[", "fill"))
-  expect_identical(type, "scatter")
-  expect_identical(fill, "tozeroy")
+  expect_identical(
+    unique(sapply(trs, "[[", "type")), "scatter"
+  )
+  expect_identical(
+    unique(sapply(trs, "[[", "fill")), "toself"
+  )
   # check legend exists
   expect_true(info$layout$showlegend, TRUE)
   # check legend for each fill exists
@@ -40,10 +42,12 @@ test_that("geom_density() respects fill aesthetic", {
 test_that("geom_density() respects colour aesthetic", {
   info <- expect_traces(base + geom_density(aes(colour=factor(vs))), 2, "color")
   trs <- info$data
-  type <- unique(sapply(trs, "[[", "type"))
-  fill <- unique(sapply(trs, "[[", "fill"))
-  expect_identical(type, "scatter")
-  expect_identical(fill, "tozeroy")
+  expect_identical(
+    unique(sapply(trs, "[[", "type")), "scatter"
+  )
+  expect_identical(
+    unique(sapply(trs, "[[", "fill")), "toself"
+  )
 })
 
 g <- base + 
@@ -64,7 +68,7 @@ p <- ggplot(data = mtcars, aes(x = mpg, fill = factor(cyl))) +
 
 test_that("traces are ordered correctly in geom_density", {
   info <- expect_traces(p, 3, "traces_order")
-  nms <- sapply(info$data, "[[", "name")
-  expect_identical(nms, c("8", "6", "4"))
+  nms <- as.character(sapply(info$data, "[[", "name"))
+  expect_identical(nms, c("4", "6", "8"))
 })
 

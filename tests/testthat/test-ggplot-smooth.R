@@ -1,7 +1,6 @@
 context("smooth")
 
 expect_traces <- function(gg, n.traces, name){
-  stopifnot(is.ggplot(gg))
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(gg, paste0("smooth-", name))
   all.traces <- L$data
@@ -10,7 +9,7 @@ expect_traces <- function(gg, n.traces, name){
   })
   has.data <- all.traces[!no.data]
   expect_equal(length(has.data), n.traces)
-  list(traces=has.data, layout=L$layout)
+  list(data = has.data, layout = L$layout)
 }
 
 p <- ggplot(mtcars, aes(mpg, wt)) + geom_point() + geom_smooth()
@@ -37,21 +36,22 @@ p4 <- qplot(carat, price, colour = cut, data = d) + geom_smooth()
 p5 <- qplot(carat, price, data = d) + geom_smooth(aes(colour = cut))
 
 test_that("geom_smooth() respects colour aesthetic", {
-  info <- expect_traces(p4, 11, "colour")
-  # number of showlegends should equal the number of factor levels 
-  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
-  expect_equal(n, nlevels(d$cut))
-  info <- expect_traces(p5, 7, "colour2")
-  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
-  expect_equal(n, nlevels(d$cut))
+  info <- expect_traces(p4, 15, "colour")
+  
+  # 5 traces of points
+  expect_equal(
+    sum(vapply(info$data, function(x) x$mode == "markers", logical(1))), 5
+  )
+  # at least 5 paths
+  expect_true(
+    sum(vapply(info$data, function(x) x$mode == "lines", logical(1))) > 5
+  )
 })
 
 p7 <- qplot(carat, price, data = d) + geom_smooth(aes(fill = cut))
 
 test_that("geom_smooth() respects fill aesthetic", {
-  info <- expect_traces(p7, 7, "fill2")
-  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
-  expect_equal(n, nlevels(d$cut))
+  info <- expect_traces(p7, 11, "fill2")
 })
 
 # ensure legend is drawn when needed
@@ -61,7 +61,5 @@ p8 <- qplot(carat, price, data = d) + facet_wrap(~cut) +
 test_that("geom_smooth() works with facets", {
   # 3 traces for each panel
   info <- expect_traces(p8, 15, "facet")
-  n <- sum(unlist(sapply(info$traces, "[[", "showlegend")))
-  expect_equal(n, nlevels(d$cut))
 })
 

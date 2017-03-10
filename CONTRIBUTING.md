@@ -2,13 +2,7 @@
 
 ## Opening issues
 
-Search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/ropensci/plotly/issues/new)
-
-Bug reports __must__ have a [reproducible example](http://adv-r.had.co.nz/Reproducibility.html) and include the output of `devtools::session_info()` (instead of `sessionInfo()`).
-
-GitHub issues are great for reporting bugs and requesting new features, but implementation questions are better suited for Stack Overflow (tagged
-[`plotly`](https://stackoverflow.com/questions/tagged/plotly)) or on
-community.plot.ly (tagged [`plotly-js`](http://community.plot.ly/c/plotly-js)).
+See the [opening issues template](https://github.com/ropensci/plotly/blob/master/.github/ISSUE_TEMPLATE.md)
 
 ## Development guidelines
 
@@ -23,10 +17,16 @@ Sys.setenv('TRAVIS_COMMIT' = substr(system('git rev-parse HEAD', intern = T), 1,
 devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 ```
 
-You can also build a ggplot2/plotly comparison table:
+You can also build a ggplot2/plotly comparison table. To do so, you'll first need to clone the [plotly-test-table](https://github.com/cpsievert/plotly-test-table) repo.
+
+```shell
+$ git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
+```
+
+Then, from R:
 
 ```r
-Sys.setenv('PLOTLY_TEST' = 'TRUE')
+Sys.setenv('PLOTLY_TABLE' = 'TRUE')
 devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
 ```
 

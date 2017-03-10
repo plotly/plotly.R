@@ -1,5 +1,4 @@
 context("Vline")
-# Vertical line
 
 x <- seq(0, 3.5, by = 0.5)
 y <- x * 0.95
@@ -16,8 +15,8 @@ test_that("second trace be the vline", {
   expect_equal(l$x[1], 1.1)
   expect_true(l$y[1] <= 0)
   expect_true(l$y[2] >= 3.325)
-  expect_identical(l$mode, "lines")
-  expect_identical(l$line$color, "rgb(0,255,0)")
+  expect_true(l$mode == "lines")
+  expect_true(l$line$color == "rgba(0,255,0,1)")
 })
 
 test_that("vector xintercept results in multiple vertical lines", {
@@ -31,6 +30,6 @@ test_that("vector xintercept results in multiple vertical lines", {
   expect_identical(xs, c(1, NA, 2))
   expect_true(min(ys, na.rm = TRUE) <= min(y))
   expect_true(max(ys, na.rm = TRUE) >= max(y))
-  expect_identical(l$mode, "lines")
-  expect_identical(l$line$color, "rgb(0,0,255)")
+  expect_true(l$mode == "lines")
+  expect_true(l$line$color == "rgba(0,0,255,1)")
 })

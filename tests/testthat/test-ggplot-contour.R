@@ -6,13 +6,10 @@ names(volcano3d) <- c("x", "y", "z")
 gg <- ggplot(volcano3d) + geom_contour(aes(x=x, y=y, z=z))
 L <- save_outputs(gg, "contour")
 
-test_that("geom_contour is translated to type=contour", {
+test_that("geom_contour is translated to a path", {
   expect_equal(length(L$data), 1)
-  expect_identical(L$data[[1]]$type, "contour")
-})
-
-test_that("geom_contour uses line contours by default", {
-  expect_identical(L$data[[1]]$contours$coloring, "lines")
+  expect_identical(L$data[[1]]$type, "scatter")
+  expect_identical(L$data[[1]]$mode, "lines")
 })
 
 

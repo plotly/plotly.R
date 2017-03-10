@@ -4,15 +4,39 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p)
+gg2list(p, width = NULL, height = NULL, tooltip = "all",
+  dynamicTicks = FALSE, layerData = 1, originalData = TRUE,
+  source = "A", ...)
 }
 \arguments{
 \item{p}{ggplot2 plot.}
+
+\item{width}{Width of the plot in pixels (optional, defaults to automatic sizing).}
+
+\item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
+
+\item{tooltip}{a character vector specifying which aesthetic tooltips to show in the
+tooltip. The default, "all", means show all the aesthetic tooltips
+(including the unofficial "text" aesthetic).}
+
+\item{dynamicTicks}{should plotly.js dynamically generate axis tick labels? 
+Dynamic ticks are useful for updating ticks in response to zoom/pan
+interactions; however, they can not always reproduce labels as they 
+would appear in the static ggplot2 image.}
+
+\item{layerData}{data from which layer should be returned?}
+
+\item{originalData}{should the "original" or "scaled" data be returned?}
+
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
+
+\item{...}{currently not used}
 }
 \value{
-figure object (list with names "data" and "layout").
+a 'built' plotly object (list with names "data" and "layout").
 }
 \description{
 Convert a ggplot to a list.
 }
-

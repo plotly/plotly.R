@@ -2,28 +2,50 @@
 % Please edit documentation in R/ggplotly.R
 \name{ggplotly}
 \alias{ggplotly}
-\title{Create plotly graphs using ggplot2 syntax}
+\title{Convert ggplot2 to plotly}
 \usage{
-ggplotly(p = ggplot2::last_plot(), filename, fileopt, world_readable = TRUE)
+ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
+  tooltip = "all", dynamicTicks = FALSE, layerData = 1,
+  originalData = TRUE, source = "A", ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
 
-\item{filename}{character string describing the name of the plot in your plotly account. 
-Use / to specify directories. If a directory path does not exist it will be created.
-If this argument is not specified and the title of the plot exists,
-that will be used for the filename.}
+\item{width}{Width of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{fileopt}{character string describing whether to create a "new" plotly, "overwrite" an existing plotly, 
-"append" data to existing plotly, or "extend" it.}
+\item{height}{Height of the plot in pixels (optional, defaults to automatic sizing).}
 
-\item{world_readable}{logical. If \code{TRUE}, the graph is viewable 
-by anyone who has the link and in the owner's plotly account.
-If \code{FALSE}, graph is only viewable in the owner's plotly account.}
+\item{tooltip}{a character vector specifying which aesthetic mappings to show
+in the tooltip. The default, "all", means show all the aesthetic mappings
+(including the unofficial "text" aesthetic). The order of variables here will
+also control the order they appear. For example, use
+\code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
+colour last.}
+
+\item{dynamicTicks}{should plotly.js dynamically generate axis tick labels? 
+Dynamic ticks are useful for updating ticks in response to zoom/pan
+interactions; however, they can not always reproduce labels as they 
+would appear in the static ggplot2 image.}
+
+\item{layerData}{data from which layer should be returned?}
+
+\item{originalData}{should the "original" or "scaled" data be returned?}
+
+\item{source}{a character string of length 1. Match the value of this string 
+with the source argument in \code{\link{event_data}()} to retrieve the 
+event data corresponding to a specific plot (shiny apps can have multiple plots).}
+
+\item{...}{arguments passed onto methods.}
 }
 \description{
-See up-to-date documentation and examples at
-\url{https://plot.ly/ggplot2}
+This function converts a \code{\link[ggplot2]{ggplot}()} object to a 
+plotly object.
+}
+\details{
+Conversion of relative sizes depends on the size of the current 
+graphics device (if no device is open, width/height of a new (off-screen) 
+device defaults to 640/480). In other words, \code{height} and
+\code{width} must be specified at runtime to ensure sizing is correct.
 }
 \examples{
 \dontrun{
@@ -31,21 +53,38 @@ See up-to-date documentation and examples at
 ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
 ggplotly(ggiris)
 
-# maps!!
 data(canada.cities, package = "maps")
 viz <- ggplot(canada.cities, aes(long, lat)) +
-  borders(regions = "canada", name = "borders") +
+  borders(regions = "canada") +
   coord_equal() +
-  geom_point(aes(text = name, size = pop), colour = "red",
-               alpha = 1/2, name = "cities")
- ggplotly(viz)
+  geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
+ggplotly(viz, tooltip = c("text", "size"))
+
+
+# highlighting lines
+demo("highlight-ggplotly", package = "plotly")
+
+# client-side linked brushing
+library(crosstalk)
+d <- SharedData$new(mtcars)
+subplot(
+ qplot(data = d, x = mpg, y = wt),
+ qplot(data = d, x = mpg, y = vs)
+)
+
+# client-side linked brushing in a scatterplot matrix
+SharedData$new(iris) \%>\%
+  GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
+  ggplotly(tooltip = c("x", "y", "colour"))
 }
 
+}
+\references{
+\url{https://plot.ly/ggplot2}
+}
+\seealso{
+\code{\link{plot_ly}()}
 }
 \author{
 Carson Sievert
 }
-\seealso{
-\link{signup}, \link{plot_ly}
-}
-

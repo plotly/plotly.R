@@ -2,18 +2,23 @@
 % Please edit documentation in R/print.R
 \name{embed_notebook}
 \alias{embed_notebook}
-\title{Embed a plotly figure as an iframe into a IPython Notebook}
+\title{Embed a plotly figure as an iframe into a Jupyter Notebook}
 \usage{
-embed_notebook(x, width = "100\%", height = "525")
+embed_notebook(x, width = NULL, height = NULL,
+  file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html"))
 }
 \arguments{
 \item{x}{a plotly object}
 
-\item{width}{attribute of the iframe}
+\item{width}{attribute of the iframe. If \code{NULL}, the width in
+\code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.}
 
-\item{height}{attribute of the iframe}
+\item{height}{attribute of the iframe. If \code{NULL}, the height in
+\code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.}
+
+\item{file}{a filename for saving the standalone HTML
+(only used if x is a non-figure object)}
 }
 \description{
-Embed a plotly figure as an iframe into a IPython Notebook
+Embed a plotly figure as an iframe into a Jupyter Notebook
 }
-
