@@ -9,7 +9,7 @@ HTMLWidgets.widget({
     // open in chrome, right-click on console output: "save-as" -> "schema.json"
     // Schema <- jsonlite::fromJSON("~/Downloads/schema.json")
     // devtools::use_data(Schema, overwrite = T, internal = T)
-    console.log(JSON.stringify(Plotly.PlotSchema.get()));
+    // console.log(JSON.stringify(Plotly.PlotSchema.get()));
     
     return {
       // Push JavaScript closures onto this list, and renderValue
