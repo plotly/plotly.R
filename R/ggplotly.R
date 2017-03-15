@@ -595,6 +595,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (i == 1) {
           traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
         }
+      }
+      # ensure plotly.js knows this is a date axis (important for dynamicTicks) 
+      if (any(c("date", "datetime") %in% sc$scale_name)) {
         axisObj$type <- "date"
       }
       # tickvals are currently on 0-1 scale, but we want them on data scale
