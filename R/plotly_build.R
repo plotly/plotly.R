@@ -326,10 +326,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- populate_categorical_axes(p)
   # translate '\n' to '<br />' in text strings
   p <- translate_linebreaks(p)
-  # verify plot attributes are legal according to the plotly.js spec
-  p <- verify_attr_names(p)
-  # box up 'data_array' attributes where appropriate
-  p <- verify_boxed(p)
   # if it makes sense, add markers/lines/text to mode
   p <- verify_mode(p)
   # annotations & shapes must be an array of objects
@@ -355,6 +351,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   p <- verify_guides(p)
   
+  # verify plot attributes are legal according to the plotly.js spec
+  p <- verify_attr_names(p)
+  # box up 'data_array' attributes where appropriate
+  p <- verify_boxed(p)
+  
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   p
@@ -370,12 +371,12 @@ registerFrames <- function(p, frameMapping = NULL) {
     tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
     tr
   })
-
+  
   # the ordering of this object determines the ordering of the frames
   frameAttrs <- getLevels(unlist(lapply(p$x$data, "[[", "frame")))
   frameNames <- frameAttrs[!is.na(frameAttrs)]
   p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
-
+  
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
   traceNames <- strsplit(as.character(traceNames), "<br />")
@@ -385,11 +386,11 @@ registerFrames <- function(p, frameMapping = NULL) {
     x$frameOrder <- NULL
     x
   }, p$x$data, traceNames)
-
+  
   # exit in trivial cases
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
-
+  
   # set a "global" range of x/y (TODO: handle multiple axes?)
   x <- unlist(lapply(p$x$data, function(x) x[["x"]]))
   if (is.numeric(x)) {
@@ -422,9 +423,11 @@ registerFrames <- function(p, frameMapping = NULL) {
     )
   }
   
-  # remove "frame traces", except for the first one
+  # remove "frame traces" from "plot traces", except for the first one
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
+  p$x$data <- retrain_color_defaults(p$x$data)
+  
   # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
   
   p$x$frames <- lapply(p$x$frames, function(f) {
