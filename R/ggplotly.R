@@ -236,7 +236,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
     if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
-      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+      x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x
   }, layers, layer_data)
@@ -913,7 +913,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       lapply(mappings, lazyeval::f_new)
     } else {
       nms <- names(mappings)
-      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.name(x))), nms)
     }
   })
   
