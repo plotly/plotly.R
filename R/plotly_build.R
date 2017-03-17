@@ -192,7 +192,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
-        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, builtData[isSplit])
+        splitVars <- builtData[isSplit]
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, splitVars)
+        # in registerFrames() we need to strip the frame from .plotlyTraceIndex
+        # so keep track of which variable it is...
+        trace$frameOrder <- which(names(splitVars) %in% "frame")
       }
       # Build the index used to determine grouping (later on, NAs are inserted
       # via group2NA() to create the groups). This is done in 3 parts:
@@ -366,21 +370,26 @@ registerFrames <- function(p, frameMapping = NULL) {
     tr[["frame"]] <- tr[["frame"]][[1]] %||% NA
     tr
   })
-  
+
   # the ordering of this object determines the ordering of the frames
   frameAttrs <- getLevels(unlist(lapply(p$x$data, "[[", "frame")))
   frameNames <- frameAttrs[!is.na(frameAttrs)]
   p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
-  
+
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
   traceNames <- strsplit(as.character(traceNames), "<br />")
-  p$x$data <- Map(function(x, y) { x$name <- y[!y %in% frameAttrs]; x }, p$x$data, traceNames)
-  
+  p$x$data <- Map(function(x, y) {
+    if (!x$frameOrder %||% 0 %in% seq_along(y)) return(x)
+    x$name <- paste(y[-x$frameOrder], collapse = "<br />")
+    x$frameOrder <- NULL
+    x
+  }, p$x$data, traceNames)
+
   # exit in trivial cases
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
-  
+
   # set a "global" range of x/y (TODO: handle multiple axes?)
   x <- unlist(lapply(p$x$data, function(x) x[["x"]]))
   if (is.numeric(x)) {
