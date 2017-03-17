@@ -587,19 +587,20 @@ gg2list <- function(p, width = NULL, height = NULL,
         title = faced(axisTitleText, axisTitle$face),
         titlefont = text2font(axisTitle)
       )
-      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
-      # this way both dates/datetimes are on same scale
+      
+      # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (identical("date", sc$scale_name)) {
-        axisObj$range <- axisObj$range * 86400000
-        if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
-        }
-      }
-      # ensure plotly.js knows this is a date axis (important for dynamicTicks) 
       if (any(c("date", "datetime") %in% sc$scale_name)) {
-        axisObj$type <- "date"
+        # convert days (date) / seconds (datetime) to milliseconds
+        # (86400000 = 24 * 60 * 60 * 1000)
+        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
+        axisObj$range <- axisObj$range * constant
+        if (i == 1) {
+          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
+        }
+        if (dynamicTicks) axisObj$type <- "date"
       }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
