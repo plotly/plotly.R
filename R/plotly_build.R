@@ -429,9 +429,30 @@ registerFrames <- function(p, frameMapping = NULL) {
   p$x$data <- retrain_color_defaults(p$x$data)
   
   # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
-  
+  traceNames <- sapply(p$x$data, "[[", "name")
   p$x$frames <- lapply(p$x$frames, function(f) {
-    f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
+    frameNames <- sapply(f$data, "[[", "name")
+    f[["traces"]] <- which(traceNames %in% frameNames) - 1
+    f
+  })
+  
+  # as per @rreusser, frames specify *state changes* -- so if frame 1
+  # has 3 traces, and frame 2 has 2 traces, we need to explicity supply 3 traces
+  # in both frames, but make 1 invisible in frame 2. For example,
+  # http://codepen.io/cpsievert/pen/gmXVWe
+  frameTraces <- lapply(p$x$frames, "[[", "traces")
+  allFrameTraces <- unique(unlist(frameTraces))
+  p$x$frames <- lapply(p$x$frames, function(f) {
+    for (i in f$traces) {
+      f$data[[i+1]]$visible <- f$data[[i+1]]$visible %||% TRUE
+    }
+    missingTraces <- setdiff(allFrameTraces, f$traces)
+    for (i in missingTraces) {
+      f$traces <- c(f$traces, i)
+      # grab trace data from the plot trace that it references, but hide it
+      trace <- modify_list(p$x$data[[i+1]], list(visible = FALSE))
+      f$data <- c(f$data, list(trace))
+    }
     f
   })
   
