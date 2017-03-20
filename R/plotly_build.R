@@ -443,8 +443,8 @@ registerFrames <- function(p, frameMapping = NULL) {
   frameTraces <- lapply(p$x$frames, "[[", "traces")
   allFrameTraces <- unique(unlist(frameTraces))
   p$x$frames <- lapply(p$x$frames, function(f) {
-    for (i in f$traces) {
-      f$data[[i+1]]$visible <- f$data[[i+1]]$visible %||% TRUE
+    for (i in seq_along(f$data)) {
+      f$data[[i]]$visible <- f$data[[i]]$visible %||% TRUE
     }
     missingTraces <- setdiff(allFrameTraces, f$traces)
     for (i in missingTraces) {
