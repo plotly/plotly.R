@@ -39,6 +39,7 @@ before_script:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
+  - R CMD INSTALL ${R_PKG}_*.tar.gz
 
 script:
   # run R CMD check on the non-pull request build
