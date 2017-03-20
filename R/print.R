@@ -44,14 +44,17 @@ embed_notebook <- function(x, width = NULL, height = NULL) {
 #' @export
 embed_notebook.plotly <- function(x, width = NULL, height = NULL) {
   p <- plotly_build(x)
-  p$width <- width %||% p$width
-  p$height <- height %||% p$height
-  html <- getFromNamespace("toHTML", asNamespace("htmlwidgets"))(p)
-  # if we've already printed a plotly object, remove it's dependencies
-  if (!is.null(last_plot())) {
-    htmltools::htmlDependencies(html) <- NULL
-  }
-  get("display_html", envir = asNamespace("IRdisplay"))(as.character(html))
+  tmp <- tempfile(fileext = ".html")
+  on.exit(unlink(tmp), add = TRUE)
+  res <- htmlwidgets::saveWidget(p, tmp)
+  # wrap in an iframe as *nteract* won't do this automatically
+  html <- sprintf(
+    '<iframe src="%s" scrolling="no" seamless="seamless" frameBorder="0" width="%s" height="%s"></iframe>',
+    base64enc::dataURI(mime = "text/html;charset=utf-8", file = tmp), 
+    width %||% p$width %||% "100%", 
+    height %||% p$height %||% 400
+  )
+  IRdisplay::display_html(html)
 }
 
 # TODO: provide method for api_figure objects
