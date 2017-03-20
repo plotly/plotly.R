@@ -21,4 +21,3 @@ obj <- list(data = list(trace), layout = list(title = "my plot"))
 as_widget(obj)
 
 }
-

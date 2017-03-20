@@ -46,6 +46,91 @@ HTMLWidgets.widget({
 
     var graphDiv = document.getElementById(el.id);
     
+    // inject a "control panel" holding selectize/dynamic color widget(s)
+    if (x.selectize || x.highlight.dynamic && !instance.plotly) {
+      var flex = document.createElement("div");
+      flex.class = "plotly-crosstalk-control-panel";
+      flex.style = "display: flex; flex-wrap: wrap";
+      
+      // inject the colourpicker HTML container into the flexbox
+      if (x.highlight.dynamic) {
+        var pickerDiv = document.createElement("div");
+        
+        var pickerInput = document.createElement("input");
+        pickerInput.id = el.id + "-colourpicker";
+        pickerInput.placeholder = "asdasd";
+        
+        var pickerLabel = document.createElement("label");
+        pickerLabel.for = pickerInput.id;
+        pickerLabel.innerHTML = "Brush color&nbsp;&nbsp;";
+        
+        pickerDiv.appendChild(pickerLabel);
+        pickerDiv.appendChild(pickerInput);
+        flex.appendChild(pickerDiv);
+      }
+      
+      // inject selectize HTML containers (one for every crosstalk group)
+      if (x.selectize) {
+        var ids = Object.keys(x.selectize);
+        
+        for (var i = 0; i < ids.length; i++) {
+          var container = document.createElement("div");
+          container.id = ids[i];
+          container.style = "width: 80%; height: 10%";
+          container.class = "form-group crosstalk-input-plotly-highlight";
+          
+          var label = document.createElement("label");
+          label.for = ids[i];
+          label.innerHTML = x.selectize[ids[i]].group;
+          label.class = "control-label";
+          
+          var selectDiv = document.createElement("div");
+          var select = document.createElement("select");
+          select.multiple = true;
+          
+          selectDiv.appendChild(select);
+          container.appendChild(label);
+          container.appendChild(selectDiv);
+          flex.appendChild(container);
+        }
+      }
+      
+      // finally, insert the flexbox inside the htmlwidget container,
+      // but before the plotly graph div
+      graphDiv.parentElement.insertBefore(flex, graphDiv);
+      
+      if (x.highlight.dynamic) {
+        var picker = $("#" + pickerInput.id);
+        var colors = x.highlight.color || [];
+        // TODO: let users specify options?
+        var opts = {
+          value: colors[0],
+          showColour: "both",
+          palette: "limited",
+          allowedCols: colors.join(" "),
+          width: "20%",
+          height: "10%"
+        };
+        picker.colourpicker({changeDelay: 0});
+        picker.colourpicker("settings", opts);
+        picker.colourpicker("value", opts.value);
+        // inform crosstalk about a change in the current selection colour
+        var grps = x.highlight.ctGroups || [];
+        for (var i = 0; i < grps.length; i++) {
+          crosstalk.group(grps[i]).var('plotlySelectionColour')
+            .set(picker.colourpicker('value'));
+        }
+        picker.on("change", function() {
+          for (var i = 0; i < grps.length; i++) {
+            crosstalk.group(grps[i]).var('plotlySelectionColour')
+              .set(picker.colourpicker('value'));
+          }
+        });
+      }
+      
+      
+    }
+    
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
       
@@ -57,9 +142,15 @@ HTMLWidgets.widget({
       
     } else {
       
-      // using Plotly.newPlot creates new WebGL context, Plotly.redraw just redraws.
-      graphDiv.data = x.data; graphDiv.layout = x.layout; 
-      var plot = Plotly.redraw(graphDiv);
+      // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
+      // a new webgl context
+      // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
+      
+      // TODO: restore crosstalk selections?
+      Plotly.purge(graphDiv);
+      // TODO: why is this necessary to get crosstalk working?
+      graphDiv.data = x.data;
+      var plot = Plotly.plot(graphDiv, x);
       
     }
     
@@ -222,6 +313,7 @@ HTMLWidgets.widget({
       
       // On a plotly "clear" event, set crosstalk variable value to null
       graphDiv.on(x.highlight.off, function turnOff(e) {
+        removeBrush(el);
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
@@ -242,13 +334,32 @@ HTMLWidgets.widget({
               options: first.concat(items),
               searchField: "label",
               valueField: "value",
-              labelField: "label"
+              labelField: "label",
+              maxItems: 50
             };
             var select = $("#" + selectizeID).find("select")[0];
             var selectize = $(select).selectize(opts)[0].selectize;
+            // NOTE: this callback is triggered when *directly* altering 
+            // dropdown items
             selectize.on("change", function() {
-              // TODO: updateSelection() should really work when we *remove* items...
-              traceManager.updateSelection(set, selectize.items);
+              var currentItems = traceManager.groupSelections[set] || [];
+              if (!x.highlight.persistent) {
+                removeBrush(el);
+                for (var i = 0; i < currentItems.length; i++) {
+                  selectize.removeItem(currentItems[i], true);
+                }
+              }
+              var newItems = selectize.items.filter(function(idx) { 
+                return currentItems.indexOf(idx) < 0;
+              });
+              if (newItems.length > 0) {
+                traceManager.updateSelection(set, newItems);
+              } else {
+                // Item has been removed...
+                // TODO: this logic won't work for dynamically changing palette 
+                traceManager.updateSelection(set, null);
+                traceManager.updateSelection(set, selectize.items);
+              }
             });
           }
           
@@ -267,12 +378,11 @@ HTMLWidgets.widget({
               traceManager.updateSelection(set, e.value);
               // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
               if (x.selectize) {
-                if (e.value === null) {
+                if (!x.highlight.persistent || e.value === null) {
                   selectize.clear(true);
-                } else {
-                  selectize.addItem(e.value, true);
-                  selectize.close();
                 }
+                selectize.addItems(e.value, true);
+                selectize.close();
               }
               
             }
@@ -282,13 +392,6 @@ HTMLWidgets.widget({
             traceManager.updateFilter(set, e.value);
           });
   
-          /* Remove event listeners in the future
-          CPS: for some reason I was getting crosstalk_sel_change is undefined in a shiny app?
-          instance.onNextRender.push(function() {
-            grp.var("selection").removeListener("change", crosstalk_sel_change);
-            grp.var("filter").removeListener("change", crosstalk_filter_change);
-          });
-          */
         })();
       }
     }
@@ -365,9 +468,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     throw new Error("Invalid keys argument; null or array expected");
   }
   
-  this.groupSelections[group] = keys;
-  
-  // if selection has been cleared, or if this is transient (not persistent)
+  // if selection has been cleared, or if this is transient
   // selection, delete the "selection traces"
   var nNewTraces = this.gd.data.length - this.origData.length;
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
@@ -376,6 +477,16 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       tracesToRemove.push(i);
     }
     Plotly.deleteTraces(this.gd, tracesToRemove);
+    this.groupSelections[group] = keys;
+  } else {
+    // add to the groupSelection, rather than overwriting it
+    this.groupSelections[group] = this.groupSelections[group] || [];
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (this.groupSelections[group].indexOf(k) < 0) {
+        this.groupSelections[group].push(k);
+      }
+    }
   }
   
   if (keys === null) {
@@ -387,7 +498,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     // placeholder for new "selection traces"
     var traces = [];
     // this variable is set in R/highlight.R
-    var selectionColour = crosstalk.var("plotlySelectionColour").get() || 
+    var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
     for (var i = 0; i < this.origData.length; i++) {

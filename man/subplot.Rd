@@ -75,4 +75,3 @@ economics_long \%>\%
 \author{
 Carson Sievert
 }
-

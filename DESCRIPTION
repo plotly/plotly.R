@@ -21,8 +21,9 @@ URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     R (>= 3.2.0),
-    ggplot2 (> 2.1.0)
+    ggplot2 (> 2.1.1)
 Imports:
+    tools,
     scales,
     httr,
     jsonlite,
@@ -39,7 +40,6 @@ Imports:
     tibble,
     lazyeval (>= 0.2.0),
     crosstalk,
-    colourpicker,
     purrr
 Suggests:
     MASS,
@@ -58,6 +58,9 @@ Suggests:
     broom,
     webshot,
     listviewer,
-    dendextend
+    dendextend,
+    RSelenium
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
+Remotes:
+  tidyverse/ggplot2

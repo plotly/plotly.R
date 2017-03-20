@@ -12,4 +12,3 @@ plotly_empty(...)
 \description{
 Useful when used with \code{\link{subplot}()}
 }
-

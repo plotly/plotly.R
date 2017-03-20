@@ -14,6 +14,16 @@ is.bare.list <- function(x) {
   is.list(x) && !is.data.frame(x)
 }
 
+is.evaled <- function(p) {
+  all(vapply(p$x$attrs, function(attr) inherits(attr, "plotly_eval"), logical(1)))
+}
+
+is.webgl <- function(p) {
+  if (!is.evaled(p)) p <- plotly_build(p)
+  types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+  any(types %in% c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud"))
+}
+
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
@@ -116,9 +126,9 @@ is_geo <- function(p) {
   identical(p$x$layout[["mapType"]], "geo")
 }
 
-is_ternary <- function(p) {
+is_type <- function(p, type) {
   types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
-  all(types %in% "scatterternary")
+  all(types %in% type)
 }
 
 # retrive mapbox token if one is set; otherwise, throw error
@@ -172,7 +182,13 @@ supply_defaults <- function(p) {
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
   } else {
-    axes <- if (is_ternary(p)) c("aaxis", "baxis", "caxis") else c("xaxis", "yaxis")
+    axes <- if (is_type(p, "scatterternary"))  {
+      c("aaxis", "baxis", "caxis") 
+    } else if (is_type(p, "pie")) {
+      NULL
+    } else {
+      c("xaxis", "yaxis")
+    }
     for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
         list(domain = c(0, 1)), p$x$layout[[axis]]
@@ -181,6 +197,60 @@ supply_defaults <- function(p) {
   }
   p
 }
+
+supply_highlight_attrs <- function(p) {
+  # set "global" options via crosstalk variable
+  hd <- highlight_defaults()
+  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
+  p <- htmlwidgets::onRender(
+    p, sprintf(
+      "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
+      jsonlite::toJSON(ctOpts, auto_unbox = TRUE)
+    )
+  )
+  
+  # use "global" options as the default, but override with non-default options
+  # specified via highlight()
+  p$x$highlight <- p$x$highlight %||% hd
+  for (opt in names(ctOpts)) {
+    isDefault <- identical(p$x$highlight[[opt]], hd[[opt]])
+    if (isDefault) p$x$highlight[[opt]] <- ctOpts[[opt]]
+  }
+  
+  # defaults are now populated, allowing us to populate some other 
+  # attributes such as the selectize widget definition
+  sets <- unlist(lapply(p$x$data, "[[", "set"))
+  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
+  p$x$highlight$ctGroups <- I(unique(sets))
+  
+  # TODO: throw warning if we don't detect valid keys?
+  for (i in p$x$highlight$ctGroups) {
+    k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
+    if (is.null(k)) next
+    k <- k[!is.null(k)]
+    
+    # include one selectize dropdown per "valid" SharedData layer
+    if (isTRUE(p$x$highlight$selectize)) {
+      p$x$selectize[[new_id()]] <- list(
+        items = data.frame(value = k, label = k), group = i
+      )
+    }
+    
+    # set default values via crosstalk api
+    vals <- p$x$highlight$defaultValues[p$x$highlight$defaultValues %in% k]
+    if (length(vals)) {
+      p <- htmlwidgets::onRender(
+        p, sprintf(
+          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
+          i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+        )
+      )
+    }
+  }
+  
+  p
+}
+
 
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
@@ -331,22 +401,20 @@ relay_type <- function(type) {
 # linebreaks (i.e., '\n' -> '<br />'). JavaScript function definitions created 
 # via `htmlwidgets::JS()` are ignored
 translate_linebreaks <- function(p) {
-  # maintain trace classes (important for colorbars)... 
-  # is there a more general way maintain list element classes?
-  cl <- lapply(p$x$data, class)
   recurse <- function(a) {
     typ <- typeof(a)
     if (typ == "list") {
-      lapply(a, recurse)
+      # retain the class of list elements 
+      # which important for many things, such as colorbars
+      a[] <- lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
-      b <- gsub("\n", "<br />", a, fixed = TRUE)
-      attributes(b) <- attributes(a)
-      b
-    } else a
+      attrs <- attributes(a)
+      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      attributes(a) <- attrs
+    }
+    a
   }
-  p$x$data <- lapply(p$x$data, recurse)
-  p$x$data <- Map(function(x, y) structure(x, class = y), p$x$data, cl)
-  p$x$layout <- lapply(p$x$layout, recurse)
+  p$x[] <- lapply(p$x, recurse)
   p
 }
 

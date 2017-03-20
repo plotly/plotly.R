@@ -133,6 +133,8 @@ bp.fonts <- bp +
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 1, "fonts")
   expect_equal(info$layout$xaxis$tickangle, -90)
+  expect_match(info$layout$xaxis$title, "<b>", fixed = TRUE)
+  expect_match(info$layout$xaxis$title, "</b>", fixed = TRUE)
 })
 
 # Label formatters

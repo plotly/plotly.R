@@ -22,8 +22,7 @@ events altogether, use \code{NULL}.}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
-\item{dynamic}{should UI controls for changing selection colors be 
-included in the output?}
+\item{dynamic}{should a widget for changing selection colors be included?}
 
 \item{color}{character string of color(s) to use for 
 highlighting selections. See \code{\link{toRGB}()} for valid color
@@ -44,15 +43,15 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{showInLegend}{populate an additional legend entry for the selection?}
 }
-\value{
-If \code{dynamic} or \code{selectize} are \code{TRUE}, 
-a \link[htmltools]{browsable} \link[htmltools]{tagList} (otherwise, plotly object). 
-Note that other plotly functions may not be used to modify tagList objects, 
-so best practice is to use this function immediately before printing.
-}
 \description{
-For documentation and examples, see 
-\url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+This function sets a variety of options for brushing (i.e., highlighting)
+plotly graphs. Use this function to set options (or populate widgets) 
+for a \emph{single} plot. When linking multiple plots, use 
+\code{\link{options}()} to set "global" options, where the option name 
+matches the relevant argument name. For instance, 
+to link multiple plots with \code{persistent} selection, set
+\code{options(persistent = TRUE)}. To see an example linking plotly to 
+leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
 }
 \examples{
 
@@ -65,11 +64,14 @@ ggplotly(p, tooltip = "city") \%>\%
 # The group name is currently used to populate a title for the selectize widget
 sd <- SharedData$new(txhousing, ~city, "Choose a city")
 plot_ly(sd, x = ~date, y = ~median) \%>\%
+  group_by(city) \%>\%
   add_lines(text = ~city, hoverinfo = "text") \%>\%
   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 
 }
+\references{
+\url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+}
 \author{
 Carson Sievert
 }
-

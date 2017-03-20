@@ -25,4 +25,3 @@ are not included with ggplot2 itself. Users shouldn't need to use
 this function. It exists purely to allow other package authors to write
 their own conversion method(s).
 }
-

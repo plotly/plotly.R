@@ -36,7 +36,7 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   
   expect_equal(length(L$data), 1)  # 1 trace
   expect_identical(L$data[[1]]$type, "box")
-  expect_identical(L$data[[1]]$y, as.numeric(df$y))
+  expect_identical(L$data[[1]]$y, as.numeric(df$y) * 1000)
 })
 
 # check legend shows up when each box-and-whiskers has a fill
