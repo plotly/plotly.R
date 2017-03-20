@@ -31,18 +31,22 @@ knit_print.plotly_figure <- function(x, options, ...) {
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
 #' @param height attribute of the iframe. If \code{NULL}, the height in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
+#' @param file deprecated.
 #' @export
-embed_notebook <- function(x, width = NULL, height = NULL) {
+embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
   if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
     return(x)
   }
+  if (!is.null(file)) {
+    warning("The file argument is no longer used", call. = FALSE)
+  }
   UseMethod("embed_notebook")
 }
 
 #' @export
-embed_notebook.plotly <- function(x, width = NULL, height = NULL) {
+embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
   p <- plotly_build(x)
   tmp <- tempfile(fileext = ".html")
   on.exit(unlink(tmp), add = TRUE)
