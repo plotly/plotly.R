@@ -31,30 +31,45 @@ knit_print.plotly_figure <- function(x, options, ...) {
 #' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
 #' @param height attribute of the iframe. If \code{NULL}, the height in
 #' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
-#' @param file a filename for saving the standalone HTML
-#' (only used if x is a non-figure object)
+#' @param file deprecated.
 #' @export
-embed_notebook <- function(x, width = NULL, height = NULL,
-                           file = paste0("plotlyJupyterHTML/", digest::digest(Sys.time()), ".html")) {
+embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
   if (system.file(package = "IRdisplay") == "") {
     warning("You need the IRdisplay package to use this function: \n",
             "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
     return(x)
   }
-  l <- plotly_build(x)
-  src <- if (is.null(l$url)) {
-    dir <- dirname(file)
-    if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
-    owd <- setwd(dir)
-    on.exit(setwd(owd), add = TRUE)
-    htmlwidgets::saveWidget(l, file = basename(file))
-    file
-  } else {
-    l$url
+  if (!is.null(file)) {
+    warning("The file argument is no longer used", call. = FALSE)
   }
-  iframe <- plotly_iframe(src, width %||% l$width, height %||% l$height, url_ext = "")
-  get("display_html", envir = asNamespace("IRdisplay"))(iframe)
+  UseMethod("embed_notebook")
 }
+
+#' @export
+embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
+  # TODO: get rid of this and provide method for api_figure objects
+  if (!is.null(x$x$url)) {
+    html <- plotly_iframe(
+      x$x$url,
+      width %||% x$width %||% "100%", 
+      height %||% x$height %||% 400
+    )
+    return(IRdisplay::display_html(html))
+  }
+  p <- plotly_build(x)
+  tmp <- tempfile(fileext = ".html")
+  on.exit(unlink(tmp), add = TRUE)
+  res <- htmlwidgets::saveWidget(p, tmp)
+  # wrap in an iframe as *nteract* won't do this automatically
+  html <- plotly_iframe(
+    base64enc::dataURI(mime = "text/html;charset=utf-8", file = tmp),
+    width %||% p$width %||% "100%", 
+    height %||% p$height %||% 400,
+    ""
+  )
+  IRdisplay::display_html(html)
+}
+
 
 plotly_iframe <- function(url = "", width = NULL, height = NULL, url_ext = ".embed") {
   url <- paste0(url, url_ext)

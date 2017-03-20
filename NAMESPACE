@@ -3,6 +3,7 @@
 S3method(arrange_,plotly)
 S3method(distinct_,plotly)
 S3method(do_,plotly)
+S3method(embed_notebook,plotly)
 S3method(filter_,plotly)
 S3method(fortify,SharedData)
 S3method(geom2trace,GeomBar)
