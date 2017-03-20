@@ -47,21 +47,28 @@ embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
 
 #' @export
 embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
+  # TODO: get rid of this and provide method for api_figure objects
+  if (!is.null(x$x$url)) {
+    html <- plotly_iframe(
+      x$x$url,
+      width %||% x$width %||% "100%", 
+      height %||% x$height %||% 400
+    )
+    return(IRdisplay::display_html(html))
+  }
   p <- plotly_build(x)
   tmp <- tempfile(fileext = ".html")
   on.exit(unlink(tmp), add = TRUE)
   res <- htmlwidgets::saveWidget(p, tmp)
   # wrap in an iframe as *nteract* won't do this automatically
-  html <- sprintf(
-    '<iframe src="%s" scrolling="no" seamless="seamless" frameBorder="0" width="%s" height="%s"></iframe>',
-    base64enc::dataURI(mime = "text/html;charset=utf-8", file = tmp), 
+  html <- plotly_iframe(
+    base64enc::dataURI(mime = "text/html;charset=utf-8", file = tmp),
     width %||% p$width %||% "100%", 
-    height %||% p$height %||% 400
+    height %||% p$height %||% 400,
+    ""
   )
   IRdisplay::display_html(html)
 }
-
-# TODO: provide method for api_figure objects
 
 
 plotly_iframe <- function(url = "", width = NULL, height = NULL, url_ext = ".embed") {
