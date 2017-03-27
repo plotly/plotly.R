@@ -170,3 +170,54 @@ test_that("geo+cartesian behaves", {
   expect_equal(geoDom$y, c(0, 0.68))
 })
 
+
+
+testt_that("May specify legendgroup with through a vector of values", {
+  
+  # example adapted from https://github.com/ropensci/plotly/issues/817
+  df <- dplyr::bind_rows(
+    data.frame(x = rnorm(100,2), Name = "x1"),
+    data.frame(x = rnorm(100,6), Name = "x2"),
+    data.frame(x = rnorm(100,4), Name = "x3")
+  )
+  df$y <- rnorm(300)
+  
+  # marker definition...
+  m <- list(
+    size = 10, 
+    line = list(
+      width = 1, 
+      color = "black"
+    )
+  )
+  
+  base <- plot_ly(
+    df, 
+    marker = m, 
+    color = ~factor(Name), 
+    legendgroup = ~factor(Name)
+  ) 
+  
+  s <- subplot(
+    add_histogram(base, x = ~x, showlegend = FALSE),
+    plotly_empty(), 
+    add_markers(base, x = ~x, y = ~y),
+    add_histogram(base, y = ~y, showlegend = FALSE),
+    nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), 
+    shareX = TRUE, shareY = TRUE, titleX = FALSE, titleY = FALSE
+  ) %>% layout(barmode = "stack")
+  
+  # one trace for the empty plot
+  l <- expect_traces(s, 10, "subplot-legendgroup")
+  
+  # really this means show three legend items (one is blank)
+  expect_equal(
+    sum(sapply(l$data, function(tr) tr$showlegend %||% TRUE)), 4
+  )
+  
+  expect_length(
+    unlist(lapply(l$data, "[[", "legendgroup")), 9
+  )
+  
+})
+
