@@ -172,7 +172,7 @@ test_that("geo+cartesian behaves", {
 
 
 
-testt_that("May specify legendgroup with through a vector of values", {
+test_that("May specify legendgroup with through a vector of values", {
   
   # example adapted from https://github.com/ropensci/plotly/issues/817
   df <- dplyr::bind_rows(
