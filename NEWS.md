@@ -1,6 +1,6 @@
 # 4.5.6.9000
 
-## NEW FEATURES
+## NEW FEATURES & IMPROVEMENTS
 
 * Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html>. For some more complex examples, see <https://cpsievert.github.io/pedestrians/>
 * Added the `highlight()` function for configuring selection modes/sequences.
@@ -13,6 +13,7 @@
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
 * The `export()` function now tries it's best to export WebGL plots (via **RSelenium**). It also gains a `delay` argument.
 * The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
+* Better type checking of trace attributes will now automatically reduce a single-valued vector to a constant (when appropriate). This is particularly useful for anchoring multiple traces to a single legend entry via `legendgroup` (see #675, #817, #826).
 
 ## CHANGES
 

@@ -255,24 +255,27 @@ supply_highlight_attrs <- function(p) {
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
-  check_attrs(
+  attrs_name_check(
     sub("[0-9]+$", "", names(p$x$layout)),
     c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
     "layout"
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
-    validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    check_attrs(
+    attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
+    # make sure attribute names are valid
+    attrs_name_check(
       names(thisTrace), 
-      c(names(validAttrs), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
+      c(names(attrSpec), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
       thisTrace$type
     )
+    # if it makes sense, reduce a single-valued vector to a constant 
+    p$x$data[[tr]] <- attrs_simplify(thisTrace, attrSpec)
   }
   invisible(p)
 }
 
-check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
+attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
@@ -282,6 +285,15 @@ check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
             call. = FALSE)
   }
   invisible(proposedAttrs)
+}
+
+attrs_simplify <- function(trace, spec) {
+  for (attr in names(trace)) {
+    type <- tryCatch(spec[[attr]]$valType, error = function(e) NULL)
+    if (isTRUE(type %in% c("any", "data_array"))) next
+    trace[[attr]] <- uniq(trace[[attr]])
+  }
+  trace
 }
 
 # ensure both the layout and trace attributes are sent to plotly.js
