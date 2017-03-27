@@ -31,7 +31,7 @@ process.plotly_figure <- function(resp) {
   fig$url <- sub("apigetfile/", "~", resp$url)
   # make sure that we always return a HTTPS link
   con$url <- sub("^http[s]?:", "https:", con$url)
-  fig <- verify_boxed(fig)
+  fig <- verify_attr_spec(fig)
   as_widget(fig)
 }
 

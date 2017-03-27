@@ -354,7 +354,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
-  p <- verify_boxed(p)
+  p <- verify_attr_spec(p)
   
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()

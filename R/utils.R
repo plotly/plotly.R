@@ -269,8 +269,6 @@ verify_attr_names <- function(p) {
       c(names(attrSpec), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
       thisTrace$type
     )
-    # if it makes sense, reduce a single-valued vector to a constant 
-    p$x$data[[tr]] <- attrs_simplify(thisTrace, attrSpec)
   }
   invisible(p)
 }
@@ -287,21 +285,11 @@ attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   invisible(proposedAttrs)
 }
 
-attrs_simplify <- function(trace, spec) {
-  for (attr in names(trace)) {
-    type <- tryCatch(spec[[attr]]$valType, error = function(e) NULL)
-    if (isTRUE(type %in% c("any", "data_array"))) next
-    trace[[attr]] <- uniq(trace[[attr]])
-  }
-  trace
-}
-
-# ensure both the layout and trace attributes are sent to plotly.js
-# as data_arrays
-verify_boxed <- function(p) {
+# ensure both the layout and trace attributes adhere to the plot schema
+verify_attr_spec <- function(p) {
   if (!is.null(p$x$layout)) {
     layoutNames <- names(p$x$layout)
-    layoutNew <- verify_box(
+    layoutNew <- verify_attr(
       setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
       Schema$layout$layoutAttributes
     )
@@ -310,41 +298,47 @@ verify_boxed <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
+    p$x$data[[tr]] <- verify_attr(thisTrace, validAttrs)
     # prevent these objects from sending null keys
     p$x$data[[tr]][["xaxis"]] <- p$x$data[[tr]][["xaxis"]] %||% NULL
     p$x$data[[tr]][["yaxis"]] <- p$x$data[[tr]][["yaxis"]] %||% NULL
   }
-  p$x$layout$updatemenus
   
   p
 }
 
-verify_box <- function(proposed, schema) {
+verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
-    attrVal <- proposed[[attr]]
     attrSchema <- schema[[attr]]
-    isArray <- tryCatch(
-      identical(attrSchema[["valType"]], "data_array"),
-      error = function(e) FALSE
-    )
-    isObject <- tryCatch(
-      identical(attrSchema[["role"]], "object"),
-      error = function(e) FALSE
-    )
-    if (isArray) {
-      proposed[[attr]] <- i(attrVal)
+    valType <- tryNULL(attrSchema[["valType"]]) %||% ""
+    role <- tryNULL(attrSchema[["role"]]) %||% ""
+    # ensure data_arrays of length 1 are boxed up by to_JSON()
+    if (identical(valType, "data_array")) {
+      proposed[[attr]] <- i(proposed[[attr]])
     }
-    # we don't have to go more than two-levels, right?
-    if (isObject) {
-      for (attr2 in names(attrVal)) {
-        isArray2 <- tryCatch(
-          identical(attrSchema[[attr2]][["valType"]], "data_array"),
-          error = function(e) FALSE
-        )
-        if (isArray2) {
-          proposed[[attr]][[attr2]] <- i(attrVal[[attr2]])
+    # where applicable, reduce single valued vectors to a constant 
+    # (while preserving any 'special' attribute class)
+    if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
+      proposed[[attr]] <- structure(
+        uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
+      )
+    }
+    # do the same for "sub-attributes"
+    if (identical(role, "object")) {
+      for (attr2 in names(proposed[[attr]])) {
+        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
+        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
+        # ensure data_arrays of length 1 are boxed up by to_JSON()
+        if (identical(valType2, "data_array")) {
+          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
+        # where applicable, reduce single valued vectors to a constant
+        if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
+          proposed[[attr]][[attr2]] <- structure(
+            uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
+          )
+        }
+        # we don't have to go more than two-levels, right?
       }
     }
   }
