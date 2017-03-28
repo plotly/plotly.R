@@ -266,7 +266,7 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey"), 
       thisTrace$type
     )
   }
@@ -490,7 +490,11 @@ populate_categorical_axes <- function(p) {
     if (length(d) == 0) next
     isDiscrete <- vapply(d, is.discrete, logical(1))
     if (0 < sum(isDiscrete) & sum(isDiscrete) < length(d)) {
-      stop("Can't display both discrete & non-discrete data on same axis")
+      warning(
+        "Can't display both discrete & non-discrete data on same axis", 
+        call. = FALSE
+      )
+      next
     }
     if (sum(isDiscrete) == 0) next
     categories <- lapply(d, getLevels)
