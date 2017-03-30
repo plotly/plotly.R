@@ -11,7 +11,7 @@
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
-* The `export()` function now tries it's best to export WebGL plots (via **RSelenium**). It also gains a `delay` argument.
+* The `export()` function now leverages **RSelenium** to render/export WebGL plots (via the plotly.js function [Plotly.downloadImage()](https://plot.ly/javascript/plotlyjs-function-reference/#plotlydownloadimage)). As a result, it also now supports exporting to svg and webp. 
 * The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
 * Better type checking of trace attributes will now automatically reduce a single-valued vector to a constant (when appropriate). This is particularly useful for anchoring multiple traces to a single legend entry via `legendgroup` (see #675, #817, #826).
 
