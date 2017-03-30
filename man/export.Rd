@@ -4,7 +4,7 @@
 \alias{export}
 \title{Export a plotly graph to a static file}
 \usage{
-export(p = last_plot(), file = "plotly.png", delay = 2, ...)
+export(p = last_plot(), file = "plotly.png", selenium = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
@@ -12,12 +12,13 @@ export(p = last_plot(), file = "plotly.png", delay = 2, ...)
 \item{file}{a filename. The file type is inferred from the file extension.
 Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'}
 
-\item{delay}{time (in seconds) to wait before taking screenshot/writing to disk. 
-Sometimes a longer delay is needed for all assets to display properly.}
+\item{selenium}{used only when \code{p} is a WebGL plot or the output 
+format is 'webp' or 'svg'. Should be an object of class "rsClientServer"
+returned by \code{RSelenium::rsDriver} (see examples).}
 
-\item{...}{if \code{p} is a webgl plot, arguments are passed along 
-to \code{RSelenium::rsDriver()}; otherwise, they are passed along to
-\code{webshot::webshot()}}
+\item{...}{if \code{p} is non-WebGL and the output file format is 
+jpeg/png/pdf arguments are passed along to \code{webshot::webshot()}.
+Otherwise, they are ignored.}
 }
 \description{
 Export a plotly graph to a static file
@@ -28,9 +29,37 @@ Since \code{phantomjs} (and hence \code{webshot}) does not support WebGL,
 the RSelenium package is used for exporting WebGL plots.
 }
 \examples{
-\dontrun{
+# The webshot package handles non-WebGL conversion to jpeg/png/pdf
 export(plot_ly(economics, x = ~date, y = ~pce))
-export(plot_ly(economics, x = ~date, y = ~pce), "plot.svg")
-export(plot_ly(economics, x = ~date, y = ~pce, z = ~pop))
+export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
+
+\dontrun{
+  # svg/webp output or WebGL conversion can be done via RSelenium
+  if (requireNamespace("RSelenium")) {
+   rD <- RSelenium::rsDriver(browser = "chrome")
+   export(
+     plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
+   )
+   export(
+     plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
+   )
+  }
 }
+
+# If you can't get a selenium server running, another option is to
+# use Plotly.downloadImage() via htmlwidgets::onRender()...
+# Downloading images won't work inside RStudio, but you can set the viewer
+# option to NULL to prompt your default web browser
+options(viewer = NULL)
+plot_ly(economics, x = ~date, y = ~pce, z = ~pop) \%>\%
+  htmlwidgets::onRender(
+   "function(el, x) {
+     var gd = document.getElementById(el.id); 
+     Plotly.downloadImage(gd, {format: 'png', width: 600, height: 400, filename: 'plot'});
+   }"
+ )
+ 
+}
+\author{
+Carson Sievert
 }
