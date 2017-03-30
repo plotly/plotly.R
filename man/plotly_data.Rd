@@ -19,31 +19,31 @@
 \usage{
 plotly_data(p, id = p$x$cur_data)
 
-groups.plotly(x)
+\method{groups}{plotly}(x)
 
-ungroup.plotly(x, ...)
+\method{ungroup}{plotly}(x, ...)
 
-group_by_.plotly(.data, ..., .dots, add = FALSE)
+\method{group_by_}{plotly}(.data, ..., .dots, add = FALSE)
 
-summarise_.plotly(.data, ..., .dots)
+\method{summarise_}{plotly}(.data, ..., .dots)
 
-mutate_.plotly(.data, ..., .dots)
+\method{mutate_}{plotly}(.data, ..., .dots)
 
-do_.plotly(.data, ..., .dots)
+\method{do_}{plotly}(.data, ..., .dots)
 
-arrange_.plotly(.data, ..., .dots)
+\method{arrange_}{plotly}(.data, ..., .dots)
 
-select_.plotly(.data, ..., .dots)
+\method{select_}{plotly}(.data, ..., .dots)
 
-filter_.plotly(.data, ..., .dots)
+\method{filter_}{plotly}(.data, ..., .dots)
 
-distinct_.plotly(.data, ..., .dots)
+\method{distinct_}{plotly}(.data, ..., .dots)
 
-slice_.plotly(.data, ..., .dots)
+\method{slice_}{plotly}(.data, ..., .dots)
 
-rename_.plotly(.data, ..., .dots)
+\method{rename_}{plotly}(.data, ..., .dots)
 
-transmute_.plotly(.data, ..., .dots)
+\method{transmute_}{plotly}(.data, ..., .dots)
 }
 \arguments{
 \item{p}{a plotly visualization}
