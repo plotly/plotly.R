@@ -9,7 +9,8 @@ export(p = last_plot(), file = "plotly.png", delay = 2, ...)
 \arguments{
 \item{p}{a plotly or ggplot object.}
 
-\item{file}{a filename. File extension must be included.}
+\item{file}{a filename. The file type is inferred from the file extension.
+Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'}
 
 \item{delay}{time (in seconds) to wait before taking screenshot/writing to disk. 
 Sometimes a longer delay is needed for all assets to display properly.}
@@ -29,6 +30,7 @@ the RSelenium package is used for exporting WebGL plots.
 \examples{
 \dontrun{
 export(plot_ly(economics, x = ~date, y = ~pce))
+export(plot_ly(economics, x = ~date, y = ~pce), "plot.svg")
 export(plot_ly(economics, x = ~date, y = ~pce, z = ~pop))
 }
 }

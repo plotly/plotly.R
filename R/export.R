@@ -5,7 +5,8 @@
 #' the RSelenium package is used for exporting WebGL plots. 
 #' 
 #' @param p a plotly or ggplot object.
-#' @param file a filename. File extension must be included.
+#' @param file a filename. The file type is inferred from the file extension.
+#' Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'
 #' @param delay time (in seconds) to wait before taking screenshot/writing to disk. 
 #' Sometimes a longer delay is needed for all assets to display properly.
 #' @param ... if \code{p} is a webgl plot, arguments are passed along 
@@ -14,17 +15,49 @@
 #' @export
 #' @examples \dontrun{
 #' export(plot_ly(economics, x = ~date, y = ~pce))
+#' export(plot_ly(economics, x = ~date, y = ~pce), "plot.svg")
+#' export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 #' export(plot_ly(economics, x = ~date, y = ~pce, z = ~pop))
 #' }
 export <- function(p = last_plot(), file = "plotly.png", delay = 2, ...) {
-  # save to an HTML file (and attach id so we may query graphdiv later on)
+  # infer the file type
+  fileType <- tolower(tools::file_ext(file))
+  if (!fileType %in% c('jpeg', 'png', 'webp', 'svg', 'pdf')) {
+    stop("File type ", filetype, "not supported", call. = FALSE)
+  }
+  if (is.webgl(p) && fileType %in% "pdf") {
+    stop(
+      "A personal (or professional) plan is required to export WebGL to pdf:\n",
+      "https://plot.ly/products/cloud/",
+      call. = FALSE
+    )
+  }
+  
+  # webshot only support non-webgl jpeg/png/pdf
+  use_webshot <- !is.webgl(p) && fileType %in% c('jpeg', 'png', 'pdf')
+  
+  if (!use_webshot) {
+    # download the image when widget is done rendering
+    cmd <- sprintf(
+      "function(el, x) {
+        var gd = document.getElementById(el.id); 
+        Plotly.downloadImage(gd, {format: '%s', width: %s, height: %s, filename: '%s'});
+      }", 
+      fileType, 
+      p$width %||% p$layout$width %||% 800, 
+      p$height %||% p$layout$height %||% 600, 
+      tools::file_path_sans_ext(file)
+    )
+    p <- htmlwidgets::onRender(p, cmd)
+  }
+  
+  # save widget to an HTML file
   f <- basename(tempfile('plotly', '.', '.html'))
   on.exit(unlink(f), add = TRUE)
-  p$elementId <- "myPlot"
   html <- htmlwidgets::saveWidget(p, f)
   
-  # phantomjs doesn't support webgl :(
-  if (!is.webgl(p)) {
+  # phantomjs doesn't support webgl or svg/webp output
+  if (use_webshot) {
     return(webshot::webshot(f, file, delay = delay, ...))
   }
   
@@ -33,36 +66,17 @@ export <- function(p = last_plot(), file = "plotly.png", delay = 2, ...) {
          "install.packages('RSelenium')", call. = FALSE)
   }
   continue <- readline(
-    "Exporting WebGL may require downloading/installing extraneous software, continue? [y/n]"
+    "Exporting requires downloading/installing a selenium webdriver, continue? [y/n]"
   )
   if (!interactive() || grepl("[yY]", continue)) {
-    # start up a selenium webdriver and navigate to the HTML file
+    # Start up a selenium webdriver and navigate to the HTML file
+    # I'm pretty sure this will clean itself up after the R session ends
     rD <- RSelenium::rsDriver(browser = "chrome", verbose = FALSE, ...)
-    on.exit(rD$server$stop(), add = TRUE)
     # TODO: does this work cross-platform?
     rD$client$navigate(paste0("file://", normalizePath(f)))
-    width <- p$width %||% p$layout$width %||% 800
-    height <- p$height %||% p$layout$height %||% 600
-    cmd <- sprintf(
-      "var gd = document.getElementById('myPlot'); Plotly.downloadImage(gd, {format: '%s', width: %s, height: %s, filename: '%s'});", 
-      tools::file_ext(file), width, height, tools::file_path_sans_ext(file)
-    )
-    rD$client$executeScript(cmd)
-    # wait for file to write to disk
-    Sys.sleep(delay)
   }
   message(
     sprintf("Success! Check your downloads folder for a file named: '%s'", file)
   )
   invisible(file)
 }
-
-
-#library(htmlwidgets)
-#plot_ly(economics, x = ~date, y = ~uempmed) %>%
-#  onRender(
-#    "function(el, x) {
-#       var gd = document.getElementById(el.id);
-#      Plotly.downloadImage(gd, {format: 'jpeg', height: 300, width: 300, filename: 'plotly_download'})
-#    }"
-#  )
