@@ -297,7 +297,7 @@ HTMLWidgets.widget({
 
     if (allSets.length > 0) {
       
-      // On plotly event, update crosstalk variable selection value
+      // Set a crosstalk variable selection value, triggering an update
       graphDiv.on(x.highlight.on, function turnOn(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
@@ -312,9 +312,12 @@ HTMLWidgets.widget({
         }
       });
       
-      // On a plotly "clear" event, set crosstalk variable value to null
       graphDiv.on(x.highlight.off, function turnOff(e) {
+        // remove any visual clues
         removeBrush(el);
+        // remove any selection history
+        crosstalk.var("plotlySelectionHistory").set(null);
+        // trigger the actual removal of selection traces
         for (var i = 0; i < allSets.length; i++) {
           crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
         }
@@ -364,29 +367,44 @@ HTMLWidgets.widget({
             });
           }
           
-          // When crosstalk selection changes, update plotly style
           grp.var("selection").on("change", function crosstalk_sel_change(e) {
-            if (e.sender !== el) {
-              // If we're not the originator of this selection, and we have an
-              // active selection outline box, we need to remove it. Otherwise
-              // it could appear like there are two active brushes in one plot
-              // group.
-              removeBrush(el);
+            
+            // array of "event objects" tracking the selection history
+            var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
+            
+            // do nothing if the event isn't "new"
+            // TODO: is there a smarter way to check object equality?
+            var event = {};
+            event[set] = e.value;
+            if (selectionHistory.length > 0) {
+              var ev = JSON.stringify(event);
+              for (var i = 0; i < selectionHistory.length; i++) {
+                var sel = JSON.stringify(selectionHistory[i]);
+                if (sel == ev) {
+                  return;
+                }
+              }
             }
             
-            // e.value is either null, or an array of newly selected values
-            if (e.oldValue !== e.value) {
-              traceManager.updateSelection(set, e.value);
-              // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
-              if (x.selectize) {
-                if (!x.highlight.persistent || e.value === null) {
-                  selectize.clear(true);
-                }
-                selectize.addItems(e.value, true);
-                selectize.close();
-              }
-              
+            // accumulate history for persistent selection
+            if (!x.highlight.persistent) {
+              selectionHistory = [event];
+            } else {
+              selectionHistory.push(event);
             }
+            crosstalk.var("plotlySelectionHistory").set(selectionHistory);
+            
+            // e.value is either null, or an array of newly selected values
+            traceManager.updateSelection(set, e.value);
+            // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
+            if (x.selectize) {
+              if (!x.highlight.persistent || e.value === null) {
+                selectize.clear(true);
+              }
+              selectize.addItems(e.value, true);
+              selectize.close();
+            }
+            
           });
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
