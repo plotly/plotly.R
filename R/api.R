@@ -34,19 +34,19 @@
 #' @examples
 #' \dontrun{
 #' # upload a data frame and start creating via plotly's platform
-#' m <- upload_grid(mtcars)
+#' m <- grid_upload(mtcars)
 #' 
 #' # or download data from the platform into R
-#' download_grid("14705", "cpsievert")
+#' grid_download("14705", "cpsievert")
 #' 
 #' # upload a plot to plotly's web platforam
 #' p <- plot_ly(mtcars, x = ~factor(vs))
-#' r <- upload_plot(p, filename = "mtcars-bar-plot")
+#' r <- plot_upload(p, filename = "mtcars-bar-plot")
 #' # note that you can always obtain about the remote figure
 #' str(r)
 #' 
 #' # or pull a plot down from the platform and work with it locally
-#' download_plot("14708", "cpsievert")
+#' plot_download("14708", "cpsievert")
 #' 
 #' }
 #' 
@@ -54,14 +54,14 @@
 
 #' @export
 #' @rdname api
-upload_plot <- function(p = last_plot(), filename = NULL,
+plot_upload <- function(p = last_plot(), filename = NULL,
                          sharing = c("public", "private", "secret"), ...) {
   
   if (!is.null(file <- file_lookup(filename))) {
     warning(
       "A file with this name already exists. Returning that file... \n", 
       "If you want to create a new plot, specify a new filename. \n",
-      "If you want to overwrite this plot, use overwrite_plot().", call. = FALSE
+      "If you want to overwrite this plot, use plot_overwrite().", call. = FALSE
     )
     return(prefix_class(file, "api_plot"))
   }
@@ -105,7 +105,7 @@ upload_plot <- function(p = last_plot(), filename = NULL,
 
 #' @export
 #' @rdname api
-download_plot <- function(id, username) {
+plot_download <- function(id, username) {
   
   if (missing(id)) stop("Please provide a figure id number")
   if (missing(username)) username <- verify("username")
@@ -121,14 +121,14 @@ download_plot <- function(id, username) {
 
 #' @export
 #' @rdname api
-overwrite_plot <- function() {
+plot_overwrite <- function() {
   
 }
 
 
 #' @export
 #' @rdname api
-upload_grid <- function(x, filename = as.character(substitute(x)),
+grid_upload <- function(x, filename = as.character(substitute(x)),
                         sharing = c("public", "private", "secret"), ...) {
   
   # Does this file already exist?
@@ -136,7 +136,7 @@ upload_grid <- function(x, filename = as.character(substitute(x)),
     warning(
       "A file with this name already exists. Returning that file... \n", 
       "  If you want to create a new grid, specify a new filename. \n",
-      "  If you want to overwrite a grid, use overwrite_grid().", call. = FALSE
+      "  If you want to overwrite a grid, use grid_overwrite().", call. = FALSE
     )
     return(prefix_class(file, "api_grid"))
   }
@@ -161,14 +161,14 @@ upload_grid <- function(x, filename = as.character(substitute(x)),
 
 #' @export
 #' @rdname api
-overwrite_grid <- function(x, filename = as.character(substitute(x)), ...) {
+grid_overwrite <- function(x, filename = as.character(substitute(x)), ...) {
   
 }
 
 
 #' @export
 #' @rdname api
-download_grid <- function(id, username) {
+grid_download <- function(id, username) {
   resp <- file_get(id, username, "grids")
   prefix_class(process(resp), "api_grid_local")
 }
@@ -204,7 +204,7 @@ srcify <- function(trace) {
   grid <- trace[names(trace) %in% names(Attrs)[isArray]]
   # create the grid and replace actual data with "src pointers"
   if (length(grid)) {
-    resp <- upload_grid(grid, filename = new_id())
+    resp <- grid_upload(grid, filename = new_id())
     fid <- resp[["file"]][["fid"]]
     cols <- resp[["file"]][["cols"]]
     for (j in seq_along(cols)) {

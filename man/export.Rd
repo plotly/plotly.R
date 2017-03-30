@@ -31,6 +31,7 @@ the RSelenium package is used for exporting WebGL plots.
 \dontrun{
 export(plot_ly(economics, x = ~date, y = ~pce))
 export(plot_ly(economics, x = ~date, y = ~pce), "plot.svg")
+export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 export(plot_ly(economics, x = ~date, y = ~pce, z = ~pop))
 }
 }
