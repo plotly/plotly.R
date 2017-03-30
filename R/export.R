@@ -90,7 +90,7 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
   
   if (inherits(selenium, "rsClientServer")) {
     # TODO: does this work cross-platform?
-    rD$client$navigate(paste0("file://", normalizePath(f)))
+    selenium$client$navigate(paste0("file://", normalizePath(f)))
   } else {
     stop("`selenium` must be an object of class 'rsClientServer'", call. = FALSE)
   }
