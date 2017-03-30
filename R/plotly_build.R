@@ -192,7 +192,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
-        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, builtData[isSplit])
+        splitVars <- builtData[isSplit]
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, splitVars)
+        # in registerFrames() we need to strip the frame from .plotlyTraceIndex
+        # so keep track of which variable it is...
+        trace$frameOrder <- which(names(splitVars) %in% "frame")
       }
       # Build the index used to determine grouping (later on, NAs are inserted
       # via group2NA() to create the groups). This is done in 3 parts:
@@ -322,10 +326,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- populate_categorical_axes(p)
   # translate '\n' to '<br />' in text strings
   p <- translate_linebreaks(p)
-  # verify plot attributes are legal according to the plotly.js spec
-  p <- verify_attr_names(p)
-  # box up 'data_array' attributes where appropriate
-  p <- verify_boxed(p)
   # if it makes sense, add markers/lines/text to mode
   p <- verify_mode(p)
   # annotations & shapes must be an array of objects
@@ -351,6 +351,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   p <- verify_guides(p)
   
+  # verify plot attributes are legal according to the plotly.js spec
+  p <- verify_attr_names(p)
+  # box up 'data_array' attributes where appropriate
+  p <- verify_attr_spec(p)
+  
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   p
@@ -375,7 +380,12 @@ registerFrames <- function(p, frameMapping = NULL) {
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
   traceNames <- strsplit(as.character(traceNames), "<br />")
-  p$x$data <- Map(function(x, y) { x$name <- y[!y %in% frameAttrs]; x }, p$x$data, traceNames)
+  p$x$data <- Map(function(x, y) {
+    if (!x$frameOrder %||% 0 %in% seq_along(y)) return(x)
+    x$name <- paste(y[-x$frameOrder], collapse = "<br />")
+    x$frameOrder <- NULL
+    x
+  }, p$x$data, traceNames)
   
   # exit in trivial cases
   nFrames <- length(frameNames)
@@ -413,13 +423,36 @@ registerFrames <- function(p, frameMapping = NULL) {
     )
   }
   
-  # remove "frame traces", except for the first one
+  # remove "frame traces" from "plot traces", except for the first one
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
-  # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
+  p$x$data <- retrain_color_defaults(p$x$data)
   
+  # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
+  traceNames <- sapply(p$x$data, "[[", "name")
   p$x$frames <- lapply(p$x$frames, function(f) {
-    f[["traces"]] <- I(which(!is.na(unlist(lapply(p$x$data, "[[", "frame")))) - 1)
+    frameNames <- sapply(f$data, "[[", "name")
+    f[["traces"]] <- which(traceNames %in% frameNames) - 1
+    f
+  })
+  
+  # as per @rreusser, frames specify *state changes* -- so if frame 1
+  # has 3 traces, and frame 2 has 2 traces, we need to explicity supply 3 traces
+  # in both frames, but make 1 invisible in frame 2. For example,
+  # http://codepen.io/cpsievert/pen/gmXVWe
+  frameTraces <- lapply(p$x$frames, "[[", "traces")
+  allFrameTraces <- unique(unlist(frameTraces))
+  p$x$frames <- lapply(p$x$frames, function(f) {
+    for (i in seq_along(f$data)) {
+      f$data[[i]]$visible <- f$data[[i]]$visible %||% TRUE
+    }
+    missingTraces <- setdiff(allFrameTraces, f$traces)
+    for (i in missingTraces) {
+      f$traces <- c(f$traces, i)
+      # grab trace data from the plot trace that it references, but hide it
+      trace <- modify_list(p$x$data[[i+1]], list(visible = FALSE))
+      f$data <- c(f$data, list(trace))
+    }
     f
   })
   

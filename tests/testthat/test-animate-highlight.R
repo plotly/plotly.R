@@ -125,3 +125,54 @@ test_that("Key structure is passed along to frame data", {
   }
   
 })
+
+
+
+test_that("can handle inconsistent # of traces across frames & supply default colors", {
+  d <- data.frame(
+    y = rnorm(20),
+    score = c(1,1,1,1,2,2,2,2,3,3,3,3,1,1,1,1,2,2,2,2),
+    population = c(rep(1, 12), rep(2, 8))
+  )
+  
+  p <- plot_ly(d, y = ~y, split = ~as.factor(score), frame = ~population) %>%
+    add_boxplot()
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 3)
+  
+  # default colors are the plotly.js defaults
+  cols <- sapply(l$data, function(x) x$line$color)
+  defaultCols <- toRGB(traceColorDefaults()[1:3])
+  expect_equal(cols, defaultCols)
+  
+  # trace names reflect the split/score (i.e., frames are removed)
+  nms <- sapply(l$data, "[[", "name")
+  expect_equal(nms, levels(as.factor(d$score)))
+  
+  # 2 frames: both with 3 traces
+  expect_length(l$frames, 2)
+  expect_length(l$frames[[1]]$data, 3)
+  expect_length(l$frames[[2]]$data, 3)
+  
+  # make sure the frames are targetting the right traces
+  expect_equal(l$frames[[1]]$traces, 0:2)
+  expect_equal(l$frames[[2]]$traces, 0:2)
+  
+  # 1st frame has all 3 traces visible; 2nd frame has 2 visible
+  expect_true(
+    unique(sapply(l$frames[[1]]$data, "[[", "visible"))
+  )
+  expect_identical(
+    sapply(l$frames[[2]]$data, "[[", "visible"),
+    c(TRUE, TRUE, FALSE)
+  )
+  
+  # ensure the default colors remain consistent throughout the animation
+  cols <- sapply(l$frames[[1]]$data, function(x) x$line$color)
+  expect_equal(cols, defaultCols)
+  cols <- sapply(l$frames[[2]]$data, function(x) x$line$color)
+  expect_equal(cols, defaultCols)
+  
+})

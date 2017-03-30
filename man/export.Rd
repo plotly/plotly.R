@@ -4,21 +4,31 @@
 \alias{export}
 \title{Export a plotly graph to a static file}
 \usage{
-export(p = last_plot(), file = "plotly.png", ...)
+export(p = last_plot(), file = "plotly.png", delay = 2, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
 
-\item{file}{a filename. See the file argument of \code{webshot::webshot} 
-for valid extensions.}
+\item{file}{a filename. File extension must be included.}
 
-\item{...}{arguments passed onto \code{webshot::webshot}}
+\item{delay}{time (in seconds) to wait before taking screenshot/writing to disk. 
+Sometimes a longer delay is needed for all assets to display properly.}
+
+\item{...}{if \code{p} is a webgl plot, arguments are passed along 
+to \code{RSelenium::rsDriver()}; otherwise, they are passed along to
+\code{webshot::webshot()}}
 }
 \description{
 Export a plotly graph to a static file
 }
+\details{
+For SVG plots, a screenshot is taken via \code{webshot::webshot()}.
+Since \code{phantomjs} (and hence \code{webshot}) does not support WebGL,
+the RSelenium package is used for exporting WebGL plots.
+}
 \examples{
 \dontrun{
 export(plot_ly(economics, x = ~date, y = ~pce))
+export(plot_ly(economics, x = ~date, y = ~pce, z = ~pop))
 }
 }

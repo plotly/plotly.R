@@ -17,7 +17,6 @@ process.api_image <- function(resp) {
            error = function(e) httr::content(resp, as = "raw"))
 }
 
-
 # the default for httr::content() doesn't simplify vectors apparently...
 json_content <- function(resp) {
   from_JSON(

@@ -14,6 +14,16 @@ is.bare.list <- function(x) {
   is.list(x) && !is.data.frame(x)
 }
 
+is.evaled <- function(p) {
+  all(vapply(p$x$attrs, function(attr) inherits(attr, "plotly_eval"), logical(1)))
+}
+
+is.webgl <- function(p) {
+  if (!is.evaled(p)) p <- plotly_build(p)
+  types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+  any(types %in% c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud"))
+}
+
 "%||%" <- function(x, y) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
@@ -245,24 +255,25 @@ supply_highlight_attrs <- function(p) {
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
-  check_attrs(
+  attrs_name_check(
     sub("[0-9]+$", "", names(p$x$layout)),
     c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
     "layout"
   )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
-    validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    check_attrs(
+    attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
+    # make sure attribute names are valid
+    attrs_name_check(
       names(thisTrace), 
-      c(names(validAttrs), "key", "set", "frame", "_isNestedKey", "_isSimpleKey"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey"), 
       thisTrace$type
     )
   }
   invisible(p)
 }
 
-check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
+attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
@@ -274,12 +285,11 @@ check_attrs <- function(proposedAttrs, validAttrs, type = "scatter") {
   invisible(proposedAttrs)
 }
 
-# ensure both the layout and trace attributes are sent to plotly.js
-# as data_arrays
-verify_boxed <- function(p) {
+# ensure both the layout and trace attributes adhere to the plot schema
+verify_attr_spec <- function(p) {
   if (!is.null(p$x$layout)) {
     layoutNames <- names(p$x$layout)
-    layoutNew <- verify_box(
+    layoutNew <- verify_attr(
       setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
       Schema$layout$layoutAttributes
     )
@@ -288,41 +298,47 @@ verify_boxed <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     validAttrs <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    p$x$data[[tr]] <- verify_box(thisTrace, validAttrs)
+    p$x$data[[tr]] <- verify_attr(thisTrace, validAttrs)
     # prevent these objects from sending null keys
     p$x$data[[tr]][["xaxis"]] <- p$x$data[[tr]][["xaxis"]] %||% NULL
     p$x$data[[tr]][["yaxis"]] <- p$x$data[[tr]][["yaxis"]] %||% NULL
   }
-  p$x$layout$updatemenus
   
   p
 }
 
-verify_box <- function(proposed, schema) {
+verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
-    attrVal <- proposed[[attr]]
     attrSchema <- schema[[attr]]
-    isArray <- tryCatch(
-      identical(attrSchema[["valType"]], "data_array"),
-      error = function(e) FALSE
-    )
-    isObject <- tryCatch(
-      identical(attrSchema[["role"]], "object"),
-      error = function(e) FALSE
-    )
-    if (isArray) {
-      proposed[[attr]] <- i(attrVal)
+    valType <- tryNULL(attrSchema[["valType"]]) %||% ""
+    role <- tryNULL(attrSchema[["role"]]) %||% ""
+    # ensure data_arrays of length 1 are boxed up by to_JSON()
+    if (identical(valType, "data_array")) {
+      proposed[[attr]] <- i(proposed[[attr]])
     }
-    # we don't have to go more than two-levels, right?
-    if (isObject) {
-      for (attr2 in names(attrVal)) {
-        isArray2 <- tryCatch(
-          identical(attrSchema[[attr2]][["valType"]], "data_array"),
-          error = function(e) FALSE
-        )
-        if (isArray2) {
-          proposed[[attr]][[attr2]] <- i(attrVal[[attr2]])
+    # where applicable, reduce single valued vectors to a constant 
+    # (while preserving any 'special' attribute class)
+    if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
+      proposed[[attr]] <- structure(
+        uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
+      )
+    }
+    # do the same for "sub-attributes"
+    if (identical(role, "object")) {
+      for (attr2 in names(proposed[[attr]])) {
+        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
+        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
+        # ensure data_arrays of length 1 are boxed up by to_JSON()
+        if (identical(valType2, "data_array")) {
+          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
+        # where applicable, reduce single valued vectors to a constant
+        if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
+          proposed[[attr]][[attr2]] <- structure(
+            uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
+          )
+        }
+        # we don't have to go more than two-levels, right?
       }
     }
   }
@@ -466,13 +482,19 @@ populate_categorical_axes <- function(p) {
     d <- lapply(p$x$data, "[[", axisType)
     isOnThisAxis <- function(tr) {
       is.null(tr[["geo"]]) && sub("axis", "", axisName) %in% 
-        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType)
+        (tr[[sub("[0-9]+", "", axisName)]] %||% axisType) &&
+        # avoid reordering matrices (see #863)
+        !is.matrix(tr[["z"]])
     }
     d <- d[vapply(p$x$data, isOnThisAxis, logical(1))]
     if (length(d) == 0) next
     isDiscrete <- vapply(d, is.discrete, logical(1))
     if (0 < sum(isDiscrete) & sum(isDiscrete) < length(d)) {
-      stop("Can't display both discrete & non-discrete data on same axis")
+      warning(
+        "Can't display both discrete & non-discrete data on same axis", 
+        call. = FALSE
+      )
+      next
     }
     if (sum(isDiscrete) == 0) next
     categories <- lapply(d, getLevels)

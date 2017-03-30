@@ -1,6 +1,6 @@
 # 4.5.6.9000
 
-## NEW FEATURES
+## NEW FEATURES & IMPROVEMENTS
 
 * Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html>. For some more complex examples, see <https://cpsievert.github.io/pedestrians/>
 * Added the `highlight()` function for configuring selection modes/sequences.
@@ -11,17 +11,23 @@
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#nested-selections>
-
-## BUG FIXES
-
-* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
+* The `export()` function now tries it's best to export WebGL plots (via **RSelenium**). It also gains a `delay` argument.
+* The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
+* Better type checking of trace attributes will now automatically reduce a single-valued vector to a constant (when appropriate). This is particularly useful for anchoring multiple traces to a single legend entry via `legendgroup` (see #675, #817, #826).
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.22.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.22.0
+* Upgraded to plotly.js v1.25.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.1
 * `HTMLwidgets.renderValue()` now calls `Plotly.redraw()` instead of `Plotly.newPlot()`. (thanks @AleksandrIanevski)
-* A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824.
+* A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824, #717, #825.
 * If no graphics device is already open, `ggplotly()` now tries to open/close a Cairo graphics device, then a bitmap (png/jpeg) device. If neither is available, it errors. This helps to ensure that a *screen* device is never opened by `ggplotly()` (which fixes #829). Furthermore, if `width`/`height` is not specified *and* no graphics device is currently open, a default of 640/480 is used for width/height of the device. 
+
+## BUG FIXES
+
+* `embed_notebook()` now works in *nteract* notebooks (see #768). 
+* Axis categories are no longer reordered for matrices (see #863).
+* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
+* Font faces for axis titles are now translated in `ggplotly()`. Fixes #861.
 
 # 4.5.6
 
@@ -312,7 +318,7 @@ sorted alphabetically before scales are applied. Also, when mapping a factor to 
 * Misspecified trace/layout attributes produce a warning.
 * New `plotly_data()` function for returning/inspecting data frame(s) associated with a plotly object.
 * New `plotly_json()` function for inspecting the data sent to plotly.js (as an R list or JSON).
-* `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics:layout()` (fixes #464).
+* `layout()` is now a generic function and uses method dispatch to avoid conflicts with `graphics::layout()` (fixes #464).
 
 ## OTHER CHANGES:
 

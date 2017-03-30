@@ -236,7 +236,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
     if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
-      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+      x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x
   }, layers, layer_data)
@@ -584,19 +584,23 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = axisTitleText,
+        title = faced(axisTitleText, axisTitle$face),
         titlefont = text2font(axisTitle)
       )
-      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
-      # this way both dates/datetimes are on same scale
+      
+      # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (identical("date", sc$scale_name)) {
-        axisObj$range <- axisObj$range * 86400000
+      if (any(c("date", "datetime") %in% sc$scale_name)) {
+        # convert days (date) / seconds (datetime) to milliseconds
+        # (86400000 = 24 * 60 * 60 * 1000)
+        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
+        axisObj$range <- axisObj$range * constant
         if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
+          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
         }
-        axisObj$type <- "date"
+        if (dynamicTicks) axisObj$type <- "date"
       }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
@@ -909,7 +913,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       lapply(mappings, lazyeval::f_new)
     } else {
       nms <- names(mappings)
-      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.name(x))), nms)
     }
   })
   

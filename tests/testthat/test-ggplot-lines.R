@@ -1,4 +1,4 @@
-context("line")
+context("lines")
 
 test_that("6 different automatic lty converted to plotly's 6 types", {
   d <- expand.grid(x=1:6, y=1:6)
@@ -39,4 +39,51 @@ test_that("different colored lines become different colored traces", {
   expect_identical(info$data[[2]]$line$color, toRGB("red"))
   expect_identical(info$data[[2]]$y[1:n], y2)
   expect_identical(info$data[[2]]$x[1:n], x)
+})
+
+
+
+test_that("Translates both dates and datetimes (with dynamic ticks) correctly", {
+  
+  dates <- seq(
+    as.Date("2002-01-01"), 
+    by = "1 month", 
+    length.out = 100
+  )
+  
+  d <- data.frame(
+    value = rnorm(100),
+    date = dates
+  )
+  
+  p <- ggplot(d, aes(date, value)) + geom_line()
+  l <- plotly_build(ggplotly(p, dynamicTicks = TRUE))$x
+  
+  milliseconds <- as.numeric(d$date) * 86400000
+  
+  d2 <- data.frame(
+    value = rnorm(100),
+    date = as.POSIXct(dates)
+  )
+  
+  milliseconds2 <- as.numeric(d2$date) * 1000
+  p2 <- ggplot(d2, aes(date, value)) + geom_line()
+  l2 <- plotly_build(ggplotly(p2, dynamicTicks = TRUE))$x
+  
+  # data is all on millisecond level
+  expect_equal(milliseconds, milliseconds2)
+  expect_equal(milliseconds, l$data[[1]]$x)
+  expect_equal(milliseconds, l2$data[[1]]$x)
+  
+  # same with range
+  expect_equal(grDevices::extendrange(milliseconds), l$layout$xaxis$range)
+  expect_equal(grDevices::extendrange(milliseconds), l2$layout$xaxis$range)
+  
+  # since these are dynamic ticks, let plotly.js generate the ticks
+  expect_null(l$layout$xaxis$ticktext)
+  expect_null(l$layout$xaxis$tickvals)
+  expect_null(l2$layout$xaxis$ticktext)
+  expect_null(l2$layout$xaxis$tickvals)
+  expect_equal(l$layout$xaxis$type, "date")
+  expect_equal(l2$layout$xaxis$type, "date")
 })
