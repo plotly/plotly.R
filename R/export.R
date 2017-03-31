@@ -85,7 +85,7 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
   
   # phantomjs doesn't support webgl or svg/webp output
   if (use_webshot) {
-    return(webshot::webshot(f, file, delay = delay, ...))
+    return(webshot::webshot(f, file, ...))
   }
   
   if (inherits(selenium, "rsClientServer")) {
