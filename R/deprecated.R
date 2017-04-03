@@ -1,6 +1,6 @@
 #' Create/Modify plotly graphs
 #'
-#' Deprecated: see \link{plots_create}.
+#' Deprecated: see \link{upload}.
 #'
 #' @param x either a ggplot object, a plotly object, or a list.
 #' @param filename character string describing the name of the plot in your 
@@ -27,8 +27,8 @@
 #' @seealso \code{\link{plot_ly}()}, \code{\link{signup}()}
 plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret"), ...) {
-  .Deprecated("plots_create")
-  plots_create(x, filename, fileopt, sharing, ...)
+  .Deprecated("upload")
+  upload(x, filename = filename, sharing = sharing, ...)
 }
 
 #' Request a figure object
@@ -39,8 +39,8 @@ plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
 #' @param id of the Plotly figure.
 #' @export
 get_figure <- function(username, id) {
-  .Deprecated("plots_get")
-  plots_get(id, username)
+  .Deprecated("download")
+  download(id, username)
 }
 
 #' Main interface to plotly 

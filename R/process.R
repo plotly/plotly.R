@@ -10,6 +10,10 @@ process.default <- function(resp) {
   json_content(relay_error(resp))
 }
 
+process.api_plot <- function(resp) {
+  json_content(relay_error(resp))
+}
+
 process.api_image <- function(resp) {
   relay_error(resp)
   # httr (should) know to call png::readPNG() which returns raster array

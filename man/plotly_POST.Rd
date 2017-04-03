@@ -34,7 +34,7 @@ viewing that page will be able to view the graph.
 You do not need to be logged in to view this plot.}
 }
 \description{
-Deprecated: see \link{plots_create}.
+Deprecated: see \link{upload}.
 }
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{signup}()}
