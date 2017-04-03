@@ -17,7 +17,7 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.25.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.1
+* Upgraded to plotly.js v1.25.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.2
 * `HTMLwidgets.renderValue()` now calls `Plotly.redraw()` instead of `Plotly.newPlot()`. (thanks @AleksandrIanevski)
 * A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824, #717, #825.
 * If no graphics device is already open, `ggplotly()` now tries to open/close a Cairo graphics device, then a bitmap (png/jpeg) device. If neither is available, it errors. This helps to ensure that a *screen* device is never opened by `ggplotly()` (which fixes #829). Furthermore, if `width`/`height` is not specified *and* no graphics device is currently open, a default of 640/480 is used for width/height of the device. 
