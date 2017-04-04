@@ -87,3 +87,36 @@ test_that("Translates both dates and datetimes (with dynamic ticks) correctly", 
   expect_equal(l$layout$xaxis$type, "date")
   expect_equal(l2$layout$xaxis$type, "date")
 })
+
+test_that("geom_linerange() without a y aesthetic translates to a path", {
+  d <- data.frame(
+    x = 1:5, 
+    ymax = 1:5,
+    ymin = 0
+  )
+  
+  p <- ggplot(d, aes(x, ymax = ymax, ymin = ymin)) +  
+    geom_linerange()
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 1)
+  expect_equal(l$data[[1]]$type, "scatter")
+  expect_equal(
+    l$data[[1]]$x,
+    c(1, 1, NA, 2, 2, NA, 3, 3, NA, 4, 4, NA, 5, 5)
+  )
+  expect_equal(
+    l$data[[1]]$y,
+    c(0, 1, NA, 0, 2, NA, 0, 3, NA, 0, 4, NA, 0, 5)
+  )
+  expect_equal(
+    unlist(l$data[[1]]$text),
+    c(
+      'x: 1<br>ymin: 0', 'x: 1<br>ymax: 1', NA, 'x: 2<br>ymin: 0', 
+      'x: 2<br>ymax: 2', NA, 'x: 3<br>ymin: 0', 'x: 3<br>ymax: 3', NA, 
+      'x: 4<br>ymin: 0', 'x: 4<br>ymax: 4', NA, 'x: 5<br>ymin: 0', 'x: 5<br>ymax: 5'
+    )
+  )
+  
+})
