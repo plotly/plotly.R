@@ -175,4 +175,78 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   cols <- sapply(l$frames[[2]]$data, function(x) x$line$color)
   expect_equal(cols, defaultCols)
   
+  # ensure the animation defaults are supplied
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
+  defaults <- animation_opts_defaults()
+  expect_identical(
+    buttonArgs[names(defaults)], defaults
+  )
+  
+  # step values reflect the frame values
+  steps <- l$layout$sliders[[1]]$steps
+  expect_equal(
+    unlist(lapply(steps, function(s) s$args[[1]])),
+    c("1", "2")
+  )
+  
+  # all the slider steps reflect the animation default
+  res <- lapply(steps, function(s) {
+    expect_identical(s$args[[2]], defaults)
+  })
+  
+})
+
+test_that("can change animation defaults", {
+  
+  data(mtcars)
+  
+  p <- plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl)  %>%
+    animation_opts(frame = 1200, transition = 1000, easing = "elastic") %>%
+    animation_button(
+      x = 1, xanchor = "right", y = 0, yanchor = "bottom"
+    ) %>%
+    animation_slider(
+      currentvalue = list(prefix = "YEAR ", font = list(color="red"))
+    )
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 1)
+  expect_length(l$frames, 3)
+  
+  cyl <- as.character(unique(sort(mtcars$cyl)))
+  for (i in seq_along(l$frames)) {
+    f <- l$frames[[i]]
+    expect_equal(f$name, cyl[[i]])
+    expect_length(f$data, 1)
+  }
+  
+  # the expectation for animation option values
+  aniOpts <- modify_list(
+    rapply(animation_opts_defaults(), unclass, how = "list"), 
+    list(
+      frame = list(duration = 1200), 
+      transition = list(duration = 1000, easing = "elastic")
+    )
+  )
+  
+  # ensure the animation options are supplied
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
+  expect_equal(
+    buttonArgs[names(aniOpts)], aniOpts
+  )
+  
+  # step values reflect the frame values
+  steps <- l$layout$sliders[[1]]$steps
+  expect_equal(
+    unlist(lapply(steps, function(s) s$args[[1]])), cyl
+  )
+  
+  # all the slider steps reflect the animation options
+  res <- lapply(steps, function(s) {
+    expect_identical(
+      s$args[[2]], aniOpts
+    )
+  })
+  
 })

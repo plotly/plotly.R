@@ -78,6 +78,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     lapply(p$x$attrs, function(x) deparse2(x[["frame"]])),
     use.names = FALSE
   ))
+  if (length(frameMapping) > 1) {
+    warning("Only one `frame` variable is allowed", call. = FALSE)
+  }
   
   # Attributes should be NULL if none exist (rather than an empty list)
   if (length(p$x$attrs) == 0) p$x$attrs <- NULL
@@ -193,7 +196,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
         splitVars <- builtData[isSplit]
-        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, splitVars)
+        traceIndex <- Reduce(paste2, splitVars)
+        if (!is.null(trace$name)) {
+          traceIndex <- paste2(traceIndex, trace$name)
+        }
+        builtData[[".plotlyTraceIndex"]] <- traceIndex
         # in registerFrames() we need to strip the frame from .plotlyTraceIndex
         # so keep track of which variable it is...
         trace$frameOrder <- which(names(splitVars) %in% "frame")
@@ -373,25 +380,31 @@ registerFrames <- function(p, frameMapping = NULL) {
   })
   
   # the ordering of this object determines the ordering of the frames
-  frameAttrs <- getLevels(unlist(lapply(p$x$data, "[[", "frame")))
-  frameNames <- frameAttrs[!is.na(frameAttrs)]
+  frameAttrs <- unlist(lapply(p$x$data, "[[", "frame"))
+  # NOTE: getLevels() should drop NAs
+  frameNames <- getLevels(frameAttrs)
   p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
   
   # remove frames from the trace names
   traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
-  traceNames <- strsplit(as.character(traceNames), "<br />")
-  p$x$data <- Map(function(x, y) {
-    if (!x$frameOrder %||% 0 %in% seq_along(y)) return(x)
-    x$name <- paste(y[-x$frameOrder], collapse = "<br />")
-    x$frameOrder <- NULL
-    x
-  }, p$x$data, traceNames)
+  nameComponents <- strsplit(as.character(traceNames), "<br />")
+  
+  for (i in seq_along(p$x$data)) {
+    tr <- p$x$data[[i]]
+    nms <- nameComponents[[i]]
+    if (!tr$frameOrder %||% 0 %in% seq_along(nms)) next
+    p$x$data[[i]]$name <- paste(nms[-tr$frameOrder], collapse="<br/>")
+    p$x$data[[i]]$frameOrder <- NULL
+  }
   
   # exit in trivial cases
   nFrames <- length(frameNames)
   if (nFrames < 2) return(p)
   
+  # --------------------------------------------------------------------------
   # set a "global" range of x/y (TODO: handle multiple axes?)
+  # --------------------------------------------------------------------------
+  
   x <- unlist(lapply(p$x$data, function(x) x[["x"]]))
   if (is.numeric(x)) {
     rng <- range(x, na.rm = TRUE)
@@ -411,48 +424,61 @@ registerFrames <- function(p, frameMapping = NULL) {
     p$x$layout$yaxis$range <- p$x$layout$yaxis$range %||% extendrange(rng)
   }
   
-  # copy over "frame traces" over to the frames key (required by plotly.js API)
+  # --------------------------------------------------------------------------
+  # Similar to setting a global x/y range, we need a "global trace range"
+  # 
+  # implementation details via @rreusser: frames specify *state changes*, 
+  # so if frame 1 has 3 traces, and frame 2 has 2 traces, 
+  # we need to explicity supply 3 traces
+  # in both frames, but make 1 invisible in frame 2. For example,
+  # http://codepen.io/cpsievert/pen/gmXVWe
+  # For that reason, every frame (including the "initial" frame) has the 
+  # max # of traces and "missing traces" are not visible (i.e., `visible=false`)
+  # --------------------------------------------------------------------------
+  
+  # remember, at this point, frame has been removed from the trace name
+  frameTraceNames <- unique(unlist(lapply(p$x$data[!is.na(frameAttrs)], "[[", "name")))
   for (i in seq_along(frameNames)) {
-    thisFrame <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))
-    isNotAFrame <- vapply(p$x$data, function(tr) is.na(tr[["frame"]]), logical(1))
-    # retrain colors on each frame (including other data that isn't animated)
-    frameDat <- retrain_color_defaults(p$x$data[thisFrame | isNotAFrame])
+    nm <- frameNames[[i]]
+    d <- p$x$data[sapply(p$x$data, "[[", "frame") %in% nm]
+    
+    # ensure, the frames API knows what is visible/invisible
+    d <- lapply(d, function(tr) { tr$visible <- tr$visible %||% TRUE; tr })
+    
+    # if this frame is missing a trace name, supply an invisible one
+    traceNamesMissing <- setdiff(frameTraceNames, sapply(d, "[[", "name"))
+    for (j in traceNamesMissing) {
+      idx <- vapply(p$x$data, function(tr) isTRUE(tr[["name"]] == j), logical(1))
+      idx <- which(idx)[[1]]
+      invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
+      d <- c(d, list(invisible))
+    }
+    
     p$x$frames[[i]] <- list(
-      name = as.character(format(frameNames[i])),
-      data = frameDat[vapply(frameDat, function(tr) isTRUE(tr[["frame"]] == frameNames[i]), logical(1))]
+      name = as.character(format(nm)),
+      data = d
     )
   }
   
-  # remove "frame traces" from "plot traces", except for the first one
+  # ensure the plot knows about the "global trace range"
+  firstFrame <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[[1]]), logical(1))
+  p$x$data[firstFrame] <- p$x$frames[[1]]$data
+  
+  # remove frame traces
   idx <- vapply(p$x$data, function(tr) isTRUE(tr[["frame"]] %in% frameNames[-1]), logical(1))
   p$x$data[idx] <- NULL
-  p$x$data <- retrain_color_defaults(p$x$data)
   
-  # which trace does each frame target? http://codepen.io/rsreusser/pen/kkxqOz?editors=0010
-  traceNames <- sapply(p$x$data, "[[", "name")
+  # this works since we now have a global trace range
   p$x$frames <- lapply(p$x$frames, function(f) {
-    frameNames <- sapply(f$data, "[[", "name")
-    f[["traces"]] <- which(traceNames %in% frameNames) - 1
+    f$traces <- i(which(!is.na(sapply(p$x$data, "[[", "frame"))) - 1)
     f
   })
   
-  # as per @rreusser, frames specify *state changes* -- so if frame 1
-  # has 3 traces, and frame 2 has 2 traces, we need to explicity supply 3 traces
-  # in both frames, but make 1 invisible in frame 2. For example,
-  # http://codepen.io/cpsievert/pen/gmXVWe
-  frameTraces <- lapply(p$x$frames, "[[", "traces")
-  allFrameTraces <- unique(unlist(frameTraces))
+  # retrain color defaults
+  p$x$data <- retrain_color_defaults(p$x$data)
   p$x$frames <- lapply(p$x$frames, function(f) {
-    for (i in seq_along(f$data)) {
-      f$data[[i]]$visible <- f$data[[i]]$visible %||% TRUE
-    }
-    missingTraces <- setdiff(allFrameTraces, f$traces)
-    for (i in missingTraces) {
-      f$traces <- c(f$traces, i)
-      # grab trace data from the plot trace that it references, but hide it
-      trace <- modify_list(p$x$data[[i+1]], list(visible = FALSE))
-      f$data <- c(f$data, list(trace))
-    }
+    if (length(f$data) == 10) browser()
+    f$data <- retrain_color_defaults(f$data)
     f
   })
   
@@ -468,8 +494,21 @@ registerFrames <- function(p, frameMapping = NULL) {
     )
   } else NULL
   
+  # supply animation option defaults (a la, highlight_defaults())
+  p$animation <- p$animation %||% animation_opts_defaults()
+  
+  # if all the frame trace data are scatter traces, set a default of redraw=F
+  types <- unique(unlist(lapply(p$x$frames, function(f) {
+    vapply(f$data, function(tr) tr$type %||% "scatter", character(1))
+  })))
+  if (identical(types, "scatter") && is.default(p$animation$frame$redraw)) {
+    p$animation$frame$redraw <- default(FALSE)
+  }
+  
   # _always_ display an animation button and slider by default
-  supply_ani_button(supply_ani_slider(p, currentvalue = defaultvalue))
+  animation_button_supply(
+    animation_slider_supply(p, currentvalue = defaultvalue)
+  )
 }
 
 

@@ -17,7 +17,7 @@
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js}
 #' @param redraw Trigger a redraw of the plot at completion of the transition?
 #' A redraw may significantly impact performance, but may be necessary to
-#' update plot attributes that can't be transitioned.
+#' update graphical elements that can't be transitioned.
 #' @param mode Describes how a new animate call interacts with currently-running
 #' animations. If `immediate`, current animations are interrupted and
 #' the new animation is started. If `next`, the current frame is allowed
@@ -59,35 +59,65 @@
 #' #' # for more, see https://cpsievert.github.io/plotly_book/key-frame-animations.html
 #'
 animation_opts <- function(p, frame = 500, transition = frame, easing = "linear",
-                           redraw = FALSE, mode = "immediate") {
+                           redraw = TRUE, mode = "immediate") {
+  
+  p$animation <- animation_opts_format(
+    frame = frame,
+    transition = transition,
+    easing = easing,
+    redraw = redraw,
+    mode = mode
+  )
+  
+  p
+}
+
+
+animation_opts_format <- function(frame, transition, easing, redraw, mode) {
   if (frame < 0) {
     stop("frame must be non-negative.", call. = FALSE)
   }
   if (transition < 0) {
-    stop("frame must be non-negative.", call. = FALSE)
+    stop("transition must be non-negative.", call. = FALSE)
   }
   if (frame < transition) {
-    stop("frame must be larger than transition", call. = FALSE)
+    stop("frame must be a value larger than transition (it includes the transition)", call. = FALSE)
   }
-
-  opts <- list(
+  
+  e <- match.arg(easing, easingOpts())
+  m <- match.arg(mode, c('immediate', 'next', 'afterall'))
+  
+  list(
     transition = list(
       duration = transition,
-      easing = match.arg(easing, easingOpts())
+      easing = easing
     ),
     frame = list(
       duration = frame,
       redraw = redraw
     ),
-    mode = match.arg(mode, c('immediate', 'next', 'afterall'))
+    mode = mode
   )
+}
 
-  # build step will ensure we can access the animation frames
-  # (required to fill the steps in correctly)
-  p <- plotly_build(p)
-
-  # overwrite the animation options in the slider/button spec
-  supply_ani_slider(supply_ani_button(p, opts = opts), opts = opts)
+# a la highlight_defaults()
+animation_opts_defaults <- function() {
+  opts <- formals(animation_opts)[-1]
+  
+  # yayyyy for lazy evaluation of arguments
+  isQuoted <- identical(opts$transition, quote(frame))
+  opts$transition <- if (isQuoted) opts$frame else opts$transition
+  
+  # flag these as plotly defaults 
+  opts <- rapply(opts, default, how = "list")
+  
+  animation_opts_format(
+    frame = opts$frame,
+    transition = opts$transition,
+    easing = opts$easing,
+    redraw = opts$redraw,
+    mode = opts$mode
+  )
 }
 
 
@@ -134,15 +164,16 @@ animation_button <- function(p, ...) {
 
 # supply an animation button if it doesn't exist,
 # and _replace_ an existing animation button
-supply_ani_button <- function(p, opts = NULL) {
+animation_button_supply <- function(p) {
   nmenus <- length(p$x$layout$updatemenus)
   isAniButton <- vapply(p$x$layout$updatemenus, is_ani_button, logical(1))
   idx <- if (sum(isAniButton) == 1) which(isAniButton) else nmenus + 1
-  p$x$layout$updatemenus[[idx]] <- create_ani_button(opts)
+  p$x$layout$updatemenus[[idx]] <- animation_button_create(p$animation)
   p
 }
 
-create_ani_button <- function(opts) {
+animation_button_create <- function(opts = animation_opts_defaults()) {
+  
   button <- list(
     type = 'buttons',
     direction = 'right',
@@ -168,22 +199,21 @@ is_ani_button <- function(obj) {
 
 # supply an animation slider if it doesn't exist,
 # and _replace_ an existing animation slider
-supply_ani_slider <- function(p, opts = NULL, ...) {
+animation_slider_supply <- function(p, ...) {
   nsliders <- length(p$x$layout$sliders)
   isAniSlider <- vapply(p$x$layout$sliders, is_ani_slider, logical(1))
   hasAniSlider <- sum(isAniSlider) == 1
   idx <- if (hasAniSlider) which(isAniSlider) else nsliders + 1
-  p$x$layout$sliders[[idx]] <- create_ani_slider(p, opts, ...)
+  p$x$layout$sliders[[idx]] <- animation_slider_create(p, ...)
   p
 }
 
-
-create_ani_slider <- function(p, opts = NULL, ...) {
+animation_slider_create <- function(p, ...) {
   steps <- lapply(p$x$frames, function(f) {
     # frame names should already be formatted
     nm <- f[["name"]]
     args <- list(list(nm))
-    args[[2]] <- opts
+    args[[2]] <- p$animation %||% animation_opts_defaults()
     list(method = "animate", args = args, label = nm, value = nm)
   })
 
@@ -203,7 +233,6 @@ create_ani_slider <- function(p, opts = NULL, ...) {
 is_ani_slider <- function(obj) {
   class(obj) %in% "aniSlider"
 }
-
 
 easingOpts <- function() {
   c('linear', 'quad', 'cubic', 'sin', 'exp', 'circle', 'elastic', 'back',

@@ -7,7 +7,7 @@
 \title{Animation configuration options}
 \usage{
 animation_opts(p, frame = 500, transition = frame, easing = "linear",
-  redraw = FALSE, mode = "immediate")
+  redraw = TRUE, mode = "immediate")
 
 animation_slider(p, hide = FALSE, ...)
 
@@ -27,7 +27,7 @@ frames (in milliseconds).}
 
 \item{redraw}{Trigger a redraw of the plot at completion of the transition?
 A redraw may significantly impact performance, but may be necessary to
-update plot attributes that can't be transitioned.}
+update graphical elements that can't be transitioned.}
 
 \item{mode}{Describes how a new animate call interacts with currently-running
 animations. If `immediate`, current animations are interrupted and
