@@ -130,6 +130,9 @@ hide_colorbar <- function(p) {
 #' hide_legend(p)
 
 hide_legend <- function(p) {
+  if (ggplot2::is.ggplot(p)) {
+    p <- plotly_build(p)
+  }
   p$x$.hideLegend <- TRUE
   p
 }
