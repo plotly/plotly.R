@@ -130,12 +130,7 @@ hide_colorbar <- function(p) {
 #' hide_legend(p)
 
 hide_legend <- function(p) {
-  p <- plotly_build(p)
-  # annotations have to be an array of objects, so this should be a list of lists
-  ann <- p$x$layout$annotations
-  is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
-  p$x$layout$annotations <- ann[!is_title]
-  p$x$layout$showlegend <- FALSE
+  p$x$.hideLegend <- TRUE
   p
 }
 
