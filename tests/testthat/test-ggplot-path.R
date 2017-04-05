@@ -72,6 +72,12 @@ test_that("lines & points are merged into markers+lines traces", {
   expect_identical(info$data[[1]]$marker$symbol, "circle")
   expect_identical(info$data[[2]]$name, "Male")
   expect_identical(info$data[[2]]$marker$symbol, "triangle-up")
-  expect_identical(info$data[[1]]$mode, "markers+lines")
-  expect_identical(info$data[[2]]$mode, "markers+lines")
+  expect_identical(
+    sort(strsplit(info$data[[1]]$mode, "+", fixed = TRUE)[[1]]), 
+    c("lines", "markers")
+  )
+  expect_identical(
+    sort(strsplit(info$data[[2]]$mode, "+", fixed = TRUE)[[1]]), 
+    c("lines", "markers")
+  )
 })

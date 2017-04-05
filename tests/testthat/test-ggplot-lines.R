@@ -113,9 +113,9 @@ test_that("geom_linerange() without a y aesthetic translates to a path", {
   expect_equal(
     unlist(l$data[[1]]$text),
     c(
-      'x: 1<br>ymin: 0', 'x: 1<br>ymax: 1', NA, 'x: 2<br>ymin: 0', 
-      'x: 2<br>ymax: 2', NA, 'x: 3<br>ymin: 0', 'x: 3<br>ymax: 3', NA, 
-      'x: 4<br>ymin: 0', 'x: 4<br>ymax: 4', NA, 'x: 5<br>ymin: 0', 'x: 5<br>ymax: 5'
+      'x: 1<br />ymin: 0', 'x: 1<br />ymax: 1', NA, 'x: 2<br />ymin: 0', 
+      'x: 2<br />ymax: 2', NA, 'x: 3<br />ymin: 0', 'x: 3<br />ymax: 3', NA, 
+      'x: 4<br />ymin: 0', 'x: 4<br />ymax: 4', NA, 'x: 5<br />ymin: 0', 'x: 5<br />ymax: 5'
     )
   )
   

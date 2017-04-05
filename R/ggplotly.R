@@ -868,13 +868,15 @@ gg2list <- function(p, width = NULL, height = NULL,
     mergedTraces <- vector("list", nhashes)
     for (i in unique(hashes)) {
       idx <- which(hashes %in% i)
-      # for now we just merge markers and lines -- I can't imagine text being worthwhile
-      if (all(modes[idx] %in% c("lines", "markers"))) {
-        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
-        mergedTraces[[i]]$mode <- "markers+lines"
-        if (any(sapply(traces[idx], "[[", "showlegend"))) {
-          mergedTraces[[i]]$showlegend <- TRUE
-        }
+      mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
+      mergedTraces[[i]]$mode <- paste(
+        unique(unlist(lapply(traces[idx], "[[", "mode"))), 
+        collapse = "+"
+      )
+      # show one, show all
+      show <- vapply(traces[idx], function(tr) tr$showlegend %||% TRUE, logical(1))
+      if (any(show)) {
+        mergedTraces[[i]]$showlegend <- TRUE
       }
     }
     traces <- mergedTraces
