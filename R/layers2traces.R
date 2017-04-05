@@ -400,23 +400,23 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) 
 
 #' @export
 to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) {
-  data$width <- 0
-  # y is not a required aes
-  if (is.null(data[["y"]])) {
-    # reshape data so that x/y reflect path data
-    data$group <- seq_len(nrow(data))
-    data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
-    data <- data[order(data$group), ]
-    # fix the hovertext (by removing the "irrelevant" aesthetic)
-    recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
-    data$hovertext <- Map(function(x, y) { 
-      paste(x[!grepl(y, x)], collapse = br())
-    }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
-    
-    prefix_class(data, "GeomPath")
-  } else {
-    prefix_class(data, "GeomErrorbar")
+  
+  if (!is.null(data[["y"]])) {
+    data$width <- 0
+    return(prefix_class(data, "GeomErrorbar"))
   }
+  
+  # reshape data so that x/y reflect path data
+  data$group <- seq_len(nrow(data))
+  data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
+  data <- data[order(data$group), ]
+  # fix the hovertext (by removing the "irrelevant" aesthetic)
+  recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
+  data$hovertext <- Map(function(x, y) { 
+    paste(x[!grepl(y, x)], collapse = br())
+  }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
+  
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
