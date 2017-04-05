@@ -699,7 +699,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     colorBarTrace <- list(
       x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
       y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
-      type = "scatter",
+      type = if (any(types %in% glTypes())) "scattergl" else "scatter",
       mode = "markers",
       opacity = 0,
       hoverinfo = "none",

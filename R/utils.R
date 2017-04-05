@@ -21,7 +21,11 @@ is.evaled <- function(p) {
 is.webgl <- function(p) {
   if (!is.evaled(p)) p <- plotly_build(p)
   types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
-  any(types %in% c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud"))
+  any(types %in% glTypes())
+}
+
+glTypes <- function() {
+  c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords")
 }
 
 "%||%" <- function(x, y) {
