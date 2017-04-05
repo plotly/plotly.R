@@ -209,6 +209,9 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
+  if (nrow(data) == 0) {
+    return(prefix_class(data, "GeomBlank"))
+  }
   dat <- prefix_class(data, "GeomPath")
   # alpha for the path is always 1 (see GeomSmooth$draw_key)
   dat$alpha <- 1
