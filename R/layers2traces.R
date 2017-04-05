@@ -55,7 +55,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
         if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
       }
       # add a line break if hovertext already exists
-      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
+      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
@@ -189,7 +189,7 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = data[["x"]] - data$violinwidth / 2, data[, idx]),
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
-  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, "<br>")
+  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
   data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
@@ -329,7 +329,7 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) {
   if ("hovertext" %in% names(data)) {
-    data$hovertext <- paste0(data$hovertext, "<br>")
+    data$hovertext <- paste0(data$hovertext, br())
   }
   data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
   if (!"fill" %in% names(data)) data$fill <- NA
@@ -410,8 +410,8 @@ to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) 
     # fix the hovertext (by removing the "irrelevant" aesthetic)
     recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
     data$hovertext <- Map(function(x, y) { 
-      paste(x[!grepl(y, x)], collapse = "<br>")  
-    }, strsplit(data$hovertext, "<br>"), paste0("^", recodeMap, ":"))
+      paste(x[!grepl(y, x)], collapse = br())
+    }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
     
     prefix_class(data, "GeomPath")
   } else {

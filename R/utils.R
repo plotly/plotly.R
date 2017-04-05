@@ -34,6 +34,9 @@ is.webgl <- function(p) {
   if (!is.default(x)) x %||% y else y
 }
 
+# standard way to specify a line break
+br <- function() "<br/>"
+
 is.default <- function(x) {
   inherits(x, "plotly_default")
 }
@@ -415,7 +418,7 @@ translate_linebreaks <- function(p) {
       a[] <- lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
       attrs <- attributes(a)
-      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      a <- gsub("\n", br(), a, fixed = TRUE)
       attributes(a) <- attrs
     }
     a

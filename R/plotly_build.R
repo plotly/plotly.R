@@ -194,7 +194,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
-        paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = "<br />")
+        paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
         splitVars <- builtData[isSplit]
         traceIndex <- Reduce(paste2, splitVars)
         if (!is.null(trace$name)) {
@@ -282,7 +282,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   colorTitle <- unlist(lapply(p$x$attrs, function(x) {
     deparse2(x[["color"]] %||% x[["z"]])
   }))
-  traces <- map_color(traces, title = paste(colorTitle, collapse = "<br>"))
+  traces <- map_color(traces, title = paste(colorTitle, collapse = br()))
   traces <- map_size(traces)
   traces <- map_symbol(traces)
   traces <- map_linetype(traces)
@@ -386,14 +386,12 @@ registerFrames <- function(p, frameMapping = NULL) {
   p$x$data <- lapply(p$x$data, function(tr) { tr$frame <- as.character(tr$frame); tr })
   
   # remove frames from the trace names
-  traceNames <- unlist(lapply(p$x$data, function(x) x[["name"]] %||% ""))
-  nameComponents <- strsplit(as.character(traceNames), "<br />")
-  
   for (i in seq_along(p$x$data)) {
     tr <- p$x$data[[i]]
-    nms <- nameComponents[[i]]
-    if (!tr$frameOrder %||% 0 %in% seq_along(nms)) next
-    p$x$data[[i]]$name <- paste(nms[-tr$frameOrder], collapse="<br/>")
+    if (length(tr[["name"]]) != 1) next
+    nms <- strsplit(as.character(tr[["name"]]), br())[[1]]
+    idx <- setdiff(seq_along(nms), tr$frameOrder %||% 0)
+    p$x$data[[i]]$name <- if (length(idx)) paste(nms[idx], collapse = br()) else NULL
     p$x$data[[i]]$frameOrder <- NULL
   }
   
@@ -477,8 +475,9 @@ registerFrames <- function(p, frameMapping = NULL) {
   # retrain color defaults
   p$x$data <- retrain_color_defaults(p$x$data)
   p$x$frames <- lapply(p$x$frames, function(f) {
-    if (length(f$data) == 10) browser()
-    f$data <- retrain_color_defaults(f$data)
+    f$data <- retrain_color_defaults(
+      f$data, colorDefaults = traceColorDefaults()[f$traces + 1]
+    )
     f
   })
   

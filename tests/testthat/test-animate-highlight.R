@@ -250,3 +250,56 @@ test_that("can change animation defaults", {
   })
   
 })
+
+test_that("simple animation targeting works", {
+  
+  df <- data.frame(
+    x = c(1, 2, 2, 1, 1, 2),
+    y = c(1, 2, 2, 1, 1, 2),
+    z = c(1, 1, 2, 2, 3, 3)
+  )
+  p <- plot_ly(df) %>%
+    add_markers(x = 1.5, y = 1.5) %>%
+    add_markers(x = ~x, y = ~y, frame = ~z)
+  
+  l <- plotly_build(p)$x
+  
+  
+  expect_length(l$data, 2)
+  for (i in seq_along(l$data)) {
+    tr <- l$data[[i]]
+    # trace names are empty
+    expect_equal(tr$name %||% "no-name", "no-name")
+    # color defaults are retained
+    expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
+  }
+  
+  # frame trace names are empty
+  expect_length(l$frames, 3)
+  for (i in seq_along(l$frames)) {
+    f <- l$frames[[i]]
+    for (j in seq_along(f$data)) {
+      tr <- f$data[[j]]
+      # trace names are empty
+      expect_equal(tr$name %||% "no-name", "no-name")
+      # color defaults are retained
+      expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
+    }
+  }
+  
+  
+  
+  
+  # since all trace types are scatter, redraw = FALSE
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args
+  expect_false(buttonArgs[[2]]$frame$redraw)
+  
+  steps <- l$layout$sliders[[1]]$steps
+  res <- lapply(steps, function(s) {
+    expect_false(s$args[[2]]$frame$redraw)
+  })
+  
+  
+})
+
+

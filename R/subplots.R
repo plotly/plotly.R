@@ -397,12 +397,11 @@ reposition <- function(obj, domains) {
 }
 
 
-retrain_color_defaults <- function(traces) {
-  colorDefaults <- traceColorDefaults()
+retrain_color_defaults <- function(traces, colorDefaults = traceColorDefaults()) {
   for (i in seq_along(traces)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
     idx <- i %% length(colorDefaults)
-    if (idx == 0) idx <- 10
+    if (idx == 0) idx <- length(colorDefaults)
     newDefault <- colorDefaults[[idx]]
     for (j in c("marker", "line", "text")) {
       obj <- traces[[i]][[j]]
