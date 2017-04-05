@@ -35,7 +35,7 @@ is.webgl <- function(p) {
 }
 
 # standard way to specify a line break
-br <- function() "<br/>"
+br <- function() "<br />"
 
 is.default <- function(x) {
   inherits(x, "plotly_default")
