@@ -10,10 +10,6 @@ is.colorbar <- function(tr) {
   inherits(tr, "plotly_colorbar")
 }
 
-is.bare.list <- function(x) {
-  is.list(x) && !is.data.frame(x)
-}
-
 is.evaled <- function(p) {
   all(vapply(p$x$attrs, function(attr) inherits(attr, "plotly_eval"), logical(1)))
 }
@@ -26,6 +22,11 @@ is.webgl <- function(p) {
 
 glTypes <- function() {
   c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords")
+}
+
+# just like ggplot2:::is.discrete()
+is.discrete <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
 }
 
 "%||%" <- function(x, y) {
@@ -57,8 +58,12 @@ modify_list <- function(x, y, ...) {
   modifyList(x %||% list(), y %||% list(), ...)
 }
 
-is.discrete <- function(x) {
-  is.factor(x) || is.character(x) || is.logical(x)
+# convert a vector of dates/date-times to milliseconds
+to_milliseconds <- function(x) {
+  if (inherits(x, "Date")) return(as.numeric(x) * 86400000)
+  if (inherits(x, "POSIXt")) return(as.numeric(x) * 1000)
+  # throw warning?
+  x
 }
 
 deparse2 <- function(x) {
