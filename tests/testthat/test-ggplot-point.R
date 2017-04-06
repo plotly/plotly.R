@@ -55,5 +55,5 @@ test_that("can plot on sub-second time scale", {
   )
   g <- ggplot(d, aes(x, y)) + geom_point()
   info <- save_outputs(g, "point-size-alpha2")
-  expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
+  expect_equivalent(info$data[[1]]$x, as.numeric(d$x) * 1000)
 })

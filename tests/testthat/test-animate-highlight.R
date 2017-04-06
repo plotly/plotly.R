@@ -125,3 +125,181 @@ test_that("Key structure is passed along to frame data", {
   }
   
 })
+
+
+
+test_that("can handle inconsistent # of traces across frames & supply default colors", {
+  d <- data.frame(
+    y = rnorm(20),
+    score = c(1,1,1,1,2,2,2,2,3,3,3,3,1,1,1,1,2,2,2,2),
+    population = c(rep(1, 12), rep(2, 8))
+  )
+  
+  p <- plot_ly(d, y = ~y, split = ~as.factor(score), frame = ~population) %>%
+    add_boxplot()
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 3)
+  
+  # default colors are the plotly.js defaults
+  cols <- sapply(l$data, function(x) x$line$color)
+  defaultCols <- toRGB(traceColorDefaults()[1:3])
+  expect_equal(cols, defaultCols)
+  
+  # trace names reflect the split/score (i.e., frames are removed)
+  nms <- sapply(l$data, "[[", "name")
+  expect_equal(nms, levels(as.factor(d$score)))
+  
+  # 2 frames: both with 3 traces
+  expect_length(l$frames, 2)
+  expect_length(l$frames[[1]]$data, 3)
+  expect_length(l$frames[[2]]$data, 3)
+  
+  # make sure the frames are targetting the right traces
+  expect_equal(l$frames[[1]]$traces, 0:2)
+  expect_equal(l$frames[[2]]$traces, 0:2)
+  
+  # 1st frame has all 3 traces visible; 2nd frame has 2 visible
+  expect_true(
+    unique(sapply(l$frames[[1]]$data, "[[", "visible"))
+  )
+  expect_identical(
+    sapply(l$frames[[2]]$data, "[[", "visible"),
+    c(TRUE, TRUE, FALSE)
+  )
+  
+  # ensure the default colors remain consistent throughout the animation
+  cols <- sapply(l$frames[[1]]$data, function(x) x$line$color)
+  expect_equal(cols, defaultCols)
+  cols <- sapply(l$frames[[2]]$data, function(x) x$line$color)
+  expect_equal(cols, defaultCols)
+  
+  # ensure the animation defaults are supplied
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
+  defaults <- animation_opts_defaults()
+  expect_identical(
+    buttonArgs[names(defaults)], defaults
+  )
+  
+  # step values reflect the frame values
+  steps <- l$layout$sliders[[1]]$steps
+  expect_equal(
+    unlist(lapply(steps, function(s) s$args[[1]])),
+    c("1", "2")
+  )
+  
+  # all the slider steps reflect the animation default
+  res <- lapply(steps, function(s) {
+    expect_identical(s$args[[2]], defaults)
+  })
+  
+})
+
+test_that("can change animation defaults", {
+  
+  data(mtcars)
+  
+  p <- plot_ly(mtcars, x = ~wt, y = ~mpg, frame = ~cyl)  %>%
+    animation_opts(frame = 1200, transition = 1000, easing = "elastic") %>%
+    animation_button(
+      x = 1, xanchor = "right", y = 0, yanchor = "bottom"
+    ) %>%
+    animation_slider(
+      currentvalue = list(prefix = "YEAR ", font = list(color="red"))
+    )
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 1)
+  expect_length(l$frames, 3)
+  
+  cyl <- as.character(unique(sort(mtcars$cyl)))
+  for (i in seq_along(l$frames)) {
+    f <- l$frames[[i]]
+    expect_equal(f$name, cyl[[i]])
+    expect_length(f$data, 1)
+  }
+  
+  # the expectation for animation option values
+  aniOpts <- modify_list(
+    rapply(animation_opts_defaults(), unclass, how = "list"), 
+    list(
+      frame = list(duration = 1200), 
+      transition = list(duration = 1000, easing = "elastic")
+    )
+  )
+  
+  # ensure the animation options are supplied
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
+  expect_equal(
+    buttonArgs[names(aniOpts)], aniOpts
+  )
+  
+  # step values reflect the frame values
+  steps <- l$layout$sliders[[1]]$steps
+  expect_equal(
+    unlist(lapply(steps, function(s) s$args[[1]])), cyl
+  )
+  
+  # all the slider steps reflect the animation options
+  res <- lapply(steps, function(s) {
+    expect_identical(
+      s$args[[2]], aniOpts
+    )
+  })
+  
+})
+
+test_that("simple animation targeting works", {
+  
+  df <- data.frame(
+    x = c(1, 2, 2, 1, 1, 2),
+    y = c(1, 2, 2, 1, 1, 2),
+    z = c(1, 1, 2, 2, 3, 3)
+  )
+  p <- plot_ly(df) %>%
+    add_markers(x = 1.5, y = 1.5) %>%
+    add_markers(x = ~x, y = ~y, frame = ~z)
+  
+  l <- plotly_build(p)$x
+  
+  
+  expect_length(l$data, 2)
+  for (i in seq_along(l$data)) {
+    tr <- l$data[[i]]
+    # trace names are empty
+    expect_equal(tr$name %||% "no-name", "no-name")
+    # color defaults are retained
+    expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
+  }
+  
+  # frame trace names are empty
+  expect_length(l$frames, 3)
+  for (i in seq_along(l$frames)) {
+    f <- l$frames[[i]]
+    for (j in seq_along(f$data)) {
+      tr <- f$data[[j]]
+      # trace names are empty
+      expect_equal(tr$name %||% "no-name", "no-name")
+      # color defaults are retained
+      expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
+    }
+  }
+  
+  
+  
+  
+  # since all trace types are scatter, redraw = FALSE
+  buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args
+  expect_false(buttonArgs[[2]]$frame$redraw)
+  
+  steps <- l$layout$sliders[[1]]$steps
+  res <- lapply(steps, function(s) {
+    expect_false(s$args[[2]]$frame$redraw)
+  })
+  
+  
+})
+
+

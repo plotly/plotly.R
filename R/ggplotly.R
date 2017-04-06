@@ -236,7 +236,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
     if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
-      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+      x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x
   }, layers, layer_data)
@@ -686,18 +686,23 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = axisTitleText,
+        title = faced(axisTitleText, axisTitle$face),
         titlefont = text2font(axisTitle)
       )
-      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
-      # this way both dates/datetimes are on same scale
+      
+      # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (identical("date", sc$scale_name)) {
-        axisObj$range <- axisObj$range * 86400000
+      if (any(c("date", "datetime") %in% sc$scale_name)) {
+        # convert days (date) / seconds (datetime) to milliseconds
+        # (86400000 = 24 * 60 * 60 * 1000)
+        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
+        axisObj$range <- axisObj$range * constant
         if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
+          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
         }
+        if (dynamicTicks) axisObj$type <- "date"
       }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
@@ -777,7 +782,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       col_txt <- paste(
         plot$facet$params$labeller(
           lay[names(plot$facet$params[[col_vars]])]
-        ), collapse = "<br>"
+        ), collapse = br()
       )
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
@@ -794,7 +799,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       row_txt <- paste(
         plot$facet$params$labeller(
           lay[names(plot$facet$params$rows)]
-        ), collapse = "<br>"
+        ), collapse = br()
       )
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$COL != nCols) row_txt <- ""
@@ -882,7 +887,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       idx <- which(vapply(gdefs, inherits, logical(1), "legend"))
       if (length(idx) != 1) warning("Expected one legend definition", call. = FALSE)
       legendLines <- strsplit(gdefs[[idx]]$title, "\n", fixed = TRUE)[[1]]
-      legendTitle <- paste(legendLines, collapse = "<br>")
+      legendTitle <- paste(legendLines, collapse = br())
       titleAnnotation <- make_label(
         legendTitle,
         x = gglayout$legend$x %||% 1.02,
@@ -969,15 +974,15 @@ gg2list <- function(p, width = NULL, height = NULL,
     mergedTraces <- vector("list", nhashes)
     for (i in unique(hashes)) {
       idx <- which(hashes %in% i)
-      if (all(modes[idx] %in% c("lines", "markers", "text"))) {
-        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
-        mergedTraces[[i]]$mode <- paste(
-          unique(vapply(traces[idx], function(x) x$mode %||% "", character(1))), 
-          collapse = "+"
-        )
-        if (any(sapply(traces[idx], "[[", "showlegend"))) {
-          mergedTraces[[i]]$showlegend <- TRUE
-        }
+      mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
+      mergedTraces[[i]]$mode <- paste(
+        unique(unlist(lapply(traces[idx], "[[", "mode"))), 
+        collapse = "+"
+      )
+      # show one, show all
+      show <- vapply(traces[idx], function(tr) tr$showlegend %||% TRUE, logical(1))
+      if (any(show)) {
+        mergedTraces[[i]]$showlegend <- TRUE
       }
     }
     traces <- mergedTraces
@@ -1029,7 +1034,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       lapply(mappings, lazyeval::f_new)
     } else {
       nms <- names(mappings)
-      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.name(x))), nms)
     }
   })
   

@@ -11,7 +11,7 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
   info <- save_outputs(gg, "date-strings")
   expect_equal(length(info$data), 2)
   for(trace in info$data[1:2]){
-    expect_true(all(as.numeric(time.obj) %in% trace$x))
+    expect_equal(as.numeric(time.obj) * 1000, trace$x)
   }
 })
 

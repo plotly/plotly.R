@@ -23,6 +23,7 @@ Depends:
     R (>= 3.2.0),
     ggplot2 (> 2.1.1)
 Imports:
+    tools,
     scales,
     httr,
     jsonlite,
@@ -39,7 +40,6 @@ Imports:
     tibble,
     lazyeval (>= 0.2.0),
     crosstalk,
-    colourpicker,
     purrr
 Suggests:
     MASS,
@@ -59,7 +59,8 @@ Suggests:
     webshot,
     listviewer,
     dendextend,
-    sf
+    sf,
+    RSelenium
 LazyData: true
 RoxygenNote: 6.0.1
 Remotes:

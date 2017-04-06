@@ -60,7 +60,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
         if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
       }
       # add a line break if hovertext already exists
-      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
+      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
@@ -194,7 +194,7 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = data[["x"]] - data$violinwidth / 2, data[, idx]),
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
-  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, "<br>")
+  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
   data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
@@ -214,6 +214,9 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
+  if (nrow(data) == 0) {
+    return(prefix_class(data, "GeomBlank"))
+  }
   dat <- prefix_class(data, "GeomPath")
   # alpha for the path is always 1 (see GeomSmooth$draw_key)
   dat$alpha <- 1
@@ -360,7 +363,7 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) {
   if ("hovertext" %in% names(data)) {
-    data$hovertext <- paste0(data$hovertext, "<br>")
+    data$hovertext <- paste0(data$hovertext, br())
   }
   data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
   if (!"fill" %in% names(data)) data$fill <- NA
@@ -431,8 +434,23 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) 
 
 #' @export
 to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) {
-  data$width <- 0
-  prefix_class(data, "GeomErrorbar")
+  
+  if (!is.null(data[["y"]])) {
+    data$width <- 0
+    return(prefix_class(data, "GeomErrorbar"))
+  }
+  
+  # reshape data so that x/y reflect path data
+  data$group <- seq_len(nrow(data))
+  data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
+  data <- data[order(data$group), ]
+  # fix the hovertext (by removing the "irrelevant" aesthetic)
+  recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
+  data$hovertext <- Map(function(x, y) { 
+    paste(x[!grepl(y, x)], collapse = br())
+  }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
+  
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -457,6 +475,101 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   }
   prefix_class(data, "GeomPoint")
+}
+
+#' @export
+to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
+  # if radius/angle are a constant, still add them to the hovertext
+  # NOTE: it'd be more accurate, but more complicated, to use the aes mapping
+  for (var in c("radius", "angle")) {
+    if (length(unique(data[[var]])) != 1) next
+    data[["hovertext"]] <- paste0(
+      data[["hovertext"]], br(), var, ": ", data[[var]]
+    )
+  }
+  prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
+}
+
+#' @export
+to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
+  # from GeomCrossbar$draw_panel()
+  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  list(
+    prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
+    prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
+  )
+}
+
+#' @export
+to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
+  # allow the tick length to vary across panels
+  layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
+  layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
+  data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
+  
+  # see GeomRug$draw_panel()
+  rugs <- list()
+  sides <- params$sides
+  others <- data[!names(data) %in% c("x", "y")]
+  if (!is.null(data[["x"]])) {
+    if (grepl("b", sides)) {
+      rugs$b <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_min, 
+          yend = y_min + tickval_y,
+          others
+        )
+      )
+    }
+    if (grepl("t", sides)) {
+      rugs$t <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_max - tickval_y, 
+          yend = y_max,
+          others
+        )
+      )
+    }
+  }
+  if (!is.null(data[["y"]])) {
+    if (grepl("l", sides)) {
+      rugs$l <- with(
+        data, data.frame(
+          x = x_min, 
+          xend = x_min + tickval_x,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+    if (grepl("r", sides)) {
+      rugs$r <- with(
+        data, data.frame(
+          x = x_max - tickval_x, 
+          xend = x_max,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+  }
+  
+  lapply(rugs, function(d) {
+    prefix_class(to_basic.GeomSegment(d), "GeomRug")
+  })
+}
+
+#' @export
+to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
+  dat <- split(data, data$quantile)
+  dat <- lapply(dat, prefix_class, y = "GeomPath")
+  dat
 }
 
 #' @export
@@ -603,9 +716,8 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     ),
     hoveron = hover_on(data)
   )
-  if (inherits(data, "GeomSmooth")) {
-    L$hoverinfo <- "x+y"
-  }
+  if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
+  if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
   
 }

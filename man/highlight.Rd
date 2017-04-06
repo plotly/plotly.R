@@ -44,8 +44,14 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 \item{showInLegend}{populate an additional legend entry for the selection?}
 }
 \description{
-For documentation and examples, see 
-\url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+This function sets a variety of options for brushing (i.e., highlighting)
+plotly graphs. Use this function to set options (or populate widgets) 
+for a \emph{single} plot. When linking multiple plots, use 
+\code{\link{options}()} to set "global" options, where the option name 
+matches the relevant argument name. For instance, 
+to link multiple plots with \code{persistent} selection, set
+\code{options(persistent = TRUE)}. To see an example linking plotly to 
+leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
 }
 \examples{
 
@@ -62,6 +68,9 @@ plot_ly(sd, x = ~date, y = ~median) \%>\%
   add_lines(text = ~city, hoverinfo = "text") \%>\%
   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
 
+}
+\references{
+\url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
 }
 \author{
 Carson Sievert
