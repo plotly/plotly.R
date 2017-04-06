@@ -463,16 +463,9 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   # from GeomCrossbar$draw_panel()
   middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
-  # from to_basic.GeomSegment
-  middle$group <- seq_len(nrow(middle))
-  others <- middle[!names(middle) %in% c("x", "y", "xend", "yend")]
-  middle <- with(middle, {
-    rbind(cbind(x, y, others),
-          cbind(x = xend, y = yend, others))
-  })
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
-    prefix_class(middle, c("GeomCrossbar", "GeomPath"))
+    prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
   )
 }
 
