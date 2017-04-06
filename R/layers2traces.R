@@ -471,55 +471,66 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
-  sides <- params$sides
-  others <- data[!names(data) %in% c("x", "y")]
+  # allow the tick length to vary across panels
+  layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
+  layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
+  data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
+  
   # see GeomRug$draw_panel()
   rugs <- list()
-  if (!is.null(data$x)) {
-    tickval <- 0.03 * diff(range(data$y))
+  sides <- params$sides
+  others <- data[!names(data) %in% c("x", "y")]
+  if (!is.null(data[["x"]])) {
     if (grepl("b", sides)) {
-      rugs$x_b <- data.frame(
-        x = data$x, 
-        xend = data$x,
-        y = min(data$y) - tickval, 
-        yend = min(data$y) - .25*tickval,
-        others
+      rugs$b <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_min, 
+          yend = y_min + tickval_y,
+          others
+        )
       )
     }
     if (grepl("t", sides)) {
-      rugs$x_t <- data.frame(
-        x = data$x, 
-        xend = data$x,
-        y = max(data$y) + .25*tickval, 
-        yend = max(data$y) + tickval,
-        others
+      rugs$t <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_max - tickval_y, 
+          yend = y_max,
+          others
+        )
       )
     }
   }
-  if (!is.null(data$y)) {
-    tickval <- 0.03 * diff(range(data$x))
+  if (!is.null(data[["y"]])) {
     if (grepl("l", sides)) {
-      rugs$x_l <- data.frame(
-        x = min(data$x) - tickval, 
-        xend = min(data$x) - .25*tickval,
-        y = data$y, 
-        yend = data$y,
-        others
+      rugs$l <- with(
+        data, data.frame(
+          x = x_min, 
+          xend = x_min + tickval_x,
+          y = y, 
+          yend = y,
+          others
+        )
       )
     }
     if (grepl("r", sides)) {
-      rugs$x_r <- data.frame(
-        x = max(data$x) + .25*tickval, 
-        xend = max(data$x) + tickval,
-        y = data$y, 
-        yend = data$y,
-        others
+      rugs$r <- with(
+        data, data.frame(
+          x = x_max - tickval_x, 
+          xend = x_max,
+          y = y, 
+          yend = y,
+          others
+        )
       )
     }
   }
   
   lapply(rugs, function(d) {
-    prefix_class(to_basic.GeomSegment(d), "GeomSegment")
+    prefix_class(to_basic.GeomSegment(d), "GeomRug")
   })
 }
 
