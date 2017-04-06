@@ -447,6 +447,135 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' @export
+to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
+  # this is the same code as to_basic.GeomSegment and it seems to work just fine :)
+  data$group <- seq_len(nrow(data))
+  others <- data[!names(data) %in% c("x", "y", "xend", "yend")]
+  data <- with(data, {
+    rbind(cbind(x, y, others),
+          cbind(x = xend, y = yend, others))
+  })
+  prefix_class(data, "GeomPath")
+}
+
+#' @export
+to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
+  # copied from to_basic.GeomRect
+  data$group <- seq_len(nrow(data))
+  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
+  dat <- with(data, {
+    rbind(cbind(x = xmin, y = ymin, others),
+          cbind(x = xmin, y = ymax, others),
+          cbind(x = xmax, y = ymax, others),
+          cbind(x = xmax, y = ymin, others))
+  })
+  # from ggplot2 geom-crossbar
+  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  # from to.basic_GeomSegment
+  middle$group <- seq_len(nrow(middle))
+  others <- middle[!names(middle) %in% c("x", "y", "xend", "yend")]
+  middle <- with(middle, {
+    rbind(cbind(x, y, others),
+          cbind(x = xend, y = yend, others))
+  })
+  
+  list(
+    prefix_class(dat, "GeomPolygon"),
+    prefix_class(middle, "GeomPath")
+  )
+}
+
+#' @export
+to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
+  sides <- params$sides
+  others <- data[!names(data) %in% c("x", "y")]
+  # see ggplot2 geom-rug.r
+  rugs <- list()
+  if (!is.null(data$x)) {
+    tickval <- 0.03 * diff(range(data$y))
+    if (grepl("b", sides)) {
+      rugs$x_b <- data.frame(
+        x = data$x, 
+        xend = data$x,
+        y = min(data$y) - tickval, 
+        yend = min(data$y) - .25*tickval,
+        others
+      )
+      # to_basic.GeomSegment
+      rugs$x_b$group <- seq_len(nrow(rugs$x_b))
+      others <- rugs$x_b[!names(rugs$x_b) %in% c("x", "y", "xend", "yend")]
+      rugs$x_b <- with(rugs$x_b, {
+        rbind(cbind(x, y, others),
+              cbind(x = xend, y = yend, others))
+      })
+    }
+    if (grepl("t", sides)) {
+      rugs$x_t <- data.frame(
+        x = data$x, 
+        xend = data$x,
+        y = max(data$y) + .25*tickval, 
+        yend = max(data$y) + tickval,
+        others
+      )
+      rugs$x_t$group <- seq_len(nrow(rugs$x_t))
+      others <- rugs$x_t[!names(rugs$x_t) %in% c("x", "y", "xend", "yend")]
+      rugs$x_t <- with(rugs$x_t, {
+        rbind(cbind(x, y, others),
+              cbind(x = xend, y = yend, others))
+      })
+      
+    }
+  }
+  if (!is.null(data$y)) {
+    tickval <- 0.03*diff(range(data$x))
+    if (grepl("l", sides)) {
+      rugs$x_l <- data.frame(
+        x = min(data$x) - tickval, 
+        xend = min(data$x) - .25*tickval,
+        y = data$y, 
+        yend = data$y,
+        others
+      )
+      rugs$x_l$group <- seq_len(nrow(rugs$x_l))
+      others <- rugs$x_l[!names(rugs$x_l) %in% c("x", "y", "xend", "yend")]
+      rugs$x_l <- with(rugs$x_l, {
+        rbind(cbind(x, y, others),
+              cbind(x = xend, y = yend, others))
+      })
+    }
+    if (grepl("r", sides)) {
+      rugs$x_r <- data.frame(
+        x = max(data$x) + .25*tickval, 
+        xend = max(data$x) + tickval,
+        y = data$y, 
+        yend = data$y,
+        others
+      )
+      rugs$x_r$group <- seq_len(nrow(rugs$x_r))
+      others <- rugs$x_r[!names(rugs$x_r) %in% c("x", "y", "xend", "yend")]
+      rugs$x_r <- with(rugs$x_r, {
+        rbind(cbind(x, y, others),
+              cbind(x = xend, y = yend, others))
+      })
+      
+    }
+  }
+  list(
+    prefix_class(rugs$x_b, "GeomPath"),
+    prefix_class(rugs$x_t, "GeomPath"),
+    prefix_class(rugs$x_l, "GeomPath"),
+    prefix_class(rugs$x_r, "GeomPath")
+  )
+}
+
+#' @export
+to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
+  dat <- split(data, data$quantile)
+  dat <- lapply(dat, prefix_class, y = "GeomPath")
+  dat
+}
+
+#' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
