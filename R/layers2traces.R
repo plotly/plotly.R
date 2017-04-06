@@ -460,18 +460,10 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
-  # copied from to_basic.GeomRect
-  data$group <- seq_len(nrow(data))
-  others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
-  dat <- with(data, {
-    rbind(cbind(x = xmin, y = ymin, others),
-          cbind(x = xmin, y = ymax, others),
-          cbind(x = xmax, y = ymax, others),
-          cbind(x = xmax, y = ymin, others))
-  })
-  # from ggplot2 geom-crossbar
+  
+  # from GeomCrossbar$draw_panel()
   middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
-  # from to.basic_GeomSegment
+  # from to_basic.GeomSegment
   middle$group <- seq_len(nrow(middle))
   others <- middle[!names(middle) %in% c("x", "y", "xend", "yend")]
   middle <- with(middle, {
@@ -480,8 +472,8 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   })
   
   list(
-    prefix_class(dat, "GeomPolygon"),
-    prefix_class(middle, "GeomPath")
+    prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
+    prefix_class(middle, c("GeomCrossbar", "GeomPath"))
   )
 }
 
@@ -717,9 +709,8 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     ),
     hoveron = hover_on(data)
   )
-  if (inherits(data, "GeomSmooth")) {
-    L$hoverinfo <- "x+y"
-  }
+  if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
+  if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
   
 }
