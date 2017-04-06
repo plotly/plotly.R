@@ -10,10 +10,6 @@ is.colorbar <- function(tr) {
   inherits(tr, "plotly_colorbar")
 }
 
-is.bare.list <- function(x) {
-  is.list(x) && !is.data.frame(x)
-}
-
 is.evaled <- function(p) {
   all(vapply(p$x$attrs, function(attr) inherits(attr, "plotly_eval"), logical(1)))
 }
@@ -21,7 +17,16 @@ is.evaled <- function(p) {
 is.webgl <- function(p) {
   if (!is.evaled(p)) p <- plotly_build(p)
   types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
-  any(types %in% c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud"))
+  any(types %in% glTypes())
+}
+
+glTypes <- function() {
+  c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords")
+}
+
+# just like ggplot2:::is.discrete()
+is.discrete <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
 }
 
 "%||%" <- function(x, y) {
@@ -33,6 +38,9 @@ is.webgl <- function(p) {
 "%|D|%" <- function(x, y) {
   if (!is.default(x)) x %||% y else y
 }
+
+# standard way to specify a line break
+br <- function() "<br />"
 
 is.default <- function(x) {
   inherits(x, "plotly_default")
@@ -50,8 +58,12 @@ modify_list <- function(x, y, ...) {
   modifyList(x %||% list(), y %||% list(), ...)
 }
 
-is.discrete <- function(x) {
-  is.factor(x) || is.character(x) || is.logical(x)
+# convert a vector of dates/date-times to milliseconds
+to_milliseconds <- function(x) {
+  if (inherits(x, "Date")) return(as.numeric(x) * 86400000)
+  if (inherits(x, "POSIXt")) return(as.numeric(x) * 1000)
+  # throw warning?
+  x
 }
 
 deparse2 <- function(x) {
@@ -415,7 +427,7 @@ translate_linebreaks <- function(p) {
       a[] <- lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
       attrs <- attributes(a)
-      a <- gsub("\n", "<br />", a, fixed = TRUE)
+      a <- gsub("\n", br(), a, fixed = TRUE)
       attributes(a) <- attrs
     }
     a
@@ -595,6 +607,14 @@ verify_webgl <- function(p) {
 }
 
 verify_showlegend <- function(p) {
+  # this attribute should be set in hide_legend()
+  # it ensures that "legend titles" go away in addition to showlegend = FALSE
+  if (isTRUE(p$x$.hideLegend)) {
+    ann <- p$x$layout$annotations
+    is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
+    p$x$layout$annotations <- ann[!is_title]
+    p$x$layout$showlegend <- FALSE 
+  }
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
   # respect only _user-specified_ defaults 
   p$x$layout$showlegend <- p$x$layout$showlegend %|D|%

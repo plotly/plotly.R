@@ -3,6 +3,22 @@
 #' @param alpha alpha channel on 0-1 scale
 #' @return hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 #' @export
+#' @seealso \code{\link{showRGB}()}
+#' @examples 
+#' 
+#' toRGB("steelblue") 
+#' # [1] "rgba(70,130,180,1)"
+#' 
+#' m <- list(
+#'   color = toRGB("red"),
+#'   line = list(
+#'     color = toRGB("black"), 
+#'     width = 19
+#'   )
+#' )
+#' 
+#' plot_ly(x = 1, y = 1, marker = m)
+#' 
 toRGB <- function(x, alpha = 1) {
   if (length(x) == 0) return(x)
   if (any(x %in% "transparent")) return(x)
@@ -27,6 +43,30 @@ toRGB <- function(x, alpha = 1) {
   
   rgba[is.na(x)] <- "transparent"
   rgba
+}
+
+
+#' View colors already formatted by toRGB()
+#' 
+#' Useful for viewing colors after they've been converted to plotly.js'
+#' color format -- "rgba(255, 255, 255, 1)"
+#' 
+#' @param A character string specifying color(s).
+#' @param ... arguments passed along to \code{scales::show_col}.
+#' @export
+#' @author Carson Sievert
+#' @examples
+#' 
+#' showRGB(toRGB(colors()), labels = FALSE)
+showRGB <- function(x, ...) {
+  if (!all(grepl("^rgba", x))) stop("All values must begin with rgba")
+  cols <- lapply(strsplit(x, ","), function(y) {
+    vals <- as.numeric(gsub("rgba\\(|\\)", "", y))
+    vals[1:3] <- vals[1:3] / 255
+    setNames(as.list(vals), c("red", "green", "blue", "alpha"))
+  })
+  rgbs <- sapply(cols, function(x) do.call(rgb, x))
+  scales::show_col(rgbs, ...)
 }
 
 # take a 'plotly color' and produce a hex code
