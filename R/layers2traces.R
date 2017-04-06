@@ -492,13 +492,6 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         yend = min(data$y) - .25*tickval,
         others
       )
-      # to_basic.GeomSegment
-      rugs$x_b$group <- seq_len(nrow(rugs$x_b))
-      others <- rugs$x_b[!names(rugs$x_b) %in% c("x", "y", "xend", "yend")]
-      rugs$x_b <- with(rugs$x_b, {
-        rbind(cbind(x, y, others),
-              cbind(x = xend, y = yend, others))
-      })
     }
     if (grepl("t", sides)) {
       rugs$x_t <- data.frame(
@@ -508,17 +501,10 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         yend = max(data$y) + tickval,
         others
       )
-      rugs$x_t$group <- seq_len(nrow(rugs$x_t))
-      others <- rugs$x_t[!names(rugs$x_t) %in% c("x", "y", "xend", "yend")]
-      rugs$x_t <- with(rugs$x_t, {
-        rbind(cbind(x, y, others),
-              cbind(x = xend, y = yend, others))
-      })
-      
     }
   }
   if (!is.null(data$y)) {
-    tickval <- 0.03*diff(range(data$x))
+    tickval <- 0.03 * diff(range(data$x))
     if (grepl("l", sides)) {
       rugs$x_l <- data.frame(
         x = min(data$x) - tickval, 
@@ -527,12 +513,6 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         yend = data$y,
         others
       )
-      rugs$x_l$group <- seq_len(nrow(rugs$x_l))
-      others <- rugs$x_l[!names(rugs$x_l) %in% c("x", "y", "xend", "yend")]
-      rugs$x_l <- with(rugs$x_l, {
-        rbind(cbind(x, y, others),
-              cbind(x = xend, y = yend, others))
-      })
     }
     if (grepl("r", sides)) {
       rugs$x_r <- data.frame(
@@ -542,22 +522,12 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         yend = data$y,
         others
       )
-      rugs$x_r$group <- seq_len(nrow(rugs$x_r))
-      others <- rugs$x_r[!names(rugs$x_r) %in% c("x", "y", "xend", "yend")]
-      rugs$x_r <- with(rugs$x_r, {
-        rbind(cbind(x, y, others),
-              cbind(x = xend, y = yend, others))
-      })
-      
     }
   }
-  L <- list(
-    prefix_class(rugs$x_b, "GeomPath"),
-    prefix_class(rugs$x_t, "GeomPath"),
-    prefix_class(rugs$x_l, "GeomPath"),
-    prefix_class(rugs$x_r, "GeomPath")
-  )
-  L[sapply(L, length) > 0]
+  
+  lapply(rugs, function(d) {
+    prefix_class(to_basic.GeomSegment(d), "GeomSegment")
+  })
 }
 
 #' @export
