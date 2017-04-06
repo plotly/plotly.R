@@ -448,14 +448,15 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
-  # this is the same code as to_basic.GeomSegment and it seems to work just fine :)
-  data$group <- seq_len(nrow(data))
-  others <- data[!names(data) %in% c("x", "y", "xend", "yend")]
-  data <- with(data, {
-    rbind(cbind(x, y, others),
-          cbind(x = xend, y = yend, others))
-  })
-  prefix_class(data, "GeomPath")
+  # if radius/angle are a constant, still add them to the hovertext
+  # NOTE: it'd be more accurate, but more complicated, to use the aes mapping
+  for (var in c("radius", "angle")) {
+    if (length(unique(data[[var]])) != 1) next
+    data[["hovertext"]] <- paste0(
+      data[["hovertext"]], br(), var, ": ", data[[var]]
+    )
+  }
+  prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
 }
 
 #' @export
