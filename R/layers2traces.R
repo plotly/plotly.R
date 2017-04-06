@@ -354,7 +354,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
-  data$group <- interaction(
+  data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
@@ -366,7 +366,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
-  data$group <- interaction(
+  data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
