@@ -447,6 +447,101 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' @export
+to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
+  # if radius/angle are a constant, still add them to the hovertext
+  # NOTE: it'd be more accurate, but more complicated, to use the aes mapping
+  for (var in c("radius", "angle")) {
+    if (length(unique(data[[var]])) != 1) next
+    data[["hovertext"]] <- paste0(
+      data[["hovertext"]], br(), var, ": ", data[[var]]
+    )
+  }
+  prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
+}
+
+#' @export
+to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
+  # from GeomCrossbar$draw_panel()
+  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  list(
+    prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
+    prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
+  )
+}
+
+#' @export
+to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
+  # allow the tick length to vary across panels
+  layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
+  layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
+  data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
+  
+  # see GeomRug$draw_panel()
+  rugs <- list()
+  sides <- params$sides
+  others <- data[!names(data) %in% c("x", "y")]
+  if (!is.null(data[["x"]])) {
+    if (grepl("b", sides)) {
+      rugs$b <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_min, 
+          yend = y_min + tickval_y,
+          others
+        )
+      )
+    }
+    if (grepl("t", sides)) {
+      rugs$t <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_max - tickval_y, 
+          yend = y_max,
+          others
+        )
+      )
+    }
+  }
+  if (!is.null(data[["y"]])) {
+    if (grepl("l", sides)) {
+      rugs$l <- with(
+        data, data.frame(
+          x = x_min, 
+          xend = x_min + tickval_x,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+    if (grepl("r", sides)) {
+      rugs$r <- with(
+        data, data.frame(
+          x = x_max - tickval_x, 
+          xend = x_max,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+  }
+  
+  lapply(rugs, function(d) {
+    prefix_class(to_basic.GeomSegment(d), "GeomRug")
+  })
+}
+
+#' @export
+to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
+  dat <- split(data, data$quantile)
+  dat <- lapply(dat, prefix_class, y = "GeomPath")
+  dat
+}
+
+#' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
@@ -588,9 +683,8 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     ),
     hoveron = hover_on(data)
   )
-  if (inherits(data, "GeomSmooth")) {
-    L$hoverinfo <- "x+y"
-  }
+  if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
+  if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
   
 }
