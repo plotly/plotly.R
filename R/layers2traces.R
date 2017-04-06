@@ -461,7 +461,6 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
-  
   # from GeomCrossbar$draw_panel()
   middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
   # from to_basic.GeomSegment
@@ -471,7 +470,6 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
     rbind(cbind(x, y, others),
           cbind(x = xend, y = yend, others))
   })
-  
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
     prefix_class(middle, c("GeomCrossbar", "GeomPath"))
@@ -482,7 +480,7 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
   sides <- params$sides
   others <- data[!names(data) %in% c("x", "y")]
-  # see ggplot2 geom-rug.r
+  # see GeomRug$draw_panel()
   rugs <- list()
   if (!is.null(data$x)) {
     tickval <- 0.03 * diff(range(data$y))
@@ -553,12 +551,13 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
       
     }
   }
-  list(
+  L <- list(
     prefix_class(rugs$x_b, "GeomPath"),
     prefix_class(rugs$x_t, "GeomPath"),
     prefix_class(rugs$x_l, "GeomPath"),
     prefix_class(rugs$x_r, "GeomPath")
   )
+  L[sapply(L, length) > 0]
 }
 
 #' @export
