@@ -15,3 +15,4 @@ plotly(username, key)
 Deprecated: see \link{signup} for credentials/configuration storage details.
 See \link{ggplotly} for the new ggplot2 interface.
 }
+\keyword{internal}

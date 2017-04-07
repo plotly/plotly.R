@@ -3,7 +3,7 @@
 "_PACKAGE"
 
 #' @import ggplot2
-#' @importFrom grDevices col2rgb extendrange dev.list dev.off
+#' @importFrom grDevices col2rgb extendrange dev.list dev.off rgb
 #' @importFrom graphics layout
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
 #' @importFrom stats setNames complete.cases quantile is.leaf

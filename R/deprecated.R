@@ -3,6 +3,7 @@
 #' Deprecated: see \link{signup} for credentials/configuration storage details.
 #' See \link{ggplotly} for the new ggplot2 interface.
 #' 
+#' @keywords internal
 #' @param username plotly username
 #' @param key plotly API key
 #' @export
