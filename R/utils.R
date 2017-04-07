@@ -312,42 +312,49 @@ verify_attr_spec <- function(p) {
 verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
     attrSchema <- schema[[attr]]
+    # if schema is missing (i.e., this is an un-official attr), move along
+    if (is.null(attrSchema)) next
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
     
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving any 'special' attribute class)
-    if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
+    if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
       proposed[[attr]] <- structure(
-        uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
+        unique(proposed[[attr]]), 
+        class = oldClass(proposed[[attr]])
       )
     }
+    
     # ensure data_arrays of length 1 are boxed up by to_JSON()
-    if (identical(valType, "data_array") || arrayOK) {
+    # TODO: eventually this special case can be removed -- 
+    # https://github.com/plotly/plotly.js/issues/1565
+    txtArray <- identical(attr, "text") && !identical(proposed[["hoveron"]], "fill")
+    if (identical(valType, "data_array") || txtArray) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
     
     # do the same for "sub-attributes"
+    # TODO: should this be done recursively?
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
+        if (is.null(attrSchema[[attr2]])) next
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
         arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
         
-        # where applicable, reduce single valued vectors to a constant
-        if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
+        if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
           proposed[[attr]][[attr2]] <- structure(
-            uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
+            unique(proposed[[attr]][[attr2]]), 
+            class = oldClass(proposed[[attr]][[attr2]])
           )
         }
+        
         # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (identical(valType2, "data_array") || arrayOK2) {
+        if (identical(valType2, "data_array")) {
           proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
-        
-        
-        # we don't have to go more than two-levels, right?
       }
     }
   }
@@ -787,6 +794,10 @@ prefix_class <- function(x, y) {
 }
 replace_class <- function(x, new, old) {
   class(x) <- sub(old, new, class(x))
+  x
+}
+remove_class <- function(x, y) {
+  oldClass(x) <- setdiff(oldClass(x), y)
   x
 }
 

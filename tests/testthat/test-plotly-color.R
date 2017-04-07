@@ -97,7 +97,7 @@ test_that("attributes are boxed-up correctly", {
   )
   
   p <- plot_ly(df, x = ~a, y = ~b, color = ~b) %>%
-    add_bars(text = ~paste("Value: ", round(a, 1)))
+    add_bars(text = ~paste("Value: ", round(a, 1)), hoverinfo = "text")
   
   l <- plotly_build(p)$x
   
