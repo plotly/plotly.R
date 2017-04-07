@@ -12,7 +12,14 @@ plotly(username, key)
 \item{key}{plotly API key}
 }
 \description{
-Deprecated: see \link{signup} for credentials/configuration storage details.
-See \link{ggplotly} for the new ggplot2 interface.
+This function is now deprecated. It used to provide a way to store plotly 
+account credentials, but that can now be done with environment variables. 
+For more details and examples, see \url{https://plot.ly/r/getting-started/}.
+
+If you're here looking for an intro/overview of the package, see the 
+\href{https://github.com/ropensci/plotly/}{readme}
+}
+\seealso{
+\code{\link{ggplotly}()}, \code{\link{plot_ly}()}, \code{\link{signup}()}
 }
 \keyword{internal}
