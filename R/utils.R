@@ -285,17 +285,7 @@ verify_attr_names <- function(p) {
   invisible(p)
 }
 
-attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
-  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
-  if (length(illegalAttrs)) {
-    warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
-            "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
-            call. = FALSE)
-  }
-  invisible(proposedAttrs)
-}
+
 
 # ensure both the layout and trace attributes adhere to the plot schema
 verify_attr_spec <- function(p) {
@@ -324,10 +314,8 @@ verify_attr <- function(proposed, schema) {
     attrSchema <- schema[[attr]]
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
-    # ensure data_arrays of length 1 are boxed up by to_JSON()
-    if (identical(valType, "data_array")) {
-      proposed[[attr]] <- i(proposed[[attr]])
-    }
+    arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
+    
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving any 'special' attribute class)
     if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
@@ -335,21 +323,30 @@ verify_attr <- function(proposed, schema) {
         uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
       )
     }
+    # ensure data_arrays of length 1 are boxed up by to_JSON()
+    if (identical(valType, "data_array") || arrayOK) {
+      proposed[[attr]] <- i(proposed[[attr]])
+    }
+    
     # do the same for "sub-attributes"
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
-        # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (identical(valType2, "data_array")) {
-          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
-        }
+        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
+        
         # where applicable, reduce single valued vectors to a constant
         if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
           proposed[[attr]][[attr2]] <- structure(
             uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
           )
         }
+        # ensure data_arrays of length 1 are boxed up by to_JSON()
+        if (identical(valType2, "data_array") || arrayOK2) {
+          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
+        }
+        
+        
         # we don't have to go more than two-levels, right?
       }
     }
@@ -357,6 +354,17 @@ verify_attr <- function(proposed, schema) {
   proposed
 }
 
+attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
+  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if (length(illegalAttrs)) {
+    warning("'", type, "' objects don't have these attributes: '",
+            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            "Valid attributes include:\n'",
+            paste(validAttrs, collapse = "', '"), "'\n", 
+            call. = FALSE)
+  }
+  invisible(proposedAttrs)
+}
 
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
