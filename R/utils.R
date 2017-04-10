@@ -328,10 +328,7 @@ verify_attr <- function(proposed, schema) {
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
-    # TODO: eventually this special case can be removed -- 
-    # https://github.com/plotly/plotly.js/issues/1565
-    txtArray <- identical(attr, "text") && !identical(proposed[["hoveron"]], "fill")
-    if (identical(valType, "data_array") || txtArray) {
+    if (identical(valType, "data_array")) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
     
@@ -538,7 +535,7 @@ populate_categorical_axes <- function(p) {
 }
 
 verify_arrays <- function(p) {
-  for (i in c("annotations", "shapes")) {
+  for (i in c("annotations", "shapes", "images")) {
     thing <- p$x$layout[[i]]
     if (is.list(thing) && !is.null(names(thing))) {
       p$x$layout[[i]] <- list(thing)
