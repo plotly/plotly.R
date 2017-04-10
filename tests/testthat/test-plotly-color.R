@@ -106,7 +106,7 @@ test_that("attributes are boxed-up correctly", {
   for (i in seq_along(l$data)) {
     expect_is(l$data[[i]]$x, "AsIs")
     expect_is(l$data[[i]]$y, "AsIs")
-    expect_is(l$data[[i]]$text, "AsIs")
+    expect_length(l$data[[i]]$text, 1)
   }
   
 })
