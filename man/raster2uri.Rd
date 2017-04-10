@@ -7,9 +7,9 @@
 raster2uri(r, ...)
 }
 \arguments{
-\item{...}{arguments passed onto \code{\link{as.raster}()}.}
+\item{r}{an object coercable to a raster object via \code{\link{as.raster}()}}
 
-\item{p}{a object coercable to a raster object}
+\item{...}{arguments passed onto \code{\link{as.raster}()}.}
 }
 \description{
 Convenient embedding images via \code{\link{layout}()}

@@ -6,7 +6,8 @@
 * Added the `highlight()` function for configuring selection modes/sequences/options.
 * Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
-* Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`.
+* The new function `raster2uri()` makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
+* Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
@@ -18,7 +19,7 @@
 ## CHANGES
 
 * Upgraded to plotly.js v1.25.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.2
-* `HTMLwidgets.renderValue()` now calls `Plotly.redraw()` instead of `Plotly.newPlot()`. (thanks @AleksandrIanevski)
+* `HTMLwidgets.renderValue()` should now avoid creating too many active WebGL contexts (thanks @AleksandrIanevski).
 * A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824, #717, #825.
 * If no graphics device is already open, `ggplotly()` now tries to open/close a Cairo graphics device, then a bitmap (png/jpeg) device. If neither is available, it errors. This helps to ensure that a *screen* device is never opened by `ggplotly()` (which fixes #829). Furthermore, if `width`/`height` is not specified *and* no graphics device is currently open, a default of 640/480 is used for width/height of the device. 
 

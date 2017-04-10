@@ -178,7 +178,7 @@ plotly_empty <- function(...) {
 #' Convenient embedding images via \code{\link{layout}()}
 #' \href{images}{https://plot.ly/r/reference/#layout-images}.
 #' 
-#' @param p a object coercable to a raster object
+#' @param r an object coercable to a raster object via \code{\link{as.raster}()}
 #' @param ... arguments passed onto \code{\link{as.raster}()}.
 #' @author Carson Sievert
 #' @export
