@@ -1,9 +1,5 @@
-# https://blog.rstudio.org/2017/02/01/roxygen2-6-0-0/
-#' @keywords internal
-"_PACKAGE"
-
 #' @import ggplot2
-#' @importFrom grDevices col2rgb extendrange dev.list dev.off
+#' @importFrom grDevices col2rgb extendrange dev.list dev.off rgb
 #' @importFrom graphics layout
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL
 #' @importFrom stats setNames complete.cases quantile is.leaf

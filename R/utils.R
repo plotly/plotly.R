@@ -285,17 +285,7 @@ verify_attr_names <- function(p) {
   invisible(p)
 }
 
-attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
-  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
-  if (length(illegalAttrs)) {
-    warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
-            "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
-            call. = FALSE)
-  }
-  invisible(proposedAttrs)
-}
+
 
 # ensure both the layout and trace attributes adhere to the plot schema
 verify_attr_spec <- function(p) {
@@ -322,41 +312,63 @@ verify_attr_spec <- function(p) {
 verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
     attrSchema <- schema[[attr]]
+    # if schema is missing (i.e., this is an un-official attr), move along
+    if (is.null(attrSchema)) next
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
+    arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
+    
+    # where applicable, reduce single valued vectors to a constant 
+    # (while preserving any 'special' attribute class)
+    if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
+      proposed[[attr]] <- structure(
+        unique(proposed[[attr]]), 
+        class = oldClass(proposed[[attr]])
+      )
+    }
+    
     # ensure data_arrays of length 1 are boxed up by to_JSON()
     if (identical(valType, "data_array")) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
-    # where applicable, reduce single valued vectors to a constant 
-    # (while preserving any 'special' attribute class)
-    if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
-      proposed[[attr]] <- structure(
-        uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
-      )
-    }
+    
     # do the same for "sub-attributes"
+    # TODO: should this be done recursively?
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
+        if (is.null(attrSchema[[attr2]])) next
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
+        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
+        
+        if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
+          proposed[[attr]][[attr2]] <- structure(
+            unique(proposed[[attr]][[attr2]]), 
+            class = oldClass(proposed[[attr]][[attr2]])
+          )
+        }
+        
         # ensure data_arrays of length 1 are boxed up by to_JSON()
         if (identical(valType2, "data_array")) {
           proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
-        # where applicable, reduce single valued vectors to a constant
-        if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- structure(
-            uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
-          )
-        }
-        # we don't have to go more than two-levels, right?
       }
     }
   }
   proposed
 }
 
+attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
+  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if (length(illegalAttrs)) {
+    warning("'", type, "' objects don't have these attributes: '",
+            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            "Valid attributes include:\n'",
+            paste(validAttrs, collapse = "', '"), "'\n", 
+            call. = FALSE)
+  }
+  invisible(proposedAttrs)
+}
 
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
@@ -523,7 +535,7 @@ populate_categorical_axes <- function(p) {
 }
 
 verify_arrays <- function(p) {
-  for (i in c("annotations", "shapes")) {
+  for (i in c("annotations", "shapes", "images")) {
     thing <- p$x$layout[[i]]
     if (is.list(thing) && !is.null(names(thing))) {
       p$x$layout[[i]] <- list(thing)
@@ -779,6 +791,10 @@ prefix_class <- function(x, y) {
 }
 replace_class <- function(x, new, old) {
   class(x) <- sub(old, new, class(x))
+  x
+}
+remove_class <- function(x, y) {
+  oldClass(x) <- setdiff(oldClass(x), y)
   x
 }
 

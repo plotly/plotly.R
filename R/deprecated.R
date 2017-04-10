@@ -45,12 +45,18 @@ get_figure <- function(username, id) {
 
 #' Main interface to plotly 
 #' 
-#' Deprecated: see \link{signup} for credentials/configuration storage details.
-#' See \link{ggplotly} for the new ggplot2 interface.
+#' @description This function is now deprecated. It used to provide a way to store plotly 
+#' account credentials, but that can now be done with environment variables. 
+#' For more details and examples, see \url{https://plot.ly/r/getting-started/}.
 #' 
+#' If you're here looking for an intro/overview of the package, see the 
+#' \href{https://github.com/ropensci/plotly/#getting-started}{readme}
+#' 
+#' @keywords internal
 #' @param username plotly username
 #' @param key plotly API key
 #' @export
+#' @seealso \code{\link{ggplotly}()}, \code{\link{plot_ly}()}, \code{\link{signup}()}
 plotly <- function(username, key) {
   
   if (!missing(username)) {

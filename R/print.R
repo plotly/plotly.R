@@ -112,13 +112,15 @@ embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
 #' @export
 embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
   # TODO: get rid of this and provide method for api_figure objects
+  display <- getFromNamespace("display_html", asNamespace("IRdisplay"))
+  
   if (!is.null(x$x$url)) {
     html <- plotly_iframe(
       x$x$url,
       width %||% x$width %||% "100%", 
       height %||% x$height %||% 400
     )
-    return(IRdisplay::display_html(html))
+    return(display(html))
   }
   p <- plotly_build(x)
   tmp <- tempfile(fileext = ".html")
@@ -131,7 +133,7 @@ embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
     height %||% p$height %||% 400,
     ""
   )
-  IRdisplay::display_html(html)
+  display(html)
 }
 
 

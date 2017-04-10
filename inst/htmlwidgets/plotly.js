@@ -179,8 +179,16 @@ HTMLWidgets.widget({
         */
         var gd = document.getElementById(el.id);
         var trace = gd.data[pt.curveNumber];
+        
         // Add other attributes here, if desired
-        var attrsToAttach = ["key", "z"];
+        if (!trace._isSimpleKey) {
+          var attrsToAttach = ["key", "z"];
+        } else {
+          // simple keys fire the whole key
+          obj.key = trace.key;
+          var attrsToAttach = ["z"];
+        }
+        
         for (var i = 0; i < attrsToAttach.length; i++) {
           var attr = trace[attrsToAttach[i]];
           if (Array.isArray(attr)) {

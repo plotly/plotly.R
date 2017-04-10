@@ -7,9 +7,9 @@
 showRGB(x, ...)
 }
 \arguments{
-\item{...}{arguments passed along to \code{scales::show_col}.}
+\item{x}{character string specifying color(s).}
 
-\item{A}{character string specifying color(s).}
+\item{...}{arguments passed along to \code{scales::show_col}.}
 }
 \description{
 Useful for viewing colors after they've been converted to plotly.js'

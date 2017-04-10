@@ -165,6 +165,26 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") == "2.2.1") {
+    warning(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (dynamicTicks) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
+  }
+  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
   # It is undesirable to both open a *screen* device and leave a new device
@@ -462,6 +482,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # reattach crosstalk key-set attribute
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, layout$layout, plot)
+  
+  gglayout <- layers2layout(gglayout, layers, layout$layout)
   
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320

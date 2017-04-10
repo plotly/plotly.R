@@ -30,20 +30,19 @@ the RSelenium package is used for exporting WebGL plots.
 }
 \examples{
 # The webshot package handles non-WebGL conversion to jpeg/png/pdf
+\dontrun{
 export(plot_ly(economics, x = ~date, y = ~pce))
 export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 
-\dontrun{
-  # svg/webp output or WebGL conversion can be done via RSelenium
-  if (requireNamespace("RSelenium")) {
-   rD <- RSelenium::rsDriver(browser = "chrome")
-   export(
-     plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
-   )
-   export(
-     plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
-   )
-  }
+# svg/webp output or WebGL conversion can be done via RSelenium
+if (requireNamespace("RSelenium")) {
+ rD <- RSelenium::rsDriver(browser = "chrome")
+ export(
+   plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
+ )
+ export(
+   plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
+ )
 }
 
 # If you can't get a selenium server running, another option is to
@@ -58,7 +57,7 @@ plot_ly(economics, x = ~date, y = ~pce, z = ~pop) \%>\%
      Plotly.downloadImage(gd, {format: 'png', width: 600, height: 400, filename: 'plot'});
    }"
  )
- 
+}
 }
 \author{
 Carson Sievert
