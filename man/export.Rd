@@ -30,8 +30,8 @@ the RSelenium package is used for exporting WebGL plots.
 }
 \examples{
 # The webshot package handles non-WebGL conversion to jpeg/png/pdf
-export(plot_ly(economics, x = ~date, y = ~pce))
 \dontrun{
+export(plot_ly(economics, x = ~date, y = ~pce))
 export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 
 # svg/webp output or WebGL conversion can be done via RSelenium

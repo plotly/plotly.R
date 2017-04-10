@@ -5,7 +5,7 @@
 #' For more details and examples, see \url{https://plot.ly/r/getting-started/}.
 #' 
 #' If you're here looking for an intro/overview of the package, see the 
-#' \href{https://github.com/ropensci/plotly/}{readme}
+#' \href{https://github.com/ropensci/plotly/#getting-started}{readme}
 #' 
 #' @keywords internal
 #' @param username plotly username

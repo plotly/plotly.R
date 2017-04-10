@@ -17,7 +17,7 @@ account credentials, but that can now be done with environment variables.
 For more details and examples, see \url{https://plot.ly/r/getting-started/}.
 
 If you're here looking for an intro/overview of the package, see the 
-\href{https://github.com/ropensci/plotly/}{readme}
+\href{https://github.com/ropensci/plotly/#getting-started}{readme}
 }
 \seealso{
 \code{\link{ggplotly}()}, \code{\link{plot_ly}()}, \code{\link{signup}()}
