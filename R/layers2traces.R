@@ -290,9 +290,30 @@ to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' @export
+to_basic.GeomAnnotationMap <- function(data, prestats_data, layout, params, p, ...) {
+  # TODO: we could/should? reduce this data down to the panel limits, but 
+  # probably more effort than it's worth
+  d <- params$map
+  
+  # add hovertext
+  hasRegion <- isTRUE(p$tooltip %in% c("all", "region"))
+  hasSubRegion <- isTRUE(p$tooltip %in% c("all", "subregion"))
+  d$hovertext <- d$hovertext %||% paste0(
+    if (hasRegion) d$region, if (hasSubRegion) paste0(br(), d$subregion)
+  )
+  prefix_class(d, c("GeomPolygon", "GeomAnnotationMap"))
+}
+
+#' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, p, ...) {
   data <- prefix_class(data, "GeomTile")
   to_basic(data, prestats_data, layout, params)
+}
+
+#' @export
+to_basic.GeomRasterAnn <- function(data, prestats_data, layout, params, p, ...) {
+  # rasters are handled in ggplotly.R since they are layout specific
+  prefix_class(data, "GeomBlank")
 }
 
 #' @export
@@ -687,7 +708,6 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
   if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
-  
 }
 
 #' @export
@@ -838,7 +858,7 @@ split_on <- function(dat) {
 
 # given a geom, are we hovering over points or fill?
 hover_on <- function(data) {
-  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic")) ||
+  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap")) ||
       # is this a "basic" polygon?
       identical("GeomPolygon", grep("^Geom", class(data), value = T))) {
     "fills"
