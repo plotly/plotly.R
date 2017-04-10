@@ -169,8 +169,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # there are too many naming changes in 2.2.1.9000 to realistically 
   if (packageVersion("ggplot2") == "2.2.1") {
     warning(
-      "It is *highly* recommended you use the dev version of ggplot2 with `ggplotly()`!\n",
-      "Install with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
     )
     if (dynamicTicks) {
       warning(
@@ -482,35 +482,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   # reattach crosstalk key-set attribute
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, layout$layout, plot)
-  
-  # convert layout-specific geoms/layers 
-  layers2layout <- function(gglayout, layers, layout) {
-    geoms <- sapply(layers, function(x) class(x[["geom"]])[1])
-    RasterGeom <- which(geoms %in% "GeomRasterAnn")
-    for (i in RasterGeom) {
-      params <- layers[[i]]$geom_params
-      for (j in seq_len(nrow(layout))) {
-        lay <- layout[j, ]
-        img <- list(
-          source = raster2uri(params$raster),
-          # TODO: ask plotly.js to implement explicit placement between traces?
-          layer = if (RasterGeom / length(geoms) > 0.5) "above" else "below",
-          xref = sub("axis", "", lay[["xaxis"]]), 
-          yref = sub("axis", "", lay[["yaxis"]]), 
-          x = params$xmin, 
-          xanchor = "left",
-          sizex = with(params, abs(xmax - xmin)),
-          y = params$ymin, 
-          yanchor = "bottom",
-          sizey = with(params, abs(ymax - ymin)),
-          sizing = "stretch"
-        )
-        gglayout$images <- c(gglayout$images, list(img))
-      }
-    }
-    # TODO: maybe we could support a subset of grobs in GeomCustomAnn?
-    gglayout
-  }
   
   gglayout <- layers2layout(gglayout, layers, layout$layout)
   

@@ -163,6 +163,7 @@ gg2list_legacy <- function(p, width = NULL, height = NULL, tooltip = "all", laye
   }, data, groupDomains)
   traces <- layers2traces(data, prestats_data, layout$panel_layout, 
                           plot)
+  gglayout <- layers2layout(gglayout, layers, layout$panel_layout)
   traces <- lapply(traces, function(tr) {
     tr$hoverinfo <- tr$hoverinfo %||% "text"
     tr
