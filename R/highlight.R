@@ -104,11 +104,6 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
   if (dynamic) {
     p$dependencies <- c(p$dependencies, list(colourPickerLib()))
   }
-  if (system.file(package = "rmarkdown") != "") {
-    p$dependencies <- c(p$dependencies, list(rmarkdown::html_dependency_bootstrap("default")))
-  } else {
-    message("Install the rmarkdown package for nice font styling in widget labels ")
-  }
   
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
   p$x$highlight <- list(
