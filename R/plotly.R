@@ -356,7 +356,7 @@ as_widget <- function(x, ...) {
   # add plotly class mainly for printing method
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
-  htmlwidgets::createWidget(
+  w <- htmlwidgets::createWidget(
     name = "plotly",
     x = x,
     width = x$layout$width,
@@ -369,12 +369,16 @@ as_widget <- function(x, ...) {
     preRenderHook = plotly_build,
     dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill()))
   )
+  # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
+  # note this will throw a warning in shiny, but it is at least less obtrusive
+  w$elementId <- w$elementId %||% new_id()
+  w
 }
 
 typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
     "typedarray", 0.1,
-    src = system.file("htmlwidgets", "lib", "typedarray", package = "plotly"),
+    src = depPath("typedarray"),
     script = "typedarray.min.js"
   )
 }

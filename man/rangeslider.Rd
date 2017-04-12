@@ -4,10 +4,14 @@
 \alias{rangeslider}
 \title{Add a range slider to the x-axis}
 \usage{
-rangeslider(p, ...)
+rangeslider(p, start = NULL, end = NULL, ...)
 }
 \arguments{
 \item{p}{plotly object.}
+
+\item{start}{a start date/value.}
+
+\item{end}{an end date/value.}
 
 \item{...}{these arguments are documented here 
 \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}}
@@ -20,6 +24,16 @@ Add a range slider to the x-axis
 plot_ly(x = time(USAccDeaths), y = USAccDeaths) \%>\% 
   add_lines() \%>\%
   rangeslider()
+  
+d <- tibble::tibble(
+  time = seq(as.Date("2016-01-01"), as.Date("2016-08-31"), by = "days"),
+  y = rnorm(seq_along(time))
+ )
+ 
+plot_ly(d, x = ~time, y = ~y) \%>\%
+  add_lines() \%>\%
+  rangeslider(d$time[5], d$time[50])
+  
 
 }
 \author{

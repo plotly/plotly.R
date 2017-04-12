@@ -89,3 +89,25 @@ test_that("Can specify a scale manually", {
   expect_equal(toRGB(expected), sapply(markers, "[[", "color"))
 })
 
+test_that("attributes are boxed-up correctly", {
+  df <- data.frame(
+    a = rnorm(5, 50, 1), 
+    b = letters[1:5], 
+    stringsAsFactors = FALSE
+  )
+  
+  p <- plot_ly(df, x = ~a, y = ~b, color = ~b) %>%
+    add_bars(text = ~paste("Value: ", round(a, 1)), hoverinfo = "text")
+  
+  l <- plotly_build(p)$x
+  
+  expect_length(l$data, 5)
+  
+  for (i in seq_along(l$data)) {
+    expect_is(l$data[[i]]$x, "AsIs")
+    expect_is(l$data[[i]]$y, "AsIs")
+    expect_length(l$data[[i]]$text, 1)
+  }
+  
+})
+
