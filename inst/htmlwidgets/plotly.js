@@ -528,6 +528,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
+    // selection brush attributes
+    var selectAttrs = Object.keys(this.highlight.selected);
+
     for (var i = 0; i < this.origData.length; i++) {
       // TODO: try using Lib.extendFlat() as done in  
       // https://github.com/plotly/plotly.js/pull/1136 
@@ -544,10 +547,14 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (!trace._isSimpleKey) {
           trace = subsetArrayAttrs(trace, matches);
         }
-        trace.opacity = this.origOpacity[i];
-        trace.showlegend = this.highlight.showInLegend;
-        trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
-        trace.name = "selected";
+        // Apply selection brush attributes (supplied from R)
+        // TODO: it would be neat to have a dropdown to dynamically specify these
+        for (var j = 0; j < selectAttrs.length; j++) {
+          var attr = selectAttrs[j];
+          trace[attr] = this.highlight.selected[attr];
+        }
+        
+        // if it is defined, override color with the "dynamic brush color""
         var d = this.gd._fullData[i];
         if (d.marker) {
           trace.marker = d.marker;
@@ -561,7 +568,12 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           trace.textfont = d.textfont;
           trace.textfont.color =  selectionColour || trace.textfont.color;
         }
+        // attach a sensible name/legendgroup
+        trace.name = trace.name || keys.join(", ");
+        trace.legendgroup = trace.legendgroup || keys.join(", ");
+        
         // keep track of mapping between this new trace and the trace it targets
+        // (necessary for updating frames to reflect the selection traces)
         trace._originalIndex = i;
         trace._newIndex = this.gd._fullData.length + traces.length;
         traces.push(trace);
