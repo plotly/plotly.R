@@ -375,15 +375,18 @@ HTMLWidgets.widget({
             });
           }
           
-          grp.var("selection").on("change", function crosstalk_sel_change(e) {
+          
+          var crosstalkSelectionChange = function(e) {
             
             // array of "event objects" tracking the selection history
+            // this is used to avoid adding redundant selections
             var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
             
             // do nothing if the event isn't "new"
             // TODO: is there a smarter way to check object equality?
             var event = {};
             event[set] = e.value;
+            event.plotlySelectionColour = crosstalk.group(set).var("plotlySelectionColour").get();
             if (selectionHistory.length > 0) {
               var ev = JSON.stringify(event);
               for (var i = 0; i < selectionHistory.length; i++) {
@@ -413,7 +416,10 @@ HTMLWidgets.widget({
               selectize.close();
             }
             
-          });
+          }
+          
+          grp.var("selection").on("change", crosstalkSelectionChange);
+
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
             traceManager.updateFilter(set, e.value);
@@ -507,6 +513,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     this.groupSelections[group] = keys;
   } else {
     // add to the groupSelection, rather than overwriting it
+    // TODO: can this be removed?
     this.groupSelections[group] = this.groupSelections[group] || [];
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
