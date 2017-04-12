@@ -139,3 +139,36 @@ test_that('Specifying alpha in hex color code works', {
   expect_match(info$data[[1]]$fillcolor, "rgba\\(0,0,0,0\\.0[6]+")
 })
 
+p1 = ggplot(data.frame(x = 1, y = 1)) +
+  geom_point(aes(x = x, y = y)) +
+  geom_rect(xmin = 0.9, xmax = 1.1, ymin = -Inf, ymax = Inf)
+p2 = ggplot(data.frame(x = 1, y = 1)) +
+  geom_point(aes(x = x, y = y)) +
+  geom_rect(ymin = 0.9, ymax = 1.1, xmin = -Inf, xmax = Inf) +
+  coord_flip()
+info1 <- save_outputs(p1, "rect-vert-inf")
+info2 <- save_outputs(p2, "rect-vert-flip-inf")
+
+test_that("rect vertical inf is translated correctly", {
+  expect_identical(info1$data[[2]]$x, c(0.9, 0.9, 1.1, 1.1, 0.9))
+  expect_identical(info1$data[[2]]$y, c(0.5, 1.5, 1.5, 0.5, 0.5))
+  expect_identical(info2$data[[2]]$x, c(0.9, 1.1, 1.1, 0.9, 0.9))
+  expect_identical(info2$data[[2]]$y, c(0.5, 0.5, 1.5, 1.5, 0.5))
+})
+
+p3 = ggplot(data.frame(x = 1, y = 1)) +
+  geom_point(aes(x = x, y = y)) +
+  geom_rect(ymin = 0.9, ymax = 1.1, xmin = -Inf, xmax = Inf)
+p4 = ggplot(data.frame(x = 1, y = 1)) +
+  geom_point(aes(x = x, y = y)) +
+  geom_rect(xmin = 0.9, xmax = 1.1, ymin = -Inf, ymax = Inf) +
+  coord_flip()
+info3 <- save_outputs(p3, "rect-hor-inf")
+info4 <- save_outputs(p4, "rect-hor-flip-inf")
+
+test_that("rect horizontal inf is translated correctly", {
+  expect_identical(info4$data[[2]]$y, c(0.9, 0.9, 1.1, 1.1, 0.9))
+  expect_identical(info4$data[[2]]$x, c(0.5, 1.5, 1.5, 0.5, 0.5))
+  expect_identical(info3$data[[2]]$y, c(0.9, 1.1, 1.1, 0.9, 0.9))
+  expect_identical(info3$data[[2]]$x, c(0.5, 0.5, 1.5, 1.5, 0.5))
+})

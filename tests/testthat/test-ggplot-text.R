@@ -42,3 +42,28 @@ test_that("geom_text splits along colour", {
   # Right colour for each trace
   expect_true(L$data[[1]]$textfont$color != L$data[[2]]$textfont$color)
 })
+
+gg1 = ggplot(data.frame(x = seq(5, 25, 5), y = 60)) +
+  geom_point(aes(x = x, y = y)) +
+  geom_text(x = 5, y = 60, label = "nothing") +
+  geom_text(x = 10, y = 60, label = "bold", fontface = "bold", hjust = 0, vjust = 0) +
+  geom_text(x = 15, y = 60, label = "italic", fontface = "italic", hjust = 1, vjust = 1) +
+  geom_text(x = 20, y = 60, label = "bold italic", fontface = "bold.italic", hjust = 0, vjust = 1) +
+  geom_text(x = 25, y = 60, label = "plain", fontface = "plain", hjust = 1, vjust = 0)
+info1 <- save_outputs(gg1, "text-fontjust")
+
+test_that("fontface is translated correctly", {
+  expect_identical(info1$data[[2]]$text, rep("nothing", 5))
+  expect_identical(info1$data[[3]]$text, rep("<b>bold</b>", 5))
+  expect_identical(info1$data[[4]]$text, rep("<i>italic</i>", 5))
+  expect_identical(info1$data[[5]]$text, rep("<b><i>bold italic</i></b>", 5))
+  expect_identical(info1$data[[6]]$text, rep("plain", 5))
+})
+
+test_that("hjust/vjust is translated correctly", {
+  expect_identical(info1$data[[2]]$textposition, rep("center", 5))
+  expect_identical(info1$data[[3]]$textposition, rep("top right", 5))
+  expect_identical(info1$data[[4]]$textposition, rep("bottom left", 5))
+  expect_identical(info1$data[[5]]$textposition, rep("bottom right", 5))
+  expect_identical(info1$data[[6]]$textposition, rep("top center", 5))
+})
