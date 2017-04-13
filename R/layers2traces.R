@@ -45,7 +45,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       # "automatically" generated group aes is not informative
       if (identical("group", unique(varName, aesName))) next
       # by default assume the values don't need any formatting
-      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
+      forMat <- format
       sc <- p$scales$get_scales(aesName)
       if (isTRUE(aesName %in% c("x", "y"))) {
         # convert "milliseconds from the UNIX epoch" to a date/datetime
