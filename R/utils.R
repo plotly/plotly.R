@@ -197,6 +197,8 @@ supply_defaults <- function(p) {
     axes <- if (is_type(p, "scatterternary"))  {
       c("aaxis", "baxis", "caxis") 
     } else if (is_type(p, "pie") || is_type(p, "parcoords")) {
+      # hack to avoid https://github.com/ropensci/plotly/issues/945
+      p$x$layout$margin <- NULL
       NULL
     } else {
       c("xaxis", "yaxis")
