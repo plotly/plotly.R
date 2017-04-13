@@ -566,14 +566,37 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (d.marker) {
           trace.marker = d.marker;
           trace.marker.color =  selectionColour || trace.marker.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.marker || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.marker[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.line) {
           trace.line = d.line;
           trace.line.color =  selectionColour || trace.line.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.line || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.line[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.textfont) {
           trace.textfont = d.textfont;
           trace.textfont.color =  selectionColour || trace.textfont.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.textfont || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.textfont[attrs[j]] = selected[attrs[j]];
+          }
         }
         // attach a sensible name/legendgroup
         trace.name = trace.name || keys.join(", ");
