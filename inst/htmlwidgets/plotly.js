@@ -375,15 +375,18 @@ HTMLWidgets.widget({
             });
           }
           
-          grp.var("selection").on("change", function crosstalk_sel_change(e) {
+          
+          var crosstalkSelectionChange = function(e) {
             
             // array of "event objects" tracking the selection history
+            // this is used to avoid adding redundant selections
             var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
             
             // do nothing if the event isn't "new"
             // TODO: is there a smarter way to check object equality?
             var event = {};
             event[set] = e.value;
+            event.plotlySelectionColour = crosstalk.group(set).var("plotlySelectionColour").get();
             if (selectionHistory.length > 0) {
               var ev = JSON.stringify(event);
               for (var i = 0; i < selectionHistory.length; i++) {
@@ -413,7 +416,10 @@ HTMLWidgets.widget({
               selectize.close();
             }
             
-          });
+          }
+          
+          grp.var("selection").on("change", crosstalkSelectionChange);
+
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
             traceManager.updateFilter(set, e.value);
@@ -507,6 +513,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     this.groupSelections[group] = keys;
   } else {
     // add to the groupSelection, rather than overwriting it
+    // TODO: can this be removed?
     this.groupSelections[group] = this.groupSelections[group] || [];
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
@@ -528,6 +535,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
+    // selection brush attributes
+    var selectAttrs = Object.keys(this.highlight.selected);
+
     for (var i = 0; i < this.origData.length; i++) {
       // TODO: try using Lib.extendFlat() as done in  
       // https://github.com/plotly/plotly.js/pull/1136 
@@ -544,24 +554,56 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (!trace._isSimpleKey) {
           trace = subsetArrayAttrs(trace, matches);
         }
-        trace.opacity = this.origOpacity[i];
-        trace.showlegend = this.highlight.showInLegend;
-        trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
-        trace.name = "selected";
+        // Apply selection brush attributes (supplied from R)
+        // TODO: it would be neat to have a dropdown to dynamically specify these
+        for (var j = 0; j < selectAttrs.length; j++) {
+          var attr = selectAttrs[j];
+          trace[attr] = this.highlight.selected[attr];
+        }
+        
+        // if it is defined, override color with the "dynamic brush color""
         var d = this.gd._fullData[i];
         if (d.marker) {
           trace.marker = d.marker;
           trace.marker.color =  selectionColour || trace.marker.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.marker || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.marker[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.line) {
           trace.line = d.line;
           trace.line.color =  selectionColour || trace.line.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.line || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.line[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.textfont) {
           trace.textfont = d.textfont;
           trace.textfont.color =  selectionColour || trace.textfont.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.textfont || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.textfont[attrs[j]] = selected[attrs[j]];
+          }
         }
+        // attach a sensible name/legendgroup
+        trace.name = trace.name || keys.join(", ");
+        trace.legendgroup = trace.legendgroup || keys.join(", ");
+        
         // keep track of mapping between this new trace and the trace it targets
+        // (necessary for updating frames to reflect the selection traces)
         trace._originalIndex = i;
         trace._newIndex = this.gd._fullData.length + traces.length;
         traces.push(trace);

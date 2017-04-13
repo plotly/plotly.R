@@ -19,7 +19,7 @@ proj_dat <- function(step_size) {
  )
 }
 
-steps <- c(0, rep(1/15, 200))
+steps <- c(0, rep(1/15, 50))
 stepz <- cumsum(steps)
 
 # tidy version of tour data
@@ -49,4 +49,4 @@ proj_dat %>%
   add_markers(color = ~species, data = tour_dat) %>%
   hide_legend() %>%
   layout(xaxis = ax, yaxis = ax) %>%
-  animation_opts(33, 33)
+  animation_opts(33, redraw = FALSE)

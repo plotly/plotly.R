@@ -2,6 +2,7 @@
 % Please edit documentation in R/animate.R
 \name{animation_opts}
 \alias{animation_opts}
+\alias{animation}
 \alias{animation_slider}
 \alias{animation_button}
 \title{Animation configuration options}
