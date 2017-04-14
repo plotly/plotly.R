@@ -42,8 +42,8 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{...}{currently not supported.}
 
-\item{other}{attributes of the other (i.e., non-selected) traces, 
-see \code{\link{attrs_other}()}.}
+\item{filter}{when receiving events from other events from other widgets,
+should they be interpreted}
 }
 \description{
 This function sets a variety of options for brushing (i.e., highlighting)
