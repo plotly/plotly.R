@@ -8,11 +8,7 @@
 #' @author Carson Sievert
 #' @export
 embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
-  if (system.file(package = "IRdisplay") == "") {
-    warning("You need the IRdisplay package to use this function: \n",
-            "devtools::install_github(c('IRkernel/repr', 'IRKernel/IRdisplay'))")
-    return(x)
-  }
+  try_library("IRdisplay", "embed_notebook")
   if (!is.null(file)) {
     warning("The file argument is no longer used", call. = FALSE)
   }
