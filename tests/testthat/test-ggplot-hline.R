@@ -74,10 +74,4 @@ test_that("hline/vline/abline split on linetype/colour/size", {
   expect_length(
     unique(vapply(l$data, function(x) x$line$width, numeric(1))), 4
   )
-  
-  
 })
-
-
-
-
