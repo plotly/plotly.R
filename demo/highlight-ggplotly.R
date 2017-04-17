@@ -16,20 +16,20 @@ p <- ggplot(sd, aes(month, median)) +
   geom_smooth(data = txhousing, method = "gam") + 
   facet_wrap(~ year)
 ggplotly(p) %>%
-  highlight(on = "plotly_hover", color = "red")
+  highlight(on = "plotly_click", color = "red")
 
-# perhaps a more useful example (why is the group = year necessary here?)
+# perhaps a more useful example
 sd <- SharedData$new(txhousing, ~year)
 p <- ggplot(sd, aes(month, median)) +
   geom_line(aes(group = year)) + 
   geom_smooth(data = txhousing, method = "gam") + 
   facet_wrap(~ city)
 ggplotly(p, height = 800, width = 1600) %>%
-  highlight(on = "plotly_hover", color = "red")
+  highlight(on = "plotly_click", color = "red")
 
 # TODO: why doesn't this work?
 sd <- SharedData$new(mtcars, ~cyl)
 p <- ggplot(sd, aes(factor(vs))) + 
   geom_bar() + facet_wrap(~am)
 ggplotly(p) %>%
-  highlight(on = "plotly_hover", color = "red")
+  highlight(on = "plotly_click", color = "red")

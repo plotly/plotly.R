@@ -255,7 +255,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # later on, for more complicated geoms (w/ non-trivial summary statistics),
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
-    if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
+    if (crosstalk_key() %in% names(y) && !"key" %in% names(x[["mapping"]]) && 
+        inherits(x[["stat"]], "StatIdentity")) {
       x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x

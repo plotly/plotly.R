@@ -16,11 +16,28 @@ p <- subplot(
 
 # Crosstalk selections are actually additional traces, and, by default, 
 # plotly.js will try to dodge bars placed under the same category
-layout(p, barmode = "overlay")
+layout(p, barmode = "overlay") %>%
+  highlight(selected = attrs_selected(showlegend = FALSE))
 
-subplot(
-  plot_ly(d, y = ~disp, color = I("black")) %>% add_boxplot(name = "overall"),
-  scatterplot,
-  shareY = TRUE
-) %>% layout(dragmode = "select")
+# same idea, but now with a boxplot
+p <- plot_ly(d, y = ~disp, color = I("black")) %>% add_boxplot(name = "overall")
+subplot(p, scatterplot, shareY = TRUE) %>% 
+  layout(dragmode = "select") %>%
+  highlight(selected = attrs_selected(name = "selection"))
+
+
+library(plotly)
+library(crosstalk)
+
+tx <- SharedData$new(txhousing, ~city)
+p1 <- ggplot(tx, aes(date, median, group = city)) + geom_line()
+p2 <- plot_ly(tx, x = ~median, color = I("black")) %>% 
+  add_histogram(histnorm = "probability density")
+
+subplot(p1, p2) %>% 
+  layout(barmode = "overlay") %>%
+  highlight(
+    "plotly_click", dynamic = TRUE, persistent = TRUE, 
+    selected = attrs_selected(opacity = 0.3)
+  )
 

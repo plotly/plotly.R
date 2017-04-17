@@ -369,7 +369,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
@@ -381,7 +381,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- data$yintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
@@ -393,7 +393,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data[["x"]] <- data$xintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomVline", "GeomPath"))
 }
 
 #' @export
@@ -826,8 +826,10 @@ geom2trace.default <- function(data, params, p) {
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
 split_on <- function(dat) {
-  geom <- class(dat)[1]
   lookup <- list(
+    GeomHline = c("linetype", "colour", "size"),
+    GeomVline = c("linetype", "colour", "size"),
+    GeomAbline = c("linetype", "colour", "size"),
     GeomPath = c("fill", "colour", "size"),
     GeomPolygon = c("fill", "colour", "size"),
     GeomBar = "fill",
@@ -836,11 +838,17 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
-  # split on the domain to ensure sensible trace ordering
+  # try to split on the domain (for sensible trace ordering)
   for (i in names(lookup)) {
-    lookup[[i]] <- paste0(lookup[[i]], "_plotlyDomain")
+    domainName <- paste0(lookup[[i]], "_plotlyDomain")
+    idx <- domainName %in% names(dat)
+    lookup[[i]][idx] <- domainName[idx]
   }
-  splits <- lookup[[geom]]
+  # search all the classes for relevant splits (moving from specific->generic) 
+  splits <- NULL
+  for (i in class(dat)) {
+    splits <- splits %||% lookup[[i]]
+  }
   # if hovering on fill, we need to split on hovertext
   if (identical(hover_on(dat), "fills")) {
     splits <- c(splits, "hovertext")

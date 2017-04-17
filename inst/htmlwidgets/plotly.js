@@ -478,15 +478,18 @@ TraceManager.prototype.updateFilter = function(group, keys) {
       var matchFunc = getMatchFunc(trace);
       var matches = matchFunc(trace.key, keys);
       
-      if (matches.length > 0 && !trace._isSimpleKey) {
+      if (matches.length == 0) {
+        this.gd.data[i] = undefined;
+      }
+      if (!trace._isSimpleKey) {
         // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
         this.gd.data[i] = subsetArrayAttrs(trace, matches);
       }
-      
     }
     
   }
-
+  
+  this.gd.data = this.gd.data.filter(function(tr) { return tr !== undefined; });
   Plotly.redraw(this.gd);
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,
@@ -599,8 +602,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           }
         }
         // attach a sensible name/legendgroup
-        trace.name = trace.name || keys.join(", ");
-        trace.legendgroup = trace.legendgroup || keys.join(", ");
+        trace.name = trace.name || keys.join("<br />");
+        trace.legendgroup = trace.legendgroup || keys.join("<br />");
         
         // keep track of mapping between this new trace and the trace it targets
         // (necessary for updating frames to reflect the selection traces)
