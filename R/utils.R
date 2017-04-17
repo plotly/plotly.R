@@ -853,3 +853,13 @@ cat_profile <- function(key, value, path = "~") {
   message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
 }
+
+
+# check that suggested packages are installed
+try_library <- function(pkg, fun) {
+  if (system.file(package = pkg) != "") {
+    return(invisible())
+  }
+  stop("Package `", pkg, "` required for `", fun, "`.\n", 
+       "Please install and try again.", call. = FALSE)
+}
