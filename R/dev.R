@@ -15,10 +15,7 @@
 plotly_json <- function(p = last_plot(), jsonedit = interactive(), ...) {
   plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = TRUE)
   if (jsonedit) {
-    if (system.file(package = "listviewer") == "") {
-      stop("This function requires the listviewer package:\n", 
-           "install.packages('listviewer')", call. = FALSE)
-    }
+    try_library("listviewer", "plotly_json")
     listviewer::jsonedit(plotlyJSON, mode = "form", ...)
   } else {
     plotlyJSON
