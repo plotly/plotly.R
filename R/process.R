@@ -32,6 +32,13 @@ relay_error <- function(resp) {
   if (!httr::http_error(resp)) {
     return(resp)
   }
+  if (httr::http_type(resp) != "application/json") {
+    stop(
+      "API did not return json. Please report this error:\n", 
+      "  https://github.com/ropensci/plotly/issues/new",
+      call. = FALSE
+    )
+  }
   # HTTP error message
   msg <- httr::http_status(resp)[["message"]]
   # Custom plotly server error message(s)

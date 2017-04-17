@@ -821,7 +821,7 @@ api_headers <- function() {
     plotly_version = v,
     `Plotly-Client-Platform` = paste("R", v),
     `Content-Type` = "application/json",
-    Accept = "*/*"
+    Accept = "application/json"
   )
 }
 
@@ -856,10 +856,10 @@ cat_profile <- function(key, value, path = "~") {
 
 
 # check that suggested packages are installed
-try_library <- function(pkg, fun) {
+try_library <- function(pkg, fun = NULL) {
   if (system.file(package = pkg) != "") {
     return(invisible())
   }
-  stop("Package `", pkg, "` required for `", fun, "`.\n", 
+  stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
        "Please install and try again.", call. = FALSE)
 }
