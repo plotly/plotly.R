@@ -838,12 +838,11 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
-  # split on the domain (if possible) to ensure sensible trace ordering
+  # try to split on the domain (for sensible trace ordering)
   for (i in names(lookup)) {
     domainName <- paste0(lookup[[i]], "_plotlyDomain")
-    if (domainName %in% names(dat)) {
-      lookup[[i]] <- domainName
-    }
+    idx <- domainName %in% names(dat)
+    lookup[[i]][idx] <- domainName[idx]
   }
   # search all the classes for relevant splits (moving from specific->generic) 
   splits <- NULL
