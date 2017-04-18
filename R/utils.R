@@ -821,7 +821,7 @@ api_headers <- function() {
     plotly_version = v,
     `Plotly-Client-Platform` = paste("R", v),
     `Content-Type` = "application/json",
-    Accept = "application/json"
+    Accept = "*/*"
   )
 }
 

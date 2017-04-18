@@ -39,8 +39,8 @@ plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
 #' @param id of the Plotly figure.
 #' @export
 get_figure <- function(username, id) {
-  .Deprecated("download")
-  download(id, username)
+  .Deprecated("api_download_plot")
+  api_download_plot(id, username)
 }
 
 #' Main interface to plotly 

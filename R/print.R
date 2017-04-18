@@ -1,3 +1,16 @@
+#' Print method for a 'generic' API response
+#'
+#' @param x a list.
+#' @param ... additional arguments (currently ignored)
+#' @export
+print.api <- function(x, ...) {
+  cat("<Response from plot.ly>\n")
+  str(x)
+  x
+}
+
+
+
 #' Print a plot on plotly's platform
 #'
 #' @param x a plotly figure object

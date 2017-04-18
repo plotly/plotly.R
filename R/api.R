@@ -1,32 +1,29 @@
-# ---------------------------------------------------------------------------
-# Uploading
-# ---------------------------------------------------------------------------
-
-upload_plot <- function(x = last_plot(), filename = NULL,
-                        sharing = c("public", "private", "secret"), ...) {
+api_create_plot <- function(x = last_plot(), filename = NULL,
+                            sharing = c("public", "private", "secret"), ...) {
   
-  if (!is.null(file <- file_lookup(filename))) {
+  fileINFO <- tryNULL(api(paste0("files/lookup?path=", filename)))
+  if (!is.null(fileINFO)) {
     warning(
       "A file with this name already exists. Returning that file... \n", 
       "If you want to create a new plot, specify a new filename. \n",
       "If you want to overwrite this plot, use plot_overwrite().", call. = FALSE
     )
-    return(prefix_class(file, "api_plot"))
+    return(fileINFO)
   }
   
-  x <- plotly_build(p)[["x"]]
+  x <- plotly_build(x)[["x"]]
   
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
   for (i in seq_along(x$data)) {
-    x$data[[i]] <- srcify(x$data[[i]])
+    x$data[[i]] <- api_srcify(x$data[[i]])
   }
   
   # same for animation frames
   for (i in seq_along(x$frames)) {
     frame <- x$frames[[i]]
     for (j in seq_along(frame$data)) {
-      x$frames[[i]]$data[[j]] <- srcify(frame$data[[j]])
+      x$frames[[i]]$data[[j]] <- api_srcify(frame$data[[j]])
     }
   }
   
@@ -42,26 +39,24 @@ upload_plot <- function(x = last_plot(), filename = NULL,
     )
   )
   
-  resp <- httr::POST(
-    url = file.path(get_domain("api"), "v2", "plots"),
-    body = bod, api_headers(), api_auth()
+  # TODO: do we need to PATCH to ensure this is secret?
+  prefix_class(
+    api("plots", "POST", bod), "api_plot"
   )
-  
-  prefix_class(httr::content(resp), "api_plot")
 }
 
 
-upload_grid <- function(x, filename = as.character(substitute(x)),
-                        sharing = c("public", "private", "secret"), ...) {
+api_create_grid <- function(x, filename = NULL,
+                            sharing = c("public", "private", "secret"), ...) {
   
-  # Does this file already exist?
-  if (!is.null(file <- file_lookup(filename))) {
+  fileINFO <- tryNULL(api(paste0("files/lookup?path=", filename)))
+  if (!is.null(fileINFO)) {
     warning(
       "A file with this name already exists. Returning that file... \n", 
       "  If you want to create a new grid, specify a new filename. \n",
       "  If you want to overwrite a grid, use grid_overwrite().", call. = FALSE
     )
-    return(prefix_class(file, "api_grid"))
+    return(fileINFO)
   }
   
   sharing <- match.arg(sharing, sharing)
@@ -74,82 +69,25 @@ upload_grid <- function(x, filename = as.character(substitute(x)),
     ...
   ))
   
-  resp <- httr::POST(
-    file.path(get_domain("api"), "v2", "grids"),
-    body = bod, api_headers(), api_auth()
-  )
-  
-  prefix_class(process(resp), "api_grid")
-}
-
-
-# ---------------------------------------------------------------------------
-# Downloading
-# ---------------------------------------------------------------------------
-
-download_plot <- function(id, username) {
-  as_widget(
-    download_file(id, username, "plots", "content?inline_data=true")
-  )
-}
-
-download_grid <- function(id, username) {
   prefix_class(
-    download_file(id, username, "grids"), 
-    "api_grid_local"
+    api("grids", "POST", bod), "api_grid"
   )
 }
 
-# TODO: should files_get() be exposed to users?
-download_file <- function(id, username, endpoint = "files", ...) {
-  if (missing(id)) stop("Please provide a figure id number")
-  if (missing(username)) username <- verify("username")
-  fid <- paste(username, id, sep = ":")
-  url <- file.path(get_domain("api"), "v2", endpoint, fid, ...)
-  resp <- httr::GET(url, api_headers(), api_auth())
-  process(resp)
-}
 
-# ---------------------------------------------------------------------------
-# Overwriting
-# ---------------------------------------------------------------------------
 
-overwrite_plot <- function() {
-  
-}
 
-overwrite_grid <- function(x, filename = as.character(substitute(x)), ...) {
-  
-}
 
-# ---------------------------------------------------------------------------
-# Listing?
-# ---------------------------------------------------------------------------
-
-list_files <- function(username) {
-  if (missing(username)) username <- verify("username")
-  url <- file.path(get_domain("api"), "v2", "folders", paste0("home?user=", username))
-  resp <- httr::GET(url, api_headers(), api_auth())
-  process(resp)
-}
 
 
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
 
-file_lookup <- function(path) {
-  url <- file.path(get_domain("api"), "v2", "files", paste0("lookup?path=", path))
-  resp <- httr::GET(url, api_headers(), api_auth())
-  if (httr::http_error(resp)) {
-    return(NULL)
-  }
-  httr::content(resp)
-}
 
 # upload a grid of data array attributes, attach src references to the trace,
 # and remove the actual data from trace
-srcify <- function(trace) {
+api_srcify <- function(trace) {
   Attrs <- Schema$traces[[trace[["type"]]]]$attributes
   isArray <- sapply(Attrs, function(x) {
     tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
@@ -157,7 +95,7 @@ srcify <- function(trace) {
   grid <- trace[names(trace) %in% names(Attrs)[isArray]]
   # create the grid and replace actual data with "src pointers"
   if (length(grid)) {
-    resp <- grid_upload(grid, filename = new_id())
+    resp <- api_create_grid(grid, filename = new_id())
     fid <- resp[["file"]][["fid"]]
     cols <- resp[["file"]][["cols"]]
     for (j in seq_along(cols)) {
@@ -175,3 +113,51 @@ df2grid <- function(df) {
   columns <- Map(function(x, y) list(data = x, order = y), df, idx)
   list(cols = columns)
 }
+
+
+api_expect_filetype <- function(f = NULL, type = "plot") {
+  if (!identical(type, f[["filetype"]])) {
+    stop(
+      sprintf("This file is of filetype '%s', not '%s'", f[["filetype"]] %||% "", type),
+      call. = FALSE
+    )
+  }
+  invisible(f)
+}
+
+# verify `method` is an httr verb
+api_check_verb <- function(verb) {
+  is_httr_verb <- any(vapply(api_verbs(), identical, logical(1), verb))
+  if (!is_httr_verb) {
+    warning("Didn't recognize verb:", verb, call. = FALSE)
+  }
+  verb
+}
+
+# verify `endpoint` is a valid endpoint
+api_check_endpoint <- function(endpoint = "/") {
+  # check the endpoint -- is this a fool-proof way to get the "root path"?
+  rootpoint <- strsplit(endpoint, "(/|\\?)")[[1]][[1]]
+  if (!rootpoint %in% api_endpoints()) {
+    stop(
+      "`endpoint` must point to one of these endpoints:\n", 
+      "'", paste(api_endpoints(), collapse = "', '"), "'",
+      call. = FALSE
+    )
+  }
+  endpoint
+}
+
+api_verbs <- function() {
+  c("DELETE", "BROWSE", "GET", "HEAD", "PATCH", "POST", "PUT", "VERB")
+}
+
+api_endpoints <- function() {
+  c(
+    "", "search", "files", "grids", "plots", "extras", "folders", "images", 
+    "comments", "plot-schema", "users", "memberships", "organizations", 
+    "subscriptions", "jupyter-notebooks", "shapefiles", "external-images", 
+    "spectacle-presentations", "dashboards", "analysis", "dash-apps"
+  )
+}
+
