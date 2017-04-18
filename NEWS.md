@@ -18,7 +18,7 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.25.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.2
+* Upgraded to plotly.js v1.26.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.2
 * `ggplotly()` now applies `format()` to automatically generated hoverinfo. This will allow for finer control over the text displayed (for instance, `options(digits = 4)` can now be used to choose the number of significant digits used). See #834 for an example.
 * `HTMLwidgets.renderValue()` should now avoid creating too many active WebGL contexts (thanks @AleksandrIanevski).
 * A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824, #717, #825.
