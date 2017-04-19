@@ -32,7 +32,10 @@ api(endpoint = "/", verb = "GET", body = NULL, ...)
 \item{x}{An R object to hosted on plotly's web platform. 
 Can be a plotly/ggplot2 object, a data frame, a list of options, or \code{NULL}.}
 
-\item{filename}{character string which names the file.}
+\item{filename}{character string naming the file. If this string 
+references an already existing file, in an interactive session, 
+you will be given the option to overwrite it; otherwise 
+(in a non-interactive session), the file is automatically overwritten.}
 
 \item{sharing}{If 'public', anyone can view this graph. It will appear in 
 your profile and can appear in search engines. You do not need to be
@@ -103,23 +106,24 @@ layout(
 # list all the endpoints
 api()
 
-# Any query parameters must be included in the endpoint 
+# search the entire platform!
 # see https://api.plot.ly/v2/search
 api("search?q=overdose")
-
 api("search?q=plottype:pie trump fake")
 
-# some user specific info
+# these examples will require a user account
 usr <- Sys.getenv("plotly_username", NA)
 if (!is.na(usr)) {
-  # account info https://api.plot.ly/v2/#users
+  # your account info https://api.plot.ly/v2/#users
   api(sprintf("users/\%s", usr))
-  # list your folders/files https://api.plot.ly/v2/folders#user
+  # your folders/files https://api.plot.ly/v2/folders#user
   api(sprintf("folders/home?user=\%s", usr))
 }
 
 # Retrieve a specific file https://api.plot.ly/v2/files#retrieve
 api("files/cpsievert:14681")
+# change the filename https://api.plot.ly/v2/files#update
+api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
 # Copy a file https://api.plot.ly/v2/files#lookup
 api("files/cpsievert:14681/copy", "POST")
 # Create a folder https://api.plot.ly/v2/folders#create

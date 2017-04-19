@@ -151,7 +151,7 @@ test_run <- function(...) {
 }
 
 if (packageVersion("ggplot2") > "2.2.1") {
-  test_run("plotly")
+  test_run("plotly", filter = "api")
 }
 
 # now, actually build the table (if necessary)

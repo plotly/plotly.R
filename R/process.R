@@ -16,15 +16,23 @@ process.api_plot <- function(resp) {
 
 process.api_image <- function(resp) {
   relay_error(resp)
+  type <- resp[["headers"]][["content-type"]]
   # httr (should) know to call png::readPNG() which returns raster array
-  tryCatch(httr::content(resp, as = "parsed"), 
-           error = function(e) httr::content(resp, as = "raw"))
+  tryCatch(
+    httr::content(resp, as = "parsed", type = type), 
+    error = function(e) httr::content(resp, as = "raw", type = type)
+  )
 }
 
 # the default for httr::content() doesn't simplify vectors apparently...
 json_content <- function(resp) {
   from_JSON(
-    httr::content(resp, as = "text")
+    httr::content(
+      resp, 
+      as = "text", 
+      type = resp[["headers"]][["content-type"]],
+      encoding = "UTF-8"
+    )
   )
 }
 

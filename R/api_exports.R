@@ -8,7 +8,11 @@
 #' 
 #' @param x An R object to hosted on plotly's web platform. 
 #' Can be a plotly/ggplot2 object, a data frame, a list of options, or \code{NULL}.
-#' @param filename character string which names the file.
+#' @param filename character string naming the file. If this string 
+#' references an already existing file, in an interactive session, 
+#' you will be given the option to overwrite it; otherwise 
+#' (in a non-interactive session), the file is automatically overwritten.
+#' 
 #' @param sharing If 'public', anyone can view this graph. It will appear in 
 #' your profile and can appear in search engines. You do not need to be
 #' logged in to Plotly to view this chart.
@@ -73,23 +77,24 @@
 #' # list all the endpoints
 #' api()
 #' 
-#' # Any query parameters must be included in the endpoint 
+#' # search the entire platform!
 #' # see https://api.plot.ly/v2/search
 #' api("search?q=overdose")
-#' 
 #' api("search?q=plottype:pie trump fake")
 #' 
-#' # some user specific info
+#' # these examples will require a user account
 #' usr <- Sys.getenv("plotly_username", NA)
 #' if (!is.na(usr)) {
-#'   # account info https://api.plot.ly/v2/#users
+#'   # your account info https://api.plot.ly/v2/#users
 #'   api(sprintf("users/%s", usr))
-#'   # list your folders/files https://api.plot.ly/v2/folders#user
+#'   # your folders/files https://api.plot.ly/v2/folders#user
 #'   api(sprintf("folders/home?user=%s", usr))
 #' }
 #' 
 #' # Retrieve a specific file https://api.plot.ly/v2/files#retrieve
 #' api("files/cpsievert:14681")
+#' # change the filename https://api.plot.ly/v2/files#update
+#' api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
 #' # Copy a file https://api.plot.ly/v2/files#lookup
 #' api("files/cpsievert:14681/copy", "POST")
 #' # Create a folder https://api.plot.ly/v2/folders#create
@@ -103,7 +108,11 @@
 #' @export
 api_create <- function(x = last_plot(), filename = NULL,
                        sharing = c("public", "private", "secret"), ...) {
-  UseMethod("api_create")
+  dots <- list(...)
+  if (!is.null(dots[["fileopt"]])) {
+    warning("The fileopt argument is no longer supported", call. = FALSE)
+  }
+  UseMethod("api_create", x)
 }
 
 
@@ -118,7 +127,6 @@ api_create.ggplot <- api_create_plot
 #' @rdname api
 #' @export
 api_create.data.frame <- api_create_grid
-
 
 
 
@@ -150,17 +158,16 @@ api_download_file <- function(id, username, endpoint = "files", ...) {
   if (missing(id)) stop("Please provide a figure id number")
   if (missing(username)) username <- verify("username")
   fid <- paste(username, id, sep = ":")
-  api(file.path(endpoint, fid, ...))
+  prefix_class(
+    api(file.path(endpoint, fid, ...)), "api_file"
+  )
 }
-
-
 
 
 #' @rdname api
 #' @export
 api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
   api_check_endpoint(endpoint)
-  api_check_verb(verb)
   
   # construct the url
   url <- httr::modify_url(

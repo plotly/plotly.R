@@ -27,8 +27,8 @@
 #' @seealso \code{\link{plot_ly}()}, \code{\link{signup}()}
 plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret"), ...) {
-  .Deprecated("upload")
-  upload(x, filename = filename, sharing = sharing, ...)
+  .Deprecated("api_create")
+  api_create(x, filename = filename, sharing = sharing, fileopt = fileopt, ...)
 }
 
 #' Request a figure object
@@ -110,7 +110,7 @@ offline <- function(p, height, width, out_dir, open_browser) {
 #' @export
 
 as.widget <- function(x, ...) {
-  .Deprecated("plot_ly")
+  .Deprecated("as_widget")
   x
 }
 
