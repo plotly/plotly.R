@@ -5,7 +5,7 @@
 #' @export
 print.api <- function(x, ...) {
   cat("<Response from plot.ly>\n")
-  str(x)
+  utils::str(x)
   invisible(x)
 }
 

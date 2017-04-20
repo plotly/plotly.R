@@ -28,7 +28,7 @@ test_that("polygons with different hovertext must be different traces ", {
   expect_equal(info$data[[2]]$y, c(0, 0, 1, 1, 0))
   expect_equal(unique(sapply(info$data, "[[", "fill")), "toself")
   expect_equal(unique(sapply(info$data, "[[", "hoveron")), "fills")
-  expect_equal(sapply(info$data, "[[", "text"), format(c("lab: left", "lab: right")))
+  expect_equal(sapply(info$data, "[[", "text"), c("lab: left", "lab: right"))
 })
 
 test_that("polygons with identical fill and hovertext generate one trace", {
