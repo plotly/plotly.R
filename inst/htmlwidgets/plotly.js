@@ -46,7 +46,20 @@ HTMLWidgets.widget({
 
     var graphDiv = document.getElementById(el.id);
     
-    // inject a "control panel" holding selectize/dynamic color widget(s)
+    // TODO: move the control panel injection strategy inside here...
+    HTMLWidgets.addPostRenderHandler(function() {
+      
+      // lower the z-index of the modebar to prevent it from highjacking hover
+      // (TODO: do this via CSS?)
+      // https://github.com/ropensci/plotly/issues/956
+      // https://www.w3schools.com/jsref/prop_style_zindex.asp
+      var modebars = document.querySelectorAll(".js-plotly-plot .plotly .modebar");
+      for (var i = 0; i < modebars.length; i++) {
+        modebars[i].style.zIndex = 1;
+      }
+    });
+      
+      // inject a "control panel" holding selectize/dynamic color widget(s)
     if (x.selectize || x.highlight.dynamic && !instance.plotly) {
       var flex = document.createElement("div");
       flex.class = "plotly-crosstalk-control-panel";
