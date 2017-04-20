@@ -29,13 +29,11 @@
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param selected attributes of the selection, see \code{\link{attrs_selected}()}.
-#' @param filter when receiving events from other events from other widgets,
-#' should they be interpreted 
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
 #' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
-#' @seealso \code{\link{attrs_selected}()}, \code{\link{attrs_other}()}
+#' @seealso \code{\link{attrs_selected}()}
 #' @examples
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*

@@ -32,9 +32,11 @@ not appear in the Plotly feed, your profile, or search engines.
 If it is embedded inside a webpage or an IPython notebook, anybody who is 
 viewing that page will be able to view the graph. 
 You do not need to be logged in to view this plot.}
+
+\item{...}{not used}
 }
 \description{
-Deprecated: see \link{upload}.
+Deprecated: see \code{\link{api_create}()}.
 }
 \seealso{
 \code{\link{plot_ly}()}, \code{\link{signup}()}

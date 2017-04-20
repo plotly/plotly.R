@@ -12,5 +12,5 @@ get_figure(username, id)
 \item{id}{of the Plotly figure.}
 }
 \description{
-Deprecated: see \link{plots_get}.
+Deprecated: see \code{\link{api_download_plot}()}.
 }

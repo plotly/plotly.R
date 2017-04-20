@@ -1,6 +1,6 @@
 #' Create/Modify plotly graphs
 #'
-#' Deprecated: see \link{upload}.
+#' Deprecated: see \code{\link{api_create}()}.
 #'
 #' @param x either a ggplot object, a plotly object, or a list.
 #' @param filename character string describing the name of the plot in your 
@@ -23,6 +23,7 @@
 #' If it is embedded inside a webpage or an IPython notebook, anybody who is 
 #' viewing that page will be able to view the graph. 
 #' You do not need to be logged in to view this plot.
+#' @param ... not used
 #' @export
 #' @seealso \code{\link{plot_ly}()}, \code{\link{signup}()}
 plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
@@ -33,7 +34,7 @@ plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
 
 #' Request a figure object
 #' 
-#' Deprecated: see \link{plots_get}.
+#' Deprecated: see \code{\link{api_download_plot}()}.
 #' 
 #' @param username corresponding username for the figure.
 #' @param id of the Plotly figure.

@@ -41,9 +41,6 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 \item{selected}{attributes of the selection, see \code{\link{attrs_selected}()}.}
 
 \item{...}{currently not supported.}
-
-\item{filter}{when receiving events from other events from other widgets,
-should they be interpreted}
 }
 \description{
 This function sets a variety of options for brushing (i.e., highlighting)
@@ -88,7 +85,7 @@ highlight(
 \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
 }
 \seealso{
-\code{\link{attrs_selected}()}, \code{\link{attrs_other}()}
+\code{\link{attrs_selected}()}
 }
 \author{
 Carson Sievert
