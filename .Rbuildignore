@@ -11,3 +11,4 @@ inst/examples/flexdashboard
 Untitled*
 rsconnect/
 revdep/
+^LICENSE\.md$

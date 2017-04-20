@@ -6,8 +6,9 @@
 * Added the `highlight()` function for configuring selection modes/sequences/options.
 * Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
-* The new function `raster2uri()` makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
+* Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
 * Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
+* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
