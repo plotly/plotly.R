@@ -200,10 +200,10 @@ gg2list <- function(p, width = NULL, height = NULL,
     } else {
       stop(
         "No graphics device is currently open and no cairo or bitmap device is available.\n", 
-        "To ensure sizes are converted correctly, you have three options:",
-        "  (1) Open a graphics device (with the desired size) b4 using ggplotly()",
+        "A graphics device is required to convert sizes correctly. You have three options:",
+        "  (1) Open a graphics device (with the desired size)  using ggplotly()",
         "  (2) install.packages('Cairo')",
-        "  (3) compile R to use a bitmap device",
+        "  (3) compile R to use a bitmap device (png or jpeg)",
         call. = FALSE
       )
     }
