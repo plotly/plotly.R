@@ -1,10 +1,12 @@
 context("quantile")
 
-base <- ggplot(mpg, aes(displ, 1 / hwy)) + geom_point()
-
 test_that("Basic geom_quantile() works", {
   
-  l <- plotly_build(base + geom_quantile())$x
+  p <- ggplot(mpg, aes(displ, 1 / hwy)) + 
+    geom_point() +
+    geom_quantile()
+  
+  l <- plotly_build(p)$x
   
   expect_length(l$data, 4)
   
@@ -23,9 +25,11 @@ test_that("Can specify gpar() in geom_quantile()", {
   
   # TODO: implement lineend/linejoin/linemitre?
   
-  l <- plotly_build(
-    base + geom_quantile(colour = "red", alpha = 0.5)
-  )$x
+  p <- ggplot(mpg, aes(displ, 1 / hwy)) + 
+    geom_point() +
+    geom_quantile(colour = "red", alpha = 0.5)
+  
+  l <- plotly_build(p)$x
   
   expect_length(l$data, 4)
   
