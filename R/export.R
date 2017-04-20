@@ -92,7 +92,11 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
     # TODO: does this work cross-platform?
     selenium$client$navigate(paste0("file://", normalizePath(f)))
   } else {
-    stop("`selenium` must be an object of class 'rsClientServer'", call. = FALSE)
+    stop(
+      "Must provide an object of class 'rsClientServer' to the `selenium` ",
+      "argument to export this plot (see examples section on `help(export)`)",
+      call. = FALSE
+    )
   }
   message(
     sprintf("Success! Check your downloads folder for a file named: '%s'", file)

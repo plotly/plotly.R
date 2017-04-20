@@ -21,7 +21,10 @@ is.webgl <- function(p) {
 }
 
 glTypes <- function() {
-  c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords")
+  c(
+    "scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords",
+    "surface"
+  )
 }
 
 # just like ggplot2:::is.discrete()
