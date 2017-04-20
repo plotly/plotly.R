@@ -1,9 +1,12 @@
 api_create_plot <- function(x = last_plot(), filename = NULL,
                             sharing = c("public", "private", "secret"), ...) {
   
-  # this function only returns a file object when user refuses to overwrite it
+  # returns a file object *only* when user refuses to overwrite it
   file <- api_trash_filename(filename)
   if (is.file(file)) return(file)
+  
+  # retrieve the parent path, and ensure it exists
+  parent_path <- api_pave_path(filename)
   
   x <- plotly_build(x)[["x"]]
   
@@ -25,7 +28,8 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   
   bod <- compact(list(
     figure = compact(x[c("data", "layout", "frames")]),
-    filename = filename,
+    filename = if (!is.null(filename)) basename(filename),
+    parent_path = if (!is.null(parent_path)) parent_path,
     world_readable = identical(sharing, "public"),
     share_key_enabled = identical(sharing, "secret"),
     ...
@@ -38,15 +42,19 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
 api_create_grid <- function(x, filename = NULL,
                             sharing = c("public", "private", "secret"), ...) {
   
-  # this function only returns a file object when user refuses to overwrite it
+  # returns a file object *only* when user refuses to overwrite it
   file <- api_trash_filename(filename)
   if (is.file(file)) return(file)
+  
+  # retrieve the parent path, and ensure it exists
+  parent_path <- api_pave_path(filename)
   
   sharing <- match.arg(sharing)
   
   bod <- compact(list(
     data = df2grid(x),
-    filename = filename,
+    filename = if (!is.null(filename)) basename(filename),
+    parent_path = if (!is.null(parent_path)) parent_path,
     world_readable = identical(sharing, "public"),
     share_key_enabled = identical(sharing, "secret"),
     ...
@@ -60,6 +68,18 @@ api_create_grid <- function(x, filename = NULL,
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
+
+# returns the "parent" directory of the filename (and NULL if none exists)
+api_pave_path <- function(filename = NULL) {
+  parent <- dirname(filename %||% ".")
+  # no directory required
+  if (identical(parent, ".")) return(NULL)
+  # does this directory already exist?
+  file <- api_lookup_file(parent)
+  if (is.file(file)) return(parent)
+  fold <- api("folders", "POST", list(path = parent))
+  parent
+}
 
 api_trash_filename <- function(filename = NULL) {
   file <- api_lookup_file(filename)

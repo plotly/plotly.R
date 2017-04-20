@@ -1,9 +1,17 @@
 context("Filename")
 
-test_that("filepath with directories is returned as passed", {
+test_that("filename supports names with paths included ", {
   skip_on_cran()
   skip_on_pull_request()
   p <- plot_ly(mtcars, x = ~wt, y = ~vs)
-  f <- plotly_POST(p, filename = "directory/awesome")
-  expect_match(f$filename, "directory/awesome")
+  filename <- "directory/awesome"
+  # trash the file if it already exists
+  file <- api_lookup_file(filename)
+  if (is.file(file)) {
+    endpt <- sprintf("files/%s/trash", file$fid)
+    res <- api(endpt, "POST")
+  }
+  f <- plotly_POST(p, filename = filename)
+  expect_match(f$filename, "awesome")
+  expect_true(f$parented)
 })
