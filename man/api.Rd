@@ -33,9 +33,9 @@ api(endpoint = "/", verb = "GET", body = NULL, ...)
 Can be a plotly/ggplot2 object, a data frame, a list of options, or \code{NULL}.}
 
 \item{filename}{character string naming the file. If this string 
-references an already existing file, in an interactive session, 
-you will be given the option to overwrite it; otherwise 
-(in a non-interactive session), the file is automatically overwritten.}
+matches a file that already exists, you will be prompted with an option
+to overwrite it (if called non-interactively, the file will be 
+overwritten automatically, unless it is a folder).}
 
 \item{sharing}{If 'public', anyone can view this graph. It will appear in 
 your profile and can appear in search engines. You do not need to be
@@ -51,8 +51,9 @@ If it is embedded inside a webpage or an IPython notebook, anybody who is
 viewing that page will be able to view the graph. 
 You do not need to be logged in to view this plot.}
 
-\item{...}{arguments passed onto relevant methods. For \code{api()}, these 
-arguments are passed onto \code{\link[httr]{VERB}()}.}
+\item{...}{For \code{api()}, these arguments are passed onto 
+\code{\link[httr]{VERB}()}. For \code{api_create()}, these arguments are
+included in the body of the HTTP request.}
 
 \item{id}{a filename id.}
 
@@ -60,7 +61,7 @@ arguments are passed onto \code{\link[httr]{VERB}()}.}
 
 \item{endpoint}{the endpoint (i.e., location) for the request. 
 To see a list of all available endpoints, call \code{api()}.
-Any query parameters should be included here (see examples).}
+Any relevant query parameters should be included here (see examples).}
 
 \item{verb}{name of the HTTP verb to use (as in, \code{\link[httr]{VERB}()}).}
 
@@ -70,8 +71,10 @@ If this value is not already converted to JSON
 to ensure values are "automatically unboxed" (i.e., vec.}
 }
 \description{
-Convenience functions for working with version 2 of plotly's REST API. The 
-"lowest-level" function, \code{api()} may be used to
+Convenience functions for working with version 2 of plotly's REST API.
+Upload R objects to a plotly account via \code{api_create()} and download
+plotly objects via \code{api_download_plot()}/\code{api_download_grid()}.
+For anything else, use \code{api()}.
 }
 \examples{
 
@@ -122,10 +125,14 @@ if (!is.na(usr)) {
 
 # Retrieve a specific file https://api.plot.ly/v2/files#retrieve
 api("files/cpsievert:14681")
+
 # change the filename https://api.plot.ly/v2/files#update
+# (note: this won't work unless you have proper credentials to the relevant account)
 api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
+
 # Copy a file https://api.plot.ly/v2/files#lookup
 api("files/cpsievert:14681/copy", "POST")
+
 # Create a folder https://api.plot.ly/v2/folders#create
 api("folders", "POST", list(path = "/starts/at/root/and/ends/here"))
 
