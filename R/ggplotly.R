@@ -149,10 +149,10 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
-#' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
-#' Dynamic ticks are useful for updating ticks in response to zoom/pan
-#' interactions; however, they can not always reproduce labels as they 
-#' would appear in the static ggplot2 image.
+#' @param dynamicTicks accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
+#' Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
+#' interactions; however, there is no guarantee they reproduce axis tick text 
+#' as they would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
@@ -165,6 +165,17 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
+  # check the value of dynamicTicks
+  dynamicValues <- c(FALSE, TRUE, "x", "y")
+  if (length(setdiff(dynamicTicks, dynamicValues))) {
+   stop(
+     sprintf(
+       "`dynamicValues` accepts the following values: '%s'", 
+       paste(dynamicValues, collapse = "', '")
+     ), call. = FALSE
+    )
+  }
+  
   # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
   # there are too many naming changes in 2.2.1.9000 to realistically 
   if (packageVersion("ggplot2") == "2.2.1") {
@@ -172,7 +183,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
       "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
     )
-    if (dynamicTicks) {
+    if (!identical(dynamicTicks, FALSE)) {
       warning(
         "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
       )
@@ -588,8 +599,6 @@ gg2list <- function(p, width = NULL, height = NULL,
         tickmode = "array",
         range = rng[[paste0(xy, ".range")]],
         ticktext = rng[[paste0(xy, ".labels")]],
-        # TODO: implement minor grid lines with another axis object
-        # and _always_ hide ticks/text?
         tickvals = rng[[paste0(xy, ".major")]],
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
@@ -611,6 +620,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
       
+      # is this axis dynamic?
+      isDynamic <- isTRUE(dynamicTicks) || identical(dynamicTicks, xy)
+      
       # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
       if (any(c("date", "datetime") %in% sc$scale_name)) {
@@ -621,7 +633,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (i == 1) {
           traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
         }
-        if (dynamicTicks) axisObj$type <- "date"
+        if (isDynamic) axisObj$type <- "date"
       }
       
       # tickvals are currently on 0-1 scale, but we want them on data scale
@@ -629,9 +641,18 @@ gg2list <- function(p, width = NULL, height = NULL,
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
       
-      # clear out tickvals/ticktext if dynamic ticks are requested
-      if (dynamicTicks) {
-        axisObj[c("tickvals", "ticktext")] <- NULL
+      # auto tick/range if this axis is dynamic
+      if (isDynamic) {
+        if (!p$coordinates$is_linear()) {
+          warning(
+            "dynamicTicks is only supported for linear (i.e., cartesian) coordiates", 
+            call. = FALSE
+          )
+        }
+        axisObj$tickmode <- "auto"
+        axisObj$ticktext <- NULL
+        axisObj$autorange <- TRUE
+        axisObj$nticks <- length(axisObj$tickvals)
       }
       
       # attach axis object to the layout
