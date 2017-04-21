@@ -30,6 +30,7 @@
 * `embed_notebook()` now works in *nteract* notebooks (see #768). 
 * Axis categories are no longer reordered for matrices (see #863).
 * Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
+* Fix for hoverinfo displaying values after scale transformations. Fixes #804.
 * Font faces for axis titles are now translated in `ggplotly()`. Fixes #861.
 
 # 4.5.6
