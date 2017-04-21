@@ -283,6 +283,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     }, error = function(e) NULL
     )
   }, data, groupDomains)
+  
+  # Before mapping x/y position, save the domain (for discrete scales)
+  # to display in tooltip.
+  data <- lapply(data, function(d) {
+    dplyr::mutate(d, x_plotlyDomain = x, y_plotlyDomain = y)
+  })
 
   # Transform all scales
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
@@ -294,13 +300,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   layout$train_position(data, scale_x(), scale_y())
   
-  # Before mapping x/y position, save the domain (for discrete scales)
-  # to display in tooltip.
-  data <- lapply(data, function(d) {
-    if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
-    if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
-    d
-  })
   data <- layout$map_position(data)
   
   # build a mapping between group and key
