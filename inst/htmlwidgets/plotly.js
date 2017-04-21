@@ -140,8 +140,13 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
+    }
+    
+    // remove "sendDataToCloud", unless user has specified they want it
+    var config = x.config || {};
+    if (!config.cloud) {
+      x.config.modeBarButtonsToRemove = config.modeBarButtonsToRemove || [];
+      x.config.modeBarButtonsToRemove.push("sendDataToCloud");
     }
     
     // if no plot exists yet, create one with a particular configuration
