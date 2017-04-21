@@ -78,10 +78,11 @@ test_that("Can overwrite a file", {
   skip_on_cran()
   skip_if_not(!interactive())
   
-  m <- api_create(mtcars, "mtcars")
-  mfile <- api_lookup_file("mtcars")
-  m2 <- api_create(iris, "mtcars")
-  m2file <- api_lookup_file("mtcars")
+  id <- new_id()
+  m <- api_create(mtcars, id)
+  mfile <- api_lookup_file(id)
+  m2 <- api_create(iris, id)
+  m2file <- api_lookup_file(id)
   expect_false(identical(mfile$preview, m2file$preview))
 })
 
