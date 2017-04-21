@@ -1,7 +1,13 @@
 #' Highlight graphical elements in multiple linked views
 #' 
-#' For documentation and examples, see 
-#' \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+#' This function sets a variety of options for brushing (i.e., highlighting)
+#' plotly graphs. Use this function to set options (or populate widgets) 
+#' for a \emph{single} plot. When linking multiple plots, use 
+#' \code{\link{options}()} to set "global" options, where the option name 
+#' matches the relevant argument name. For instance, 
+#' to link multiple plots with \code{persistent} selection, set
+#' \code{options(persistent = TRUE)}. To see an example linking plotly to 
+#' leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
@@ -15,178 +21,143 @@
 #' @param color character string of color(s) to use for 
 #' highlighting selections. See \code{\link{toRGB}()} for valid color
 #' specifications. If \code{NULL} (the default), the color of selected marks
-#' are not altered (only their opacity).
+#' are not altered.
 #' @param selectize provide a selectize.js widget for selecting keys? Note that 
 #' the label used for this widget derives from the groupName of the SharedData object.
 #' @param defaultValues a vector of values for setting a "default selection".
 #' These values should match the key attribute.
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
-#' @param hoverinfo hoverinfo attributes for the selected traces. The default,
-#' \code{NULL}, means to inherit the hoverinfo attribute from the non-selected traces.
-#' @param showInLegend populate an additional legend entry for the selection?
+#' @param selected attributes of the selection, see \code{\link{attrs_selected}()}.
+#' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
+#' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+#' @seealso \code{\link{attrs_selected}()}
 #' @examples
 #' 
+#' # These examples are designed to show you how to highlight/brush a *single*
+#' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
 #' library(crosstalk)
 #' d <- SharedData$new(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
-#' ggplotly(p, tooltip = "city") %>%
-#'   highlight(on = "plotly_hover", color = "red")
-#'   
-#' # The group name is currently used to populate a title for the selectize widget
-#' sd <- SharedData$new(txhousing, ~city, "Choose a city")
-#' plot_ly(sd, x = ~date, y = ~median) %>%
-#'   group_by(city) %>%
-#'   add_lines(text = ~city, hoverinfo = "text") %>%
-#'   highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
+#' gg <- ggplotly(p, tooltip = "city") 
+#' highlight(gg, on = "plotly_click", persistent = TRUE, dynamic = TRUE)
+#' 
+#' # supply custom colors to the brush 
+#' cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
+#' highlight(gg, on = "plotly_click", color = cols, persistent = TRUE, dynamic = TRUE)
+#' 
+#' # Use attrs_selected() for complete control over the selection appearance
+#' # note any relevant colors you specify here should override the color argument
+#' s <- attrs_selected(
+#'   showlegend = TRUE,
+#'   mode = "lines+markers",
+#'   marker = list(symbol = "x")
+#' )
+#' 
+#' highlight(
+#'  layout(gg, showlegend = TRUE), 
+#'  on = "plotly_click", selected = s,
+#'  persistent = TRUE, dynamic = TRUE
+#' )
 #' 
 
 highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
                       persistent = FALSE, dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
-                      opacityDim = 0.2, hoverinfo = NULL, showInLegend = FALSE) {
-  p <- plotly_build(p)
-  keys <- unlist(lapply(p$x$data, "[[", "key"))
-  if (length(keys) == 0) {
-    warning("No 'key' attribute found. \n", 
-            "Linked interaction(s) aren't possible without a 'key' attribute.",
-            call. = FALSE)
+                      opacityDim = 0.2, selected = attrs_selected(), ...) {
+  
+  # currently ... is not-supported and will catch 
+  # some arguments we supported at one point 
+  dots <- list(...)
+  if (length(dots)) {
+    warning(
+      "The following arguments are not supported:\n",
+      toString(names(dots)), "\n",
+      "Arguments such as: hoverinfo and showInLegend \n",
+      "have been replaced by selected and other",
+      call. = FALSE
+    )
   }
+  
   if (opacityDim < 0 || 1 < opacityDim) {
     stop("opacityDim must be between 0 and 1", call. = FALSE)
   }
   if (dynamic && length(color) < 2) {
     message("Adding more colors to the selection color palette")
-    color <- c(color, c(RColorBrewer::brewer.pal(4, "Set1"), "transparent"))
+    color <- c(color, RColorBrewer::brewer.pal(4, "Set1"))
   }
-  if (!dynamic) {
-    if (length(color) > 1) {
-      warning(
-        "Can only use a single color for selections when dynamic=FALSE",
-        call. = FALSE
-      )
-      color <- color[1] 
-    }
-  }
-  p$x$highlight <- modify_list(
-    p$x$highlight,
-    list(
-      on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
-      off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
-      color = toRGB(color),
-      dynamic = dynamic,
-      persistent = persistent,
-      opacityDim = opacityDim,
-      hoverinfo = hoverinfo,
-      showInLegend = showInLegend
+  if (!dynamic && length(color) > 1) {
+    warning(
+      "Can only use a single color for selections when dynamic=FALSE",
+      call. = FALSE
     )
-  )
-  # set some default crosstalk selections, if appropriate
-  defaultValues <- defaultValues[defaultValues %in% keys]
-  if (length(defaultValues)) {
-    sets <- lapply(p$x$data, "[[", "set")
-    for (i in seq_along(sets)) {
-      valsInSet <- defaultValues[defaultValues %in% p$x$data[[i]][["key"]]]
-      if (!length(valsInSet)) next
-      p <- htmlwidgets::onRender(p, sprintf("
-        function(el, x) {
-          crosstalk.group('%s').var('selection').set(%s)
-        }", sets[i], jsonlite::toJSON(valsInSet, auto_unbox = FALSE)))
-    }
+    color <- color[1] 
   }
-  
+  # attach HTML dependencies (these libraries are used in the HTMLwidgets.renderValue() method)
   if (selectize) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
   }
-  
-  # if necessary, include one colourwidget and/or selectize dropdown
-  # per SharedData layer
-  sets <- unlist(lapply(p$x$data, "[[", "set"))
-  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  uniqueSets <- unique(sets)
-  for (i in uniqueSets) {
-    k <- unique(unlist(keys[names(keys) %in% i]))
-    if (is.null(k)) next
-    k <- k[!is.null(k)]
-    
-    id <- new_id()
-    
-    if (selectize) {
-      # have to attach this info to the plot JSON so we can initialize properly
-      p$x$selectize[[id]] <- list(
-        items = data.frame(value = k, label = k), group = i
-      )
-    }
-    
-    if (dynamic || selectize) {
-      
-      if (is.null(p$height)) {
-        warning(
-          "It's recommended you specify a height (in plot_ly or ggplotly)\n",
-          "when using selectize and/or dynamic", call. = FALSE
-        )
-      }
-      
-      panel <- htmltools::tags$div(
-        class = "plotly-crosstalk-control-panel",
-        style = "display: flex; flex-wrap: wrap",
-        if (dynamic) colour_widget(color, i, width = "85px", height = "60px"),
-        if (selectize) selectizeDIV(id, label = i)
-      )
-      
-      p <- htmlwidgets::prependContent(p, panel)
-      
-    }
-    
-    
+  if (dynamic) {
+    p$dependencies <- c(p$dependencies, list(colourPickerLib()))
   }
   
-  htmltools::browsable(p)
+  # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
+  p$x$highlight <- list(
+    # NULL may be used to disable on/off events
+    on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
+    off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
+    persistent = persistent,
+    dynamic = dynamic,
+    # TODO: convert to hex...see colourpicker:::formatHEX()
+    color = toRGB(color),
+    selectize = selectize,
+    defaultValues = defaultValues,
+    opacityDim = opacityDim,
+    selected = selected
+  )
+  
+  p
 }
+
+#' Specify attributes of selection traces
+#' 
+#' By default the name of the selection trace derives from the selected values.
+#' 
+#' 
+#' @param opacity a number between 0 and 1 specifying the overall opacity of
+#' the selected trace
+#' @param ... other trace attributes attached to the selection trace.
+#' @export
+#' @author Carson Sievert
+
+attrs_selected <- function(opacity = 1, ...) {
+  if (opacity < 0 || 1 < opacity) {
+    stop("opacity must be between 0 and 1", call. = FALSE)
+  }
+  
+  args <- list(
+    opacity = opacity
+  )
+  
+  # TODO: verify attr names... maybe that should happen in the build step?
+  dots <- list(...)
+  
+  
+  c(dots, args)
+}
+
+
+# ----------------------------------------------------------------------------
+# Utility functions
+# ----------------------------------------------------------------------------
 
 
 highlight_defaults <- function() {
-  formals(highlight)[-1]
-}
-
-
-# set argument relates to the "crosstalk group"
-colour_widget <- function(colors, set = new_id(), ...) {
-  
-  w <- colourpicker::colourWidget(
-    value = colors[1],
-    palette = "limited",
-    allowedCols = colors,
-    ...
-  )
-  
-  # inform crosstalk when the value of colour widget changes
-  htmlwidgets::onRender(w, sprintf("
-    function(el, x) {
-      var $el = $('#' + el.id);
-      var grp = crosstalk.group('%s').var('plotlySelectionColour')
-      grp.set($el.colourpicker('value'));
-      $el.on('change', function() {
-        crosstalk.group('%s').var('plotlySelectionColour').set($el.colourpicker('value'));
-      })
-    }", set, set))
-  
-}
-
-
-# Heavily inspired by https://github.com/rstudio/crosstalk/blob/209ac2a2c0cb1e6e23ccec6c1bc1ac7b6ba17ddb/R/controls.R#L105-L125
-selectizeDIV <- function(id, multiple = TRUE, label = NULL, width = "80%", height = "10%") {
-  htmltools::tags$div(
-    id = id, 
-    style = sprintf("width: %s; height: '%s'", width, height),
-    class = "form-group crosstalk-input-plotly-highlight",
-    htmltools::tags$label(class = "control-label", `for` = id, label),
-    htmltools::tags$div(
-      htmltools::tags$select(multiple = if (multiple) NA else NULL)
-    )
-  )
+  args <- formals(highlight)[-1]
+  # have to evaluate args now that some of them are functions...
+  compact(lapply(args, function(x) tryNULL(eval(x))))
 }
 
 selectizeLib <- function(bootstrap = TRUE) {
@@ -194,6 +165,14 @@ selectizeLib <- function(bootstrap = TRUE) {
     "selectize", "0.12.0", depPath("selectize"),
     stylesheet = if (bootstrap) "selectize.bootstrap3.css",
     script = "selectize.min.js"
+  )
+}
+
+colourPickerLib <- function() {
+  htmltools::htmlDependency(
+    "colourpicker", "1.1", depPath("colourpicker"),
+    stylesheet = "colourpicker.min.css",
+    script = "colourpicker.min.js"
   )
 }
 

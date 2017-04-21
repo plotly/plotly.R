@@ -16,12 +16,10 @@ test_that("requests made to retrieve a figure that doesn't exist returns a 404",
   }, ".*404.*")
 })
 
-test_that("requests made to retrieve some elses private file errors a 403", {
+test_that("requests made to retrieve some elses private file errors", {
   skip_on_cran()
   skip_on_pull_request()
-  expect_error({
-    get_figure("get_test_user", 1)
-  }, ".*403.*")
+  expect_error(get_figure("get_test_user", 1))
 })
 
 test_that("retrieving a public figure ... works.", {
@@ -48,7 +46,7 @@ test_that("posting a hidden plot returns a secret key", {
   skip_on_cran()
   skip_on_pull_request()
   res <- plotly_POST(plot_ly(), sharing = "secret")
-  key <- strsplit(res$url, "=")[[1]][2]
-  expect_true(nchar(key) > 1)
+  expect_true(res$share_key_enabled)
+  expect_true(nchar(res$share_key) > 1)
 })
 

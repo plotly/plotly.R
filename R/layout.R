@@ -46,6 +46,8 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' Add a range slider to the x-axis
 #'
 #' @param p plotly object.
+#' @param start a start date/value.
+#' @param end an end date/value.
 #' @param ... these arguments are documented here 
 #' \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}
 #' @export
@@ -55,11 +57,27 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' plot_ly(x = time(USAccDeaths), y = USAccDeaths) %>% 
 #'   add_lines() %>%
 #'   rangeslider()
+#'   
+#' d <- tibble::tibble(
+#'   time = seq(as.Date("2016-01-01"), as.Date("2016-08-31"), by = "days"),
+#'   y = rnorm(seq_along(time))
+#'  )
+#'  
+#' plot_ly(d, x = ~time, y = ~y) %>%
+#'   add_lines() %>%
+#'   rangeslider(d$time[5], d$time[50])
+#'   
 #' 
-rangeslider <- function(p, ...) {
+rangeslider <- function(p, start = NULL, end = NULL, ...) {
   if (sum(grepl("^xaxis", names(p$x$layout))) > 1) {
     stop("Can only add a rangeslider to a plot with one x-axis", call. = FALSE)
   }
+  
+  p$x$layout$xaxis$range <- c(
+    to_milliseconds(start),
+    to_milliseconds(end)
+  )
+  
   p$x$layout$xaxis$rangeslider <- list(visible = TRUE, ...)
   p
 }
@@ -94,21 +112,7 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
     p$x$config[["modeBarButtonsToAdd"]][nms %in% sharingButton()[["name"]]] <- NULL
   }
 
-  hasCloud <- !'sendDataToCloud' %in% p$x$config[["modeBarButtonsToRemove"]]
-  if (!cloud) {
-    p$x$config[["modeBarButtonsToRemove"]] <- c(
-      p$x$config[["modeBarButtonsToRemove"]], 'sendDataToCloud'
-    )
-  }
-  if (cloud) {
-    b <- p$x$config[["modeBarButtonsToRemove"]]
-    p$x$config[["modeBarButtonsToRemove"]] <- b[!b %in% 'sendDataToCloud']
-  }
-  
-  # ensure array
-  if (length(p$x$config[["modeBarButtonsToRemove"]]) == 1) {
-    p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
-  }
+  p$x$config$cloud <- cloud
 
   p
 }

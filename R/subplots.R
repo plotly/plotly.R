@@ -35,6 +35,16 @@
 #' p2 <- plot_ly(economics, x = ~date, y = ~unemploy)
 #' subplot(p1, p2, p1, p2, nrows = 2, margin = 0.05)
 #' 
+#' #'  # anchor multiple traces on the same legend entry
+#'  p1 <- add_lines(p1, color = I("black"), name = "1st", legendgroup = "1st")
+#'  p2 <- add_lines(p2, color = I("red"), name = "2nd", legendgroup = "2nd")
+#'  
+#'  subplot(
+#'    p1, style(p1, showlegend = FALSE),
+#'    p2, style(p2, showlegend = FALSE),
+#'    nrows = 2, margin = 0.05
+#'  )
+#' 
 #' # or pass a list
 #' economics_long %>%
 #'   split(.$variable) %>%
@@ -397,12 +407,11 @@ reposition <- function(obj, domains) {
 }
 
 
-retrain_color_defaults <- function(traces) {
-  colorDefaults <- traceColorDefaults()
+retrain_color_defaults <- function(traces, colorDefaults = traceColorDefaults()) {
   for (i in seq_along(traces)) {
     # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
     idx <- i %% length(colorDefaults)
-    if (idx == 0) idx <- 10
+    if (idx == 0) idx <- length(colorDefaults)
     newDefault <- colorDefaults[[idx]]
     for (j in c("marker", "line", "text")) {
       obj <- traces[[i]][[j]]

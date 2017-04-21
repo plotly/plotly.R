@@ -50,7 +50,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       # "automatically" generated group aes is not informative
       if (identical("group", unique(varName, aesName))) next
       # by default assume the values don't need any formatting
-      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
+      forMat <- function(x) format(x, justify = "none")
       sc <- p$scales$get_scales(aesName)
       if (isTRUE(aesName %in% c("x", "y"))) {
         # convert "milliseconds from the UNIX epoch" to a date/datetime
@@ -60,7 +60,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
         if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
       }
       # add a line break if hovertext already exists
-      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, "<br>")
+      if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
@@ -194,7 +194,7 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = data[["x"]] - data$violinwidth / 2, data[, idx]),
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
-  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, "<br>")
+  if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
   data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
@@ -214,6 +214,9 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSmooth <- function(data, prestats_data, layout, params, p, ...) {
+  if (nrow(data) == 0) {
+    return(prefix_class(data, "GeomBlank"))
+  }
   dat <- prefix_class(data, "GeomPath")
   # alpha for the path is always 1 (see GeomSmooth$draw_key)
   dat$alpha <- 1
@@ -318,9 +321,30 @@ to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
 }
 
 #' @export
+to_basic.GeomAnnotationMap <- function(data, prestats_data, layout, params, p, ...) {
+  # TODO: we could/should? reduce this data down to the panel limits, but 
+  # probably more effort than it's worth
+  d <- params$map
+  
+  # add hovertext
+  hasRegion <- isTRUE(p$tooltip %in% c("all", "region"))
+  hasSubRegion <- isTRUE(p$tooltip %in% c("all", "subregion"))
+  d$hovertext <- d$hovertext %||% paste0(
+    if (hasRegion) d$region, if (hasSubRegion) paste0(br(), d$subregion)
+  )
+  prefix_class(d, c("GeomPolygon", "GeomAnnotationMap"))
+}
+
+#' @export
 to_basic.GeomRaster <- function(data, prestats_data, layout, params, p, ...) {
   data <- prefix_class(data, "GeomTile")
   to_basic(data, prestats_data, layout, params)
+}
+
+#' @export
+to_basic.GeomRasterAnn <- function(data, prestats_data, layout, params, p, ...) {
+  # rasters are handled in ggplotly.R since they are layout specific
+  prefix_class(data, "GeomBlank")
 }
 
 #' @export
@@ -360,7 +384,7 @@ to_basic.GeomContour <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) {
   if ("hovertext" %in% names(data)) {
-    data$hovertext <- paste0(data$hovertext, "<br>")
+    data$hovertext <- paste0(data$hovertext, br())
   }
   data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
   if (!"fill" %in% names(data)) data$fill <- NA
@@ -376,31 +400,31 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
 to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
-  data$group <- interaction(
+  data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- data$yintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
 to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   # ugh, we can't trust the group here
-  data$group <- interaction(
+  data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data[["x"]] <- data$xintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomVline", "GeomPath"))
 }
 
 #' @export
@@ -431,8 +455,23 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) 
 
 #' @export
 to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) {
-  data$width <- 0
-  prefix_class(data, "GeomErrorbar")
+  
+  if (!is.null(data[["y"]])) {
+    data$width <- 0
+    return(prefix_class(data, "GeomErrorbar"))
+  }
+  
+  # reshape data so that x/y reflect path data
+  data$group <- seq_len(nrow(data))
+  data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
+  data <- data[order(data$group), ]
+  # fix the hovertext (by removing the "irrelevant" aesthetic)
+  recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
+  data$hovertext <- Map(function(x, y) { 
+    paste(x[!grepl(y, x)], collapse = br())
+  }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
+  
+  prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -457,6 +496,102 @@ to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   }
   prefix_class(data, "GeomPoint")
+}
+
+#' @export
+to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
+  # if radius/angle are a constant, still add them to the hovertext
+  # NOTE: it'd be more accurate, but more complicated, to use the aes mapping
+  for (var in c("radius", "angle")) {
+    if (length(unique(data[[var]])) != 1) next
+    data[["hovertext"]] <- paste0(
+      data[["hovertext"]], br(), var, ": ", data[[var]]
+    )
+  }
+  prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
+}
+
+#' @export
+to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
+  # from GeomCrossbar$draw_panel()
+  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  list(
+    prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
+    prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
+  )
+}
+utils::globalVariables(c("xmin", "xmax", "y", "size"))
+
+#' @export
+to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
+  # allow the tick length to vary across panels
+  layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
+  layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
+  data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
+  
+  # see GeomRug$draw_panel()
+  rugs <- list()
+  sides <- params$sides
+  others <- data[!names(data) %in% c("x", "y")]
+  if (!is.null(data[["x"]])) {
+    if (grepl("b", sides)) {
+      rugs$b <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_min, 
+          yend = y_min + tickval_y,
+          others
+        )
+      )
+    }
+    if (grepl("t", sides)) {
+      rugs$t <- with(
+        data, data.frame(
+          x = x, 
+          xend = x,
+          y = y_max - tickval_y, 
+          yend = y_max,
+          others
+        )
+      )
+    }
+  }
+  if (!is.null(data[["y"]])) {
+    if (grepl("l", sides)) {
+      rugs$l <- with(
+        data, data.frame(
+          x = x_min, 
+          xend = x_min + tickval_x,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+    if (grepl("r", sides)) {
+      rugs$r <- with(
+        data, data.frame(
+          x = x_max - tickval_x, 
+          xend = x_max,
+          y = y, 
+          yend = y,
+          others
+        )
+      )
+    }
+  }
+  
+  lapply(rugs, function(d) {
+    prefix_class(to_basic.GeomSegment(d), "GeomRug")
+  })
+}
+
+#' @export
+to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
+  dat <- split(data, data$quantile)
+  dat <- lapply(dat, prefix_class, y = "GeomPath")
+  dat
 }
 
 #' @export
@@ -603,11 +738,9 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     ),
     hoveron = hover_on(data)
   )
-  if (inherits(data, "GeomSmooth")) {
-    L$hoverinfo <- "x+y"
-  }
+  if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
+  if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
-  
 }
 
 #' @export
@@ -726,8 +859,10 @@ geom2trace.default <- function(data, params, p) {
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
 split_on <- function(dat) {
-  geom <- class(dat)[1]
   lookup <- list(
+    GeomHline = c("linetype", "colour", "size"),
+    GeomVline = c("linetype", "colour", "size"),
+    GeomAbline = c("linetype", "colour", "size"),
     GeomPath = c("fill", "colour", "size"),
     GeomPolygon = c("fill", "colour", "size"),
     GeomBar = "fill",
@@ -736,11 +871,17 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
-  # split on the domain to ensure sensible trace ordering
+  # try to split on the domain (for sensible trace ordering)
   for (i in names(lookup)) {
-    lookup[[i]] <- paste0(lookup[[i]], "_plotlyDomain")
+    domainName <- paste0(lookup[[i]], "_plotlyDomain")
+    idx <- domainName %in% names(dat)
+    lookup[[i]][idx] <- domainName[idx]
   }
-  splits <- lookup[[geom]]
+  # search all the classes for relevant splits (moving from specific->generic) 
+  splits <- NULL
+  for (i in class(dat)) {
+    splits <- splits %||% lookup[[i]]
+  }
   # if hovering on fill, we need to split on hovertext
   if (identical(hover_on(dat), "fills")) {
     splits <- c(splits, "hovertext")
@@ -758,7 +899,7 @@ split_on <- function(dat) {
 
 # given a geom, are we hovering over points or fill?
 hover_on <- function(data) {
-  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic")) ||
+  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap")) ||
       # is this a "basic" polygon?
       identical("GeomPolygon", grep("^Geom", class(data), value = T))) {
     "fills"

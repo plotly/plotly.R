@@ -8,7 +8,7 @@ p <- ggplot(test, aes(time, x)) + geom_point()
 
 test_that("datetimes are displayed in tooltip properly", {
   l <- save_outputs(p, "tooltip-datetime")
-  txt <- strsplit(l$data[[1]]$text, "<br>")
+  txt <- strsplit(l$data[[1]]$text, br())
   expect_identical(
     paste0("time: ", test$time), sapply(txt, "[[", 1)
   )
@@ -22,7 +22,7 @@ p <- ggplot(test, aes(time, x)) + geom_point()
 
 test_that("dates are displayed in tooltip properly", {
   l <- save_outputs(p, "tooltip-date")
-  txt <- strsplit(l$data[[1]]$text, "<br>")
+  txt <- strsplit(l$data[[1]]$text, br())
   expect_identical(
     paste0("time: ", test$time), sapply(txt, "[[", 1)
   )
@@ -32,7 +32,7 @@ test_that("tooltip argument respects ordering", {
   p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
   p <- ggplotly(p, tooltip = c("density", "x"))
   info <- plotly_build(p)$x
-  txt <- strsplit(info$data[[1]]$text, "<br>")
+  txt <- strsplit(info$data[[1]]$text, br())
   expect_true(all(grepl("^density", sapply(txt, "[[", 1))))
   expect_true(all(grepl("^mpg", sapply(txt, "[[", 2))))
 })

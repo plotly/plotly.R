@@ -130,12 +130,10 @@ hide_colorbar <- function(p) {
 #' hide_legend(p)
 
 hide_legend <- function(p) {
-  p <- plotly_build(p)
-  # annotations have to be an array of objects, so this should be a list of lists
-  ann <- p$x$layout$annotations
-  is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
-  p$x$layout$annotations <- ann[!is_title]
-  p$x$layout$showlegend <- FALSE
+  if (ggplot2::is.ggplot(p)) {
+    p <- plotly_build(p)
+  }
+  p$x$.hideLegend <- TRUE
   p
 }
 
@@ -174,21 +172,46 @@ plotly_empty <- function(...) {
   layout(plot_ly(...), xaxis = eaxis, yaxis = eaxis)
 }
 
-#' #' Convenience function for running examples 
-#' #' 
-#' #' @ex 
+
+#' Convert a raster object to a data URI
 #' 
-#' run_example <- function(ex = "plotlyEvents") {
-#'   ex_dir <- system.file("examples", package = "plotly")
-#'   rmd_files <- dir(ex_dir, "\\.Rmd$", recursive = TRUE)
-#'   r_files <- dir(ex_dir, "\\.R$", recursive = TRUE)
-#'   #ex <- match.arg(ex, unique(dirname(c(rmd_files, r_files))))
-#'   if (ex %in% dirname(rmd_files)) {
-#'     dirName <- filepath(ex_dir, ex)
-#'     owd <- setwd(dirName)
-#'     on.exit(setwd(owd))
-#'     rmarkdown::render(dirName)
-#'     return(invisible())
-#'   }
-#'   
-#' }
+#' Convenient embedding images via \code{\link{layout}()}
+#' \href{images}{https://plot.ly/r/reference/#layout-images}.
+#' 
+#' @param r an object coercable to a raster object via \code{\link{as.raster}()}
+#' @param ... arguments passed onto \code{\link{as.raster}()}.
+#' @author Carson Sievert
+#' @export
+#' @examples
+#' 
+#' # a red gradient (from ?as.raster)
+#' r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+#' plot(r)
+#' 
+#' # embed the raster as an image
+#' plot_ly(x = 1, y = 1) %>% 
+#'   layout(
+#'     images = list(list(
+#'      source = raster2uri(r),
+#'      xref = "paper", 
+#'      yref = "paper", 
+#'      x = 0, y = 0, 
+#'      sizex = 0.5, sizey = 0.5, 
+#'      xanchor = "left", yanchor = "bottom"
+#'   ))
+#'  ) 
+
+raster2uri <- function(r, ...) {
+  try_library("png", "raster2uri")
+  # should be 4 x n matrix
+  r <- grDevices::as.raster(r, ...)
+  rgbs <- col2rgb(c(r), alpha = T) / 255
+  nr <- dim(r)[1]
+  nc <- dim(r)[2]
+  reds <- matrix(rgbs[1, ], nrow = nr, ncol = nc, byrow = TRUE)
+  greens <- matrix(rgbs[2, ], nrow = nr, ncol = nc, byrow = TRUE)
+  blues <- matrix(rgbs[3, ], nrow = nr, ncol = nc, byrow = TRUE)
+  alphas <- matrix(rgbs[4, ], nrow = nr, ncol = nc, byrow = TRUE)
+  png <- array(c(reds, greens, blues, alphas), dim = c(dim(r), 4))
+  base64enc::dataURI(png::writePNG(png), mime = "image/png")
+}

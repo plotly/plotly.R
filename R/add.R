@@ -605,7 +605,8 @@ add_fun <- function(p, fun, ...) {
 #' 
 #' @param p a plotly object
 #' @param text annotation text (required).
-#' @param ... these arguments are documented at \url{https://plot.ly/r/reference/#layout-annotations}
+#' @param ... these arguments are documented at 
+#' \url{https://github.com/plotly/plotly.js/blob/master/src/components/annotations/attributes.js}
 #' @param data a data frame.
 #' @param inherit inherit attributes from \code{\link{plot_ly}()}?
 #' @author Carson Sievert

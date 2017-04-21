@@ -165,12 +165,32 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") == "2.2.1") {
+    warning(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (dynamicTicks) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
+  }
+  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
   # It is undesirable to both open a *screen* device and leave a new device
   # open, so if required, we open a non-screen device now, and close on exit 
   # see https://github.com/att/rcloud.htmlwidgets/issues/2
-  if (is.null(grDevices::dev.list())) {
+  if (is.null(grDevices::dev.list()) || identical(Sys.getenv("RSTUDIO"), "1")) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
     } else if (capabilities("png")) {
@@ -180,10 +200,10 @@ gg2list <- function(p, width = NULL, height = NULL,
     } else {
       stop(
         "No graphics device is currently open and no cairo or bitmap device is available.\n", 
-        "To ensure sizes are converted correctly, you have three options:",
-        "  (1) Open a graphics device (with the desired size) b4 using ggplotly()",
+        "A graphics device is required to convert sizes correctly. You have three options:",
+        "  (1) Open a graphics device (with the desired size)  using ggplotly()",
         "  (2) install.packages('Cairo')",
-        "  (3) compile R to use a bitmap device",
+        "  (3) compile R to use a bitmap device (png or jpeg)",
         call. = FALSE
       )
     }
@@ -235,8 +255,9 @@ gg2list <- function(p, width = NULL, height = NULL,
   # later on, for more complicated geoms (w/ non-trivial summary statistics),
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
-    if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
-      x[["mapping"]] <- c(x[["mapping"]], key = as.symbol(crosstalk_key()))
+    if (crosstalk_key() %in% names(y) && !"key" %in% names(x[["mapping"]]) && 
+        inherits(x[["stat"]], "StatIdentity")) {
+      x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x
   }, layers, layer_data)
@@ -262,6 +283,14 @@ gg2list <- function(p, width = NULL, height = NULL,
     }, error = function(e) NULL
     )
   }, data, groupDomains)
+  
+  # Before mapping x/y position, save the domain (for discrete scales)
+  # to display in tooltip.
+  data <- lapply(data, function(d) {
+    d[["x_plotlyDomain"]] <- d[["x"]]
+    d[["y_plotlyDomain"]] <- d[["y"]]
+    d
+  })
 
   # Transform all scales
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
@@ -273,13 +302,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   layout$train_position(data, scale_x(), scale_y())
   
-  # Before mapping x/y position, save the domain (for discrete scales)
-  # to display in tooltip.
-  data <- lapply(data, function(d) {
-    if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
-    if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
-    d
-  })
   data <- layout$map_position(data)
   
   # build a mapping between group and key
@@ -463,6 +485,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   data <- Map(function(x, y) structure(x, set = y), data, sets)
   traces <- layers2traces(data, prestats_data, layout, plot)
   
+  gglayout <- layers2layout(gglayout, layers, layout$layout)
+  
   # default to just the text in hover info, mainly because of this
   # https://github.com/plotly/plotly.js/issues/320
   traces <- lapply(traces, function(tr) {
@@ -637,18 +661,23 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = axisTitleText,
+        title = faced(axisTitleText, axisTitle$face),
         titlefont = text2font(axisTitle)
       )
-      # convert dates to milliseconds (86400000 = 24 * 60 * 60 * 1000)
-      # this way both dates/datetimes are on same scale
+      
+      # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (identical("date", sc$scale_name)) {
-        axisObj$range <- axisObj$range * 86400000
+      if (any(c("date", "datetime") %in% sc$scale_name)) {
+        # convert days (date) / seconds (datetime) to milliseconds
+        # (86400000 = 24 * 60 * 60 * 1000)
+        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
+        axisObj$range <- axisObj$range * constant
         if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * 86400000; z })
+          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
         }
+        if (dynamicTicks) axisObj$type <- "date"
       }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
@@ -727,7 +756,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       col_txt <- paste(
         plot$facet$params$labeller(
           lay[names(plot$facet$params[[col_vars]])]
-        ), collapse = "<br>"
+        ), collapse = br()
       )
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
@@ -744,7 +773,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       row_txt <- paste(
         plot$facet$params$labeller(
           lay[names(plot$facet$params$rows)]
-        ), collapse = "<br>"
+        ), collapse = br()
       )
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$COL != nCols) row_txt <- ""
@@ -830,7 +859,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
     if (isTRUE(gglayout$showlegend)) {
       legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = "<br>")
+      legendTitle <- paste(legendTitles, collapse = br())
       titleAnnotation <- make_label(
         legendTitle,
         x = gglayout$legend$x %||% 1.02,
@@ -917,15 +946,15 @@ gg2list <- function(p, width = NULL, height = NULL,
     mergedTraces <- vector("list", nhashes)
     for (i in unique(hashes)) {
       idx <- which(hashes %in% i)
-      if (all(modes[idx] %in% c("lines", "markers", "text"))) {
-        mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
-        mergedTraces[[i]]$mode <- paste(
-          unique(vapply(traces[idx], function(x) x$mode %||% "", character(1))), 
-          collapse = "+"
-        )
-        if (any(sapply(traces[idx], "[[", "showlegend"))) {
-          mergedTraces[[i]]$showlegend <- TRUE
-        }
+      mergedTraces[[i]] <- Reduce(modify_list, traces[idx])
+      mergedTraces[[i]]$mode <- paste(
+        unique(unlist(lapply(traces[idx], "[[", "mode"))), 
+        collapse = "+"
+      )
+      # show one, show all
+      show <- vapply(traces[idx], function(tr) tr$showlegend %||% TRUE, logical(1))
+      if (any(show)) {
+        mergedTraces[[i]]$showlegend <- TRUE
       }
     }
     traces <- mergedTraces
@@ -964,7 +993,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       lapply(mappings, lazyeval::f_new)
     } else {
       nms <- names(mappings)
-      setNames(lapply(nms, function(x) lazyeval::f_new(as.symbol(x))), nms)
+      setNames(lapply(nms, function(x) lazyeval::f_new(as.name(x))), nms)
     }
   })
   

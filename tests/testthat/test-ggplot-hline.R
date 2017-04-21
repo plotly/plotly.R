@@ -46,3 +46,32 @@ test_that("hline can be drawn over range of factors", {
   L <- save_outputs(gg, "hline-factor")
   expect_equal(length(L$data), 2)  # 1 trace for bar chart, 1 trace for hline
 })
+
+
+test_that("hline/vline/abline split on linetype/colour/size", {
+  d <- tibble::tibble(
+    x = seq(0, 3.5, by = 0.5), 
+    y = x * 0.95
+  )
+  gg <- ggplot(d, aes(x, y)) +
+    geom_vline(xintercept = c(2.5, 3, 3.5), linetype = 1:3) +
+    geom_hline(yintercept = c(2.5, 3, 3.5), size = 1:3) +
+    geom_abline(slope = -1, intercept = c(2.5, 3, 3.5), colour = 1:3)
+  
+  l <- plotly_build(gg)$x
+  expect_length(l$data, 9)
+  
+  expect_equal(
+    vapply(l$data, function(x) x$line$dash, character(1)), 
+    lty2dash(c(1:3, rep(1, 6)))
+  )
+  
+  expect_equal(
+    unique(vapply(l$data, function(x) x$line$color, character(1))),
+    c("rgba(0,0,0,1)", "rgba(255,0,0,1)", "rgba(0,205,0,1)")
+  )
+  
+  expect_length(
+    unique(vapply(l$data, function(x) x$line$width, numeric(1))), 4
+  )
+})

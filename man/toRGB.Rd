@@ -17,3 +17,22 @@ hexadecimal colour value (if is.na(x), return "transparent" for compatibility wi
 \description{
 Convert R colours to RGBA hexadecimal colour values
 }
+\examples{
+
+toRGB("steelblue") 
+# [1] "rgba(70,130,180,1)"
+
+m <- list(
+  color = toRGB("red"),
+  line = list(
+    color = toRGB("black"), 
+    width = 19
+  )
+)
+
+plot_ly(x = 1, y = 1, marker = m)
+
+}
+\seealso{
+\code{\link{showRGB}()}
+}
