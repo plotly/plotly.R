@@ -592,14 +592,26 @@ gg2list <- function(p, width = NULL, height = NULL,
       # get axis title
       axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
       if (is_blank(axisTitle)) axisTitleText <- ""
-      # https://plot.ly/r/reference/#layout-xaxis
+      
+      # is this axis dynamic?
+      isDynamic <- isTRUE(dynamicTicks) || identical(dynamicTicks, xy)
+      if (isDynamic && !p$coordinates$is_linear()) {
+        warning(
+          "`dynamicTicks` is only supported for linear (i.e., cartesian) coordinates", 
+          call. = FALSE
+        )
+      }
+      isDiscrete <- identical(sc$scale_name, "position_d")
+      
       axisObj <- list(
         type = "linear",
-        autorange = FALSE,
-        tickmode = "array",
+        autorange = isDynamic,
+        # no need to autotick for a discrete axis
+        tickmode = if (isDynamic && !isDiscrete) "auto" else "array",
         range = rng[[paste0(xy, ".range")]],
         ticktext = rng[[paste0(xy, ".labels")]],
         tickvals = rng[[paste0(xy, ".major")]],
+        nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
@@ -620,9 +632,6 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
       
-      # is this axis dynamic?
-      isDynamic <- isTRUE(dynamicTicks) || identical(dynamicTicks, xy)
-      
       # ensure dates/datetimes are put on the same millisecond scale
       # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
       if (any(c("date", "datetime") %in% sc$scale_name)) {
@@ -640,20 +649,6 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
-      
-      # auto tick/range if this axis is dynamic
-      if (isDynamic) {
-        if (!p$coordinates$is_linear()) {
-          warning(
-            "dynamicTicks is only supported for linear (i.e., cartesian) coordiates", 
-            call. = FALSE
-          )
-        }
-        axisObj$tickmode <- "auto"
-        axisObj$ticktext <- NULL
-        axisObj$autorange <- TRUE
-        axisObj$nticks <- length(axisObj$tickvals)
-      }
       
       # attach axis object to the layout
       gglayout[[axisName]] <- axisObj
