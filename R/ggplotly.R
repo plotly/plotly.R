@@ -602,16 +602,23 @@ gg2list <- function(p, width = NULL, height = NULL,
           call. = FALSE
         )
       }
+      # determine axis types (note: scale_name may go away someday)
+      # https://github.com/hadley/ggplot2/issues/1312
+      isDate <- isTRUE(sc$scale_name %in% c("date", "datetime"))
+      isDateType <- isDynamic && isDate
       isDiscrete <- identical(sc$scale_name, "position_d")
+      isDiscreteType <- isDynamic && isDiscrete
       
       axisObj <- list(
-        type = "linear",
+        # TODO: log type?
+        type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
-        # no need to autotick for a discrete axis
-        tickmode = if (isDynamic && !isDiscrete) "auto" else "array",
         range = rng[[paste0(xy, ".range")]],
+        tickmode = if (isDynamic) "auto" else "array",
         ticktext = rng[[paste0(xy, ".labels")]],
         tickvals = rng[[paste0(xy, ".major")]],
+        categoryorder = "array",
+        categoryarray = rng[[paste0(xy, ".labels")]],
         nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
@@ -634,8 +641,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       
       # ensure dates/datetimes are put on the same millisecond scale
-      # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (any(c("date", "datetime") %in% sc$scale_name)) {
+      # (necessary regardless of whether axis is dynamic)
+      # TODO: inverse transform to the original dates?!
+      # https://github.com/plotly/plotly.js/issues/420
+      if (isDate) {
         # convert days (date) / seconds (datetime) to milliseconds
         # (86400000 = 24 * 60 * 60 * 1000)
         constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
@@ -643,13 +652,21 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (i == 1) {
           traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
         }
-        if (isDynamic) axisObj$type <- "date"
       }
       
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
+      
+      # inverse transform categorical data based on tickvals/ticktext
+      if (isDiscreteType) {
+        tickMap <- with(axisObj, setNames(ticktext, tickvals))
+        traces <- lapply(traces, function(tr) { 
+          tr[[xy]] <- tickMap[[as.character(tr[[xy]])]]
+          tr
+        })
+      }
       
       # attach axis object to the layout
       gglayout[[axisName]] <- axisObj
