@@ -1,6 +1,10 @@
 context("quantile")
 
+
+
 test_that("Basic geom_quantile() works", {
+  
+  skip_if_not_installed("quantreg")
   
   p <- ggplot(mpg, aes(displ, 1 / hwy)) + 
     geom_point() +
@@ -22,6 +26,8 @@ test_that("Basic geom_quantile() works", {
 })
 
 test_that("Can specify gpar() in geom_quantile()", {
+  
+  skip_if_not_installed("quantreg")
   
   # TODO: implement lineend/linejoin/linemitre?
   
