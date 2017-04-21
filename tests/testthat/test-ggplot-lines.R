@@ -80,12 +80,16 @@ test_that("Translates both dates and datetimes (with dynamic ticks) correctly", 
   expect_equal(grDevices::extendrange(milliseconds), l2$layout$xaxis$range)
   
   # since these are dynamic ticks, let plotly.js generate the ticks
-  expect_null(l$layout$xaxis$ticktext)
-  expect_null(l$layout$xaxis$tickvals)
-  expect_null(l2$layout$xaxis$ticktext)
-  expect_null(l2$layout$xaxis$tickvals)
-  expect_equal(l$layout$xaxis$type, "date")
-  expect_equal(l2$layout$xaxis$type, "date")
+  axisType <- with(l$layout$xaxis, list(type, tickmode, autorange))
+  expect_equal(axisType, list("date", "auto", TRUE))
+  axisType2 <- with(l2$layout$xaxis, list(type, tickmode, autorange))
+  expect_equal(axisType2, list("date", "auto", TRUE))
+  
+  # check the hovertext
+  dates1 <- sapply(strsplit(l$data[[1]]$text, br()), "[[", 1)
+  dates2 <- sapply(strsplit(l2$data[[1]]$text, br()), "[[", 1)
+  expect_equal(paste("date:", d$date), dates1)
+  expect_equal(paste("date:", d2$date), dates2)
 })
 
 test_that("geom_linerange() without a y aesthetic translates to a path", {

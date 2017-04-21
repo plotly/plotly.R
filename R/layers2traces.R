@@ -44,25 +44,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
       varName <- y[[i]]
       # "automatically" generated group aes is not informative
       if (identical("group", unique(varName, aesName))) next
-      # by default assume the values don't need any formatting
-      forMat <- function(x) format(x, justify = "none")
-      sc <- p$scales$get_scales(aesName)
-      if (isTRUE(aesName %in% c("x", "y"))) {
-        # convert "milliseconds from the UNIX epoch" to a date/datetime
-        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% sc$scale_name) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01", tz = sc$timezone)
-        # convert "days from the UNIX epoch" to a date/datetime
-        if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
-      }
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
-      suffix <- tryCatch(
-        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
-        error = function(e) ""
-      )
+      txt <- x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]
+      suffix <- tryNULL(format(txt, justify = "none")) %||% ""
       # put the height of the bar in the tooltip
       if (inherits(x, "GeomBar") && identical(aesName, "y")) {
         suffix <- format(x[["ymax"]] - x[["ymin"]])
