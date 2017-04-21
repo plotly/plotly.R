@@ -112,21 +112,7 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
     p$x$config[["modeBarButtonsToAdd"]][nms %in% sharingButton()[["name"]]] <- NULL
   }
 
-  hasCloud <- !'sendDataToCloud' %in% p$x$config[["modeBarButtonsToRemove"]]
-  if (!cloud) {
-    p$x$config[["modeBarButtonsToRemove"]] <- c(
-      p$x$config[["modeBarButtonsToRemove"]], 'sendDataToCloud'
-    )
-  }
-  if (cloud) {
-    b <- p$x$config[["modeBarButtonsToRemove"]]
-    p$x$config[["modeBarButtonsToRemove"]] <- b[!b %in% 'sendDataToCloud']
-  }
-  
-  # ensure array
-  if (length(p$x$config[["modeBarButtonsToRemove"]]) == 1) {
-    p$x$config[["modeBarButtonsToRemove"]] <- list(p$x$config[["modeBarButtonsToRemove"]])
-  }
+  p$x$config$cloud <- cloud
 
   p
 }
