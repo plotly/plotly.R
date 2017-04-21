@@ -287,7 +287,9 @@ gg2list <- function(p, width = NULL, height = NULL,
   # Before mapping x/y position, save the domain (for discrete scales)
   # to display in tooltip.
   data <- lapply(data, function(d) {
-    dplyr::mutate(d, x_plotlyDomain = x, y_plotlyDomain = y)
+    d[["x_plotlyDomain"]] <- d[["x"]]
+    d[["y_plotlyDomain"]] <- d[["y"]]
+    d
   })
 
   # Transform all scales
