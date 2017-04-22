@@ -640,32 +640,37 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
       
-      # ensure dates/datetimes are put on the same millisecond scale
-      # (necessary regardless of whether axis is dynamic)
-      # TODO: inverse transform to the original dates?!
-      # https://github.com/plotly/plotly.js/issues/420
-      if (isDate) {
-        # convert days (date) / seconds (datetime) to milliseconds
-        # (86400000 = 24 * 60 * 60 * 1000)
-        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
-        axisObj$range <- axisObj$range * constant
-        if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
-        }
-      }
-      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
       
-      # inverse transform categorical data based on tickvals/ticktext
-      if (isDiscreteType) {
-        tickMap <- with(axisObj, setNames(ticktext, tickvals))
-        traces <- lapply(traces, function(tr) { 
-          tr[[xy]] <- tickMap[[as.character(tr[[xy]])]]
+      # inverse transform date data based on tickvals/ticktext
+      if (isDateType) {
+        as_date <- function(x) as.POSIXct(x, origin="1970-01-01", tz=sc$timezone)
+        axisObj$range <- as_date(axisObj$range)
+        traces <- lapply(traces, function(tr) {
+          tr[[xy]] <- as_date(tr[[xy]])
+          # TODO: are there other similar cases we need to handle?
+          if (identical("bar", tr$type)) {
+            tr[["width"]] <- as_date(tr[["width"]])
+            tr[["base"]] <- as_date(tr[["base"]])
+          }
           tr
         })
+      }
+      
+      # inverse transform categorical data based on tickvals/ticktext
+      if (isDiscreteType) {
+        traces <- lapply(traces, function(tr) { 
+          # map x/y trace data back to the 'closest' ticktext label
+          # http://r.789695.n4.nabble.com/check-for-nearest-value-in-a-vector-td4369339.html
+          tr[[xy]]<- vapply(tr[[xy]], function(val) {
+            with(axisObj, ticktext[[which.min(abs(tickvals - val))]])
+          }, character(1))
+          tr
+        })
+        if ("dodge" %in% sapply(layers, ggtype, "position")) gglayout$barmode <- "dodge"
       }
       
       # attach axis object to the layout
@@ -857,44 +862,13 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
   }
   
-  # geom_bar() hacks
-  geoms <- sapply(layers, ggtype, "geom")
-  if (any(idx <- geoms %in% c("bar", "col"))) {
-    # traces were reversed in layers2traces()
-    gglayout$legend$traceorder <- "reversed"
-    # since `layout.barmode` is plot-specific, we can't support multiple bar
-    # geoms with different positions
-    positions <- sapply(layers, ggtype, "position")
-    position <- unique(positions[idx])
-    if (length(position) > 1) {
-      warning("plotly doesn't support multiple positions\n",
-              "across geom_bar() layers", call. = FALSE)
-      position <- position[1]
-    }
-    # hacks for position_identity()
-    if ("identity" %in% position) {
-      gglayout$barmode <- "overlay"
-    } else {
-      # yes, this should work even for position_dodge()
-      gglayout$barmode <- "stack"
-    }
-    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
-    # (i.e., at this point, y should be the count/density)
-    is_hist <- inherits(plot$scales$get_scales("x"), "ScaleContinuous")
-    # TODO: get rid of this and use explicit width for bars
-    # https://github.com/plotly/plotly.js/issues/80
-    if (position == "dodge" || is_hist) {
-      gglayout$bargap <- 0
-    }
-  }
-  
   # flip x/y in traces for flipped coordinates
   # (we've already done appropriate flipping for axis objects)
   if (inherits(plot$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
-      traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% c("bar", "box")) traces[[i]]$orientation <- "h"
+      # TODO: move this to the layer2trace definition...
+      if (tr$type %in% "box") traces[[i]]$orientation <- "h"
       if (tr$type == "box") traces[[i]]$hoverinfo <- "x"
       names(traces[[i]])[grepl("^error_y$", names(tr))] <- "error_x"
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
@@ -950,6 +924,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   gglayout$width <- width
   gglayout$height <- height
+  gglayout$barmode <- gglayout$barmode %||% "relative"
   
   l <- list(
     data = setNames(traces, NULL),
