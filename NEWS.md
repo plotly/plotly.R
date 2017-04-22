@@ -27,11 +27,13 @@
 
 ## BUG FIXES
 
+
+* Placement of bars (in all cases, even when representing a negative count) should now be correct (applies to `geom_bar()`, `geom_histogram()`, `geom_col()`). Fixes #560, #874, #901, #831.
+* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
 * `embed_notebook()` now works in *nteract* notebooks (see #768). 
 * Axis categories are no longer reordered for matrices (see #863).
-* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
-* Fix for hoverinfo displaying values after scale transformations. Fixes #804.
-* Font faces for axis titles are now translated in `ggplotly()`. Fixes #861.
+* Fix for hoverinfo displaying values after scale transformations (in `ggplotly()`). Fixes #804.
+* Font faces for axis titles are now translated (in `ggplotly()`). Fixes #861.
 
 # 4.5.6
 
