@@ -488,6 +488,7 @@ TraceManager.prototype.updateFilter = function(group, keys) {
     
   } else {
   
+    var traces = [];
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.origData[i];
       if (!trace.key || trace.set !== group) {
@@ -496,18 +497,17 @@ TraceManager.prototype.updateFilter = function(group, keys) {
       var matchFunc = getMatchFunc(trace);
       var matches = matchFunc(trace.key, keys);
       
-      if (matches.length == 0) {
-        this.gd.data[i] = undefined;
-      }
-      if (!trace._isSimpleKey) {
-        // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
-        this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      if (matches.length > 0) {
+        if (!trace._isSimpleKey) {
+          // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+          trace = subsetArrayAttrs(trace, matches);
+        }
+        traces.push(trace);
       }
     }
-    
   }
   
-  this.gd.data = this.gd.data.filter(function(tr) { return tr !== undefined; });
+  this.gd.data = traces;
   Plotly.redraw(this.gd);
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,

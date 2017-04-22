@@ -672,12 +672,30 @@ geom2trace.GeomPoint <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBar <- function(data, params, p) {
-  data[["y"]] <- data[["ymax"]] - data[["ymin"]]
-  # TODO: use xmin/xmax once plotly.js allows explicit bar widths
-  # https://github.com/plotly/plotly.js/issues/80
+  # TODO: does position play a role here?
+  #pos <- params$position %||% "stack"
+  flip <- inherits(p$coordinates, "CoordFlip")
+  
+  if (!flip) {
+    width <- with(data, xmax - xmin)
+    # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
+    x <- with(data, (xmax + xmin) / 2)
+    base <- data[["ymin"]]
+    y <- with(data, ymax - ymin)
+  } else {
+    width <- with(data, ymax - ymin)
+    # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
+    y <- with(data, (ymax + ymin) / 2)
+    base <- data[["xmin"]]
+    x <- with(data, xmax - xmin)
+  }
+  
   compact(list(
-    x = data[["x"]],
-    y = data[["y"]],
+    orientation = if (flip) "h" else "v",
+    width = width,
+    base = base,
+    x = x,
+    y = y,
     text = uniq(data[["hovertext"]]),
     key = data[["key"]],
     frame = data[["frame"]],
