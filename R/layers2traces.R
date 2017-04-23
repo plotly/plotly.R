@@ -174,7 +174,9 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
   if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
-  data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
+  data$hovertext <- paste0(
+    data$hovertext, "density: ", format(data$density, justify = "none")
+  )
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
 
@@ -339,7 +341,9 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) 
   if ("hovertext" %in% names(data)) {
     data$hovertext <- paste0(data$hovertext, br())
   }
-  data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
+  data$hovertext <- paste0(
+    data$hovertext, "Level: ", format(data$level,  justify = "none")
+  )
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
@@ -458,7 +462,7 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
   for (var in c("radius", "angle")) {
     if (length(unique(data[[var]])) != 1) next
     data[["hovertext"]] <- paste0(
-      data[["hovertext"]], br(), var, ": ", data[[var]]
+      data[["hovertext"]], br(), var, ": ", format(data[[var]], justify = "none")
     )
   }
   prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
