@@ -53,7 +53,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       suffix <- tryNULL(format(txt, justify = "none")) %||% ""
       # put the height of the bar in the tooltip
       if (inherits(x, "GeomBar") && identical(aesName, "y")) {
-        suffix <- format(x[["ymax"]] - x[["ymin"]])
+        suffix <- format(x[["ymax"]] - x[["ymin"]], justify = "none")
       }
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
@@ -134,10 +134,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
       panel <- unique(dl[[j]]$PANEL)
       trs[[j]]$xaxis <-  sub("axis", "", layout[panel, "xaxis"])
       trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
-    }
-    # also need to set `layout.legend.traceorder='reversed'`
-    if (inherits(d, "GeomBar") && paramz[[i]]$position != "fill") {
-      trs <- rev(trs)
     }
     trace.list <- c(trace.list, trs)
   }
