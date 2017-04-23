@@ -652,13 +652,13 @@ geom2trace.GeomBar <- function(data, params, p) {
     base <- data[["ymin"]]
     y <- with(data, ymax - ymin)
   } else {
-    width <- with(data, ymax - ymin)
+    width <- with(data, xmax - xmin)
     # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
-    y <- with(data, (ymax + ymin) / 2)
-    base <- data[["xmin"]]
-    x <- with(data, xmax - xmin)
+    y <- with(data, (xmax + xmin) / 2)
+    base <- data[["ymin"]]
+    x <- with(data, ymax - ymin)
   }
-  
+
   compact(list(
     orientation = if (flip) "h" else "v",
     width = width,
