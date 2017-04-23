@@ -413,6 +413,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
     x <- reComputeGroup(x, z)
+    # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
+    attr(y$group, "n") <- NULL
     suppressMessages(dplyr::left_join(x, y))
   }, data, nestedKeys, layers)
   
