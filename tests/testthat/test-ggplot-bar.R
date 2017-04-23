@@ -28,10 +28,10 @@ test_that("position_dodge()", {
   
   l <- ggplotly(gg.dodge, dynamicTicks = "x")$x
   expect_identical(l$layout$barmode, "dodge")
-  expect_equal(l$data[[1]]$x, c("Canada", "USA"))
-  expect_equal(l$data[[1]]$name, "Math")
-  expect_equal(l$data[[2]]$x, c("Canada", "Germany"))
-  expect_equal(l$data[[2]]$name, "Bio")
+  expect_equal(l$data[[1]]$x, c("Canada", "Germany"))
+  expect_equal(l$data[[1]]$name, "Bio")
+  expect_equal(l$data[[2]]$x, c("Canada", "USA"))
+  expect_equal(l$data[[2]]$name, "Math")
 })
 
 test_that("position_stack()", {
