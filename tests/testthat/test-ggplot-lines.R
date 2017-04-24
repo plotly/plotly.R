@@ -74,8 +74,8 @@ test_that("Translates both dates and datetimes (with dynamic ticks) correctly", 
   expect_equal(axisType2, list("date", "auto", TRUE))
   
   # range and data have been reverse transformed
-  expect_is(l$layout$xaxis$range, "POSIXct")
-  expect_is(l$data[[1]]$x, "POSIXct")
+  expect_is(l$layout$xaxis$range, "Date")
+  expect_is(l$data[[1]]$x, "Date")
   expect_is(l2$layout$xaxis$range, "POSIXct")
   expect_is(l2$data[[1]]$x, "POSIXct")
   
