@@ -4,8 +4,8 @@
 \alias{highlight}
 \title{Highlight graphical elements in multiple linked views}
 \usage{
-highlight(p, on = "plotly_selected", off = "plotly_relayout",
-  persistent = FALSE, dynamic = FALSE, color = NULL, selectize = FALSE,
+highlight(p, on = "plotly_click", off, persistent = FALSE,
+  dynamic = FALSE, color = NULL, selectize = FALSE,
   defaultValues = NULL, opacityDim = 0.2, selected = attrs_selected(),
   ...)
 }
@@ -60,11 +60,13 @@ library(crosstalk)
 d <- SharedData$new(txhousing, ~city)
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 gg <- ggplotly(p, tooltip = "city") 
-highlight(gg, on = "plotly_click", persistent = TRUE, dynamic = TRUE)
+highlight(gg, persistent = TRUE, dynamic = TRUE)
 
 # supply custom colors to the brush 
 cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
-highlight(gg, on = "plotly_click", color = cols, persistent = TRUE, dynamic = TRUE)
+highlight(
+  gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
+)
 
 # Use attrs_selected() for complete control over the selection appearance
 # note any relevant colors you specify here should override the color argument
@@ -75,9 +77,8 @@ s <- attrs_selected(
 )
 
 highlight(
- layout(gg, showlegend = TRUE), 
- on = "plotly_click", selected = s,
- persistent = TRUE, dynamic = TRUE
+ layout(gg, showlegend = TRUE),  
+ selected = s, persistent = TRUE
 )
 
 }

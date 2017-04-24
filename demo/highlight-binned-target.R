@@ -5,7 +5,7 @@ library(plotly)
 d <- SharedData$new(mtcars)
 scatterplot <- plot_ly(d, x = ~mpg, y = ~disp) %>%
   add_markers(color = I("black")) %>%
-  layout(dragmode = "select")
+  highlight("plotly_selected")
 
 # add_histogram() does both continuous _and_ discrete binning in the browser,
 # allowing us to perform aggregations on the fly, without 
@@ -17,13 +17,18 @@ p <- subplot(
 # Crosstalk selections are actually additional traces, and, by default, 
 # plotly.js will try to dodge bars placed under the same category
 layout(p, barmode = "overlay") %>%
-  highlight(selected = attrs_selected(showlegend = FALSE))
+  highlight(
+    "plotly_selected",
+    selected = attrs_selected(showlegend = FALSE)
+  )
 
 # same idea, but now with a boxplot
 p <- plot_ly(d, y = ~disp, color = I("black")) %>% add_boxplot(name = "overall")
 subplot(p, scatterplot, shareY = TRUE) %>% 
-  layout(dragmode = "select") %>%
-  highlight(selected = attrs_selected(name = "selection"))
+  highlight(
+    "plotly_selected",
+    selected = attrs_selected(name = "selection")
+  )
 
 
 library(plotly)
@@ -37,7 +42,7 @@ p2 <- plot_ly(tx, x = ~median, color = I("black")) %>%
 subplot(p1, p2) %>% 
   layout(barmode = "overlay") %>%
   highlight(
-    "plotly_click", dynamic = TRUE, persistent = TRUE, 
+    dynamic = TRUE, persistent = TRUE, 
     selected = attrs_selected(opacity = 0.3)
   )
 

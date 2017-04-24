@@ -42,11 +42,13 @@
 #' d <- SharedData$new(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 
-#' highlight(gg, on = "plotly_click", persistent = TRUE, dynamic = TRUE)
+#' highlight(gg, persistent = TRUE, dynamic = TRUE)
 #' 
 #' # supply custom colors to the brush 
 #' cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
-#' highlight(gg, on = "plotly_click", color = cols, persistent = TRUE, dynamic = TRUE)
+#' highlight(
+#'   gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
+#' )
 #' 
 #' # Use attrs_selected() for complete control over the selection appearance
 #' # note any relevant colors you specify here should override the color argument
@@ -57,13 +59,12 @@
 #' )
 #' 
 #' highlight(
-#'  layout(gg, showlegend = TRUE), 
-#'  on = "plotly_click", selected = s,
-#'  persistent = TRUE, dynamic = TRUE
+#'  layout(gg, showlegend = TRUE),  
+#'  selected = s, persistent = TRUE
 #' )
 #' 
 
-highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
+highlight <- function(p, on = "plotly_click", off, 
                       persistent = FALSE, dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
                       opacityDim = 0.2, selected = attrs_selected(), ...) {
@@ -95,7 +96,9 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     )
     color <- color[1] 
   }
+  
   # attach HTML dependencies (these libraries are used in the HTMLwidgets.renderValue() method)
+  # TODO: only attach these when keys are present!
   if (selectize) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
   }
@@ -103,11 +106,26 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     p$dependencies <- c(p$dependencies, list(colourPickerLib()))
   }
   
+  
+  # TODO: expose unhover?
+  off_options <- paste0(
+    "plotly_", c("doubleclick", "deselect", "relayout")
+  )
+  if (missing(off)) {
+    off_default <- switch(
+      on %||% "", 
+      plotly_selected = "plotly_deselect",
+      plotly_click = "plotly_doubleclick",
+      plotly_hover = "plotly_doubleclick"
+    )
+    off <- default(off_default %||% "plotly_relayout")
+  }
+  
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
   p$x$highlight <- list(
     # NULL may be used to disable on/off events
     on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
-    off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
+    off = if (is.default(off)) off else if (!is.null(off)) match.arg(off, off_options),
     persistent = persistent,
     dynamic = dynamic,
     # TODO: convert to hex...see colourpicker:::formatHEX()

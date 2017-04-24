@@ -16,16 +16,17 @@ sd <- SharedData$new(df, ~patient)
 p <- plot_ly(sd, x = ~visit, y = ~perc, color = I("black"),
              text = ~paste("Patient:", patient)) %>%
   group_by(patient) %>%
-  add_trace(mode = "markers+lines")
+  add_trace(mode = "markers+lines") %>%
+  highlight("plotly_selected")
 
 # Since crosstalk's SharedData object was supplied to plot_ly() with a key of
 # patient, it knows to highlight any lines/markers matching the selected patient(s).
-# By default, the interaction type is "plotly_selected", which corresponds to
-# click and drag mouse events. Plotly provides two types of drag modes: "lasso"
-# and "select". For this type of plot, a rectangular selection seems more 
-# appropriate since one may want to see how patient(s) with a high/low response
-# on a given visit respond during other visits.
-layout(p, dragmode = "select")
+# By default, the "on trigger" is "plotly_click", but we've changed that to 
+# "plotly_selected", which corresponds to click and drag mouse events.
+# Plotly provides two types of drag modes that will trigger a "plotly_selected"
+# event: "lasso" and "select". You can change the dragmode interactively via 
+# the modebar and/or set the default dragmode via `layout()`.
+layout(p, dragmode = "lasso")
 
 # Other interaction types, beyond click and drag interactions, can also select 
 # value(s) of a SharedData key and are specified via the highlight() function. 

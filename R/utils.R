@@ -241,11 +241,13 @@ supply_highlight_attrs <- function(p) {
   p$x$highlight$ctGroups <- I(unique(sets))
   
   # TODO: throw warning if we don't detect valid keys?
+  hasKeys <- FALSE
   for (i in p$x$highlight$ctGroups) {
     k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
     if (is.null(k)) next
     k <- k[!is.null(k)]
-    
+    hasKeys <- TRUE
+
     # include one selectize dropdown per "valid" SharedData layer
     if (isTRUE(p$x$highlight$selectize)) {
       p$x$selectize[[new_id()]] <- list(
@@ -260,6 +262,20 @@ supply_highlight_attrs <- function(p) {
         p, sprintf(
           "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
           i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+        )
+      )
+    }
+  }
+
+  # add HTML dependencies, set a sensible dragmode default, & throw messages
+  if (hasKeys) {
+    p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
+      default(switch(p$x$highlight$on %||% "", plotly_selected = "select") %||% "zoom")
+    if (is.default(p$x$highlight$off)) {
+      message(
+        sprintf(
+          "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
+          p$x$highlight$off, p$x$highlight$on
         )
       )
     }
@@ -562,15 +578,6 @@ verify_hovermode <- function(p) {
   p
 }
 
-verify_dragmode <- function(p) {
-  if (!is.null(p$x$layout$dragmode)) {
-    return(p)
-  }
-  selecty <- has_highlight(p) && "plotly_selected" %in% p$x$highlight$on
-  p$x$layout$dragmode <- if (selecty) "lasso" else "zoom"
-  p
-}
-
 verify_key_type <- function(p) {
   keys <- lapply(p$x$data, "[[", "key")
   for (i in seq_along(keys)) {
@@ -597,12 +604,6 @@ verify_key_type <- function(p) {
   }
   p 
 }
-
-has_highlight <- function(p) {
-  hasKey <- any(vapply(p$x$data, function(x) length(x[["key"]]), integer(1)) > 1)
-  hasKey && !is.null(p[["x"]][["highlight"]])
-}
-
 
 verify_webgl <- function(p) {
   # see toWebGL

@@ -26,5 +26,5 @@ p <- ggplot(sd, aes(x = gameno, y = cumpts)) +
 
 gg <- ggplotly(p, tooltip = "colour")
 
-highlight(gg, "plotly_click", opacityDim = 0.05, selectize = TRUE)
+highlight(gg, opacityDim = 0.05, selectize = TRUE)
 

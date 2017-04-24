@@ -340,8 +340,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_arrays(p)
   # set a sensible hovermode if it hasn't been specified already
   p <- verify_hovermode(p)
-  # set a sensible dragmode if it hasn't been specified already
-  p <- verify_dragmode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
