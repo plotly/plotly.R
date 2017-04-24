@@ -568,12 +568,13 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @export
 geom2trace <- function(data, params, p) {
+  if (nrow(data) == 0) return(geom2trace.GeomBlank(data, params, p))
   UseMethod("geom2trace")
 }
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list()
+  list(visible = FALSE)
 }
 
 #' @export
