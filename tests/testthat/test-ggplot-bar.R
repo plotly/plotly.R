@@ -70,9 +70,9 @@ test_that("dates work well with bar charts", {
   l <- ggplotly(gd, dynamicTicks = TRUE)$x
   expect_equal(l$layout$xaxis$type, "date")
   expect_equal(l$layout$xaxis$tickmode, "auto")
-  expect_is(l$layout$xaxis$range, "POSIXct")
-  for (attr in c("x", "base", "width")) {
-    expect_is(l$data[[1]][[attr]], "POSIXct")
+  expect_is(l$layout$xaxis$range, "Date")
+  for (attr in c("x", "width")) {
+    expect_is(l$data[[1]][[attr]], "Date")
   }
   
 })

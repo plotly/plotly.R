@@ -665,7 +665,6 @@ gg2list <- function(p, width = NULL, height = NULL,
           # TODO: are there other similar cases we need to handle?
           if (identical("bar", tr$type)) {
             tr[["width"]] <- invert_date(tr[["width"]], sc)
-            tr[["base"]] <- invert_date(tr[["base"]], sc)
           }
           tr
         })
