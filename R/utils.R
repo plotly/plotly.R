@@ -221,7 +221,7 @@ supply_highlight_attrs <- function(p) {
   p <- htmlwidgets::onRender(
     p, sprintf(
       "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
-      jsonlite::toJSON(p$x$highlight, auto_unbox = TRUE)
+      to_JSON(p$x$highlight)
     )
   )
   
