@@ -238,7 +238,7 @@ supply_highlight_attrs <- function(p) {
   # attributes such as the selectize widget definition
   sets <- unlist(lapply(p$x$data, "[[", "set"))
   keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  p$x$highlight$ctGroups <- I(unique(sets))
+  p$x$highlight$ctGroups <- i(unique(sets))
   
   # TODO: throw warning if we don't detect valid keys?
   hasKeys <- FALSE
