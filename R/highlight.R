@@ -1,13 +1,11 @@
-#' Highlight graphical elements in multiple linked views
+#' Query graphical elements in multiple linked views
 #' 
 #' This function sets a variety of options for brushing (i.e., highlighting)
-#' plotly graphs. Use this function to set options (or populate widgets) 
-#' for a \emph{single} plot. When linking multiple plots, use 
-#' \code{\link{options}()} to set "global" options, where the option name 
-#' matches the relevant argument name. For instance, 
-#' to link multiple plots with \code{persistent} selection, set
-#' \code{options(persistent = TRUE)}. To see an example linking plotly to 
-#' leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
+#' multiple plots. These options are primarily designed for linking
+#' multiple plotly graphs, and may not behave as expected when linking 
+#' plotly to another htmlwidget package via crosstalk. In some cases,
+#' other htmlwidgets will respect these options, such as persistent selection
+#' in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
@@ -38,6 +36,8 @@
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
+#' 
+#' 
 #' library(crosstalk)
 #' d <- SharedData$new(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
@@ -65,9 +65,11 @@
 #' 
 
 highlight <- function(p, on = "plotly_click", off, 
-                      persistent = FALSE, dynamic = FALSE, color = NULL,
+                      persistent = getOption("persistent", FALSE),
+                      dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
-                      opacityDim = 0.2, selected = attrs_selected(), ...) {
+                      opacityDim = getOption("opacityDim", 0.2), 
+                      selected = attrs_selected(), ...) {
   
   # currently ... is not-supported and will catch 
   # some arguments we supported at one point 
