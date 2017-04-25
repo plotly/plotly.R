@@ -20,6 +20,7 @@ via phantomjs and RStudio on some Windows platforms.
 }
 \examples{
 
+\dontrun{
 p1 <- plot_ly()
 p2 <- remove_typedarray_polyfill(p1)
 t1 <- tempfile(fileext = ".html")
@@ -27,4 +28,5 @@ htmlwidgets::saveWidget(p1, t1)
 file.info(t1)$size
 htmlwidgets::saveWidget(p2, t1)
 file.info(t1)$size
+}
 }
