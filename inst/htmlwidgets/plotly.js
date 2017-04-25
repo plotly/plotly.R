@@ -400,11 +400,13 @@ HTMLWidgets.widget({
             // this is used to avoid adding redundant selections
             var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
             
-            // do nothing if the event isn't "new"
-            // TODO: is there a smarter way to check object equality?
-            var event = {};
+            // Construct an event object "defining" the current event. 
+            var event = {
+              receiverID: traceManager.gd.id,
+              plotlySelectionColour: crosstalk.group(set).var("plotlySelectionColour").get()
+            };
             event[set] = e.value;
-            event.plotlySelectionColour = crosstalk.group(set).var("plotlySelectionColour").get();
+            // TODO: is there a smarter way to check object equality?
             if (selectionHistory.length > 0) {
               var ev = JSON.stringify(event);
               for (var i = 0; i < selectionHistory.length; i++) {
@@ -440,6 +442,7 @@ HTMLWidgets.widget({
 
 
           grp.var("filter").on("change", function crosstalk_filter_change(e) {
+            removeBrush(el);
             traceManager.updateFilter(set, e.value);
           });
   

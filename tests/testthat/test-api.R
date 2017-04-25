@@ -18,7 +18,7 @@ test_that("Can search with white-space", {
 test_that("Changing a filename works", {
   skip_on_cran()
   
-  id <- new_id()
+  id <- plotly:::new_id()
   f <- api("files/cpsievert:14680", "PATCH", list(filename = id)) 
   expect_equal(f$filename, id)
 })
@@ -64,8 +64,9 @@ test_that("Creating produces a new file by default", {
   expect_new <- function(obj) {
     old <- api("folders/home?user=cpsievert")
     new_obj <- api_create(obj)
+    Sys.sleep(3)
     new <- api("folders/home?user=cpsievert")
-    n <- if (is.plot(new_obj)) 2 else 1
+    n <- if (plotly:::is.plot(new_obj)) 2 else 1
     expect_equal(old$children$count + n, new$children$count)
   }
   
@@ -80,9 +81,9 @@ test_that("Can overwrite a file", {
   
   id <- new_id()
   m <- api_create(mtcars, id)
-  mfile <- api_lookup_file(id)
+  mfile <- plotly:::api_lookup_file(id)
   m2 <- api_create(iris, id)
-  m2file <- api_lookup_file(id)
+  m2file <- plotly:::api_lookup_file(id)
   expect_false(identical(mfile$preview, m2file$preview))
 })
 

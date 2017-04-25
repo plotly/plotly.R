@@ -28,10 +28,10 @@ test_that("position_dodge()", {
   
   l <- ggplotly(gg.dodge, dynamicTicks = "x")$x
   expect_identical(l$layout$barmode, "dodge")
-  expect_equal(l$data[[1]]$x, c("Canada", "USA"))
-  expect_equal(l$data[[1]]$name, "Math")
-  expect_equal(l$data[[2]]$x, c("Canada", "Germany"))
-  expect_equal(l$data[[2]]$name, "Bio")
+  expect_equal(l$data[[1]]$x, c("Canada", "Germany"))
+  expect_equal(l$data[[1]]$name, "Bio")
+  expect_equal(l$data[[2]]$x, c("Canada", "USA"))
+  expect_equal(l$data[[2]]$name, "Math")
 })
 
 test_that("position_stack()", {
@@ -70,9 +70,9 @@ test_that("dates work well with bar charts", {
   l <- ggplotly(gd, dynamicTicks = TRUE)$x
   expect_equal(l$layout$xaxis$type, "date")
   expect_equal(l$layout$xaxis$tickmode, "auto")
-  expect_is(l$layout$xaxis$range, "POSIXct")
-  for (attr in c("x", "base", "width")) {
-    expect_is(l$data[[1]][[attr]], "POSIXct")
+  expect_is(l$layout$xaxis$range, "Date")
+  for (attr in c("x", "width")) {
+    expect_is(l$data[[1]][[attr]], "Date")
   }
   
 })

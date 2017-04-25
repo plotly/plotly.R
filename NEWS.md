@@ -1,4 +1,4 @@
-# 4.5.6.9000
+# 4.6.0
 
 ## NEW FEATURES & IMPROVEMENTS
 

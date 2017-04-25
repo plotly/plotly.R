@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.5.6.9000
+Version: 4.6.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = "aut",
@@ -15,7 +15,7 @@ Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "marianne@plot.ly"),
     person("Pedro", "Despouy", role = "aut",
     email = "pedro@plot.ly"),
-    person("Plotly", role = "cph"))
+    person("Plotly Technologies Inc.", role = "cph"))
 License: MIT + file LICENSE
 Description: Easily translate 'ggplot2' graphs to an interactive web-based version and/or create custom web-based visualizations directly from R. Once uploaded to a 'plotly' account, 'plotly' graphs (and the data behind them) can be viewed and modified in a web browser.
 URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github.com/ropensci/plotly

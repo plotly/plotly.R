@@ -413,6 +413,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
     x <- reComputeGroup(x, z)
+    # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
+    attr(y$group, "n") <- NULL
     suppressMessages(dplyr::left_join(x, y))
   }, data, nestedKeys, layers)
   
@@ -701,15 +703,23 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       
       # inverse transform date data based on tickvals/ticktext
+      invert_date <- function(x, scale) {
+        if (inherits(scale, "ScaleContinuousDatetime")) {
+          as.POSIXct(x, origin = "1970-01-01", tz = scale$timezone)
+        } else {
+          as.Date(x, origin = "1970-01-01", tz = scale$timezone)
+        }
+      }
+      
+      
+      
       if (isDateType) {
-        as_date <- function(x) as.POSIXct(x, origin="1970-01-01", tz=sc$timezone)
-        axisObj$range <- as_date(axisObj$range)
+        axisObj$range <- invert_date(axisObj$range, sc)
         traces <- lapply(traces, function(tr) {
-          tr[[xy]] <- as_date(tr[[xy]])
+          tr[[xy]] <- invert_date(tr[[xy]], sc)
           # TODO: are there other similar cases we need to handle?
           if (identical("bar", tr$type)) {
-            tr[["width"]] <- as_date(tr[["width"]])
-            tr[["base"]] <- as_date(tr[["base"]])
+            tr[["width"]] <- invert_date(tr[["width"]], sc)
           }
           tr
         })

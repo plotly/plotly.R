@@ -1,13 +1,11 @@
-#' Highlight graphical elements in multiple linked views
+#' Query graphical elements in multiple linked views
 #' 
 #' This function sets a variety of options for brushing (i.e., highlighting)
-#' plotly graphs. Use this function to set options (or populate widgets) 
-#' for a \emph{single} plot. When linking multiple plots, use 
-#' \code{\link{options}()} to set "global" options, where the option name 
-#' matches the relevant argument name. For instance, 
-#' to link multiple plots with \code{persistent} selection, set
-#' \code{options(persistent = TRUE)}. To see an example linking plotly to 
-#' leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
+#' multiple plots. These options are primarily designed for linking
+#' multiple plotly graphs, and may not behave as expected when linking 
+#' plotly to another htmlwidget package via crosstalk. In some cases,
+#' other htmlwidgets will respect these options, such as persistent selection
+#' in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? Likely candidates are
@@ -38,15 +36,19 @@
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
+#' 
+#' 
 #' library(crosstalk)
 #' d <- SharedData$new(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 
-#' highlight(gg, on = "plotly_click", persistent = TRUE, dynamic = TRUE)
+#' highlight(gg, persistent = TRUE, dynamic = TRUE)
 #' 
 #' # supply custom colors to the brush 
 #' cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
-#' highlight(gg, on = "plotly_click", color = cols, persistent = TRUE, dynamic = TRUE)
+#' highlight(
+#'   gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
+#' )
 #' 
 #' # Use attrs_selected() for complete control over the selection appearance
 #' # note any relevant colors you specify here should override the color argument
@@ -57,16 +59,17 @@
 #' )
 #' 
 #' highlight(
-#'  layout(gg, showlegend = TRUE), 
-#'  on = "plotly_click", selected = s,
-#'  persistent = TRUE, dynamic = TRUE
+#'  layout(gg, showlegend = TRUE),  
+#'  selected = s, persistent = TRUE
 #' )
 #' 
 
-highlight <- function(p, on = "plotly_selected", off = "plotly_relayout", 
-                      persistent = FALSE, dynamic = FALSE, color = NULL,
+highlight <- function(p, on = "plotly_click", off, 
+                      persistent = getOption("persistent", FALSE),
+                      dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
-                      opacityDim = 0.2, selected = attrs_selected(), ...) {
+                      opacityDim = getOption("opacityDim", 0.2), 
+                      selected = attrs_selected(), ...) {
   
   # currently ... is not-supported and will catch 
   # some arguments we supported at one point 
@@ -95,7 +98,9 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     )
     color <- color[1] 
   }
+  
   # attach HTML dependencies (these libraries are used in the HTMLwidgets.renderValue() method)
+  # TODO: only attach these when keys are present!
   if (selectize) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
   }
@@ -103,11 +108,26 @@ highlight <- function(p, on = "plotly_selected", off = "plotly_relayout",
     p$dependencies <- c(p$dependencies, list(colourPickerLib()))
   }
   
+  
+  # TODO: expose unhover?
+  off_options <- paste0(
+    "plotly_", c("doubleclick", "deselect", "relayout")
+  )
+  if (missing(off)) {
+    off_default <- switch(
+      on %||% "", 
+      plotly_selected = "plotly_deselect",
+      plotly_click = "plotly_doubleclick",
+      plotly_hover = "plotly_doubleclick"
+    )
+    off <- default(off_default %||% "plotly_relayout")
+  }
+  
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
   p$x$highlight <- list(
     # NULL may be used to disable on/off events
     on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
-    off = if (!is.null(off)) match.arg(off, paste0("plotly_", c("unhover", "doubleclick", "deselect", "relayout"))),
+    off = if (is.default(off)) off else if (!is.null(off)) match.arg(off, off_options),
     persistent = persistent,
     dynamic = dynamic,
     # TODO: convert to hex...see colourpicker:::formatHEX()

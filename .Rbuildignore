@@ -7,7 +7,7 @@ CONTRIBUTING.md
 build_site.R
 todo.R
 .github/
-inst/examples/*.html
+inst/examples/printing.html
 inst/examples/flexdashboard
 Untitled*
 rsconnect/

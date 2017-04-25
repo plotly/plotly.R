@@ -60,3 +60,35 @@ test_that("Categorical axis reflects custom scale mapping", {
   )
   
 })
+
+test_that("Time axis inverse transforms correctly", {
+  
+  d <- data.frame(
+    x = seq(Sys.Date(), Sys.Date() + 9, length.out = 10), 
+    y = rnorm(10)
+  )
+  
+  l <- ggplotly(ggplot(d, aes(x, y)) + geom_line(), dynamicTicks = TRUE)$x
+  
+  expect_length(l$data, 1)
+  expect_equal(l$layout$xaxis$type, "date")
+  expect_equal(l$layout$xaxis$tickmode, "auto")
+  expect_is(l$layout$xaxis$range, "Date")
+  expect_equal(l$data[[1]][["x"]], d$x)
+  
+  d2 <- data.frame(
+    x = seq(Sys.time(), Sys.time() + 9000, length.out = 10), 
+    y = rnorm(10)
+  )
+  
+  l2 <- ggplotly(ggplot(d2, aes(x, y)) + geom_line(), dynamicTicks = TRUE)$x
+  
+  expect_length(l2$data, 1)
+  expect_equal(l2$layout$xaxis$type, "date")
+  expect_equal(l2$layout$xaxis$tickmode, "auto")
+  expect_is(l2$layout$xaxis$range, "POSIXt")
+  expect_equal(l2$data[[1]][["x"]], d2$x)
+  
+})
+
+

@@ -58,7 +58,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       suffix <- tryNULL(format(txt, justify = "none")) %||% ""
       # put the height of the bar in the tooltip
       if (inherits(x, "GeomBar") && identical(aesName, "y")) {
-        suffix <- format(x[["ymax"]] - x[["ymin"]])
+        suffix <- format(x[["ymax"]] - x[["ymin"]], justify = "none")
       }
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
@@ -140,10 +140,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
       trs[[j]]$xaxis <-  sub("axis", "", layout$layout[panel, "xaxis"])
       trs[[j]]$yaxis <-  sub("axis", "", layout$layout[panel, "yaxis"])
     }
-    # also need to set `layout.legend.traceorder='reversed'`
-    if (inherits(d, "GeomBar") && paramz[[i]]$position != "fill") {
-      trs <- rev(trs)
-    }
     trace.list <- c(trace.list, trs)
   }
   trace.list
@@ -183,7 +179,9 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
   if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
-  data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
+  data$hovertext <- paste0(
+    data$hovertext, "density: ", format(data$density, justify = "none")
+  )
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
 
@@ -374,7 +372,9 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) 
   if ("hovertext" %in% names(data)) {
     data$hovertext <- paste0(data$hovertext, br())
   }
-  data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
+  data$hovertext <- paste0(
+    data$hovertext, "Level: ", format(data$level,  justify = "none")
+  )
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
@@ -493,7 +493,7 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
   for (var in c("radius", "angle")) {
     if (length(unique(data[[var]])) != 1) next
     data[["hovertext"]] <- paste0(
-      data[["hovertext"]], br(), var, ": ", data[[var]]
+      data[["hovertext"]], br(), var, ": ", format(data[[var]], justify = "none")
     )
   }
   prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
@@ -599,12 +599,13 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @export
 geom2trace <- function(data, params, p) {
+  if (nrow(data) == 0) return(geom2trace.GeomBlank(data, params, p))
   UseMethod("geom2trace")
 }
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list()
+  list(visible = FALSE)
 }
 
 #' @export
@@ -683,13 +684,13 @@ geom2trace.GeomBar <- function(data, params, p) {
     base <- data[["ymin"]]
     y <- with(data, ymax - ymin)
   } else {
-    width <- with(data, ymax - ymin)
+    width <- with(data, xmax - xmin)
     # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
-    y <- with(data, (ymax + ymin) / 2)
-    base <- data[["xmin"]]
-    x <- with(data, xmax - xmin)
+    y <- with(data, (xmax + xmin) / 2)
+    base <- data[["ymin"]]
+    x <- with(data, ymax - ymin)
   }
-  
+
   compact(list(
     orientation = if (flip) "h" else "v",
     width = width,
