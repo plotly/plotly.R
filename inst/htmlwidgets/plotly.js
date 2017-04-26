@@ -143,9 +143,9 @@ HTMLWidgets.widget({
     }
     
     // remove "sendDataToCloud", unless user has specified they want it
-    var config = x.config || {};
-    if (!config.cloud) {
-      x.config.modeBarButtonsToRemove = config.modeBarButtonsToRemove || [];
+    x.config = x.config || {};
+    if (!x.config.cloud) {
+      x.config.modeBarButtonsToRemove = x.config.modeBarButtonsToRemove || [];
       x.config.modeBarButtonsToRemove.push("sendDataToCloud");
     }
     
