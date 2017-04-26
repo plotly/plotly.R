@@ -17,7 +17,7 @@ highlight(p, on = "plotly_click", off, persistent = getOption("persistent",
 altogether, use \code{NULL}.}
 
 \item{off}{turn off a selection on which event(s)? Likely candidates are
-'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
+'plotly_relayout', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
 events altogether, use \code{NULL}.}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
