@@ -13,14 +13,14 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
   for (i in seq_along(x$data)) {
-    x$data[[i]] <- api_srcify(x$data[[i]])
+    x$data[[i]] <- api_srcify(x$data[[i]], sharing = sharing)
   }
   
   # same for animation frames
   for (i in seq_along(x$frames)) {
     frame <- x$frames[[i]]
     for (j in seq_along(frame$data)) {
-      x$frames[[i]]$data[[j]] <- api_srcify(frame$data[[j]])
+      x$frames[[i]]$data[[j]] <- api_srcify(frame$data[[j]], sharing = sharing)
     }
   }
   
@@ -125,7 +125,7 @@ api_trash_file <- function(file) {
 
 # upload a grid of data array attributes, attach src references to the trace,
 # and remove the actual data from trace
-api_srcify <- function(trace) {
+api_srcify <- function(trace, sharing = "public") {
   Attrs <- Schema$traces[[trace[["type"]]]]$attributes
   isArray <- vapply(
     Attrs, function(x) tryFALSE(identical(x[["valType"]], "data_array")), logical(1)
@@ -134,7 +134,7 @@ api_srcify <- function(trace) {
   grid <- trace[names(trace) %in% names(Attrs)[isArray | arrayOK]]
   # create the grid and replace actual data with "src pointers"
   if (length(grid)) {
-    resp <- api_create_grid(grid, filename = new_id())
+    resp <- api_create_grid(grid, filename = new_id(), sharing = sharing)
     fid <- resp[["fid"]]
     cols <- resp[["cols"]]
     for (j in seq_along(cols)) {
