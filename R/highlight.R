@@ -12,7 +12,7 @@
 #' 'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
 #' altogether, use \code{NULL}.
 #' @param off turn off a selection on which event(s)? Likely candidates are
-#' 'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
+#' 'plotly_relayout', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
 #' events altogether, use \code{NULL}.
 #' @param persistent should selections persist (i.e., accumulate)?
 #' @param dynamic should a widget for changing selection colors be included? 
