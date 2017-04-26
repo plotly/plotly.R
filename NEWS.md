@@ -1,3 +1,10 @@
+# 4.6.0.9000
+
+## Bug fixes 
+
+* When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).
+* Fixed bug when highlight multiple 'simple key' traces (fixes #974) 
+
 # 4.6.0
 
 ## NEW FEATURES & IMPROVEMENTS
