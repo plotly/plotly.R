@@ -513,6 +513,7 @@ utils::globalVariables(c("xmin", "xmax", "y", "size"))
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
   # allow the tick length to vary across panels
+  layout <- layout$layout
   layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
   layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
   data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
