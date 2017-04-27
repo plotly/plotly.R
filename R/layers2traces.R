@@ -790,6 +790,7 @@ geom2trace.GeomText <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = data[["label"]],
+    hovertext = data[["hovertext"]],
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
