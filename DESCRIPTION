@@ -1,9 +1,9 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.5.6.9000
+Version: 4.6.0.9000
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
-    person("Chris", "Parmer", role = c("aut", "cph"),
+    person("Chris", "Parmer", role = "aut",
     email = "chris@plot.ly"),
     person("Toby", "Hocking", role = "aut",
     email = "tdhock5@gmail.com"),
@@ -14,14 +14,15 @@ Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     person("Marianne", "Corvellec", role = "aut",
     email = "marianne@plot.ly"),
     person("Pedro", "Despouy", role = "aut",
-    email = "pedro@plot.ly"))
+    email = "pedro@plot.ly"),
+    person("Plotly Technologies Inc.", role = "cph"))
 License: MIT + file LICENSE
 Description: Easily translate 'ggplot2' graphs to an interactive web-based version and/or create custom web-based visualizations directly from R. Once uploaded to a 'plotly' account, 'plotly' graphs (and the data behind them) can be viewed and modified in a web browser.
 URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github.com/ropensci/plotly
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     R (>= 3.2.0),
-    ggplot2 (> 2.1.1)
+    ggplot2 (>= 2.2.1)
 Imports:
     tools,
     scales,
@@ -60,8 +61,8 @@ Suggests:
     listviewer,
     dendextend,
     sf,
-    RSelenium
+    RSelenium,
+    png,
+    IRdisplay
 LazyData: true
 RoxygenNote: 6.0.1
-Remotes:
-  tidyverse/ggplot2

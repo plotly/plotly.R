@@ -2,7 +2,7 @@
 library(tourr)
 library(plotly)
 
-mat <- rescale(USArrests)
+mat <- rescale(USArrests[, 1:4])
 tour <- new_tour(mat, grand_tour(), NULL)
 
 tour_dat <- function(step_size) {
@@ -71,5 +71,5 @@ map <- plot_geo(USArrests, color = I("black")) %>%
 subplot(tour, map, nrows = 2, margin = 0) %>%
   subplot(dend, shareY = FALSE, margin = 0) %>%
   hide_legend() %>%
-  animation_opts(33, mode = "next") %>%
+  animation_opts(33, redraw = FALSE) %>%
   highlight("plotly_click", NULL, persistent = T, dynamic = T)

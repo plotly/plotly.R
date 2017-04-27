@@ -21,22 +21,35 @@ researchers <- data.frame(
 
 gg <- ggplot(researchers, aes(country, papers, fill = field))
 
-test_that("position_dodge is translated to barmode=stack", {
+test_that("position_dodge()", {
   gg.dodge <- gg + geom_bar(stat = "identity", position = "dodge")
   info <- expect_traces(gg.dodge, 2, "dodge")
-  expect_identical(info$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "relative")
+  
+  l <- ggplotly(gg.dodge, dynamicTicks = "x")$x
+  expect_identical(l$layout$barmode, "dodge")
+  expect_equal(l$data[[1]]$x, c("Canada", "Germany"))
+  expect_equal(l$data[[1]]$name, "Bio")
+  expect_equal(l$data[[2]]$x, c("Canada", "USA"))
+  expect_equal(l$data[[2]]$name, "Math")
 })
 
-test_that("position_stack is translated to barmode=stack", {
+test_that("position_stack()", {
   gg.stack <- gg + geom_bar(stat = "identity", position = "stack")
   info <- expect_traces(gg.stack, 2, "stack")
-  expect_identical(info$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "relative")
+  
+  l <- ggplotly(gg.stack, dynamicTicks = T)$x
+  expect_identical(l$layout$barmode, "relative")
 })
 
-test_that("position_identity is translated to barmode=overlay", {
+test_that("position_identity()", {
   gg.identity <- gg + geom_bar(stat = "identity", position = "identity")
   info <- expect_traces(gg.identity, 2, "identity")
-  expect_identical(info$layout$barmode, "overlay")
+  expect_identical(info$layout$barmode, "relative")
+  
+  l <- ggplotly(gg.identity, dynamicTicks = T)$x
+  expect_identical(l$layout$barmode, "relative")
 })
 
 test_that("dates work well with bar charts", {
@@ -45,10 +58,23 @@ test_that("dates work well with bar charts", {
   gd <- ggplot(researchers, aes(month, papers, fill = field)) +
     geom_bar(stat = "identity")
   info <- expect_traces(gd, 2, "dates")
-  trs <- info$data
-  # plotly likes time in milliseconds
-  t <- as.numeric(unique(researchers$month)) * 24 * 60 * 60 * 1000
-  expect_equal(trs[[1]]$x, t)
+  
+  # by default, date axes are linear...
+  expect_equal(info$layout$xaxis$type, "linear")
+  expect_equal(
+    info$data[[1]]$x,
+    as.numeric(unique(researchers$month))
+  )
+  
+  # different story for dynamicTicks...
+  l <- ggplotly(gd, dynamicTicks = TRUE)$x
+  expect_equal(l$layout$xaxis$type, "date")
+  expect_equal(l$layout$xaxis$tickmode, "auto")
+  expect_is(l$layout$xaxis$range, "Date")
+  for (attr in c("x", "width")) {
+    expect_is(l$data[[1]][[attr]], "Date")
+  }
+  
 })
 
 ## http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
@@ -117,7 +143,7 @@ base <- ggplot(mtcars, aes(factor(vs), fill = factor(cyl)))
 
 test_that("geom_bar() stacks counts", { 
   info <- expect_traces(base + geom_bar(), 3, "position-stack")
-  expect_identical(info$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "relative")
   trs <- info$data
   # sum of y values for each trace 
   test <- as.numeric(sort(sapply(trs, function(x) sum(x$y))))
@@ -127,7 +153,7 @@ test_that("geom_bar() stacks counts", {
 
 test_that("geom_bar(position = 'fill') stacks proportions", {
   info <- expect_traces(base + geom_bar(position = "fill"), 3, "position-fill")
-  expect_identical(info$layout$barmode, "stack")
+  expect_identical(info$layout$barmode, "relative")
   trs <- info$data
   # sum of y-values *conditioned* on a x-value
   prop <- sum(sapply(sapply(trs, "[[", "y"), "[", 1))

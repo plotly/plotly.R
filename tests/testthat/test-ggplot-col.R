@@ -23,7 +23,7 @@ test_that("geom_col is supported", {
   )
   expect_equal(
     unlist(lapply(barDat, "[[", "y")), 
-    c(0.2857143, 0.5172414, 0.8, 0.7142857, 0.4827586, 0.2),
+    c(0.7142857, 0.4827586, 0.2, 0.2857143, 0.5172414, 0.8),
     tolerance = 0.0001
   )
 })

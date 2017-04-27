@@ -22,6 +22,7 @@ r_binary_packages:
 
 r_packages:
   - devtools
+  - quantreg
   
 r_github_packages:
   - tidyverse/ggplot2

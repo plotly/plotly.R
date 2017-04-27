@@ -51,7 +51,7 @@ toRGB <- function(x, alpha = 1) {
 #' Useful for viewing colors after they've been converted to plotly.js'
 #' color format -- "rgba(255, 255, 255, 1)"
 #' 
-#' @param A character string specifying color(s).
+#' @param x character string specifying color(s).
 #' @param ... arguments passed along to \code{scales::show_col}.
 #' @export
 #' @author Carson Sievert
@@ -65,7 +65,7 @@ showRGB <- function(x, ...) {
     vals[1:3] <- vals[1:3] / 255
     setNames(as.list(vals), c("red", "green", "blue", "alpha"))
   })
-  rgbs <- sapply(cols, function(x) do.call(rgb, x))
+  rgbs <- sapply(cols, function(x) do.call(grDevices::rgb, x))
   scales::show_col(rgbs, ...)
 }
 

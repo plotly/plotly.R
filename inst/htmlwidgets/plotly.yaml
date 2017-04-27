@@ -1,6 +1,6 @@
 dependencies:
   - name: plotlyjs
-    version: 1.25.2
+    version: 1.26.1
     src: "htmlwidgets/lib/plotlyjs"
     script: plotly-latest.min.js
     stylesheet: plotly-htmlwidgets.css

@@ -58,34 +58,32 @@ test_that("Translates both dates and datetimes (with dynamic ticks) correctly", 
   
   p <- ggplot(d, aes(date, value)) + geom_line()
   l <- plotly_build(ggplotly(p, dynamicTicks = TRUE))$x
-  
-  milliseconds <- as.numeric(d$date) * 86400000
-  
+
   d2 <- data.frame(
     value = rnorm(100),
     date = as.POSIXct(dates)
   )
   
-  milliseconds2 <- as.numeric(d2$date) * 1000
   p2 <- ggplot(d2, aes(date, value)) + geom_line()
   l2 <- plotly_build(ggplotly(p2, dynamicTicks = TRUE))$x
   
-  # data is all on millisecond level
-  expect_equal(milliseconds, milliseconds2)
-  expect_equal(milliseconds, l$data[[1]]$x)
-  expect_equal(milliseconds, l2$data[[1]]$x)
-  
-  # same with range
-  expect_equal(grDevices::extendrange(milliseconds), l$layout$xaxis$range)
-  expect_equal(grDevices::extendrange(milliseconds), l2$layout$xaxis$range)
-  
   # since these are dynamic ticks, let plotly.js generate the ticks
-  expect_null(l$layout$xaxis$ticktext)
-  expect_null(l$layout$xaxis$tickvals)
-  expect_null(l2$layout$xaxis$ticktext)
-  expect_null(l2$layout$xaxis$tickvals)
-  expect_equal(l$layout$xaxis$type, "date")
-  expect_equal(l2$layout$xaxis$type, "date")
+  axisType <- with(l$layout$xaxis, list(type, tickmode, autorange))
+  expect_equal(axisType, list("date", "auto", TRUE))
+  axisType2 <- with(l2$layout$xaxis, list(type, tickmode, autorange))
+  expect_equal(axisType2, list("date", "auto", TRUE))
+  
+  # range and data have been reverse transformed
+  expect_is(l$layout$xaxis$range, "Date")
+  expect_is(l$data[[1]]$x, "Date")
+  expect_is(l2$layout$xaxis$range, "POSIXct")
+  expect_is(l2$data[[1]]$x, "POSIXct")
+  
+  # check the hovertext
+  dates1 <- sapply(strsplit(l$data[[1]]$text, br()), "[[", 1)
+  dates2 <- sapply(strsplit(l2$data[[1]]$text, br()), "[[", 1)
+  expect_equal(paste("date:", d$date), dates1)
+  expect_equal(paste("date:", d2$date), dates2)
 })
 
 test_that("geom_linerange() without a y aesthetic translates to a path", {

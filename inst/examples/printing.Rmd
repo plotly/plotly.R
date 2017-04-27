@@ -1,0 +1,85 @@
+---
+title: "Printing plotly objects in a knitr/rmarkdown doc"
+output: html_document
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 4,
+  comment = "#>",
+  collapse = TRUE
+)
+```
+
+Printing anything created via the R package **plotly** should "just work" in a knitr/rmarkdown document -- including representations of things on your plotly account. However, the default print method that the package provides may not work for your purposes, so this document is designed to help you go beyond those defaults. This is especially useful for objects representing "remote files".
+
+## Remote files
+
+For example, if you create a plot or grid (via `api_create()`), then print the result, you get an HTML iframe pointing to that object on your account.
+
+```{r}
+library(plotly)
+d <- api_create(mtcars)
+d
+```
+
+
+
+As it turns out, the `api_create()` function returns a bunch of metadata about that file on your account. A nice way to inspect that information is to leverage the `jsonedit()` function from the **listviewer** package.
+
+```{r}
+listviewer::jsonedit(d)
+```
+
+Storing this information is a good idea since now you can [modify the "remote file"](https://api.plot.ly/v2/files#partial_update) at a later point. Let's rename the file using the "low-level" `api()` interface.
+
+```{r}
+nm <- paste(sample(LETTERS, 20), collapse = "-")
+d2 <- api(
+  file.path("files", d$fid), "PATCH", list(filename = nm)
+)
+identical(d2$filename, nm)
+```
+
+The `api_create()` function also understands how to "upload" ggplot2/plotly objects to the web platform. Printing in this case will again produce an HTML iframe pointing to the plot as it appears on the platform. 
+
+
+```{r}
+p <- api_create(qplot(1:10))
+p
+```
+
+The metadata returned for a plot is structured very much like a grid (i.e., what we saw previously), but now we can leverage some attributes unique to a plot, such as image urls.
+
+```{r}
+library(htmltools)
+tags$img(src = p$image_urls$default)
+```
+
+## Downloading files
+
+You can also download a plot or a grid already hosted on plotly's web platform (assuming they're public, or you have the proper crendentials). When you download a plot, it is converted to an htmlwidget, meaning that when you print it, the plot will render entirely locally (i.e., you don't need internet access for it to render).
+
+```{r}
+p <- api_download_plot(200, "cpsievert")
+layout(
+  p, title ="An htmlwidget version of <a href='https://plot.ly/~cpsievert/200'>this</a> plot"
+)
+```
+
+There is no guarantee a plotly grid will _always_ map back to an R data frame, so `api_download_grid()` returns the abstract list representation of the data, but will _try to_ convert it to a data frame when printing.
+
+```{r}
+g <- api_download_grid(14681, "cpsievert")
+g
+```
+
+```{r}
+# note how the actual data is inside the 'preview' element
+listviewer::jsonedit(g)
+```
+
+
+

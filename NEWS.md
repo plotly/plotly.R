@@ -1,4 +1,16 @@
-# 4.5.6.9000
+# 4.6.0.9000
+
+## NEW FEATURES & IMPROVEMENTS
+
+* Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
+* Added support for `geom_sf()` and `coord_sf()`.
+
+## Bug fixes 
+
+* When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).
+* Fixed bug when highlight multiple 'simple key' traces (fixes #974) 
+
+# 4.6.0
 
 ## NEW FEATURES & IMPROVEMENTS
 
@@ -6,7 +18,9 @@
 * Added the `highlight()` function for configuring selection modes/sequences/options.
 * Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
-* Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`.
+* Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
+* Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
+* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
@@ -17,17 +31,21 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.25.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.25.2
-* `HTMLwidgets.renderValue()` now calls `Plotly.redraw()` instead of `Plotly.newPlot()`. (thanks @AleksandrIanevski)
+* Upgraded to plotly.js v1.26.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.26.1
+* `ggplotly()` now applies `format()` to automatically generated hoverinfo. This will allow for finer control over the text displayed (for instance, `options(digits = 4)` can now be used to choose the number of significant digits used). See #834 for an example.
+* `HTMLwidgets.renderValue()` should now avoid creating too many active WebGL contexts (thanks @AleksandrIanevski).
 * A TypedArray polyfill is now included by default, and the function `remove_typedarray_polyfill()` was added to make it easy to remove it. Fixes #824, #717, #825.
 * If no graphics device is already open, `ggplotly()` now tries to open/close a Cairo graphics device, then a bitmap (png/jpeg) device. If neither is available, it errors. This helps to ensure that a *screen* device is never opened by `ggplotly()` (which fixes #829). Furthermore, if `width`/`height` is not specified *and* no graphics device is currently open, a default of 640/480 is used for width/height of the device. 
 
 ## BUG FIXES
 
+
+* Placement of bars (in all cases, even when representing a negative count) should now be correct (applies to `geom_bar()`, `geom_histogram()`, `geom_col()`). Fixes #560, #874, #901, #831.
+* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
 * `embed_notebook()` now works in *nteract* notebooks (see #768). 
 * Axis categories are no longer reordered for matrices (see #863).
-* Fix for hoverinfo displaying the heights of bars in the translation `geom_bar()` via `ggplotly()`. Fixes #557 and #662.
-* Font faces for axis titles are now translated in `ggplotly()`. Fixes #861.
+* Fix for hoverinfo displaying values after scale transformations (in `ggplotly()`). Fixes #804.
+* Font faces for axis titles are now translated (in `ggplotly()`). Fixes #861.
 
 # 4.5.6
 

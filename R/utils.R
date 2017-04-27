@@ -21,7 +21,10 @@ is.webgl <- function(p) {
 }
 
 glTypes <- function() {
-  c("scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords")
+  c(
+    "scattergl", "scatter3d", "mesh3d", "heatmapgl", "pointcloud", "parcoords",
+    "surface"
+  )
 }
 
 # just like ggplot2:::is.discrete()
@@ -197,6 +200,8 @@ supply_defaults <- function(p) {
     axes <- if (is_type(p, "scatterternary"))  {
       c("aaxis", "baxis", "caxis") 
     } else if (is_type(p, "pie") || is_type(p, "parcoords")) {
+      # hack to avoid https://github.com/ropensci/plotly/issues/945
+      p$x$layout$margin <- NULL
       NULL
     } else {
       c("xaxis", "yaxis")
@@ -212,35 +217,28 @@ supply_defaults <- function(p) {
 
 supply_highlight_attrs <- function(p) {
   # set "global" options via crosstalk variable
-  hd <- highlight_defaults()
-  ctOpts <- Map(function(x, y) getOption(x, y), names(hd), hd)
+  p$x$highlight <- p$x$highlight %||% highlight_defaults()
   p <- htmlwidgets::onRender(
     p, sprintf(
       "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
-      jsonlite::toJSON(ctOpts, auto_unbox = TRUE)
+      to_JSON(p$x$highlight)
     )
   )
-  
-  # use "global" options as the default, but override with non-default options
-  # specified via highlight()
-  p$x$highlight <- p$x$highlight %||% hd
-  for (opt in names(ctOpts)) {
-    isDefault <- identical(p$x$highlight[[opt]], hd[[opt]])
-    if (isDefault) p$x$highlight[[opt]] <- ctOpts[[opt]]
-  }
   
   # defaults are now populated, allowing us to populate some other 
   # attributes such as the selectize widget definition
   sets <- unlist(lapply(p$x$data, "[[", "set"))
   keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  p$x$highlight$ctGroups <- I(unique(sets))
+  p$x$highlight$ctGroups <- i(unique(sets))
   
   # TODO: throw warning if we don't detect valid keys?
+  hasKeys <- FALSE
   for (i in p$x$highlight$ctGroups) {
     k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
     if (is.null(k)) next
     k <- k[!is.null(k)]
-    
+    hasKeys <- TRUE
+
     # include one selectize dropdown per "valid" SharedData layer
     if (isTRUE(p$x$highlight$selectize)) {
       p$x$selectize[[new_id()]] <- list(
@@ -255,6 +253,20 @@ supply_highlight_attrs <- function(p) {
         p, sprintf(
           "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
           i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+        )
+      )
+    }
+  }
+
+  # add HTML dependencies, set a sensible dragmode default, & throw messages
+  if (hasKeys) {
+    p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
+      default(switch(p$x$highlight$on %||% "", plotly_selected = "select") %||% "zoom")
+    if (is.default(p$x$highlight$off)) {
+      message(
+        sprintf(
+          "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
+          p$x$highlight$off, p$x$highlight$on
         )
       )
     }
@@ -278,24 +290,14 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule"),
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule"), 
       thisTrace$type
     )
   }
   invisible(p)
 }
 
-attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
-  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
-  if (length(illegalAttrs)) {
-    warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
-            "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
-            call. = FALSE)
-  }
-  invisible(proposedAttrs)
-}
+
 
 # ensure both the layout and trace attributes adhere to the plot schema
 verify_attr_spec <- function(p) {
@@ -322,41 +324,63 @@ verify_attr_spec <- function(p) {
 verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
     attrSchema <- schema[[attr]]
+    # if schema is missing (i.e., this is an un-official attr), move along
+    if (is.null(attrSchema)) next
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
+    arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
+    
+    # where applicable, reduce single valued vectors to a constant 
+    # (while preserving any 'special' attribute class)
+    if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
+      proposed[[attr]] <- structure(
+        unique(proposed[[attr]]), 
+        class = oldClass(proposed[[attr]])
+      )
+    }
+    
     # ensure data_arrays of length 1 are boxed up by to_JSON()
     if (identical(valType, "data_array")) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
-    # where applicable, reduce single valued vectors to a constant 
-    # (while preserving any 'special' attribute class)
-    if (!valType %in% c("data_array", "any") && !identical(role, "object")) {
-      proposed[[attr]] <- structure(
-        uniq(proposed[[attr]]), class = oldClass(proposed[[attr]])
-      )
-    }
+    
     # do the same for "sub-attributes"
+    # TODO: should this be done recursively?
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
+        if (is.null(attrSchema[[attr2]])) next
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
+        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
+        
+        if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
+          proposed[[attr]][[attr2]] <- structure(
+            unique(proposed[[attr]][[attr2]]), 
+            class = oldClass(proposed[[attr]][[attr2]])
+          )
+        }
+        
         # ensure data_arrays of length 1 are boxed up by to_JSON()
         if (identical(valType2, "data_array")) {
           proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
-        # where applicable, reduce single valued vectors to a constant
-        if (!valType2 %in% c("data_array", "any", "color") && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- structure(
-            uniq(proposed[[attr]][[attr2]]), class = oldClass(proposed[[attr]][[attr2]])
-          )
-        }
-        # we don't have to go more than two-levels, right?
       }
     }
   }
   proposed
 }
 
+attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
+  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if (length(illegalAttrs)) {
+    warning("'", type, "' objects don't have these attributes: '",
+            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            "Valid attributes include:\n'",
+            paste(validAttrs, collapse = "', '"), "'\n", 
+            call. = FALSE)
+  }
+  invisible(proposedAttrs)
+}
 
 # make sure trace type is valid
 # TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
@@ -523,7 +547,7 @@ populate_categorical_axes <- function(p) {
 }
 
 verify_arrays <- function(p) {
-  for (i in c("annotations", "shapes")) {
+  for (i in c("annotations", "shapes", "images")) {
     thing <- p$x$layout[[i]]
     if (is.list(thing) && !is.null(names(thing))) {
       p$x$layout[[i]] <- list(thing)
@@ -542,15 +566,6 @@ verify_hovermode <- function(p) {
       any(c("plotly_hover", "plotly_click") %in% p$x$highlight$on)) {
     p$x$layout$hovermode <- "closest"
   }
-  p
-}
-
-verify_dragmode <- function(p) {
-  if (!is.null(p$x$layout$dragmode)) {
-    return(p)
-  }
-  selecty <- has_highlight(p) && "plotly_selected" %in% p$x$highlight$on
-  p$x$layout$dragmode <- if (selecty) "lasso" else "zoom"
   p
 }
 
@@ -580,12 +595,6 @@ verify_key_type <- function(p) {
   }
   p 
 }
-
-has_highlight <- function(p) {
-  hasKey <- any(vapply(p$x$data, function(x) length(x[["key"]]), integer(1)) > 1)
-  hasKey && !is.null(p[["x"]][["highlight"]])
-}
-
 
 verify_webgl <- function(p) {
   # see toWebGL
@@ -781,6 +790,10 @@ replace_class <- function(x, new, old) {
   class(x) <- sub(old, new, class(x))
   x
 }
+remove_class <- function(x, y) {
+  oldClass(x) <- setdiff(oldClass(x), y)
+  x
+}
 
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "") {
@@ -796,29 +809,22 @@ get_kwargs <- function() {
   c("filename", "fileopt", "style", "traces", "layout", "frames", "world_readable")
 }
 
-# POST header fields
-#' @importFrom base64enc base64encode
-plotly_headers <- function(type = "main") {
-  usr <- verify("username")
-  key <- verify("api_key")
+# "common" POST header fields
+api_headers <- function() {
   v <- as.character(packageVersion("plotly"))
-  h <- if (type == "v2") {
-    auth <- base64enc::base64encode(charToRaw(paste(usr, key, sep = ":")))
-    c(
-      "authorization" = paste("Basic", auth),
-      "plotly-client-platform" = paste("R", v),
-      "plotly_version" = v,
-      "content-type" = "application/json"
-    )
-  } else {
-    c(
-      "plotly-username" = usr,
-      "plotly-apikey" = key,
-      "plotly-version" = v,
-      "plotly-platform" = "R"
-    )
-  }
-  httr::add_headers(.headers = h)
+  httr::add_headers(
+    plotly_version = v,
+    `Plotly-Client-Platform` = paste("R", v),
+    `Content-Type` = "application/json",
+    Accept = "*/*"
+  )
+}
+
+api_auth <- function() {
+  httr::authenticate(
+    verify("username"),
+    verify("api_key")
+  )
 }
 
 
@@ -841,4 +847,14 @@ cat_profile <- function(key, value, path = "~") {
   }
   message("Adding plotly_", key, " environment variable to ", r_profile)
   cat(snippet, file = r_profile, append = TRUE)
+}
+
+
+# check that suggested packages are installed
+try_library <- function(pkg, fun = NULL) {
+  if (system.file(package = pkg) != "") {
+    return(invisible())
+  }
+  stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
+       "Please install and try again.", call. = FALSE)
 }

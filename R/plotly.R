@@ -258,7 +258,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' dend1 <- as.dendrogram(hc)
 #' plot_dendro(dend1, height = 600) %>% 
 #'   hide_legend() %>% 
-#'   highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
+#'   highlight(persistent = TRUE, dynamic = TRUE)
 #' 
 
 plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {
@@ -356,7 +356,7 @@ as_widget <- function(x, ...) {
   # add plotly class mainly for printing method
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
-  htmlwidgets::createWidget(
+  w <- htmlwidgets::createWidget(
     name = "plotly",
     x = x,
     width = x$layout$width,
@@ -369,6 +369,10 @@ as_widget <- function(x, ...) {
     preRenderHook = plotly_build,
     dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill()))
   )
+  # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
+  # note this will throw a warning in shiny, but it is at least less obtrusive
+  w$elementId <- w$elementId %||% new_id()
+  w
 }
 
 typedArrayPolyfill <- function() {
@@ -392,6 +396,7 @@ typedArrayPolyfill <- function() {
 #' @export
 #' @examples 
 #' 
+#' \dontrun{
 #' p1 <- plot_ly()
 #' p2 <- remove_typedarray_polyfill(p1)
 #' t1 <- tempfile(fileext = ".html")
@@ -399,6 +404,7 @@ typedArrayPolyfill <- function() {
 #' file.info(t1)$size
 #' htmlwidgets::saveWidget(p2, t1)
 #' file.info(t1)$size
+#' }
 
 remove_typedarray_polyfill <- function(p) {
   isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))

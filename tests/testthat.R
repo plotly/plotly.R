@@ -150,8 +150,9 @@ test_run <- function(...) {
   test_check(...)
 }
 
-test_run("plotly")
-
+if (packageVersion("ggplot2") > "2.2.1") {
+  test_run("plotly")
+}
 
 # now, actually build the table (if necessary)
 if (build_table) {

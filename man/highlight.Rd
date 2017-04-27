@@ -2,23 +2,37 @@
 % Please edit documentation in R/highlight.R
 \name{highlight}
 \alias{highlight}
-\title{Highlight graphical elements in multiple linked views}
+\title{Query graphical elements in multiple linked views}
 \usage{
-highlight(p, on = "plotly_selected", off = "plotly_relayout",
-  persistent = FALSE, dynamic = FALSE, color = NULL, selectize = FALSE,
-  defaultValues = NULL, opacityDim = 0.2, hoverinfo = NULL,
-  showInLegend = FALSE)
+highlight(p, on = "plotly_click", off, persistent = getOption("persistent",
+  FALSE), dynamic = FALSE, color = NULL, selectize = FALSE,
+  defaultValues = NULL, opacityDim = getOption("opacityDim", 0.2),
+  selected = attrs_selected(), ...)
 }
 \arguments{
 \item{p}{a plotly visualization.}
 
-\item{on}{turn on a selection on which event(s)? Likely candidates are
-'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
-altogether, use \code{NULL}.}
+\item{on}{turn on a selection on which event(s)? To disable on events 
+altogether, use \code{NULL}. Currently the following are supported:
+\itemize{
+ \item \code{'plotly_click'}
+ \item \code{'plotly_hover'}
+ \item \code{'plotly_selected'}: triggered through rectangular 
+ (layout.dragmode = 'select') or lasso (layout.dragmode = 'lasso') brush.
+ Currently only works for scatter traces with mode 'markers'.
+}}
 
-\item{off}{turn off a selection on which event(s)? Likely candidates are
-'plotly_unhover', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
-events altogether, use \code{NULL}.}
+\item{off}{turn off a selection on which event(s)? To disable off 
+events altogether, use \code{NULL}. Currently the following are supported:
+\itemize{
+ \item \code{'plotly_doubleclick'}: triggered on a double mouse click while
+ (layout.dragmode = 'zoom') or (layout.dragmode = 'pan')
+ \item \code{'plotly_deselect'}: triggered on a double mouse click while 
+ (layout.dragmode = 'select') or (layout.dragmode = 'lasso')
+ \item \code{'plotly_relayout'}: triggered whenever axes are rescaled 
+ (i.e., clicking the home button in the modebar) or whenever the height/width
+ of the plot changes.
+}}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
@@ -27,7 +41,7 @@ events altogether, use \code{NULL}.}
 \item{color}{character string of color(s) to use for 
 highlighting selections. See \code{\link{toRGB}()} for valid color
 specifications. If \code{NULL} (the default), the color of selected marks
-are not altered (only their opacity).}
+are not altered.}
 
 \item{selectize}{provide a selectize.js widget for selecting keys? Note that 
 the label used for this widget derives from the groupName of the SharedData object.}
@@ -38,39 +52,55 @@ These values should match the key attribute.}
 \item{opacityDim}{a number between 0 and 1 used to reduce the
 opacity of non-selected traces (by multiplying with the existing opacity).}
 
-\item{hoverinfo}{hoverinfo attributes for the selected traces. The default,
-\code{NULL}, means to inherit the hoverinfo attribute from the non-selected traces.}
+\item{selected}{attributes of the selection, see \code{\link{attrs_selected}()}.}
 
-\item{showInLegend}{populate an additional legend entry for the selection?}
+\item{...}{currently not supported.}
 }
 \description{
 This function sets a variety of options for brushing (i.e., highlighting)
-plotly graphs. Use this function to set options (or populate widgets) 
-for a \emph{single} plot. When linking multiple plots, use 
-\code{\link{options}()} to set "global" options, where the option name 
-matches the relevant argument name. For instance, 
-to link multiple plots with \code{persistent} selection, set
-\code{options(persistent = TRUE)}. To see an example linking plotly to 
-leaflet, see \code{demo("highlight-leaflet", package = "leaflet")}
+multiple plots. These options are primarily designed for linking
+multiple plotly graphs, and may not behave as expected when linking 
+plotly to another htmlwidget package via crosstalk. In some cases,
+other htmlwidgets will respect these options, such as persistent selection
+in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
 }
 \examples{
+
+# These examples are designed to show you how to highlight/brush a *single*
+# view. For examples of multiple linked views, see `demo(package = "plotly")` 
+
 
 library(crosstalk)
 d <- SharedData$new(txhousing, ~city)
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
-ggplotly(p, tooltip = "city") \%>\%
-  highlight(on = "plotly_hover", color = "red")
-  
-# The group name is currently used to populate a title for the selectize widget
-sd <- SharedData$new(txhousing, ~city, "Choose a city")
-plot_ly(sd, x = ~date, y = ~median) \%>\%
-  group_by(city) \%>\%
-  add_lines(text = ~city, hoverinfo = "text") \%>\%
-  highlight(on = "plotly_hover", persistent = TRUE, selectize = TRUE)
+gg <- ggplotly(p, tooltip = "city") 
+highlight(gg, persistent = TRUE, dynamic = TRUE)
+
+# supply custom colors to the brush 
+cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
+highlight(
+  gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
+)
+
+# Use attrs_selected() for complete control over the selection appearance
+# note any relevant colors you specify here should override the color argument
+s <- attrs_selected(
+  showlegend = TRUE,
+  mode = "lines+markers",
+  marker = list(symbol = "x")
+)
+
+highlight(
+ layout(gg, showlegend = TRUE),  
+ selected = s, persistent = TRUE
+)
 
 }
 \references{
 \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+}
+\seealso{
+\code{\link{attrs_selected}()}
 }
 \author{
 Carson Sievert

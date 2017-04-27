@@ -19,10 +19,10 @@ gg2list(p, width = NULL, height = NULL, tooltip = "all",
 tooltip. The default, "all", means show all the aesthetic tooltips
 (including the unofficial "text" aesthetic).}
 
-\item{dynamicTicks}{should plotly.js dynamically generate axis tick labels? 
-Dynamic ticks are useful for updating ticks in response to zoom/pan
-interactions; however, they can not always reproduce labels as they 
-would appear in the static ggplot2 image.}
+\item{dynamicTicks}{accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
+Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
+interactions; however, there is no guarantee they reproduce axis tick text 
+as they would appear in the static ggplot2 image.}
 
 \item{layerData}{data from which layer should be returned?}
 

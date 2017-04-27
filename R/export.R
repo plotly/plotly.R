@@ -17,20 +17,19 @@
 #' @author Carson Sievert
 #' @examples 
 #' # The webshot package handles non-WebGL conversion to jpeg/png/pdf
+#' \dontrun{
 #' export(plot_ly(economics, x = ~date, y = ~pce))
 #' export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 #' 
-#' \dontrun{
-#'   # svg/webp output or WebGL conversion can be done via RSelenium
-#'   if (requireNamespace("RSelenium")) {
-#'    rD <- RSelenium::rsDriver(browser = "chrome")
-#'    export(
-#'      plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
-#'    )
-#'    export(
-#'      plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
-#'    )
-#'   }
+#' # svg/webp output or WebGL conversion can be done via RSelenium
+#' if (requireNamespace("RSelenium")) {
+#'  rD <- RSelenium::rsDriver(browser = "chrome")
+#'  export(
+#'    plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
+#'  )
+#'  export(
+#'    plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
+#'  )
 #' }
 #' 
 #' # If you can't get a selenium server running, another option is to
@@ -45,12 +44,12 @@
 #'      Plotly.downloadImage(gd, {format: 'png', width: 600, height: 400, filename: 'plot'});
 #'    }"
 #'  )
-#'  
+#'}
 export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
   # infer the file type
   fileType <- tolower(tools::file_ext(file))
   if (!fileType %in% c('jpeg', 'png', 'webp', 'svg', 'pdf')) {
-    stop("File type ", filetype, " not supported", call. = FALSE)
+    stop("File type ", fileType, " not supported", call. = FALSE)
   }
   if (is.webgl(p) && fileType %in% "pdf") {
     stop(
@@ -85,6 +84,7 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
   
   # phantomjs doesn't support webgl or svg/webp output
   if (use_webshot) {
+    try_library("webshot", "export")
     return(webshot::webshot(f, file, ...))
   }
   
@@ -92,7 +92,11 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
     # TODO: does this work cross-platform?
     selenium$client$navigate(paste0("file://", normalizePath(f)))
   } else {
-    stop("`selenium` must be an object of class 'rsClientServer'", call. = FALSE)
+    stop(
+      "Must provide an object of class 'rsClientServer' to the `selenium` ",
+      "argument to export this plot (see examples section on `help(export)`)",
+      call. = FALSE
+    )
   }
   message(
     sprintf("Success! Check your downloads folder for a file named: '%s'", file)

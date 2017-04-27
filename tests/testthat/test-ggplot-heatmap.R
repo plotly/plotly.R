@@ -25,7 +25,7 @@ test_that("geom_tile is translated to type=heatmap", {
     L$data[[1]]$hoverinfo == "text"
   )
   expect_true(
-    all(grepl("value: [-]?[0-9]+$", c(L$data[[1]]$text)))
+    all(grepl("value:\\s+[-]?[0-9]+$", c(L$data[[1]]$text)))
   )
 })
 
