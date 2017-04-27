@@ -12,13 +12,27 @@ highlight(p, on = "plotly_click", off, persistent = getOption("persistent",
 \arguments{
 \item{p}{a plotly visualization.}
 
-\item{on}{turn on a selection on which event(s)? Likely candidates are
-'plotly_hover', 'plotly_click', 'plotly_selected'. To disable on events 
-altogether, use \code{NULL}.}
+\item{on}{turn on a selection on which event(s)? To disable on events 
+altogether, use \code{NULL}. Currently the following are supported:
+\itemize{
+ \item \code{'plotly_click'}
+ \item \code{'plotly_hover'}
+ \item \code{'plotly_selected'}: triggered through rectangular 
+ (layout.dragmode = 'select') or lasso (layout.dragmode = 'lasso') brush.
+ Currently only works for scatter traces with mode 'markers'.
+}}
 
-\item{off}{turn off a selection on which event(s)? Likely candidates are
-'plotly_relayout', 'plotly_doubleclick', 'plotly_deselect'. To disable off 
-events altogether, use \code{NULL}.}
+\item{off}{turn off a selection on which event(s)? To disable off 
+events altogether, use \code{NULL}. Currently the following are supported:
+\itemize{
+ \item \code{'plotly_doubleclick'}: triggered on a double mouse click while
+ (layout.dragmode = 'zoom') or (layout.dragmode = 'pan')
+ \item \code{'plotly_deselect'}: triggered on a double mouse click while 
+ (layout.dragmode = 'select') or (layout.dragmode = 'lasso')
+ \item \code{'plotly_relayout'}: triggered whenever axes are rescaled 
+ (i.e., clicking the home button in the modebar) or whenever the height/width
+ of the plot changes.
+}}
 
 \item{persistent}{should selections persist (i.e., accumulate)?}
 
