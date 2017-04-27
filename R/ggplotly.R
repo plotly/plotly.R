@@ -697,6 +697,13 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
       
+      # set scaleanchor/scaleratio if these are fixed coordinates
+      fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
+      if (inherits(p$coordinates, fixed_coords) && xy == "y") {
+        axisObj$scaleanchor <- anchor
+        axisObj$scaleratio <- p$coordinates$ratio
+      }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
@@ -710,8 +717,6 @@ gg2list <- function(p, width = NULL, height = NULL,
           as.Date(x, origin = "1970-01-01", tz = scale$timezone)
         }
       }
-      
-      
       
       if (isDateType) {
         axisObj$range <- invert_date(axisObj$range, sc)
