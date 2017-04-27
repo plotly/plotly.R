@@ -97,6 +97,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     d <- datz[[i]]
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    show_legend <- paste0(names(Filter(function(x) x$guide != "none", discreteScales)), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
     split_by <- c(split_legend, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
@@ -117,7 +118,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     trs <- Map(function(x, y) { x$set <- attr(y, "set"); x}, trs, dl)
     # if we need a legend, set name/legendgroup/showlegend
     # note: this allows us to control multiple traces from one legend entry
-    if (any(split_legend %in% names(d))) {
+    if (any(show_legend %in% names(d))) {
       nms <- strsplit(names(trs), separator, fixed = TRUE)
       nms <- vapply(nms, function(x) {
         y <- unique(x[seq_along(split_legend)])
@@ -257,11 +258,26 @@ to_basic.GeomSegment <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- seq_len(nrow(data))
   others <- data[!names(data) %in% c("xmin", "ymin", "xmax", "ymax", "y", "x")]
+  if (inherits(p$coordinates, "CoordFlip")) {
+    x_min <- layout$y_min
+    x_max <- layout$y_max
+    y_min <- layout$x_min
+    y_max <- layout$x_max
+  } else {
+    x_min <- layout$x_min
+    x_max <- layout$x_max
+    y_min <- layout$y_min
+    y_max <- layout$y_max
+  }
   dat <- with(data, {
-    rbind(cbind(x = xmin, y = ymin, others),
-          cbind(x = xmin, y = ymax, others),
-          cbind(x = xmax, y = ymax, others),
-          cbind(x = xmax, y = ymin, others))
+    rbind(cbind(x = ifelse(xmin == -Inf, x_min, xmin),
+                y = ifelse(ymin == -Inf, y_min, ymin), others),
+          cbind(x = ifelse(xmin == -Inf, x_min, xmin),
+                y = ifelse(ymax == Inf, y_max, ymax), others),
+          cbind(x = ifelse(xmax == Inf, x_max, xmax),
+                y = ifelse(ymax == Inf, y_max, ymax), others),
+          cbind(x = ifelse(xmax == Inf, x_max, xmax),
+                y = ifelse(ymin == -Inf, y_min, ymin), others))
   })
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
@@ -786,10 +802,15 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomText <- function(data, params, p) {
+  text <- as.character(data[["label"]])
+  i_ind <- grepl("italic", data[["fontface"]])
+  text[i_ind]  <- paste0("<i>", text[i_ind], "</i>")
+  b_ind <- grepl("bold", data[["fontface"]])
+  text[b_ind]  <- paste0("<b>", text[b_ind], "</b>")
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
-    text = data[["label"]],
+    text = text,
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
@@ -799,6 +820,14 @@ geom2trace.GeomText <- function(data, params, p) {
       color = toRGB(
         aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
+      )
+    ),
+    textposition = paste0(
+      ifelse(data[["vjust"]] < 0.5, "top ",
+             ifelse(data[["vjust"]] > 0.5, "bottom ", "")
+      ),
+      ifelse(data[["hjust"]] < 0.5, "right",
+             ifelse(data[["vjust"]] > 0.5, "left", "center")
       )
     ),
     type = "scatter",
