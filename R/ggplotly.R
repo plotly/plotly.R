@@ -631,8 +631,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         } else{
           # convert the special *degree expression in plotmath to HTML entity
           # TODO: can this be done more generally for all ?
-          rng[[paste0(xy, ".labels")]] <- sub("\\*\\s+degree\\s+\\*", "&#176;", 
-              as.character(rng$graticule$degree_label)
+          rng[[paste0(xy, ".labels")]] <- sub(
+            "\\*\\s+degree\\s+\\*", "&#176;", rng[[paste0(xy, ".labels")]]
           )
         }
         
@@ -669,7 +669,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
-        range = rng[[paste0(xy, ".range")]]%||% rng[[paste0(xy, "_range")]],
+        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
         ticktext = rng[[paste0(xy, ".labels")]],
         tickvals = rng[[paste0(xy, ".major")]],
