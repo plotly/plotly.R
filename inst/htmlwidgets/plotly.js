@@ -421,7 +421,7 @@ HTMLWidgets.widget({
             }
             crosstalk.var("plotlySelectionHistory").set(selectionHistory);
             
-            // e.value is either null, or an array of newly selected values
+
             traceManager.updateSelection(set, e.value);
             // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
             if (x.selectize) {

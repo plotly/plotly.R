@@ -290,7 +290,7 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule"), 
       thisTrace$type
     )
   }

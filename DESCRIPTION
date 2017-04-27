@@ -60,6 +60,7 @@ Suggests:
     webshot,
     listviewer,
     dendextend,
+    sf,
     RSelenium,
     png,
     IRdisplay
