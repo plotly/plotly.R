@@ -1,5 +1,10 @@
 # 4.6.0.9000
 
+## NEW FEATURES & IMPROVEMENTS
+
+* Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
+* Added support for `geom_sf()` and `coord_sf()`.
+
 ## Bug fixes 
 
 * When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).

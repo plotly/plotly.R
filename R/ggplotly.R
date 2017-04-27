@@ -704,6 +704,14 @@ gg2list <- function(p, width = NULL, height = NULL,
         axisObj$scaleratio <- p$coordinates$ratio
       }
       
+      # TODO: should we implement aspect ratios?
+      if (!is.null(theme$aspect.ratio)) {
+        warning(
+          "Aspect ratios aren't yet implemented, but you can manually set", 
+          " a suitable height/width", call. = FALSE
+        )
+      }
+      
       # tickvals are currently on 0-1 scale, but we want them on data scale
       axisObj$tickvals <- scales::rescale(
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
