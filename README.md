@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
-
 # plotly
 
-An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
+[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
 
-## Installation
+> Create interactive web graphics from R via plotly's [JavaScript graphing library](https://github.com/plotly/plotly.js)
+
+## Install
 
 Install from CRAN:
 
@@ -18,7 +18,7 @@ Or install the latest development version (on GitHub) via devtools:
 devtools::install_github("ropensci/plotly")
 ```
 
-## Getting Started
+## Usage
 
 ### Web-based ggplot2 graphics
 
@@ -27,7 +27,7 @@ If you use [ggplot2](https://github.com/hadley/ggplot2), `ggplotly()` converts y
 ```r
 library(plotly)
 g <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
-  stat_density_2d(aes(fill = ..level..), geom = "polygon") + 
+  stat_density_2d(aes(fill = ..level..), geom = "polygon") +
   xlim(1, 6) + ylim(40, 100)
 ggplotly(g)
 ```
@@ -64,10 +64,18 @@ You can also hook into these events without shiny using `htmlwidgets::onRender()
 
 We have lots of examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive review is also available at <https://cpsievert.github.io/plotly_book/>
 
-## Contributing
+## Maintainers
 
-Please read through our [contributing guidelines](https://github.com/ropensci/plotly/blob/master/CONTRIBUTING.md). Included are directions for opening issues, asking questions, contributing changes to plotly, and our code of conduct. 
+- [@cpsievert](https://github.com/cpsievert)
 
----
+If you're interested in helping out as a maintainer, get involved!
+
+## Contribute
+
+Please read through our [contributing guidelines](https://github.com/ropensci/plotly/blob/master/CONTRIBUTING.md). Included are directions for opening issues, asking questions, contributing changes to Plotly, and our [code of conduct](CONDUCT.md).
 
 [![](http://ropensci.org/public_images/github_footer.png)](http://ropensci.org)
+
+## License
+
+[MIT](LICENSE.md) © 2017 Plotly, Inc
