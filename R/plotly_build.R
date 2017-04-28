@@ -166,11 +166,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     # collect non-positional scales, plotly.js data_arrays, and "special"
     # array attributes for "data training"
     Attrs <- Schema$traces[[trace[["type"]]]]$attributes
-    isArray <- lapply(Attrs, function(x) {
-      tryCatch(identical(x[["valType"]], "data_array"), error = function(e) FALSE)
-    })
+    isArray <- vapply(Attrs, function(x) {
+      tryFALSE(identical(x[["valType"]], "data_array"))
+    }, logical(1))
+    arrayOk <- vapply(Attrs, function(x) tryNULL(x[["arrayOk"]]) %||% FALSE, logical(1))
     # "non-tidy" traces allow x/y of different lengths, so ignore those
-    dataArrayAttrs <- if (is_tidy(trace)) names(Attrs)[as.logical(isArray)]
+    dataArrayAttrs <- if (is_tidy(trace)) names(Attrs)[isArray | arrayOk]
     allAttrs <- c(
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
