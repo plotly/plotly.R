@@ -31,18 +31,34 @@ subplot(p, scatterplot, shareY = TRUE) %>%
   )
 
 
-library(plotly)
-library(crosstalk)
 
 tx <- SharedData$new(txhousing, ~city)
-p1 <- ggplot(tx, aes(date, median, group = city)) + geom_line()
+p1 <- ggplot(tx, aes(date, median, group = city)) + geom_line() + xlab(NULL)
 p2 <- plot_ly(tx, x = ~median, color = I("black")) %>% 
   add_histogram(histnorm = "probability density")
 
-subplot(p1, p2) %>% 
+subplot(p1, p2, titleX = TRUE, titleY = TRUE) %>% 
   layout(barmode = "overlay") %>%
   highlight(
     dynamic = TRUE, persistent = TRUE, 
     selected = attrs_selected(opacity = 0.3)
   )
+
+
+
+
+d <- SharedData$new(mpg)
+dots <- plot_ly(d, color = ~class, x = ~displ, y = ~cyl)
+boxs <- plot_ly(d, color = ~class, x = ~class, y = ~cty) %>% add_boxplot()
+bars <- plot_ly(d, x = ~class, color = ~class)
+
+subplot(dots, boxs) %>%
+  subplot(bars, nrows = 2) %>%
+  layout(
+    dragmode = "select",
+    barmode = "overlay",
+    showlegend = FALSE
+  ) %>%
+  highlight("plotly_selected")
+
 
