@@ -72,4 +72,4 @@ subplot(tour, map, nrows = 2, margin = 0) %>%
   subplot(dend, shareY = FALSE, margin = 0) %>%
   hide_legend() %>%
   animation_opts(33, redraw = FALSE) %>%
-  highlight("plotly_click", NULL, persistent = T, dynamic = T)
+  highlight(persistent = TRUE, dynamic = TRUE)
