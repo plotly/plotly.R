@@ -11,14 +11,7 @@ HTMLWidgets.widget({
     // devtools::use_data(Schema, overwrite = T, internal = T)
     // console.log(JSON.stringify(Plotly.PlotSchema.get()));
     
-    return {
-      // Push JavaScript closures onto this list, and renderValue
-      // will pop them off and run them one at a time the next
-      // time it runs. Use this to dispose of e.g. old event
-      // registrations.
-      onNextRender: []
-    };
-    
+    return {};
   },
 
   resize: function(el, width, height, instance) {
@@ -30,11 +23,6 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
-
-    // Release previously registered crosstalk event listeners
-    while (instance.onNextRender.length > 0) {
-      instance.onNextRender.pop()();
-    }
       
     var shinyMode;
     if (typeof(window) !== "undefined") {
@@ -317,7 +305,63 @@ HTMLWidgets.widget({
       }
     }
 
-    if (allSets.length > 0) {
+    // register event listeners for all sets
+    for (var i = 0; i < allSets.length; i++) {
+      
+      var set = allSets[i];
+      var selection = new crosstalk.SelectionHandle(set);
+      var filter = new crosstalk.FilterHandle(set);
+      
+      var filterChange = function(e) {
+        removeBrush(el);
+        traceManager.updateFilter(set, e.value);
+      };
+      filter.on("change", filterChange);
+      
+      
+      var selectionChange = function(e) {
+        
+        // array of "event objects" tracking the selection history
+        // this is used to avoid adding redundant selections
+        var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
+        
+        // Construct an event object "defining" the current event. 
+        var event = {
+          receiverID: traceManager.gd.id,
+          plotlySelectionColour: crosstalk.group(set).var("plotlySelectionColour").get()
+        };
+        event[set] = e.value;
+        // TODO: is there a smarter way to check object equality?
+        if (selectionHistory.length > 0) {
+          var ev = JSON.stringify(event);
+          for (var i = 0; i < selectionHistory.length; i++) {
+            var sel = JSON.stringify(selectionHistory[i]);
+            if (sel == ev) {
+              return;
+            }
+          }
+        }
+        
+        // accumulate history for persistent selection
+        if (!x.highlight.persistent) {
+          selectionHistory = [event];
+        } else {
+          selectionHistory.push(event);
+        }
+        crosstalk.var("plotlySelectionHistory").set(selectionHistory);
+        
+        // do the actual updating of traces, frames, and the selectize widget
+        traceManager.updateSelection(set, e.value);
+        // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
+        if (x.selectize) {
+          if (!x.highlight.persistent || e.value === null) {
+            selectize.clear(true);
+          }
+          selectize.addItems(e.value, true);
+          selectize.close();
+        }
+      }
+      selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
       graphDiv.on(x.highlight.on, function turnOn(e) {
@@ -326,11 +370,9 @@ HTMLWidgets.widget({
           // Keys are group names, values are array of selected keys from group.
           for (var set in selectedKeys) {
             if (selectedKeys.hasOwnProperty(set)) {
-              crosstalk.group(set).var("selection")
-                .set(selectedKeys[set].value, {sender: el});
+              selection.set(selectedKeys[set].value, {sender: el});
             }
           }
-          
         }
       });
       
@@ -340,113 +382,59 @@ HTMLWidgets.widget({
         // remove any selection history
         crosstalk.var("plotlySelectionHistory").set(null);
         // trigger the actual removal of selection traces
-        for (var i = 0; i < allSets.length; i++) {
-          crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
-        }
+        selection.set(null, {sender: el});
       });
-      
-
-      for (var i = 0; i < allSets.length; i++) {
-        (function() {
-          var set = allSets[i];
-          var grp = crosstalk.group(set);
           
-          // Create a selectize widget for each group
-          if (x.selectize) {
-            var selectizeID = Object.keys(x.selectize)[i];
-            var items = x.selectize[selectizeID].items;
-            var first = [{value: "", label: "(All)"}];
-            var opts = {
-              options: first.concat(items),
-              searchField: "label",
-              valueField: "value",
-              labelField: "label",
-              maxItems: 50
-            };
-            var select = $("#" + selectizeID).find("select")[0];
-            var selectize = $(select).selectize(opts)[0].selectize;
-            // NOTE: this callback is triggered when *directly* altering 
-            // dropdown items
-            selectize.on("change", function() {
-              var currentItems = traceManager.groupSelections[set] || [];
-              if (!x.highlight.persistent) {
-                removeBrush(el);
-                for (var i = 0; i < currentItems.length; i++) {
-                  selectize.removeItem(currentItems[i], true);
-                }
-              }
-              var newItems = selectize.items.filter(function(idx) { 
-                return currentItems.indexOf(idx) < 0;
-              });
-              if (newItems.length > 0) {
-                traceManager.updateSelection(set, newItems);
-              } else {
-                // Item has been removed...
-                // TODO: this logic won't work for dynamically changing palette 
-                traceManager.updateSelection(set, null);
-                traceManager.updateSelection(set, selectize.items);
-              }
-            });
-          }
-          
-          
-          var crosstalkSelectionChange = function(e) {
-            
-            // array of "event objects" tracking the selection history
-            // this is used to avoid adding redundant selections
-            var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
-            
-            // Construct an event object "defining" the current event. 
-            var event = {
-              receiverID: traceManager.gd.id,
-              plotlySelectionColour: crosstalk.group(set).var("plotlySelectionColour").get()
-            };
-            event[set] = e.value;
-            // TODO: is there a smarter way to check object equality?
-            if (selectionHistory.length > 0) {
-              var ev = JSON.stringify(event);
-              for (var i = 0; i < selectionHistory.length; i++) {
-                var sel = JSON.stringify(selectionHistory[i]);
-                if (sel == ev) {
-                  return;
-                }
-              }
-            }
-            
-            // accumulate history for persistent selection
-            if (!x.highlight.persistent) {
-              selectionHistory = [event];
-            } else {
-              selectionHistory.push(event);
-            }
-            crosstalk.var("plotlySelectionHistory").set(selectionHistory);
-            
-
-            traceManager.updateSelection(set, e.value);
-            // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
-            if (x.selectize) {
-              if (!x.highlight.persistent || e.value === null) {
-                selectize.clear(true);
-              }
-              selectize.addItems(e.value, true);
-              selectize.close();
-            }
-            
-          }
-          
-          grp.var("selection").on("change", crosstalkSelectionChange);
-
-
-          grp.var("filter").on("change", function crosstalk_filter_change(e) {
+      // register a callback for selectize so that there is bi-directional
+      // communication between the widget and direct manipulation events
+      if (x.selectize) {
+        var selectizeID = Object.keys(x.selectize)[i];
+        var items = x.selectize[selectizeID].items;
+        var first = [{value: "", label: "(All)"}];
+        var opts = {
+          options: first.concat(items),
+          searchField: "label",
+          valueField: "value",
+          labelField: "label",
+          maxItems: 50
+        };
+        var select = $("#" + selectizeID).find("select")[0];
+        var selectize = $(select).selectize(opts)[0].selectize;
+        // NOTE: this callback is triggered when *directly* altering 
+        // dropdown items
+        selectize.on("change", function() {
+          var currentItems = traceManager.groupSelections[set] || [];
+          if (!x.highlight.persistent) {
             removeBrush(el);
-            traceManager.updateFilter(set, e.value);
+            for (var i = 0; i < currentItems.length; i++) {
+              selectize.removeItem(currentItems[i], true);
+            }
+          }
+          var newItems = selectize.items.filter(function(idx) { 
+            return currentItems.indexOf(idx) < 0;
           });
-  
-        })();
+          if (newItems.length > 0) {
+            traceManager.updateSelection(set, newItems);
+          } else {
+            // Item has been removed...
+            // TODO: this logic won't work for dynamically changing palette 
+            traceManager.updateSelection(set, null);
+            traceManager.updateSelection(set, selectize.items);
+          }
+        });
       }
+      
+      
+      
+      
+      
+          
+      
+      
     }
-  }
-});
+    
+  } // end of renderValue
+}); // end of widget definition
 
 /**
  * @param graphDiv The Plotly graph div
