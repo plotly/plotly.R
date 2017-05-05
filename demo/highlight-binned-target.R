@@ -34,10 +34,11 @@ subplot(p, scatterplot, shareY = TRUE) %>%
 
 tx <- SharedData$new(txhousing, ~city)
 p1 <- ggplot(tx, aes(date, median, group = city)) + geom_line() + xlab(NULL)
+gg1 <- ggplotly(p1, tooltip = c("city", "date", "median"))
 p2 <- plot_ly(tx, x = ~median, color = I("black")) %>% 
   add_histogram(histnorm = "probability density")
 
-subplot(p1, p2, titleX = TRUE, titleY = TRUE) %>% 
+subplot(gg1, p2, titleX = TRUE, titleY = TRUE) %>% 
   layout(barmode = "overlay") %>%
   highlight(
     dynamic = TRUE, persistent = TRUE, 
