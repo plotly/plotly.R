@@ -287,9 +287,6 @@ test_that("simple animation targeting works", {
     }
   }
   
-  
-  
-  
   # since all trace types are scatter, redraw = FALSE
   buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args
   expect_false(buttonArgs[[2]]$frame$redraw)
@@ -298,7 +295,23 @@ test_that("simple animation targeting works", {
   res <- lapply(steps, function(s) {
     expect_false(s$args[[2]]$frame$redraw)
   })
+})
+
+test_that("animation frames are boxed up correctly", {
+  dallas <- subset(txhousing, city == "Dallas" & month == 1)
+  p <- ggplot(dallas) +
+    geom_point(aes(x = volume, y = sales, frame = year))
+  l <- plotly_build(p)$x
   
+  for (i in seq_along(l$frames)) {
+    traces <- l$frames[[i]]$data
+    for (j in seq_along(traces)) {
+      x <- traces[[j]]$x
+      y <- traces[[j]]$y
+      expect_true(length(x) > 1 || inherits(x, "AsIs"))
+      expect_true(length(y) > 1 || inherits(y, "AsIs"))
+    }
+  }
   
 })
 

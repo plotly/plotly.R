@@ -450,10 +450,12 @@ registerFrames <- function(p, frameMapping = NULL) {
       invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
       d <- c(d, list(invisible))
     }
-    
     p$x$frames[[i]] <- list(
       name = as.character(format(nm)),
-      data = d
+      data = lapply(d, function(tr) { 
+        spec <- Schema$traces[[tr$type %||% "scatter"]]$attributes
+        verify_attr(tr, spec)
+      })
     )
   }
   
