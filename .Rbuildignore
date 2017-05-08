@@ -13,3 +13,6 @@ Untitled*
 rsconnect/
 revdep/
 ^LICENSE\.md$
+^packrat/
+^\.Rprofile$
+Matt/

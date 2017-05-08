@@ -21,11 +21,18 @@
 # elong <- tidyr::gather(economics, variable, value, -date)
 # plot_ly(group2NA(elong, "variable"), x = ~date, y = ~value)
 # 
-
+# @import data.table
+#
 group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
                      retrace.first = inherits(data, "GeomPolygon")) {
   if (NROW(data) == 0) return(data)
-  data <- data[!duplicated(names(data))]
+  
+  if(data.table::is.data.table(data)){
+    data <- data[,unique(names(data)),with=FALSE]
+  } else {
+    data <- data[!duplicated(names(data))]
+  }
+  
   # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
   retrace <- force(retrace.first)
   datClass <- class(data)
@@ -34,41 +41,38 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   groupNames <- groupNames[groupNames %in% names(data)]
   nested <- nested[nested %in% names(data)]
   ordered <- ordered[ordered %in% names(data)]
-  # ignore any already existing groups
-  data <- dplyr::ungroup(data)
+  
+  # ignore any already existing groups (not required w/data.table?)
   
   # if group doesn't exist, just arrange before returning
   if (!length(groupNames)) {
     if (length(ordered)) {
-      data <- dplyr::arrange_(data, c(nested, ordered))
+      data.table::setDT(data,key = c(nested, ordered))
     }
     return(data)
   }
+  
   allVars <- c(nested, groupNames, ordered)
-  for (i in allVars) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  # first, arrange everything
-  data <- dplyr::do(data, dplyr::arrange_(., allVars))
-  data <- dplyr::ungroup(data)
-  for (i in c(nested, groupNames)) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  # TODO: this is slow, can it be done with dplyr::slice()?
+  
+  ## first, arrange everything (not required w/data.table?)
+  
+  # TODO: this is slow
   d <- if (retrace.first) {
-    dplyr::do(data, rbind.data.frame(., .[1,], NA))
+    data.table::setDT(data)[, index := .GRP, keyby = allVars][, .SD[c(1:(.N),1,(.N+1))], keyby = index][,index := NULL]
   } else {
-    dplyr::do(data, rbind.data.frame(., NA))
+    data.table::setDT(data)[, index := .GRP, keyby = allVars][, .SD[1:(.N+1)], keyby = index][,index := NULL]
   }
+  
   # TODO: how to drop the NAs separating the nested values? Does it even matter?
   # d <- dplyr::ungroup(d)
   # for (i in nested) {
   #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
   # }
   # d <- dplyr::do(d, .[seq_len(NROW(.)),])
-  n <- NROW(d)
-  if (all(is.na(d[n, ]))) d <- d[-n, ]
+  
+  if (all(is.na(d[.N, ]))) d <- d[-.N,]
   structure(d, class = datClass)
+  
 }
 
 
