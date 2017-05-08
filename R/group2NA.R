@@ -54,8 +54,6 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   allVars <- c(nested, groupNames, ordered)
   
-  ## first, arrange everything (not required w/data.table?)
-  
   # TODO: this is slow
   d <- if (retrace.first) {
     data.table::setDT(data)[, index := .GRP, keyby = allVars][, .SD[c(1:(.N),1,(.N+1))], keyby = index][,index := NULL]
