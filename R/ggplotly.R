@@ -681,7 +681,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           # convert the special *degree expression in plotmath to HTML entity
           # TODO: can this be done more generally for all ?
           rng[[paste0(xy, ".labels")]] <- sub(
-            "\\*\\s+degree\\s+\\*", "&#176;", rng[[paste0(xy, ".labels")]]
+            "\\*\\s+degree[ ]?[\\*]?", "&#176;", rng[[paste0(xy, ".labels")]]
           )
         }
         

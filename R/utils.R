@@ -574,7 +574,8 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
-    uk <- unique(k)
+    # does it *ever* make sense to have a missing key value?
+    uk <- uniq(k)
     if (length(uk) == 1) {
       # i.e., the key for this trace has one value. In this case, 
       # we don't have iterate through the entire key, so instead, 
