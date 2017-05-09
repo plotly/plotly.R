@@ -54,11 +54,11 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   allVars <- c(nested, groupNames, ordered)
   
-  # TODO: this is slow
+  # TODO: better now
   d <- if (retrace.first) {
-    data.table::setDT(data)[, index := .GRP, keyby = allVars][, .SD[c(1:(.N),1,(.N+1))], keyby = index][,index := NULL]
+    data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ]
   } else {
-    data.table::setDT(data)[, index := .GRP, keyby = allVars][, .SD[1:(.N+1)], keyby = index][,index := NULL]
+    data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ]
   }
   
   # TODO: how to drop the NAs separating the nested values? Does it even matter?
