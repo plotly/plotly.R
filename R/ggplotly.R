@@ -198,10 +198,17 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
-  # It is undesirable to both open a *screen* device and leave a new device
-  # open, so if required, we open a non-screen device now, and close on exit 
-  # see https://github.com/att/rcloud.htmlwidgets/issues/2
-  if (is.null(grDevices::dev.list()) || identical(Sys.getenv("RSTUDIO"), "1")) {
+  # To avoid undesirable side effects, we may need to open a 
+  # non-interactive device and close it on exit...
+  # https://github.com/att/rcloud.htmlwidgets/issues/2
+  
+  # Note that we never have to open a non-interactive device 
+  # in RStudio since it ships with one...
+  rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
+  width <- width %||% rStudioDevSize[1]
+  height <- height %||% rStudioDevSize[2]
+  # note that calling dev.size() (inside RStudio) will add it to the list
+  if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
     } else if (capabilities("png")) {
