@@ -52,9 +52,8 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   if (!length(groupNames)) {
     if (length(ordered)) {
       return(
-        structure(
-          data.table::setDT(data,key = c(nested, ordered)),
-          class = datClass)
+          data.table::setDT(data,key = c(nested, ordered)) %>%
+          structure(class = datClass)
       )
     } else {
       return(data)
@@ -74,10 +73,9 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
         structure(class = datClass)
     )
   } else {
-    return(
-      structure(
-        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), .N+1L)], by=allVars]$V1 ][-.N,],
-        class = datClass)
+    return(      
+        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), .N+1L)], by=allVars]$V1 ][-.N,] %>%
+        structure(class = datClass)
     )
   }
   
