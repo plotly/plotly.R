@@ -859,3 +859,7 @@ try_library <- function(pkg, fun = NULL) {
   stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
        "Please install and try again.", call. = FALSE)
 }
+
+is_rstudio <- function() {
+  identical(Sys.getenv("RSTUDIO", NA), "1")
+}
