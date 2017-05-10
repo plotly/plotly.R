@@ -76,7 +76,7 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   } else {
     return(
       structure(
-        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ][-.N,],
+        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), .N+1L)], by=allVars]$V1 ][-.N,],
         class = datClass)
     )
   }
