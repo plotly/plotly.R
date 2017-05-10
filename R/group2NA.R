@@ -25,7 +25,13 @@
 #
 group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
                      retrace.first = inherits(data, "GeomPolygon")) {
+  
   if (NROW(data) == 0) return(data)
+  
+  ## make copy and eliminate duplicated column names
+  ## If data is already an internal copy and does not need to be protected from in place modifications, then 
+  ## the copy being created here could be eliminated for all cases except where column names are duplicated -- 
+  ## wouldn't save much time, but could lower amt. of memory allocation required for plotly calls.
   
   if(data.table::is.data.table(data)){
     data <- data[,unique(names(data)),with=FALSE]
@@ -33,44 +39,55 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
     data <- data[!duplicated(names(data))]
   }
   
-  # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
+  ## store class information from function input
   retrace <- force(retrace.first)
   datClass <- class(data)
   
-  # sanitize variable names
+  ## sanitize variable names
   groupNames <- groupNames[groupNames %in% names(data)]
   nested <- nested[nested %in% names(data)]
   ordered <- ordered[ordered %in% names(data)]
   
-  # ignore any already existing groups (not required w/data.table?)
-  
-  # if group doesn't exist, just arrange before returning
+  ## if group doesn't exist, just arrange before returning
   if (!length(groupNames)) {
     if (length(ordered)) {
-      data.table::setDT(data,key = c(nested, ordered))
+      return(
+        structure(
+          data.table::setDT(data,key = c(nested, ordered)),
+          class = datClass)
+      )
+    } else {
+      return(data)
     }
-    return(data)
   }
   
   allVars <- c(nested, groupNames, ordered)
   
-  # TODO: better now
-  d <- if (retrace.first) {
-    data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ]
+  ## if retrace.first is TRUE,repeat the first row of each group and add an empty row of NA's after each group.
+  ## if retrace.first is FALSE, just add an empty row to each group.
+  ## delete final row of NA's, return d with the original class
+  
+  ## IMPORTANT: does it matter if operating w/data.table setDT() clobbers row names attribute?
+  if (retrace.first) {
+    return(
+      data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ][-.N,] %>% 
+        structure(class = datClass)
+    )
   } else {
-    data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ]
+    return(
+      structure(
+        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ][-.N,],
+        class = datClass)
+    )
   }
   
-  # TODO: how to drop the NAs separating the nested values? Does it even matter?
+  ## IMPORTANT: does this still need to be done?
+  ## TODO: how to drop the NAs separating the nested values? Does it even matter?
   # d <- dplyr::ungroup(d)
   # for (i in nested) {
   #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
   # }
   # d <- dplyr::do(d, .[seq_len(NROW(.)),])
-  
-  if (all(is.na(d[.N, ]))) d <- d[-.N,]
-  structure(d, class = datClass)
-  
 }
 
 
