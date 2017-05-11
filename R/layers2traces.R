@@ -291,6 +291,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   }
   if (length(d) == 1) d[[1]] else d
 }
+utils::globalVariables(c(".plotlySfType"))
 
 #' @export
 to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {

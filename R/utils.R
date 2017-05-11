@@ -331,12 +331,13 @@ verify_attr <- function(proposed, schema) {
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
     
     # where applicable, reduce single valued vectors to a constant 
-    # (while preserving any 'special' attribute class)
+    # (while preserving attributes)
     if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
+      attrVals <- proposed[[attr]]
       proposed[[attr]] <- structure(
-        unique(proposed[[attr]]), 
-        class = oldClass(proposed[[attr]])
+        unique(attrVals), class = oldClass(attrVals)
       )
+      attributes(proposed[[attr]]) <- attributes(attrVals)
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
@@ -354,10 +355,11 @@ verify_attr <- function(proposed, schema) {
         arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
         
         if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
+          attrVals <- proposed[[attr]][[attr2]]
           proposed[[attr]][[attr2]] <- structure(
-            unique(proposed[[attr]][[attr2]]), 
-            class = oldClass(proposed[[attr]][[attr2]])
+            unique(attrVals), class = oldClass(attrVals)
           )
+          attributes(proposed[[attr]][[attr2]]) <- attributes(attrVals)
         }
         
         # ensure data_arrays of length 1 are boxed up by to_JSON()
