@@ -8,6 +8,7 @@
 ## CHANGES
 
 * Upgraded to plotly.js v1.27.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.27.0
+* The `traces` argument in the `style()` function now defaults to `NULL` (instead of 1). Meaning that, by default, supplied attributes now modify _every_ trace (instead of the first one).
 
 ## Bug fixes 
 

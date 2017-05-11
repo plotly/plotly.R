@@ -6,8 +6,9 @@
 #'
 #' @param p A plotly visualization.
 #' @param ... Visual properties.
-#' @param traces numeric vector. Which traces should be modified?
-#' @seealso \code{\link{get_figure}()}
+#' @param traces numeric vector. Which traces should be modified? By default,
+#' attributes place in \code{...} will be applied to every trace.
+#' @seealso \code{\link{api_download_plot}()}
 #' @author Carson Sievert
 #' @export
 #' @examples 
@@ -16,9 +17,10 @@
 #' # keep the hover info for points, but remove it for the line/ribbon
 #' style(p, hoverinfo = "none", traces = c(2, 3))
 #' 
-style <- function(p, ..., traces = 1) {
+style <- function(p, ..., traces = NULL) {
   p <- plotly_build(p)
   nTraces <- length(p$x$data)
+  traces <- traces %||% seq_len(nTraces)
   idx <- traces > nTraces
   traces <- traces[!idx]
   if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
