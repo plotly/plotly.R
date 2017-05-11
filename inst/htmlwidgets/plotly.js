@@ -161,6 +161,19 @@ HTMLWidgets.widget({
       
     }
     
+    // for ggplotly labels, scale annotation height/width sensibly
+    plot.then(function(gd) {
+      var layout = x.layout || {};
+      var anns = layout.annotations || [];
+      for (var i = 0; i < anns.length; i++) {
+        anns[i].width = anns[i].ggplotlyDirection === "horizontal" ? gd._fullLayout._size.w : anns[i].width;
+        anns[i].height = anns[i].ggplotlyDirection === "vertical" ? gd._fullLayout._size.h : anns[i].height;
+      }
+      if (anns.length > 0) {
+        Plotly.relayout(gd, {annotations: anns});
+      }
+    });
+    
     // Attach attributes (e.g., "key", "z") to plotly event data
     function eventDataWithKey(eventData) {
       if (eventData === undefined || !eventData.hasOwnProperty("points")) {
@@ -360,7 +373,8 @@ HTMLWidgets.widget({
           selectize.addItems(e.value, true);
           selectize.close();
         }
-      }
+      };
+      
       selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
@@ -423,14 +437,7 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
-      
-      
-      
-          
-      
-      
+
     }
     
   } // end of renderValue
