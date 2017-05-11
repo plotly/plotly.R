@@ -367,7 +367,8 @@ as_widget <- function(x, ...) {
       defaultHeight = 400
     ),
     preRenderHook = plotly_build,
-    dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill()))
+    dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill())),
+    ...
   )
   # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
   # note this will throw a warning in shiny, but it is at least less obtrusive
