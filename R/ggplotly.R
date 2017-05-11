@@ -785,7 +785,6 @@ gg2list <- function(p, width = NULL, height = NULL,
         )
         # shift the title 
         shift <- switch(xy, x = "yshift", y = "xshift")
-        browser()
         axisLabel[[shift]] <-  -axisSize
         gglayout <- label_add(gglayout, axisLabel)
         gglayout$margin[[side]] <- gglayout$margin[[side]] + 
