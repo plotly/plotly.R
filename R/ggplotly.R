@@ -770,28 +770,30 @@ gg2list <- function(p, width = NULL, height = NULL,
         
         # add that to the relevant margin
         side <- substr(sc$position, 0, 1)
+        
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisSize
         
         # draw axis title as annotation
-        # TODO: account for sc$position!
         axisTitle <- theme_el("axis.title")
         axisTitleText <- sc$name %||% plot$labels[[xy]]
         axisLabel <- label_create(
-          faced(axisTitleText, axisTitle$face), 
-          0, 0, el = axisTitle,
+          faced(axisTitleText, axisTitle$face), el = axisTitle,
+          0, switch(side, b = 0, t = 1),
+          yanchor = switch(xy, y = "bottom", x = switch(side, b = "top", t = "bottom")),
           annotationType = paste0(xy, "axis"),
           # horizontal labels scale with graph width, vertical labels scale with graph height
           direction = switch(xy, x = "horizontal", y = "vertical")
         )
         # shift the title 
         shift <- switch(xy, x = "yshift", y = "xshift")
-        axisLabel[[shift]] <-  -axisSize
+        # one of these _has_ to be fixed...it should be correct one
+        axisFixedSize <- (axisLabel$height %||% axisLabel$width)
+        axisLabel[[shift]] <-  switch(side, t = axisSize, r = axisSize, b = -axisSize, l = -axisSize)
         gglayout <- label_add(gglayout, axisLabel)
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + 
-          # one of these _has_ to be fixed...it should be correct one
-          (axisLabel$height %||% axisLabel$width)
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisFixedSize
           
-        
+          
+        #if (xy == "x") browser()
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
