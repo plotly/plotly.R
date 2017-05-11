@@ -5,6 +5,10 @@
 * Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
 * Added support for `geom_sf()` and `coord_sf()`.
 
+## CHANGES
+
+* Upgraded to plotly.js v1.27.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.27.0
+
 ## Bug fixes 
 
 * When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).
