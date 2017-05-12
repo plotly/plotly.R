@@ -69,6 +69,19 @@ to_milliseconds <- function(x) {
   x
 }
 
+# apply a function to x, retaining class and "special" plotly attributes
+retain <- function(x, f = identity) {
+  y <- structure(f(x), class = oldClass(x))
+  attrs <- attributes(x)
+  # TODO: do we set any other "special" attributes internally 
+  # (grepping "structure(" suggests no)
+  attrs <- attrs[names(attrs) %in% "defaultAlpha"]
+  if (length(attrs)) {
+    attributes(y) <- attrs
+  }
+  y
+}
+
 deparse2 <- function(x) {
   if (is.null(x) || !is.language(x)) return(NULL)
   sub("^~", "", paste(deparse(x, 500L), collapse = ""))
@@ -331,12 +344,9 @@ verify_attr <- function(proposed, schema) {
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
     
     # where applicable, reduce single valued vectors to a constant 
-    # (while preserving any 'special' attribute class)
+    # (while preserving attributes)
     if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
-      proposed[[attr]] <- structure(
-        unique(proposed[[attr]]), 
-        class = oldClass(proposed[[attr]])
-      )
+      proposed[[attr]] <- retain(proposed[[attr]], unique)
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
@@ -354,10 +364,7 @@ verify_attr <- function(proposed, schema) {
         arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
         
         if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- structure(
-            unique(proposed[[attr]][[attr2]]), 
-            class = oldClass(proposed[[attr]][[attr2]])
-          )
+          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
         }
         
         # ensure data_arrays of length 1 are boxed up by to_JSON()
