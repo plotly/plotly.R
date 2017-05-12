@@ -65,7 +65,11 @@ plot_ly(z = ~volcano, type = "surface")
 The R package has special support for linking/highlighting/filtering views that is not (yet) available outside of the R package. This functionality is built upon the [**crosstalk** package](https://rstudio.github.io/crosstalk/), which distinguishes between two event classes: *select* and *filter*. The **plotly** package interprets these classes in the following way:
 
 1. **Select**: add new "selection" trace(s) (i.e., graphical marks) and *dim* the other traces. Some people refer to this as "brushing" or "highlighting".
-1. **Filter**: retain "selection" trace(s), but *remove* other traces, and update the layout accordingly. Some people refer to this as "crossfilter" or "drill-down". 
+2. **Filter**: retain "selection" trace(s), but *remove* other traces, and update the layout accordingly. Some people refer to this as "crossfilter" or "drill-down". 
+
+The following gif helps to demonstrate the difference -- see [here](http://rpubs.com/cpsievert/275511) for the code used to generate it. 
+
+![http://rpubs.com/cpsievert/275511](http://i.imgur.com/cYsuNQn.gif)
 
 Like other [crosstalk enabled widgets](https://rstudio.github.io/crosstalk/widgets.html), **plotly** responds to filter events, but you can't (yet) emit a filter event via direct manipulation of a plotly graph. Unlike (some) other crosstalk enabled widgets, **plotly** has advanced support for select events (which is much broader class than filter), like [persistent/dynamic brushing](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#transient-versus-persistent-selection), [brushing via indirect manipulation](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#selection-via-indirect-manipulation), and even ways to [completely control the appearance new selection traces](https://cpsievert.github.io/plotcon17/workshop/day2/#21). In other words, these "special" brushing features work when linking multiple **plotly** graphs, but may not when linking to other crosstalk enabled widgets. 
 
