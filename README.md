@@ -47,19 +47,17 @@ style(gg, hoveron = "points+fills", hoverinfo = "x+y+text", hoverlabel = list(bg
 
 Moreover, since `ggplotly()` returns a plotly object, you can apply essentially any function from the R package on that object. Some useful ones include `layout()` (for [customizing the layout](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#customizing-the-layout)), `add_traces()` (and its higher-level `add_*()` siblings, for example `add_polygons()`, for [adding new traces/data](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#leveraging-statistical-output)), `subplot()` (for [combining multiple plotly objects](https://cpsievert.github.io/plotly_book/merging-plotly-objects.html)), and `plotly_json()` (for inspecting the underlying JSON sent to plotly.js).
 
-The `ggplotly()` function will also respect some "unofficial" **ggplot2** aesthetics, namely `text` (for [customizing the tooltip](http://i.imgur.com/G1rSArP.gifv)) and `frame` (for [creating animations](https://cpsievert.github.io/plotly_book/key-frame-animations.html)). 
+The `ggplotly()` function will also respect some "unofficial" **ggplot2** aesthetics, namely `text` (for [customizing the tooltip](https://cpsievert.github.io/plotly_book/a-case-study-of-housing-sales-in-texas.html#fig:ggsubplot)) and `frame` (for [creating animations](https://cpsievert.github.io/plotly_book/key-frame-animations.html)). 
 
-### plotly's custom R interface
+### Using plotly without ggplot2
 
-[plotly.js](https://github.com/plotly/plotly.js) supports some chart types that ggplot2 doesn't (our [cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) provides a nice summary of the available chart types). You can create any of these charts via `plot_ly()`.
+The `plot_ly()` function provides a more direct interface to plotly.js so you can leverage more specialized chart types (e.g., [parallel coordinates](https://plot.ly/r/parallel-coordinates-plot/) or [maps](https://plot.ly/r/maps/)) or even some visualization that the ggplot2 API won't ever support (e.g., surface, [mesh](https://plot.ly/r/3d-mesh/), [trisurf](https://plot.ly/r/trisurf/), or sankey diagrams). The [cheatsheet]((https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) is a nice quick reference for this interface, but the [plotly cookbook](https://cpsievert.github.io/plotly_book/the-plotly-cookbook.html) has more complete overview of the philosophy behind this "non-ggplot2" approach.
 
 ```r
 plot_ly(z = ~volcano, type = "surface")
 ```
 
 ![https://plot.ly/~brnvg/1134](https://plot.ly/~brnvg/1134.png)
-
-The [plotly cookbook](https://cpsievert.github.io/plotly_book/the-plotly-cookbook.html) is the most complete official reference for learning about this "non-ggplot2" approach.
 
 
 ## Crosstalk support
