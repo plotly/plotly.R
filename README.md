@@ -51,7 +51,7 @@ The `ggplotly()` function will also respect some "unofficial" **ggplot2** aesthe
 
 ### Using plotly without ggplot2
 
-The `plot_ly()` function provides a more direct interface to plotly.js so you can leverage more specialized chart types (e.g., [parallel coordinates](https://plot.ly/r/parallel-coordinates-plot/) or [maps](https://plot.ly/r/maps/)) or even some visualization that the ggplot2 API won't ever support (e.g., surface, [mesh](https://plot.ly/r/3d-mesh/), [trisurf](https://plot.ly/r/trisurf/), or sankey diagrams). The [cheatsheet]((https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) is a nice quick reference for this interface, but the [plotly cookbook](https://cpsievert.github.io/plotly_book/the-plotly-cookbook.html) has more complete overview of the philosophy behind this "non-ggplot2" approach.
+The `plot_ly()` function provides a more direct interface to plotly.js so you can leverage more specialized chart types (e.g., [parallel coordinates](https://plot.ly/r/parallel-coordinates-plot/) or [maps](https://plot.ly/r/maps/)) or even some visualization that the ggplot2 API won't ever support (e.g., surface, [mesh](https://plot.ly/r/3d-mesh/), [trisurf](https://plot.ly/r/trisurf/), or sankey diagrams). The [cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf) is a nice quick reference for this interface, but the [plotly cookbook](https://cpsievert.github.io/plotly_book/the-plotly-cookbook.html) has more complete overview of the philosophy behind this "non-ggplot2" approach.
 
 ```r
 plot_ly(z = ~volcano, type = "surface")
