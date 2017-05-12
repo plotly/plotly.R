@@ -43,7 +43,7 @@ gg <- ggplotly(g, dynamicTicks = "y")
 style(gg, hoveron = "points+fills", hoverinfo = "x+y+text", hoverlabel = list(bgcolor = "white"))
 ```
 
-![http://i.imgur.com/qRvLgea.gifv](http://i.imgur.com/eVqsZma.gif)
+![http://i.imgur.com/qRvLgea.gifv](http://imgur.com/qRvLgea.gif)
 
 Moreover, since `ggplotly()` returns a plotly object, you can apply essentially any function from the R package on that object. Some useful ones include `layout()` (for [customizing the layout](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#customizing-the-layout)), `add_traces()` (and its higher-level `add_*()` siblings, for example `add_polygons()`, for [adding new traces/data](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#leveraging-statistical-output)), `subplot()` (for [combining multiple plotly objects](https://cpsievert.github.io/plotly_book/merging-plotly-objects.html)), and `plotly_json()` (for inspecting the underlying JSON sent to plotly.js).
 
