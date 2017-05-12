@@ -75,7 +75,7 @@ Like other [crosstalk enabled widgets](https://rstudio.github.io/crosstalk/widge
 
 To date, [this slide deck](https://cpsievert.github.io/plotcon17/workshop/day2) is the most comprehensive, yet somewhat thorough, walk-through of this framework, but the [linking views without shiny](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html) chapter of the [plotly book](https://cpsievert.github.io/plotly_book/) provides more background. There are also numerous demos shipped with the package which provide nice examples (list all the demos via `demo(package = "plotly")`).
 
-In some sense, **plotly**'s **crosstalk** support provides interactive tools for exploring subsets of your data with a fixed definition from data to plot. If you need more flexibility, you can also [capture plotly events in shiny](https://cpsievert.github.io/plotly_book/linking-views-with-shiny.html), but this flexibility comes with a cost -- the result is no longer standalone HTML (harder to share/host) and linking views requires sophicated knowledge/use of shiny's reactive programming framework.
+**plotly**'s **crosstalk** functionality aims to provide tools for interactively exploring subsets of your data with a fixed definition from data to plot. If you need more flexibility, you can always embed **crosstalk** plots within a larger **shiny** app, or even [access and respond to any plotly event within shiny](https://cpsievert.github.io/plotly_book/linking-views-with-shiny.html), but adding **shiny** into the equation comes with a cost -- the result is no longer standalone HTML (harder to share/host) and linking views requires fairly sophicated knowledge/use of shiny's reactive programming framework.
 
 ## Learn more
 
