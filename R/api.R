@@ -1,5 +1,5 @@
-api_create_plot <- function(x = last_plot(), filename = NULL,
-                            sharing = c("public", "private", "secret"), ...) {
+api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
+                            sharing = "public", ...) {
   
   x <- plotly_build(x)[["x"]]
   
@@ -8,18 +8,14 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   plotname <- if (len > 1) filename[[1]] else filename
   gridname <- if (len > 1) filename[[2]] else if (len == 1) paste(filename, "Grid")
   
-  # returns a file object *only* when user refuses to overwrite it
-  file <- api_trash_filename(plotname)
-  if (is.file(file)) return(file)
+  plotname <- api_resolve_filename(plotname, fileopt = fileopt)
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(plotname)
   
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
-  x <- api_srcify(x, filename = gridname, sharing = sharing)
-  
-  sharing <- match.arg(sharing)
+  x <- api_srcify(x, filename = gridname, fileopt = fileopt, sharing = sharing)
   
   bod <- compact(list(
     figure = compact(x[c("data", "layout", "frames")]),
@@ -34,21 +30,13 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   prefix_class(res$file, c("api_plot", "api_file"))
 }
 
-api_create_grid <- function(x, filename = NULL,
-                            sharing = c("public", "private", "secret"), ...) {
+api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
+                            sharing = "public", ...) {
   
-  if (length(filename) > 1) {
-    stop("Length of filename must be 1 or 0 (NULL)", call. = FALSE)
-  }
-  
-  # returns a file object *only* when user refuses to overwrite it
-  file <- api_trash_filename(filename)
-  if (is.file(file)) return(file)
+  filename <- api_resolve_filename(filename, fileopt = fileopt)
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(filename)
-  
-  sharing <- match.arg(sharing)
   
   bod <- compact(list(
     data = df2grid(x),
@@ -68,6 +56,38 @@ api_create_grid <- function(x, filename = NULL,
 # Helper functions
 # ---------------------------------------------------------------------------
 
+
+api_resolve_filename <- function(filename = NULL, fileopt) {
+  if (is.null(filename)) return(filename)
+  file <- api_lookup_file(filename)
+  if (is.null(file)) return(filename)
+  
+  message(sprintf("A %s named '%s' already exists.", file$filetype, file$filename))
+  if (identical(fileopt, "new")) {
+    message("Creating a new file with the default naming scheme")
+    return(NULL)
+  }
+  if (identical(fileopt, "overwrite")) {
+    if (identical(file$filetype, "fold")) {
+      stop(
+        "You can't overwrite a folder with a file. Please specify a new filename", 
+        call. = FALSE
+      )
+    }
+    message("Since `fileopt='overwrite'`, the current file will be deleted and replaced with a new one.")
+    api_trash_file(file)
+    return(filename)
+  }
+  
+  # this should never happen
+  stop("Unsupported `fileopt` value", call. = FALSE)
+}
+
+api_lookup_file <- function(filename = NULL) {
+  file <- tryNULL(api(paste0("files/lookup?path=", filename)))
+  if (is.null(file)) file else prefix_class(file, "api_file")
+}
+
 # returns the "parent" directory of the filename (and NULL if none exists)
 api_pave_path <- function(filename = NULL) {
   parent <- dirname(filename %||% ".")
@@ -80,52 +100,17 @@ api_pave_path <- function(filename = NULL) {
   parent
 }
 
-api_trash_filename <- function(filename = NULL) {
-  file <- api_lookup_file(filename)
-  if (is.null(file)) return(NULL)
-  overwrite <- readline(
-    sprintf("I found a file already named '%s' on your account. Overwrite it? [y/n]", filename)
-  )
-  # default to overwrite, so that you can overwrite non-interactively
-  if (identical(overwrite, "n")) {
-    message("Returning the file '", filename, "' without overwriting it.")
-    return(prefix_class(file, "api_file"))
-  }
-  api_trash_file(file)
-}
-
-api_lookup_file <- function(filename = NULL) {
-  file <- tryNULL(api(paste0("files/lookup?path=", filename)))
-  if (is.null(file)) file else prefix_class(file, "api_file")
-}
-
 api_trash_file <- function(file) {
-  if (!is.file(file)) {
-    stop("Can't trash a non-file object:", call. = FALSE)
-  }
-  # make *really* sure before trashing a folder
-  if (identical("fold", file$filetype)) {
-    prompt <- readline(
-      sprintf(
-        "'%s' is a folder. Trash it *and* all of its children? [y/n]", 
-        file$filename
-      )
-    )
-    if (!identical(prompt, "y")) {
-      message("Ok, I won't trash this folder.")
-      return(file)
-    }
-  }
+  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
   # TODO: remind user they can recover files?
   endpoint <- sprintf("files/%s/trash", file$fid)
   res <- api(endpoint, "POST")
   invisible(TRUE)
 }
 
-
 # upload *one* grid of data array attributes, and replace actual trace data
 # with src/uid references 
-api_srcify <- function(p, filename = new_id(), sharing = "public") {
+api_srcify <- function(p, filename = new_id(), fileopt = "overwrite", sharing = "public") {
   
   # filter to all the "src-ifiable" trace attributes
   srcs <- lapply(p$data, trace_filter_src)
@@ -145,7 +130,7 @@ api_srcify <- function(p, filename = new_id(), sharing = "public") {
   # create a grid as long as there is >1 src attribute
   if (length(srcFlat)) {
     # TODO: allow user do specify filename of the grid?
-    resp <- api_create_grid(srcFlat, filename = filename, sharing = sharing)
+    resp <- api_create_grid(srcFlat, filename = filename, fileopt = fileopt, sharing = sharing)
     
     # create an index mapping so we can assign a uid back to a frame/trace
     srcMap <- lapply(srcAll, function(frame) { 

@@ -10,17 +10,17 @@
 \alias{api}
 \title{Tools for working with plotly's REST API (v2)}
 \usage{
-api_create(x = last_plot(), filename = NULL, sharing = c("public",
-  "private", "secret"), ...)
+api_create(x = last_plot(), filename = NULL, fileopt = c("overwrite",
+  "new"), sharing = c("public", "private", "secret"), ...)
 
 \method{api_create}{plotly}(x = last_plot(), filename = NULL,
-  sharing = c("public", "private", "secret"), ...)
+  fileopt = "overwrite", sharing = "public", ...)
 
 \method{api_create}{ggplot}(x = last_plot(), filename = NULL,
-  sharing = c("public", "private", "secret"), ...)
+  fileopt = "overwrite", sharing = "public", ...)
 
-\method{api_create}{data.frame}(x, filename = NULL, sharing = c("public",
-  "private", "secret"), ...)
+\method{api_create}{data.frame}(x, filename = NULL, fileopt = "overwrite",
+  sharing = "public", ...)
 
 api_download_plot(id, username)
 
@@ -33,10 +33,10 @@ api(endpoint = "/", verb = "GET", body = NULL, ...)
 Can be a plotly/ggplot2 object or a \link{data.frame}.}
 
 \item{filename}{character vector naming file(s). If \code{x} is a plot,
-can be a vector of length 2 naming both the plot AND the underlying grid.
-If a filename matches a file that already exists, you will be prompted with 
-an option to overwrite it (if called non-interactively, the file will be 
-overwritten automatically, unless it is a folder).}
+can be a vector of length 2 naming both the plot AND the underlying grid.}
+
+\item{fileopt}{character string describing whether to "overwrite" existing 
+files or ensure "new" file(s) are always created.}
 
 \item{sharing}{If 'public', anyone can view this graph. It will appear in 
 your profile and can appear in search engines. You do not need to be

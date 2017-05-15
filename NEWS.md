@@ -4,6 +4,7 @@
 
 * Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
 * Added support for `geom_sf()` and `coord_sf()`.
+* The `api_create()` function gains a new `fileopt` argument inspired from the `fileopt` argument in `plotly_POST()` (fixes #976).
 
 ## CHANGES
 
