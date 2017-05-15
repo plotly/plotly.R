@@ -12,17 +12,7 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
-  for (i in seq_along(x$data)) {
-    x$data[[i]] <- api_srcify(x$data[[i]], sharing = sharing)
-  }
-  
-  # same for animation frames
-  for (i in seq_along(x$frames)) {
-    frame <- x$frames[[i]]
-    for (j in seq_along(frame$data)) {
-      x$frames[[i]]$data[[j]] <- api_srcify(frame$data[[j]], sharing = sharing)
-    }
-  }
+  x <- api_srcify(x, filename = new_id(), sharing = sharing)
   
   sharing <- match.arg(sharing)
   
@@ -123,27 +113,76 @@ api_trash_file <- function(file) {
   invisible(TRUE)
 }
 
-# upload a grid of data array attributes, attach src references to the trace,
-# and remove the actual data from trace
-api_srcify <- function(trace, sharing = "public") {
-  Attrs <- Schema$traces[[trace[["type"]]]]$attributes
-  isArray <- vapply(
-    Attrs, function(x) tryFALSE(identical(x[["valType"]], "data_array")), logical(1)
-  )
-  arrayOK <- vapply(Attrs, function(x) tryFALSE(isTRUE(x[["arrayOk"]])), logical(1))
-  grid <- trace[names(trace) %in% names(Attrs)[isArray | arrayOK]]
-  # create the grid and replace actual data with "src pointers"
-  if (length(grid)) {
-    resp <- api_create_grid(grid, filename = new_id(), sharing = sharing)
-    fid <- resp[["fid"]]
-    cols <- resp[["cols"]]
-    for (j in seq_along(cols)) {
-      col <- cols[[j]]
-      trace[[paste0(col$name, "src")]] <- paste(fid, col$uid, sep = ":")
-      trace[[col$name]] <- NULL
+
+# upload *one* grid of data array attributes, and replace actual trace data
+# with src/uid references 
+api_srcify <- function(p, filename = new_id(), sharing = "public") {
+  
+  # filter to all the "src-ifiable" trace attributes
+  srcs <- lapply(p$data, trace_filter_src)
+  
+  # do the same for frames (if frames is NULL, this returns `list()`)
+  srcFrames <- lapply(p$frames, function(f) {
+    lapply(f$data, trace_filter_src)
+  })
+  
+  # treat p$data as the "first frame" (i.e., create a list where first level 
+  # is "frames", second is "traces", and third is "src attributes")
+  srcAll <- c(list(srcs), srcFrames)
+  
+  # reduce to a list of src attributes
+  srcFlat <- Reduce(c, Reduce(c, srcAll))
+  
+  # create a grid as long as there is >1 src attribute
+  if (length(srcFlat)) {
+    # TODO: allow user do specify filename of the grid?
+    resp <- api_create_grid(srcFlat, filename = filename, sharing = sharing)
+    
+    # create an index mapping so we can assign a uid back to a frame/trace
+    srcMap <- lapply(srcAll, function(frame) { 
+      rep(seq_along(frame), lengths(frame))
+    })
+    
+    # sanity check
+    if (length(srcFlat) != sum(lengths(srcMap))) {
+      stop(
+        "Something went wrong. Please report to https://github.com/ropensci/plotly/issues/new",
+        call. = FALSE
+      )
     }
+    
+    # replace data values with uid references 
+    # TODO: this has to be hopelessly slow with many frames...
+    ctr <- 1
+    for (i in seq_along(srcMap)) {
+      traceIndicies <- srcMap[[i]]
+      for (j in seq_along(traceIndicies)) {
+        index <- traceIndicies[[j]]
+        col <- resp[["cols"]][[ctr]]
+        nm <- names(srcFlat)[[ctr]]
+        if (i > 1) {
+          p$frames[[i - 1]]$data[[index]][[nm]] <- NULL
+          p$frames[[i - 1]]$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
+        } else {
+          p$data[[index]][[nm]] <- NULL
+          p$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
+        }
+        ctr <- ctr + 1
+      }
+    }
+    
   }
-  trace
+  
+  p
+}
+
+# filter a trace down to it's "src-able" attributes
+trace_filter_src <- function(trace) {
+  if (!length(trace)) return(trace)
+  type <- trace[["type"]] %||% "scatter"
+  attrs <- Schema$traces[[type]]$attributes
+  srcs <- sub("src$", "", grep("src$", names(attrs), value = TRUE))
+  trace[names(trace) %in% srcs]
 }
 
 # transform a data frame to plotly's grid schema
