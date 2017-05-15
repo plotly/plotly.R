@@ -30,11 +30,12 @@ api(endpoint = "/", verb = "GET", body = NULL, ...)
 }
 \arguments{
 \item{x}{An R object to hosted on plotly's web platform. 
-Can be a plotly/ggplot2 object, a data frame, a list of options, or \code{NULL}.}
+Can be a plotly/ggplot2 object or a \link{data.frame}.}
 
-\item{filename}{character string naming the file. If this string 
-matches a file that already exists, you will be prompted with an option
-to overwrite it (if called non-interactively, the file will be 
+\item{filename}{character vector naming file(s). If \code{x} is a plot,
+can be a vector of length 2 naming both the plot AND the underlying grid.
+If a filename matches a file that already exists, you will be prompted with 
+an option to overwrite it (if called non-interactively, the file will be 
 overwritten automatically, unless it is a folder).}
 
 \item{sharing}{If 'public', anyone can view this graph. It will appear in 

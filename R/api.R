@@ -1,24 +1,29 @@
 api_create_plot <- function(x = last_plot(), filename = NULL,
                             sharing = c("public", "private", "secret"), ...) {
   
+  x <- plotly_build(x)[["x"]]
+  
+  # filename can be of length 2 (in that case, first filename is plotname)
+  len <- length(filename)
+  plotname <- if (len > 1) filename[[1]] else filename
+  gridname <- if (len > 1) filename[[2]] else if (len == 1) paste(filename, "Grid")
+  
   # returns a file object *only* when user refuses to overwrite it
-  file <- api_trash_filename(filename)
+  file <- api_trash_filename(plotname)
   if (is.file(file)) return(file)
   
   # retrieve the parent path, and ensure it exists
-  parent_path <- api_pave_path(filename)
-  
-  x <- plotly_build(x)[["x"]]
+  parent_path <- api_pave_path(plotname)
   
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
-  x <- api_srcify(x, filename = new_id(), sharing = sharing)
+  x <- api_srcify(x, filename = gridname, sharing = sharing)
   
   sharing <- match.arg(sharing)
   
   bod <- compact(list(
     figure = compact(x[c("data", "layout", "frames")]),
-    filename = if (!is.null(filename)) basename(filename),
+    filename = if (!is.null(plotname)) basename(plotname),
     parent_path = if (!is.null(parent_path)) parent_path,
     world_readable = identical(sharing, "public"),
     share_key_enabled = identical(sharing, "secret"),
@@ -31,6 +36,10 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
 
 api_create_grid <- function(x, filename = NULL,
                             sharing = c("public", "private", "secret"), ...) {
+  
+  if (length(filename) > 1) {
+    stop("Length of filename must be 1 or 0 (NULL)", call. = FALSE)
+  }
   
   # returns a file object *only* when user refuses to overwrite it
   file <- api_trash_filename(filename)
