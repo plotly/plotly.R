@@ -74,7 +74,7 @@ test_that("Creating produces a new file by default", {
   # even if plot has multiple traces, only one grid should be created
   p1 <- plot_ly(mtcars, x = ~mpg, y = ~wt)
   p2 <- add_markers(p1, color = ~factor(cyl))
-  p2 <- add_markers(p1, color = ~factor(cyl), frame = ~factor(vs))
+  p3 <- add_markers(p1, color = ~factor(cyl), frame = ~factor(vs))
   expect_new(p1)
   expect_new(p2)
   expect_new(p3)
@@ -86,11 +86,9 @@ test_that("Can overwrite a grid", {
   
   id <- new_id()
   m <- api_create(mtcars, id)
-  mfile <- plotly:::api_lookup_file(id)
   m2 <- api_create(iris, id)
-  m2file <- plotly:::api_lookup_file(id)
-  expect_true(identical(mfile$embed_url, m2file$embed_url))
-  expect_false(identical(mfile$preview, m2file$preview))
+  expect_true(identical(m$embed_url, m2$embed_url))
+  expect_false(identical(m$cols, m2$cols))
 })
 
 test_that("Can overwrite a plot", {
@@ -99,11 +97,9 @@ test_that("Can overwrite a plot", {
   id <- new_id()
   p <- plot_ly()
   m <- api_create(p, id)
-  mfile <- plotly:::api_lookup_file(id)
   m2 <- api_create(layout(p, title = "test"), id)
-  m2file <- plotly:::api_lookup_file(id)
-  expect_true(identical(mfile$embed_url, m2file$embed_url))
-  expect_false(identical(mfile$figure$layout$title, m2file$figure$layout$title))
+  expect_true(identical(m$embed_url, m2$embed_url))
+  expect_false(identical(m$figure$layout$title, m2$figure$layout$title))
 })
 
 
