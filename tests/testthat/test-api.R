@@ -81,16 +81,29 @@ test_that("Creating produces a new file by default", {
 })
 
 
-test_that("Can overwrite a file", {
+test_that("Can overwrite a grid", {
   skip_on_cran()
-  skip_if_not(!interactive())
   
   id <- new_id()
   m <- api_create(mtcars, id)
   mfile <- plotly:::api_lookup_file(id)
   m2 <- api_create(iris, id)
   m2file <- plotly:::api_lookup_file(id)
+  expect_true(identical(mfile$embed_url, m2file$embed_url))
   expect_false(identical(mfile$preview, m2file$preview))
+})
+
+test_that("Can overwrite a plot", {
+  skip_on_cran()
+  
+  id <- new_id()
+  p <- plot_ly()
+  m <- api_create(p, id)
+  mfile <- plotly:::api_lookup_file(id)
+  m2 <- api_create(layout(p, title = "test"), id)
+  m2file <- plotly:::api_lookup_file(id)
+  expect_true(identical(mfile$embed_url, m2file$embed_url))
+  expect_false(identical(mfile$figure$layout$title, m2file$figure$layout$title))
 })
 
 

@@ -8,7 +8,15 @@ api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwri
   plotname <- if (len > 1) filename[[1]] else filename
   gridname <- if (len > 1) filename[[2]] else if (len == 1) paste(filename, "Grid")
   
-  plotname <- api_resolve_filename(plotname, fileopt = fileopt)
+  # if file already exists, determine if we can overwrite it
+  origfile <- api_lookup_file(plotname)
+  overwrite <- is.file(origfile) && identical(fileopt, "overwrite")
+  if (overwrite && !identical(origfile$filetype, "plot")) {
+    stop(
+      sprintf("Can overwrite a file of type '%s' with a plot", origfile$filetype),
+      call. = FALSE
+    )
+  }
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(plotname)
@@ -26,14 +34,36 @@ api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwri
     ...
   ))
   
-  res <- api("plots", "POST", to_JSON(bod))
-  prefix_class(res$file, c("api_plot", "api_file"))
+  # overwrite the original file; otherwise, let plotly create it
+  res <- if (overwrite) {
+    
+    message(sprintf(
+      "Found a plot already named: '%s'. Since fileopt='overwrite', I'll try to update it", 
+      origfile$filename
+    ))
+    api(paste0("plots/", origfile$fid), "PATCH", to_JSON(bod))
+    
+  } else {
+    
+    api("plots", "POST", to_JSON(bod))$file
+    
+  }
+  
+  prefix_class(res, c("api_plot", "api_file"))
 }
 
 api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
                             sharing = "public", ...) {
   
-  filename <- api_resolve_filename(filename, fileopt = fileopt)
+  # if file already exists, determine if we can overwrite it
+  origfile <- api_lookup_file(filename)
+  overwrite <- is.file(origfile) && identical(fileopt, "overwrite")
+  if (overwrite && !identical(origfile$filetype, "grid")) {
+    stop(
+      sprintf("Can overwrite a file of type '%s' with a grid", origfile$filetype),
+      call. = FALSE
+    )
+  }
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(filename)
@@ -47,41 +77,35 @@ api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
     ...
   ))
   
-  res <- api("grids", "POST", to_JSON(bod))
-  prefix_class(res$file, c("api_grid", "api_file"))
+  # At least for now, 'overwrite' really means append new columns
+  # It shouldn't be so convoluted/hard to update a grid! -- https://api.plot.ly/v2/grids#col
+  res <- if (overwrite) {
+    
+    message(sprintf(
+      "Found a grid already named: '%s'. Since fileopt='overwrite', I'll try to update it", 
+      origfile$filename
+    ))
+    cols <- bod$data$cols
+    colz <- Map(function(x, y) {
+      list(name = paste0(x, "-", new_id()), data = y$data)
+    }, names(cols), cols)
+    colString <- as.character(to_JSON(setNames(colz, NULL)))
+    resp <- api(sprintf("grids/%s/col", origfile$fid), "POST", to_JSON(list(cols = colString)))
+    modify_list(origfile, resp)
+    
+  } else {
+    
+    api("grids", "POST", to_JSON(bod))$file
+    
+  }
+  
+  prefix_class(res, c("api_grid", "api_file"))
 }
 
 
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
-
-
-api_resolve_filename <- function(filename = NULL, fileopt) {
-  if (is.null(filename)) return(filename)
-  file <- api_lookup_file(filename)
-  if (is.null(file)) return(filename)
-  
-  message(sprintf("A %s named '%s' already exists.", file$filetype, file$filename))
-  if (identical(fileopt, "new")) {
-    message("Creating a new file with the default naming scheme")
-    return(NULL)
-  }
-  if (identical(fileopt, "overwrite")) {
-    if (identical(file$filetype, "fold")) {
-      stop(
-        "You can't overwrite a folder with a file. Please specify a new filename", 
-        call. = FALSE
-      )
-    }
-    message("Since `fileopt='overwrite'`, the current file will be deleted and replaced with a new one.")
-    api_trash_file(file)
-    return(filename)
-  }
-  
-  # this should never happen
-  stop("Unsupported `fileopt` value", call. = FALSE)
-}
 
 api_lookup_file <- function(filename = NULL) {
   file <- tryNULL(api(paste0("files/lookup?path=", filename)))
@@ -100,13 +124,12 @@ api_pave_path <- function(filename = NULL) {
   parent
 }
 
-api_trash_file <- function(file) {
-  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
-  # TODO: remind user they can recover files?
-  endpoint <- sprintf("files/%s/trash", file$fid)
-  res <- api(endpoint, "POST")
-  invisible(TRUE)
-}
+#api_trash_file <- function(file) {
+#  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
+#  res <- api(sprintf("files/%s/trash", file$fid), "POST")
+#  res2 <- api(sprintf("files/%s/permanent_delete", file$fid), "DELETE")
+#  invisible(TRUE)
+#}
 
 # upload *one* grid of data array attributes, and replace actual trace data
 # with src/uid references 
