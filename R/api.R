@@ -1,34 +1,25 @@
-api_create_plot <- function(x = last_plot(), filename = NULL,
-                            sharing = c("public", "private", "secret"), ...) {
-  
-  # returns a file object *only* when user refuses to overwrite it
-  file <- api_trash_filename(filename)
-  if (is.file(file)) return(file)
-  
-  # retrieve the parent path, and ensure it exists
-  parent_path <- api_pave_path(filename)
+api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
+                            sharing = "public", ...) {
   
   x <- plotly_build(x)[["x"]]
   
+  # filename can be of length 2 (in that case, first filename is plotname)
+  len <- length(filename)
+  plotname <- if (len > 1) filename[[1]] else filename
+  gridname <- if (len > 1) filename[[2]] else if (len == 1) paste(filename, "Grid")
+  
+  plotname <- api_resolve_filename(plotname, fileopt = fileopt)
+  
+  # retrieve the parent path, and ensure it exists
+  parent_path <- api_pave_path(plotname)
+  
   # in v2, traces must reference grid data, so create grid references first
   # http://moderndata.plot.ly/simple-rest-apis-for-charts-and-datasets/
-  for (i in seq_along(x$data)) {
-    x$data[[i]] <- api_srcify(x$data[[i]], sharing = sharing)
-  }
-  
-  # same for animation frames
-  for (i in seq_along(x$frames)) {
-    frame <- x$frames[[i]]
-    for (j in seq_along(frame$data)) {
-      x$frames[[i]]$data[[j]] <- api_srcify(frame$data[[j]], sharing = sharing)
-    }
-  }
-  
-  sharing <- match.arg(sharing)
+  x <- api_srcify(x, filename = gridname, fileopt = fileopt, sharing = sharing)
   
   bod <- compact(list(
     figure = compact(x[c("data", "layout", "frames")]),
-    filename = if (!is.null(filename)) basename(filename),
+    filename = if (!is.null(plotname)) basename(plotname),
     parent_path = if (!is.null(parent_path)) parent_path,
     world_readable = identical(sharing, "public"),
     share_key_enabled = identical(sharing, "secret"),
@@ -39,17 +30,13 @@ api_create_plot <- function(x = last_plot(), filename = NULL,
   prefix_class(res$file, c("api_plot", "api_file"))
 }
 
-api_create_grid <- function(x, filename = NULL,
-                            sharing = c("public", "private", "secret"), ...) {
+api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
+                            sharing = "public", ...) {
   
-  # returns a file object *only* when user refuses to overwrite it
-  file <- api_trash_filename(filename)
-  if (is.file(file)) return(file)
+  filename <- api_resolve_filename(filename, fileopt = fileopt)
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(filename)
-  
-  sharing <- match.arg(sharing)
   
   bod <- compact(list(
     data = df2grid(x),
@@ -69,6 +56,38 @@ api_create_grid <- function(x, filename = NULL,
 # Helper functions
 # ---------------------------------------------------------------------------
 
+
+api_resolve_filename <- function(filename = NULL, fileopt) {
+  if (is.null(filename)) return(filename)
+  file <- api_lookup_file(filename)
+  if (is.null(file)) return(filename)
+  
+  message(sprintf("A %s named '%s' already exists.", file$filetype, file$filename))
+  if (identical(fileopt, "new")) {
+    message("Creating a new file with the default naming scheme")
+    return(NULL)
+  }
+  if (identical(fileopt, "overwrite")) {
+    if (identical(file$filetype, "fold")) {
+      stop(
+        "You can't overwrite a folder with a file. Please specify a new filename", 
+        call. = FALSE
+      )
+    }
+    message("Since `fileopt='overwrite'`, the current file will be deleted and replaced with a new one.")
+    api_trash_file(file)
+    return(filename)
+  }
+  
+  # this should never happen
+  stop("Unsupported `fileopt` value", call. = FALSE)
+}
+
+api_lookup_file <- function(filename = NULL) {
+  file <- tryNULL(api(paste0("files/lookup?path=", filename)))
+  if (is.null(file)) file else prefix_class(file, "api_file")
+}
+
 # returns the "parent" directory of the filename (and NULL if none exists)
 api_pave_path <- function(filename = NULL) {
   parent <- dirname(filename %||% ".")
@@ -81,69 +100,83 @@ api_pave_path <- function(filename = NULL) {
   parent
 }
 
-api_trash_filename <- function(filename = NULL) {
-  file <- api_lookup_file(filename)
-  if (is.null(file)) return(NULL)
-  overwrite <- readline(
-    sprintf("I found a file already named '%s' on your account. Overwrite it? [y/n]", filename)
-  )
-  # default to overwrite, so that you can overwrite non-interactively
-  if (identical(overwrite, "n")) {
-    message("Returning the file '", filename, "' without overwriting it.")
-    return(prefix_class(file, "api_file"))
-  }
-  api_trash_file(file)
-}
-
-api_lookup_file <- function(filename = NULL) {
-  file <- tryNULL(api(paste0("files/lookup?path=", filename)))
-  if (is.null(file)) file else prefix_class(file, "api_file")
-}
-
 api_trash_file <- function(file) {
-  if (!is.file(file)) {
-    stop("Can't trash a non-file object:", call. = FALSE)
-  }
-  # make *really* sure before trashing a folder
-  if (identical("fold", file$filetype)) {
-    prompt <- readline(
-      sprintf(
-        "'%s' is a folder. Trash it *and* all of its children? [y/n]", 
-        file$filename
-      )
-    )
-    if (!identical(prompt, "y")) {
-      message("Ok, I won't trash this folder.")
-      return(file)
-    }
-  }
+  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
   # TODO: remind user they can recover files?
   endpoint <- sprintf("files/%s/trash", file$fid)
   res <- api(endpoint, "POST")
   invisible(TRUE)
 }
 
-# upload a grid of data array attributes, attach src references to the trace,
-# and remove the actual data from trace
-api_srcify <- function(trace, sharing = "public") {
-  Attrs <- Schema$traces[[trace[["type"]]]]$attributes
-  isArray <- vapply(
-    Attrs, function(x) tryFALSE(identical(x[["valType"]], "data_array")), logical(1)
-  )
-  arrayOK <- vapply(Attrs, function(x) tryFALSE(isTRUE(x[["arrayOk"]])), logical(1))
-  grid <- trace[names(trace) %in% names(Attrs)[isArray | arrayOK]]
-  # create the grid and replace actual data with "src pointers"
-  if (length(grid)) {
-    resp <- api_create_grid(grid, filename = new_id(), sharing = sharing)
-    fid <- resp[["fid"]]
-    cols <- resp[["cols"]]
-    for (j in seq_along(cols)) {
-      col <- cols[[j]]
-      trace[[paste0(col$name, "src")]] <- paste(fid, col$uid, sep = ":")
-      trace[[col$name]] <- NULL
+# upload *one* grid of data array attributes, and replace actual trace data
+# with src/uid references 
+api_srcify <- function(p, filename = new_id(), fileopt = "overwrite", sharing = "public") {
+  
+  # filter to all the "src-ifiable" trace attributes
+  srcs <- lapply(p$data, trace_filter_src)
+  
+  # do the same for frames (if frames is NULL, this returns `list()`)
+  srcFrames <- lapply(p$frames, function(f) {
+    lapply(f$data, trace_filter_src)
+  })
+  
+  # treat p$data as the "first frame" (i.e., create a list where first level 
+  # is "frames", second is "traces", and third is "src attributes")
+  srcAll <- c(list(srcs), srcFrames)
+  
+  # reduce to a list of src attributes
+  srcFlat <- Reduce(c, Reduce(c, srcAll))
+  
+  # create a grid as long as there is >1 src attribute
+  if (length(srcFlat)) {
+    # TODO: allow user do specify filename of the grid?
+    resp <- api_create_grid(srcFlat, filename = filename, fileopt = fileopt, sharing = sharing)
+    
+    # create an index mapping so we can assign a uid back to a frame/trace
+    srcMap <- lapply(srcAll, function(frame) { 
+      rep(seq_along(frame), lengths(frame))
+    })
+    
+    # sanity check
+    if (length(srcFlat) != sum(lengths(srcMap))) {
+      stop(
+        "Something went wrong. Please report to https://github.com/ropensci/plotly/issues/new",
+        call. = FALSE
+      )
     }
+    
+    # replace data values with uid references 
+    # TODO: this has to be hopelessly slow with many frames...
+    ctr <- 1
+    for (i in seq_along(srcMap)) {
+      traceIndicies <- srcMap[[i]]
+      for (j in seq_along(traceIndicies)) {
+        index <- traceIndicies[[j]]
+        col <- resp[["cols"]][[ctr]]
+        nm <- names(srcFlat)[[ctr]]
+        if (i > 1) {
+          p$frames[[i - 1]]$data[[index]][[nm]] <- NULL
+          p$frames[[i - 1]]$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
+        } else {
+          p$data[[index]][[nm]] <- NULL
+          p$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
+        }
+        ctr <- ctr + 1
+      }
+    }
+    
   }
-  trace
+  
+  p
+}
+
+# filter a trace down to it's "src-able" attributes
+trace_filter_src <- function(trace) {
+  if (!length(trace)) return(trace)
+  type <- trace[["type"]] %||% "scatter"
+  attrs <- Schema$traces[[type]]$attributes
+  srcs <- sub("src$", "", grep("src$", names(attrs), value = TRUE))
+  trace[names(trace) %in% srcs]
 }
 
 # transform a data frame to plotly's grid schema

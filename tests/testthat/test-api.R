@@ -71,7 +71,13 @@ test_that("Creating produces a new file by default", {
   }
   
   expect_new(mtcars)
-  expect_new(qplot(1:10))
+  # even if plot has multiple traces, only one grid should be created
+  p1 <- plot_ly(mtcars, x = ~mpg, y = ~wt)
+  p2 <- add_markers(p1, color = ~factor(cyl))
+  p2 <- add_markers(p1, color = ~factor(cyl), frame = ~factor(vs))
+  expect_new(p1)
+  expect_new(p2)
+  expect_new(p3)
 })
 
 

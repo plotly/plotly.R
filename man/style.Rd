@@ -4,14 +4,15 @@
 \alias{style}
 \title{Modify trace(s)}
 \usage{
-style(p, ..., traces = 1)
+style(p, ..., traces = NULL)
 }
 \arguments{
 \item{p}{A plotly visualization.}
 
 \item{...}{Visual properties.}
 
-\item{traces}{numeric vector. Which traces should be modified?}
+\item{traces}{numeric vector. Which traces should be modified? By default,
+attributes place in \code{...} will be applied to every trace.}
 }
 \description{
 Modify trace(s) of an existing plotly visualization. Useful when used in
@@ -25,7 +26,7 @@ style(p, hoverinfo = "none", traces = c(2, 3))
 
 }
 \seealso{
-\code{\link{get_figure}()}
+\code{\link{api_download_plot}()}
 }
 \author{
 Carson Sievert

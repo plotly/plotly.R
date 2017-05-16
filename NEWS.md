@@ -4,14 +4,17 @@
 
 * Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
 * Added support for `geom_sf()` and `coord_sf()`.
+* The `api_create()` function gains a new `fileopt` argument inspired from the `fileopt` argument in `plotly_POST()` (fixes #976).
 
 ## CHANGES
 
 * Upgraded to plotly.js v1.27.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.27.0
+* The `traces` argument in the `style()` function now defaults to `NULL` (instead of 1). Meaning that, by default, supplied attributes now modify _every_ trace (instead of the first one).
 
 ## Bug fixes 
 
-* When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).
+* When creating private plots (via `api_create()`), both the plot and the data behind the plot are private (fixes #976).
+* Creating a plot with multiple traces (or frames) via (via `api_create()`) no longer creates multiple grids (fixes #1004).
 * Fixed bug when highlight multiple 'simple key' traces (fixes #974) 
 
 # 4.6.0
