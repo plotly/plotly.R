@@ -18,11 +18,23 @@ test_that("geom_boxplot gives a boxplot", {
   
   L <- save_outputs(gg, "boxplot")
 
-  # right nb. traces
-  expect_equal(length(L$data), 1)
-  # right type for 1st trace
-  expect_identical(L$data[[1]]$type, "box")
+  expect_length(L$data, 1)
+  expect_true(L$data[[1]]$type == "box")
+  expect_true(L$data[[1]]$orientation == "v")
 })
+
+test_that("geom_boxplot with coord_flip", {
+  p <- ggplot(diamonds, aes(cut, price)) +
+    geom_boxplot() +
+    coord_flip()
+  
+  L <- plotly_build(p)$x
+  
+  expect_length(L$data, 1)
+  expect_true(L$data[[1]]$orientation == "h")
+  expect_equal(sort(L$data[[1]]$x), sort(diamonds[["price"]]))
+})
+
 
 test_that("you can make a boxplot for a distribution of datetimes", {
   dist <- c(10, 20, 33, 40, 11, 12, 11)

@@ -947,8 +947,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
       # TODO: move this to the layer2trace definition...
-      if (tr$type %in% "box") traces[[i]]$orientation <- "h"
-      if (tr$type == "box") traces[[i]]$hoverinfo <- "x"
       names(traces[[i]])[grepl("^error_y$", names(tr))] <- "error_x"
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }

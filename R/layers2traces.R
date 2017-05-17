@@ -754,14 +754,22 @@ geom2trace.GeomPolygon <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
+  flip <- inherits(p$coordinates, "CoordFlip")
+  x <- if (flip) data[["y"]] else data[["x"]]
+  y <- if (flip) data[["x"]] else data[["y"]]
+  orientation <- if (flip) "h" else "v"
+  # always y???
+  #hoverinfo <- if (flip) "y" else "x"
+  
   compact(list(
-    x = data[["x"]],
-    y = data[["y"]],
+    x = x,
+    y = y,
+    orientation = orientation,
+    hoverinfo = "y",
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "box",
-    hoverinfo = "y",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
