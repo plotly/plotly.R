@@ -20,7 +20,7 @@ test_that("geom_boxplot gives a boxplot", {
 
   expect_length(L$data, 1)
   expect_true(L$data[[1]]$type == "box")
-  expect_true(L$data[[1]]$orientation == "v")
+  expect_true(L$data[[1]]$orientation %||% "v" == "v")
 })
 
 test_that("geom_boxplot with coord_flip", {
