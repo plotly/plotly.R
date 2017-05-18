@@ -18,6 +18,7 @@
 * The typed array polyfill is now included *before* the plotly.js bundle, which should fix some rendering issues in some browsers, including RStudio (fixes #1010).
 * When creating private plots (via `api_create()`), both the plot and the data behind the plot are private (fixes #976).
 * Creating a plot with multiple traces (or frames) via (via `api_create()`) no longer creates multiple grids (fixes #1004).
+* The `api_create()` function should now create grid references for all data array attributes (fixes #1014).
 * Fixed bug when highlight multiple 'simple key' traces (fixes #974).
 
 # 4.6.0

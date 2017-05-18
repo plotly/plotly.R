@@ -75,7 +75,7 @@ retain <- function(x, f = identity) {
   attrs <- attributes(x)
   # TODO: do we set any other "special" attributes internally 
   # (grepping "structure(" suggests no)
-  attrs <- attrs[names(attrs) %in% "defaultAlpha"]
+  attrs <- attrs[names(attrs) %in% c("defaultAlpha", "apiSrc")]
   if (length(attrs)) {
     attributes(y) <- attrs
   }
@@ -158,6 +158,41 @@ is_type <- function(p, type) {
   types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
   all(types %in% type)
 }
+
+#' Replace elements of a nested list
+#' 
+#' @param x a named list
+#' @param indicies a vector of indices. 
+#' A 1D list may be used to specify both numeric and non-numeric inidices
+#' @param val the value used to 
+#' @examples 
+#' 
+#' x <- list(a = 1)
+#' # equivalent to `x$a <- 2`
+#' re_place(x, "a", 2)
+#' 
+#' y <- list(a = list(list(b = 2)))
+#' 
+#' # equivalent to `y$a[[1]]$b <- 2`
+#' y <- re_place(y, list("a", 1, "b"), 3)
+#' y
+
+re_place <- function(x, indicies = 1, val) {
+  
+  expr <- call("[[", quote(x), indicies[[1]])
+  if (length(indicies) == 1) {
+    eval(call("<-", expr, val))
+    return(x)
+  }
+  
+  for (i in seq(2, length(indicies))) {
+    expr <- call("[[", expr, indicies[[i]])
+  }
+  
+  eval(call("<-", expr, val))
+  x
+}
+
 
 # retrive mapbox token if one is set; otherwise, throw error
 mapbox_token <- function() {
@@ -339,6 +374,14 @@ verify_attr <- function(proposed, schema) {
     attrSchema <- schema[[attr]]
     # if schema is missing (i.e., this is an un-official attr), move along
     if (is.null(attrSchema)) next
+    
+    # tag 'src-able' attributes (needed for api_create())
+    if (!is.null(schema[[paste0(attr, "src")]])) {
+      proposed[[attr]] <- structure(
+        proposed[[attr]], apiSrc = TRUE
+      )
+    }
+    
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
@@ -359,6 +402,14 @@ verify_attr <- function(proposed, schema) {
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
         if (is.null(attrSchema[[attr2]])) next
+        
+        # tag 'src-able' attributes (needed for api_create())
+        if (!is.null(schema[[attr]][[paste0(attr2, "src")]])) {
+          proposed[[attr]][[attr2]] <- structure(
+            proposed[[attr]][[attr2]], apiSrc = TRUE
+          )
+        }
+        
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
         arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
