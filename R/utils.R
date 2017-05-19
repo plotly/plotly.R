@@ -237,6 +237,9 @@ supply_defaults <- function(p) {
     }
     tr
   })
+  # hack to avoid https://github.com/ropensci/plotly/issues/945
+  if (is_type(p, "parcoords")) p$x$layout$margin$t <- NULL
+  
   # supply domain defaults
   geoDomain <- list(x = c(0, 1), y = c(0, 1))
   if (is_geo(p) || is_mapbox(p)) {
@@ -248,8 +251,6 @@ supply_defaults <- function(p) {
     axes <- if (is_type(p, "scatterternary"))  {
       c("aaxis", "baxis", "caxis") 
     } else if (is_type(p, "pie") || is_type(p, "parcoords")) {
-      # hack to avoid https://github.com/ropensci/plotly/issues/945
-      p$x$layout$margin <- NULL
       NULL
     } else {
       c("xaxis", "yaxis")
