@@ -165,37 +165,6 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
-  # check the value of dynamicTicks
-  dynamicValues <- c(FALSE, TRUE, "x", "y")
-  if (length(setdiff(dynamicTicks, dynamicValues))) {
-   stop(
-     sprintf(
-       "`dynamicValues` accepts the following values: '%s'", 
-       paste(dynamicValues, collapse = "', '")
-     ), call. = FALSE
-    )
-  }
-  
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
   # To avoid undesirable side effects, we may need to open a 
@@ -227,6 +196,38 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
+  }
+  
+  
+  # check the value of dynamicTicks
+  dynamicValues <- c(FALSE, TRUE, "x", "y")
+  if (length(setdiff(dynamicTicks, dynamicValues))) {
+   stop(
+     sprintf(
+       "`dynamicValues` accepts the following values: '%s'", 
+       paste(dynamicValues, collapse = "', '")
+     ), call. = FALSE
+    )
+  }
+  
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") == "2.2.1") {
+    warning(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (!identical(dynamicTicks, FALSE)) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
   }
   
   # ------------------------------------------------------------------------

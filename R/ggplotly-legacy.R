@@ -2,24 +2,24 @@
 gg2list_legacy <- function(p, width = NULL, height = NULL, tooltip = "all", layerData = 1, 
                             originalData = TRUE, source = "A", ...) 
 {
-  deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), 
-                                        "pixels", "width")
-  deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), 
-                                          "pixels", "height")
-  dev_fun <- if (capabilities("png")) {
-    grDevices::png
-  }
-  else if (capabilities("jpeg")) {
-    grDevices::jpeg
-  }
-  else {
-    warning("Couldn't find a bitmap device (e.g. png or jpeg).", 
-            "To ensure sizes are converted correctly please", 
-            "compile R to use a bitmap device", call. = FALSE)
-    grDevices::dev.new
-  }
-  tmpPlotFile <- tempfile(fileext = ".png")
-  dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
+  # deviceWidth <- width %||% unitConvert(grid::unit(1, "npc"), 
+  #                                       "pixels", "width")
+  # deviceHeight <- height %||% unitConvert(grid::unit(1, "npc"), 
+  #                                         "pixels", "height")
+  # dev_fun <- if (capabilities("png")) {
+  #   grDevices::png
+  # }
+  # else if (capabilities("jpeg")) {
+  #   grDevices::jpeg
+  # }
+  # else {
+  #   warning("Couldn't find a bitmap device (e.g. png or jpeg).", 
+  #           "To ensure sizes are converted correctly please", 
+  #           "compile R to use a bitmap device", call. = FALSE)
+  #   grDevices::dev.new
+  # }
+  # tmpPlotFile <- tempfile(fileext = ".png")
+  # dev_fun(tmpPlotFile, width = deviceWidth, height = deviceHeight)
   plot <- ggfun("plot_clone")(p)
   if (length(plot$layers) == 0) {
     plot <- plot + geom_blank()
@@ -497,8 +497,8 @@ gg2list_legacy <- function(p, width = NULL, height = NULL, tooltip = "all", laye
   })
   gglayout$width <- width
   gglayout$height <- height
-  grDevices::dev.off()
-  unlink(tmpPlotFile)
+  #grDevices::dev.off()
+  #unlink(tmpPlotFile)
   l <- list(data = setNames(traces, NULL), layout = compact(gglayout), 
             source = source)
   l <- rm_asis(l)
