@@ -22,7 +22,7 @@ gg <- ggplot(countrypop, aes(edu, illn, colour = country, size = population)) +
 
 test_that("global scaling works for sizes over different traces", {
   L <- save_outputs(gg, "size-global-scaling")
-  expect_equal(length(L$data), 3)  # 1 trace per country (3)
+  expect_equivalent(length(L$data), 3)  # 1 trace per country (3)
   expect_true(as.numeric(L$data[[1]]$marker$size) <
                 as.numeric(L$data[[2]]$marker$size))
   expect_true(as.numeric(L$data[[2]]$marker$size) <

@@ -165,37 +165,6 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
-  # check the value of dynamicTicks
-  dynamicValues <- c(FALSE, TRUE, "x", "y")
-  if (length(setdiff(dynamicTicks, dynamicValues))) {
-   stop(
-     sprintf(
-       "`dynamicValues` accepts the following values: '%s'", 
-       paste(dynamicValues, collapse = "', '")
-     ), call. = FALSE
-    )
-  }
-  
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
   # To avoid undesirable side effects, we may need to open a 
@@ -227,6 +196,38 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
+  }
+  
+  
+  # check the value of dynamicTicks
+  dynamicValues <- c(FALSE, TRUE, "x", "y")
+  if (length(setdiff(dynamicTicks, dynamicValues))) {
+   stop(
+     sprintf(
+       "`dynamicValues` accepts the following values: '%s'", 
+       paste(dynamicValues, collapse = "', '")
+     ), call. = FALSE
+    )
+  }
+  
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") == "2.2.1") {
+    warning(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (!identical(dynamicTicks, FALSE)) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
   }
   
   # ------------------------------------------------------------------------
@@ -993,9 +994,12 @@ gg2list <- function(p, width = NULL, height = NULL,
   if (inherits(plot$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
-      # TODO: move this to the layer2trace definition...
-      if (tr$type %in% "box") traces[[i]]$orientation <- "h"
-      if (tr$type == "box") traces[[i]]$hoverinfo <- "x"
+      # flipping logic for bar positioning is in geom2trace.GeomBar
+      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (tr$type %in% "box") {
+        traces[[i]]$orientation <- "h"
+        traces[[i]]$hoverinfo <- "x"
+      }
       names(traces[[i]])[grepl("^error_y$", names(tr))] <- "error_x"
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }

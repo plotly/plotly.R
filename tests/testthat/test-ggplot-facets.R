@@ -8,7 +8,7 @@ test_that("6 facets becomes 6 panels", {
     theme(panel.spacing = grid::unit(0, "cm"))
   info <- save_outputs(gg, "barley")
   # two legend entries, but two groups
-  expect_equal(sum(sapply(info$data, "[[", "showlegend")), 2)
+  expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 2)
   expect_identical(
     sort(unique(sapply(info$data, "[[", "legendgroup"))), c("1931", "1932")
   )
@@ -95,7 +95,7 @@ test_that("facet_wrap(..., scales = 'free') can handle multiple traces on each p
 test_that("facet_wrap() doesn't create interior scales", {
   g <- ggplot(mtcars, aes(mpg, wt)) + geom_point() + facet_wrap(~cyl)
   info <- save_outputs(g, "facet_wrap")
-  expect_equal(unique(unlist(lapply(info$data, "[[", "yaxis"))), "y")
+  expect_equivalent(unique(unlist(lapply(info$data, "[[", "yaxis"))), "y")
 })
 
 
@@ -129,5 +129,5 @@ test_that("when y scales are free, x-axes are still anchored on exterior", {
   info <- save_outputs(p, "facet_wrap-free_y")
   xaxes <- info$layout[grep("^xaxis", names(info$layout))]
   yaxes <- info$layout[grep("^yaxis", names(info$layout))]
-  expect_equal(unique(sapply(xaxes, "[[", "anchor")), "y5")
+  expect_equivalent(unique(sapply(xaxes, "[[", "anchor")), "y5")
 })

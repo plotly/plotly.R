@@ -16,10 +16,10 @@ hm <- ggplot(ww) + geom_tile(aes(x = day, y = time, fill = value))
 test_that("geom_tile is translated to type=heatmap", {
   L <- save_outputs(hm, "heatmap")
   # one trace is for the colorbar
-  expect_equal(length(L$data), 2)
-  expect_identical(L$data[[1]]$type, "heatmap")
-  expect_identical(L$layout$xaxis$ticktext, wdays)
-  expect_identical(L$layout$yaxis$ticktext, dtimes)
+  expect_equivalent(length(L$data), 2)
+  expect_equivalent(L$data[[1]]$type, "heatmap")
+  expect_equivalent(L$layout$xaxis$ticktext, wdays)
+  expect_equivalent(L$layout$yaxis$ticktext, dtimes)
   # show bin value on hover (but without x/y since they are discrete)
   expect_true(
     L$data[[1]]$hoverinfo == "text"
@@ -41,8 +41,8 @@ p <- ggplot(data = d, aes(x, y)) +
 test_that("geom_tile() scale_fill_gradient2()", {
   L <- save_outputs(p, "heatmap-midpoint")
   # one trace is for the colorbar
-  expect_equal(length(L$data), 2)
-  expect_equal(L$data[[1]]$type, "heatmap")
+  expect_equivalent(length(L$data), 2)
+  expect_equivalent(L$data[[1]]$type, "heatmap")
 })
 
 tidy_cor <- function(x) {
@@ -56,7 +56,7 @@ p <- ggplot(d, aes(var1, var2, fill = cor)) + geom_tile()
 test_that("geom_tile() with discrete x/y", {
   L <- save_outputs(p, "heatmap-discrete")
   # one trace is for the colorbar
-  expect_equal(length(L$data), 2)
-  expect_equal(L$data[[1]]$type, "heatmap")
+  expect_equivalent(length(L$data), 2)
+  expect_equivalent(L$data[[1]]$type, "heatmap")
 })
 

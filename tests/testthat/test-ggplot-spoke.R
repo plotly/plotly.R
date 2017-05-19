@@ -11,16 +11,16 @@ test_that("Basic geom_spoke()", {
   
   l <- plotly_build(p)$x
   expect_length(l$data, 1)
-  expect_equal(l$data[[1]]$type, "scatter")
-  expect_equal(l$data[[1]]$mode, "lines")
+  expect_equivalent(l$data[[1]]$type, "scatter")
+  expect_equivalent(l$data[[1]]$mode, "lines")
   
   txt <- strsplit(l$data[[1]]$text, br())
   angle <- unlist(lapply(txt, function(x) x[grepl("angle", x, fixed = T)]))
   radius <- unlist(lapply(txt, function(x) x[grepl("radius", x, fixed = T)]))
-  expect_equal(
+  expect_equivalent(
     angle, rep(paste0("angle: ", format(df$angle)), each = 2)
   )
-  expect_equal(
+  expect_equivalent(
     unique(radius), "radius: 0.5"
   )
   
@@ -37,7 +37,7 @@ test_that("Basic geom_spoke() with color", {
   # more than one `line.color`
   expect_length(l$data, 3)
   for (i in seq_along(l$data)) {
-    expect_equal(l$data[[i]]$type, "scatter")
+    expect_equivalent(l$data[[i]]$type, "scatter")
     expect_match(l$data[[i]]$mode, "markers|lines")
   }
   

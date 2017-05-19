@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -26,7 +26,7 @@ bp.flevels <- bp + scale_x_discrete(limits = flevels)
 
 test_that("factor levels determine tick order", {
   info <- expect_traces(bp.flevels, 1, "flevels")
-  expect_identical(info$layout$xaxis$ticktext, c("trt2", "trt1", "ctrl"))
+  expect_equivalent(info$layout$xaxis$ticktext, c("trt2", "trt1", "ctrl"))
 })
 
 ## These two do the same thing; all data points outside the graphing
@@ -39,7 +39,7 @@ test_that("ylim hides points", {
 bp.scale.hide <- bp + scale_y_continuous(limits = c(5, 7.5))
 test_that("scale_y(limits) hides points", {
   info <- expect_traces(bp.scale.hide, 1, "scale.hide")
-  expect_equal(range(info$layout$yaxis$tickvals), c(5, 7.5))
+  expect_equivalent(range(info$layout$yaxis$tickvals), c(5, 7.5))
   y <- unlist(lapply(info$data, "[[", "y"))
   expect_true(all(5 <= y & y <= 7.5, na.rm = TRUE))
 })
@@ -47,7 +47,7 @@ test_that("scale_y(limits) hides points", {
 bp.coord <- bp + coord_cartesian(ylim = c(5, 7.5))
 test_that("Using coord_cartesian zooms into the area", {
   info <- expect_traces(bp.coord, 1, "coord-ylim")
-  expect_equal(range(info$layout$yaxis$tickvals), c(5, 7.5))
+  expect_equivalent(range(info$layout$yaxis$tickvals), c(5, 7.5))
   y <- unlist(lapply(info$data, "[[", "y"))
   expect_false(all(5 <= y & y <= 7.5))
 })
@@ -132,7 +132,7 @@ bp.fonts <- bp +
 
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 1, "fonts")
-  expect_equal(info$layout$xaxis$tickangle, -90)
+  expect_equivalent(info$layout$xaxis$tickangle, -90)
   expect_match(info$layout$xaxis$title, "<b>", fixed = TRUE)
   expect_match(info$layout$xaxis$title, "</b>", fixed = TRUE)
 })

@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -28,10 +28,10 @@ test_that("position_dodge()", {
   
   l <- ggplotly(gg.dodge, dynamicTicks = "x")$x
   expect_identical(l$layout$barmode, "dodge")
-  expect_equal(l$data[[1]]$x, c("Canada", "Germany"))
-  expect_equal(l$data[[1]]$name, "Bio")
-  expect_equal(l$data[[2]]$x, c("Canada", "USA"))
-  expect_equal(l$data[[2]]$name, "Math")
+  expect_equivalent(l$data[[1]]$x, c("Canada", "Germany"))
+  expect_equivalent(l$data[[1]]$name, "Bio")
+  expect_equivalent(l$data[[2]]$x, c("Canada", "USA"))
+  expect_equivalent(l$data[[2]]$name, "Math")
 })
 
 test_that("position_stack()", {
@@ -60,16 +60,16 @@ test_that("dates work well with bar charts", {
   info <- expect_traces(gd, 2, "dates")
   
   # by default, date axes are linear...
-  expect_equal(info$layout$xaxis$type, "linear")
-  expect_equal(
+  expect_equivalent(info$layout$xaxis$type, "linear")
+  expect_equivalent(
     info$data[[1]]$x,
     as.numeric(unique(researchers$month))
   )
   
   # different story for dynamicTicks...
   l <- ggplotly(gd, dynamicTicks = TRUE)$x
-  expect_equal(l$layout$xaxis$type, "date")
-  expect_equal(l$layout$xaxis$tickmode, "auto")
+  expect_equivalent(l$layout$xaxis$type, "date")
+  expect_equivalent(l$layout$xaxis$tickmode, "auto")
   expect_is(l$layout$xaxis$range, "Date")
   for (attr in c("x", "width")) {
     expect_is(l$data[[1]][[attr]], "Date")
@@ -89,7 +89,7 @@ test_that("Very basic bar graph", {
   info <- expect_traces(gg, 1, "nocolor")
   tr <- info$data[[1]]
   expect_identical(tr$type, "bar")
-  expect_identical(tr$y, df$total_bill)
+  expect_equivalent(tr$y, df$total_bill)
 })
 
 test_that("Map the time of day to different fill colors", {
@@ -130,7 +130,7 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
     guides(fill = FALSE)
   info <- expect_traces(gg, 2, "aes-colour-guides-fill-FALSE")
   for(tr in info$data){
-    expect_identical(tr$marker$color, toRGB("grey"))
+    expect_equivalent(tr$marker$color, toRGB("grey"))
     expect_true(is.character(tr$marker$line$color))
     expect_true(tr$showlegend)
   }

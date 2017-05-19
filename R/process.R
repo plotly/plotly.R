@@ -26,6 +26,7 @@ process.api_image <- function(resp) {
 
 # the default for httr::content() doesn't simplify vectors apparently...
 json_content <- function(resp) {
+  if (length(resp$content) == 0) return(list())
   from_JSON(
     httr::content(
       resp, 

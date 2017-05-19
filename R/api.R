@@ -8,7 +8,15 @@ api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwri
   plotname <- if (len > 1) filename[[1]] else filename
   gridname <- if (len > 1) filename[[2]] else if (len == 1) paste(filename, "Grid")
   
-  plotname <- api_resolve_filename(plotname, fileopt = fileopt)
+  # if file already exists, determine if we can overwrite it
+  origfile <- api_lookup_file(plotname)
+  overwrite <- is.file(origfile) && identical(fileopt, "overwrite")
+  if (overwrite && !identical(origfile$filetype, "plot")) {
+    stop(
+      sprintf("Can overwrite a file of type '%s' with a plot", origfile$filetype),
+      call. = FALSE
+    )
+  }
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(plotname)
@@ -26,14 +34,36 @@ api_create_plot <- function(x = last_plot(), filename = NULL, fileopt = "overwri
     ...
   ))
   
-  res <- api("plots", "POST", to_JSON(bod))
-  prefix_class(res$file, c("api_plot", "api_file"))
+  # overwrite the original file; otherwise, let plotly create it
+  res <- if (overwrite) {
+    
+    message(sprintf(
+      "Found a plot already named: '%s'. Since fileopt='overwrite', I'll try to update it", 
+      origfile$filename
+    ))
+    api(paste0("plots/", origfile$fid), "PATCH", to_JSON(bod))
+    
+  } else {
+    
+    api("plots", "POST", to_JSON(bod))$file
+    
+  }
+  
+  prefix_class(res, c("api_plot", "api_file"))
 }
 
 api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
                             sharing = "public", ...) {
   
-  filename <- api_resolve_filename(filename, fileopt = fileopt)
+  # if file already exists, determine if we can overwrite it
+  origfile <- api_lookup_file(filename)
+  overwrite <- is.file(origfile) && identical(fileopt, "overwrite")
+  if (overwrite && !identical(origfile$filetype, "grid")) {
+    stop(
+      sprintf("Can overwrite a file of type '%s' with a grid", origfile$filetype),
+      call. = FALSE
+    )
+  }
   
   # retrieve the parent path, and ensure it exists
   parent_path <- api_pave_path(filename)
@@ -47,41 +77,35 @@ api_create_grid <- function(x, filename = NULL, fileopt = "overwrite",
     ...
   ))
   
-  res <- api("grids", "POST", to_JSON(bod))
-  prefix_class(res$file, c("api_grid", "api_file"))
+  # At least for now, 'overwrite' really means append new columns
+  # It shouldn't be so convoluted/hard to update a grid! -- https://api.plot.ly/v2/grids#col
+  res <- if (overwrite) {
+    
+    message(sprintf(
+      "Found a grid already named: '%s'. Since fileopt='overwrite', I'll try to update it", 
+      origfile$filename
+    ))
+    cols <- bod$data$cols
+    colz <- Map(function(x, y) {
+      list(name = paste0(x, "-", new_id()), data = y$data)
+    }, names(cols), cols)
+    colString <- as.character(to_JSON(setNames(colz, NULL)))
+    resp <- api(sprintf("grids/%s/col", origfile$fid), "POST", to_JSON(list(cols = colString)))
+    modify_list(origfile, resp)
+    
+  } else {
+    
+    api("grids", "POST", to_JSON(bod))$file
+    
+  }
+  
+  prefix_class(res, c("api_grid", "api_file"))
 }
 
 
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
-
-
-api_resolve_filename <- function(filename = NULL, fileopt) {
-  if (is.null(filename)) return(filename)
-  file <- api_lookup_file(filename)
-  if (is.null(file)) return(filename)
-  
-  message(sprintf("A %s named '%s' already exists.", file$filetype, file$filename))
-  if (identical(fileopt, "new")) {
-    message("Creating a new file with the default naming scheme")
-    return(NULL)
-  }
-  if (identical(fileopt, "overwrite")) {
-    if (identical(file$filetype, "fold")) {
-      stop(
-        "You can't overwrite a folder with a file. Please specify a new filename", 
-        call. = FALSE
-      )
-    }
-    message("Since `fileopt='overwrite'`, the current file will be deleted and replaced with a new one.")
-    api_trash_file(file)
-    return(filename)
-  }
-  
-  # this should never happen
-  stop("Unsupported `fileopt` value", call. = FALSE)
-}
 
 api_lookup_file <- function(filename = NULL) {
   file <- tryNULL(api(paste0("files/lookup?path=", filename)))
@@ -100,83 +124,73 @@ api_pave_path <- function(filename = NULL) {
   parent
 }
 
-api_trash_file <- function(file) {
-  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
-  # TODO: remind user they can recover files?
-  endpoint <- sprintf("files/%s/trash", file$fid)
-  res <- api(endpoint, "POST")
-  invisible(TRUE)
-}
+#api_trash_file <- function(file) {
+#  if (!is.file(file)) stop("Can't trash a non-file object:", call. = FALSE)
+#  res <- api(sprintf("files/%s/trash", file$fid), "POST")
+#  res2 <- api(sprintf("files/%s/permanent_delete", file$fid), "DELETE")
+#  invisible(TRUE)
+#}
 
 # upload *one* grid of data array attributes, and replace actual trace data
 # with src/uid references 
 api_srcify <- function(p, filename = new_id(), fileopt = "overwrite", sharing = "public") {
   
-  # filter to all the "src-ifiable" trace attributes
-  srcs <- lapply(p$data, trace_filter_src)
+  # track the trace/frame index with official element names
+  # this makes it easier to map uids to attributes (& vice versa)
+  p$data <- setNames(p$data, seq_along(p$data))
+  for (i in seq_along(p$frames)) {
+    p$frames <- setNames(p$frames, seq_along(p$frames))
+    d <- p$frames[[i]]$data
+    p$frames[[i]]$data <- setNames(d, seq_along(d))
+  }
   
-  # do the same for frames (if frames is NULL, this returns `list()`)
-  srcFrames <- lapply(p$frames, function(f) {
-    lapply(f$data, trace_filter_src)
-  })
+  # grab just the src-able attributes
+  pSrc <- filter_to_src(p)
   
-  # treat p$data as the "first frame" (i.e., create a list where first level 
-  # is "frames", second is "traces", and third is "src attributes")
-  srcAll <- c(list(srcs), srcFrames)
+  # flatten the list
+  # http://stackoverflow.com/questions/42739419/r-convert-nested-list-into-a-one-level-list
+  pSrcFlat <- lapply(rapply(pSrc, enquote, how = "unlist"), eval)
   
-  # reduce to a list of src attributes
-  srcFlat <- Reduce(c, Reduce(c, srcAll))
-  
-  # create a grid as long as there is >1 src attribute
-  if (length(srcFlat)) {
-    # TODO: allow user do specify filename of the grid?
-    resp <- api_create_grid(srcFlat, filename = filename, fileopt = fileopt, sharing = sharing)
+  if (length(pSrcFlat)) {
     
-    # create an index mapping so we can assign a uid back to a frame/trace
-    srcMap <- lapply(srcAll, function(frame) { 
-      rep(seq_along(frame), lengths(frame))
-    })
+    resp <- api_create_grid(
+      pSrcFlat, filename = filename, 
+      fileopt = fileopt, sharing = sharing
+    )
     
-    # sanity check
-    if (length(srcFlat) != sum(lengths(srcMap))) {
-      stop(
-        "Something went wrong. Please report to https://github.com/ropensci/plotly/issues/new",
-        call. = FALSE
-      )
+    # replace data values with their uid references 
+    idx <- strsplit(names(pSrcFlat), "\\.")
+    idxSrc <- strsplit(paste0(names(pSrcFlat), "src"), "\\.")
+    for (i in seq_along(pSrcFlat)) {
+      p <- re_place(p, idx[[i]], NULL)
+      uid <- paste(resp$fid, resp[["cols"]][[i]]$uid, sep = ":")
+      p <- re_place(p, idxSrc[[i]], uid)
     }
-    
-    # replace data values with uid references 
-    # TODO: this has to be hopelessly slow with many frames...
-    ctr <- 1
-    for (i in seq_along(srcMap)) {
-      traceIndicies <- srcMap[[i]]
-      for (j in seq_along(traceIndicies)) {
-        index <- traceIndicies[[j]]
-        col <- resp[["cols"]][[ctr]]
-        nm <- names(srcFlat)[[ctr]]
-        if (i > 1) {
-          p$frames[[i - 1]]$data[[index]][[nm]] <- NULL
-          p$frames[[i - 1]]$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
-        } else {
-          p$data[[index]][[nm]] <- NULL
-          p$data[[index]][[paste0(nm, "src")]] <- paste(resp$fid, col$uid, sep = ":")
-        }
-        ctr <- ctr + 1
-      }
-    }
-    
+  }
+  
+  # restore sanity
+  p$data <- setNames(p$data, NULL)
+  for (i in seq_along(p$frames)) {
+    p$frames <- setNames(p$frames, NULL)
+    p$frames[[i]]$data <- setNames(p$frames[[i]]$data, NULL)
   }
   
   p
 }
 
-# filter a trace down to it's "src-able" attributes
-trace_filter_src <- function(trace) {
-  if (!length(trace)) return(trace)
-  type <- trace[["type"]] %||% "scatter"
-  attrs <- Schema$traces[[type]]$attributes
-  srcs <- sub("src$", "", grep("src$", names(attrs), value = TRUE))
-  trace[names(trace) %in% srcs]
+filter_to_src <- function(x) {
+  if (!is.list(x)) {
+    val <- if (isTRUE(attr(x, "apiSrc"))) x else NULL
+    return(val)
+  }
+  rmNullObs(lapply(x, filter_to_src))
+}
+
+# http://stackoverflow.com/questions/26539441/r-remove-null-elements-from-list-of-lists
+is.NullOb <- function(x) is.null(x) | all(sapply(x, is.null))
+rmNullObs <- function(x) {
+  x <- Filter(Negate(is.NullOb), x)
+  lapply(x, function(x) if (is.list(x)) rmNullObs(x) else x)
 }
 
 # transform a data frame to plotly's grid schema

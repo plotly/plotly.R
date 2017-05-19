@@ -7,7 +7,7 @@ m <- ggplot(MASS::geyser, aes(x=duration, y=waiting)) +
 L <- save_outputs(m, "density2d")
 
 test_that("geom_density2d translates to path(s)", {
-  expect_equal(length(L$data), 2)
+  expect_equivalent(length(L$data), 2)
   expect_identical(L$data[[2]]$type, "scatter")
   expect_identical(L$data[[2]]$mode, "lines")
 })
@@ -25,7 +25,7 @@ test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
   legends <- unlist(lapply(L$data, "[[", "showlegend"))
   points <- L$data[legends]
   # make sure we have 20 traces of points
-  expect_equal(length(points), 20)
+  expect_equivalent(length(points), 20)
   expect_identical(
     unique(unlist(lapply(points, "[[", "type"))), "scatter"
   )

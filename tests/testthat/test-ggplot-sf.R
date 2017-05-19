@@ -50,7 +50,7 @@ test_that("geom_sf() with basic polygons and points.", {
   # one trace for graticule, one for point, and one polygons
   expect_length(l$data, 3)
   # graticule should be red
-  expect_equal(l$data[[1]]$line$color, "rgba(255,0,0,1)")
-  expect_equal(l$data[[2]]$mode, "lines")
-  expect_equal(l$data[[3]]$mode, "markers")
+  expect_equivalent(l$data[[1]]$line$color, "rgba(255,0,0,1)")
+  expect_equivalent(l$data[[2]]$mode, "lines")
+  expect_equivalent(l$data[[3]]$mode, "markers")
 })
