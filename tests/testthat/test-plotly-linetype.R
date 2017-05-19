@@ -3,7 +3,7 @@ context("plotly-linetype")
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-linetype-", name))
-  expect_equal(length(L$data), n.traces)
+  expect_equivalent(length(L$data), n.traces)
   L
 }
 
@@ -17,7 +17,7 @@ test_that("Mapping a variable to linetype works", {
   l <- expect_traces(p, 5, "linetype")
   lines <- lapply(l$data, "[[", "line")
   dashes <- unlist(lapply(lines, "[[", "dash"))
-  expect_equal(length(dashes), 5)
+  expect_equivalent(length(dashes), 5)
 })
 
 test_that("Can set the linetype range.", {
@@ -25,7 +25,7 @@ test_that("Can set the linetype range.", {
   l <- expect_traces(p, 5, "linetype2")
   lines <- lapply(l$data, "[[", "line")
   dashes <- unlist(lapply(lines, "[[", "dash"))
-  expect_equal(dashes, plotly:::lty2dash(5:1))
+  expect_equivalent(dashes, plotly:::lty2dash(5:1))
 })
 
 test_that("Can avoid scaling", {
@@ -33,7 +33,7 @@ test_that("Can avoid scaling", {
   l <- expect_traces(p, 1, "linetype3")
   lines <- lapply(l$data, "[[", "line")
   dashes <- unlist(lapply(lines, "[[", "dash"))
-  expect_equal(dashes, plotly:::lty2dash(3))
+  expect_equivalent(dashes, plotly:::lty2dash(3))
 })
 
 test_that("Warn about invalid linetypes", {
@@ -47,18 +47,18 @@ test_that("Can specify a scale manually", {
   l <- expect_traces(p, 2, "manual")
   dashes <- lapply(l$data, "[[", "line")
   expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
-  expect_equal(expected, sapply(dashes, "[[", "dash"))
+  expect_equivalent(expected, sapply(dashes, "[[", "dash"))
 })
 
 test_that("Trace ordering matches factor levels", {
   p <- plot_ly(mtcars, x = ~mpg, y = ~disp, linetype = ~factor(vs, levels = c(1, 0))) %>% add_lines()
   l <- expect_traces(p, 2, "ordering")
-  expect_equal(sapply(l$data, "[[", "name"), c("1", "0"))
+  expect_equivalent(sapply(l$data, "[[", "name"), c("1", "0"))
 })
 
 test_that("Trace ordering is alphabetical", {
   lvls <- sort(unique(mpg$class))
   p <- plot_ly(mpg, x = ~cty, y = ~hwy, linetype = ~class) %>% add_lines()
   l <- expect_traces(p, length(lvls), "alphabetical")
-  expect_equal(sapply(l$data, "[[", "name"), lvls)
+  expect_equivalent(sapply(l$data, "[[", "name"), lvls)
 })

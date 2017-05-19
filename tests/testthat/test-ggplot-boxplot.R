@@ -9,7 +9,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(traces=has.data, layout=L$layout)
 }
 
@@ -32,7 +32,7 @@ test_that("geom_boxplot with coord_flip", {
   
   expect_length(L$data, 1)
   expect_true(L$data[[1]]$orientation == "h")
-  expect_equal(sort(L$data[[1]]$x), sort(diamonds[["price"]]))
+  expect_equivalent(sort(L$data[[1]]$x), sort(diamonds[["price"]]))
 })
 
 
@@ -46,9 +46,9 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   
   L <- save_outputs(bp, "boxplot-datetime")
   
-  expect_equal(length(L$data), 1)  # 1 trace
-  expect_identical(L$data[[1]]$type, "box")
-  expect_identical(L$data[[1]]$y, as.numeric(df$y))
+  expect_equivalent(length(L$data), 1)  # 1 trace
+  expect_equivalent(L$data[[1]]$type, "box")
+  expect_equivalent(L$data[[1]]$y, as.numeric(df$y))
 })
 
 # check legend shows up when each box-and-whiskers has a fill
@@ -79,8 +79,8 @@ g <- ggplot(dat, aes(x = cond, y = rating)) +
 
 test_that("correct # of unique fillcolors", {
   L <- save_outputs(g, "boxplot-fillcolor")
-  expect_equal(length(L$data), 2)
+  expect_equivalent(length(L$data), 2)
   expect_identical(L$data[[1]]$type, "box")
   fills <- sapply(L$data, "[[", "fillcolor")
-  expect_equal(length(unique(fills)), length(unique(dat$col)))
+  expect_equivalent(length(unique(fills)), length(unique(dat$col)))
 })

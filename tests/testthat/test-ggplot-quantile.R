@@ -16,9 +16,9 @@ test_that("Basic geom_quantile() works", {
   
   for (i in 2:4) {
     tr <- l$data[[i]]
-    expect_equal(tr$type, "scatter")
-    expect_equal(tr$mode, "lines")
-    expect_equal(
+    expect_equivalent(tr$type, "scatter")
+    expect_equivalent(tr$mode, "lines")
+    expect_equivalent(
       tr$line$color, toRGB(GeomQuantile$default_aes[["colour"]])
     )
   }
@@ -41,9 +41,9 @@ test_that("Can specify gpar() in geom_quantile()", {
   
   for (i in 2:4) {
     tr <- l$data[[i]]
-    expect_equal(tr$type, "scatter")
-    expect_equal(tr$mode, "lines")
-    expect_equal(
+    expect_equivalent(tr$type, "scatter")
+    expect_equivalent(tr$mode, "lines")
+    expect_equivalent(
       tr$line$color, toRGB("red", 0.5)
     )
   }

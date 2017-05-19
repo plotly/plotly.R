@@ -22,12 +22,12 @@ expect_traces <- function(gg, n.traces, name){
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
 test_that("ylim is respected for 1 trace", {
   info <- expect_traces(gg.ylim, 1, "one-trace")
-  expect_equal(min(info$layout$yaxis$tickvals), 0)
+  expect_equivalent(min(info$layout$yaxis$tickvals), 0)
   expect_identical(info$data[[1]]$showlegend, FALSE)
 })

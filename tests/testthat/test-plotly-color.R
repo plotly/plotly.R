@@ -3,7 +3,7 @@ context("plotly-color")
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-color-", name))
-  expect_equal(length(L$data), n.traces)
+  expect_equivalent(length(L$data), n.traces)
   L
 }
 
@@ -16,7 +16,7 @@ test_that("Mapping a factor variable to color works", {
   l <- expect_traces(p, 3, "scatterplot-color-factor")
   markers <- lapply(l$data, "[[", "marker")
   cols <- unlist(lapply(markers, "[[", "color"))
-  expect_equal(length(cols), 3)
+  expect_equivalent(length(cols), 3)
 })
 
 test_that("Custom RColorBrewer pallette works for factor variable", {
@@ -56,10 +56,10 @@ test_that("Mapping a numeric variable to color works", {
   idx <- vapply(l$data, is.colorbar, logical(1))
   markerScale <- l$data[[which(idx)]]$marker
   markerDat <- l$data[[which(!idx)]]$marker
-  expect_identical(markerDat$color, iris$Petal.Width)
-  expect_identical(markerScale$colorbar$title, "Petal.Width")
-  expect_equal(min(iris$Petal.Width), markerScale$cmin)
-  expect_equal(max(iris$Petal.Width), markerScale$cmax)
+  expect_equivalent(markerDat$color, iris$Petal.Width)
+  expect_equivalent(markerScale$colorbar$title, "Petal.Width")
+  expect_equivalent(min(iris$Petal.Width), markerScale$cmin)
+  expect_equivalent(max(iris$Petal.Width), markerScale$cmax)
   expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
 })
 
@@ -86,7 +86,7 @@ test_that("Can specify a scale manually", {
   l <- expect_traces(p, 2, "color-manual")
   markers <- lapply(l$data, "[[", "marker")
   expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
-  expect_equal(toRGB(expected), sapply(markers, "[[", "color"))
+  expect_equivalent(toRGB(expected), sapply(markers, "[[", "color"))
 })
 
 test_that("attributes are boxed-up correctly", {

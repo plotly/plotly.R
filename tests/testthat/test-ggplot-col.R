@@ -17,7 +17,7 @@ p <- df %>%
 test_that("geom_col is supported", {
   l <- save_outputs(p, "col")
   barDat <- l$data[sapply(l$data, "[[", "type") %in% "bar"]
-  expect_equal(
+  expect_equivalent(
     unlist(lapply(barDat, "[[", "x")),
     c(1, 2, 3, 1, 2, 3)
   )

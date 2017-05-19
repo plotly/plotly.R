@@ -20,6 +20,7 @@
 * Creating a plot with multiple traces (or frames) via (via `api_create()`) no longer creates multiple grids (fixes #1004).
 * The `api_create()` function should now create grid references for all data array attributes (fixes #1014).
 * Fixed bug when highlight multiple 'simple key' traces (fixes #974).
+* Margins are no longer always set to `NULL` for pie charts (fixes #1002)
 
 # 4.6.0
 

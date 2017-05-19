@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -18,8 +18,8 @@ test_that("geom_histogram() is a bar chart of counts with no bargap", {
   info <- expect_traces(base + geom_histogram(), 1, "counts")
   tr <- info$data[[1]]
   expect_identical(tr$type, "bar")
-  expect_equal(sum(tr$y), nrow(mtcars))
-  expect_equal(info$layout$barmode, "relative")
+  expect_equivalent(sum(tr$y), nrow(mtcars))
+  expect_equivalent(info$layout$barmode, "relative")
 })
 
 test_that("geom_histogram(aes(y = ..density..)) displays a density", { 
@@ -41,7 +41,7 @@ test_that("geom_histogram(aes(fill = ..count..)) works", {
   # each traces should have the same value of y
   for (i in seq_along(bars)) {
     ys <- bars[[i]]$y
-    expect_equal(length(unique(ys)), 1)
+    expect_equivalent(length(unique(ys)), 1)
   }
 })
 
@@ -58,13 +58,13 @@ test_that("Specify histogram binwidth", {
   info <- expect_traces(gg, 1, "density-binwidth")
   tr <- info$data[[1]]
   area <- sum(tr$y) * 0.3
-  expect_equal(area, 1, 0.1)
+  expect_equivalent(area, 1, 0.1)
 })
 
 test_that("geom_histogram(aes(fill = factor(...))) is a stacked by default", {
   gg <- base + geom_histogram(aes(fill = factor(vs)))
   info <- expect_traces(gg, 2, "fill-factor")
-  expect_equal(info$layout$barmode, "relative")
+  expect_equivalent(info$layout$barmode, "relative")
 })
 
 test_that("geom_histogram(aes(fill = factor(...))) respects position_identity()", {
@@ -72,7 +72,7 @@ test_that("geom_histogram(aes(fill = factor(...))) respects position_identity()"
     aes(fill = factor(vs)), alpha = 0.3, position = "identity"
   )
   info <- expect_traces(gg, 2, "fill-factor-identity")
-  expect_equal(info$layout$barmode, "relative")
+  expect_equivalent(info$layout$barmode, "relative")
 })
 
 test_that("geom_histogram(aes(fill = factor(...))) respects position_dodge()", {
@@ -80,7 +80,7 @@ test_that("geom_histogram(aes(fill = factor(...))) respects position_dodge()", {
     aes(fill = factor(vs)), alpha = 0.3, position = "dodge"
   )
   info <- expect_traces(gg, 2, "fill-factor-dodge")
-  expect_equal(info$layout$barmode, "relative")
+  expect_equivalent(info$layout$barmode, "relative")
 })
 
 test_that("geom_histogram() with facets", {
@@ -92,7 +92,7 @@ test_that("geom_histogram() with facets", {
   gap <- unique(sapply(trs, "[[", "bargap"))
   barmode <- unique(sapply(trs, "[[", "barmode"))
   expect_identical(type, "bar")
-  expect_equal(info$layout$barmode, "relative")
+  expect_equivalent(info$layout$barmode, "relative")
 })
 
 test_that("vline overlaid histogram", {

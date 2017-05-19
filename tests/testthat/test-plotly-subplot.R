@@ -3,7 +3,7 @@ context("subplot")
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-subplot-", name))
-  expect_equal(length(L$data), n.traces)
+  expect_equivalent(length(L$data), n.traces)
   L
 }
 
@@ -38,7 +38,7 @@ test_that("group + [x/y]axis works", {
   doms <- lapply(ax, "[[", "domain")
   # make sure y domain is [0, 1] on every axis
   ydom <- doms[grepl("^y", names(doms))]
-  expect_equal(sort(unique(unlist(ydom))), c(0, 1))
+  expect_equivalent(sort(unique(unlist(ydom))), c(0, 1))
   xdom <- doms[grepl("^x", names(doms))]
   expect_true(all(1/3 > xdom[[1]] & xdom[[1]] >= 0))
   expect_true(all(2/3 > xdom[[2]] & xdom[[2]] > 1/3))
@@ -87,10 +87,10 @@ s <- subplot(
 
 test_that("Row/column height/width", {
   l <- expect_traces(s, 3, "width-height")
-  expect_equal(diff(l$layout$xaxis$domain), 0.8 - 0.005)
-  expect_equal(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
-  expect_equal(diff(l$layout$yaxis$domain), 0.2 - 0.005)
-  expect_equal(diff(l$layout$yaxis2$domain), 0.8 - 0.005)
+  expect_equivalent(diff(l$layout$xaxis$domain), 0.8 - 0.005)
+  expect_equivalent(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
+  expect_equivalent(diff(l$layout$yaxis$domain), 0.2 - 0.005)
+  expect_equivalent(diff(l$layout$yaxis2$domain), 0.8 - 0.005)
 })
 
 test_that("recursive subplots work", {
@@ -166,8 +166,8 @@ test_that("geo+cartesian behaves", {
   )
   l <- expect_traces(s, 9, "geo-cartesian")
   geoDom <- l$layout[[grep("^geo", names(l$layout))]]$domain
-  expect_equal(geoDom$x, c(0, 1))
-  expect_equal(geoDom$y, c(0, 0.68))
+  expect_equivalent(geoDom$x, c(0, 1))
+  expect_equivalent(geoDom$y, c(0, 0.68))
 })
 
 
@@ -211,7 +211,7 @@ test_that("May specify legendgroup with through a vector of values", {
   l <- expect_traces(s, 10, "subplot-legendgroup")
   
   # really this means show three legend items (one is blank)
-  expect_equal(
+  expect_equivalent(
     sum(sapply(l$data, function(tr) tr$showlegend %||% TRUE)), 4
   )
   

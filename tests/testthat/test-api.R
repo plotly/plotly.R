@@ -20,7 +20,7 @@ test_that("Changing a filename works", {
   
   id <- plotly:::new_id()
   f <- api("files/cpsievert:14680", "PATCH", list(filename = id)) 
-  expect_equal(f$filename, id)
+  expect_equivalent(f$filename, id)
 })
 
 
@@ -67,7 +67,7 @@ test_that("Creating produces a new file by default", {
     Sys.sleep(3)
     new <- api("folders/home?user=cpsievert")
     n <- if (plotly:::is.plot(new_obj)) 2 else 1
-    expect_equal(old$children$count + n, new$children$count)
+    expect_equivalent(old$children$count + n, new$children$count)
   }
   
   expect_new(mtcars)

@@ -12,9 +12,9 @@ test_that("Discrete axis maps to categorical type", {
     p$x$layout$xaxis, list(type, tickmode, categoryorder, categoryarray)
   )
   axisExpect <- list("category", "auto", "array", classes)
-  expect_equal(axisActual, axisExpect)
+  expect_equivalent(axisActual, axisExpect)
   # trace data reflects the "domain" values
-  expect_equal(
+  expect_equivalent(
     sort(sapply(p$x$data, "[[", "x")), classes
   )
   
@@ -23,7 +23,7 @@ test_that("Discrete axis maps to categorical type", {
     p$x$layout$yaxis, list(type, tickmode)
   )
   axisExpect <- list("linear", "array")
-  expect_equal(axisActual, axisExpect)
+  expect_equivalent(axisActual, axisExpect)
 })
 
 test_that("Categorical axis reflects custom scale mapping", {
@@ -39,8 +39,8 @@ test_that("Categorical axis reflects custom scale mapping", {
     p$x$layout$xaxis, list(type, tickmode, categoryorder, categoryarray)
   )
   axisExpect <- list("category", "auto", "array", lims)
-  expect_equal(axisActual, axisExpect)
-  expect_equal(
+  expect_equivalent(axisActual, axisExpect)
+  expect_equivalent(
     sort(sapply(p$x$data, "[[", "x")), sort(lims)
   )
   
@@ -54,8 +54,8 @@ test_that("Categorical axis reflects custom scale mapping", {
     p$x$layout$xaxis, list(type, tickmode, categoryorder, categoryarray)
   )
   axisExpect <- list("category", "auto", "array", labs)
-  expect_equal(axisActual, axisExpect)
-  expect_equal(
+  expect_equivalent(axisActual, axisExpect)
+  expect_equivalent(
     sort(sapply(p$x$data, "[[", "x")), sort(labs)
   )
   
@@ -71,10 +71,10 @@ test_that("Time axis inverse transforms correctly", {
   l <- ggplotly(ggplot(d, aes(x, y)) + geom_line(), dynamicTicks = TRUE)$x
   
   expect_length(l$data, 1)
-  expect_equal(l$layout$xaxis$type, "date")
-  expect_equal(l$layout$xaxis$tickmode, "auto")
+  expect_equivalent(l$layout$xaxis$type, "date")
+  expect_equivalent(l$layout$xaxis$tickmode, "auto")
   expect_is(l$layout$xaxis$range, "Date")
-  expect_equal(l$data[[1]][["x"]], d$x)
+  expect_equivalent(l$data[[1]][["x"]], d$x)
   
   d2 <- data.frame(
     x = seq(Sys.time(), Sys.time() + 9000, length.out = 10), 
@@ -84,10 +84,10 @@ test_that("Time axis inverse transforms correctly", {
   l2 <- ggplotly(ggplot(d2, aes(x, y)) + geom_line(), dynamicTicks = TRUE)$x
   
   expect_length(l2$data, 1)
-  expect_equal(l2$layout$xaxis$type, "date")
-  expect_equal(l2$layout$xaxis$tickmode, "auto")
+  expect_equivalent(l2$layout$xaxis$type, "date")
+  expect_equivalent(l2$layout$xaxis$tickmode, "auto")
   expect_is(l2$layout$xaxis$range, "POSIXt")
-  expect_equal(l2$data[[1]][["x"]], d2$x)
+  expect_equivalent(l2$data[[1]][["x"]], d2$x)
   
 })
 
