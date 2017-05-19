@@ -19,8 +19,9 @@
 * When creating private plots (via `api_create()`), both the plot and the data behind the plot are private (fixes #976).
 * Creating a plot with multiple traces (or frames) via (via `api_create()`) no longer creates multiple grids (fixes #1004).
 * The `api_create()` function should now create grid references for all data array attributes (fixes #1014).
-* Fixed bug when highlight multiple 'simple key' traces (fixes #974).
+* `ggplotly()` no longer opens an (off-screen) graphics device in RStudio for sizing. It will now correctly use the size of the viewer panel when querying the size of the graphics device.
 * Margins are no longer always set to `NULL` for pie charts (fixes #1002)
+* Fixed bug when highlight multiple 'simple key' traces (fixes #974).
 
 # 4.6.0
 
