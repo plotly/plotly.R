@@ -1,7 +1,7 @@
 library(plotly)
 library(htmlwidgets)
 
-# Thanks to Étienne Tétreault-Pinard 
+# Thanks to Etienne Tetreault-Pinard
 # http://codepen.io/etpinard/pen/jmvyxV?editors=0010
 
 plot_ly(z = list(list(1,2,3), list(3,2,1)), type = "surface") %>%
