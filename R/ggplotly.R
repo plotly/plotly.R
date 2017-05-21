@@ -212,8 +212,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
   # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
+  if (packageVersion("ggplot2") <= "2.2.1") {
+    message(
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
       "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
     )
