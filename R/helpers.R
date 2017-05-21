@@ -202,8 +202,9 @@ plotly_empty <- function(...) {
 #'  ) 
 
 raster2uri <- function(r, ...) {
+  try_library("png", "raster2uri")
   # should be 4 x n matrix
-  r <- as.raster(r, ...)
+  r <- grDevices::as.raster(r, ...)
   rgbs <- col2rgb(c(r), alpha = T) / 255
   nr <- dim(r)[1]
   nc <- dim(r)[2]

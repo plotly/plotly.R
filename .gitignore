@@ -4,8 +4,10 @@ Rapp.history
 *.RData
 *.Rproj.user
 *.DS_Store
+node_modules/
 build_site.R
 todo.R
+inst/examples/*.html
 inst/examples/*/*.html
 inst/examples/*/rsconnect/*
 .Rproj.user

@@ -12,7 +12,7 @@ expect_traces <- function(gg, n.traces, name){
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -57,13 +57,13 @@ test_that('boxes with coord_flip()+facet_grid(scales="free")', {
 test_that("limits can hide data", {
   boxes.limits <- boxes + scale_x_discrete(limits = c("trt1", "ctrl"))
   info <- expect_traces(boxes.limits, 1, "limits-hide")
-  expect_identical(info$layout$xaxis$ticktext, c("trt1", "ctrl"))
+  expect_equivalent(info$layout$xaxis$ticktext, c("trt1", "ctrl"))
 })
 
 test_that("limits can create a gap", {
   boxes.limits <- boxes + scale_x_discrete(limits = c("trt1", "trt2", "GAP", "ctrl"))
   info <- expect_traces(boxes.limits, 1, "limits-gap")
-  expect_identical(info$layout$xaxis$ticktext, c("trt1", "trt2", "GAP", "ctrl"))
+  expect_equivalent(info$layout$xaxis$ticktext, c("trt1", "trt2", "GAP", "ctrl"))
 })
 
 boxes.breaks <- boxes +
@@ -93,7 +93,7 @@ boxes.less <- boxes +
 
 test_that("less breaks is fine", {
   info <- expect_traces(boxes.less, 1, "breaks-less")
-  expect_identical(info$layout$xaxis$ticktext, c("trt1", "ctrl"))
+  expect_equivalent(info$layout$xaxis$ticktext, c("trt1", "ctrl"))
 })
 
 boxes.labels <- boxes +
@@ -102,7 +102,7 @@ boxes.labels <- boxes +
 
 test_that("scale(labels) changes trace names", {
   info <- expect_traces(boxes.labels, 1, "scale-labels")
-  expect_identical(
+  expect_equivalent(
     info$layout$xaxis$ticktext, 
     c("Treatment 1", "Control", "Treatment 2")
   )
@@ -134,14 +134,14 @@ test_that("scale_y_continuous(limits) means yaxis$ranges", {
   boxes.range <- boxes + scale_y_continuous(limits = c(0,8))
   info <- expect_traces(boxes.range, 1, "ycontinuous-ranges")
   y.axis <- info$layout$yaxis
-  expect_equal(range(y.axis$tickvals), c(0, 8))
+  expect_equivalent(range(y.axis$tickvals), c(0, 8))
 })
 
 test_that("ylim() means yaxis$ranges", {
   boxes.range <- boxes + ylim(0, 8)
   info <- expect_traces(boxes.range, 1, "ylim-ranges")
   y.axis <- info$layout$yaxis
-  expect_equal(range(y.axis$tickvals), c(0, 8))
+  expect_equivalent(range(y.axis$tickvals), c(0, 8))
 })
 
 test_that("scale_y_reverse() -> yaxis$ranges reversed", {
@@ -165,7 +165,7 @@ test_that("Set the X tick mark locations", {
   boxes.ticks <- boxes + scale_y_continuous(breaks = seq(4, 5, length.out = 12))
   info <- expect_traces(boxes.ticks, 1, "evenly-spaced-ticks")
   y.axis <- info$layout$yaxis
-  expect_equal(length(y.axis$ticktext), 12)
+  expect_equivalent(length(y.axis$ticktext), 12)
 })
 
 test_that("The breaks can be spaced unevenly", {

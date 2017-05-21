@@ -149,10 +149,10 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
-#' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
-#' Dynamic ticks are useful for updating ticks in response to zoom/pan
-#' interactions; however, they can not always reproduce labels as they 
-#' would appear in the static ggplot2 image.
+#' @param dynamicTicks accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
+#' Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
+#' interactions; however, there is no guarantee they reproduce axis tick text 
+#' as they would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
@@ -165,31 +165,18 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
-    )
-    if (dynamicTicks) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
-  # It is undesirable to both open a *screen* device and leave a new device
-  # open, so if required, we open a non-screen device now, and close on exit 
-  # see https://github.com/att/rcloud.htmlwidgets/issues/2
+  # To avoid undesirable side effects, we may need to open a 
+  # non-interactive device and close it on exit...
+  # https://github.com/att/rcloud.htmlwidgets/issues/2
+  
+  # Note that we never have to open a non-interactive device 
+  # in RStudio since it ships with one...
+  rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
+  width <- width %||% rStudioDevSize[1]
+  height <- height %||% rStudioDevSize[2]
+  # note that calling dev.size() (inside RStudio) will add it to the list
   if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
@@ -200,15 +187,47 @@ gg2list <- function(p, width = NULL, height = NULL,
     } else {
       stop(
         "No graphics device is currently open and no cairo or bitmap device is available.\n", 
-        "To ensure sizes are converted correctly, you have three options:",
-        "  (1) Open a graphics device (with the desired size) b4 using ggplotly()",
+        "A graphics device is required to convert sizes correctly. You have three options:",
+        "  (1) Open a graphics device (with the desired size)  using ggplotly()",
         "  (2) install.packages('Cairo')",
-        "  (3) compile R to use a bitmap device",
+        "  (3) compile R to use a bitmap device (png or jpeg)",
         call. = FALSE
       )
     }
     dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
+  }
+  
+  
+  # check the value of dynamicTicks
+  dynamicValues <- c(FALSE, TRUE, "x", "y")
+  if (length(setdiff(dynamicTicks, dynamicValues))) {
+   stop(
+     sprintf(
+       "`dynamicValues` accepts the following values: '%s'", 
+       paste(dynamicValues, collapse = "', '")
+     ), call. = FALSE
+    )
+  }
+  
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") <= "2.2.1") {
+    message(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (!identical(dynamicTicks, FALSE)) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
   }
   
   # ------------------------------------------------------------------------
@@ -255,7 +274,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # later on, for more complicated geoms (w/ non-trivial summary statistics),
   # we construct a nested key mapping (within group)
   layers <- Map(function(x, y) {
-    if (crosstalk_key() %in% names(y) && inherits(x[["stat"]], "StatIdentity")) {
+    if (crosstalk_key() %in% names(y) && !"key" %in% names(x[["mapping"]]) && 
+        inherits(x[["stat"]], "StatIdentity")) {
       x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
     }
     x
@@ -282,6 +302,14 @@ gg2list <- function(p, width = NULL, height = NULL,
     }, error = function(e) NULL
     )
   }, data, groupDomains)
+  
+  # Before mapping x/y position, save the domain (for discrete scales)
+  # to display in tooltip.
+  data <- lapply(data, function(d) {
+    d[["x_plotlyDomain"]] <- d[["x"]]
+    d[["y_plotlyDomain"]] <- d[["y"]]
+    d
+  })
 
   # Transform all scales
   data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
@@ -293,13 +321,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   layout$train_position(data, scale_x(), scale_y())
   
-  # Before mapping x/y position, save the domain (for discrete scales)
-  # to display in tooltip.
-  data <- lapply(data, function(d) {
-    if (!is.null(scale_x()) && scale_x()$is_discrete()) d$x_plotlyDomain <- d$x
-    if (!is.null(scale_y()) && scale_y()$is_discrete()) d$y_plotlyDomain <- d$y
-    d
-  })
   data <- layout$map_position(data)
   
   # build a mapping between group and key
@@ -400,6 +421,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
     x <- reComputeGroup(x, z)
+    # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
+    attr(y$group, "n") <- NULL
     suppressMessages(dplyr::left_join(x, y))
   }, data, nestedKeys, layers)
   
@@ -468,10 +491,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range))
+  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
+  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
+  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
+  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -481,7 +504,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # reattach crosstalk key-set attribute
   data <- Map(function(x, y) structure(x, set = y), data, sets)
-  traces <- layers2traces(data, prestats_data, layout$layout, plot)
+  traces <- layers2traces(data, prestats_data, layout, plot)
   
   gglayout <- layers2layout(gglayout, layers, layout$layout)
   
@@ -569,6 +592,60 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisName <- lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- layout$panel_params[[i]]
+      
+      # panel_params is quite different for "CoordSf"
+      if ("CoordSf" %in% class(p$coordinates)) {
+        # see CoordSf$render_axis_v
+        direction <- if (xy == "x") "E" else "N"
+        idx <- rng$graticule$type == direction & !is.na(rng$graticule$degree_label)
+        tickData <- rng$graticule[idx, ]
+        # TODO: how to convert a language object to unicode character string?
+        rng[[paste0(xy, ".labels")]] <- as.character(tickData[["degree_label"]])
+        rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
+        
+        # If it doesn't already exist (for this panel), 
+        # generate graticule (as done in, CoordSf$render_bg)
+        isGrill <- vapply(traces, function(tr) {
+          identical(tr$xaxis, lay$xaxis) && 
+            identical(tr$yaxis, lay$yaxis) &&
+            isTRUE(tr$`_isGraticule`)
+        }, logical(1))
+        
+        if (sum(isGrill) == 0) {
+          d <- expand(rng$graticule)
+          d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
+          d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
+          params <- list(
+            colour = theme$panel.grid.major$colour,
+            size = theme$panel.grid.major$size,
+            linetype = theme$panel.grid.major$linetype
+          )
+          grill <- geom2trace.GeomPath(d, params)
+          grill$hoverinfo <- "none"
+          grill$showlegend <- FALSE
+          grill$`_isGraticule` <- TRUE
+          grill$xaxis <- lay$xaxis
+          grill$yaxis <- lay$yaxis
+          
+          traces <- c(list(grill), traces)
+        }
+        
+        # if labels are empty, don't show axis ticks
+        emptyTicks <- all(with(
+          rng$graticule, sapply(degree_label, is.na) | sapply(degree_label, nchar) == 0
+        ))
+        if (emptyTicks) {
+          theme$axis.ticks.length <- 0
+        } else{
+          # convert the special *degree expression in plotmath to HTML entity
+          # TODO: can this be done more generally for all ?
+          rng[[paste0(xy, ".labels")]] <- sub(
+            "\\*\\s+degree[ ]?[\\*]?", "&#176;", rng[[paste0(xy, ".labels")]]
+          )
+        }
+        
+      }
+      
       # stuff like layout$panel_params is already flipped, but scales aren't
       sc <- if (inherits(plot$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
@@ -580,16 +657,33 @@ gg2list <- function(p, width = NULL, height = NULL,
       # get axis title
       axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
       if (is_blank(axisTitle)) axisTitleText <- ""
-      # https://plot.ly/r/reference/#layout-xaxis
+      
+      # is this axis dynamic?
+      isDynamic <- isTRUE(dynamicTicks) || identical(dynamicTicks, xy)
+      if (isDynamic && !p$coordinates$is_linear()) {
+        warning(
+          "`dynamicTicks` is only supported for linear (i.e., cartesian) coordinates", 
+          call. = FALSE
+        )
+      }
+      # determine axis types (note: scale_name may go away someday)
+      # https://github.com/hadley/ggplot2/issues/1312
+      isDate <- isTRUE(sc$scale_name %in% c("date", "datetime"))
+      isDateType <- isDynamic && isDate
+      isDiscrete <- identical(sc$scale_name, "position_d")
+      isDiscreteType <- isDynamic && isDiscrete
+      
       axisObj <- list(
-        type = "linear",
-        autorange = FALSE,
-        tickmode = "array",
-        range = rng[[paste0(xy, ".range")]],
+        # TODO: log type?
+        type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
+        autorange = isDynamic,
+        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
+        tickmode = if (isDynamic) "auto" else "array",
         ticktext = rng[[paste0(xy, ".labels")]],
-        # TODO: implement minor grid lines with another axis object
-        # and _always_ hide ticks/text?
         tickvals = rng[[paste0(xy, ".major")]],
+        categoryorder = "array",
+        categoryarray = rng[[paste0(xy, ".labels")]],
+        nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
         ticklen = unitConvert(theme$axis.ticks.length, "pixels", type),
@@ -600,7 +694,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
         linewidth = unitConvert(axisLine, "pixels", type),
-        showgrid = !is_blank(panelGrid),
+        # TODO: always `showgrid=FALSE` and implement our own using traces
+        showgrid = !is_blank(panelGrid) && !"CoordSf" %in% class(p$coordinates),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
         gridwidth = unitConvert(panelGrid, "pixels", type),
@@ -610,17 +705,19 @@ gg2list <- function(p, width = NULL, height = NULL,
         titlefont = text2font(axisTitle)
       )
       
-      # ensure dates/datetimes are put on the same millisecond scale
-      # hopefully scale_name doesn't go away -- https://github.com/hadley/ggplot2/issues/1312
-      if (any(c("date", "datetime") %in% sc$scale_name)) {
-        # convert days (date) / seconds (datetime) to milliseconds
-        # (86400000 = 24 * 60 * 60 * 1000)
-        constant <- if ("date" %in% sc$scale_name) 86400000 else 1000
-        axisObj$range <- axisObj$range * constant
-        if (i == 1) {
-          traces <- lapply(traces, function(z) { z[[xy]] <- z[[xy]] * constant; z })
-        }
-        if (dynamicTicks) axisObj$type <- "date"
+      # set scaleanchor/scaleratio if these are fixed coordinates
+      fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
+      if (inherits(p$coordinates, fixed_coords) && xy == "y") {
+        axisObj$scaleanchor <- anchor
+        axisObj$scaleratio <- p$coordinates$ratio
+      }
+      
+      # TODO: should we implement aspect ratios?
+      if (!is.null(theme$aspect.ratio)) {
+        warning(
+          "Aspect ratios aren't yet implemented, but you can manually set", 
+          " a suitable height/width", call. = FALSE
+        )
       }
       
       # tickvals are currently on 0-1 scale, but we want them on data scale
@@ -628,9 +725,38 @@ gg2list <- function(p, width = NULL, height = NULL,
         axisObj$tickvals, to = axisObj$range, from = c(0, 1)
       )
       
-      # clear out tickvals/ticktext if dynamic ticks are requested
-      if (dynamicTicks) {
-        axisObj[c("tickvals", "ticktext")] <- NULL
+      # inverse transform date data based on tickvals/ticktext
+      invert_date <- function(x, scale) {
+        if (inherits(scale, "ScaleContinuousDatetime")) {
+          as.POSIXct(x, origin = "1970-01-01", tz = scale$timezone)
+        } else {
+          as.Date(x, origin = "1970-01-01", tz = scale$timezone)
+        }
+      }
+      
+      if (isDateType) {
+        axisObj$range <- invert_date(axisObj$range, sc)
+        traces <- lapply(traces, function(tr) {
+          tr[[xy]] <- invert_date(tr[[xy]], sc)
+          # TODO: are there other similar cases we need to handle?
+          if (identical("bar", tr$type)) {
+            tr[["width"]] <- invert_date(tr[["width"]], sc)
+          }
+          tr
+        })
+      }
+      
+      # inverse transform categorical data based on tickvals/ticktext
+      if (isDiscreteType) {
+        traces <- lapply(traces, function(tr) { 
+          # map x/y trace data back to the 'closest' ticktext label
+          # http://r.789695.n4.nabble.com/check-for-nearest-value-in-a-vector-td4369339.html
+          tr[[xy]]<- vapply(tr[[xy]], function(val) {
+            with(axisObj, ticktext[[which.min(abs(tickvals - val))]])
+          }, character(1))
+          tr
+        })
+        if ("dodge" %in% sapply(layers, ggtype, "position")) gglayout$barmode <- "dodge"
       }
       
       # attach axis object to the layout
@@ -735,6 +861,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
   } # end of panel loop
   
+  
   # ------------------------------------------------------------------------
   # guide conversion
   #   Strategy: Obtain and translate the output of ggplot2:::guides_train().
@@ -822,45 +949,17 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
   }
   
-  # geom_bar() hacks
-  geoms <- sapply(layers, ggtype, "geom")
-  if (any(idx <- geoms %in% c("bar", "col"))) {
-    # traces were reversed in layers2traces()
-    gglayout$legend$traceorder <- "reversed"
-    # since `layout.barmode` is plot-specific, we can't support multiple bar
-    # geoms with different positions
-    positions <- sapply(layers, ggtype, "position")
-    position <- unique(positions[idx])
-    if (length(position) > 1) {
-      warning("plotly doesn't support multiple positions\n",
-              "across geom_bar() layers", call. = FALSE)
-      position <- position[1]
-    }
-    # hacks for position_identity()
-    if ("identity" %in% position) {
-      gglayout$barmode <- "overlay"
-    } else {
-      # yes, this should work even for position_dodge()
-      gglayout$barmode <- "stack"
-    }
-    # note: ggplot2 doesn't flip x/y scales when the coord is flipped
-    # (i.e., at this point, y should be the count/density)
-    is_hist <- inherits(plot$scales$get_scales("x"), "ScaleContinuous")
-    # TODO: get rid of this and use explicit width for bars
-    # https://github.com/plotly/plotly.js/issues/80
-    if (position == "dodge" || is_hist) {
-      gglayout$bargap <- 0
-    }
-  }
-  
   # flip x/y in traces for flipped coordinates
   # (we've already done appropriate flipping for axis objects)
   if (inherits(plot$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
-      traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% c("bar", "box")) traces[[i]]$orientation <- "h"
-      if (tr$type == "box") traces[[i]]$hoverinfo <- "x"
+      # flipping logic for bar positioning is in geom2trace.GeomBar
+      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (tr$type %in% "box") {
+        traces[[i]]$orientation <- "h"
+        traces[[i]]$hoverinfo <- "x"
+      }
       names(traces[[i]])[grepl("^error_y$", names(tr))] <- "error_x"
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }
@@ -915,6 +1014,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   gglayout$width <- width
   gglayout$height <- height
+  gglayout$barmode <- gglayout$barmode %||% "relative"
   
   l <- list(
     data = setNames(traces, NULL),

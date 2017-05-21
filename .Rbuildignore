@@ -7,7 +7,10 @@ CONTRIBUTING.md
 build_site.R
 todo.R
 .github/
+inst/examples/printing.html
 inst/examples/flexdashboard
 Untitled*
+node_modules/
 rsconnect/
 revdep/
+^LICENSE\.md$

@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name){
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -39,7 +39,7 @@ test_that("geom_smooth() respects colour aesthetic", {
   info <- expect_traces(p4, 15, "colour")
   
   # 5 traces of points
-  expect_equal(
+  expect_equivalent(
     sum(vapply(info$data, function(x) x$mode == "markers", logical(1))), 5
   )
   # at least 5 paths

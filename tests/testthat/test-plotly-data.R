@@ -1,7 +1,7 @@
 context("plotly data")
 
 test_that("uniq works as expected", {
-  expect_equal(uniq(c("red", "red", NA)), "red")
+  expect_equivalent(uniq(c("red", "red", NA)), "red")
 })
 
 test_that("plotly_data returns empty data frame when none is specified", {
@@ -29,16 +29,16 @@ test_that("add_fun can apply two different chunks of data to a plot", {
       p %>% slice(which.min(mpg)) %>% add_annotations(text = "Bad mileage")
     })
   l <- plotly_build(p)[["x"]]
-  expect_equal(length(l$layout$annotations), 2)
-  expect_equal(
+  expect_equivalent(length(l$layout$annotations), 2)
+  expect_equivalent(
     sort(sapply(l$layout$annotations, "[[", "text")),
     c("Bad mileage", "Good mileage")
   )
-  expect_equal(
+  expect_equivalent(
     sort(sapply(l$layout$annotations, "[[", "x")),
     c(1.835, 5.250)
   )
-  expect_equal(
+  expect_equivalent(
     sort(sapply(l$layout$annotations, "[[", "y")),
     c(10.4, 33.9)
   )

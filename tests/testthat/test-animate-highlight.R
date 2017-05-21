@@ -145,11 +145,11 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   # default colors are the plotly.js defaults
   cols <- sapply(l$data, function(x) x$line$color)
   defaultCols <- toRGB(traceColorDefaults()[1:3])
-  expect_equal(cols, defaultCols)
+  expect_equivalent(cols, defaultCols)
   
   # trace names reflect the split/score (i.e., frames are removed)
   nms <- sapply(l$data, "[[", "name")
-  expect_equal(nms, levels(as.factor(d$score)))
+  expect_equivalent(nms, levels(as.factor(d$score)))
   
   # 2 frames: both with 3 traces
   expect_length(l$frames, 2)
@@ -157,8 +157,8 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   expect_length(l$frames[[2]]$data, 3)
   
   # make sure the frames are targetting the right traces
-  expect_equal(l$frames[[1]]$traces, 0:2)
-  expect_equal(l$frames[[2]]$traces, 0:2)
+  expect_equivalent(l$frames[[1]]$traces, 0:2)
+  expect_equivalent(l$frames[[2]]$traces, 0:2)
   
   # 1st frame has all 3 traces visible; 2nd frame has 2 visible
   expect_true(
@@ -171,9 +171,9 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   
   # ensure the default colors remain consistent throughout the animation
   cols <- sapply(l$frames[[1]]$data, function(x) x$line$color)
-  expect_equal(cols, defaultCols)
+  expect_equivalent(cols, defaultCols)
   cols <- sapply(l$frames[[2]]$data, function(x) x$line$color)
-  expect_equal(cols, defaultCols)
+  expect_equivalent(cols, defaultCols)
   
   # ensure the animation defaults are supplied
   buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
@@ -184,7 +184,7 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   
   # step values reflect the frame values
   steps <- l$layout$sliders[[1]]$steps
-  expect_equal(
+  expect_equivalent(
     unlist(lapply(steps, function(s) s$args[[1]])),
     c("1", "2")
   )
@@ -217,7 +217,7 @@ test_that("can change animation defaults", {
   cyl <- as.character(unique(sort(mtcars$cyl)))
   for (i in seq_along(l$frames)) {
     f <- l$frames[[i]]
-    expect_equal(f$name, cyl[[i]])
+    expect_equivalent(f$name, cyl[[i]])
     expect_length(f$data, 1)
   }
   
@@ -232,13 +232,13 @@ test_that("can change animation defaults", {
   
   # ensure the animation options are supplied
   buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args[[2]]
-  expect_equal(
+  expect_equivalent(
     buttonArgs[names(aniOpts)], aniOpts
   )
   
   # step values reflect the frame values
   steps <- l$layout$sliders[[1]]$steps
-  expect_equal(
+  expect_equivalent(
     unlist(lapply(steps, function(s) s$args[[1]])), cyl
   )
   
@@ -269,9 +269,9 @@ test_that("simple animation targeting works", {
   for (i in seq_along(l$data)) {
     tr <- l$data[[i]]
     # trace names are empty
-    expect_equal(tr$name %||% "no-name", "no-name")
+    expect_equivalent(tr$name %||% "no-name", "no-name")
     # color defaults are retained
-    expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
+    expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
   }
   
   # frame trace names are empty
@@ -281,14 +281,11 @@ test_that("simple animation targeting works", {
     for (j in seq_along(f$data)) {
       tr <- f$data[[j]]
       # trace names are empty
-      expect_equal(tr$name %||% "no-name", "no-name")
+      expect_equivalent(tr$name %||% "no-name", "no-name")
       # color defaults are retained
-      expect_equal(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
+      expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
     }
   }
-  
-  
-  
   
   # since all trace types are scatter, redraw = FALSE
   buttonArgs <- l$layout$updatemenus[[1]]$buttons[[1]]$args
@@ -298,7 +295,23 @@ test_that("simple animation targeting works", {
   res <- lapply(steps, function(s) {
     expect_false(s$args[[2]]$frame$redraw)
   })
+})
+
+test_that("animation frames are boxed up correctly", {
+  dallas <- subset(txhousing, city == "Dallas" & month == 1)
+  p <- ggplot(dallas) +
+    geom_point(aes(x = volume, y = sales, frame = year))
+  l <- plotly_build(p)$x
   
+  for (i in seq_along(l$frames)) {
+    traces <- l$frames[[i]]$data
+    for (j in seq_along(traces)) {
+      x <- traces[[j]]$x
+      y <- traces[[j]]$y
+      expect_true(length(x) > 1 || inherits(x, "AsIs"))
+      expect_true(length(y) > 1 || inherits(y, "AsIs"))
+    }
+  }
   
 })
 

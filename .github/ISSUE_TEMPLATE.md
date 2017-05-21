@@ -1,9 +1,13 @@
-Thanks for your interest in plotly!
+Please briefly describe your problem and what output you expect. If you have a question, please don't use this form, but instead ask on the community forum <http://community.plot.ly/c/api/r> or stackoverflow <http://stackoverflow.com>.
 
-Before opening an issue, please search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/ropensci/plotly/issues/new).
+Please include a minimal reprex. The goal of a reprex is to make it as easy as possible for me to recreate your problem so that I can fix it. If you've never heard of a reprex before, start by reading <https://github.com/jennybc/reprex#what-is-a-reprex>, and follow the advice further down the page. Do NOT include session info unless it's explicitly asked for, or you've used `reprex::reprex(..., si = TRUE)` to hide it away.  
 
-Bug reports must be accompanied with a [reproducible example](http://stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example).
+Delete these instructions once you have read them.
 
-Note that GitHub issues are reserved for bug reports and feature requests only. Implementation questions should be asked on community.plot.ly (tagged [`R`](http://community.plot.ly/c/api/r)) or on Stack Overflow (tagged [`plotly`](https://stackoverflow.com/questions/tagged/plotly)).
+---
 
-Comments on GitHub issues or pull requests should add content to the discussions. Approbation comments such as *+1* or *I would like this feature to be implemented as well* will be deleted by the maintainers. Please use [GitHub reactions](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments) instead.
+Brief description of the problem
+
+```r
+# insert reprex here
+```

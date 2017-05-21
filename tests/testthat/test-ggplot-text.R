@@ -10,8 +10,8 @@ test_that("label is translated correctly", {
 })
 
 test_that("position is translated correctly", {
-  expect_identical(info$data[[1]]$x, mtcars$wt)
-  expect_identical(info$data[[1]]$y, mtcars$mpg)
+  expect_equivalent(info$data[[1]]$x, mtcars$wt)
+  expect_equivalent(info$data[[1]]$y, mtcars$mpg)
 })
 
 test_that("geom_text splits along colour", {
@@ -33,7 +33,7 @@ test_that("geom_text splits along colour", {
   
   L <- save_outputs(gg, "text-colour")
   
-  expect_equal(length(L$data), 2)  # 2 traces
+  expect_equivalent(length(L$data), 2)  # 2 traces
   # Proper type and mode conversion
   expect_identical(L$data[[1]]$type, "scatter")
   expect_identical(L$data[[1]]$mode, "text")

@@ -9,6 +9,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
       position = ggtype(y, "position")
     )
+    
     # by default, show all user-specified and generated aesthetics in hovertext
     stat_aes <- y$stat$default_aes
     map <- c(y$mapping, stat_aes[grepl("^\\.\\.", as.character(stat_aes))])
@@ -27,6 +28,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
     if (identical("fills", hover_on(x))) {
       map <- map[!names(map) %in% c("x", "xmin", "xmax", "y", "ymin", "ymax")]
     }
+    # disregard geometry mapping in hovertext for GeomSf
+    if ("GeomSf" %in% class(y$geom)) {
+      map <- map[!names(map) %in% "geometry"]
+    }
     param[["hoverTextAes"]] <- map
     param
   }, data, p$layers)
@@ -44,28 +49,16 @@ layers2traces <- function(data, prestats_data, layout, p) {
       varName <- y[[i]]
       # "automatically" generated group aes is not informative
       if (identical("group", unique(varName, aesName))) next
-      # by default assume the values don't need any formatting
-      forMat <- function(x) if (is.numeric(x)) round(x, 2) else x
-      sc <- p$scales$get_scales(aesName)
-      if (isTRUE(aesName %in% c("x", "y"))) {
-        # convert "milliseconds from the UNIX epoch" to a date/datetime
-        # http://stackoverflow.com/questions/13456241/convert-unix-epoch-to-date-object-in-r
-        if ("datetime" %in% sc$scale_name) forMat <- function(x) as.POSIXct(x, origin = "1970-01-01", tz = sc$timezone)
-        # convert "days from the UNIX epoch" to a date/datetime
-        if ("date" %in% sc$scale_name) forMat <- function(x) as.Date(as.POSIXct(x * 86400, origin = "1970-01-01", tz = sc$timezone))
-      }
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
       prefix <- if (identical(aesName, "text")) "" else paste0(varName, ": ")
       # look for the domain, if that's not found, provide the range (useful for identity scales)
-      suffix <- tryCatch(
-        forMat(x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]),
-        error = function(e) ""
-      )
+      txt <- x[[paste0(aesName, "_plotlyDomain")]] %||% x[[aesName]]
+      suffix <- tryNULL(format(txt, justify = "none")) %||% ""
       # put the height of the bar in the tooltip
       if (inherits(x, "GeomBar") && identical(aesName, "y")) {
-        suffix <- format(x[["ymax"]] - x[["ymin"]])
+        suffix <- format(x[["ymax"]] - x[["ymin"]], justify = "none")
       }
       x$hovertext <- paste0(x$hovertext, prefix, suffix)
     }
@@ -144,12 +137,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # each trace is with respect to which axis?
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
-      trs[[j]]$xaxis <-  sub("axis", "", layout[panel, "xaxis"])
-      trs[[j]]$yaxis <-  sub("axis", "", layout[panel, "yaxis"])
-    }
-    # also need to set `layout.legend.traceorder='reversed'`
-    if (inherits(d, "GeomBar") && paramz[[i]]$position != "fill") {
-      trs <- rev(trs)
+      trs[[j]]$xaxis <-  sub("axis", "", layout$layout[panel, "xaxis"])
+      trs[[j]]$yaxis <-  sub("axis", "", layout$layout[panel, "yaxis"])
     }
     trace.list <- c(trace.list, trs)
   }
@@ -190,7 +179,9 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
     cbind(x = revData[["x"]] + revData$violinwidth / 2, revData[, idx])
   )
   if (!is.null(data$hovertext)) data$hovertext <- paste0(data$hovertext, br())
-  data$hovertext <- paste0(data$hovertext, "density: ", round(data$density, 3))
+  data$hovertext <- paste0(
+    data$hovertext, "density: ", format(data$density, justify = "none")
+  )
   prefix_class(data, c("GeomPolygon", "GeomViolin"))
 }
 
@@ -296,6 +287,33 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
+#' @export 
+to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
+  
+  data <- expand(data)
+  
+  # determine the type of simple feature for each row
+  # recode the simple feature with the type of geometry used to render it
+  data[[".plotlySfType"]] <- sapply(data$geometry, function(x) class(x)[2])
+  dat <- dplyr::mutate(
+    data, .plotlySfType = dplyr::recode(.plotlySfType,
+      MULTIPOLYGON = "GeomPolygon",
+      MULTILINESTRING = "GeomLine",
+      MULTIPOINT = "GeomPoint",
+      POLYGON = "GeomPolygon",
+      LINESTRING = "GeomLine",
+      POINT = "GeomPoint"
+  ))
+  
+  # return a list of data frames...one for every geometry (a la, GeomSmooth)
+  d <- split(dat, dat[[".plotlySfType"]])
+  for (i in seq_along(d)) {
+    d[[i]] <- prefix_class(d[[i]], names(d)[[i]])
+  }
+  if (length(d) == 1) d[[1]] else d
+}
+utils::globalVariables(c(".plotlySfType"))
+
 #' @export
 to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
   common <- intersect(data$map_id, params$map$id)
@@ -376,7 +394,9 @@ to_basic.GeomDensity2d <- function(data, prestats_data, layout, params, p, ...) 
   if ("hovertext" %in% names(data)) {
     data$hovertext <- paste0(data$hovertext, br())
   }
-  data$hovertext <- paste0(data$hovertext, "Level: ", data$level)
+  data$hovertext <- paste0(
+    data$hovertext, "Level: ", format(data$level,  justify = "none")
+  )
   if (!"fill" %in% names(data)) data$fill <- NA
   prefix_class(data, "GeomPath")
 }
@@ -387,10 +407,10 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
@@ -399,10 +419,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- data$yintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomHline", "GeomPath"))
 }
 
 #' @export
@@ -411,10 +431,10 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout, "variable", "y", c("y_min", "y_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data[["x"]] <- data$xintercept
-  prefix_class(data, "GeomPath")
+  prefix_class(data, c("GeomVline", "GeomPath"))
 }
 
 #' @export
@@ -427,7 +447,7 @@ to_basic.GeomJitter <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
   # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
-  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
   data$width <- (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
@@ -437,7 +457,7 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
 to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) {
   # height for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
-  data <- merge(data, layout, by = "PANEL", sort = FALSE)
+  data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
   data$width <- (data[["ymax"]] - data[["y"]]) / (data[["y_max"]] - data[["y_min"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbarh")
@@ -476,11 +496,11 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 #' @export
 to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
   if (identical(params$binaxis, "y")) {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$y_max - layout$y_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$y_max - layout$layout$y_min)
     data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
     data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   } else {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$x_max - layout$x_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$x_max - layout$layout$x_min)
     data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
     # TODO: why times 6?!?!
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
@@ -495,7 +515,7 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
   for (var in c("radius", "angle")) {
     if (length(unique(data[[var]])) != 1) next
     data[["hovertext"]] <- paste0(
-      data[["hovertext"]], br(), var, ": ", data[[var]]
+      data[["hovertext"]], br(), var, ": ", format(data[[var]], justify = "none")
     )
   }
   prefix_class(to_basic.GeomSegment(data), "GeomSpoke")
@@ -515,6 +535,7 @@ utils::globalVariables(c("xmin", "xmax", "y", "size"))
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
   # allow the tick length to vary across panels
+  layout <- layout$layout
   layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
   layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
   data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
@@ -601,12 +622,13 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @export
 geom2trace <- function(data, params, p) {
+  if (nrow(data) == 0) return(geom2trace.GeomBlank(data, params, p))
   UseMethod("geom2trace")
 }
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list()
+  list(visible = FALSE)
 }
 
 #' @export
@@ -674,12 +696,30 @@ geom2trace.GeomPoint <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBar <- function(data, params, p) {
-  data[["y"]] <- data[["ymax"]] - data[["ymin"]]
-  # TODO: use xmin/xmax once plotly.js allows explicit bar widths
-  # https://github.com/plotly/plotly.js/issues/80
+  # TODO: does position play a role here?
+  #pos <- params$position %||% "stack"
+  flip <- inherits(p$coordinates, "CoordFlip")
+  
+  if (!flip) {
+    width <- with(data, xmax - xmin)
+    # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
+    x <- with(data, (xmax + xmin) / 2)
+    base <- data[["ymin"]]
+    y <- with(data, ymax - ymin)
+  } else {
+    width <- with(data, xmax - xmin)
+    # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
+    y <- with(data, (xmax + xmin) / 2)
+    base <- data[["ymin"]]
+    x <- with(data, ymax - ymin)
+  }
+
   compact(list(
-    x = data[["x"]],
-    y = data[["y"]],
+    orientation = if (flip) "h" else "v",
+    width = width,
+    base = base,
+    x = x,
+    y = y,
     text = uniq(data[["hovertext"]]),
     key = data[["key"]],
     frame = data[["frame"]],
@@ -701,7 +741,9 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
+  
   data <- group2NA(data)
+  
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
@@ -736,11 +778,11 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
+    hoverinfo = "y",
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "box",
-    hoverinfo = "y",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
@@ -770,6 +812,7 @@ geom2trace.GeomText <- function(data, params, p) {
     x = data[["x"]],
     y = data[["y"]],
     text = data[["label"]],
+    hovertext = data[["hovertext"]],
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
@@ -847,8 +890,10 @@ geom2trace.default <- function(data, params, p) {
 # this is necessary for some geoms, for example, polygons
 # since plotly.js can't draw two polygons with different fill in a single trace
 split_on <- function(dat) {
-  geom <- class(dat)[1]
   lookup <- list(
+    GeomHline = c("linetype", "colour", "size"),
+    GeomVline = c("linetype", "colour", "size"),
+    GeomAbline = c("linetype", "colour", "size"),
     GeomPath = c("fill", "colour", "size"),
     GeomPolygon = c("fill", "colour", "size"),
     GeomBar = "fill",
@@ -857,11 +902,17 @@ split_on <- function(dat) {
     GeomErrorbarh = "colour",
     GeomText = "colour"
   )
-  # split on the domain to ensure sensible trace ordering
+  # try to split on the domain (for sensible trace ordering)
   for (i in names(lookup)) {
-    lookup[[i]] <- paste0(lookup[[i]], "_plotlyDomain")
+    domainName <- paste0(lookup[[i]], "_plotlyDomain")
+    idx <- domainName %in% names(dat)
+    lookup[[i]][idx] <- domainName[idx]
   }
-  splits <- lookup[[geom]]
+  # search all the classes for relevant splits (moving from specific->generic) 
+  splits <- NULL
+  for (i in class(dat)) {
+    splits <- splits %||% lookup[[i]]
+  }
   # if hovering on fill, we need to split on hovertext
   if (identical(hover_on(dat), "fills")) {
     splits <- c(splits, "hovertext")
@@ -1035,8 +1086,8 @@ lty2dash <- function(x) {
     "13" = "longdash",
     "1343" = "longdashdot",
     "73" = "dash",
-    "2262" = "dotdash",
-    "12223242" = "dotdash",
+    "2262" = "dashdot" ,
+    "12223242" = "dashdot" ,
     "F282" = "dash",
     "F4448444" = "dash",
     "224282F2" = "dash",

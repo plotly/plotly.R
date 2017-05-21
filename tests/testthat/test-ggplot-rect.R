@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data=has.data, layout=L$layout)
 }
 
@@ -49,12 +49,12 @@ test_that('trace contains NA back to 1st rect', {
                   2, 2, 2.5, 2.5, 2, NA,
                   3, 3, 3.5, 3.5, 3, NA,
                   4, 4, 4.5, 4.5, 4)
-  expect_equal(tr$x, expected.x)
+  expect_equivalent(tr$x, expected.x)
   expected.y <- c(0, 1, 1, 0, 0, NA,
                   0, 1, 1, 0, 0, NA,
                   0, 1, 1, 0, 0, NA,
                   0, 1, 1, 0, 0)
-  expect_equal(tr$y, expected.y)
+  expect_equivalent(tr$y, expected.y)
 })
 
 rect.color <- ggplot(df4, aes(xmin = x, xmax = x + 0.5, ymin = 0, ymax = 1)) +
@@ -66,13 +66,13 @@ test_that('rect color', {
   for(tr in info$data){
     expect_true(tr$fillcolor == toRGB("grey"))
     expect_true(tr$fill == "toself")
-    expect_equal(tr$y, c(0, 1, 1, 0, 0, NA, 0, 1, 1, 0, 0))
+    expect_equivalent(tr$y, c(0, 1, 1, 0, 0, NA, 0, 1, 1, 0, 0))
     traces.by.name[[tr$name]] <- tr
   }
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[1]]$x, c(1, 1, 1.5, 1.5, 1, NA, 4, 4, 4.5, 4.5, 4)
   )
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[2]]$x,c(2, 2, 2.5, 2.5, 2, NA, 3, 3, 3.5, 3.5, 3)
   )
   expect_false(
@@ -89,13 +89,13 @@ test_that('rect color', {
   for(tr in info$data){
     expect_true(tr$line$color == "transparent")
     expect_true(tr$fill == "toself")
-    expect_equal(tr$y, c(0, 1, 1, 0, 0, NA, 0, 1, 1, 0, 0))
+    expect_equivalent(tr$y, c(0, 1, 1, 0, 0, NA, 0, 1, 1, 0, 0))
     traces.by.name[[tr$name]] <- tr
   }
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[1]]$x, c(1, 1, 1.5, 1.5, 1, NA, 4, 4, 4.5, 4.5, 4)
   )
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[2]]$x, c(2, 2, 2.5, 2.5, 2, NA, 3, 3, 3.5, 3.5, 3)
   )
   expect_false(
@@ -113,15 +113,15 @@ test_that('rect aes(fill) with constant color', {
   for(tr in info$data){
     expect_true(tr$line$color == toRGB("black"))
     expect_true(tr$fill == "toself")
-    expect_equal(
+    expect_equivalent(
       tr$y, c(0, 1, 1, 0, 0, NA, 0, 1, 1, 0, 0)
     )
     traces.by.name[[tr$name]] <- tr
   }
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[1]]$x, c(1, 1, 1.5, 1.5, 1, NA, 4, 4, 4.5, 4.5, 4)
   )
-  expect_equal(
+  expect_equivalent(
     traces.by.name[[2]]$x, c(2, 2, 2.5, 2.5, 2, NA, 3, 3, 3.5, 3.5, 3)
   )
   expect_false(

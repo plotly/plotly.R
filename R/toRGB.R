@@ -22,6 +22,17 @@
 toRGB <- function(x, alpha = 1) {
   if (length(x) == 0) return(x)
   if (any(x %in% "transparent")) return(x)
+  # allow x/alpha vector(s), but only sensible cases...
+  if (length(x) != length(alpha)) {
+    # try to reduce alpha to length 1 (in case x is of length 1)
+    alpha <- uniq(alpha)
+    if (length(x) != length(alpha) && length(alpha) != 1) {
+      stop(
+        "alpha must be of length 1 or the same length as x",
+        call. = FALSE
+      )
+    }
+  }
   # add alpha to already converted "rgb(x,y,z)" codes
   idx <- grepl("^rgba\\(", x) & alpha <= 1 & 0 <= alpha
   if (any(idx)) {

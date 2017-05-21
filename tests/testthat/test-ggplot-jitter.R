@@ -10,7 +10,7 @@ expect_traces <- function(gg, n_traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has_data <- all_traces[!no_data]
-  expect_equal(length(has_data), n_traces)
+  expect_equivalent(length(has_data), n_traces)
   list(traces = has_data, layout = L$layout)
 }
 

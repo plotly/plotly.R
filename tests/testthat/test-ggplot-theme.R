@@ -57,7 +57,7 @@ gg <- ggplot(countrypop) +
 test_that("marker default shape is a circle", {
   info <- save_outputs(gg, "theme-marker-default")
   for (i in c(1:3)) {
-    expect_identical(info$data[[i]]$marker$symbol, "circle")
+    expect_equivalent(info$data[[i]]$marker$symbol, "circle")
     expect_true(info$data[[i]]$showlegend)
   }
 })

@@ -3,7 +3,7 @@ context("plotly-symbol")
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- save_outputs(p, paste0("plotly-symbol-", name))
-  expect_equal(length(L$data), n.traces)
+  expect_equivalent(length(L$data), n.traces)
   L
 }
 
@@ -53,18 +53,18 @@ test_that("Can specify a scale manually", {
   l <- expect_traces(p, 2, "symbol-manual")
   markers <- lapply(l$data, "[[", "marker")
   expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
-  expect_equal(expected, sapply(markers, "[[", "symbol"))
+  expect_equivalent(expected, sapply(markers, "[[", "symbol"))
 })
 
 test_that("Trace ordering matches factor levels", {
   p <- plot_ly(mtcars, x = ~mpg, y = ~disp, symbol = ~factor(vs, levels = c(1, 0)))
   l <- expect_traces(p, 2, "ordering")
-  expect_equal(sapply(l$data, "[[", "name"), c("1", "0"))
+  expect_equivalent(sapply(l$data, "[[", "name"), c("1", "0"))
 })
 
 test_that("Trace ordering is alphabetical", {
   lvls <- sort(unique(mpg$class))
   p <- plot_ly(mpg, x = ~cty, y = ~hwy, symbol = ~class)
   l <- expect_traces(p, length(lvls), "alphabetical")
-  expect_equal(sapply(l$data, "[[", "name"), lvls)
+  expect_equivalent(sapply(l$data, "[[", "name"), lvls)
 })

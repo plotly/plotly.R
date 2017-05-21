@@ -21,9 +21,7 @@ p2 <- base %>%
   add_lines(x = ~date, y = ~median, alpha = 0.3) %>%
   layout(xaxis = list(title = ""))
 
-subplot(p1, p2, titleX = TRUE, widths = c(0.3, 0.7)) %>% 
+ subplot(p1, p2, titleX = TRUE, widths = c(0.3, 0.7)) %>% 
   layout(margin = list(l = 120)) %>%
   hide_legend() %>%
-  highlight(on = "plotly_click", off = NULL, color = "red")
-
-# TODO: provide a way to loop through possible selections...
+  highlight(color = "red")

@@ -258,7 +258,7 @@ plot_geo <- function(data = data.frame(), ...) {
 #' dend1 <- as.dendrogram(hc)
 #' plot_dendro(dend1, height = 600) %>% 
 #'   hide_legend() %>% 
-#'   highlight(off = "plotly_deselect", persistent = TRUE, dynamic = TRUE)
+#'   highlight(persistent = TRUE, dynamic = TRUE)
 #' 
 
 plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {
@@ -367,7 +367,11 @@ as_widget <- function(x, ...) {
       defaultHeight = 400
     ),
     preRenderHook = plotly_build,
-    dependencies = c(crosstalk::crosstalkLibs(), list(typedArrayPolyfill()))
+    dependencies = c(
+      list(typedArrayPolyfill()),
+      crosstalk::crosstalkLibs(),
+      list(plotlyMainBundle())
+    )
   )
   # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
   # note this will throw a warning in shiny, but it is at least less obtrusive
@@ -377,9 +381,20 @@ as_widget <- function(x, ...) {
 
 typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
-    "typedarray", 0.1,
+    "typedarray", "0.1",
     src = depPath("typedarray"),
     script = "typedarray.min.js"
+  )
+}
+
+# TODO: suggest a plotlyBundles package that has trace-level bundles 
+# and bundle size at print time.
+plotlyMainBundle <- function() {
+  htmltools::htmlDependency(
+    "plotlyjs", "1.27.1",
+    src = depPath("plotlyjs"),
+    script = "plotly-latest.min.js",
+    stylesheet = "plotly-htmlwidgets.css"
   )
 }
 
@@ -396,6 +411,7 @@ typedArrayPolyfill <- function() {
 #' @export
 #' @examples 
 #' 
+#' \dontrun{
 #' p1 <- plot_ly()
 #' p2 <- remove_typedarray_polyfill(p1)
 #' t1 <- tempfile(fileext = ".html")
@@ -403,6 +419,7 @@ typedArrayPolyfill <- function() {
 #' file.info(t1)$size
 #' htmlwidgets::saveWidget(p2, t1)
 #' file.info(t1)$size
+#' }
 
 remove_typedarray_polyfill <- function(p) {
   isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))

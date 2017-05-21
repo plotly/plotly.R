@@ -9,9 +9,9 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
               data.frame(who = "you", time.obj, dollars = c(10.2, 0)))
   gg <- qplot(time.obj, dollars, data = df, color = who, geom = "line")
   info <- save_outputs(gg, "date-strings")
-  expect_equal(length(info$data), 2)
+  expect_equivalent(length(info$data), 2)
   for(trace in info$data[1:2]){
-    expect_equal(as.numeric(time.obj) * 1000, trace$x)
+    expect_equivalent(as.numeric(time.obj), trace$x)
   }
 })
 
@@ -23,7 +23,7 @@ test_that("class Date is supported", {
   df$x <- as.Date(df$x)
   gg <- ggplot(df) + geom_line(aes(x = x, y = y))
   info <- save_outputs(gg, "date-class-Date")
-  expect_equal(length(info$data), 1)
+  expect_equivalent(length(info$data), 1)
 })
 
 test_that("scale_x_date and irregular time series work", {

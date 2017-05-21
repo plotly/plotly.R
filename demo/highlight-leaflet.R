@@ -13,8 +13,7 @@ sd <- SharedData$new(quakes)
 
 p <- plot_ly(sd, x = ~depth, y = ~mag) %>% 
   add_markers(alpha = 0.5) %>%
-  layout(dragmode = "select") %>%
-  highlight(dynamic = TRUE)
+  highlight("plotly_selected", dynamic = TRUE)
 
 map <- leaflet(sd) %>% 
   addTiles() %>% 

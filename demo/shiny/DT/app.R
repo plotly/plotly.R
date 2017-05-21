@@ -20,7 +20,7 @@ server <- function(input, output) {
       qplot(data = d, x = mpg, y = wt),
       qplot(data = d, x = mpg, y = disp),
       titleX = T, titleY = T, margin = 0.03
-    )
+    ) %>% highlight("plotly_selected")
   })
   
   output$table <- DT::renderDataTable({

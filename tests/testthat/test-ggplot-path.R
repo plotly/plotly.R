@@ -22,7 +22,7 @@ test_that("paths with different colors become different traces", {
     geom_path(aes(x, y, group = y, color = y), data = two.paths)
   info <- save_outputs(gg, "path-colors")
   # one trace is for the colorbar
-  expect_equal(length(info$data), 3)
+  expect_equivalent(length(info$data), 3)
   expect_identical(info$data[[1]]$x[1:2], c(1,2))
   expect_identical(info$data[[2]]$x[1:2], c(1,2))
   expect_identical(info$data[[1]]$y[1:2], c(1,1))
@@ -31,7 +31,7 @@ test_that("paths with different colors become different traces", {
   gg <- ggplot() +
     geom_path(aes(x, y, group = y, color = paste0("FOO", y)), data = two.paths)
   info <- save_outputs(gg, "path-colors2")
-  expect_equal(length(info$data), 2)
+  expect_equivalent(length(info$data), 2)
   expect_identical(info$data[[1]]$x[1:2], c(1,2))
   expect_identical(info$data[[2]]$x[1:2], c(1,2))
   expect_identical(info$data[[1]]$y[1:2], c(1,1))
@@ -47,7 +47,7 @@ test_that("paths with the same color but different groups stay together", {
   gg <- ggplot() +
     geom_path(aes(x, y, group = y, color = g), data = four.paths)
   info <- save_outputs(gg, "path-colored-groups-stay-together")
-  expect_equal(length(info$data), 2)
+  expect_equivalent(length(info$data), 2)
   expect_identical(info$data[[1]]$name, "positive")
   expect_identical(info$data[[2]]$name, "negative")
   expect_true(any(is.na(info$data[[1]]$x)))
@@ -67,17 +67,13 @@ test_that("lines & points are merged into markers+lines traces", {
     geom_line() +
     geom_point()
   info <- save_outputs(gg, "path-line-symbols")
-  expect_equal(length(info$data), 2)  # 2 traces
-  expect_identical(info$data[[1]]$name, "Female")
-  expect_identical(info$data[[1]]$marker$symbol, "circle")
-  expect_identical(info$data[[2]]$name, "Male")
-  expect_identical(info$data[[2]]$marker$symbol, "triangle-up")
-  expect_identical(
-    sort(strsplit(info$data[[1]]$mode, "+", fixed = TRUE)[[1]]), 
-    c("lines", "markers")
-  )
-  expect_identical(
-    sort(strsplit(info$data[[2]]$mode, "+", fixed = TRUE)[[1]]), 
-    c("lines", "markers")
-  )
+  expect_equivalent(length(info$data), 2)  # 2 traces
+  expect_equivalent(info$data[[1]]$name, "Female")
+  expect_equivalent(info$data[[1]]$marker$symbol, "circle")
+  expect_equivalent(info$data[[2]]$name, "Male")
+  expect_equivalent(info$data[[2]]$marker$symbol, "triangle-up")
+  expect_match(info$data[[1]]$mode, "lines")
+  expect_match(info$data[[1]]$mode, "markers")
+  expect_match(info$data[[2]]$mode, "lines")
+  expect_match(info$data[[2]]$mode, "markers")
 })

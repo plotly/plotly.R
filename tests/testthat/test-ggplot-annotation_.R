@@ -17,20 +17,20 @@ test_that("Basic annotation_raster() example works", {
   expect_length(l$data, 4)
   
   expect_length(l$layout$images, 2)
-  expect_equal(l$layout$images[[1]]$xref, "x") 
-  expect_equal(l$layout$images[[1]]$yref, "y") 
-  expect_equal(l$layout$images[[2]]$xref, "x2") 
-  expect_equal(l$layout$images[[2]]$yref, "y")
+  expect_equivalent(l$layout$images[[1]]$xref, "x") 
+  expect_equivalent(l$layout$images[[1]]$yref, "y") 
+  expect_equivalent(l$layout$images[[2]]$xref, "x2") 
+  expect_equivalent(l$layout$images[[2]]$yref, "y")
   
   for (i in 1:2) {
-    expect_equal(l$layout$images[[i]]$layer, "above")
-    expect_equal(l$layout$images[[i]]$xanchor, "left")
-    expect_equal(l$layout$images[[i]]$yanchor, "bottom")
-    expect_equal(l$layout$images[[i]]$sizex, 5)
-    expect_equal(l$layout$images[[i]]$sizey, 1)
-    expect_equal(l$layout$images[[i]][["x"]], 15)
-    expect_equal(l$layout$images[[i]][["y"]], 3)
-    expect_equal(l$layout$images[[i]]$sizing, "stretch")
+    expect_equivalent(l$layout$images[[i]]$layer, "above")
+    expect_equivalent(l$layout$images[[i]]$xanchor, "left")
+    expect_equivalent(l$layout$images[[i]]$yanchor, "bottom")
+    expect_equivalent(l$layout$images[[i]]$sizex, 5)
+    expect_equivalent(l$layout$images[[i]]$sizey, 1)
+    expect_equivalent(l$layout$images[[i]][["x"]], 15)
+    expect_equivalent(l$layout$images[[i]][["y"]], 3)
+    expect_equivalent(l$layout$images[[i]]$sizing, "stretch")
   }
   
   # TODO: how to test the data URI content?
@@ -50,10 +50,10 @@ test_that("Basic annotation_map() example works", {
   
   l <- plotly_build(p)$x
   
-  expect_equal(l$data[[1]]$type, "scatter")
-  expect_equal(l$data[[1]]$fill, "toself")
-  expect_equal(l$data[[1]]$fillcolor, "transparent")
-  expect_equal(l$data[[1]]$hoveron, "fills")
+  expect_equivalent(l$data[[1]]$type, "scatter")
+  expect_equivalent(l$data[[1]]$fill, "toself")
+  expect_equivalent(l$data[[1]]$fillcolor, "transparent")
+  expect_equivalent(l$data[[1]]$hoveron, "fills")
   expect_false(l$data[[1]]$showlegend)
   
 })

@@ -4,7 +4,7 @@ sudo: true
 dist: trusty
 
 r:
-#  - oldrel
+  - oldrel
   - release
   - devel
 
@@ -12,9 +12,9 @@ env:
   global:
     - _R_CHECK_FORCE_SUGGESTS_=false R_PKG="$(basename $TRAVIS_REPO_SLUG)"
     # plotly_api_key (for posting to plot.ly)
-    - secure: "jlIAFoBGaDWUQDh6oGNb2BgU31/80iioM4y4xwx35yWkGKkNIID1eMEuiIn+/ipLvOVHkPTDS6DYnOtD8EIBpROgAKHFY33gM1h7P6NRxVszzC6WLP2ASnq95DWq36DAC2Oevy05V7nwSRFilPwSt6JLppYUInG+WdaZ+QOSRi4="
+    - secure: "WsvmMHN4YVhnk0bLRE04APcLbs5s4vWKSHjEdU0bPXd0xdMTzZeP5D7pxyF1983C+P5LpSnGHv4dgwLMBkNzxJwBR7/Ta7lfO1akYILWwxib+1DVbCqUH5Z4Ba1FSCQptIrLNGR3P7+0Lem4hEhqKdPKltFnxhnXO0Y+MeG71IQ="
     # GITHUB_PAT (for pushing to plotly-test-table)
-    - secure: "LHJONgWOo+98vNeFLI7LSJU3RtbMVszlI79GB8CcXmc2mlgM/UtZ5b6RnkNlhmg3Gj1/uObfm/rIybVTwuS1yNpeKv73+gsZOYhobVXiUGVxdRFG/mg5mbqwyWkkuofjPGFlMZCEMgHim37eZzgjSibwVH1LClRDsCoFMCgvgV0="
+    - secure: "Ar5FRxsMJHxb8CQmmsoFx5Tm6ncFvF3LHtAMtfcOE2e9JAbXQ471PGzOMM7yudGa2vVuQJBpB6bWktuE30J68MQxgRmxeaJYmOp+ePqyW80y/zEa2P3R4//eb9Rif2lmsmaqz7HtVfX4xr3YX4N+ZjfyI8TFt5Phue18tXeMoJw="
 
 # installing Rserve from source requires non-standard R build (--enable-R-shlib) 
 r_binary_packages:
@@ -22,6 +22,7 @@ r_binary_packages:
 
 r_packages:
   - devtools
+  - quantreg
   
 r_github_packages:
   - tidyverse/ggplot2
@@ -39,7 +40,6 @@ before_script:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
   - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
-  - R CMD INSTALL ${R_PKG}_*.tar.gz
 
 script:
   # run R CMD check on the non-pull request build

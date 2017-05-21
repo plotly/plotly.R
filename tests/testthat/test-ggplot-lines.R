@@ -31,7 +31,7 @@ test_that("different colored lines become different colored traces", {
     geom_line()+
     scale_color_manual(values=c(y1="blue", y2="red"))
   info <- save_outputs(gg, "linetype-colors")
-  expect_equal(length(info$data), 2)
+  expect_equivalent(length(info$data), 2)
   expect_identical(info$data[[1]]$line$color, toRGB("blue"))
   n <- length(x)
   expect_identical(info$data[[1]]$y[1:n], y1)
@@ -58,34 +58,32 @@ test_that("Translates both dates and datetimes (with dynamic ticks) correctly", 
   
   p <- ggplot(d, aes(date, value)) + geom_line()
   l <- plotly_build(ggplotly(p, dynamicTicks = TRUE))$x
-  
-  milliseconds <- as.numeric(d$date) * 86400000
-  
+
   d2 <- data.frame(
     value = rnorm(100),
     date = as.POSIXct(dates)
   )
   
-  milliseconds2 <- as.numeric(d2$date) * 1000
   p2 <- ggplot(d2, aes(date, value)) + geom_line()
   l2 <- plotly_build(ggplotly(p2, dynamicTicks = TRUE))$x
   
-  # data is all on millisecond level
-  expect_equal(milliseconds, milliseconds2)
-  expect_equal(milliseconds, l$data[[1]]$x)
-  expect_equal(milliseconds, l2$data[[1]]$x)
-  
-  # same with range
-  expect_equal(grDevices::extendrange(milliseconds), l$layout$xaxis$range)
-  expect_equal(grDevices::extendrange(milliseconds), l2$layout$xaxis$range)
-  
   # since these are dynamic ticks, let plotly.js generate the ticks
-  expect_null(l$layout$xaxis$ticktext)
-  expect_null(l$layout$xaxis$tickvals)
-  expect_null(l2$layout$xaxis$ticktext)
-  expect_null(l2$layout$xaxis$tickvals)
-  expect_equal(l$layout$xaxis$type, "date")
-  expect_equal(l2$layout$xaxis$type, "date")
+  axisType <- with(l$layout$xaxis, list(type, tickmode, autorange))
+  expect_equivalent(axisType, list("date", "auto", TRUE))
+  axisType2 <- with(l2$layout$xaxis, list(type, tickmode, autorange))
+  expect_equivalent(axisType2, list("date", "auto", TRUE))
+  
+  # range and data have been reverse transformed
+  expect_is(l$layout$xaxis$range, "Date")
+  expect_is(l$data[[1]]$x, "Date")
+  expect_is(l2$layout$xaxis$range, "POSIXct")
+  expect_is(l2$data[[1]]$x, "POSIXct")
+  
+  # check the hovertext
+  dates1 <- sapply(strsplit(l$data[[1]]$text, br()), "[[", 1)
+  dates2 <- sapply(strsplit(l2$data[[1]]$text, br()), "[[", 1)
+  expect_equivalent(paste("date:", d$date), dates1)
+  expect_equivalent(paste("date:", d2$date), dates2)
 })
 
 test_that("geom_linerange() without a y aesthetic translates to a path", {
@@ -101,16 +99,16 @@ test_that("geom_linerange() without a y aesthetic translates to a path", {
   l <- plotly_build(p)$x
   
   expect_length(l$data, 1)
-  expect_equal(l$data[[1]]$type, "scatter")
-  expect_equal(
+  expect_equivalent(l$data[[1]]$type, "scatter")
+  expect_equivalent(
     l$data[[1]]$x,
     c(1, 1, NA, 2, 2, NA, 3, 3, NA, 4, 4, NA, 5, 5)
   )
-  expect_equal(
+  expect_equivalent(
     l$data[[1]]$y,
     c(0, 1, NA, 0, 2, NA, 0, 3, NA, 0, 4, NA, 0, 5)
   )
-  expect_equal(
+  expect_equivalent(
     unlist(l$data[[1]]$text),
     c(
       'x: 1<br />ymin: 0', 'x: 1<br />ymax: 1', NA, 'x: 2<br />ymin: 0', 

@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -162,10 +162,10 @@ test_that("Add a red dashed vertical line", {
   expect_true(info$layout$showlegend)
   mode <- sapply(info$data, "[[", "mode")
   line.traces <- info$data[mode == "lines"]
-  expect_equal(length(line.traces), 2)
+  expect_equivalent(length(line.traces), 2)
   dash <- sapply(line.traces, function(tr)tr$line$dash)
   dash.traces <- line.traces[dash == "dash"]
-  expect_equal(length(dash.traces), 1)
+  expect_equivalent(length(dash.traces), 1)
   dash.trace <- dash.traces[[1]]
   expect_identical(dash.trace$line$color, toRGB("#BB0000"))
 })
@@ -177,7 +177,7 @@ test_that("scatter facet -> 2 traces", {
   expect_true(info$data[[1]]$xaxis != info$data[[2]]$xaxis)
   expect_true(info$data[[1]]$yaxis == info$data[[2]]$yaxis)
   # only one yaxis
-  expect_equal(sum(grepl("yaxis", names(info$layout))), 1)
+  expect_equivalent(sum(grepl("yaxis", names(info$layout))), 1)
 })
 
 temp <- spf + geom_hline(aes(yintercept=10))
@@ -186,7 +186,7 @@ test_that("geom_hline -> 2 more traces", {
   
   expect_true(info$layout$showlegend)
   has.name <- sapply(info$data, function(tr) isTRUE(nchar(tr$name) > 0))
-  expect_equal(sum(has.name), 2)
+  expect_equivalent(sum(has.name), 2)
 })
 
 df.vlines <- data.frame(cond = levels(df$cond), xval = c(10,11.5))

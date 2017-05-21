@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name){
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(traces=has.data, layout=L$layout)
 }
 
@@ -16,10 +16,10 @@ test_that("geom_point size & alpha translate to a single trace", {
   gg <- ggplot(mtcars, aes(cyl, wt)) + 
     geom_point(aes(size = gear, alpha = cyl)) 
   info <- save_outputs(gg, "point-size-alpha")
-  expect_equal(length(info$data), 1)
+  expect_equivalent(length(info$data), 1)
   mkr <- info$data[[1]]$marker
-  expect_equal(length(mkr$size), nrow(mtcars))
-  expect_equal(length(mkr$opacity), nrow(mtcars))
+  expect_equivalent(length(mkr$size), nrow(mtcars))
+  expect_equivalent(length(mkr$opacity), nrow(mtcars))
 })
 
 test_that("marker color is non-transparent for open shapes", {
@@ -40,7 +40,7 @@ test_that("marker color inherits from fill, when appropriate", {
     facet_wrap(~shape) +
     scale_shape_manual(values = df_shapes$shape, guide = "none")
   l <- save_outputs(p, "all-shapes")
-  expect_equal(length(l$data), 25)
+  expect_equivalent(length(l$data), 25)
   markerColors <- sapply(l$data, function(x) x$marker$color)
   lineColors <- sapply(l$data, function(x) x$marker$line$color)
   expect_true(all(markerColors[1:20] == lineColors[1:20]))
@@ -55,5 +55,5 @@ test_that("can plot on sub-second time scale", {
   )
   g <- ggplot(d, aes(x, y)) + geom_point()
   info <- save_outputs(g, "point-size-alpha2")
-  expect_equivalent(info$data[[1]]$x, as.numeric(d$x) * 1000)
+  expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
 })

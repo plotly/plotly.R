@@ -11,14 +11,7 @@ HTMLWidgets.widget({
     // devtools::use_data(Schema, overwrite = T, internal = T)
     // console.log(JSON.stringify(Plotly.PlotSchema.get()));
     
-    return {
-      // Push JavaScript closures onto this list, and renderValue
-      // will pop them off and run them one at a time the next
-      // time it runs. Use this to dispose of e.g. old event
-      // registrations.
-      onNextRender: []
-    };
-    
+    return {};
   },
 
   resize: function(el, width, height, instance) {
@@ -30,11 +23,6 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
-
-    // Release previously registered crosstalk event listeners
-    while (instance.onNextRender.length > 0) {
-      instance.onNextRender.pop()();
-    }
       
     var shinyMode;
     if (typeof(window) !== "undefined") {
@@ -46,7 +34,20 @@ HTMLWidgets.widget({
 
     var graphDiv = document.getElementById(el.id);
     
-    // inject a "control panel" holding selectize/dynamic color widget(s)
+    // TODO: move the control panel injection strategy inside here...
+    HTMLWidgets.addPostRenderHandler(function() {
+      
+      // lower the z-index of the modebar to prevent it from highjacking hover
+      // (TODO: do this via CSS?)
+      // https://github.com/ropensci/plotly/issues/956
+      // https://www.w3schools.com/jsref/prop_style_zindex.asp
+      var modebars = document.querySelectorAll(".js-plotly-plot .plotly .modebar");
+      for (var i = 0; i < modebars.length; i++) {
+        modebars[i].style.zIndex = 1;
+      }
+    });
+      
+      // inject a "control panel" holding selectize/dynamic color widget(s)
     if (x.selectize || x.highlight.dynamic && !instance.plotly) {
       var flex = document.createElement("div");
       flex.class = "plotly-crosstalk-control-panel";
@@ -127,8 +128,13 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
+    }
+    
+    // remove "sendDataToCloud", unless user has specified they want it
+    x.config = x.config || {};
+    if (!x.config.cloud) {
+      x.config.modeBarButtonsToRemove = x.config.modeBarButtonsToRemove || [];
+      x.config.modeBarButtonsToRemove.push("sendDataToCloud");
     }
     
     // if no plot exists yet, create one with a particular configuration
@@ -257,29 +263,25 @@ HTMLWidgets.widget({
           continue;
         }
         
+        // set defaults for this keySet
+        // note that we don't track the nested property (yet) since we always 
+        // emit the union -- http://cpsievert.github.io/talks/20161212b/#21
+        keysBySet[trace.set] = keysBySet[trace.set] || {
+          value: [],
+          _isSimpleKey: trace._isSimpleKey
+        };
+        
         // selecting a point of a "simple" trace means: select the 
         // entire key attached to this trace, which is useful for,
         // say clicking on a fitted line to select corresponding observations 
-        if (trace._isSimpleKey) {
-          keysBySet[trace.set] = {value: trace.key, _isSimpleKey: true};
-          // TODO: could this be made more efficient by looping at the trace level first?
-          continue;
-        }
+        var key = trace._isSimpleKey ? trace.key : trace.key[points[i].pointNumber];
+        // http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
+        var keyFlat = trace._isNestedKey ? [].concat.apply([], key) : key;
         
-        // set defaults for this key set
-        keysBySet[trace.set] = keysBySet[trace.set] || 
-          {value: [], _isSimpleKey: false};
-        
-        // the key for this point (could be "nested" -- i.e. a 2D array)
-        var key = trace.key[points[i].pointNumber];
-        if (trace._isNestedKey) {
-          // TODO: is this faster than pushing?
-          keysBySet[trace.set].value = keysBySet[trace.set].value.concat(key);
-        } else {
-          keysBySet[trace.set].value.push(key);
-        }
-        
+        // TODO: better to only add new values?
+        keysBySet[trace.set].value = keysBySet[trace.set].value.concat(keyFlat);
       }
+      
       return keysBySet;
     }
     
@@ -303,7 +305,63 @@ HTMLWidgets.widget({
       }
     }
 
-    if (allSets.length > 0) {
+    // register event listeners for all sets
+    for (var i = 0; i < allSets.length; i++) {
+      
+      var set = allSets[i];
+      var selection = new crosstalk.SelectionHandle(set);
+      var filter = new crosstalk.FilterHandle(set);
+      
+      var filterChange = function(e) {
+        removeBrush(el);
+        traceManager.updateFilter(set, e.value);
+      };
+      filter.on("change", filterChange);
+      
+      
+      var selectionChange = function(e) {
+        
+        // array of "event objects" tracking the selection history
+        // this is used to avoid adding redundant selections
+        var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
+        
+        // Construct an event object "defining" the current event. 
+        var event = {
+          receiverID: traceManager.gd.id,
+          plotlySelectionColour: crosstalk.group(set).var("plotlySelectionColour").get()
+        };
+        event[set] = e.value;
+        // TODO: is there a smarter way to check object equality?
+        if (selectionHistory.length > 0) {
+          var ev = JSON.stringify(event);
+          for (var i = 0; i < selectionHistory.length; i++) {
+            var sel = JSON.stringify(selectionHistory[i]);
+            if (sel == ev) {
+              return;
+            }
+          }
+        }
+        
+        // accumulate history for persistent selection
+        if (!x.highlight.persistent) {
+          selectionHistory = [event];
+        } else {
+          selectionHistory.push(event);
+        }
+        crosstalk.var("plotlySelectionHistory").set(selectionHistory);
+        
+        // do the actual updating of traces, frames, and the selectize widget
+        traceManager.updateSelection(set, e.value);
+        // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
+        if (x.selectize) {
+          if (!x.highlight.persistent || e.value === null) {
+            selectize.clear(true);
+          }
+          selectize.addItems(e.value, true);
+          selectize.close();
+        }
+      }
+      selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
       graphDiv.on(x.highlight.on, function turnOn(e) {
@@ -312,11 +370,9 @@ HTMLWidgets.widget({
           // Keys are group names, values are array of selected keys from group.
           for (var set in selectedKeys) {
             if (selectedKeys.hasOwnProperty(set)) {
-              crosstalk.group(set).var("selection")
-                .set(selectedKeys[set].value, {sender: el});
+              selection.set(selectedKeys[set].value, {sender: el});
             }
           }
-          
         }
       });
       
@@ -326,104 +382,59 @@ HTMLWidgets.widget({
         // remove any selection history
         crosstalk.var("plotlySelectionHistory").set(null);
         // trigger the actual removal of selection traces
-        for (var i = 0; i < allSets.length; i++) {
-          crosstalk.group(allSets[i]).var("selection").set(null, {sender: el});
-        }
+        selection.set(null, {sender: el});
       });
-      
-
-      for (var i = 0; i < allSets.length; i++) {
-        (function() {
-          var set = allSets[i];
-          var grp = crosstalk.group(set);
           
-          // Create a selectize widget for each group
-          if (x.selectize) {
-            var selectizeID = Object.keys(x.selectize)[i];
-            var items = x.selectize[selectizeID].items;
-            var first = [{value: "", label: "(All)"}];
-            var opts = {
-              options: first.concat(items),
-              searchField: "label",
-              valueField: "value",
-              labelField: "label",
-              maxItems: 50
-            };
-            var select = $("#" + selectizeID).find("select")[0];
-            var selectize = $(select).selectize(opts)[0].selectize;
-            // NOTE: this callback is triggered when *directly* altering 
-            // dropdown items
-            selectize.on("change", function() {
-              var currentItems = traceManager.groupSelections[set] || [];
-              if (!x.highlight.persistent) {
-                removeBrush(el);
-                for (var i = 0; i < currentItems.length; i++) {
-                  selectize.removeItem(currentItems[i], true);
-                }
-              }
-              var newItems = selectize.items.filter(function(idx) { 
-                return currentItems.indexOf(idx) < 0;
-              });
-              if (newItems.length > 0) {
-                traceManager.updateSelection(set, newItems);
-              } else {
-                // Item has been removed...
-                // TODO: this logic won't work for dynamically changing palette 
-                traceManager.updateSelection(set, null);
-                traceManager.updateSelection(set, selectize.items);
-              }
-            });
+      // register a callback for selectize so that there is bi-directional
+      // communication between the widget and direct manipulation events
+      if (x.selectize) {
+        var selectizeID = Object.keys(x.selectize)[i];
+        var items = x.selectize[selectizeID].items;
+        var first = [{value: "", label: "(All)"}];
+        var opts = {
+          options: first.concat(items),
+          searchField: "label",
+          valueField: "value",
+          labelField: "label",
+          maxItems: 50
+        };
+        var select = $("#" + selectizeID).find("select")[0];
+        var selectize = $(select).selectize(opts)[0].selectize;
+        // NOTE: this callback is triggered when *directly* altering 
+        // dropdown items
+        selectize.on("change", function() {
+          var currentItems = traceManager.groupSelections[set] || [];
+          if (!x.highlight.persistent) {
+            removeBrush(el);
+            for (var i = 0; i < currentItems.length; i++) {
+              selectize.removeItem(currentItems[i], true);
+            }
           }
-          
-          grp.var("selection").on("change", function crosstalk_sel_change(e) {
-            
-            // array of "event objects" tracking the selection history
-            var selectionHistory = crosstalk.var("plotlySelectionHistory").get() || [];
-            
-            // do nothing if the event isn't "new"
-            // TODO: is there a smarter way to check object equality?
-            var event = {};
-            event[set] = e.value;
-            if (selectionHistory.length > 0) {
-              var ev = JSON.stringify(event);
-              for (var i = 0; i < selectionHistory.length; i++) {
-                var sel = JSON.stringify(selectionHistory[i]);
-                if (sel == ev) {
-                  return;
-                }
-              }
-            }
-            
-            // accumulate history for persistent selection
-            if (!x.highlight.persistent) {
-              selectionHistory = [event];
-            } else {
-              selectionHistory.push(event);
-            }
-            crosstalk.var("plotlySelectionHistory").set(selectionHistory);
-            
-            // e.value is either null, or an array of newly selected values
-            traceManager.updateSelection(set, e.value);
-            // https://github.com/selectize/selectize.js/blob/master/docs/api.md#methods_items
-            if (x.selectize) {
-              if (!x.highlight.persistent || e.value === null) {
-                selectize.clear(true);
-              }
-              selectize.addItems(e.value, true);
-              selectize.close();
-            }
-            
+          var newItems = selectize.items.filter(function(idx) { 
+            return currentItems.indexOf(idx) < 0;
           });
-
-          grp.var("filter").on("change", function crosstalk_filter_change(e) {
-            traceManager.updateFilter(set, e.value);
-          });
-  
-        })();
+          if (newItems.length > 0) {
+            traceManager.updateSelection(set, newItems);
+          } else {
+            // Item has been removed...
+            // TODO: this logic won't work for dynamically changing palette 
+            traceManager.updateSelection(set, null);
+            traceManager.updateSelection(set, selectize.items);
+          }
+        });
       }
+      
+      
+      
+      
+      
+          
+      
+      
     }
-  }
-});
+    
+  } // end of renderValue
+}); // end of widget definition
 
 /**
  * @param graphDiv The Plotly graph div
@@ -464,6 +475,7 @@ TraceManager.prototype.updateFilter = function(group, keys) {
     
   } else {
   
+    var traces = [];
     for (var i = 0; i < this.origData.length; i++) {
       var trace = this.origData[i];
       if (!trace.key || trace.set !== group) {
@@ -472,15 +484,17 @@ TraceManager.prototype.updateFilter = function(group, keys) {
       var matchFunc = getMatchFunc(trace);
       var matches = matchFunc(trace.key, keys);
       
-      if (matches.length > 0 && !trace._isSimpleKey) {
-        // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
-        this.gd.data[i] = subsetArrayAttrs(trace, matches);
+      if (matches.length > 0) {
+        if (!trace._isSimpleKey) {
+          // subsetArrayAttrs doesn't mutate trace (it makes a modified clone)
+          trace = subsetArrayAttrs(trace, matches);
+        }
+        traces.push(trace);
       }
-      
     }
-    
   }
-
+  
+  this.gd.data = traces;
   Plotly.redraw(this.gd);
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,
@@ -507,6 +521,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     this.groupSelections[group] = keys;
   } else {
     // add to the groupSelection, rather than overwriting it
+    // TODO: can this be removed?
     this.groupSelections[group] = this.groupSelections[group] || [];
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
@@ -528,6 +543,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
+    // selection brush attributes
+    var selectAttrs = Object.keys(this.highlight.selected);
+
     for (var i = 0; i < this.origData.length; i++) {
       // TODO: try using Lib.extendFlat() as done in  
       // https://github.com/plotly/plotly.js/pull/1136 
@@ -544,24 +562,56 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (!trace._isSimpleKey) {
           trace = subsetArrayAttrs(trace, matches);
         }
-        trace.opacity = this.origOpacity[i];
-        trace.showlegend = this.highlight.showInLegend;
-        trace.hoverinfo = this.highlight.hoverinfo || trace.hoverinfo;
-        trace.name = "selected";
+        // Apply selection brush attributes (supplied from R)
+        // TODO: it would be neat to have a dropdown to dynamically specify these
+        for (var j = 0; j < selectAttrs.length; j++) {
+          var attr = selectAttrs[j];
+          trace[attr] = this.highlight.selected[attr];
+        }
+        
+        // if it is defined, override color with the "dynamic brush color""
         var d = this.gd._fullData[i];
         if (d.marker) {
           trace.marker = d.marker;
           trace.marker.color =  selectionColour || trace.marker.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.marker || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.marker[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.line) {
           trace.line = d.line;
           trace.line.color =  selectionColour || trace.line.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.line || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.line[attrs[j]] = selected[attrs[j]];
+          }
         }
+        
         if (d.textfont) {
           trace.textfont = d.textfont;
           trace.textfont.color =  selectionColour || trace.textfont.color;
+          
+          // adopt any user-defined styling for the selection
+          var selected = this.highlight.selected.textfont || {};
+          var attrs = Object.keys(selected);
+          for (var j = 0; j < attrs.length; j++) {
+            trace.textfont[attrs[j]] = selected[attrs[j]];
+          }
         }
+        // attach a sensible name/legendgroup
+        trace.name = trace.name || keys.join("<br />");
+        trace.legendgroup = trace.legendgroup || keys.join("<br />");
+        
         // keep track of mapping between this new trace and the trace it targets
+        // (necessary for updating frames to reflect the selection traces)
         trace._originalIndex = i;
         trace._newIndex = this.gd._fullData.length + traces.length;
         traces.push(trace);

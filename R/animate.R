@@ -26,6 +26,7 @@
 #' is started.
 #' @export
 #' @rdname animation
+#' @aliases animation
 #' @author Carson Sievert
 #' @examples
 #' 
