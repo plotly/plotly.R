@@ -62,9 +62,7 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   # internally, nested really tracks trace index, meaning we don't need 
   # to seperate them
-  if (length(nested)) {
-    dt <- dt[, .SD[-.N], by = nested]
-  }
+  dt <- if (length(nested)) dt[, .SD[-.N], by = nested] else dt[-.N]
   
   structure(data.table::setDF(dt), class = datClass)
 }
