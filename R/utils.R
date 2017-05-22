@@ -858,7 +858,9 @@ remove_class <- function(x, y) {
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "") {
   if (type == "api") {
-    Sys.getenv("plotly_api_domain", "https://api.plot.ly")
+    # new onprem instances don't have an https://api-thiscompany.plot.ly
+    # but https://thiscompany.plot.ly seems to just work in that case...
+    Sys.getenv("plotly_api_domain", Sys.getenv("plotly_domain", "https://api.plot.ly"))
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }
