@@ -6,5 +6,5 @@ test_that("remove_class() can remove 'AsIs' class", {
   x <- 1:10
   class(x) <- c("x", "y")
   x <- remove_class(I(x), "AsIs")
-  expect_equal(class(x), c("x", "y"))
+  expect_equivalent(class(x), c("x", "y"))
 })

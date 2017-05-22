@@ -38,11 +38,11 @@ test_that("geom_crossbar() with aesthetics", {
   colors <- vapply(l$data, function(x) x$line$color, character(1))
   dashes <- vapply(l$data, function(x) x$line$dash, character(1))
   
-  expect_equal(
+  expect_equivalent(
     unique(colors), toRGB(c("red", "purple"))
   )
   
-  expect_equal(
+  expect_equivalent(
     unique(dashes), lty2dash(1:2)
   )
   

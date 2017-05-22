@@ -8,7 +8,7 @@ expect_traces <- function(gg, n.traces, name){
     is.null(tr[["x"]]) && is.null(tr[["y"]])
   })
   has.data <- all.traces[!no.data]
-  expect_equal(length(has.data), n.traces)
+  expect_equivalent(length(has.data), n.traces)
   list(data = has.data, layout = L$layout)
 }
 
@@ -17,10 +17,10 @@ p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs), shape = factor(cyl)
 
 test_that("Discrete colour and shape get merged into one legend", {
   info <- save_outputs(p, "scatter_legend")
-  expect_equal(length(info$data), 5)
+  expect_equivalent(length(info$data), 5)
   expect_true(info$layout$showlegend)
   # 5 legend entries
-  expect_equal(sum(sapply(info$data, "[[", "showlegend")), 5)
+  expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 5)
   # verify entries are sorted correctly
   nms <- sapply(info$data, "[[", "name")
   d <- unique(mtcars[c("vs", "cyl")])
@@ -54,7 +54,7 @@ p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) +
 #test_that("missing breaks translates to showlegend=FALSE", {
 #  g <- p + scale_color_discrete(breaks = 1)
 #  info <- expect_traces(two.legend.entries, 3, "iris-trace-showlegend-FALSE")
-#  expect_equal(sum(sapply(info, "[[", "showlegend")), 1)
+#  expect_equivalent(sum(sapply(info, "[[", "showlegend")), 1)
 #})
 
 # test of legend position
@@ -79,7 +79,7 @@ test_that("legend is created with discrete mapping regardless of unique values",
   info <- expect_traces(p, 1, "one-entry")
   expect_true(info$data[[1]]$showlegend)
   expect_true(info$layout$showlegend)
-  expect_equal(length(info$layout$annotations), 1)
+  expect_equivalent(length(info$layout$annotations), 1)
 })
 
 test_that("can hide legend", {

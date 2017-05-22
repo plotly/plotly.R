@@ -165,43 +165,19 @@ gg2list <- function(p, width = NULL, height = NULL,
                     tooltip = "all", dynamicTicks = FALSE, 
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
-  # check the value of dynamicTicks
-  dynamicValues <- c(FALSE, TRUE, "x", "y")
-  if (length(setdiff(dynamicTicks, dynamicValues))) {
-   stop(
-     sprintf(
-       "`dynamicValues` accepts the following values: '%s'", 
-       paste(dynamicValues, collapse = "', '")
-     ), call. = FALSE
-    )
-  }
-  
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which may open a new *screen* device, if none is currently open. 
-  # It is undesirable to both open a *screen* device and leave a new device
-  # open, so if required, we open a non-screen device now, and close on exit 
-  # see https://github.com/att/rcloud.htmlwidgets/issues/2
-  if (is.null(grDevices::dev.list()) || identical(Sys.getenv("RSTUDIO"), "1")) {
+  # To avoid undesirable side effects, we may need to open a 
+  # non-interactive device and close it on exit...
+  # https://github.com/att/rcloud.htmlwidgets/issues/2
+  
+  # Note that we never have to open a non-interactive device 
+  # in RStudio since it ships with one...
+  rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
+  width <- width %||% rStudioDevSize[1]
+  height <- height %||% rStudioDevSize[2]
+  # note that calling dev.size() (inside RStudio) will add it to the list
+  if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
     } else if (capabilities("png")) {
@@ -220,6 +196,38 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
+  }
+  
+  
+  # check the value of dynamicTicks
+  dynamicValues <- c(FALSE, TRUE, "x", "y")
+  if (length(setdiff(dynamicTicks, dynamicValues))) {
+   stop(
+     sprintf(
+       "`dynamicValues` accepts the following values: '%s'", 
+       paste(dynamicValues, collapse = "', '")
+     ), call. = FALSE
+    )
+  }
+  
+  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
+  # there are too many naming changes in 2.2.1.9000 to realistically 
+  if (packageVersion("ggplot2") <= "2.2.1") {
+    message(
+      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
+      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+    )
+    if (!identical(dynamicTicks, FALSE)) {
+      warning(
+        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
+      )
+    }
+    return(
+      gg2list_legacy(
+        p, width = width, height = height, tooltip = tooltip,
+        layerData = layerData, originalData = originalData, source = source, ...
+      )
+    )
   }
   
   # ------------------------------------------------------------------------
@@ -946,9 +954,12 @@ gg2list <- function(p, width = NULL, height = NULL,
   if (inherits(plot$coordinates, "CoordFlip")) {
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
-      # TODO: move this to the layer2trace definition...
-      if (tr$type %in% "box") traces[[i]]$orientation <- "h"
-      if (tr$type == "box") traces[[i]]$hoverinfo <- "x"
+      # flipping logic for bar positioning is in geom2trace.GeomBar
+      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (tr$type %in% "box") {
+        traces[[i]]$orientation <- "h"
+        traces[[i]]$hoverinfo <- "x"
+      }
       names(traces[[i]])[grepl("^error_y$", names(tr))] <- "error_x"
       names(traces[[i]])[grepl("^error_x$", names(tr))] <- "error_y"
     }

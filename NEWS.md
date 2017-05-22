@@ -1,19 +1,27 @@
-# 4.6.0.9000
+# 4.7.0
 
 ## NEW FEATURES & IMPROVEMENTS
 
 * Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
 * Added support for `geom_sf()` and `coord_sf()`.
+* The `api_create()` function gains a new `fileopt` argument, which is inspired from the `fileopt` argument in the (deprecated) `plotly_POST()` function (fixes #976). It currently supports to values: `"new"` and `"overwrite"`. The default, `"overwrite"`, will overwrite existing file(s) with a matching `filename`.
+* The `filename` argument in `api_create()` now accepts a character vector of length 2, the first string is used to name the plot, and the second is used to name the grid (i.e., data behind the plot).
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.27.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.27.0
+* Upgraded to plotly.js v1.27.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.27.1
 * The `traces` argument in the `style()` function now defaults to `NULL` (instead of 1). Meaning that, by default, supplied attributes now modify _every_ trace (instead of the first one).
 
 ## Bug fixes 
 
-* When creating private plots via `api_create()`, both the plot and the data behind the plot are private (fixes #976).
-* Fixed bug when highlight multiple 'simple key' traces (fixes #974) 
+* Fixes numerous problems with `coord_flip()` (fixes #1012).
+* The typed array polyfill is now included *before* the plotly.js bundle, which should fix some rendering issues in some browsers, including RStudio (fixes #1010).
+* When creating private plots (via `api_create()`), both the plot and the data behind the plot are private (fixes #976).
+* Creating a plot with multiple traces (or frames) via (via `api_create()`) no longer creates multiple grids (fixes #1004).
+* The `api_create()` function should now create grid references for all data array attributes (fixes #1014).
+* `ggplotly()` no longer opens an (off-screen) graphics device in RStudio for sizing. It will now correctly use the size of the viewer panel when querying the size of the graphics device.
+* Margins are no longer always set to `NULL` for pie charts (fixes #1002)
+* Fixed bug when highlight multiple 'simple key' traces (fixes #974).
 
 # 4.6.0
 

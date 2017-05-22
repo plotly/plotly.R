@@ -9,21 +9,21 @@ test_that("Basic geom_rug() works", {
   p <- base + geom_rug(sides = "b")
   l <- plotly_build(p)$x
   expect_length(l$data, 2)
-  expect_equal(l$data[[2]]$mode, "lines")
+  expect_equivalent(l$data[[2]]$mode, "lines")
   
   # default should be "bl" (bottom-left)
   p <- base + geom_rug()
   l <- plotly_build(p)$x
   expect_length(l$data, 3)
   for (i in 2:3) {
-    expect_equal(l$data[[i]]$mode, "lines")
+    expect_equivalent(l$data[[i]]$mode, "lines")
   }
   
   p <- base + geom_rug(sides = "trbl")
   l <- plotly_build(p)$x
   expect_length(l$data, 5)
   for (i in 2:5) {
-    expect_equal(l$data[[i]]$mode, "lines")
+    expect_equivalent(l$data[[i]]$mode, "lines")
   }
   
 })
@@ -51,8 +51,8 @@ test_that("geom_rug() with graphical parameters", {
   modes <- sapply(l$data, "[[", "mode")
   rug <- l$data[modes %in% "lines"]
   for (i in seq_along(rug)) {
-    expect_equal(rug[[i]]$line$color, toRGB("red", 0.5))
-    expect_equal(rug[[i]]$line$dash, lty2dash(2))
+    expect_equivalent(rug[[i]]$line$color, toRGB("red", 0.5))
+    expect_equivalent(rug[[i]]$line$dash, lty2dash(2))
   }
   
 })

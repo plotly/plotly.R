@@ -41,7 +41,7 @@ test_that("can hide x values in tooltip", {
   gg2 <- ggplot(mtcars, aes(factor(cyl), mpg, fill = factor(cyl))) + geom_violin()
   p <- ggplotly(gg2, tooltip = "y")
   l <- plotly_build(p)$x
-  expect_equal(sum(grepl("cyl", l$data[[1]]$text)), 0)
+  expect_equivalent(sum(grepl("cyl", l$data[[1]]$text)), 0)
 })
 
 cars <- ggplot(mtcars, aes(mpg, factor(cyl)))
@@ -49,8 +49,8 @@ p <- cars + stat_bin2d(aes(fill = ..density..), binwidth = c(3,1))
 
 test_that("geom_tile() displays correct info in tooltip with discrete y", {
   L <- save_outputs(p, "heatmap-discrete-tooltip")
-  expect_equal(length(L$data), 2)
-  expect_equal(L$data[[1]]$type, "heatmap")
+  expect_equivalent(length(L$data), 2)
+  expect_equivalent(L$data[[1]]$type, "heatmap")
   txt <- c(L$data[[1]]$text)
   txt <- txt[!is.na(txt)]
   # tooltip should show y-values on the _data_ scale
@@ -62,7 +62,7 @@ p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
 
 test_that("group domain is included in hovertext", {
   L <- save_outputs(p, "group-lines-hovertext")
-  expect_equal(length(L$data), 1)
+  expect_equivalent(length(L$data), 1)
   txt <- L$data[[1]]$text
   txt <- txt[!is.na(txt)]
   pattern <- paste(unique(txhousing$city), collapse = "|")
@@ -88,7 +88,7 @@ test_that("tooltip elements are not crossed", {
   pltly <- plotly::ggplotly(gplt)
   y_equal_ten <- grepl("y: 10", pltly$x$data[[1]]$text)
   sample_2 <- grepl("id: Sample2", pltly$x$data[[1]]$text)
-  expect_equal(y_equal_ten, sample_2)
+  expect_equivalent(y_equal_ten, sample_2)
 })
 
 labelDF <- data.frame(
@@ -112,8 +112,8 @@ myPlot <- ggplot(data = labelDF, aes(x = x, y = y)) +
 test_that("Hoverinfo is only displayed if no tooltip variables are present", {
   L <- save_outputs(p, "hovertext-display")
   L <- plotly_build(ggplotly(myPlot, tooltip = "label"))[["x"]]
-  expect_equal(length(L$data), 2)
-  expect_equal(sum(nchar(L$data[[1]]$text)), 0)
+  expect_equivalent(length(L$data), 2)
+  expect_equivalent(sum(nchar(L$data[[1]]$text)), 0)
   expect_true(all(grepl("^label", L$data[[2]]$text)))
 })
 

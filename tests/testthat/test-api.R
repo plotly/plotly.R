@@ -20,7 +20,7 @@ test_that("Changing a filename works", {
   
   id <- plotly:::new_id()
   f <- api("files/cpsievert:14680", "PATCH", list(filename = id)) 
-  expect_equal(f$filename, id)
+  expect_equivalent(f$filename, id)
 })
 
 
@@ -67,24 +67,62 @@ test_that("Creating produces a new file by default", {
     Sys.sleep(3)
     new <- api("folders/home?user=cpsievert")
     n <- if (plotly:::is.plot(new_obj)) 2 else 1
-    expect_equal(old$children$count + n, new$children$count)
+    expect_equivalent(old$children$count + n, new$children$count)
   }
   
   expect_new(mtcars)
-  expect_new(qplot(1:10))
+  # even if plot has multiple traces, only one grid should be created
+  p1 <- plot_ly(mtcars, x = ~mpg, y = ~wt)
+  p2 <- add_markers(p1, color = ~factor(cyl))
+  p3 <- add_markers(p1, color = ~factor(cyl), frame = ~factor(vs))
+  expect_new(p1)
+  expect_new(p2)
+  expect_new(p3)
 })
 
 
-test_that("Can overwrite a file", {
+test_that("Can overwrite a grid", {
   skip_on_cran()
-  skip_if_not(!interactive())
   
   id <- new_id()
   m <- api_create(mtcars, id)
-  mfile <- plotly:::api_lookup_file(id)
   m2 <- api_create(iris, id)
-  m2file <- plotly:::api_lookup_file(id)
-  expect_false(identical(mfile$preview, m2file$preview))
+  expect_true(identical(m$embed_url, m2$embed_url))
+  expect_false(identical(m$cols, m2$cols))
+})
+
+test_that("Can overwrite a plot", {
+  skip_on_cran()
+  
+  id <- new_id()
+  p <- plot_ly()
+  m <- api_create(p, id)
+  m2 <- api_create(layout(p, title = "test"), id)
+  expect_true(identical(m$embed_url, m2$embed_url))
+  expect_false(identical(m$figure$layout$title, m2$figure$layout$title))
+})
+
+test_that("Can create plots with non-trivial src attributes", {
+  skip_on_cran()
+  
+  # can src-ify data[i].marker.color
+  p <- plot_ly(x = 1:10, y = 1:10, color = 1:10)
+  res <- api_create(p)
+  m <- res$figure$data[[1]]$marker
+  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  
+  # can src-ify frames[i].data[i].marker.color
+  res <- p %>% 
+    add_markers(frame = rep(1:2, 5)) %>%
+    api_create()
+  m <- res$figure$frames[[1]]$data[[1]]$marker
+  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  
+  # can src-ify layout.xaxis.tickvals
+  res <- api_create(qplot(1:10))
+  ticks <- res$figure$layout$xaxis$tickvalssrc
+  expect_length(strsplit(ticks, ":")[[1]], 3)
+  
 })
 
 

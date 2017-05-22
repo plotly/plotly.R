@@ -9,11 +9,11 @@
 #' @param username a plotly username.
 #' 
 #' @param x An R object to hosted on plotly's web platform. 
-#' Can be a plotly/ggplot2 object, a data frame, a list of options, or \code{NULL}.
-#' @param filename character string naming the file. If this string 
-#' matches a file that already exists, you will be prompted with an option
-#' to overwrite it (if called non-interactively, the file will be 
-#' overwritten automatically, unless it is a folder).
+#' Can be a plotly/ggplot2 object or a \link{data.frame}.
+#' @param filename character vector naming file(s). If \code{x} is a plot,
+#' can be a vector of length 2 naming both the plot AND the underlying grid.
+#' @param fileopt character string describing whether to "overwrite" existing 
+#' files or ensure "new" file(s) are always created.
 #' @param sharing If 'public', anyone can view this graph. It will appear in 
 #' your profile and can appear in search engines. You do not need to be
 #' logged in to Plotly to view this chart.
@@ -112,13 +112,12 @@
 
 #' @rdname api
 #' @export
-api_create <- function(x = last_plot(), filename = NULL,
+api_create <- function(x = last_plot(), filename = NULL, 
+                       fileopt = c("overwrite", "new"),
                        sharing = c("public", "private", "secret"), ...) {
-  dots <- list(...)
-  if (!is.null(dots[["fileopt"]])) {
-    warning("The fileopt argument is no longer supported", call. = FALSE)
-  }
-  UseMethod("api_create", x)
+  fileopt <- match.arg(fileopt, c("overwrite", "new"))
+  sharing <- match.arg(sharing, c("public", "private", "secret"))
+  UseMethod("api_create")
 }
 
 

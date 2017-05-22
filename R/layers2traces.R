@@ -757,11 +757,11 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
+    hoverinfo = "y",
     key = data[["key"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "box",
-    hoverinfo = "y",
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
