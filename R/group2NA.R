@@ -53,7 +53,7 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   # retracing is useful for creating polygon(s) via scatter trace(s)
   if (retrace) {
-    dt <- dt[, rbind(.SD, SD[1]), by = c(nested, groupNames)]
+    dt <- dt[, rbind(.SD, .SD[1]), by = c(nested, groupNames)]
   }
   
   # when connectgaps=FALSE, inserting NAs ensures each "group" 
