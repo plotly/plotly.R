@@ -29,61 +29,44 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   if (NROW(data) == 0) return(data)
   
-  # make copy via assignment and eliminate duplicated column names 
-  if(data.table::is.data.table(data)){
-    data <- data[,unique(names(data)),with=FALSE]
-  } else {
-    data <- data[!duplicated(names(data))]
-  }
-  
-  # store class information from function input
+  # evaluate this lazy argument now (in case we change class of data)
   retrace <- force(retrace.first)
-  datClass <- class(data)
   
-  # sanitize variable names
+  # sanitize variable names (TODO: throw warnings if non-existing vars are referenced?)
   groupNames <- groupNames[groupNames %in% names(data)]
   nested <- nested[nested %in% names(data)]
   ordered <- ordered[ordered %in% names(data)]
   
-  # if group doesn't exist, just arrange before returning
+  # for restoring class information on exit
+  datClass <- oldClass(data)
+  
+  dt <- data.table::setDT(data)
+  
+  # if group doesn't exist, just order the rows and exit
   if (!length(groupNames)) {
-    if (length(ordered)) {
-      return(
-          data.table::setDT(data,key = c(nested, ordered)) %>%
-          structure(class = datClass)
-      )
-    } else {
-      return(data)
-    }
-  }
-  
-  allVars <- c(nested, groupNames, ordered)
-  
-  # if retrace.first is TRUE,repeat the first row of each group and add an empty row of NA's after each group.
-  # if retrace.first is FALSE, just add an empty row to each group.
-  # delete final row of NA's, return d with the original class
-  
-  if (retrace.first) {
+    # TODO: what if nested doesn't exist?
+    if (length(ordered)) data.table::setorderv(dt, cols = c(nested, ordered))
     return(
-      data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), 1L, .N+1L)], by=allVars]$V1 ][-.N,] %>% 
-        structure(class = datClass)
-    )
-  } else {
-    return(      
-        data.table::setDT(data, key = allVars)[ data[, .I[c(seq_along(.I), .N+1L)], by=allVars]$V1 ][-.N,] %>%
-        structure(class = datClass)
+      structure(data.table::setDF(dt), class = datClass)
     )
   }
+  # order the rows
+  data.table::setorderv(dt, cols = c(nested, groupNames, ordered))
   
-  # Does this still need to be done?
-  # TODO: how to drop the NAs separating the nested values? Does it even matter?
-  # d <- dplyr::ungroup(d)
-  # for (i in nested) {
-  #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
-  # }
-  # d <- dplyr::do(d, .[seq_len(NROW(.)),])
+  # retracing is useful for creating polygon(s) via scatter trace(s)
+  if (retrace) {
+    dt <- dt[, rbind(.SD, SD[1]), by = c(nested, groupNames)]
+  }
+  
+  # when connectgaps=FALSE, inserting NAs ensures each "group" 
+  # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
+  dt <- dt[, rbind(.SD, .SD[NA]), by = c(nested, groupNames)]
+  
+  # internally, nested really tracks trace index, meaning we don't need 
+  # to seperate them
+  if (length(nested)) {
+    dt <- dt[, .SD[-.N], by = nested]
+  }
+  
+  structure(data.table::setDF(dt), class = datClass)
 }
-
-
-# to appease R CMD check (currently we reference '.' in group2NA)
-utils::globalVariables(".")
