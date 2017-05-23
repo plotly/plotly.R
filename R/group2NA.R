@@ -72,23 +72,28 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
   # also, retracing is useful for creating polygon(s) via scatter trace(s)
   keyVars <- c(nested, groupNames)
-  idx <- length(keyVars) + 1
-  if (retrace) {
-    dt <- dt[ dt[, c(.I, .I[1], NA), by = keyVars][[idx]] ]
+  keyNum <- length(keyVars) + 1
+  idx <- if (retrace) {
+    dt[, c(.I, .I[1], NA), by = keyVars][[keyNum]]
   } else {
-    dt <- dt[ dt[, c(.I, NA), by = keyVars][[idx]] ]
+    dt[, c(.I, NA), by = keyVars][[keyNum]]
   }
-  
-  # TODO: remove unnecessary NA values separating nested groupings
-  #if (length(nested)) {
-  #  dt <- dt[ dt[, -.N, by = nested][[length(nested) + 1]] ]
-  #}
-  
-  dt <- dt[-.N]
+  dt <- dt[idx]
   
   
-  # internally, nested really tracks trace index, meaning we don't need 
-  # to seperate them
   
+  # remove NAs that unnecessarily seperate nested groups
+  # (at least internally, nested really tracks trace index, meaning we don't need 
+  # to seperate them)
+  NAidx <- which(is.na(idx))
+  for (i in seq_along(nested)) {
+    dt[[nested[[i]]]][NAidx] <- dt[[nested[[i]]]][NAidx - 1]
+  }
+  if (length(nested)) {
+    dt <- dt[ dt[, .I[-.N], by = nested][[length(nested) + 1]] ]
+  } else {
+    dt <- dt[-.N]
+  }
+
   structure(dt, class = datClass)
 }
