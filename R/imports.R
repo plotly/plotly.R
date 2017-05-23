@@ -13,7 +13,7 @@
 #' @importFrom htmltools browsable tagList tags
 #' @importFrom purrr transpose
 #' @importFrom tools file_ext file_path_sans_ext
-#' @importFrom data.table setDT setDF setorderv
+#' @importFrom data.table as.data.table setorderv
 NULL
 
 

@@ -56,29 +56,39 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   # for restoring class information on exit
   datClass <- oldClass(data)
   
-  data.table::setDT(data)
+  dt <- data.table::as.data.table(data)
   
   # if group doesn't exist, just order the rows and exit
   if (!length(groupNames)) {
-    if (length(ordered)) data.table::setorderv(data, cols = c(nested, ordered))
-    return(structure(data, class = datClass))
+    keyVars <- c(nested, ordered)
+    if (length(keyVars)) data.table::setkeyv(dt, cols = keyVars)
+    return(structure(dt, class = datClass))
   }
   
   # order the rows
-  data.table::setorderv(data, cols = c(nested, groupNames, ordered))
-  
-  # retracing is useful for creating polygon(s) via scatter trace(s)
-  if (retrace) {
-    data <- data[, .SD[c(.I, 1)], by = c(nested, groupNames)]
-  }
+  data.table::setkeyv(dt, cols = c(nested, groupNames, ordered))
   
   # when connectgaps=FALSE, inserting NAs ensures each "group" 
   # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
-  data <- data[, .SD[c(.I, NA)], by = c(nested, groupNames)]
+  # also, retracing is useful for creating polygon(s) via scatter trace(s)
+  keyVars <- c(nested, groupNames)
+  idx <- length(keyVars) + 1
+  if (retrace) {
+    dt <- dt[ dt[, c(.I, .I[1], NA), by = keyVars][[idx]] ]
+  } else {
+    dt <- dt[ dt[, c(.I, NA), by = keyVars][[idx]] ]
+  }
+  
+  # TODO: remove unnecessary NA values separating nested groupings
+  #if (length(nested)) {
+  #  dt <- dt[ dt[, -.N, by = nested][[length(nested) + 1]] ]
+  #}
+  
+  dt <- dt[-.N]
+  
   
   # internally, nested really tracks trace index, meaning we don't need 
   # to seperate them
-  data <- if (length(nested)) data[, .SD[-.N], by = nested] else data[-.N]
   
-  structure(data, class = datClass)
+  structure(dt, class = datClass)
 }
