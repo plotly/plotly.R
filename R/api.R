@@ -149,7 +149,7 @@ api_srcify <- function(p, filename = new_id(), fileopt = "overwrite", sharing = 
   
   # flatten the list
   # http://stackoverflow.com/questions/42739419/r-convert-nested-list-into-a-one-level-list
-  pSrcFlat <- lapply(rapply(pSrc, enquote, how = "unlist"), eval)
+  pSrcFlat <- lapply(rapply(pSrc, enquote, how = "unlist"), function(x) I(eval(x)))
   
   if (length(pSrcFlat)) {
     
