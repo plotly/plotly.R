@@ -159,23 +159,23 @@ is_type <- function(p, type) {
   all(types %in% type)
 }
 
-#' Replace elements of a nested list
-#' 
-#' @param x a named list
-#' @param indicies a vector of indices. 
-#' A 1D list may be used to specify both numeric and non-numeric inidices
-#' @param val the value used to 
-#' @examples 
-#' 
-#' x <- list(a = 1)
-#' # equivalent to `x$a <- 2`
-#' re_place(x, "a", 2)
-#' 
-#' y <- list(a = list(list(b = 2)))
-#' 
-#' # equivalent to `y$a[[1]]$b <- 2`
-#' y <- re_place(y, list("a", 1, "b"), 3)
-#' y
+# Replace elements of a nested list
+# 
+# @param x a named list
+# @param indicies a vector of indices. 
+# A 1D list may be used to specify both numeric and non-numeric inidices
+# @param val the value used to 
+# @examples 
+# 
+# x <- list(a = 1)
+# # equivalent to `x$a <- 2`
+# re_place(x, "a", 2)
+# 
+# y <- list(a = list(list(b = 2)))
+# 
+# # equivalent to `y$a[[1]]$b <- 2`
+# y <- re_place(y, list("a", 1, "b"), 3)
+# y
 
 re_place <- function(x, indicies = 1, val) {
   
