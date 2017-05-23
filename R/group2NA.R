@@ -61,12 +61,12 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   # if group doesn't exist, just order the rows and exit
   if (!length(groupNames)) {
     keyVars <- c(nested, ordered)
-    if (length(keyVars)) data.table::setkeyv(dt, cols = keyVars)
+    if (length(keyVars)) data.table::setorderv(dt, cols = keyVars)
     return(structure(dt, class = datClass))
   }
   
   # order the rows
-  data.table::setkeyv(dt, cols = c(nested, groupNames, ordered))
+  data.table::setorderv(dt, cols = c(nested, groupNames, ordered))
   
   # when connectgaps=FALSE, inserting NAs ensures each "group" 
   # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
@@ -80,14 +80,12 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   }
   dt <- dt[idx]
   
-  
-  
   # remove NAs that unnecessarily seperate nested groups
   # (at least internally, nested really tracks trace index, meaning we don't need 
   # to seperate them)
   NAidx <- which(is.na(idx))
-  for (i in seq_along(nested)) {
-    dt[[nested[[i]]]][NAidx] <- dt[[nested[[i]]]][NAidx - 1]
+  for (i in seq_along(keyVars)) {
+    dt[[keyVars[[i]]]][NAidx] <- dt[[keyVars[[i]]]][NAidx - 1]
   }
   if (length(nested)) {
     dt <- dt[ dt[, .I[-.N], by = nested][[length(nested) + 1]] ]
