@@ -87,4 +87,4 @@ Please read through our [contributing guidelines](https://github.com/ropensci/pl
 
 ---
 
-[![](http://ropensci.org/public_images/github_footer.png)](http://ropensci.org)
+![http://ropensci.org](http://ropensci.org/public_images/github_footer.png)
