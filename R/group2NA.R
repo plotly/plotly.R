@@ -69,12 +69,12 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   
   # retracing is useful for creating polygon(s) via scatter trace(s)
   if (retrace) {
-    data <- data[, rbind(.SD, .SD[1]), by = c(nested, groupNames)]
+    data <- data[, .SD[c(.I, 1)], by = c(nested, groupNames)]
   }
   
   # when connectgaps=FALSE, inserting NAs ensures each "group" 
   # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
-  data <- data[, rbind(.SD, .SD[NA]), by = c(nested, groupNames)]
+  data <- data[, .SD[c(.I, NA)], by = c(nested, groupNames)]
   
   # internally, nested really tracks trace index, meaning we don't need 
   # to seperate them
