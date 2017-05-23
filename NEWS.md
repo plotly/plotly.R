@@ -1,3 +1,14 @@
+# 4.7.0.9000
+
+## NEW FEATURES & IMPROVEMENTS
+
+* The (previously internal) `group2NA()` function is now exported and its performance has been greatly improved thanks to the new **data.table** dependency. Essentially any geom conversion that reduces to a polygon/path should see speed improvements. Similarly, any `plot_ly()` graphs that use `group_by()` in conjunction with `add_lines()`, `add_paths()`, `add_segments()`, etc will also see improvements, especially when there is a large number of groups. For details on the speed improvements, see #1022 and #996 (thanks @msummersgill).
+
+## CHANGES
+
+## BUG FIXES
+
+
 # 4.7.0
 
 ## NEW FEATURES & IMPROVEMENTS
