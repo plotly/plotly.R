@@ -379,23 +379,23 @@ verify_attr <- function(proposed, schema) {
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
+    isDataArray <- identical(valType, "data_array")
     
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving attributes)
-    if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
+    if (!isDataArray && !arrayOK && !identical(role, "object")) {
       proposed[[attr]] <- retain(proposed[[attr]], unique)
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
-    if (identical(valType, "data_array")) {
+    if (isDataArray) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
     
     # tag 'src-able' attributes (needed for api_create())
-    if (!is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1) {
-      proposed[[attr]] <- structure(
-        proposed[[attr]], apiSrc = TRUE
-      )
+    isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
+    if (isDataArray || isSrcAble) {
+      proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
     # do the same for "sub-attributes"
@@ -407,18 +407,21 @@ verify_attr <- function(proposed, schema) {
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
         arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
+        isDataArray2 <- identical(valType2, "data_array")
         
-        if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
+        if (!isDataArray2 && !arrayOK2 && !identical(role2, "object")) {
           proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
         }
         
         # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (identical(valType2, "data_array")) {
+        if (isDataArray2) {
           proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
         
         # tag 'src-able' attributes (needed for api_create())
-        if (!is.null(schema[[attr]][[paste0(attr2, "src")]]) && length(proposed[[attr]][[attr2]]) > 1) {
+        isSrcAble2 <- !is.null(schema[[attr]][[paste0(attr2, "src")]]) && 
+          length(proposed[[attr]][[attr2]]) > 1
+        if (isDataArray2 || isSrcAble2) {
           proposed[[attr]][[attr2]] <- structure(
             proposed[[attr]][[attr2]], apiSrc = TRUE
           )
