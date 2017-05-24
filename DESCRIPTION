@@ -41,7 +41,8 @@ Imports:
     tibble,
     lazyeval (>= 0.2.0),
     crosstalk,
-    purrr
+    purrr,
+    data.table
 Suggests:
     MASS,
     maps,

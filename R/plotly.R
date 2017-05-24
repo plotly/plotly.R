@@ -88,16 +88,6 @@
 #' add_markers(p, symbol = ~Species)
 #' add_paths(p, linetype = ~Species)
 #' 
-#' # client-side linked brushing
-#' library(crosstalk)
-#' sd <- SharedData$new(mtcars)
-#' subplot(
-#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
-#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
-#' ) %>% 
-#' hide_legend() %>% 
-#' highlight(color = "red")
-#' 
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL, 

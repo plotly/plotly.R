@@ -376,13 +376,6 @@ verify_attr <- function(proposed, schema) {
     # if schema is missing (i.e., this is an un-official attr), move along
     if (is.null(attrSchema)) next
     
-    # tag 'src-able' attributes (needed for api_create())
-    if (!is.null(schema[[paste0(attr, "src")]])) {
-      proposed[[attr]] <- structure(
-        proposed[[attr]], apiSrc = TRUE
-      )
-    }
-    
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
@@ -398,18 +391,18 @@ verify_attr <- function(proposed, schema) {
       proposed[[attr]] <- i(proposed[[attr]])
     }
     
+    # tag 'src-able' attributes (needed for api_create())
+    if (!is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1) {
+      proposed[[attr]] <- structure(
+        proposed[[attr]], apiSrc = TRUE
+      )
+    }
+    
     # do the same for "sub-attributes"
     # TODO: should this be done recursively?
     if (identical(role, "object")) {
       for (attr2 in names(proposed[[attr]])) {
         if (is.null(attrSchema[[attr2]])) next
-        
-        # tag 'src-able' attributes (needed for api_create())
-        if (!is.null(schema[[attr]][[paste0(attr2, "src")]])) {
-          proposed[[attr]][[attr2]] <- structure(
-            proposed[[attr]][[attr2]], apiSrc = TRUE
-          )
-        }
         
         valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
         role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
@@ -423,6 +416,14 @@ verify_attr <- function(proposed, schema) {
         if (identical(valType2, "data_array")) {
           proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
         }
+        
+        # tag 'src-able' attributes (needed for api_create())
+        if (!is.null(schema[[attr]][[paste0(attr2, "src")]]) && length(proposed[[attr]][[attr2]]) > 1) {
+          proposed[[attr]][[attr2]] <- structure(
+            proposed[[attr]][[attr2]], apiSrc = TRUE
+          )
+        }
+        
       }
     }
   }
