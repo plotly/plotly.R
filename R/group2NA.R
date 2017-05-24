@@ -95,3 +95,5 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
 
   structure(dt, class = datClass)
 }
+
+utils::globalVariables(c(".I", ".N"))
