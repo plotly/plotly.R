@@ -1,9 +1,8 @@
 context("group2NA")
 
-data(mtcars)
-
 test_that("group2NA() returns the data untouched if vars don't exist", {
   
+  data(mtcars)
   expect_equivalent(group2NA(mtcars), mtcars)
   
 })
@@ -11,11 +10,12 @@ test_that("group2NA() returns the data untouched if vars don't exist", {
 test_that("group2NA() handles simple group var", {
   
   # TODO: are there cases where we wouldn't want to sort by group?
+  data(mtcars)
   m <- group2NA(mtcars, "vs")
   expect_true(nrow(m) == 33)
   expect_equivalent(
     as.numeric(m[19, ]),
-    c(NA, NA, NA, NA, NA, NA, NA, 0, NA, NA, NA, NA)
+    c(NA, NA, NA, NA, NA, NA, NA, 0, NA, NA, NA)
   )
   
 })
@@ -67,8 +67,10 @@ test_that("group2NA() yields the correct result", {
     class = "data.frame", 
     row.names = c(NA, 34L))
   
+  data(mtcars)
+  m <- transform(mtcars, id = seq_len(nrow(mtcars)))
   expect_equivalent(
-    group2NA(mtcars, "vs", "cyl", "id"), res
+    group2NA(m, "vs", "cyl", "id"), res
   )
   
 })
