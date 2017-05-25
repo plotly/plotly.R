@@ -2,7 +2,7 @@
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* Added support for fixed coordinates (i.e., the aspect component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`, `coord_sf()`).
+* Added support for fixed coordinates (i.e., the aspect ratio component of `coord_equal()`, `coord_fixed()`, `coord_map()`, `coord_quickmap()`).
 * Added support for `geom_sf()` and `coord_sf()`.
 * The (previously internal) `group2NA()` function is now exported and its performance has been greatly improved thanks to the new **data.table** dependency. Essentially any geom conversion that reduces to a polygon/path should see speed improvements. Similarly, any `plot_ly()` graph that use `group_by()` in conjunction with `add_lines()`, `add_paths()`, `add_segments()`, etc will also see improvements, especially when there is a large number of groups. For details on the speed improvements, see #1022 and #996 (thanks @msummersgill).
 * The `api_create()` function gains a new `fileopt` argument, which is inspired from the `fileopt` argument in the (deprecated) `plotly_POST()` function (fixes #976). It currently supports to values: `"new"` and `"overwrite"`. The default, `"overwrite"`, will overwrite existing file(s) with a matching `filename`.

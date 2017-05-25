@@ -79,6 +79,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
   datz <- list()
   paramz <- list()
+  layout <- if (is_dev_ggplot2()) layout else list(layout = layout)
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)

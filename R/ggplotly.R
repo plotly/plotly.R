@@ -212,7 +212,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
   # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") <= "2.2.1") {
+  if (!is_dev_ggplot2()) {
     message(
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
       "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
@@ -1261,6 +1261,10 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
     yref = "paper",
     xref = "paper"
   )
+}
+
+is_dev_ggplot2 <- function() {
+  packageVersion("ggplot2") > "2.2.1"
 }
 
 # We need access to internal ggplot2 functions in several places
