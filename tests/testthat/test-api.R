@@ -114,23 +114,34 @@ test_that("Can create plots with non-trivial src attributes", {
   skip_on_cran()
   skip_on_pull_request()
   
+  expect_srcified <- function(x) {
+    expect_length(strsplit(x, ":")[[1]], 3)
+  }
+  
+  # src-ifies data arrays, but not arrayOk of length 1
+  p <- plot_ly(x = 1:10, y = 1:10, marker = list(color = "red")) 
+  res <- api_create(p)
+  trace <- res$figure$data[[1]]
+  expect_srcified(trace$x)
+  expect_srcified(trace$y)
+  expect_true(trace$marker$color == toRGB("red"))
+  
   # can src-ify data[i].marker.color
   p <- plot_ly(x = 1:10, y = 1:10, color = 1:10)
   res <- api_create(p)
-  m <- res$figure$data[[1]]$marker
-  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  trace <- res$figure$data[[1]]
+  expect_srcified(trace$marker$colorsrc)
   
   # can src-ify frames[i].data[i].marker.color
   res <- p %>% 
     add_markers(frame = rep(1:2, 5)) %>%
     api_create()
-  m <- res$figure$frames[[1]]$data[[1]]$marker
-  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  trace <- res$figure$frames[[1]]$data[[1]]
+  expect_srcified(trace$marker$colorsrc)
   
   # can src-ify layout.xaxis.tickvals
   res <- api_create(qplot(1:10))
-  ticks <- res$figure$layout$xaxis$tickvalssrc
-  expect_length(strsplit(ticks, ":")[[1]], 3)
+  expect_srcified(res$figure$layout$xaxis$tickvalssrc)
   
 })
 
