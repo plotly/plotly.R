@@ -215,7 +215,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   if (!is_dev_ggplot2()) {
     message(
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+      "Install it with: `devtools::install_github('hadley/ggplot2')`"
     )
     if (!identical(dynamicTicks, FALSE)) {
       warning(
@@ -707,9 +707,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # set scaleanchor/scaleratio if these are fixed coordinates
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
-      if (inherits(p$coordinates, fixed_coords) && xy == "y") {
+      if (inherits(p$coordinates, fixed_coords)) {
         axisObj$scaleanchor <- anchor
-        axisObj$scaleratio <- p$coordinates$ratio
+        ratio <- p$coordinates$ratio %||% p$coordinates$aspect(rng) %||% 1
+        axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
       }
       
       # TODO: should we implement aspect ratios?
