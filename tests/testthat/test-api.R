@@ -122,9 +122,9 @@ test_that("Can create plots with non-trivial src attributes", {
   p <- plot_ly(x = 1:10, y = 1:10, marker = list(color = "red")) 
   res <- api_create(p)
   trace <- res$figure$data[[1]]
-  expect_srcified(trace$x)
-  expect_srcified(trace$y)
-  expect_true(trace$marker$color == toRGB("red"))
+  expect_srcified(trace$xsrc)
+  expect_srcified(trace$ysrc)
+  expect_true(trace$marker$color == "red")
   
   # can src-ify data[i].marker.color
   p <- plot_ly(x = 1:10, y = 1:10, color = 1:10)
