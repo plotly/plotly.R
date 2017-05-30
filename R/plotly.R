@@ -355,8 +355,7 @@ as_widget <- function(x, ...) {
     preRenderHook = plotly_build,
     dependencies = c(
       list(typedArrayPolyfill()),
-      crosstalk::crosstalkLibs(),
-      list(plotlyMainBundle())
+      crosstalk::crosstalkLibs()#,list(plotlyMainBundle())
     )
   )
   # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
