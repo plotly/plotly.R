@@ -2,14 +2,29 @@
 % Please edit documentation in R/dev.R
 \name{schema}
 \alias{schema}
-\title{Display plotly's plot schema}
+\title{Acquire (and optionally display) plotly's plot schema}
 \usage{
-schema()
+schema(jsonedit = interactive(), ...)
+}
+\arguments{
+\item{jsonedit}{use \code{listviewer::jsonedit} to view the JSON?}
+
+\item{...}{other options passed onto \code{listviewer::jsonedit}}
 }
 \description{
 The schema contains valid attributes names, their value type, 
 default values (if any), and min/max values (if applicable).
 }
 \examples{
-schema()
+s <- schema()
+View(s$traces)
+
+# get info on `layout.mapbox.style` attribute
+(styles <- s$layout$layoutAttributes$mapbox$style$values)
+subplot(
+  plot_mapbox() \%>\% layout(mapbox = list(style = styles[3])),
+  plot_mapbox() \%>\% layout(mapbox = list(style = styles[5]))
+)
+
+
 }

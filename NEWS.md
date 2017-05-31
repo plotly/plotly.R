@@ -2,6 +2,9 @@
 
 ## NEW FEATURES & IMPROVEMENTS
 
+* The `schema()` function now returns the plot schema (rather just printing it), making it easier to acquire/use values from the official plot schema. See `help(schema)` for an example. Fixes #1038.
+
+
 ## CHANGES
 
 ## BUG FIXES
