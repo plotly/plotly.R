@@ -42,6 +42,13 @@ plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(),
 }
 
 
+# ----------------------------------------------------------------------
+# TODO: implement some higher-level functions, say `plotlyProxyLayout()`,
+# `plotlyProxyAddTraces()`, `plotlyProxyStyle()`, that pick the right
+# method, except formula/data mappings, and possibly some argument checking 
+# ----------------------------------------------------------------------
+
+
 #' @param p a plotly proxy object (created with \code{plotlyProxy})
 #' @param method a plotlyjs method to invoke. For a list of options,
 #' visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}
