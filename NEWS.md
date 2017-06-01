@@ -1,3 +1,18 @@
+# 4.7.0.9000
+
+## NEW FEATURES & IMPROVEMENTS
+
+* The `schema()` function now returns the plot schema (rather just printing it), making it easier to acquire/use values from the official plot schema. See `help(schema)` for an example. Fixes #1038.
+
+
+## CHANGES
+
+## BUG FIXES
+
+* The default sizing in `ggplotly()` is no longer fixed to the device size inside RStudio. Fixes #1033.
+* `event_data("plotly_relayout")` no longer fires `NULL` for any event. Fixes #1039.
+
+
 # 4.7.0
 
 ## NEW FEATURES & IMPROVEMENTS
