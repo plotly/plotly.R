@@ -9,6 +9,8 @@
 
 ## BUG FIXES
 
+* The default sizing in `ggplotly()` is no longer fixed to the device size inside RStudio. Fixes #1033.
+* `event_data("plotly_relayout")` no longer fires `NULL` for any event. Fixes #1039.
 
 
 # 4.7.0

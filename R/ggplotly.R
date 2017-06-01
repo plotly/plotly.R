@@ -172,11 +172,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   # https://github.com/att/rcloud.htmlwidgets/issues/2
   
   # Note that we never have to open a non-interactive device 
-  # in RStudio since it ships with one...
+  # in RStudio since it ships with one. Plus, calling dev.size()
+  # adds it to dev.list() & should ensure grid can query the correct device size
   rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
-  width <- width %||% rStudioDevSize[1]
-  height <- height %||% rStudioDevSize[2]
-  # note that calling dev.size() (inside RStudio) will add it to the list
+  
   if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
@@ -197,7 +196,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
     on.exit(grDevices::dev.off(), add = TRUE)
   }
-  
   
   # check the value of dynamicTicks
   dynamicValues <- c(FALSE, TRUE, "x", "y")
