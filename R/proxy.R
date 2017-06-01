@@ -21,8 +21,10 @@ plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(),
   if (is.null(session)) {
     stop("plotlyProxy must be called from the server function of a Shiny app")
   }
+  
   if (!is.null(session$ns) && nzchar(session$ns(NULL)) && 
-      !startsWith(outputId, session$ns(""))) {
+      # TODO: require a recent version of R and use startsWith()?
+      substring(outputId, 1, nchar(session$ns(""))) != session$ns("")) {
     outputId <- session$ns(outputId)
   }
   structure(
