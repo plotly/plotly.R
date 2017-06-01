@@ -25,10 +25,9 @@ until after the next time all of the outputs are updated.}
 \item{p}{a plotly proxy object (created with \code{plotlyProxy})}
 
 \item{method}{a plotlyjs method to invoke. For a list of options,
-visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}
-{plotlyjs function reference}}
+visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}{plotlyjs function reference}}
 
-\item{...}{unnamed arguments passed onto}
+\item{...}{unnamed arguments passed onto the plotly.js method}
 }
 \description{
 Modify a plotly object inside a shiny app
@@ -37,5 +36,4 @@ Modify a plotly object inside a shiny app
 
 demo("proxy-mapbox", package = "plotly")
 demo("proxy-relayout", package = "plotly")
-
 }

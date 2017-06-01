@@ -8,15 +8,12 @@
 #' @param deferUntilFlush indicates whether actions performed against this
 #'   instance should be carried out right away, or whether they should be held
 #'   until after the next time all of the outputs are updated.
-#'
 #' @rdname plotlyProxy
 #' @export 
 #' @examples
 #' 
 #' demo("proxy-mapbox", package = "plotly")
 #' demo("proxy-relayout", package = "plotly")
-#' 
-
 plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(), 
                         deferUntilFlush = TRUE) {
   
@@ -51,9 +48,8 @@ plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(),
 
 #' @param p a plotly proxy object (created with \code{plotlyProxy})
 #' @param method a plotlyjs method to invoke. For a list of options,
-#' visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}
-#' {plotlyjs function reference}
-#' @param ... unnamed arguments passed onto 
+#' visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}{plotlyjs function reference}
+#' @param ... unnamed arguments passed onto the plotly.js method
 #' @rdname plotlyProxy
 #' @export
 plotlyProxyInvoke <- function(p, method, ...) {
