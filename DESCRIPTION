@@ -66,6 +66,7 @@ Suggests:
     png,
     IRdisplay
 Remotes:
-  tidyverse/ggplot2
+  tidyverse/ggplot2,
+  cpsievert/htmlwidgets
 LazyData: true
 RoxygenNote: 6.0.1
