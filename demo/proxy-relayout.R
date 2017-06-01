@@ -17,8 +17,8 @@ server <- function(input, output, session) {
   
   observeEvent(event_data("plotly_relayout"), {
     d <- event_data("plotly_relayout")
-    xmin <- d[["xaxis.range[0]"]] %||% d[["xaxis.range"]][1]
-    xmax <- d[["xaxis.range[1]"]] %||% d[["xaxis.range"]][2]
+    xmin <- if (length(d[["xaxis.range[0]"]])) d[["xaxis.range[0]"]] else d[["xaxis.range"]][1]
+    xmax <- if (length(d[["xaxis.range[1]"]])) d[["xaxis.range[1]"]] else d[["xaxis.range"]][2]
     if (is.null(xmin) || is.null(xmax)) return(NULL)
     
     # compute the y-range based on the new x-range
