@@ -388,7 +388,7 @@ plotlyMainBundle <- function() {
 plotlyHTMLWidget <- function() {
   htmltools::htmlDependency(
     "plotlyjs-binding", packageVersion("plotly"),
-    src = depPath(".."),
+    src = system.file('htmlwidgets', package = 'plotly'),
     script = "plotly.js"
   )
 }
