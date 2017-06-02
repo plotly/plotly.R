@@ -19,7 +19,7 @@ default values (if any), and min/max values (if applicable).
 s <- schema()
 
 # retrieve acceptable `layout.mapbox.style` values
-if (!is.na(Sys.getenv('MAPBOX_TOKEN', NA)) {
+if (!is.na(Sys.getenv('MAPBOX_TOKEN', NA))) {
   styles <- s$layout$layoutAttributes$mapbox$style$values
   subplot(
     plot_mapbox() \%>\% layout(mapbox = list(style = styles[3])),
