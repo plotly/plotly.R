@@ -32,7 +32,6 @@ plotly_json <- function(p = last_plot(), jsonedit = interactive(), ...) {
 #' @export
 #' @examples 
 #' s <- schema()
-#' View(s$traces)
 #' 
 #' # get info on `layout.mapbox.style` attribute
 #' (styles <- s$layout$layoutAttributes$mapbox$style$values)

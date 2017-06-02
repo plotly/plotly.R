@@ -17,7 +17,6 @@ default values (if any), and min/max values (if applicable).
 }
 \examples{
 s <- schema()
-View(s$traces)
 
 # get info on `layout.mapbox.style` attribute
 (styles <- s$layout$layoutAttributes$mapbox$style$values)
