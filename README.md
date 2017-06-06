@@ -47,7 +47,7 @@ style(gg, hoveron = "points", hoverinfo = "x+y+text", hoverlabel = list(bgcolor 
 
 Moreover, since `ggplotly()` returns a plotly object, you can apply essentially any function from the R package on that object. Some useful ones include `layout()` (for [customizing the layout](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#customizing-the-layout)), `add_traces()` (and its higher-level `add_*()` siblings, for example `add_polygons()`, for [adding new traces/data](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#leveraging-statistical-output)), `subplot()` (for [combining multiple plotly objects](https://cpsievert.github.io/plotly_book/merging-plotly-objects.html)), and `plotly_json()` (for inspecting the underlying JSON sent to plotly.js).
 
-The `ggplotly()` function will also respect some "unofficial" **ggplot2** aesthetics, namely `text` (for [customizing the tooltip](https://cpsievert.github.io/plotly_book/a-case-study-of-housing-sales-in-texas.html#fig:ggsubplot)) and `frame` (for [creating animations](https://cpsievert.github.io/plotly_book/key-frame-animations.html)). 
+The `ggplotly()` function will also respect some "unofficial" **ggplot2** aesthetics, namely `text` (for [customizing the tooltip](https://cpsievert.github.io/plotly_book/a-case-study-of-housing-sales-in-texas.html#fig:ggsubplot)), `frame` (for [creating animations](https://cpsievert.github.io/plotly_book/key-frame-animations.html)), and `ids` (for ensuring sensible smooth transitions). 
 
 ### Using plotly without ggplot2
 
