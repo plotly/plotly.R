@@ -356,8 +356,7 @@ as_widget <- function(x, ...) {
     dependencies = c(
       list(typedArrayPolyfill()),
       crosstalk::crosstalkLibs(),
-      list(plotlyMainBundle()),
-      list(plotlyHTMLWidget())
+      list(plotlyMainBundle())
     )
   )
   # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
@@ -382,14 +381,6 @@ plotlyMainBundle <- function() {
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
     stylesheet = "plotly-htmlwidgets.css"
-  )
-}
-
-plotlyHTMLWidget <- function() {
-  htmltools::htmlDependency(
-    "plotlyjs-binding", packageVersion("plotly"),
-    src = system.file('htmlwidgets', package = 'plotly'),
-    script = "plotly.js"
   )
 }
 

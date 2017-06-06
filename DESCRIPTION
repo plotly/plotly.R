@@ -67,6 +67,6 @@ Suggests:
     IRdisplay
 Remotes:
   tidyverse/ggplot2,
-  cpsievert/htmlwidgets
+  ramnathv/htmlwidgets
 LazyData: true
 RoxygenNote: 6.0.1
