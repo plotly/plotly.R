@@ -33,7 +33,7 @@ Imports:
     viridisLite,
     base64enc,
     htmltools,
-    htmlwidgets (>= 0.8),
+    htmlwidgets (>= 0.9),
     tidyr,
     hexbin,
     RColorBrewer,
@@ -66,6 +66,7 @@ Suggests:
     png,
     IRdisplay
 Remotes:
-  tidyverse/ggplot2
+  tidyverse/ggplot2,
+  ramnathv/htmlwidgets
 LazyData: true
 RoxygenNote: 6.0.1

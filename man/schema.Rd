@@ -17,14 +17,16 @@ default values (if any), and min/max values (if applicable).
 }
 \examples{
 s <- schema()
-View(s$traces)
 
-# get info on `layout.mapbox.style` attribute
-(styles <- s$layout$layoutAttributes$mapbox$style$values)
-subplot(
-  plot_mapbox() \%>\% layout(mapbox = list(style = styles[3])),
-  plot_mapbox() \%>\% layout(mapbox = list(style = styles[5]))
-)
+# retrieve acceptable `layout.mapbox.style` values
+if (!is.na(Sys.getenv('MAPBOX_TOKEN', NA))) {
+  styles <- s$layout$layoutAttributes$mapbox$style$values
+  subplot(
+    plot_mapbox() \%>\% layout(mapbox = list(style = styles[3])),
+    plot_mapbox() \%>\% layout(mapbox = list(style = styles[5]))
+  )
+}
+
 
 
 }
