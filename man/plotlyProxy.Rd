@@ -34,6 +34,10 @@ Modify a plotly object inside a shiny app
 }
 \examples{
 
-demo("proxy-mapbox", package = "plotly")
-demo("proxy-relayout", package = "plotly")
+
+if (require("shiny") && interactive()) {
+  runExample("shiny", "proxy_relayout")
+  runExample("shiny", "proxy_mapbox")
+}
+
 }

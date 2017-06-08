@@ -12,8 +12,12 @@
 #' @export 
 #' @examples
 #' 
-#' demo("proxy-mapbox", package = "plotly")
-#' demo("proxy-relayout", package = "plotly")
+#' 
+#' if (require("shiny") && interactive()) {
+#'   runExample("shiny", "proxy_relayout")
+#'   runExample("shiny", "proxy_mapbox")
+#' }
+#' 
 plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(), 
                         deferUntilFlush = TRUE) {
   
