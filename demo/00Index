@@ -1,13 +1,14 @@
-highlight-intro           An introduction to linked views
-highlight-subplot         Basic scatterplot brushing with subplot()
-highlight-ggplotly        Linking ggplot2 plots
-highlight-leaflet         Linking to leaflet
-highlight-ggpairs         Brushing a scatterplot matrix via ggpairs
-highlight-pipeline        Aggregating SharedData
-highlight-binned-target   Let plotly.js dynamically bin the raw data
-highlight-epl             An example of linked facets
-tour-basic                A basic example of a grand tour
-tour-USArrests            Linking a dendrogram to a tour
-filter-lines              Using crosstalk's filter_select() to filter lines
-filter-dynamic-axis       Using crosstalk's filter_select() to dynamically change the y-axis
-rotate                    Using htmlwidgets::onRender() to rotate the camera of a 3D graph
+crosstalk-highlight-intro           An introduction to linked views
+crosstalk-highlight-subplot         Basic scatterplot brushing with subplot()
+crosstalk-highlight-ggplotly        Linking ggplot2 plots
+crosstalk-highlight-leaflet         Linking to leaflet
+crosstalk-highlight-ggpairs         Brushing a scatterplot matrix via ggpairs
+crosstalk-highlight-pipeline        Aggregating SharedData
+crosstalk-highlight-binned-target   Let plotly.js dynamically bin the raw data
+crosstalk-highlight-epl             An example of linked facets
+crosstalk-filter-lines              Using crosstalk's filter_select() to filter lines
+crosstalk-filter-dynamic-axis       Using crosstalk's filter_select() to dynamically change the y-axis
+animation-tour-basic                A basic example of a grand tour
+animation-tour-USArrests            Linking a dendrogram to a tour
+rotate                              Using htmlwidgets::onRender() to rotate the camera of a 3D graph
+ternary                             A basic ternary plot

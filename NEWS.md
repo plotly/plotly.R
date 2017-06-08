@@ -2,7 +2,8 @@
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* It is now possible to modify (i.e., update without a full redraw) plotly graphs inside of a shiny app via the new `plotlyProxy()` and `plotlyProxyInvoke()` functions. For examples, see `demo("proxy-relayout", package = "plotly")` and `demo("proxy-mapbox", package = "plotly")`. Closes #580. 
+* It is now possible to modify (i.e., update without a full redraw) plotly graphs inside of a shiny app via the new `plotlyProxy()` and `plotlyProxyInvoke()` functions. For examples, see `runExample("shiny", "proxy_relayout")` and `runExample("shiny", "proxy_mapbox")`. Closes #580. 
+* Added a new `runExample()` function to make it easier to run shiny/rmarkdown examples included with the package under the `inst/examples` directory.
 * The `schema()` function now returns the plot schema (rather just printing it), making it easier to acquire/use values from the official plot schema. See `help(schema)` for an example. Fixes #1038.
 
 ## CHANGES
