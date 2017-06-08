@@ -33,8 +33,6 @@ before_install:
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   - Rscript -e 'update.packages(ask = FALSE)'
-  - echo $TRAVIS_R_VERSION_STRING
-  - Rscript -e 'print(Sys.getenv("TRAVIS_R_VERSION_STRING"))'
 
 before_script:
   - git config --global user.email "cpsievert1@gmail.com"
