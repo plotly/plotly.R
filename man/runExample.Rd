@@ -10,16 +10,12 @@ runExample(type = c("demo", "shiny", "rmd"), name, ...)
 \item{type}{the type of example}
 
 \item{name}{the name of the example (valid names depend on \code{type}).}
+
+\item{...}{arguments passed onto the suitable method.}
 }
 \description{
 Provides a unified interface for running demos, shiny apps, and Rmd documents
 which are bundled with the package.
-}
-\examples{
-
-\dontrun{
-runExample("shiny", "Diamonds")
-}
 }
 \author{
 Carson Sievert

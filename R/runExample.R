@@ -5,13 +5,9 @@
 #' 
 #' @param type the type of example
 #' @param name the name of the example (valid names depend on \code{type}).
+#' @param ... arguments passed onto the suitable method.
 #' @export
 #' @author Carson Sievert
-#' @examples 
-#' 
-#' \dontrun{
-#' runExample("shiny", "Diamonds")
-#' }
 
 runExample <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   if (missing(name)) {
@@ -40,13 +36,15 @@ runExample <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   finalDir <- system.file("examples", type, name, package = "plotly")
   
   if (type == "shiny") {
-    shiny::runApp(finalDir, ...)
+    try_library("shiny", "runExample")
+    getFromNamespace("runApp", asNamespace("shiny"))(finalDir, ...)
   }
   
   if (type == "rmd") {
+    try_library("rmarkdown", "runExample")
     input <- file.path(finalDir, "index.Rmd")
     output <- tempfile(fileext = ".html")
-    rmarkdown::render(input, output_file = output, ...)
+    getFromNamespace("render", asNamespace("rmarkdown"))(input, output_file = output, ...)
     browseURL(output)
   }
   
