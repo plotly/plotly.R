@@ -159,6 +159,23 @@ HTMLWidgets.widget({
       
     }
     
+    // Trigger plotly.js calls defined via `plotlyProxy()`
+    plot.then(function() {
+      if (HTMLWidgets.shinyMode) {
+        Shiny.addCustomMessageHandler("plotly-calls", function(msg) {
+          var gd = document.getElementById(msg.id);
+          if (!gd) {
+            throw new Error("Couldn't find plotly graph with id: " + msg.id);
+          }
+          if (!Plotly[msg.method]) {
+            throw new Error("Unknown method " + msg.method);
+          }
+          var args = [gd].concat(msg.args);
+          Plotly[msg.method].apply(null, args);
+        });
+      }
+    });
+    
     // Attach attributes (e.g., "key", "z") to plotly event data
     function eventDataWithKey(eventData) {
       if (eventData === undefined || !eventData.hasOwnProperty("points")) {
