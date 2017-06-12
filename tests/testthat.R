@@ -64,7 +64,7 @@ if (report_diffs || build_table) {
 skip_if_not_master <- function() {
   is_pr <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
   is_r_release <- Sys.getenv("TRAVIS_R_VERSION_STRING", "release") == "release"
-  if (!is_pr || is_r_release) return(invisible(TRUE))
+  if (!is_pr && is_r_release) return(invisible(TRUE))
   skip("plot.ly API calls are only tested on the master build on r-release")
 }
 
