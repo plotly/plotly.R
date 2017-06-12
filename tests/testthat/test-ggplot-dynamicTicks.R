@@ -92,3 +92,15 @@ test_that("Time axis inverse transforms correctly", {
 })
 
 
+test_that("Inverse maps colorbar data", {
+  
+  p <- ggplot(mpg, aes(hwy, manufacturer)) + 
+    stat_bin2d(aes(fill = ..density..), binwidth = c(3,1))
+  
+  l <- ggplotly(p, dynamicTicks = TRUE)$x
+  
+  expect_length(l$data, 2)
+  expect_true(l$data[[2]]$y %in% unique(mpg$manufacturer))
+  
+})
+

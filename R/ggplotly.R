@@ -747,6 +747,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # inverse transform categorical data based on tickvals/ticktext
       if (isDiscreteType) {
+        #browser()
         traces <- lapply(traces, function(tr) { 
           # map x/y trace data back to the 'closest' ticktext label
           # http://r.789695.n4.nabble.com/check-for-nearest-value-in-a-vector-td4369339.html
@@ -1285,8 +1286,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
     list(
-      x = gglayout$xaxis$range,
-      y = gglayout$yaxis$range,
+      x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
+      y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
       # esentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",
