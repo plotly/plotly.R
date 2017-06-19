@@ -8,6 +8,8 @@
 
 ## CHANGES
 
+* Upgraded to plotly.js v1.28.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.28.0
+
 ## BUG FIXES
 
 * The default sizing in `ggplotly()` is no longer fixed to the device size inside RStudio. Fixes #1033.
