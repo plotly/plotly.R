@@ -218,7 +218,7 @@ limits.
 
 ## BUG FIXES
 
-* `event_data()` now works inside shiny modules (#659). For an example, see <https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyShinyModules>
+* `event_data()` now works inside shiny modules (#659). For an example, see <https://github.com/ropensci/plotly/tree/master/inst/examples/shiny/event_data_modules>
 
 # 4.3.6 -- 9 September 2016
 
