@@ -16,7 +16,7 @@ attributes place in \code{...} will be applied to every trace.}
 }
 \description{
 Modify trace(s) of an existing plotly visualization. Useful when used in
-conjunction with \code{\link{get_figure}()}.
+conjunction with \code{\link[=get_figure]{get_figure()}}.
 }
 \examples{
 
@@ -26,7 +26,7 @@ style(p, hoverinfo = "none", traces = c(2, 3))
 
 }
 \seealso{
-\code{\link{api_download_plot}()}
+\code{\link[=api_download_plot]{api_download_plot()}}
 }
 \author{
 Carson Sievert

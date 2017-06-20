@@ -9,7 +9,7 @@ config(p, ..., collaborate = TRUE, cloud = FALSE)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{these arguments are documented at 
+\item{...}{these arguments are documented at
 \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}}
 
 \item{collaborate}{include the collaborate mode bar button (unique to the R pkg)?}

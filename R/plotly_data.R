@@ -1,6 +1,6 @@
 #' Obtain data associated with a plotly graph
 #'
-#' \code{plotly_data()} returns data associated with 
+#' `plotly_data()` returns data associated with 
 #' a plotly visualization (if there are multiple data frames, by default, 
 #' it returns the most recent one). 
 #' 

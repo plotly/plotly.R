@@ -5,34 +5,34 @@
 #' multiple plotly graphs, and may not behave as expected when linking 
 #' plotly to another htmlwidget package via crosstalk. In some cases,
 #' other htmlwidgets will respect these options, such as persistent selection
-#' in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
+#' in leaflet (see `demo("highlight-leaflet", package = "plotly")`).
 #' 
 #' @param p a plotly visualization.
 #' @param on turn on a selection on which event(s)? To disable on events 
-#' altogether, use \code{NULL}. Currently the following are supported:
+#' altogether, use `NULL`. Currently the following are supported:
 #' \itemize{
-#'  \item \code{'plotly_click'}
-#'  \item \code{'plotly_hover'}
-#'  \item \code{'plotly_selected'}: triggered through rectangular 
+#'  \item `'plotly_click'`
+#'  \item `'plotly_hover'`
+#'  \item `'plotly_selected'`: triggered through rectangular 
 #'  (layout.dragmode = 'select') or lasso (layout.dragmode = 'lasso') brush.
 #'  Currently only works for scatter traces with mode 'markers'.
 #' }
 #' @param off turn off a selection on which event(s)? To disable off 
-#' events altogether, use \code{NULL}. Currently the following are supported:
+#' events altogether, use `NULL`. Currently the following are supported:
 #' \itemize{
-#'  \item \code{'plotly_doubleclick'}: triggered on a double mouse click while
+#'  \item `'plotly_doubleclick'`: triggered on a double mouse click while
 #'  (layout.dragmode = 'zoom') or (layout.dragmode = 'pan')
-#'  \item \code{'plotly_deselect'}: triggered on a double mouse click while 
+#'  \item `'plotly_deselect'`: triggered on a double mouse click while 
 #'  (layout.dragmode = 'select') or (layout.dragmode = 'lasso')
-#'  \item \code{'plotly_relayout'}: triggered whenever axes are rescaled 
+#'  \item `'plotly_relayout'`: triggered whenever axes are rescaled 
 #'  (i.e., clicking the home button in the modebar) or whenever the height/width
 #'  of the plot changes.
 #' }
 #' @param persistent should selections persist (i.e., accumulate)?
 #' @param dynamic should a widget for changing selection colors be included? 
 #' @param color character string of color(s) to use for 
-#' highlighting selections. See \code{\link{toRGB}()} for valid color
-#' specifications. If \code{NULL} (the default), the color of selected marks
+#' highlighting selections. See [toRGB()] for valid color
+#' specifications. If `NULL` (the default), the color of selected marks
 #' are not altered.
 #' @param selectize provide a selectize.js widget for selecting keys? Note that 
 #' the label used for this widget derives from the groupName of the SharedData object.
@@ -40,12 +40,12 @@
 #' These values should match the key attribute.
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
-#' @param selected attributes of the selection, see \code{\link{attrs_selected}()}.
+#' @param selected attributes of the selection, see [attrs_selected()].
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
 #' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
-#' @seealso \code{\link{attrs_selected}()}
+#' @seealso [attrs_selected()]
 #' @examples
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*

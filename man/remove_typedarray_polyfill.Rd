@@ -15,7 +15,7 @@ printing "just works" in any context. Many users won't need this polyfill,
 so this function may be used to remove it and thus reduce the size of the page.
 }
 \details{
-The polyfill seems to be only relevant for those rendering plots 
+The polyfill seems to be only relevant for those rendering plots
 via phantomjs and RStudio on some Windows platforms.
 }
 \examples{

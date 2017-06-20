@@ -9,11 +9,11 @@ subplot(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02,
   which_layout = "merge")
 }
 \arguments{
-\item{...}{One of the following 
+\item{...}{One of the following
 \itemize{
- \item any number of plotly/ggplot2 objects.
- \item a list of plotly/ggplot2 objects.
- \item a tibble with one list-column of plotly/ggplot2 objects.
+\item any number of plotly/ggplot2 objects.
+\item a list of plotly/ggplot2 objects.
+\item a tibble with one list-column of plotly/ggplot2 objects.
 }}
 
 \item{nrows}{number of rows for laying out plots in a grid-like structure.
@@ -39,9 +39,9 @@ If a single value is provided, it will be used as all four margins.}
 
 \item{titleY}{should y-axis titles be retained?}
 
-\item{which_layout}{adopt the layout of which plot? If the default value of 
-"merge" is used, layout options found later in the sequence of plots will 
-override options found earlier in the sequence. This argument also accepts a 
+\item{which_layout}{adopt the layout of which plot? If the default value of
+"merge" is used, layout options found later in the sequence of plots will
+override options found earlier in the sequence. This argument also accepts a
 numeric vector specifying which plots to consider when merging.}
 }
 \value{

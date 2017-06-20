@@ -2,13 +2,13 @@
 #' Modify trace(s)
 #'
 #' Modify trace(s) of an existing plotly visualization. Useful when used in
-#' conjunction with \code{\link{get_figure}()}.
+#' conjunction with [get_figure()].
 #'
 #' @param p A plotly visualization.
 #' @param ... Visual properties.
 #' @param traces numeric vector. Which traces should be modified? By default,
-#' attributes place in \code{...} will be applied to every trace.
-#' @seealso \code{\link{api_download_plot}()}
+#' attributes place in `...` will be applied to every trace.
+#' @seealso [api_download_plot()]
 #' @author Carson Sievert
 #' @export
 #' @examples 

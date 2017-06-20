@@ -1,9 +1,9 @@
 #' Embed a plot as an iframe into a Jupyter Notebook
 #' @param x a plotly object
-#' @param width attribute of the iframe. If \code{NULL}, the width in
-#' \code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.
-#' @param height attribute of the iframe. If \code{NULL}, the height in
-#' \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.
+#' @param width attribute of the iframe. If `NULL`, the width in
+#' `plot_ly` is used. If that is also `NULL`, '100\%' is the default.
+#' @param height attribute of the iframe. If `NULL`, the height in
+#' `plot_ly` is used. If that is also `NULL`, '400px' is the default.
 #' @param file deprecated.
 #' @author Carson Sievert
 #' @export

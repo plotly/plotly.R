@@ -4,7 +4,7 @@
 #' which are bundled with the package.
 #' 
 #' @param type the type of example
-#' @param name the name of the example (valid names depend on \code{type}).
+#' @param name the name of the example (valid names depend on `type`).
 #' @param ... arguments passed onto the suitable method.
 #' @export
 #' @author Carson Sievert

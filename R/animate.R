@@ -1,16 +1,16 @@
 #' Animation configuration options
 #' 
-#' Animations can be created by either using the \code{frame} argument in 
-#' \code{\link{plot_ly}()} or the (unofficial) \code{frame} ggplot2 aesthetic in 
-#' \code{\link{ggplotly}()}. By default, animations populate a play button
+#' Animations can be created by either using the `frame` argument in 
+#' [plot_ly()] or the (unofficial) `frame` ggplot2 aesthetic in 
+#' [ggplotly()]. By default, animations populate a play button
 #' and slider component for controlling the state of the animation
 #' (to pause an animation, click on a relevant location on the slider bar). 
 #' Both the play button and slider component transition between frames according 
-#' rules specified by \code{\link{animation_opts}()}. 
+#' rules specified by [animation_opts()]. 
 #'
 #' @param p a plotly object.
 #' @param frame The amount of time between frames (in milliseconds).
-#' Note that this amount should include the \code{transition}.
+#' Note that this amount should include the `transition`.
 #' @param transition The duration of the smooth transition between
 #' frames (in milliseconds).
 #' @param easing The type of transition easing. See the list of options here
@@ -124,11 +124,11 @@ animation_opts_defaults <- function() {
 
 #' @inheritParams animation_opts
 #' @param hide remove the animation slider?
-#' @param ... for \code{animation_slider}, attributes are passed to a special
+#' @param ... for `animation_slider`, attributes are passed to a special
 #' layout.sliders object tied to the animation frames. 
 #' The definition of these attributes may be found here 
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
-#' For \code{animation_button}, arguments are passed to a special 
+#' For `animation_button`, arguments are passed to a special 
 #' layout.updatemenus button object tied to the animation
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}
 #' @export

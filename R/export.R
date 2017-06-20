@@ -1,17 +1,17 @@
 #' Export a plotly graph to a static file
 #' 
-#' @details For SVG plots, a screenshot is taken via \code{webshot::webshot()}.
-#' Since \code{phantomjs} (and hence \code{webshot}) does not support WebGL,
+#' @details For SVG plots, a screenshot is taken via `webshot::webshot()`.
+#' Since `phantomjs` (and hence `webshot`) does not support WebGL,
 #' the RSelenium package is used for exporting WebGL plots. 
 #' 
 #' @param p a plotly or ggplot object.
 #' @param file a filename. The file type is inferred from the file extension.
 #' Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'
-#' @param selenium used only when \code{p} is a WebGL plot or the output 
+#' @param selenium used only when `p` is a WebGL plot or the output 
 #' format is 'webp' or 'svg'. Should be an object of class "rsClientServer"
-#' returned by \code{RSelenium::rsDriver} (see examples).
-#' @param ... if \code{p} is non-WebGL and the output file format is 
-#' jpeg/png/pdf arguments are passed along to \code{webshot::webshot()}.
+#' returned by `RSelenium::rsDriver` (see examples).
+#' @param ... if `p` is non-WebGL and the output file format is 
+#' jpeg/png/pdf arguments are passed along to `webshot::webshot()`.
 #' Otherwise, they are ignored.
 #' @export
 #' @author Carson Sievert

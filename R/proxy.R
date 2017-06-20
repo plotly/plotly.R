@@ -52,7 +52,7 @@ plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(),
 # ----------------------------------------------------------------------
 
 
-#' @param p a plotly proxy object (created with \code{plotlyProxy})
+#' @param p a plotly proxy object (created with `plotlyProxy`)
 #' @param method a plotlyjs method to invoke. For a list of options,
 #' visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}{plotlyjs function reference}
 #' @param ... unnamed arguments passed onto the plotly.js method

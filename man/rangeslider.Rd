@@ -13,7 +13,7 @@ rangeslider(p, start = NULL, end = NULL, ...)
 
 \item{end}{an end date/value.}
 
-\item{...}{these arguments are documented here 
+\item{...}{these arguments are documented here
 \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}}
 }
 \description{

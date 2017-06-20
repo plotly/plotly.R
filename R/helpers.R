@@ -87,7 +87,7 @@ colorbar_built <- function(p, ..., limits = NULL, which = 1) {
 #'
 #' @param p a plotly object.
 #' @export
-#' @seealso \code{\link{hide_legend}()}, \code{\link{hide_colorbar}()}
+#' @seealso [hide_legend()], [hide_colorbar()]
 #'
 
 hide_guides <- function(p) {
@@ -99,7 +99,7 @@ hide_guides <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \code{\link{hide_legend}()}
+#' @seealso [hide_legend()]
 #' @examples
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~cyl)
@@ -123,7 +123,7 @@ hide_colorbar <- function(p) {
 #' 
 #' @param p a plotly object.
 #' @export
-#' @seealso \code{\link{hide_colorbar}()}
+#' @seealso [hide_colorbar()]
 #' @examples 
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
@@ -158,9 +158,9 @@ toWebGL <- function(p) {
 
 #' Create a complete empty plotly graph.
 #' 
-#' Useful when used with \code{\link{subplot}()}
+#' Useful when used with [subplot()]
 #' 
-#' @param ... arguments passed onto \code{\link{plot_ly}()}
+#' @param ... arguments passed onto [plot_ly()]
 #' 
 #' @export
 plotly_empty <- function(...) {
@@ -175,11 +175,11 @@ plotly_empty <- function(...) {
 
 #' Convert a raster object to a data URI
 #' 
-#' Convenient embedding images via \code{\link{layout}()}
+#' Convenient embedding images via [layout()]
 #' \href{images}{https://plot.ly/r/reference/#layout-images}.
 #' 
-#' @param r an object coercable to a raster object via \code{\link{as.raster}()}
-#' @param ... arguments passed onto \code{\link{as.raster}()}.
+#' @param r an object coercable to a raster object via [as.raster()]
+#' @param ... arguments passed onto [as.raster()].
 #' @author Carson Sievert
 #' @export
 #' @examples

@@ -12,11 +12,11 @@ export(p = last_plot(), file = "plotly.png", selenium = NULL, ...)
 \item{file}{a filename. The file type is inferred from the file extension.
 Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'}
 
-\item{selenium}{used only when \code{p} is a WebGL plot or the output 
+\item{selenium}{used only when \code{p} is a WebGL plot or the output
 format is 'webp' or 'svg'. Should be an object of class "rsClientServer"
 returned by \code{RSelenium::rsDriver} (see examples).}
 
-\item{...}{if \code{p} is non-WebGL and the output file format is 
+\item{...}{if \code{p} is non-WebGL and the output file format is
 jpeg/png/pdf arguments are passed along to \code{webshot::webshot()}.
 Otherwise, they are ignored.}
 }

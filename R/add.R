@@ -23,7 +23,7 @@ add_data <- function(p, data = NULL) {
 #' 
 #' @inheritParams plot_ly
 #' @param p a plotly object
-#' @param inherit inherit attributes from \code{\link{plot_ly}()}?
+#' @param inherit inherit attributes from [plot_ly()]?
 #' @param z a numeric matrix
 #' @param x the x variable.
 #' @param y the y variable.
@@ -32,7 +32,7 @@ add_data <- function(p, data = NULL) {
 #' @param ymax a variable used to define the upper boundary of a polygon.
 #' @param xend "final" x position (in this context, x represents "start")
 #' @param yend "final" y position (in this context, y represents "start")
-#' @seealso \code{\link{plot_ly}()}
+#' @seealso [plot_ly()]
 #' @references \url{https://plot.ly/r/reference/}
 #' @author Carson Sievert
 #' @export
@@ -268,7 +268,7 @@ add_area <- function(p, r = NULL, t = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @param values the value to associated with each slice of the pie.
-#' @param labels the labels (categories) corresponding to \code{values}.
+#' @param labels the labels (categories) corresponding to `values`.
 #' @export
 #' @examples 
 #' ds <- data.frame(
@@ -564,7 +564,7 @@ special_attrs <- function(trace) {
 #' @param p a plotly object.
 #' @param fun a function. Should take a plotly object as input and return a 
 #' modified plotly object.
-#' @param ... arguments passed to \code{fun}.
+#' @param ... arguments passed to `fun`.
 #' @export
 #' @examples
 #' 
@@ -608,7 +608,7 @@ add_fun <- function(p, fun, ...) {
 #' @param ... these arguments are documented at 
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/components/annotations/attributes.js}
 #' @param data a data frame.
-#' @param inherit inherit attributes from \code{\link{plot_ly}()}?
+#' @param inherit inherit attributes from [plot_ly()]?
 #' @author Carson Sievert
 #' @export
 #' @examples

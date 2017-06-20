@@ -31,30 +31,30 @@ A redraw may significantly impact performance, but may be necessary to
 update graphical elements that can't be transitioned.}
 
 \item{mode}{Describes how a new animate call interacts with currently-running
-animations. If `immediate`, current animations are interrupted and
-the new animation is started. If `next`, the current frame is allowed
-to complete, after which the new animation is started. If `afterall`
+animations. If \code{immediate}, current animations are interrupted and
+the new animation is started. If \code{next}, the current frame is allowed
+to complete, after which the new animation is started. If \code{afterall}
 all existing frames are animated to completion before the new animation
 is started.}
 
 \item{hide}{remove the animation slider?}
 
 \item{...}{for \code{animation_slider}, attributes are passed to a special
-layout.sliders object tied to the animation frames. 
-The definition of these attributes may be found here 
+layout.sliders object tied to the animation frames.
+The definition of these attributes may be found here
 \url{https://github.com/plotly/plotly.js/blob/master/src/components/sliders/attributes.js}
-For \code{animation_button}, arguments are passed to a special 
+For \code{animation_button}, arguments are passed to a special
 layout.updatemenus button object tied to the animation
 \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}}
 }
 \description{
-Animations can be created by either using the \code{frame} argument in 
-\code{\link{plot_ly}()} or the (unofficial) \code{frame} ggplot2 aesthetic in 
-\code{\link{ggplotly}()}. By default, animations populate a play button
+Animations can be created by either using the \code{frame} argument in
+\code{\link[=plot_ly]{plot_ly()}} or the (unofficial) \code{frame} ggplot2 aesthetic in
+\code{\link[=ggplotly]{ggplotly()}}. By default, animations populate a play button
 and slider component for controlling the state of the animation
-(to pause an animation, click on a relevant location on the slider bar). 
-Both the play button and slider component transition between frames according 
-rules specified by \code{\link{animation_opts}()}.
+(to pause an animation, click on a relevant location on the slider bar).
+Both the play button and slider component transition between frames according
+rules specified by \code{\link[=animation_opts]{animation_opts()}}.
 }
 \examples{
 

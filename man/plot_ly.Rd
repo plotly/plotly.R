@@ -10,59 +10,59 @@ plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   source = "A")
 }
 \arguments{
-\item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
+\item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
 
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
 
 \item{type}{A character string describing the type of trace.}
 
-\item{color}{A formula containing a name or expression. 
-Values are scaled and mapped to color codes based on the value of 
-\code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},
-and provide value(s) that can be converted to rgb color codes by 
-\code{\link[grDevices]{col2rgb}()}.}
+\item{color}{A formula containing a name or expression.
+Values are scaled and mapped to color codes based on the value of
+\code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link[=I]{I()}},
+and provide value(s) that can be converted to rgb color codes by
+\code{\link[grDevices:col2rgb]{grDevices::col2rgb()}}.}
 
-\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
-or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
+\item{colors}{Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"),
+or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
 or a color interpolation function like \code{colorRamp()}.}
 
 \item{alpha}{A number between 0 and 1 specifying the alpha channel applied to color.}
 
-\item{symbol}{A formula containing a name or expression. 
+\item{symbol}{A formula containing a name or expression.
 Values are scaled and mapped to symbols based on the value of \code{symbols}.
-To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
-\code{\link{pch}()} values and/or valid plotly symbol(s) as a string}
+To avoid scaling, wrap with \code{\link[=I]{I()}}, and provide valid
+\code{\link[=pch]{pch()}} values and/or valid plotly symbol(s) as a string}
 
-\item{symbols}{A character vector of symbol types. 
+\item{symbols}{A character vector of symbol types.
 Either valid \link{pch} or plotly symbol codes may be supplied.}
 
-\item{size}{A formula containing a name or expression yielding a numeric vector. 
+\item{size}{A formula containing a name or expression yielding a numeric vector.
 Values are scaled according to the range specified in \code{sizes}.}
 
 \item{sizes}{A numeric vector of length 2 used to scale sizes to pixels.}
 
-\item{linetype}{A formula containing a name or expression. 
-Values are scaled and mapped to linetypes based on the value of 
-\code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.}
+\item{linetype}{A formula containing a name or expression.
+Values are scaled and mapped to linetypes based on the value of
+\code{linetypes}. To avoid scaling, wrap with \code{\link[=I]{I()}}.}
 
-\item{linetypes}{A character vector of line types. 
+\item{linetypes}{A character vector of line types.
 Either valid \link{par} (lty) or plotly dash codes may be supplied.}
 
 \item{split}{A formula containing a name or expression. Similar to
-\code{\link{group_by}()}, but ensures at least one trace for each unique
+\code{\link[=group_by]{group_by()}}, but ensures at least one trace for each unique
 value. This replaces the functionality of the (now deprecated)
 \code{group} argument.}
 
-\item{frame}{A formula containing a name or expression. The resulting value 
+\item{frame}{A formula containing a name or expression. The resulting value
 is used to split data into frames, and then animated.}
 
 \item{width}{Width in pixels (optional, defaults to automatic sizing).}
 
 \item{height}{Height in pixels (optional, defaults to automatic sizing).}
 
-\item{source}{a character string of length 1. Match the value of this string 
-with the source argument in \code{\link{event_data}()} to retrieve the 
+\item{source}{a character string of length 1. Match the value of this string
+with the source argument in \code{\link[=event_data]{event_data()}} to retrieve the
 event data corresponding to a specific plot (shiny apps can have multiple plots).}
 }
 \description{
@@ -113,11 +113,11 @@ add_paths(p, linetype = ~Species)
 }
 \seealso{
 \itemize{
- \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
- \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
- \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
- \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
- \item
+\item For initializing a plotly-geo object: \code{\link[=plot_geo]{plot_geo()}}.
+\item For initializing a plotly-mapbox object: \code{\link[=plot_mapbox]{plot_mapbox()}}.
+\item For translating a ggplot2 object to a plotly object: \code{\link[=ggplotly]{ggplotly()}}.
+\item For modifying any plotly object: \code{\link[=layout]{layout()}}, \code{\link[=add_trace]{add_trace()}}, \code{\link[=style]{style()}}
+\item
 }
 }
 \author{

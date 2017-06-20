@@ -4,8 +4,8 @@
 #' sent to plotly.js.
 #' 
 #' @param p a plotly or ggplot object.
-#' @param jsonedit use \code{listviewer::jsonedit} to view the JSON?
-#' @param ... other options passed onto \code{listviewer::jsonedit}
+#' @param jsonedit use `listviewer::jsonedit` to view the JSON?
+#' @param ... other options passed onto `listviewer::jsonedit`
 #' @export
 #' @examples 
 #'   
@@ -27,8 +27,8 @@ plotly_json <- function(p = last_plot(), jsonedit = interactive(), ...) {
 #' The schema contains valid attributes names, their value type, 
 #' default values (if any), and min/max values (if applicable).
 #' 
-#' @param jsonedit use \code{listviewer::jsonedit} to view the JSON?
-#' @param ... other options passed onto \code{listviewer::jsonedit}
+#' @param jsonedit use `listviewer::jsonedit` to view the JSON?
+#' @param ... other options passed onto `listviewer::jsonedit`
 #' @export
 #' @examples 
 #' s <- schema()

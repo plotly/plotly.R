@@ -19,5 +19,5 @@ hide_colorbar(p)
   
 }
 \seealso{
-\code{\link{hide_legend}()}
+\code{\link[=hide_legend]{hide_legend()}}
 }

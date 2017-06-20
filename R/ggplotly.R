@@ -1,12 +1,12 @@
 #' Convert ggplot2 to plotly
 #'
-#' This function converts a \code{\link[ggplot2]{ggplot}()} object to a 
+#' This function converts a [ggplot2::ggplot()] object to a 
 #' plotly object. 
 #' 
 #' @details Conversion of relative sizes depends on the size of the current 
 #' graphics device (if no device is open, width/height of a new (off-screen) 
-#' device defaults to 640/480). In other words, \code{height} and
-#' \code{width} must be specified at runtime to ensure sizing is correct.
+#' device defaults to 640/480). In other words, `height` and
+#' `width` must be specified at runtime to ensure sizing is correct.
 #'
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
@@ -15,7 +15,7 @@
 #' in the tooltip. The default, "all", means show all the aesthetic mappings
 #' (including the unofficial "text" aesthetic). The order of variables here will
 #' also control the order they appear. For example, use
-#' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
+#' `tooltip = c("y", "x", "colour")` if you want y first, x second, and
 #' colour last.
 #' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
 #' Dynamic ticks are useful for updating ticks in response to zoom/pan
@@ -24,13 +24,13 @@
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
 #' @export
 #' @author Carson Sievert
 #' @references \url{https://plot.ly/ggplot2}
-#' @seealso \code{\link{plot_ly}()}
+#' @seealso [plot_ly()]
 #' @examples \dontrun{
 #' # simple example
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
@@ -149,14 +149,14 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
-#' @param dynamicTicks accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
+#' @param dynamicTicks accepts the following values: `FALSE`, `TRUE`, `"x"`, or `"y"`.
 #' Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
 #' interactions; however, there is no guarantee they reproduce axis tick text 
 #' as they would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").

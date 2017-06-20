@@ -12,7 +12,7 @@ schema(jsonedit = interactive(), ...)
 \item{...}{other options passed onto \code{listviewer::jsonedit}}
 }
 \description{
-The schema contains valid attributes names, their value type, 
+The schema contains valid attributes names, their value type,
 default values (if any), and min/max values (if applicable).
 }
 \examples{

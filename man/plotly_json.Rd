@@ -14,7 +14,7 @@ plotly_json(p = last_plot(), jsonedit = interactive(), ...)
 \item{...}{other options passed onto \code{listviewer::jsonedit}}
 }
 \description{
-This function is useful for obtaining/viewing/debugging JSON 
+This function is useful for obtaining/viewing/debugging JSON
 sent to plotly.js.
 }
 \examples{

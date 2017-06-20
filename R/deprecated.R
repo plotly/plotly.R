@@ -1,6 +1,6 @@
 #' Create/Modify plotly graphs
 #'
-#' Deprecated: see \code{\link{api_create}()}.
+#' Deprecated: see [api_create()].
 #'
 #' @param x either a ggplot object, a plotly object, or a list.
 #' @param filename character string describing the name of the plot in your 
@@ -25,7 +25,7 @@
 #' You do not need to be logged in to view this plot.
 #' @param ... not used
 #' @export
-#' @seealso \code{\link{plot_ly}()}, \code{\link{signup}()}
+#' @seealso [plot_ly()], [signup()]
 plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
                         sharing = c("public", "private", "secret"), ...) {
   .Deprecated("api_create")
@@ -34,7 +34,7 @@ plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
 
 #' Request a figure object
 #' 
-#' Deprecated: see \code{\link{api_download_plot}()}.
+#' Deprecated: see [api_download_plot()].
 #' 
 #' @param username corresponding username for the figure.
 #' @param id of the Plotly figure.
@@ -57,7 +57,7 @@ get_figure <- function(username, id) {
 #' @param username plotly username
 #' @param key plotly API key
 #' @export
-#' @seealso \code{\link{ggplotly}()}, \code{\link{plot_ly}()}, \code{\link{signup}()}
+#' @seealso [ggplotly()], [plot_ly()], [signup()]
 plotly <- function(username, key) {
   
   if (!missing(username)) {
@@ -88,7 +88,7 @@ plotly <- function(username, key) {
 #' @param width A valid CSS unit. (like "100\%", "600px", "auto") or a number, 
 #' which will be coerced to a string and have "px" appended.
 #' @param out_dir a directory to place the visualization. 
-#' If \code{NULL}, a temporary directory is used when the offline object is printed.
+#' If `NULL`, a temporary directory is used when the offline object is printed.
 #' @param open_browser open the visualization after creating it?
 #' @author Carson Sievert
 #' @return a plotly object of class "offline"
@@ -107,7 +107,7 @@ offline <- function(p, height, width, out_dir, open_browser) {
 #' so there is no need to convert them.
 #' 
 #' @param x a plotly object.
-#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @param ... other options passed onto `htmlwidgets::createWidget`
 #' @export
 
 as.widget <- function(x, ...) {

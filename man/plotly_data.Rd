@@ -58,12 +58,12 @@ plotly_data(p, id = p$x$cur_data)
 
 \item{.dots}{Used to work around non-standard evaluation. See vignette("nse") for details}
 
-\item{add}{By default, when add = FALSE, group_by will override existing groups. 
+\item{add}{By default, when add = FALSE, group_by will override existing groups.
 To instead add to the existing groups, use add = TRUE}
 }
 \description{
-\code{plotly_data()} returns data associated with 
-a plotly visualization (if there are multiple data frames, by default, 
+\code{plotly_data()} returns data associated with
+a plotly visualization (if there are multiple data frames, by default,
 it returns the most recent one).
 }
 \examples{

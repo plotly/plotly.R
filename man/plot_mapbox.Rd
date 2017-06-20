@@ -9,15 +9,15 @@ plot_mapbox(data = data.frame(), ...)
 \arguments{
 \item{data}{A data frame (optional).}
 
-\item{...}{arguments passed along to \code{\link{plot_ly}()}. They should be
+\item{...}{arguments passed along to \code{\link[=plot_ly]{plot_ly()}}. They should be
 valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
 Note that x/y can also be used in place of lat/lon.}
 }
 \description{
-Use this function instead of \code{\link{plot_ly}()} to initialize
+Use this function instead of \code{\link[=plot_ly]{plot_ly()}} to initialize
 a plotly-mapbox object. This enforces the entire plot so use
 the scattermapbox trace type, and enables higher level geometries
-like \code{\link{add_polygons}()} to work
+like \code{\link[=add_polygons]{add_polygons()}} to work
 }
 \examples{
 \dontrun{
@@ -35,7 +35,7 @@ map_data("world", "canada") \%>\%
 
 }
 \seealso{
-\code{\link{plot_ly}()}, \code{\link{plot_geo}()}, \code{\link{ggplotly}()}
+\code{\link[=plot_ly]{plot_ly()}}, \code{\link[=plot_geo]{plot_geo()}}, \code{\link[=ggplotly]{ggplotly()}}
 }
 \author{
 Carson Sievert

@@ -1,9 +1,9 @@
 #' Convert R colours to RGBA hexadecimal colour values
-#' @param x see the \code{col} argument in \code{col2rgb} for valid specifications
+#' @param x see the `col` argument in `col2rgb` for valid specifications
 #' @param alpha alpha channel on 0-1 scale
 #' @return hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 #' @export
-#' @seealso \code{\link{showRGB}()}
+#' @seealso [showRGB()]
 #' @examples 
 #' 
 #' toRGB("steelblue") 
@@ -63,7 +63,7 @@ toRGB <- function(x, alpha = 1) {
 #' color format -- "rgba(255, 255, 255, 1)"
 #' 
 #' @param x character string specifying color(s).
-#' @param ... arguments passed along to \code{scales::show_col}.
+#' @param ... arguments passed along to `scales::show_col`.
 #' @export
 #' @author Carson Sievert
 #' @examples

@@ -12,31 +12,31 @@ group2NA(data, groupNames = "group", nested = NULL, ordered = NULL,
 
 \item{groupNames}{character vector of grouping variable(s)}
 
-\item{nested}{other variables that group should be nested 
+\item{nested}{other variables that group should be nested
 (i.e., ordered) within.}
 
 \item{ordered}{a variable to arrange by (within nested & groupNames). This
 is useful primarily for ordering by x}
 
-\item{retrace.first}{should the first row of each group be appended to the 
+\item{retrace.first}{should the first row of each group be appended to the
 last row? This is useful for enclosing polygons with lines.}
 }
 \value{
-a data.frame with rows ordered by: \code{nested}, 
-then \code{groupNames}, then \code{ordered}. As long as \code{groupNames} 
-contains valid variable names, new rows will also be inserted to separate 
+a data.frame with rows ordered by: \code{nested},
+then \code{groupNames}, then \code{ordered}. As long as \code{groupNames}
+contains valid variable names, new rows will also be inserted to separate
 the groups.
 }
 \description{
-This function is used internally by plotly, but may also be useful to some 
+This function is used internally by plotly, but may also be useful to some
 power users. The details section explains when and why this function is useful.
 }
 \details{
-If a group of scatter traces share the same non-positional characteristics 
-(i.e., color, fill, etc), it is more efficient to draw them as a single trace 
-with missing values that separate the groups (instead of multiple traces), 
-In this case, one should also take care to make sure 
-\href{https://plot.ly/r/reference/#scatter-connectgaps}{connectgaps} 
+If a group of scatter traces share the same non-positional characteristics
+(i.e., color, fill, etc), it is more efficient to draw them as a single trace
+with missing values that separate the groups (instead of multiple traces),
+In this case, one should also take care to make sure
+\href{https://plot.ly/r/reference/#scatter-connectgaps}{connectgaps}
 is set to \code{FALSE}.
 }
 \examples{

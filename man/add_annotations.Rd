@@ -11,12 +11,12 @@ add_annotations(p, text = NULL, ..., data = NULL, inherit = TRUE)
 
 \item{text}{annotation text (required).}
 
-\item{...}{these arguments are documented at 
+\item{...}{these arguments are documented at
 \url{https://github.com/plotly/plotly.js/blob/master/src/components/annotations/attributes.js}}
 
 \item{data}{a data frame.}
 
-\item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
+\item{inherit}{inherit attributes from \code{\link[=plot_ly]{plot_ly()}}?}
 }
 \description{
 Add an annotation(s) to a plot

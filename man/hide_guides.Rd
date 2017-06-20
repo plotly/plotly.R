@@ -13,5 +13,5 @@ hide_guides(p)
 Hide guides (legends and colorbars)
 }
 \seealso{
-\code{\link{hide_legend}()}, \code{\link{hide_colorbar}()}
+\code{\link[=hide_legend]{hide_legend()}}, \code{\link[=hide_colorbar]{hide_colorbar()}}
 }

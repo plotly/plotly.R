@@ -9,12 +9,12 @@ colorbar(p, ..., limits = NULL, which = 1)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{arguments are documented here 
+\item{...}{arguments are documented here
 \url{https://plot.ly/r/reference/#scatter-marker-colorbar}.}
 
 \item{limits}{numeric vector of length 2. Set the extent of the colorbar scale.}
 
-\item{which}{colorbar to modify? Should only be relevant for subplots with 
+\item{which}{colorbar to modify? Should only be relevant for subplots with
 multiple colorbars.}
 }
 \description{

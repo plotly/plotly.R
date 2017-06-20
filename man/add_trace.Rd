@@ -83,9 +83,9 @@ add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 \item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
 Note that acceptable arguments depend on the value of \code{type}.}
 
-\item{data}{A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.}
+\item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
 
-\item{inherit}{inherit attributes from \code{\link{plot_ly}()}?}
+\item{inherit}{inherit attributes from \code{\link[=plot_ly]{plot_ly()}}?}
 
 \item{x}{the x variable.}
 
@@ -176,7 +176,7 @@ plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) \%>\% add_mesh()
 \url{https://plot.ly/r/reference/}
 }
 \seealso{
-\code{\link{plot_ly}()}
+\code{\link[=plot_ly]{plot_ly()}}
 }
 \author{
 Carson Sievert
