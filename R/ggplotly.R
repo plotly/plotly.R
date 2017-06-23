@@ -325,13 +325,22 @@ gg2list <- function(p, width = NULL, height = NULL,
   # if there are multiple keys within a group, the key is a list-column
   reComputeGroup <- function(x, layer = NULL) {
     # 1-to-1 link between data & visual marks -- group == key
-    if ("GeomDotplot" %in% class(layer$geom)) {
+    if (inherits(layer$geom, "GeomDotplot")) {
       x <- split(x, x[["PANEL"]])
       x <- lapply(x, function(d) { 
         d[["group"]] <- do.call("order", d[c("x", "group")]) 
         d 
       })
       x <- dplyr::bind_rows(x)
+    }
+    if (inherits(layer$geom, "GeomSf")) {
+      x <- split(x, x[["PANEL"]])
+      x <- lapply(x, function(d) { 
+        d[["group"]] <- seq_len(nrow(d))
+        d 
+      })
+      # I think this is safe?
+      x <- suppressWarnings(dplyr::bind_rows(x))
     }
     x
   }
@@ -747,7 +756,6 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # inverse transform categorical data based on tickvals/ticktext
       if (isDiscreteType) {
-        #browser()
         traces <- lapply(traces, function(tr) { 
           # map x/y trace data back to the 'closest' ticktext label
           # http://r.789695.n4.nabble.com/check-for-nearest-value-in-a-vector-td4369339.html
