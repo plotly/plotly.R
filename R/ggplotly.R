@@ -638,10 +638,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         }
         
         # if labels are empty, don't show axis ticks
-        emptyTicks <- all(with(
-          rng$graticule, sapply(degree_label, is.na) | sapply(degree_label, nchar) == 0
-        ))
-        if (emptyTicks) {
+        tickExists <- with(rng$graticule, sapply(degree_label, is.language))
+        if (sum(tickExists) == 0) {
           theme$axis.ticks.length <- 0
         } else{
           # convert the special *degree expression in plotmath to HTML entity
