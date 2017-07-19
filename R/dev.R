@@ -49,7 +49,7 @@ schema <- function(jsonedit = interactive(), ...) {
   
   if (jsonedit) {
     try_library("listviewer", "schema")
-    listviewer::jsonedit(Schema, mode = "form")
+    print(listviewer::jsonedit(Schema, mode = "form"))
   }
   
   invisible(Schema)
