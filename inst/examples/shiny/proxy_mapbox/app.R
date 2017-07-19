@@ -1,4 +1,5 @@
 library(shiny)
+library(plotly)
 
 # get all the available mapbox styles
 mapStyles <- schema()$layout$layoutAttributes$mapbox$style$values

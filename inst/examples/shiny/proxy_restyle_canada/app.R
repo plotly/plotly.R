@@ -1,4 +1,5 @@
 library(shiny)
+library(plotly)
 
 ui <- fluidPage(
   selectInput("color", "Canada's fillcolor", colors(), selected = "black"),
