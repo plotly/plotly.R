@@ -15,6 +15,8 @@
 * The default sizing in `ggplotly()` is no longer fixed to the device size inside RStudio. Fixes #1033.
 * Removed use of `ArrayBuffer.isView()`, which should fix rendering issues on plaforms that don't have a typed array polyfill (e.g., RStudio on Windows). Fixes #1055.
 * `event_data("plotly_relayout")` no longer fires `NULL` for any event. Fixes #1039.
+* Fixed a bug when using `color` with scattermapbox/scattergeo. Fixes #1038.
+* Fixed a highlighting bug when brushing multiple points with `marker.color` as an array. Fixes #1084.
 
 
 # 4.7.0

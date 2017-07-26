@@ -585,10 +585,11 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
         
         // if it is defined, override color with the "dynamic brush color""
+        // TODO: DRY this up
         var d = this.gd._fullData[i];
         if (d.marker) {
-          trace.marker = d.marker;
-          trace.marker.color =  selectionColour || trace.marker.color;
+          trace.marker = trace.marker || {};
+          trace.marker.color =  selectionColour || trace.marker.color || d.marker.color;
           
           // adopt any user-defined styling for the selection
           var selected = this.highlight.selected.marker || {};
@@ -599,8 +600,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
         
         if (d.line) {
-          trace.line = d.line;
-          trace.line.color =  selectionColour || trace.line.color;
+          trace.line = trace.line || {};
+          trace.line.color =  selectionColour || trace.line.color || d.line.color;
           
           // adopt any user-defined styling for the selection
           var selected = this.highlight.selected.line || {};
@@ -611,8 +612,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         }
         
         if (d.textfont) {
-          trace.textfont = d.textfont;
-          trace.textfont.color =  selectionColour || trace.textfont.color;
+          trace.textfont = trace.textfont || {};
+          trace.textfont.color =  selectionColour || trace.textfont.color || d.textfont.color;
           
           // adopt any user-defined styling for the selection
           var selected = this.highlight.selected.textfont || {};
