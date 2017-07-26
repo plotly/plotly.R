@@ -535,21 +535,24 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # panel margins must be computed before panel/axis loops
   # (in order to use get_domains())
-  panelMarginX <- unitConvert(
+  panelMarginL <- 0.5*unitConvert(
     theme[["panel.spacing.x"]] %||% theme[["panel.spacing"]],
     "npc", "width"
   )
-  panelMarginY <- unitConvert(
+  panelMarginR <- panelMarginL
+  panelMarginT <- 0.5*unitConvert(
     theme[["panel.spacing.y"]] %||% theme[["panel.spacing"]],
     "npc", "height"
   )
+  panelMarginB <- panelMarginT
   # space for _interior_ facet strips
   if (inherits(plot$facet, "FacetWrap")) {
     stripSize <- unitConvert(
       theme[["strip.text.x"]] %||% theme[["strip.text"]],
       "npc", "height"
     )
-    panelMarginY <- panelMarginY + stripSize
+    # FIXME add to MarginB if strip position is below?
+    panelMarginT <- panelMarginT + stripSize
     # space for ticks/text in free scales
     if (plot$facet$params$free$x) {
       axisTicksX <- unitConvert(
@@ -560,7 +563,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
       labz <- unlist(lapply(layout$panel_params, "[[", "x.labels"))
       lab <- labz[which.max(nchar(labz))]
-      panelMarginY <- panelMarginY + axisTicksX +
+      # FIXME add to MarginT if axis position is above?
+      panelMarginB <- panelMarginB + axisTicksX +
         bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))[["height"]]
     }
     if (plot$facet$params$free$y) {
@@ -572,14 +576,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
       labz <- unlist(lapply(layout$panel_params, "[[", "y.labels"))
       lab <- labz[which.max(nchar(labz))]
-      panelMarginX <- panelMarginX + axisTicksY +
+      # FIXME add to MarginR if axis position is on the right?
+      panelMarginL <- panelMarginL + axisTicksY +
         bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))[["width"]]
     }
   }
-  margins <- c(
-    rep(panelMarginX, 2),
-    rep(panelMarginY, 2)
-  )
+  margins <- c(panelMarginL, panelMarginR, panelMarginT, panelMarginB)
   doms <- get_domains(nPanels, nRows, margins)
   
   for (i in seq_len(nPanels)) {
