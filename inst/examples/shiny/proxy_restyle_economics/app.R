@@ -2,8 +2,8 @@ library(shiny)
 library(plotly)
 
 ui <- fluidPage(
-  sliderInput("marker", "Marker size", min = 0, max = 20, value = 5),
-  sliderInput("path", "Path size", min = 0, max = 30, value = 10),
+  sliderInput("marker", "Marker size", min = 0, max = 20, value = 8),
+  sliderInput("path", "Path size", min = 0, max = 30, value = 2),
   plotlyOutput("p")
 )
 

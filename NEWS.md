@@ -8,7 +8,7 @@
 
 ## CHANGES
 
-* Upgraded to plotly.js v1.28.3 -- https://github.com/plotly/plotly.js/releases/tag/v1.28.3
+* Upgraded to plotly.js v1.29.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.29.2
 
 ## BUG FIXES
 
