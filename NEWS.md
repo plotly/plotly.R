@@ -1,4 +1,4 @@
-# 4.7.0.9000
+# 4.7.1
 
 ## NEW FEATURES & IMPROVEMENTS
 
@@ -13,6 +13,7 @@
 ## BUG FIXES
 
 * The default sizing in `ggplotly()` is no longer fixed to the device size inside RStudio. Fixes #1033.
+* Removed use of `ArrayBuffer.isView()`, which should fix rendering issues on plaforms that don't have a typed array polyfill (e.g., RStudio on Windows). Fixes #1055.
 * `event_data("plotly_relayout")` no longer fires `NULL` for any event. Fixes #1039.
 
 
