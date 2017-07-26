@@ -698,8 +698,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     colorObj$color <- rng
     colorObj$showscale <- TRUE
     colorBarTrace <- list(
-      x = range(unlist(lapply(traces, function(tr) tr[["x"]] %||% tr[["lon"]])), na.rm = TRUE),
-      y = range(unlist(lapply(traces, function(tr) tr[["y"]] %||% tr[["lat"]])), na.rm = TRUE),
+      x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
+      y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
       type = if (any(types %in% glTypes())) "scattergl" else "scatter",
       mode = "markers",
       opacity = 0,
@@ -714,8 +714,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     }
     if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
       colorBarTrace$type <- type
-      colorBarTrace$lat <- range(unlist(lapply(traces, "[[", "lat")), na.rm = TRUE)
-      colorBarTrace$lon <- range(unlist(lapply(traces, "[[", "lon")), na.rm = TRUE)
+      colorBarTrace$lat <- colorBarTrace$y
+      colorBarTrace$lon <- colorBarTrace$x
       colorBarTrace[["x"]] <- NULL
       colorBarTrace[["y"]] <- NULL
     }
