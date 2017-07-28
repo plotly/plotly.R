@@ -14,8 +14,8 @@
 #' 
 #' 
 #' if (require("shiny") && interactive()) {
-#'   runExample("shiny", "proxy_relayout")
-#'   runExample("shiny", "proxy_mapbox")
+#'   plotly_example("shiny", "proxy_relayout")
+#'   plotly_example("shiny", "proxy_mapbox")
 #' }
 #' 
 plotlyProxy <- function(outputId, session = shiny::getDefaultReactiveDomain(), 

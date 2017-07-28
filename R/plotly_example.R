@@ -9,7 +9,7 @@
 #' @export
 #' @author Carson Sievert
 
-runExample <- function(type = c("demo", "shiny", "rmd"), name, ...) {
+plotly_example <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   if (missing(name)) {
     stop("Must provide an example name", call. = FALSE)
   }
@@ -36,12 +36,12 @@ runExample <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   finalDir <- system.file("examples", type, name, package = "plotly")
   
   if (type == "shiny") {
-    try_library("shiny", "runExample")
+    try_library("shiny", "plotly_example")
     getFromNamespace("runApp", asNamespace("shiny"))(finalDir, ...)
   }
   
   if (type == "rmd") {
-    try_library("rmarkdown", "runExample")
+    try_library("rmarkdown", "plotly_example")
     input <- file.path(finalDir, "index.Rmd")
     output <- tempfile(fileext = ".html")
     getFromNamespace("render", asNamespace("rmarkdown"))(input, output_file = output, ...)

@@ -23,7 +23,7 @@ This function must be called within a reactive shiny context.
 }
 \examples{
 \dontrun{
-runExample("shiny", "event_data")
+plotly_example("shiny", "event_data")
 }
 }
 \author{

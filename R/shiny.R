@@ -55,7 +55,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
-#' runExample("shiny", "event_data")
+#' plotly_example("shiny", "event_data")
 #' }
 
 event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
