@@ -115,148 +115,196 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       plots <- c(plots, list(newPlot))
     }
   }
-  
+  # set the domain(position) of each subplot in a grid layout
+  plots_info <- get_grid_layout(
+    length(plots), nrows, margin, widths = widths, heights = heights
+  )
+
+  # collect subplots axes information
+  axes_info <- dplyr::bind_rows(lapply(seq_along(plots), function(i){
+    ax_info <- get_axes_info(plots[[i]])
+    ax_info$plot_index <- i
+    return(ax_info)
+  }))
+
+  # get the plot position in the grid layout and the new domain(s) for each axis
+  axes_info <- axes_info %>%
+    dplyr::left_join(dplyr::select(plots_info, plot_index, plot_col=col, plot_row=row,
+                                   new_xstart=xstart, new_xend=xend,
+                                   new_ystart=ystart, new_yend=yend),
+                     by="plot_index") %>%
+    dplyr::mutate(new_xstart = dplyr::if_else(dim == "y", NA_real_, new_xstart),
+                  new_xend = dplyr::if_else(dim == "y", NA_real_, new_xend),
+                  new_ystart = dplyr::if_else(dim == "x", NA_real_, new_ystart),
+                  new_yend = dplyr::if_else(dim == "x", NA_real_, new_yend))
+
+  # number of x/y axes per plot
+  # note: a _single_ geo/mapbox object counts a both an x and y
+  xAxisN <- table(subset(axes_info, dim!="y")$plot_index)
+  yAxisN <- table(subset(axes_info, dim!="x")$plot_index)
+
+  # Set the new axes properties
+  # assign new axes indexes (1..N) for each axis type(dim)
+  axes_info <- dplyr::group_by(axes_info, dim) %>%
+    dplyr::mutate(new_dim_index = row_number()) %>%
+    dplyr::ungroup()
+  # correcct the new axes indices if they are shared by the subplots
+  if (shareX) {
+    if (length(unique(xAxisN)) > 1L) {
+      warning("Must have a consistent number of axes per 'subplot' to share them.")
+    } else {
+      axes_mask <- axes_info$dim != "y"
+      axes_info[axes_mask, "new_dim_index"] <- (axes_info$plot_col[axes_mask]-1)*unique(xAxisN) +
+                                                rep.int(seq(unique(xAxisN)), length(plots))
+      #xAxisID <- rep(rep(seq_len(ncols * unique(xAxisN)), length.out = length(plots)), unique(xAxisN))
+    }
+  }
+  if (shareY) {
+    if (length(unique(yAxisN)) > 1L) {
+      warning("Must have a consistent number of axes per 'subplot' to share them.")
+    } else {
+      axes_mask <- axes_info$dim != "x"
+      axes_info[axes_mask, "new_dim_index"] <- (axes_info$plot_row[axes_mask]-1)*unique(yAxisN) +
+                                                rep.int(seq(unique(yAxisN)), length(plots))
+      #yAxisID <- rep(rep(seq_len(nrows * unique(xAxisN)), each = ncols, length.out = length(plots)), unique(yAxisN))
+    }
+  }
+  # remove axis titles, if specified
+  axes_info$new_title <- axes_info$title
+  if (!titleX) {
+    axes_info[axes_info$dim == "x", "new_title"] <- NA_character_
+  }
+  if (!titleY) {
+    axes_info[axes_info$dim == "y", "new_title"] <- NA_character_
+  }
+  # exclude all but one shared axes (the one that is closer to the bottom-left corner)
+  axes_info <- dplyr::group_by(axes_info, dim, new_dim_index) %>%
+    dplyr::mutate(is_preserved = pmax(dplyr::min_rank(plot_col), dplyr::min_rank(-plot_row)) == 1L) %>%
+    dplyr::ungroup()
+  # add axes references to plots, one axis reference per plot
+  xaxis_refs <- dplyr::filter(axes_info, dim == "x" | !is.na(xstart)) %>%
+                dplyr::group_by(plot_index) %>% dplyr::filter(row_number()==1L) %>%
+                dplyr::ungroup() %>% dplyr::select(plot_index, xref = ref)
+  yaxis_refs <- dplyr::filter(axes_info, dim == "y" | !is.na(ystart)) %>%
+                dplyr::group_by(plot_index) %>% dplyr::filter(row_number()==1L) %>%
+                dplyr::ungroup() %>% dplyr::select(plot_index, yref = ref)
+  plots_info <- dplyr::left_join(dplyr::left_join(plots_info,
+                                    xaxis_refs, by="plot_index"),
+                                    yaxis_refs, by="plot_index")
+
+  merge_plots(plots, plots_info, axes_info, which_layout = which_layout)
+}
+
+# merge plotly "plots" using the new layout provided by "plots_info" frame and
+# updated axes properties from "axes_info" frame
+merge_plots <- function(plots, plots_info, axes_info, which_layout = "merge") {
+  # set the new axis names, if not set
+  if (!("new_name" %in% colnames(axes_info))) {
+    axes_info$new_name <- paste0(sub("[0-9]+$", "", axes_info$name), sub("^1$", "", axes_info$new_dim_index))
+  }
+  if (!("new_ref" %in% colnames(axes_info))) {
+    axes_info$new_ref <- paste0(axes_info$dim, sub("^1$", "", axes_info$new_dim_index))
+  }
+  # add the new axis anchor reference for cartesian axes
+  axes_info <- dplyr::left_join(dplyr::mutate(axes_info,
+                                              eff_anchor=dplyr::if_else(!is.na(anchor), anchor,
+                                                                        dplyr::case_when(axes_info$dim=="x" ~ "y",
+                                                                                         axes_info$dim=="y" ~ "x",
+                                                                                         TRUE ~ NA_character_))),
+                                              dplyr::select(axes_info, plot_index, eff_anchor=ref, new_anchor=new_ref),
+                                by=c("plot_index", "eff_anchor")) %>%
+              dplyr::select(-eff_anchor)
+  # get plots domains from their axes references
+  plots_info <- dplyr::left_join(plots_info,
+        dplyr::select(axes_info, plot_index, xref=ref, xstart, xend, new_xstart, new_xend),
+        by=c("plot_index", "xref")) %>%
+    dplyr::left_join(
+        dplyr::select(axes_info, plot_index, yref=ref, ystart, yend, new_ystart, new_yend),
+        by=c("plot_index", "yref"))
+
   # grab main plot objects
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
+  axes <- lapply(layouts, function(lay) lay[grepl("^geo|^mapbox|^[xy]axis", names(lay))])
   shapes <- lapply(layouts, "[[", "shapes")
   annotations <- lapply(layouts, function(x) {
     # keep non axis title annotations (for rescaling)
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
-  # collect axis objects (note a _single_ geo/mapbox object counts a both an x and y)
-  xAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^xaxis", names(lay), value = TRUE) %||% "xaxis"
-    for (k in keys) {
-      dom <- lay[[k]]$domain %||% c(0, 1)
-      if ("x" %in% names(dom)) dom <- dom[["x"]]
-    }
-    lay[keys]
-  })
-  yAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^yaxis", names(lay), value = TRUE) %||% "yaxis"
-    for (k in keys) {
-      dom <- lay[[k]]$domain %||% c(0, 1)
-      if ("y" %in% names(dom)) dom <- dom[["y"]]
-    }
-    lay[keys]
-  })
-  if (!titleX) {
-    xAxes <- lapply(xAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
+
+  # compose transform for repositioning subplots shapes/annotations
+  get_transform <- function(plot_info, dim) {
+    start <- plot_info[[paste0(dim,"start")]] %||% 0.0
+    end <- plot_info[[paste0(dim,"end")]] %||% 1.0
+    new_start <- plot_info[[paste0("new_",dim,"start")]] %||% 0.0
+    new_end <- plot_info[[paste0("new_",dim,"end")]] %||% 1.0
+    d <- end - start
+    return(c((new_end  - new_start)/d,
+             (new_start*end  - new_end*start)/d))
   }
-  if (!titleY) {
-    yAxes <- lapply(yAxes, function(ax) lapply(ax, function(y) { y$title <- NULL; y }))
-  }
-  # number of x/y axes per plot
-  xAxisN <- vapply(xAxes, length, numeric(1))
-  yAxisN <- vapply(yAxes, length, numeric(1))
-  # old -> new axis name dictionary
-  ncols <- ceiling(length(plots) / nrows)
-  xAxisID <- seq_len(sum(xAxisN))
-  if (shareX) {
-    if (length(unique(xAxisN)) > 1) {
-      warning("Must have a consistent number of axes per 'subplot' to share them.")
-    } else {
-      xAxisID <- rep(rep(seq_len(ncols * unique(xAxisN)), length.out = length(plots)), unique(xAxisN))
-    }
-  }
-  yAxisID <- seq_len(sum(yAxisN))
-  if (shareY) {
-    if (length(unique(yAxisN)) > 1) {
-      warning("Must have a consistent number of axes per 'subplot' to share them.")
-    } else {
-      yAxisID <- rep(rep(seq_len(nrows * unique(xAxisN)), each = ncols, length.out = length(plots)), unique(yAxisN))
-    }
-  }
-  # current "axis" names
-  xCurrentNames <- unlist(lapply(xAxes, names))
-  yCurrentNames <- unlist(lapply(yAxes, names))
-  xNewNames <- paste0(
-    sub("[0-9]+$", "", xCurrentNames), 
-    sub("^1$", "", xAxisID)
-  )
-  yNewNames <- paste0(
-    sub("[0-9]+$", "", yCurrentNames), 
-    sub("^1$", "", yAxisID)
-  )
-  xAxisMap <- setNames(xCurrentNames, xNewNames)
-  yAxisMap <- setNames(yCurrentNames, yNewNames)
-  # split the map by plot ID
-  xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
-  yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
-  # domains of each subplot
-  domainInfo <- get_grid_layout(
-    length(plots), nrows, margin, widths = widths, heights = heights
-  )
+
   for (i in seq_along(plots)) {
-    # map axis object names
-    xMap <- xAxisMap[[i]]
-    yMap <- yAxisMap[[i]]
-    xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
-    yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
-    # for cartesian, bump corresponding axis anchor
-    for (j in seq_along(xAxes[[i]])) {
-      if (grepl("^geo|^mapbox", names(xAxes[[i]][j]))) next
-      map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
-      xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+    plot_info <- subset(plots_info, plot_index==i)
+    # update preserved plot axes
+    plot_axes_info <- dplyr::arrange(dplyr::filter(axes_info, plot_index==i), axis_index)
+    plot_axes <- setNames(axes[[i]], plot_axes_info$new_name)
+    for (j in dplyr::filter(plot_axes_info, is_preserved)$axis_index) {
+      axis_info <- subset(plot_axes_info, axis_index==j)
+      ax <- plot_axes[[j]]
+      # update the anchor
+      if (!is.na(axis_info$new_anchor)) {
+        ax$anchor <- axis_info$new_anchor
+      }
+      # update domains
+      if (all(c("x", "y") %in% names(ax$domain))) {
+        # geo domains are different from cartesian
+        ax$domain$x <- c(axis_info$new_xstart, axis_info$new_xend)
+        ax$domain$y <- c(axis_info$new_ystart, axis_info$new_yend)
+      } else if (axis_info$dim == "x") {
+        ax$domain <- c(axis_info$new_xstart, axis_info$new_xend)
+      } else if (axis_info$dim == "y") {
+        ax$domain <- c(axis_info$new_ystart, axis_info$new_yend)
+      }
+      # update the title
+      if (is.na(axis_info$new_title) && !is.na(axis_info$title)) {
+        ax$title <- NULL
+	    } else if (!is.na(axis_info$new_title)) {
+        ax$title <- axis_info$new_title
+      }
+      plot_axes[[j]] <- ax
     }
-    for (j in seq_along(yAxes[[i]])) {
-      if (grepl("^geo|^mapbox", names(yAxes[[i]][j]))) next
-      map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
-      yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
-    }
+    # update merged plot axes excluding the unpreserved ones
+    axes[[i]] <- plot_axes[plot_axes_info$is_preserved]
+
+    # map old trace anchor names to the new ones
+    anchorMap <- setNames(plot_axes_info$new_ref, plot_axes_info$ref)
+
     # map trace xaxis/yaxis/geo attributes
     for (key in c("geo", "subplot", "xaxis", "yaxis")) {
       oldAnchors <- unlist(lapply(traces[[i]], "[[", key))
       if (!length(oldAnchors)) next
-      axisMap <- if (key == "yaxis") yMap else xMap
-      axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
-      newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
+      newAnchors <- anchorMap[oldAnchors]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
     }
-    # rescale domains according to the tabular layout
-    xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
-    yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
-    reScale <- function(old, new) {
-      sort(scales::rescale(
-        old %||% c(0, 1), new, from = c(0, 1)
-      ))
-    }
-    xAxes[[i]] <- lapply(xAxes[[i]], function(ax) {
-      if (all(c("x", "y") %in% names(ax$domain))) {
-        # geo domains are different from cartesian
-        ax$domain$x <- reScale(ax$domain$x, xDom)
-        ax$domain$y <- reScale(ax$domain$y, yDom)
-      } else {
-        ax$domain <- reScale(ax$domain, xDom)
-      }
-      ax
-    })
-    yAxes[[i]] <- lapply(yAxes[[i]], function(ax) {
-      if (all(c("x", "y") %in% names(ax$domain))) {
-        # geo domains are different from cartesian
-        ax$domain$x <- reScale(ax$domain$x, xDom)
-        ax$domain$y <- reScale(ax$domain$y, yDom)
-      } else {
-        ax$domain <- reScale(ax$domain, yDom)
-      }
-      ax
-    })
+    # reposition plot shapes and annotations
+    xTrf <- get_transform(plot_info, "x")
+    yTrf <- get_transform(plot_info, "y")
+    shapes[[i]] <- lapply(shapes[[i]], reposition, xDom, yDom)
+    annotations[[i]] <- lapply(annotations[[i]], reposition, xDom, yDom)
   }
-  
+
   p <- list(
     data = Reduce(c, traces),
-    layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
+    layout = Reduce(modify_list, axes)
   )
   # retrain default coloring
   p$data <- retrain_color_defaults(p$data)
   
-  # reposition shapes and annotations
-  annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
-  shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
-  p$layout$annotations <- Reduce(c, annotations)
+  # add repositioned shapes and annotations
   p$layout$shapes <- Reduce(c, shapes)
+  p$layout$annotations <- Reduce(c, annotations)
+
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) {
     x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes", names(x))] %||% list()
@@ -422,27 +470,20 @@ list2df <- function(x, nms) {
   if (!missing(nms)) setNames(df, nms) else df
 }
 
-# translate x/y positions according to domain objects 
+# translate x/y positions according to domain objects
 # (useful mostly for repositioning annotations/shapes in subplots)
-reposition <- function(obj, domains) {
+reposition <- function(obj, xTrf, yTrf) {
   # we need x and y in order to rescale them!
-  for (i in seq_along(obj)) {
-    o <- obj[[i]]
-    # TODO: this implementation currently assumes xref/yref == "paper"
-    # should we support references to axis objects as well?
-    for (j in c("x", "x0", "x1")) {
-      if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("xstart", "xend")]), from = c(0, 1)
-        )
-      }
+  # TODO: this implementation currently assumes xref/yref == "paper"
+  # should we support references to axis objects as well?
+  for (j in c("x", "x0", "x1")) {
+    if (is.numeric(obj[[j]])) {
+      obj[[j]] <- sapply(obj[[j]], function(x) x*xTrf[[1]] + xTrf[[2]])#scales::rescale(o[[j]], domX, from = c(0, 1))
     }
-    for (j in c("y", "y0", "y1")) {
-      if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("yend", "ystart")]), from = c(0, 1)
-        )
-      }
+  }
+  for (j in c("y", "y0", "y1")) {
+    if (is.numeric(obj[[j]])) {
+      obj[[j]] <- sapply(obj[[j]], function(y) y*yTrf[[1]] + yTrf[[2]])#scales::rescale(o[[j]], domY, from = c(0, 1))
     }
   }
   obj
