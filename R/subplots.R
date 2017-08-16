@@ -116,9 +116,16 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
   }
   # set the domain(position) of each subplot in a grid layout
-  plots_info <- get_grid_layout(
+  subplots_info <- get_grid_layout(
     length(plots), nrows, margin, widths = widths, heights = heights
   )
+  subplots_info$subplot_index <- 1L
+  # bind all shapes to the only subplot of each plot
+  subplots_info$shape_indices <- sapply(plots, function(p) paste0(seq_along(p$shapes), collapse=" "))
+  # bind all non-axis title annotations to the only subplot of each plot
+  subplots_info$annotation_indices <- sapply(plots, function(p) paste0(which(vapply(p$annotations,
+                                                                                    function(a) identical(a$annotationType, "axis"), logical(1))),
+                                                                       collapse=" "))
 
   # collect subplots axes information
   axes_info <- dplyr::bind_rows(lapply(seq_along(plots), function(i){
@@ -129,7 +136,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
 
   # get the plot position in the grid layout and the new domain(s) for each axis
   axes_info <- axes_info %>%
-    dplyr::left_join(dplyr::select(plots_info, plot_index, plot_col=col, plot_row=row,
+    dplyr::left_join(dplyr::select(subplots_info, plot_index, plot_col=col, plot_row=row,
                                    new_xstart=xstart, new_xend=xend,
                                    new_ystart=ystart, new_yend=yend),
                      by="plot_index") %>%
@@ -137,6 +144,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
                   new_xend = dplyr::if_else(dim == "y", NA_real_, new_xend),
                   new_ystart = dplyr::if_else(dim == "x", NA_real_, new_ystart),
                   new_yend = dplyr::if_else(dim == "x", NA_real_, new_yend))
+  # strip domain information from the subplots
+  subplots_info <- dplyr::select(subplots_info, -xstart, -xend, -ystart, -yend)
 
   # number of x/y axes per plot
   # note: a _single_ geo/mapbox object counts a both an x and y
@@ -181,23 +190,23 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   axes_info <- dplyr::group_by(axes_info, dim, new_dim_index) %>%
     dplyr::mutate(is_preserved = pmax(dplyr::min_rank(plot_col), dplyr::min_rank(-plot_row)) == 1L) %>%
     dplyr::ungroup()
-  # add axes references to plots, one axis reference per plot
+  # add axes references to subplots, one axis reference per plot
   xaxis_refs <- dplyr::filter(axes_info, dim == "x" | !is.na(xstart)) %>%
                 dplyr::group_by(plot_index) %>% dplyr::filter(row_number()==1L) %>%
                 dplyr::ungroup() %>% dplyr::select(plot_index, xref = ref)
   yaxis_refs <- dplyr::filter(axes_info, dim == "y" | !is.na(ystart)) %>%
                 dplyr::group_by(plot_index) %>% dplyr::filter(row_number()==1L) %>%
                 dplyr::ungroup() %>% dplyr::select(plot_index, yref = ref)
-  plots_info <- dplyr::left_join(dplyr::left_join(plots_info,
+  subplots_info <- dplyr::left_join(dplyr::left_join(subplots_info,
                                     xaxis_refs, by="plot_index"),
                                     yaxis_refs, by="plot_index")
 
-  merge_plots(plots, plots_info, axes_info, which_layout = which_layout)
+  merge_plots(plots, subplots_info, axes_info, which_layout = which_layout)
 }
 
-# merge plotly "plots" using the new layout provided by "plots_info" frame and
+# merge plotly "plots" using the new layout provided by "subplots_info" frame and
 # updated axes properties from "axes_info" frame
-merge_plots <- function(plots, plots_info, axes_info, which_layout = "merge") {
+merge_plots <- function(plots, subplots_info, axes_info, which_layout = "merge") {
   # set the new axis names, if not set
   if (!("new_name" %in% colnames(axes_info))) {
     axes_info$new_name <- paste0(sub("[0-9]+$", "", axes_info$name), sub("^1$", "", axes_info$new_dim_index))
@@ -214,8 +223,8 @@ merge_plots <- function(plots, plots_info, axes_info, which_layout = "merge") {
                                               dplyr::select(axes_info, plot_index, eff_anchor=ref, new_anchor=new_ref),
                                 by=c("plot_index", "eff_anchor")) %>%
               dplyr::select(-eff_anchor)
-  # get plots domains from their axes references
-  plots_info <- dplyr::left_join(plots_info,
+  # get subplots domains from their axes references
+  subplots_info <- dplyr::left_join(subplots_info,
         dplyr::select(axes_info, plot_index, xref=ref, xstart, xend, new_xstart, new_xend),
         by=c("plot_index", "xref")) %>%
     dplyr::left_join(
@@ -226,26 +235,21 @@ merge_plots <- function(plots, plots_info, axes_info, which_layout = "merge") {
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
   axes <- lapply(layouts, function(lay) lay[grepl("^geo|^mapbox|^[xy]axis", names(lay))])
-  shapes <- lapply(layouts, "[[", "shapes")
-  annotations <- lapply(layouts, function(x) {
-    # keep non axis title annotations (for rescaling)
-    axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
-    x$annotations[!axes]
-  })
+  shapes <- lapply(layouts, function(l) return(NULL))
+  annotations <- lapply(layouts, function(l) return(NULL))
 
   # compose transform for repositioning subplots shapes/annotations
-  get_transform <- function(plot_info, dim) {
-    start <- plot_info[[paste0(dim,"start")]] %||% 0.0
-    end <- plot_info[[paste0(dim,"end")]] %||% 1.0
-    new_start <- plot_info[[paste0("new_",dim,"start")]] %||% 0.0
-    new_end <- plot_info[[paste0("new_",dim,"end")]] %||% 1.0
+  get_transform <- function(subplot_info, dim) {
+    start <- subplot_info[[paste0(dim,"start")]] %||% 0.0
+    end <- subplot_info[[paste0(dim,"end")]] %||% 1.0
+    new_start <- subplot_info[[paste0("new_",dim,"start")]] %||% 0.0
+    new_end <- subplot_info[[paste0("new_",dim,"end")]] %||% 1.0
     d <- end - start
     return(c((new_end  - new_start)/d,
              (new_start*end  - new_end*start)/d))
   }
 
   for (i in seq_along(plots)) {
-    plot_info <- subset(plots_info, plot_index==i)
     # update preserved plot axes
     plot_axes_info <- dplyr::arrange(dplyr::filter(axes_info, plot_index==i), axis_index)
     plot_axes <- setNames(axes[[i]], plot_axes_info$new_name)
@@ -288,10 +292,21 @@ merge_plots <- function(plots, plots_info, axes_info, which_layout = "merge") {
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
     }
     # reposition plot shapes and annotations
-    xTrf <- get_transform(plot_info, "x")
-    yTrf <- get_transform(plot_info, "y")
-    shapes[[i]] <- lapply(shapes[[i]], reposition, xDom, yDom)
-    annotations[[i]] <- lapply(annotations[[i]], reposition, xDom, yDom)
+    plot_shapes <- layouts[[i]]$shapes
+    plot_anns <- layouts[[i]]$annotations
+    plot_subplots_info <- dplyr::filter(subplots_info, plot_index==i)
+
+    for (j in plot_subplots_info$subplot_index) {
+      subplot_info <- subset(plot_subplots_info, subplot_index==j)
+      xTrf <- get_transform(subplot_info, "x")
+      yTrf <- get_transform(subplot_info, "y")
+      shape_ixs <- as.integer(strsplit(subplot_info$shape_indices, " ", fixed=TRUE)[[1]])
+      plot_shapes[shape_ixs] <- lapply(plot_shapes[shape_ixs], reposition, xTrf, yTrf)
+      ann_ixs <- as.integer(strsplit(subplot_info$annotation_indices, " ", fixed=TRUE)[[1]])
+      plot_anns[ann_ixs] <- lapply(plot_anns[ann_ixs], reposition, xTrf, yTrf)
+    }
+    shapes[[i]] <- plot_shapes
+    annotations[[i]] <- plot_anns
   }
 
   p <- list(
