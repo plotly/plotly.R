@@ -186,7 +186,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   xAxisMap <- split(xAxisMap, rep(seq_along(plots), xAxisN))
   yAxisMap <- split(yAxisMap, rep(seq_along(plots), yAxisN))
   # domains of each subplot
-  domainInfo <- get_domains(
+  domainInfo <- get_grid_layout(
     length(plots), nrows, margin, widths = widths, heights = heights
   )
   for (i in seq_along(plots)) {
@@ -324,8 +324,10 @@ ensure_one <- function(plots, attr) {
 }
 
 
-get_domains <- function(nplots = 1, nrows = 1, margins = 0.01, 
-                        widths = NULL, heights = NULL) {
+# helper function returning the domains (positions) for the subplots
+# in the grid layout
+get_grid_layout <- function(nplots = 1, nrows = 1, margins = 0.01, 
+                            widths = NULL, heights = NULL) {
   if (length(margins) == 1) margins <- rep(margins, 4)
   if (length(margins) != 4) stop("margins must be length 1 or 4", call. = FALSE)
   ncols <- ceiling(nplots / nrows)
@@ -369,7 +371,12 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
       yend = 1 - (heights[j + 1]) + if (j == nrows) 0 else margins[4]
     )
   }
-  list2df(Map(c, xz, ys))
+  res <- list2df(Map(c, xz, ys))
+  res$plot_index <- seq(nplots)
+  res$col <- (res$plot_index-1L) %% ncols + 1L
+  res$row <- (res$plot_index-1L) %/% ncols + 1L
+
+  return(res)
 }
 
 list2df <- function(x, nms) {
