@@ -1,7 +1,7 @@
 library(plotly)
 library(crosstalk)
 
-sd <- SharedData$new(txhousing, ~city)
+sd <- SharedData$new(txhousing, ~city, "Select a city")
 
 base <- plot_ly(sd, color = I("black")) %>%
   group_by(city)
@@ -24,4 +24,4 @@ p2 <- base %>%
  subplot(p1, p2, titleX = TRUE, widths = c(0.3, 0.7)) %>% 
   layout(margin = list(l = 120)) %>%
   hide_legend() %>%
-  highlight(color = "red")
+  highlight(dynamic = TRUE, persistent = TRUE, selectize = TRUE)
