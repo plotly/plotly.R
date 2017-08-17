@@ -7,8 +7,7 @@ Rapp.history
 node_modules/
 build_site.R
 todo.R
-inst/examples/*.html
-inst/examples/*/*.html
+inst/examples/rmd/*.html
 inst/examples/*/rsconnect/*
 .Rproj.user
 Untitled*

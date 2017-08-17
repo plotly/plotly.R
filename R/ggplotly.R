@@ -1,12 +1,12 @@
 #' Convert ggplot2 to plotly
 #'
-#' This function converts a \code{\link[ggplot2]{ggplot}()} object to a 
+#' This function converts a [ggplot2::ggplot()] object to a 
 #' plotly object. 
 #' 
 #' @details Conversion of relative sizes depends on the size of the current 
 #' graphics device (if no device is open, width/height of a new (off-screen) 
-#' device defaults to 640/480). In other words, \code{height} and
-#' \code{width} must be specified at runtime to ensure sizing is correct.
+#' device defaults to 640/480). In other words, `height` and
+#' `width` must be specified at runtime to ensure sizing is correct.
 #'
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
@@ -15,7 +15,7 @@
 #' in the tooltip. The default, "all", means show all the aesthetic mappings
 #' (including the unofficial "text" aesthetic). The order of variables here will
 #' also control the order they appear. For example, use
-#' \code{tooltip = c("y", "x", "colour")} if you want y first, x second, and
+#' `tooltip = c("y", "x", "colour")` if you want y first, x second, and
 #' colour last.
 #' @param dynamicTicks should plotly.js dynamically generate axis tick labels? 
 #' Dynamic ticks are useful for updating ticks in response to zoom/pan
@@ -24,13 +24,13 @@
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... arguments passed onto methods.
 #' @export
 #' @author Carson Sievert
 #' @references \url{https://plot.ly/ggplot2}
-#' @seealso \code{\link{plot_ly}()}
+#' @seealso [plot_ly()]
 #' @examples \dontrun{
 #' # simple example
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
@@ -149,14 +149,14 @@ ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
 #' @param tooltip a character vector specifying which aesthetic tooltips to show in the
 #' tooltip. The default, "all", means show all the aesthetic tooltips
 #' (including the unofficial "text" aesthetic).
-#' @param dynamicTicks accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
+#' @param dynamicTicks accepts the following values: `FALSE`, `TRUE`, `"x"`, or `"y"`.
 #' Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
 #' interactions; however, there is no guarantee they reproduce axis tick text 
 #' as they would appear in the static ggplot2 image.
 #' @param layerData data from which layer should be returned?
 #' @param originalData should the "original" or "scaled" data be returned?
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param ... currently not used
 #' @return a 'built' plotly object (list with names "data" and "layout").
@@ -172,11 +172,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   # https://github.com/att/rcloud.htmlwidgets/issues/2
   
   # Note that we never have to open a non-interactive device 
-  # in RStudio since it ships with one...
+  # in RStudio since it ships with one. Plus, calling dev.size()
+  # adds it to dev.list() & should ensure grid can query the correct device size
   rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
-  width <- width %||% rStudioDevSize[1]
-  height <- height %||% rStudioDevSize[2]
-  # note that calling dev.size() (inside RStudio) will add it to the list
+  
   if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
@@ -198,7 +197,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
-  
   # check the value of dynamicTicks
   dynamicValues <- c(FALSE, TRUE, "x", "y")
   if (length(setdiff(dynamicTicks, dynamicValues))) {
@@ -212,10 +210,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
   # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (packageVersion("ggplot2") == "2.2.1") {
-    warning(
+  if (!is_dev_ggplot2()) {
+    message(
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`", call. = FALSE
+      "Install it with: `devtools::install_github('hadley/ggplot2')`"
     )
     if (!identical(dynamicTicks, FALSE)) {
       warning(
@@ -327,13 +325,22 @@ gg2list <- function(p, width = NULL, height = NULL,
   # if there are multiple keys within a group, the key is a list-column
   reComputeGroup <- function(x, layer = NULL) {
     # 1-to-1 link between data & visual marks -- group == key
-    if ("GeomDotplot" %in% class(layer$geom)) {
+    if (inherits(layer$geom, "GeomDotplot")) {
       x <- split(x, x[["PANEL"]])
       x <- lapply(x, function(d) { 
         d[["group"]] <- do.call("order", d[c("x", "group")]) 
         d 
       })
       x <- dplyr::bind_rows(x)
+    }
+    if (inherits(layer$geom, "GeomSf")) {
+      x <- split(x, x[["PANEL"]])
+      x <- lapply(x, function(d) { 
+        d[["group"]] <- seq_len(nrow(d))
+        d 
+      })
+      # I think this is safe?
+      x <- suppressWarnings(dplyr::bind_rows(x))
     }
     x
   }
@@ -633,10 +640,8 @@ gg2list <- function(p, width = NULL, height = NULL,
         }
         
         # if labels are empty, don't show axis ticks
-        emptyTicks <- all(with(
-          rng$graticule, sapply(degree_label, is.na) | sapply(degree_label, nchar) == 0
-        ))
-        if (emptyTicks) {
+        tickExists <- with(rng$graticule, sapply(degree_label, is.language))
+        if (sum(tickExists) == 0) {
           theme$axis.ticks.length <- 0
         } else{
           # convert the special *degree expression in plotmath to HTML entity
@@ -706,9 +711,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       # set scaleanchor/scaleratio if these are fixed coordinates
       # TODO: can the criteria just be if the ratio is NULL?
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
-      if (inherits(p$coordinates, fixed_coords) && xy == "y") {
+      if (inherits(p$coordinates, fixed_coords)) {
         axisObj$scaleanchor <- anchor
-        axisObj$scaleratio <- p$coordinates$ratio
+        ratio <- p$coordinates$ratio %||% p$coordinates$aspect(rng) %||% 1
+        axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
       }
       
       # TODO: should we implement aspect ratios?
@@ -1369,6 +1375,10 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
   )
 }
 
+is_dev_ggplot2 <- function() {
+  packageVersion("ggplot2") > "2.2.1"
+}
+
 # We need access to internal ggplot2 functions in several places
 # this helps us import functions in a way that R CMD check won't cry about
 ggfun <- function(x) {
@@ -1388,8 +1398,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
     list(
-      x = gglayout$xaxis$range,
-      y = gglayout$yaxis$range,
+      x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
+      y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
       # esentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",

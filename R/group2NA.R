@@ -1,76 +1,99 @@
-
-# Insert missing values to create trace groupings
-# 
-# If a group of traces share the same non-positional characteristics (i.e.,
-# color, fill, etc), it is more efficient to draw them as a single trace 
-# with missing values that separate the groups (instead of multiple traces).
-# This is a helper function for inserting missing values into a data set
-# 
-# @param data a data frame.
-# @param groupNames name(s) of the grouping variable(s) as a character vector
-# @param nested other variables that group should be nested 
-# (i.e., ordered) within.
-# @param ordered a variable to arrange by (within nested & groupNames). This
-# is useful primarily for ordering by x
-# @param retrace.first should the first row of each group be appended to the 
-# last row? This is useful for enclosing polygons with lines.
-# @examples 
-# 
-# group2NA(mtcars, "vs", "cyl")
-# 
-# elong <- tidyr::gather(economics, variable, value, -date)
-# plot_ly(group2NA(elong, "variable"), x = ~date, y = ~value)
-# 
+#' Separate groups with missing values
+#' 
+#' This function is used internally by plotly, but may also be useful to some 
+#' power users. The details section explains when and why this function is useful.
+#' 
+#' @details If a group of scatter traces share the same non-positional characteristics 
+#' (i.e., color, fill, etc), it is more efficient to draw them as a single trace 
+#' with missing values that separate the groups (instead of multiple traces), 
+#' In this case, one should also take care to make sure 
+#' \href{https://plot.ly/r/reference/#scatter-connectgaps}{connectgaps} 
+#' is set to `FALSE`.
+#' 
+#' @param data a data frame.
+#' @param groupNames character vector of grouping variable(s)
+#' @param nested other variables that group should be nested 
+#' (i.e., ordered) within.
+#' @param ordered a variable to arrange by (within nested & groupNames). This
+#' is useful primarily for ordering by x
+#' @param retrace.first should the first row of each group be appended to the 
+#' last row? This is useful for enclosing polygons with lines.
+#' @export
+#' @return a data.frame with rows ordered by: `nested`, 
+#' then `groupNames`, then `ordered`. As long as `groupNames` 
+#' contains valid variable names, new rows will also be inserted to separate 
+#' the groups.
+#' @examples 
+#' 
+#' # note the insertion of new rows with missing values 
+#' group2NA(mtcars, "vs", "cyl")
+#' 
+#' # need to group lines by city somehow!
+#' plot_ly(txhousing, x = ~date, y = ~median) %>% add_lines()
+#' 
+#' # instead of using group_by(), you could use group2NA()
+#' tx <- group2NA(txhousing, "city")
+#' plot_ly(tx, x = ~date, y = ~median) %>% add_lines()
+#' 
+#' # add_lines() will ensure paths are sorted by x, but this is equivalent
+#' tx <- group2NA(txhousing, "city", ordered = "date")
+#' plot_ly(tx, x = ~date, y = ~median) %>% add_paths()
+#' 
 
 group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
                      retrace.first = inherits(data, "GeomPolygon")) {
-  if (NROW(data) == 0) return(data)
-  data <- data[!duplicated(names(data))]
-  # a few workarounds since dplyr clobbers classes that we rely on in ggplotly
-  retrace <- force(retrace.first)
-  datClass <- class(data)
   
-  # sanitize variable names
+  if (NROW(data) == 0) return(data)
+  
+  # evaluate this lazy argument now (in case we change class of data)
+  retrace <- force(retrace.first)
+  
+  # sanitize variable names (TODO: throw warnings if non-existing vars are referenced?)
   groupNames <- groupNames[groupNames %in% names(data)]
   nested <- nested[nested %in% names(data)]
   ordered <- ordered[ordered %in% names(data)]
-  # ignore any already existing groups
-  data <- dplyr::ungroup(data)
   
-  # if group doesn't exist, just arrange before returning
+  # for restoring class information on exit
+  datClass <- oldClass(data)
+  
+  dt <- data.table::as.data.table(data)
+  
+  # if group doesn't exist, just order the rows and exit
   if (!length(groupNames)) {
-    if (length(ordered)) {
-      data <- dplyr::arrange_(data, c(nested, ordered))
-    }
-    return(data)
+    keyVars <- c(nested, ordered)
+    if (length(keyVars)) data.table::setorderv(dt, cols = keyVars)
+    return(structure(dt, class = datClass))
   }
-  allVars <- c(nested, groupNames, ordered)
-  for (i in allVars) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  # first, arrange everything
-  data <- dplyr::do(data, dplyr::arrange_(., allVars))
-  data <- dplyr::ungroup(data)
-  for (i in c(nested, groupNames)) {
-    data <- dplyr::group_by_(data, i, add = TRUE)
-  }
-  # TODO: this is slow, can it be done with dplyr::slice()?
-  d <- if (retrace.first) {
-    dplyr::do(data, rbind.data.frame(., .[1,], NA))
+  
+  # order the rows
+  data.table::setorderv(dt, cols = c(nested, groupNames, ordered))
+  
+  # when connectgaps=FALSE, inserting NAs ensures each "group" 
+  # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
+  # also, retracing is useful for creating polygon(s) via scatter trace(s)
+  keyVars <- c(nested, groupNames)
+  keyNum <- length(keyVars) + 1
+  idx <- if (retrace) {
+    dt[, c(.I, .I[1], NA), by = keyVars][[keyNum]]
   } else {
-    dplyr::do(data, rbind.data.frame(., NA))
+    dt[, c(.I, NA), by = keyVars][[keyNum]]
   }
-  # TODO: how to drop the NAs separating the nested values? Does it even matter?
-  # d <- dplyr::ungroup(d)
-  # for (i in nested) {
-  #   d <- dplyr::group_by_(dplyr::ungroup(d), i, add = TRUE)
-  # }
-  # d <- dplyr::do(d, .[seq_len(NROW(.)),])
-  n <- NROW(d)
-  if (all(is.na(d[n, ]))) d <- d[-n, ]
-  structure(d, class = datClass)
+  dt <- dt[idx]
+  
+  # remove NAs that unnecessarily seperate nested groups
+  # (at least internally, nested really tracks trace index, meaning we don't need 
+  # to seperate them)
+  NAidx <- which(is.na(idx))
+  for (i in seq_along(keyVars)) {
+    dt[[keyVars[[i]]]][NAidx] <- dt[[keyVars[[i]]]][NAidx - 1]
+  }
+  if (length(nested)) {
+    dt <- dt[ dt[, .I[-.N], by = nested][[length(nested) + 1]] ]
+  } else {
+    dt <- dt[-.N]
+  }
+
+  structure(dt, class = datClass)
 }
 
-
-# to appease R CMD check (currently we reference '.' in group2NA)
-utils::globalVariables(".")
+utils::globalVariables(c(".I", ".N"))

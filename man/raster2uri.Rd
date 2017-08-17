@@ -7,12 +7,12 @@
 raster2uri(r, ...)
 }
 \arguments{
-\item{r}{an object coercable to a raster object via \code{\link{as.raster}()}}
+\item{r}{an object coercable to a raster object via \code{\link[=as.raster]{as.raster()}}}
 
-\item{...}{arguments passed onto \code{\link{as.raster}()}.}
+\item{...}{arguments passed onto \code{\link[=as.raster]{as.raster()}}.}
 }
 \description{
-Convenient embedding images via \code{\link{layout}()}
+Convenient embedding images via \code{\link[=layout]{layout()}}
 \href{images}{https://plot.ly/r/reference/#layout-images}.
 }
 \examples{

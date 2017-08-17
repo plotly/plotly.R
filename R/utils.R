@@ -159,23 +159,23 @@ is_type <- function(p, type) {
   all(types %in% type)
 }
 
-#' Replace elements of a nested list
-#' 
-#' @param x a named list
-#' @param indicies a vector of indices. 
-#' A 1D list may be used to specify both numeric and non-numeric inidices
-#' @param val the value used to 
-#' @examples 
-#' 
-#' x <- list(a = 1)
-#' # equivalent to `x$a <- 2`
-#' re_place(x, "a", 2)
-#' 
-#' y <- list(a = list(list(b = 2)))
-#' 
-#' # equivalent to `y$a[[1]]$b <- 2`
-#' y <- re_place(y, list("a", 1, "b"), 3)
-#' y
+# Replace elements of a nested list
+# 
+# @param x a named list
+# @param indicies a vector of indices. 
+# A 1D list may be used to specify both numeric and non-numeric inidices
+# @param val the value used to 
+# @examples 
+# 
+# x <- list(a = 1)
+# # equivalent to `x$a <- 2`
+# re_place(x, "a", 2)
+# 
+# y <- list(a = list(list(b = 2)))
+# 
+# # equivalent to `y$a[[1]]$b <- 2`
+# y <- re_place(y, list("a", 1, "b"), 3)
+# y
 
 re_place <- function(x, indicies = 1, val) {
   
@@ -250,7 +250,7 @@ supply_defaults <- function(p) {
   } else {
     axes <- if (is_type(p, "scatterternary"))  {
       c("aaxis", "baxis", "caxis") 
-    } else if (is_type(p, "pie") || is_type(p, "parcoords")) {
+    } else if (is_type(p, "pie") || is_type(p, "parcoords") || is_type(p, "sankey")) {
       NULL
     } else {
       c("xaxis", "yaxis")
@@ -376,26 +376,26 @@ verify_attr <- function(proposed, schema) {
     # if schema is missing (i.e., this is an un-official attr), move along
     if (is.null(attrSchema)) next
     
-    # tag 'src-able' attributes (needed for api_create())
-    if (!is.null(schema[[paste0(attr, "src")]])) {
-      proposed[[attr]] <- structure(
-        proposed[[attr]], apiSrc = TRUE
-      )
-    }
-    
     valType <- tryNULL(attrSchema[["valType"]]) %||% ""
     role <- tryNULL(attrSchema[["role"]]) %||% ""
     arrayOK <- tryNULL(attrSchema[["arrayOk"]]) %||% FALSE
+    isDataArray <- identical(valType, "data_array")
     
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving attributes)
-    if (!identical(valType, "data_array") && !arrayOK && !identical(role, "object")) {
+    if (!isDataArray && !arrayOK && !identical(role, "object")) {
       proposed[[attr]] <- retain(proposed[[attr]], unique)
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
-    if (identical(valType, "data_array")) {
+    if (isDataArray) {
       proposed[[attr]] <- i(proposed[[attr]])
+    }
+    
+    # tag 'src-able' attributes (needed for api_create())
+    isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
+    if (isDataArray || isSrcAble) {
+      proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
     # do the same for "sub-attributes"
@@ -404,25 +404,29 @@ verify_attr <- function(proposed, schema) {
       for (attr2 in names(proposed[[attr]])) {
         if (is.null(attrSchema[[attr2]])) next
         
+        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
+        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
+        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
+        isDataArray2 <- identical(valType2, "data_array")
+        
+        if (!isDataArray2 && !arrayOK2 && !identical(role2, "object")) {
+          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
+        }
+        
+        # ensure data_arrays of length 1 are boxed up by to_JSON()
+        if (isDataArray2) {
+          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
+        }
+        
         # tag 'src-able' attributes (needed for api_create())
-        if (!is.null(schema[[attr]][[paste0(attr2, "src")]])) {
+        isSrcAble2 <- !is.null(schema[[attr]][[paste0(attr2, "src")]]) && 
+          length(proposed[[attr]][[attr2]]) > 1
+        if (isDataArray2 || isSrcAble2) {
           proposed[[attr]][[attr2]] <- structure(
             proposed[[attr]][[attr2]], apiSrc = TRUE
           )
         }
         
-        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
-        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
-        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
-        
-        if (!identical(valType2, "data_array") && !arrayOK2 && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
-        }
-        
-        # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (identical(valType2, "data_array")) {
-          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
-        }
       }
     }
   }
@@ -858,7 +862,9 @@ remove_class <- function(x, y) {
 # TODO: what are some other common configuration options we want to support??
 get_domain <- function(type = "") {
   if (type == "api") {
-    Sys.getenv("plotly_api_domain", "https://api.plot.ly")
+    # new onprem instances don't have an https://api-thiscompany.plot.ly
+    # but https://thiscompany.plot.ly seems to just work in that case...
+    Sys.getenv("plotly_api_domain", Sys.getenv("plotly_domain", "https://api.plot.ly"))
   } else {
     Sys.getenv("plotly_domain", "https://plot.ly")
   }

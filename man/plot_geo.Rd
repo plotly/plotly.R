@@ -9,13 +9,13 @@ plot_geo(data = data.frame(), ...)
 \arguments{
 \item{data}{A data frame (optional).}
 
-\item{...}{arguments passed along to \code{\link{plot_ly}()}.}
+\item{...}{arguments passed along to \code{\link[=plot_ly]{plot_ly()}}.}
 }
 \description{
-Use this function instead of \code{\link{plot_ly}()} to initialize
+Use this function instead of \code{\link[=plot_ly]{plot_ly()}} to initialize
 a plotly-geo object. This enforces the entire plot so use
 the scattergeo trace type, and enables higher level geometries
-like \code{\link{add_polygons}()} to work
+like \code{\link[=add_polygons]{add_polygons()}} to work
 }
 \examples{
 
@@ -26,7 +26,7 @@ map_data("world", "canada") \%>\%
 
 }
 \seealso{
-\code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()}
+\code{\link[=plot_ly]{plot_ly()}}, \code{\link[=plot_mapbox]{plot_mapbox()}}, \code{\link[=ggplotly]{ggplotly()}}
 }
 \author{
 Carson Sievert

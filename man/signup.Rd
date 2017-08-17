@@ -16,8 +16,8 @@ automatically stored as an environment variable in a .Rprofile?}
 }
 \value{
 \itemize{
- \item api_key key to use with the api
- \item tmp_pw temporary password to access your plotly account
+\item api_key key to use with the api
+\item tmp_pw temporary password to access your plotly account
 }
 }
 \description{

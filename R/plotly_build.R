@@ -2,7 +2,7 @@
 #'
 #' This generic function creates the list object sent to plotly.js
 #' for rendering. Using this function can be useful for overriding defaults
-#' provided by \code{ggplotly}/\code{plot_ly} or for debugging rendering
+#' provided by `ggplotly`/`plot_ly` or for debugging rendering
 #' errors.
 #'
 #' @param p a ggplot object, or a plotly object, or a list.
@@ -714,8 +714,8 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     }
     if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
       colorBarTrace$type <- type
-      colorBarTrace$lat <- range(unlist(lapply(traces, "[[", "lat")), na.rm = TRUE)
-      colorBarTrace$lon <- range(unlist(lapply(traces, "[[", "lon")), na.rm = TRUE)
+      colorBarTrace$lat <- colorBarTrace$y
+      colorBarTrace$lon <- colorBarTrace$x
       colorBarTrace[["x"]] <- NULL
       colorBarTrace[["y"]] <- NULL
     }

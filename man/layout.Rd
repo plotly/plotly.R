@@ -12,8 +12,8 @@ layout(p, ..., data = NULL)
 \item{...}{Arguments to the layout object. For documentation,
 see \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}}
 
-\item{data}{A data frame to associate with this layout (optional). If not 
-provided, arguments are evaluated using the data frame in \code{\link{plot_ly}()}.}
+\item{data}{A data frame to associate with this layout (optional). If not
+provided, arguments are evaluated using the data frame in \code{\link[=plot_ly]{plot_ly()}}.}
 }
 \description{
 Modify the layout of a plotly visualization

@@ -2,6 +2,7 @@ context("api")
 
 test_that("api() returns endpoints", {
   skip_on_cran()
+  skip_if_not_master()
   
   res <- api()
   expect_true(length(res) > 1)
@@ -10,6 +11,7 @@ test_that("api() returns endpoints", {
 
 test_that("Can search with white-space", {
   skip_on_cran()
+  skip_if_not_master()
   
   res <- api("search?q=overdose drugs")
   expect_true(length(res) > 1)
@@ -17,6 +19,7 @@ test_that("Can search with white-space", {
 
 test_that("Changing a filename works", {
   skip_on_cran()
+  skip_if_not_master()
   
   id <- plotly:::new_id()
   f <- api("files/cpsievert:14680", "PATCH", list(filename = id)) 
@@ -26,6 +29,7 @@ test_that("Changing a filename works", {
 
 test_that("Downloading plots works", {
   skip_on_cran()
+  skip_if_not_master()
   
   # https://plot.ly/~cpsievert/200
   p <- api_download_plot(200, "cpsievert")
@@ -44,6 +48,7 @@ test_that("Downloading plots works", {
 
 test_that("Downloading grids works", {
   skip_on_cran()
+  skip_if_not_master()
   
   g <- api_download_grid(14681, "cpsievert")
   expect_is(g, "api_file")
@@ -60,6 +65,7 @@ test_that("Downloading grids works", {
 
 test_that("Creating produces a new file by default", {
   skip_on_cran()
+  skip_if_not_master()
   
   expect_new <- function(obj) {
     old <- api("folders/home?user=cpsievert")
@@ -83,6 +89,7 @@ test_that("Creating produces a new file by default", {
 
 test_that("Can overwrite a grid", {
   skip_on_cran()
+  skip_if_not_master()
   
   id <- new_id()
   m <- api_create(mtcars, id)
@@ -93,6 +100,7 @@ test_that("Can overwrite a grid", {
 
 test_that("Can overwrite a plot", {
   skip_on_cran()
+  skip_if_not_master()
   
   id <- new_id()
   p <- plot_ly()
@@ -104,24 +112,36 @@ test_that("Can overwrite a plot", {
 
 test_that("Can create plots with non-trivial src attributes", {
   skip_on_cran()
+  skip_if_not_master()
+  
+  expect_srcified <- function(x) {
+    expect_length(strsplit(x, ":")[[1]], 3)
+  }
+  
+  # src-ifies data arrays, but not arrayOk of length 1
+  p <- plot_ly(x = 1:10, y = 1:10, marker = list(color = "red")) 
+  res <- api_create(p)
+  trace <- res$figure$data[[1]]
+  expect_srcified(trace$xsrc)
+  expect_srcified(trace$ysrc)
+  expect_true(trace$marker$color == "red")
   
   # can src-ify data[i].marker.color
   p <- plot_ly(x = 1:10, y = 1:10, color = 1:10)
   res <- api_create(p)
-  m <- res$figure$data[[1]]$marker
-  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  trace <- res$figure$data[[1]]
+  expect_srcified(trace$marker$colorsrc)
   
   # can src-ify frames[i].data[i].marker.color
   res <- p %>% 
     add_markers(frame = rep(1:2, 5)) %>%
     api_create()
-  m <- res$figure$frames[[1]]$data[[1]]$marker
-  expect_length(strsplit(m$colorsrc, ":")[[1]], 3)
+  trace <- res$figure$frames[[1]]$data[[1]]
+  expect_srcified(trace$marker$colorsrc)
   
   # can src-ify layout.xaxis.tickvals
   res <- api_create(qplot(1:10))
-  ticks <- res$figure$layout$xaxis$tickvalssrc
-  expect_length(strsplit(ticks, ":")[[1]], 3)
+  expect_srcified(res$figure$layout$xaxis$tickvalssrc)
   
 })
 

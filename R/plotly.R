@@ -5,50 +5,50 @@
 #' There are a number of "visual properties" that aren't included in the official
 #' Reference section (see below).
 #'
-#' @param data A data frame (optional) or \code{\link[crosstalk]{SharedData}} object.
+#' @param data A data frame (optional) or [crosstalk::SharedData] object.
 #' @param ... These arguments are documented at \url{https://plot.ly/r/reference/}
-#' Note that acceptable arguments depend on the value of \code{type}.
+#' Note that acceptable arguments depend on the value of `type`.
 #' @param type A character string describing the type of trace.
 #' @param color A formula containing a name or expression. 
 #' Values are scaled and mapped to color codes based on the value of 
-#' \code{colors} and \code{alpha}. To avoid scaling, wrap with \code{\link{I}()},
+#' `colors` and `alpha`. To avoid scaling, wrap with [I()],
 #' and provide value(s) that can be converted to rgb color codes by 
-#' \code{\link[grDevices]{col2rgb}()}.
+#' [grDevices::col2rgb()].
 #' @param colors Either a colorbrewer2.org palette name (e.g. "YlOrRd" or "Blues"), 
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
-#' or a color interpolation function like \code{colorRamp()}.
+#' or a color interpolation function like `colorRamp()`.
 #' @param alpha A number between 0 and 1 specifying the alpha channel applied to color.
 #' @param symbol A formula containing a name or expression. 
-#' Values are scaled and mapped to symbols based on the value of \code{symbols}.
-#' To avoid scaling, wrap with \code{\link{I}()}, and provide valid 
-#' \code{\link{pch}()} values and/or valid plotly symbol(s) as a string
+#' Values are scaled and mapped to symbols based on the value of `symbols`.
+#' To avoid scaling, wrap with [I()], and provide valid 
+#' [pch()] values and/or valid plotly symbol(s) as a string
 #' @param symbols A character vector of symbol types. 
 #' Either valid \link{pch} or plotly symbol codes may be supplied.
 #' @param linetype A formula containing a name or expression. 
 #' Values are scaled and mapped to linetypes based on the value of 
-#' \code{linetypes}. To avoid scaling, wrap with \code{\link{I}()}.
+#' `linetypes`. To avoid scaling, wrap with [I()].
 #' @param linetypes A character vector of line types. 
 #' Either valid \link{par} (lty) or plotly dash codes may be supplied.
 #' @param size A formula containing a name or expression yielding a numeric vector. 
-#' Values are scaled according to the range specified in \code{sizes}.
+#' Values are scaled according to the range specified in `sizes`.
 #' @param sizes A numeric vector of length 2 used to scale sizes to pixels.
 #' @param split A formula containing a name or expression. Similar to
-#' \code{\link{group_by}()}, but ensures at least one trace for each unique
+#' [group_by()], but ensures at least one trace for each unique
 #' value. This replaces the functionality of the (now deprecated)
-#' \code{group} argument.
+#' `group` argument.
 #' @param frame A formula containing a name or expression. The resulting value 
 #' is used to split data into frames, and then animated.
 #' @param width	Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{event_data}()} to retrieve the 
+#' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @author Carson Sievert
 #' @seealso \itemize{
-#'  \item For initializing a plotly-geo object: \code{\link{plot_geo}()}.
-#'  \item For initializing a plotly-mapbox object: \code{\link{plot_mapbox}()}.
-#'  \item For translating a ggplot2 object to a plotly object: \code{\link{ggplotly}()}.
-#'  \item For modifying any plotly object: \code{\link{layout}()}, \code{\link{add_trace}()}, \code{\link{style}()}
+#'  \item For initializing a plotly-geo object: [plot_geo()].
+#'  \item For initializing a plotly-mapbox object: [plot_mapbox()].
+#'  \item For translating a ggplot2 object to a plotly object: [ggplotly()].
+#'  \item For modifying any plotly object: [layout()], [add_trace()], [style()]
 #'  \item
 #' }
 #' @export
@@ -88,20 +88,6 @@
 #' add_markers(p, symbol = ~Species)
 #' add_paths(p, linetype = ~Species)
 #' 
-#' # client-side linked brushing
-#' library(crosstalk)
-#' sd <- SharedData$new(mtcars)
-#' subplot(
-#'   plot_ly(sd, x = ~wt, y = ~mpg, color = I("black")),
-#'   plot_ly(sd, x = ~wt, y = ~disp, color = I("black"))
-#' ) %>% hide_legend() %>% highlight(color = "red")
-#' 
-#' # client-side highlighting
-#' d <- SharedData$new(txhousing, ~city)
-#' plot_ly(d, x = ~date, y = ~median, color = I("black")) %>%
-#'   group_by(city) %>%
-#'   add_lines() %>% 
-#'   highlight(on = "plotly_hover", color = "red")
 #' }
 #' 
 plot_ly <- function(data = data.frame(), ..., type = NULL, 
@@ -175,18 +161,18 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
 
 #' Initiate a plotly-mapbox object
 #' 
-#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' Use this function instead of [plot_ly()] to initialize
 #' a plotly-mapbox object. This enforces the entire plot so use
 #' the scattermapbox trace type, and enables higher level geometries
-#' like \code{\link{add_polygons}()} to work
+#' like [add_polygons()] to work
 #' 
 #' @param data A data frame (optional).
-#' @param ... arguments passed along to \code{\link{plot_ly}()}. They should be
+#' @param ... arguments passed along to [plot_ly()]. They should be
 #' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
 #' Note that x/y can also be used in place of lat/lon.
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_geo}()}, \code{\link{ggplotly}()} 
+#' @seealso [plot_ly()], [plot_geo()], [ggplotly()] 
 #' 
 #' @examples \dontrun{
 #' 
@@ -211,16 +197,16 @@ plot_mapbox <- function(data = data.frame(), ...) {
 
 #' Initiate a plotly-geo object
 #' 
-#' Use this function instead of \code{\link{plot_ly}()} to initialize
+#' Use this function instead of [plot_ly()] to initialize
 #' a plotly-geo object. This enforces the entire plot so use
 #' the scattergeo trace type, and enables higher level geometries
-#' like \code{\link{add_polygons}()} to work
+#' like [add_polygons()] to work
 #' 
 #' @param data A data frame (optional).
-#' @param ... arguments passed along to \code{\link{plot_ly}()}.
+#' @param ... arguments passed along to [plot_ly()].
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
+#' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
 #' @examples
 #' 
 #' map_data("world", "canada") %>%
@@ -248,10 +234,10 @@ plot_geo <- function(data = data.frame(), ...) {
 #' @param xmin minimum of the range of the x-scale
 #' @param width width
 #' @param height height
-#' @param ... arguments supplied to \code{\link{subplot}()}
+#' @param ... arguments supplied to [subplot()]
 #' @export
 #' @author Carson Sievert
-#' @seealso \code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()} 
+#' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
 #' @examples
 #' 
 #' hc <- hclust(dist(USArrests), "ave")
@@ -342,7 +328,7 @@ get_xy <- function(node) {
 #' Convert a list to a plotly htmlwidget object
 #' 
 #' @param x a plotly object.
-#' @param ... other options passed onto \code{htmlwidgets::createWidget}
+#' @param ... other options passed onto `htmlwidgets::createWidget`
 #' @export
 #' @examples 
 #' 
@@ -392,7 +378,7 @@ typedArrayPolyfill <- function() {
 # and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
-    "plotlyjs", "1.27.1",
+    "plotlyjs", "1.29.2",
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
     stylesheet = "plotly-htmlwidgets.css"

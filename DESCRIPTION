@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.7.0
+Version: 4.7.1
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com"),
     person("Chris", "Parmer", role = "aut",
@@ -33,7 +33,7 @@ Imports:
     viridisLite,
     base64enc,
     htmltools,
-    htmlwidgets (>= 0.8),
+    htmlwidgets (>= 0.9),
     tidyr,
     hexbin,
     RColorBrewer,
@@ -41,7 +41,8 @@ Imports:
     tibble,
     lazyeval (>= 0.2.0),
     crosstalk,
-    purrr
+    purrr,
+    data.table
 Suggests:
     MASS,
     maps,
@@ -64,5 +65,8 @@ Suggests:
     RSelenium,
     png,
     IRdisplay
+Remotes:
+  tidyverse/ggplot2
 LazyData: true
 RoxygenNote: 6.0.1
+Roxygen: list(markdown = TRUE)

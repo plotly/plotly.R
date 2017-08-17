@@ -10,5 +10,5 @@ last_plot()
 Retrieve the last plot to be modified or created.
 }
 \seealso{
-\code{\link[ggplot2]{last_plot}}
+\code{\link[ggplot2:last_plot]{ggplot2::last_plot()}}
 }

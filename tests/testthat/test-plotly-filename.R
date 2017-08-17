@@ -2,7 +2,7 @@ context("Filename")
 
 test_that("filename supports names with paths included ", {
   skip_on_cran()
-  skip_on_pull_request()
+  skip_if_not_master()
   p <- plot_ly(mtcars, x = ~wt, y = ~vs)
   filename <- "directory/awesome"
   # trash the file if it already exists

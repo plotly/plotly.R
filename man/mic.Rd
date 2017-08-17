@@ -5,7 +5,7 @@
 \alias{mic}
 \title{Mic data}
 \format{A data frame with three variables: \code{r}, \code{t},
-  \code{nms}.}
+\code{nms}.}
 \usage{
 mic
 }

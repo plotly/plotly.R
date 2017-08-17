@@ -21,15 +21,15 @@ tooltip. The default, "all", means show all the aesthetic tooltips
 
 \item{dynamicTicks}{accepts the following values: \code{FALSE}, \code{TRUE}, \code{"x"}, or \code{"y"}.
 Dynamic ticks are useful for updating ticks in response to zoom/pan/filter
-interactions; however, there is no guarantee they reproduce axis tick text 
+interactions; however, there is no guarantee they reproduce axis tick text
 as they would appear in the static ggplot2 image.}
 
 \item{layerData}{data from which layer should be returned?}
 
 \item{originalData}{should the "original" or "scaled" data be returned?}
 
-\item{source}{a character string of length 1. Match the value of this string 
-with the source argument in \code{\link{event_data}()} to retrieve the 
+\item{source}{a character string of length 1. Match the value of this string
+with the source argument in \code{\link[=event_data]{event_data()}} to retrieve the
 event data corresponding to a specific plot (shiny apps can have multiple plots).}
 
 \item{...}{currently not used}

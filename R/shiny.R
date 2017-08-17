@@ -5,13 +5,13 @@
 #' 
 #' @param outputId output variable to read from
 #' @param width,height Must be a valid CSS unit (like \code{"100\%"},
-#'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
-#'   string and have \code{"px"} appended.
-#' @param inline use an inline (\code{span()}) or block container 
-#' (\code{div()}) for the output
+#'   `"400px"`, `"auto"`) or a number, which will be coerced to a
+#'   string and have `"px"` appended.
+#' @param inline use an inline (`span()`) or block container 
+#' (`div()`) for the output
 #' @param expr An expression that generates a plotly
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This 
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This 
 #'   is useful if you want to save an expression in a variable.
 #'   
 #' @importFrom htmlwidgets shinyWidgetOutput
@@ -49,13 +49,13 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param event The type of plotly event. Currently 'plotly_hover',
 #' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in \code{\link{plot_ly}()} to retrieve the 
+#' with the source argument in [plot_ly()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @param session a shiny session object (the default should almost always be used).
 #' @export
 #' @author Carson Sievert
 #' @examples \dontrun{
-#' shiny::runApp(system.file("examples", "plotlyEvents", package = "plotly"))
+#' plotly_example("shiny", "event_data")
 #' }
 
 event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 

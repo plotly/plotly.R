@@ -1,16 +1,16 @@
 #' Tools for working with plotly's REST API (v2)
 #' 
 #' Convenience functions for working with version 2 of plotly's REST API.
-#' Upload R objects to a plotly account via \code{api_create()} and download
-#' plotly objects via \code{api_download_plot()}/\code{api_download_grid()}.
-#' For anything else, use \code{api()}.
+#' Upload R objects to a plotly account via `api_create()` and download
+#' plotly objects via `api_download_plot()`/`api_download_grid()`.
+#' For anything else, use `api()`.
 #' 
 #' @param id a filename id. 
 #' @param username a plotly username.
 #' 
 #' @param x An R object to hosted on plotly's web platform. 
 #' Can be a plotly/ggplot2 object or a \link{data.frame}.
-#' @param filename character vector naming file(s). If \code{x} is a plot,
+#' @param filename character vector naming file(s). If `x` is a plot,
 #' can be a vector of length 2 naming both the plot AND the underlying grid.
 #' @param fileopt character string describing whether to "overwrite" existing 
 #' files or ensure "new" file(s) are always created.
@@ -29,23 +29,23 @@
 #' You do not need to be logged in to view this plot.
 #' 
 #' @param endpoint the endpoint (i.e., location) for the request. 
-#' To see a list of all available endpoints, call \code{api()}.
+#' To see a list of all available endpoints, call `api()`.
 #' Any relevant query parameters should be included here (see examples).
-#' @param verb name of the HTTP verb to use (as in, \code{\link[httr]{VERB}()}).
-#' @param body body of the HTTP request(as in, \code{\link[httr]{VERB}()}).
+#' @param verb name of the HTTP verb to use (as in, [httr::VERB()]).
+#' @param body body of the HTTP request(as in, [httr::VERB()]).
 #' If this value is not already converted to JSON 
-#' (via \code{\link[jsonlite]{toJSON}()}), it uses the internal \code{to_JSON()}
+#' (via [jsonlite::toJSON()]), it uses the internal `to_JSON()`
 #' to ensure values are "automatically unboxed" (i.e., vec.
 #'
-#' @param ... For \code{api()}, these arguments are passed onto 
-#' \code{\link[httr]{VERB}()}. For \code{api_create()}, these arguments are
+#' @param ... For `api()`, these arguments are passed onto 
+#' [httr::VERB()]. For `api_create()`, these arguments are
 #' included in the body of the HTTP request.
 #' 
 #' @export
 #' @rdname api
 #' @author Carson Sievert
 #' @references \url{https://api.plot.ly/v2}
-#' @seealso \code{\link{signup}()}
+#' @seealso [signup()]
 #' @examples 
 #' 
 #' \dontrun{

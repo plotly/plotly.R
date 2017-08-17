@@ -5,7 +5,7 @@
 \alias{hobbs}
 \title{Hobbs data}
 \format{A data frame with three variables: \code{r}, \code{t},
-  \code{nms}.}
+\code{nms}.}
 \usage{
 hobbs
 }

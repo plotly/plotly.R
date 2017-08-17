@@ -17,17 +17,17 @@ renderPlotly(expr, env = parent.frame(), quoted = FALSE)
 \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
 string and have \code{"px"} appended.}
 
-\item{inline}{use an inline (\code{span()}) or block container 
+\item{inline}{use an inline (\code{span()}) or block container
 (\code{div()}) for the output}
 
 \item{expr}{An expression that generates a plotly}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This 
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 }
 \description{
-Output and render functions for using plotly within Shiny 
+Output and render functions for using plotly within Shiny
 applications and interactive Rmd documents.
 }

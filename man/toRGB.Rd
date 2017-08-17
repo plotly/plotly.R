@@ -34,5 +34,5 @@ plot_ly(x = 1, y = 1, marker = m)
 
 }
 \seealso{
-\code{\link{showRGB}()}
+\code{\link[=showRGB]{showRGB()}}
 }

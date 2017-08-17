@@ -79,6 +79,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
   datz <- list()
   paramz <- list()
+  layout <- if (is_dev_ggplot2()) layout else list(layout = layout)
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
@@ -153,7 +154,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
 #'
-#' @param data the data returned by \code{ggplot2::ggplot_build()}.
+#' @param data the data returned by `ggplot2::ggplot_build()`.
 #' @param prestats_data the data before statistics are computed.
 #' @param layout the panel layout.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
@@ -596,7 +597,7 @@ to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
 #' this function. It exists purely to allow other package authors to write
 #' their own conversion method(s).
 #'
-#' @param data the data returned by \code{plotly::to_basic}.
+#' @param data the data returned by `plotly::to_basic`.
 #' @param params parameters for the geom, statistic, and 'constant' aesthetics
 #' @param p a ggplot2 object (the conversion may depend on scales, for instance).
 #' @export

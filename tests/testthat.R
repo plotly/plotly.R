@@ -61,11 +61,11 @@ if (report_diffs || build_table) {
 # (see test-plotly-filename.R). For security reasons, these tests should be 
 # skipped on pull requests (the .travis.yml file uses encrypted credentials
 # & encrypted environment vars cannot be accessed on pull request builds)
-skip_on_pull_request <- function() {
-  if (!grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))) {
-    return(invisible(TRUE))
-  }
-  skip("Can't test plot.ly API calls on a pull request")
+skip_if_not_master <- function() {
+  is_pr <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
+  is_r_release <- Sys.getenv("TRAVIS_R_VERSION_STRING", "release") == "release"
+  if (!is_pr && is_r_release) return(invisible(TRUE))
+  skip("plot.ly API calls are only tested on the master build on r-release")
 }
 
 # This function is called within testthat/test-*.R files.

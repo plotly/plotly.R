@@ -16,6 +16,6 @@ set_last_plot <- function(value) .store$set(value)
 
 #' Retrieve the last plot to be modified or created.
 #'
-#' @seealso \code{\link[ggplot2]{last_plot}}
+#' @seealso [ggplot2::last_plot()]
 #' @export
 last_plot <- function() .store$get()

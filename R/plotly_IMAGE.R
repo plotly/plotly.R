@@ -9,7 +9,7 @@
 #' @param format The desired image format 'png', 'jpeg', 'svg', 'pdf', 'eps', or 'webp'
 #' @param scale Both png and jpeg formats will be scaled beyond the specified width and height by this number.
 #' @param out_file A filename for writing the image to a file.
-#' @param ... arguments passed onto \code{httr::POST}
+#' @param ... arguments passed onto `httr::POST`
 #' @export
 #' @examples \dontrun{
 #' p <- plot_ly(x = 1:10)

@@ -7,7 +7,7 @@ CONTRIBUTING.md
 build_site.R
 todo.R
 .github/
-inst/examples/printing.html
+inst/examples/rmd/*.html
 inst/examples/flexdashboard
 Untitled*
 node_modules/

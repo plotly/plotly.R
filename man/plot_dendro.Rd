@@ -17,10 +17,10 @@ plot_dendro(d, set = "A", xmin = -50, height = 500, width = 500, ...)
 
 \item{width}{width}
 
-\item{...}{arguments supplied to \code{\link{subplot}()}}
+\item{...}{arguments supplied to \code{\link[=subplot]{subplot()}}}
 }
 \description{
-This function takes advantage of nested key selections to implement an 
+This function takes advantage of nested key selections to implement an
 interactive dendrogram. Selecting a node selects all the labels (i.e. leafs)
 under that node.
 }
@@ -34,7 +34,7 @@ plot_dendro(dend1, height = 600) \%>\%
 
 }
 \seealso{
-\code{\link{plot_ly}()}, \code{\link{plot_mapbox}()}, \code{\link{ggplotly}()}
+\code{\link[=plot_ly]{plot_ly()}}, \code{\link[=plot_mapbox]{plot_mapbox()}}, \code{\link[=ggplotly]{ggplotly()}}
 }
 \author{
 Carson Sievert

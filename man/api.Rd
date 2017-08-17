@@ -29,46 +29,46 @@ api_download_grid(id, username)
 api(endpoint = "/", verb = "GET", body = NULL, ...)
 }
 \arguments{
-\item{x}{An R object to hosted on plotly's web platform. 
+\item{x}{An R object to hosted on plotly's web platform.
 Can be a plotly/ggplot2 object or a \link{data.frame}.}
 
 \item{filename}{character vector naming file(s). If \code{x} is a plot,
 can be a vector of length 2 naming both the plot AND the underlying grid.}
 
-\item{fileopt}{character string describing whether to "overwrite" existing 
+\item{fileopt}{character string describing whether to "overwrite" existing
 files or ensure "new" file(s) are always created.}
 
-\item{sharing}{If 'public', anyone can view this graph. It will appear in 
+\item{sharing}{If 'public', anyone can view this graph. It will appear in
 your profile and can appear in search engines. You do not need to be
 logged in to Plotly to view this chart.
 If 'private', only you can view this plot. It will not appear in the
-Plotly feed, your profile, or search engines. You must be logged in to 
-Plotly to view this graph. You can privately share this graph with other 
-Plotly users in your online Plotly account and they will need to be logged 
+Plotly feed, your profile, or search engines. You must be logged in to
+Plotly to view this graph. You can privately share this graph with other
+Plotly users in your online Plotly account and they will need to be logged
 in to view this plot.
 If 'secret', anyone with this secret link can view this chart. It will
-not appear in the Plotly feed, your profile, or search engines. 
-If it is embedded inside a webpage or an IPython notebook, anybody who is 
-viewing that page will be able to view the graph. 
+not appear in the Plotly feed, your profile, or search engines.
+If it is embedded inside a webpage or an IPython notebook, anybody who is
+viewing that page will be able to view the graph.
 You do not need to be logged in to view this plot.}
 
-\item{...}{For \code{api()}, these arguments are passed onto 
-\code{\link[httr]{VERB}()}. For \code{api_create()}, these arguments are
+\item{...}{For \code{api()}, these arguments are passed onto
+\code{\link[httr:VERB]{httr::VERB()}}. For \code{api_create()}, these arguments are
 included in the body of the HTTP request.}
 
 \item{id}{a filename id.}
 
 \item{username}{a plotly username.}
 
-\item{endpoint}{the endpoint (i.e., location) for the request. 
+\item{endpoint}{the endpoint (i.e., location) for the request.
 To see a list of all available endpoints, call \code{api()}.
 Any relevant query parameters should be included here (see examples).}
 
-\item{verb}{name of the HTTP verb to use (as in, \code{\link[httr]{VERB}()}).}
+\item{verb}{name of the HTTP verb to use (as in, \code{\link[httr:VERB]{httr::VERB()}}).}
 
-\item{body}{body of the HTTP request(as in, \code{\link[httr]{VERB}()}).
-If this value is not already converted to JSON 
-(via \code{\link[jsonlite]{toJSON}()}), it uses the internal \code{to_JSON()}
+\item{body}{body of the HTTP request(as in, \code{\link[httr:VERB]{httr::VERB()}}).
+If this value is not already converted to JSON
+(via \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}), it uses the internal \code{to_JSON()}
 to ensure values are "automatically unboxed" (i.e., vec.}
 }
 \description{
@@ -144,7 +144,7 @@ api("folders", "POST", list(path = "/starts/at/root/and/ends/here"))
 \url{https://api.plot.ly/v2}
 }
 \seealso{
-\code{\link{signup}()}
+\code{\link[=signup]{signup()}}
 }
 \author{
 Carson Sievert
