@@ -323,6 +323,41 @@ ensure_one <- function(plots, attr) {
   attrs[[length(attrs)]][[1]]
 }
 
+# helper function returning the data frame with the axes information
+# for the plotly object "p"
+get_axes_info <- function(p) {
+  axes <- p$layout[grepl("^geo|^mapbox|^[xy]axis", names(p$layout))]
+  res <- data.frame(
+    name = names(axes),
+    type = sapply(axes, function(ax) ax$type %||% NA_character_),
+    axis_index = seq(axes), # position in the axes list
+    title = sapply(axes, function(ax) ax$title %||% NA_character_),
+    anchor = sapply(axes, function(ax) ax$anchor %||% NA_character_),
+    range_start = sapply(axes, function(ax) ax$range[[1]] %||% NA_real_),
+    range_end = sapply(axes, function(ax) ax$range[[2]] %||% NA_real_),
+    stringsAsFactors = FALSE
+  )
+  res$dim <- sub("(axis)?[0-9]*$", "", res$name)
+  # axis index within its dimension
+  res$dim_index <- as.integer(sub("^[^0-9]*", "", res$name))
+  res$dim_index <- dplyr::if_else(is.na(res$dim_index), 1L, res$dim_index)
+  # how the axis is referenced by the trace or as another axis anchor
+  # (index=1) is omitted
+  res$ref <- paste0(res$dim, sub("^1$", "", res$dim_index))
+  # axis domain(s)
+  dom0 <- sapply(axes, function(ax) ax$domain[[1]] %||% NA_real_)
+  dom1 <- sapply(axes, function(ax) ax$domain[[2]] %||% NA_real_)
+  xdom0 <- sapply(axes, function(ax) ax$x$domain[[1]] %||% NA_real_)
+  xdom1 <- sapply(axes, function(ax) ax$x$domain[[2]] %||% NA_real_)
+  ydom0 <- sapply(axes, function(ax) ax$y$domain[[1]] %||% NA_real_)
+  ydom1 <- sapply(axes, function(ax) ax$y$domain[[2]] %||% NA_real_)
+  res$xstart <- dplyr::if_else(res$dim == "x", dom0, xdom0)
+  res$xend <- dplyr::if_else(res$dim == "x", dom1, xdom1)
+  res$ystart <- dplyr::if_else(res$dim == "y", dom0, ydom0)
+  res$yend <- dplyr::if_else(res$dim == "y", dom1, ydom1)
+
+  return(res)
+}
 
 # helper function returning the domains (positions) for the subplots
 # in the grid layout
