@@ -15,13 +15,17 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
+    
+    var gd = document.getElementById(el.id);
+    
     if (instance.autosize) {
       var width = instance.width || width;
       var height = instance.height || height;
-      Plotly.relayout(el.id, {width: width, height: height});
+      Plotly.relayout(gd, {width: width, height: height});
+      ggplotlyAdjustLabels(gd);
     }
   },  
-  
+
   renderValue: function(el, x, instance) {
       
     if (typeof(window) !== "undefined") {
@@ -161,16 +165,7 @@ HTMLWidgets.widget({
     
     plot.then(function(gd) {
       
-      // for ggplotly labels, scale annotation height/width sensibly
-      var layout = x.layout || {};
-      var anns = layout.annotations || [];
-      for (var i = 0; i < anns.length; i++) {
-        anns[i].width = anns[i].ggplotlyDirection === "horizontal" ? gd._fullLayout._size.w : anns[i].width;
-        anns[i].height = anns[i].ggplotlyDirection === "vertical" ? gd._fullLayout._size.h : anns[i].height;
-      }
-      if (anns.length > 0) {
-        Plotly.relayout(gd, {annotations: anns});
-      }
+      ggplotlyAdjustLabels(gd);
       
       // Trigger plotly.js calls defined via `plotlyProxy()`
       if (HTMLWidgets.shinyMode) {
@@ -826,5 +821,23 @@ function removeBrush(el) {
   var outlines = el.querySelectorAll(".select-outline");
   for (var i = 0; i < outlines.length; i++) {
     outlines[i].remove();
+  }
+}
+
+
+// for ggplotly labels, scale annotation height/width to match graph size
+function ggplotlyAdjustLabels(gd) {
+  var layout = gd.layout || {};
+  var anns = layout.annotations || [];
+  for (var i = 0; i < anns.length; i++) {
+    var container = {};
+    if (anns[i].ggplotlyDirection === "horizontal") {
+      container['annotations[' + i + '].width'] = gd._fullLayout._size.w;
+      Plotly.relayout(gd, container);
+    }
+    if (anns[i].ggplotlyDirection === "vertical") {
+      container['annotations[' + i + '].height'] = gd._fullLayout._size.h;
+      Plotly.relayout(gd, container);
+    }
   }
 }
