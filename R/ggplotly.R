@@ -1139,15 +1139,6 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
     width = grid::convertWidth,
     height = grid::convertHeight
   )
-  # convert everything to npc first
-  #if (inherits(u, "margin")) {
-  #  # margins consist of 4 parts: top, right, bottom, and left
-  #  uh <- grid::convertHeight(u, "npc")
-  #  uw <- grid::convertWidth(u, "npc")
-  #  u <- grid::unit(c(uh[1], uw[2], uh[3], uw[4]), "npc")
-  #} else {
-  #  u <- convert(u, "npc")
-  #}
   if (to[1] == "pixels") {
     if (inherits(u, "margin")) {
       uh <- mm2pixels(grid::convertHeight(u, "mm"))
@@ -1157,6 +1148,8 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
       u <- mm2pixels(convert(u, "mm"))
     }
   }
+  # TODO: what about npc? Are we going to use it at all?
+  
   as.numeric(u)
 }
 
