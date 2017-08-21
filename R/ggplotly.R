@@ -400,15 +400,33 @@ gg2list <- function(p, width = NULL, height = NULL,
   # Let Layout modify data before rendering
   data <- layout$finish_data(data)
   
-  # ------------------------------------------------------------------------
-  # end of ggplot_build()
-  # ------------------------------------------------------------------------
-  # if necessary, attach key
+  # if necessary, attach key (for crosstalk)
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
     x <- reComputeGroup(x, z)
     suppressMessages(dplyr::left_join(x, y))
   }, data, nestedKeys, layers)
+  
+  # should basically mimic what ggplot_build(p) would give you....
+  built <- structure(
+    list(data = data, layout = layout, plot = plot), 
+    class = "ggplot_built"
+  )
+  
+  # ------------------------------------------------------------------------
+  # end of ggplot_build()
+  # ------------------------------------------------------------------------
+  
+  # next in print.ggplot is ggplot_gtable() which returns the table of 
+  # grobs grid uses to do the actual rendering. Throughout this file 
+  # we'll query specific characteristics of these grobs
+  gtable <- ggplot2::ggplot_gtable(built)
+  
+  # mimics https://github.com/tidyverse/ggplot2/blob/41f154f5eb89f9939c149645611a5834eb674309/R/layout.R#L104-L108
+  labels <- layout$coord$labels(list(
+    x = layout$xlabel(plot$labels),
+    y = layout$ylabel(plot$labels)
+  ))
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
@@ -439,12 +457,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   #gglayout$margin$t <- gglayout$margin$t + 16
   
-  # important stuff like layout$panel_params is already flipped, but
-  # plot$scales/plot$labels/data aren't. We flip x/y trace data at the very end
-  # and scales in the axis loop below.
-  if (inherits(plot$coordinates, "CoordFlip")) {
-    plot$labels[c("x", "y")] <- plot$labels[c("y", "x")]
-  }
+  
+  layout$layout <- summarise_layout(built)
   
   # important panel summary stats
   nPanels <- nrow(layout$layout)
