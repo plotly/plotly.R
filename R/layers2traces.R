@@ -79,7 +79,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
   datz <- list()
   paramz <- list()
-  layout <- if (is_dev_ggplot2()) layout else list(layout = layout)
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
@@ -387,7 +386,7 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("xmin", "xmax"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
   prefix_class(data, c("GeomHline", "GeomPath"))
@@ -399,7 +398,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "x", c("xmin", "xmax"))
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- data$yintercept
   prefix_class(data, c("GeomHline", "GeomPath"))
@@ -411,7 +410,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
+  lay <- tidyr::gather_(layout$layout, "variable", "y", c("ymin", "ymax"))
   data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
   data[["x"]] <- data$xintercept
   prefix_class(data, c("GeomVline", "GeomPath"))
@@ -428,7 +427,7 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
   # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
-  data$width <- (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
+  data$width <- (data[["xmax"]] - data[["x"]]) /(data[["xmax"]] - data[["xmin"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
 }
@@ -438,7 +437,7 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) 
   # height for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
-  data$width <- (data[["ymax"]] - data[["y"]]) / (data[["y_max"]] - data[["y_min"]])
+  data$width <- (data[["ymax"]] - data[["y"]]) / (data[["ymax"]] - data[["ymin"]])
   data$fill <- NULL
   prefix_class(data, "GeomErrorbarh")
 }
@@ -476,11 +475,11 @@ to_basic.GeomPointrange <- function(data, prestats_data, layout, params, p, ...)
 #' @export
 to_basic.GeomDotplot <- function(data, prestats_data, layout, params, p, ...) {
   if (identical(params$binaxis, "y")) {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$y_max - layout$layout$y_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$ymax - layout$layout$ymin)
     data$size <- as.numeric(grid::convertHeight(grid::unit(dotdia, "npc"), "mm")) / 2
     data$x <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
   } else {
-    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$x_max - layout$layout$x_min)
+    dotdia <- params$dotsize * data$binwidth[1]/(layout$layout$xmax - layout$layout$xmin)
     data$size <- as.numeric(grid::convertWidth(grid::unit(dotdia, "npc"), "mm")) / 2
     # TODO: why times 6?!?!
     data$y <- (data$countidx - 0.5) * (as.numeric(dotdia) * 6)
@@ -516,9 +515,9 @@ utils::globalVariables(c("xmin", "xmax", "y", "size"))
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
   # allow the tick length to vary across panels
   layout <- layout$layout
-  layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
-  layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
-  data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
+  layout$tickval_y <- 0.03 * abs(layout$ymax - layout$ymin)
+  layout$tickval_x <- 0.03 * abs(layout$xmax - layout$xmin)
+  data <- merge(data, layout[c("PANEL", "xmin", "xmax", "ymin", "ymax", "tickval_y", "tickval_x")])
   
   # see GeomRug$draw_panel()
   rugs <- list()
@@ -530,8 +529,8 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         data, data.frame(
           x = x, 
           xend = x,
-          y = y_min, 
-          yend = y_min + tickval_y,
+          y = ymin, 
+          yend = ymin + tickval_y,
           others
         )
       )
@@ -541,8 +540,8 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
         data, data.frame(
           x = x, 
           xend = x,
-          y = y_max - tickval_y, 
-          yend = y_max,
+          y = ymax - tickval_y, 
+          yend = ymax,
           others
         )
       )
@@ -552,8 +551,8 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("l", sides)) {
       rugs$l <- with(
         data, data.frame(
-          x = x_min, 
-          xend = x_min + tickval_x,
+          x = xmin, 
+          xend = xmin + tickval_x,
           y = y, 
           yend = y,
           others
@@ -563,8 +562,8 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("r", sides)) {
       rugs$r <- with(
         data, data.frame(
-          x = x_max - tickval_x, 
-          xend = x_max,
+          x = xmax - tickval_x, 
+          xend = xmax,
           y = y, 
           yend = y,
           others

@@ -462,30 +462,31 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # important panel summary stats
   nPanels <- nrow(layout$layout)
-  nRows <- max(layout$layout$ROW)
-  nCols <- max(layout$layout$COL)
+  nRows <- max(layout$layout$row)
+  nCols <- max(layout$layout$col)
   
+  #browser()
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  layout$layout$xaxis <- layout$layout$COL
-  layout$layout$yaxis <- layout$layout$ROW
+  layout$layout$xaxis <- layout$layout$col
+  layout$layout$yaxis <- layout$layout$row
   layout$layout$xanchor <- nRows
   layout$layout$yanchor <- 1
   if (inherits(plot$facet, "FacetWrap")) {
     if (plot$facet$params$free$x) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$ROW
+      layout$layout$xaxis <- layout$layout$col
+      layout$layout$xanchor <- layout$layout$row
     }
     if (plot$facet$params$free$y) {
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$COL
+      layout$layout$yaxis <- layout$layout$panel
+      layout$layout$yanchor <- layout$layout$col
       layout$layout$xanchor <- nPanels
     }
     if (plot$facet$params$free$x && plot$facet$params$free$y) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$PANEL
+      layout$layout$xaxis <- layout$layout$panel
+      layout$layout$yaxis <- layout$layout$panel
+      layout$layout$xanchor <- layout$layout$panel
+      layout$layout$yanchor <- layout$layout$panel
     }
   }
   # format the axis/anchor to a format plotly.js respects
@@ -493,11 +494,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$yaxis <- paste0("yaxis", sub("^1$", "", layout$layout$yaxis))
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
-  # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -591,8 +587,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
       
-      axisName <- lay[, paste0(xy, "axis")]
-      anchor <- lay[, paste0(xy, "anchor")]
+      axisName <- lay[[paste0(xy, "axis")]]
+      anchor <- lay[[paste0(xy, "anchor")]]
       rng <- layout$panel_params[[i]]
       
       # panel_params is quite different for "CoordSf"
@@ -691,7 +687,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
         linewidth = unitConvert(axisLine, "pixels", type),
-        # TODO: always `showgrid=FALSE` and implement our own using traces
+        # TODO: always `showgrid=FALSE` and implement our own using traces (unless dynamicTicks=T)?
         showgrid = !is_blank(panelGrid) && !"CoordSf" %in% class(p$coordinates),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
@@ -769,13 +765,14 @@ gg2list <- function(p, width = NULL, height = NULL,
           bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] 
         
         # add that to the relevant margin
-        side <- substr(sc$position, 0, 1)
+        side <- substr(axisObj$side, 0, 1)
         
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisSize
         
         # draw axis title as annotation
         axisTitle <- theme_el("axis.title")
-        axisTitleText <- sc$name %||% plot$labels[[xy]]
+        # TODO: do we need another loop for secondary axis?
+        axisTitleText <- labels[[xy]]$primary
         axisLabel <- label_create(
           faced(axisTitleText, axisTitle$face), el = axisTitle,
           0, switch(side, b = 0, t = 1),
@@ -793,7 +790,6 @@ gg2list <- function(p, width = NULL, height = NULL,
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisFixedSize
           
           
-        #if (xy == "x") browser()
         # add space for exterior facet strips in `layout.margin`
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
@@ -1122,6 +1118,16 @@ gg2list <- function(p, width = NULL, height = NULL,
 #-----------------------------------------------------------------------------
 # ggplotly 'utility' functions
 #-----------------------------------------------------------------------------
+
+# grab grobs from a gtable object matching some regular expression
+gtable_grab <- function(gtable, pattern = "^xlab", nullGrobs = FALSE) {
+  if (!gtable::is.gtable(gtable)) stop("Must be a gtable object")
+  gs <- gtable$grobs[grepl(pattern, gtable$layout$name)]
+  if (!nullGrobs) {
+    gs <- gs[!vapply(gs, function(g) identical(ggplot2::zeroGrob(), g), logical(1))] 
+  }
+  gs %||% NULL
+}
 
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
