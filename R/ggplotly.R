@@ -457,7 +457,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
   #gglayout$margin$t <- gglayout$margin$t + 16
   
-  
   layout$layout <- summarise_layout(built)
   
   # important panel summary stats
@@ -465,7 +464,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   nRows <- max(layout$layout$row)
   nCols <- max(layout$layout$col)
   
-  #browser()
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
   layout$layout$xaxis <- layout$layout$col
@@ -806,19 +804,20 @@ gg2list <- function(p, width = NULL, height = NULL,
     } # end of axis loop
     
     # theme(panel.border = ) -> plotly rect shape
-    xdom <- gglayout[[lay[, "xaxis"]]]$domain
-    ydom <- gglayout[[lay[, "yaxis"]]]$domain
+    xdom <- gglayout[[lay$xaxis]]$domain
+    ydom <- gglayout[[lay$yaxis]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
     
     # facet strips -> plotly annotations
+    # https://github.com/tidyverse/ggplot2/blob/41f154f5eb89f9939c149645611a5834eb674309/R/labeller.r#L495
     if (has_facet(plot)) {
-      col_vars <- ifelse(inherits(plot$facet, "FacetWrap"), "facets", "cols")
-      col_txt <- paste(
-        plot$facet$params$labeller(
-          lay[names(plot$facet$params[[col_vars]])]
-        ), collapse = br()
-      )
+      
+      
+      # TODO: support multiple strips? Or 
+      labeller <- plot$facet$params$labeller
+      strips <- labeller(lay$vars)
+      
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
       if (nchar(col_txt) > 0) {
