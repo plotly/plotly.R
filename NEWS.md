@@ -4,6 +4,8 @@
 
 ## CHANGES
 
+* Upgraded to plotly.js v1.30.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.30.0
+
 ## BUG FIXES
 
 
