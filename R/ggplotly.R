@@ -208,29 +208,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     )
   }
   
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (!is_dev_ggplot2()) {
-    message(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`"
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # ------------------------------------------------------------------------
-  # Our internal version of ggplot2::ggplot_build(). Modified from
-  # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
+  # Our internal version of ggplot2::ggplot_build()
   # ------------------------------------------------------------------------
   
   plot <- ggfun("plot_clone")(p)
