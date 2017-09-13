@@ -10,27 +10,29 @@
 #' @author Carson Sievert
 
 plotly_example <- function(type = c("demo", "shiny", "rmd"), name, ...) {
-  if (missing(name)) {
-    stop("Must provide an example name", call. = FALSE)
-  }
   
-  type <- match.arg(type, type)
+  type <- match.arg(type)
   
+  # demos don't necessarily need a name
   if (type == "demo") {
-    utils::demo(topic = name, package = "plotly")
+    if (missing(name)) {
+      return(utils::demo(package = "plotly")) 
+    } else  {
+      return(utils::demo(topic = name, package = "plotly"))
+    }
   }
   
   # check to make sure the example exists
   exampleDir <- system.file("examples", type, package = "plotly")
   nms <- basename(list.dirs(exampleDir, recursive = FALSE))
-  if (!isTRUE(name %in% nms)) {
-    stop(
+  if (missing(name) || !isTRUE(name %in% nms)) {
+    message(
       sprintf(
         "Couldn't find that %s example. Valid examples include: '%s'", 
         type, paste(nms, collapse = "', '")
-      ), 
-      .call = FALSE
+      )
     )
+    return(invisible())
   }
   
   finalDir <- system.file("examples", type, name, package = "plotly")
