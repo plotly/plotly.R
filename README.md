@@ -7,6 +7,12 @@
 
 An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
 
+## Announcements
+
+Seats are still available for a 2 day, plotly for R class in NYC, Nov 16-17.
+
+[Details & registration here](https://plotcon.plot.ly/workshops) 🎨 📈 🗽
+
 ## Installation
 
 Install from CRAN:
@@ -80,9 +86,9 @@ To date, [this slide deck](https://cpsievert.github.io/plotcon17/workshop/day2) 
 
 **plotly**'s **crosstalk** functionality aims to provide tools for interactively exploring subsets of your data with a fixed definition from data to plot. If you need more flexibility, you can always embed **crosstalk** plots within a larger **shiny** app, or even [access and respond to any plotly event within shiny](https://cpsievert.github.io/plotly_book/linking-views-with-shiny.html), but adding **shiny** into the equation comes with a cost -- the result is no longer standalone HTML (harder to share/host) and linking views requires fairly sophicated knowledge/use of shiny's reactive programming framework.
 
-## Learn more
+## Examples and documentation
 
-We have lots of examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive review is also available at <https://cpsievert.github.io/plotly_book/>. I also have a number of [slide decks](http://cpsievert.github.io/talks/) that also have useful demos.
+We have numerous online examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive write-up is also available at <https://plotly-book.cpsievert.me/>. The package itself ships with a number of demos (list them by running `demo(package = "plotly")`) and shiny/rmarkdown examples (list them by running `plotly_example("shiny")` or `plotly_example("rmd")`).  Carson Sievert also keeps numerous [slide decks](https://talks.github.me) with useful topics and demos.
 
 ## Contributing
 
