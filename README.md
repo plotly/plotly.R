@@ -1,5 +1,5 @@
 
-# <img src="man/figures/plotly.svg" width="200" />
+# <img src="man/figures/plotly.png" width="200" />
 
 [![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
 [![CRAN Status](http://www.r-pkg.org/badges/version/plotly)](http://cran.r-project.org/package=plotly)
