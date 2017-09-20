@@ -361,7 +361,9 @@ as_widget <- function(x, ...) {
   )
   # set an ID to avoid the rmarkdown warning ('.Random.seed' is not an integer vector but of type 'NULL', so ignored)
   # note this will throw a warning in shiny, but it is at least less obtrusive
-  w$elementId <- w$elementId %||% new_id()
+  if (is.null(.GlobalEnv$.Random.seed) {
+    w$elementId <- w$elementId %||% new_id()
+  }
   w
 }
 
