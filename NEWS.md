@@ -4,6 +4,7 @@
 
 ## CHANGES
 
+* The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
 * Upgraded to plotly.js v1.30.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.30.0
 
 ## BUG FIXES
