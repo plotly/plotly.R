@@ -9,7 +9,7 @@ An R package for creating interactive web graphics via the open source JavaScrip
 
 ## Announcements
 
-Seats are still available for a 2 day, plotly for R class in NYC, Nov 16-17.
+Seats are still available for a 2 day, plotly for R class in NYC, Nov 18-19.
 
 [Details & registration here](https://plotcon.plot.ly/workshops) 🎨 📈 🗽
 
