@@ -122,7 +122,6 @@ highlight <- function(p, on = "plotly_click", off,
     p$dependencies <- c(p$dependencies, list(colourPickerLib()))
   }
   
-  
   # TODO: expose unhover?
   off_options <- paste0(
     "plotly_", c("doubleclick", "deselect", "relayout")

@@ -73,7 +73,7 @@ to_milliseconds <- function(x) {
 retain <- function(x, f = identity) {
   y <- structure(f(x), class = oldClass(x))
   attrs <- attributes(x)
-  # TODO: do we set any other "special" attributes internally 
+  # TODO: do we set any other "special" attributes internally?
   # (grepping "structure(" suggests no)
   attrs <- attrs[names(attrs) %in% c("defaultAlpha", "apiSrc")]
   if (length(attrs)) {

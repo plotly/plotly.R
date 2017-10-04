@@ -208,29 +208,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     )
   }
   
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (!is_dev_ggplot2()) {
-    message(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`"
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # ------------------------------------------------------------------------
-  # Our internal version of ggplot2::ggplot_build(). Modified from
-  # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
+  # Our internal version of ggplot2::ggplot_build()
   # ------------------------------------------------------------------------
   
   plot <- ggfun("plot_clone")(p)
@@ -421,17 +400,33 @@ gg2list <- function(p, width = NULL, height = NULL,
   # Let Layout modify data before rendering
   data <- layout$finish_data(data)
   
-  # ------------------------------------------------------------------------
-  # end of ggplot_build()
-  # ------------------------------------------------------------------------
-  # if necessary, attach key
+  # if necessary, attach key (for crosstalk)
   data <- Map(function(x, y, z) { 
     if (!length(y)) return(x)
     x <- reComputeGroup(x, z)
-    # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
-    attr(y$group, "n") <- NULL
     suppressMessages(dplyr::left_join(x, y))
   }, data, nestedKeys, layers)
+  
+  # should basically mimic what ggplot_build(p) would give you....
+  built <- structure(
+    list(data = data, layout = layout, plot = plot), 
+    class = "ggplot_built"
+  )
+  
+  # ------------------------------------------------------------------------
+  # end of ggplot_build()
+  # ------------------------------------------------------------------------
+  
+  # next in print.ggplot is ggplot_gtable() which returns the table of 
+  # grobs grid uses to do the actual rendering. Throughout this file 
+  # we'll query specific characteristics of these grobs
+  gtable <- ggplot2::ggplot_gtable(built)
+  
+  # mimics https://github.com/tidyverse/ggplot2/blob/41f154f5eb89f9939c149645611a5834eb674309/R/layout.R#L104-L108
+  labels <- layout$coord$labels(list(
+    x = layout$xlabel(plot$labels),
+    y = layout$ylabel(plot$labels)
+  ))
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
@@ -439,7 +434,16 @@ gg2list <- function(p, width = NULL, height = NULL,
   for (i in elements) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
   }
-  # Translate plot wide theme elements to plotly.js layout
+  # ensure element_text() sizes are interpreted as "points" and defaults to 
+  # "Helvetica" familyfont
+  isTextElement <- vapply(theme, inherits, logical(1), "element_text")
+  textElements <- names(isTextElement)[isTextElement]
+  for (i in textElements) {
+    theme[[i]]$size <- grid::unit(theme[[i]]$size, "points")
+    if (identical(theme[[i]]$family, "")) theme[[i]]$family <- "Helvetica"
+  }
+  
+  # Translate plot-wide theme elements to plotly.js layout
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
     margin = list(t = pm[[1]], r = pm[[2]], b = pm[[3]], l = pm[[4]]),
@@ -447,49 +451,40 @@ gg2list <- function(p, width = NULL, height = NULL,
     paper_bgcolor = toRGB(theme$plot.background$fill),
     font = text2font(theme$text)
   )
-  # main plot title
-  if (nchar(plot$labels$title %||% "") > 0) {
-    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
-    gglayout$titlefont <- text2font(theme$plot.title)
-    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
-  }
-  # ensure there's enough space for the modebar (this is based on a height of 1em)
-  # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
-  gglayout$margin$t <- gglayout$margin$t + 16
   
-  # important stuff like layout$panel_params is already flipped, but
-  # plot$scales/plot$labels/data aren't. We flip x/y trace data at the very end
-  # and scales in the axis loop below.
-  if (inherits(plot$coordinates, "CoordFlip")) {
-    plot$labels[c("x", "y")] <- plot$labels[c("y", "x")]
-  }
+  # ensure there's enough space for the modebar (this is based on a height of 1em)
+  # TODO: subtract this from the overall height?
+  # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
+  #gglayout$margin$t <- gglayout$margin$t + 16
+  
+  layout$layout <- summarise_layout(built)
   
   # important panel summary stats
   nPanels <- nrow(layout$layout)
-  nRows <- max(layout$layout$ROW)
-  nCols <- max(layout$layout$COL)
+  nRows <- max(layout$layout$row)
+  nCols <- max(layout$layout$col)
   
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  layout$layout$xaxis <- layout$layout$COL
-  layout$layout$yaxis <- layout$layout$ROW
+  layout$layout$xaxis <- layout$layout$col
+  layout$layout$yaxis <- layout$layout$row
   layout$layout$xanchor <- nRows
   layout$layout$yanchor <- 1
   if (inherits(plot$facet, "FacetWrap")) {
     if (plot$facet$params$free$x) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$ROW
+      layout$layout$xaxis <- layout$layout$col
+      layout$layout$xanchor <- layout$layout$row
     }
     if (plot$facet$params$free$y) {
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$COL
+      layout$layout$yaxis <- layout$layout$panel
+      layout$layout$yanchor <- layout$layout$col
       layout$layout$xanchor <- nPanels
     }
     if (plot$facet$params$free$x && plot$facet$params$free$y) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$PANEL
+      layout$layout$xaxis <- layout$layout$panel
+      layout$layout$yaxis <- layout$layout$panel
+      layout$layout$xanchor <- layout$layout$panel
+      layout$layout$yanchor <- layout$layout$panel
     }
   }
   # format the axis/anchor to a format plotly.js respects
@@ -497,11 +492,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$yaxis <- paste0("yaxis", sub("^1$", "", layout$layout$yaxis))
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
-  # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -591,13 +581,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       }
       axisTicks <- theme_el("axis.ticks")
       axisText <- theme_el("axis.text")
-      axisTitle <- theme_el("axis.title")
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major")
       stripText <- theme_el("strip.text")
       
-      axisName <- lay[, paste0(xy, "axis")]
-      anchor <- lay[, paste0(xy, "anchor")]
+      axisName <- lay[[paste0(xy, "axis")]]
+      anchor <- lay[[paste0(xy, "anchor")]]
       rng <- layout$panel_params[[i]]
       
       # panel_params is quite different for "CoordSf"
@@ -651,7 +640,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         
       }
       
-      # stuff like layout$panel_params is already flipped, but scales aren't
+      # TODO: could we just do scale_x()/scale_y() here?
       sc <- if (inherits(plot$coordinates, "CoordFlip")) {
         scales$get_scales(setdiff(c("x", "y"), xy))
       } else {
@@ -659,9 +648,6 @@ gg2list <- function(p, width = NULL, height = NULL,
       }
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
-      # get axis title
-      axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
-      if (is_blank(axisTitle)) axisTitleText <- ""
       
       # is this axis dynamic?
       isDynamic <- isTRUE(dynamicTicks) || identical(dynamicTicks, xy)
@@ -699,18 +685,18 @@ gg2list <- function(p, width = NULL, height = NULL,
         showline = !is_blank(axisLine),
         linecolor = toRGB(axisLine$colour),
         linewidth = unitConvert(axisLine, "pixels", type),
-        # TODO: always `showgrid=FALSE` and implement our own using traces
+        # TODO: always `showgrid=FALSE` and implement our own using traces (unless dynamicTicks=T)?
         showgrid = !is_blank(panelGrid) && !"CoordSf" %in% class(p$coordinates),
         domain = sort(as.numeric(doms[i, paste0(xy, c("start", "end"))])),
         gridcolor = toRGB(panelGrid$colour),
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = faced(axisTitleText, axisTitle$face),
-        titlefont = text2font(axisTitle)
+        side = sc$position %||% switch(xy, x = "bottom", y = "left")
       )
       
       # set scaleanchor/scaleratio if these are fixed coordinates
+      # TODO: can the criteria just be if the ratio is NULL?
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
       if (inherits(p$coordinates, fixed_coords)) {
         axisObj$scaleanchor <- anchor
@@ -770,75 +756,72 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
+        
+        # estimate the size of the axis ticks and ticktext
         axisTickText <- axisObj$ticktext[which.max(nchar(axisObj$ticktext))]
-        side <- if (xy == "x") "b" else "l"
-        # account for axis ticks, ticks text, and titles in plot margins
-        # (apparently ggplot2 doesn't support axis.title/axis.text margins)
-        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
-          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
-          bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
+        axisSize <- axisObj$ticklen +
+          bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] 
         
-        if (nchar(axisTitleText) > 0) {
-          axisTextSize <- unitConvert(axisText, "npc", type)
-          axisTitleSize <- unitConvert(axisTitle, "npc", type)
-          offset <-
-            (0 -
-               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
-               unitConvert(theme$axis.ticks.length, "npc", type))
-        }
+        # add that to the relevant margin
+        side <- substr(axisObj$side, 0, 1)
         
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisSize
+        
+        # draw axis title as annotation
+        axisTitle <- theme_el("axis.title")
+        # TODO: do we need another loop for secondary axis?
+        axisTitleText <- labels[[xy]]$primary
+        axisLabel <- label_create(
+          faced(axisTitleText, axisTitle$face), el = axisTitle,
+          0, switch(side, b = 0, t = 1),
+          yanchor = switch(xy, y = "bottom", x = switch(side, b = "top", t = "bottom")),
+          annotationType = paste0(xy, "axis"),
+          # horizontal labels scale with graph width, vertical labels scale with graph height
+          direction = switch(xy, x = "horizontal", y = "vertical")
+        )
+        # shift the title 
+        shift <- switch(xy, x = "yshift", y = "xshift")
+        # one of these _has_ to be fixed...it should be correct one
+        axisFixedSize <- (axisLabel$height %||% axisLabel$width)
+        axisLabel[[shift]] <-  switch(side, t = axisSize, r = axisSize, b = -axisSize, l = -axisSize)
+        gglayout <- label_add(gglayout, axisLabel)
+        gglayout$margin[[side]] <- gglayout$margin[[side]] + axisFixedSize
+          
+          
         # add space for exterior facet strips in `layout.margin`
-        
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
-          if (xy == "x") {
-            gglayout$margin$t <- gglayout$margin$t + stripSize
-          }
-          if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
-            gglayout$margin$r <- gglayout$margin$r + stripSize
-          }
-          # facets have multiple axis objects, but only one title for the plot,
-          # so we empty the titles and try to draw the title as an annotation
-          if (nchar(axisTitleText) > 0) {
-            # npc is on a 0-1 scale of the _entire_ device,
-            # but these units _should_ be wrt to the plotting region
-            # multiplying the offset by 2 seems to work, but this is a terrible hack
-            x <- if (xy == "x") 0.5 else offset
-            y <- if (xy == "x") offset else 0.5
-            gglayout$annotations <- c(
-              gglayout$annotations,
-              make_label(
-                faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = if (xy == "x") "center" else "right", 
-                yanchor = if (xy == "x") "top" else "center", 
-                annotationType = "axis"
-              )
-            )
-          }
+          # TODO: this needs to be a function of the switch parameter
+          #if (xy == "x") {
+          #  gglayout$margin$t <- gglayout$margin$t + stripSize
+          #}
+          #if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
+          #  gglayout$margin$r <- gglayout$margin$r + stripSize
+          #}
         }
       }
-      if (has_facet(plot)) gglayout[[axisName]]$title <- ""
+      
     } # end of axis loop
     
     # theme(panel.border = ) -> plotly rect shape
-    xdom <- gglayout[[lay[, "xaxis"]]]$domain
-    ydom <- gglayout[[lay[, "yaxis"]]]$domain
+    xdom <- gglayout[[lay$xaxis]]$domain
+    ydom <- gglayout[[lay$yaxis]]$domain
     border <- make_panel_border(xdom, ydom, theme)
     gglayout$shapes <- c(gglayout$shapes, border)
     
     # facet strips -> plotly annotations
+    # https://github.com/tidyverse/ggplot2/blob/41f154f5eb89f9939c149645611a5834eb674309/R/labeller.r#L495
     if (has_facet(plot)) {
-      col_vars <- ifelse(inherits(plot$facet, "FacetWrap"), "facets", "cols")
-      col_txt <- paste(
-        plot$facet$params$labeller(
-          lay[names(plot$facet$params[[col_vars]])]
-        ), collapse = br()
-      )
+      
+      
+      # TODO: support multiple strips? Or 
+      labeller <- plot$facet$params$labeller
+      strips <- labeller(lay$vars)
+      
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
       if (nchar(col_txt) > 0) {
-        col_lab <- make_label(
+        col_lab <- label_create(
           col_txt, x = mean(xdom), y = max(ydom),
           el = theme[["strip.text.x"]] %||% theme[["strip.text"]],
           xanchor = "center", yanchor = "bottom"
@@ -855,7 +838,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$COL != nCols) row_txt <- ""
       if (nchar(row_txt) > 0) {
-        row_lab <- make_label(
+        row_lab <- label_create(
           row_txt, x = max(xdom), y = mean(ydom),
           el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
           xanchor = "left", yanchor = "middle"
@@ -866,6 +849,48 @@ gg2list <- function(p, width = NULL, height = NULL,
       }
     }
   } # end of panel loop
+  
+  # ------------------------------------------------------------------------
+  # Label conversion. A few notes:
+  # (1) label_create() should return NULL, if label doesn't exist
+  # (2) margin() adds padding *around* the textbox, not *inside*
+  # (3) annotation[i].height is fixed (i.e., absolute size), 
+  #      and can be entirely determined from element_text().
+  # (4) annotation[i].width has to match the graph width (which is relative),
+  #      so the width is determined on the client
+  # ------------------------------------------------------------------------
+  
+  subtitle <- label_create(
+    faced(plot$labels$subtitle, theme$plot.subtitle$face), 
+    0, 1, yshift = unitConvert(theme$plot.subtitle$margin, "pixels")[[3]],
+    el = theme$plot.subtitle,
+    annotationType = "subtitle"
+  )
+  title <- label_create(
+    faced(plot$labels$title, theme$plot.title$face), 
+    0, 1, el = theme$plot.title,
+    yshift = subtitle$height + (subtitle$yshift %||% 0) + 
+      unitConvert(theme$plot.title$margin, "pixels")[[3]],
+    annotationType = "title"
+  )
+  caption <- label_create(
+    faced(plot$labels$caption, theme$plot.caption$face), 
+    0, 0, el = theme$plot.caption,
+    # TODO: yshift to dodge the xaxis ticks/title
+    # note, this will have to happen after drawing axis title as annotation
+    yshift = 0,
+    annotationType = "caption"
+  )
+  
+  # add the annotations to the layout
+  gglayout <- label_add(gglayout, subtitle)
+  gglayout <- label_add(gglayout, title)
+  gglayout <- label_add(gglayout, caption)
+  
+  # TODO: add textbox margins as well!
+  gglayout$margin$t <- gglayout$margin$t + (subtitle$height %||% 0)
+  gglayout$margin$t <- gglayout$margin$t + (title$height %||% 0)
+  gglayout$margin$b <- gglayout$margin$b + (caption$height %||% 0)
   
   
   # ------------------------------------------------------------------------
@@ -935,23 +960,26 @@ gg2list <- function(p, width = NULL, height = NULL,
     
     # legend title annotation - https://github.com/plotly/plotly.js/issues/276
     if (isTRUE(gglayout$showlegend)) {
-      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = br())
-      titleAnnotation <- make_label(
+      idx <- which(vapply(gdefs, inherits, logical(1), "legend"))
+      if (length(idx) != 1) warning("Expected one legend definition", call. = FALSE)
+      legendLines <- strsplit(gdefs[[idx]]$title, "\n", fixed = TRUE)[[1]]
+      legendTitle <- paste(legendLines, collapse = br())
+      titleAnnotation <- label_create(
         legendTitle,
         x = gglayout$legend$x %||% 1.02,
         y = gglayout$legend$y %||% 1,
         theme$legend.title,
         xanchor = "left",
-        yanchor = "bottom",
+        yanchor = "top",
         # just so the R client knows this is a title
+        # TODO: move this logic to annotationType!
         legendTitle = TRUE
       )
-      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
+      gglayout <- label_add(gglayout, titleAnnotation)
       # adjust the height of the legend to accomodate for the title
       # this assumes the legend always appears below colorbars
       gglayout$legend$y <- (gglayout$legend$y %||% 1) -
-        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
+        length(legendLines) * unitConvert(theme$legend.title$size, "npc", "height")
     }
   }
   
@@ -1018,9 +1046,24 @@ gg2list <- function(p, width = NULL, height = NULL,
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
   
+  # a fixed height/width is required for aspect ratios at runtime...
+  # hopefully plotly.js will eventually support aspect ratios "natively"
+  # so that you can resize and maintain aspect ratio
+  # https://github.com/plotly/plotly.js/issues/272
+  
+  if (inherits(p$coordinates, c("CoordFixed", "CoordSf"))) {
+    warning(
+      "Fixed coordinates currently require a fixed height/width,\n",
+      "meaning that window resizing won't effect the size of the graph",
+      call. = FALSE
+    )
+  }
+  
   gglayout$width <- width
   gglayout$height <- height
   gglayout$barmode <- gglayout$barmode %||% "relative"
+  # we set names in labels_add() to make them easier to query...
+  gglayout$annotations <- setNames(gglayout$annotations, NULL)
   
   l <- list(
     data = setNames(traces, NULL),
@@ -1075,6 +1118,16 @@ gg2list <- function(p, width = NULL, height = NULL,
 # ggplotly 'utility' functions
 #-----------------------------------------------------------------------------
 
+# grab grobs from a gtable object matching some regular expression
+gtable_grab <- function(gtable, pattern = "^xlab", nullGrobs = FALSE) {
+  if (!gtable::is.gtable(gtable)) stop("Must be a gtable object")
+  gs <- gtable$grobs[grepl(pattern, gtable$layout$name)]
+  if (!nullGrobs) {
+    gs <- gs[!vapply(gs, function(g) identical(ggplot2::zeroGrob(), g), logical(1))] 
+  }
+  gs %||% NULL
+}
+
 # convert ggplot2 sizes and grid unit(s) to pixels or normalized point coordinates
 unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height", "width")) {
   u <- verifyUnit(u)
@@ -1086,24 +1139,17 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
     width = grid::convertWidth,
     height = grid::convertHeight
   )
-  # convert everything to npc first
-  if (inherits(u, "margin")) {
-    # margins consist of 4 parts: top, right, bottom, and left
-    uh <- grid::convertHeight(u, "npc")
-    uw <- grid::convertWidth(u, "npc")
-    u <- grid::unit(c(uh[1], uw[2], uh[3], uw[4]), "npc")
-  } else {
-    u <- convert(u, "npc")
-  }
   if (to[1] == "pixels") {
     if (inherits(u, "margin")) {
-      uh <- mm2pixels(grid::convertHeight(uh, "mm"))
-      uw <- mm2pixels(grid::convertWidth(uw, "mm"))
+      uh <- mm2pixels(grid::convertHeight(u, "mm"))
+      uw <- mm2pixels(grid::convertWidth(u, "mm"))
       u <- c(uh[1], uw[2], uh[3], uw[4])
     } else {
       u <- mm2pixels(convert(u, "mm"))
     }
   }
+  # TODO: what about npc? Are we going to use it at all?
+  
   as.numeric(u)
 }
 
@@ -1137,25 +1183,72 @@ is_blank <- function(x) {
 
 # given text, and x/y coordinates on 0-1 scale,
 # convert ggplot2::element_text() to plotly annotation
-make_label <- function(txt = "", x, y, el = ggplot2::element_text(), ...) {
-  if (is_blank(el) || is.null(txt) || nchar(txt) == 0 || length(txt) == 0) {
+label_create <- function(txt = "", x, y, xanchor = "left", yanchor = "bottom", 
+                       el = ggplot2::element_text(), 
+                       direction = c("horizontal", "vertical"), ...) {
+  if (is_blank(el) || is.na(txt) || is.null(txt) || nchar(txt) == 0 || length(txt) == 0) {
     return(NULL)
   }
-  angle <- el$angle %||% 0
-  list(list(
-    text = txt,
-    x = x,
-    y = y,
-    showarrow = FALSE,
-    # TODO: hjust/vjust?
-    ax = 0,
-    ay = 0,
-    font = text2font(el),
+  
+  if (!inherits(el, "element_text")) {
+    warning("`el` should be an element_text object", call. = FALSE)
+  }
+
+  direction <- match.arg(direction, direction)
+  fontObj <- text2font(el)
+  
+  ann <- list(
+    # should this label scale with graph width (horizontal) or height (vertical)?
+    ggplotlyDirection = direction,
+    # defaults that I *think* are ok for translating element_text
     xref = "paper",
     yref = "paper",
-    textangle = -angle,
+    showarrow = FALSE,
+    font = fontObj,
+    bgcolor = if (isTRUE(el$debug)) toRGB("yellow", 0.2) else "rgba(0,0,0,0)",
+    ax = 0,
+    ay = 0,
+    x = x, 
+    y = y,
+    xanchor = xanchor, 
+    yanchor = yanchor, 
+    # approximate [0, 1] -> {1, 2, 3} -> {"left", "middle", "right"}
+    align = switch(round(el$hjust * 2, 0) + 1, "left", "middle", "right"),
+    valign = switch(round(el$vjust * 2, 0) + 1, "top", "middle", "bottom"),
+    textangle = - (el$angle %||% 0),
+    text = txt,
     ...
-  ))
+  )
+  
+  # fix the height for horizontal labels and the width for vertical labels
+  dir <- switch(direction, horizontal = "height", vertical = "width")
+  ann[[dir]] <- bbox(txt, el$angle, ann$font$size)[[dir]]
+  
+  ann
+}
+
+label_add <- function(layout, ann, name = NULL) {
+  if (!length(ann)) return(layout)
+  layout$annotations <- c(
+    layout$annotations %||% list(), 
+    setNames(list(ann), name %||% ann$annotationType %||% "")
+  )
+  layout
+}
+
+label_get <- function(layout, type = "title") {
+  anns <- layout$annotations
+  anns[vapply(anns, function(x) identical(type, x$annotationType), logical(1))]
+}
+
+
+# assumes line breaks are specified via '\n'...
+nLineBreaks <- function(txt) {
+  if (length(txt) == 0) return(0)
+  if (!is.character(txt) && length(txt) != 1) {
+    stop("Must be a character string of length 1", call. = FALSE)
+  }
+  length(strsplit(txt, "\n", fixed = TRUE)[[1]] %||% "")
 }
 
 has_facet <- function(x) {
@@ -1190,17 +1283,21 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
 
 # create a plotly font object from ggplot2::element_text()
 text2font <- function(x = ggplot2::element_text(), type = "height") {
+  if (!inherits(x, "element_text")) {
+    warning("`x` must be an `element_text()` object.", call. = FALSE)
+  } 
   list(
-    color = toRGB(x$colour),
-    family = x$family,
-    # TODO: what about the size of vertical text?
-    size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", type)
+    color = toRGB(x$colour %||% "black"),
+    family = x$family %||% "Helvetica",
+    size = unitConvert(grid::unit(x$size %||% 0, "pt"), "pixels", type),
+    # waiting patiently for https://github.com/plotly/plotly.js/issues/1661
+    lineheight = x$lineheight %||% 0.9
   )
 }
 
 # wrap text in bold/italics according to the text "face"
 faced <- function(txt, face = "plain") {
-  if (is.null(face)) face <- "plain"
+  face <- face %||% "plain"
   x <- switch(face,
               plain = txt,
               bold = bold(txt),

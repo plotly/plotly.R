@@ -350,7 +350,8 @@ as_widget <- function(x, ...) {
     sizingPolicy = htmlwidgets::sizingPolicy(
       browser.fill = TRUE,
       defaultWidth = '100%',
-      defaultHeight = 400
+      defaultHeight = 400,
+      padding = 0
     ),
     preRenderHook = plotly_build,
     dependencies = c(

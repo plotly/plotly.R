@@ -15,13 +15,17 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
+    
+    var gd = document.getElementById(el.id);
+    
     if (instance.autosize) {
       var width = instance.width || width;
       var height = instance.height || height;
-      Plotly.relayout(el.id, {width: width, height: height});
+      Plotly.relayout(gd, {width: width, height: height});
+      ggplotlyAdjustLabels(gd);
     }
   },  
-  
+
   renderValue: function(el, x, instance) {
       
     if (typeof(window) !== "undefined") {
@@ -159,8 +163,11 @@ HTMLWidgets.widget({
       
     }
     
-    // Trigger plotly.js calls defined via `plotlyProxy()`
-    plot.then(function() {
+    plot.then(function(gd) {
+      
+      ggplotlyAdjustLabels(gd);
+      
+      // Trigger plotly.js calls defined via `plotlyProxy()`
       if (HTMLWidgets.shinyMode) {
         Shiny.addCustomMessageHandler("plotly-calls", function(msg) {
           var gd = document.getElementById(msg.id);
@@ -174,6 +181,7 @@ HTMLWidgets.widget({
           Plotly[msg.method].apply(null, args);
         });
       }
+      
     });
     
     // Attach attributes (e.g., "key", "z") to plotly event data
@@ -375,7 +383,8 @@ HTMLWidgets.widget({
           selectize.addItems(e.value, true);
           selectize.close();
         }
-      }
+      };
+      
       selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
@@ -438,14 +447,7 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
-      
-      
-      
-          
-      
-      
+
     }
     
   } // end of renderValue
@@ -819,5 +821,23 @@ function removeBrush(el) {
   var outlines = el.querySelectorAll(".select-outline");
   for (var i = 0; i < outlines.length; i++) {
     outlines[i].remove();
+  }
+}
+
+
+// for ggplotly labels, scale annotation height/width to match graph size
+function ggplotlyAdjustLabels(gd) {
+  var layout = gd.layout || {};
+  var anns = layout.annotations || [];
+  for (var i = 0; i < anns.length; i++) {
+    var container = {};
+    if (anns[i].ggplotlyDirection === "horizontal") {
+      container['annotations[' + i + '].width'] = gd._fullLayout._size.w;
+      Plotly.relayout(gd, container);
+    }
+    if (anns[i].ggplotlyDirection === "vertical") {
+      container['annotations[' + i + '].height'] = gd._fullLayout._size.h;
+      Plotly.relayout(gd, container);
+    }
   }
 }
