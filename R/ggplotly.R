@@ -213,7 +213,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   if (!is_dev_ggplot2()) {
     message(
       "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('hadley/ggplot2')`"
+      "Install it with: `devtools::install_github('tidyverse/ggplot2')`"
     )
     if (!identical(dynamicTicks, FALSE)) {
       warning(
