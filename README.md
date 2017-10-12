@@ -9,7 +9,7 @@ An R package for creating interactive web graphics via the open source JavaScrip
 
 ## Announcements
 
-Seats are still available for a 2 day, plotly for R class in NYC, Nov 16-17.
+Seats are still available for a 2 day, plotly for R class in NYC, Nov 18-19.
 
 [Details & registration here](https://plotcon.plot.ly/workshops) 🎨 📈 🗽
 
@@ -27,13 +27,13 @@ Or install the latest development version (on GitHub) via devtools:
 devtools::install_github("ropensci/plotly")
 ```
 
-**NOTE:** The CRAN version of **plotly** is designed to work with the CRAN version of **ggplot2**, but at least for the time being, we recommend using the development versions of both **plotly** and **ggplot2** (`devtools::install_github("hadley/ggplot2")`).
+**NOTE:** The CRAN version of **plotly** is designed to work with the CRAN version of **ggplot2**, but at least for the time being, we recommend using the development versions of both **plotly** and **ggplot2** (`devtools::install_github("tidyverse/ggplot2")`).
 
 ## Getting started
 
 ### Web-based ggplot2 graphics
 
-If you use [ggplot2](https://github.com/hadley/ggplot2), `ggplotly()` converts your static plots to an interactive web-based version!
+If you use [ggplot2](https://github.com/tidyverse/ggplot2), `ggplotly()` converts your static plots to an interactive web-based version!
 
 ```r
 library(plotly)
