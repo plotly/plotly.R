@@ -2,19 +2,23 @@
 library(tourr)
 library(plotly)
 
+data("USArrests")
+
 mat <- rescale(USArrests[, 1:4])
 tour <- new_tour(mat, grand_tour(), NULL)
 
+# projection of each observation
 tour_dat <- function(step_size) {
   step <- tour(step_size)
   proj <- center(mat %*% step$proj)
   data.frame(x = proj[,1], y = proj[,2], state = rownames(mat))
 }
 
+# projection of each variable's axis
 proj_dat <- function(step_size) {
   step <- tour(step_size)
   data.frame(
-    x = step$proj[,1], y = step$proj[,2], state = colnames(mat)
+    x = step$proj[,1], y = step$proj[,2], variable = colnames(mat)
   )
 }
 
@@ -46,8 +50,8 @@ tour_dat <- crosstalk::SharedData$new(tour_dat, ~state, group = "A")
 tour <- proj_dat %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("black")) %>%
   add_segments(xend = 0, yend = 0, color = I("gray80")) %>%
-  add_text(text = ~state) %>%
-  add_markers(data = tour_dat, text = ~state, hoverinfo = "text") %>%
+  add_text(text = ~variable) %>%
+  add_markers(data = tour_dat, text = ~state, ids = ~state, hoverinfo = "text") %>%
   layout(xaxis = ax, yaxis = ax)
 
 dend <- USArrests %>% 
@@ -68,8 +72,8 @@ map <- plot_geo(USArrests, color = I("black")) %>%
     lakecolor = toRGB('white')
   ))
 
-subplot(tour, map, nrows = 2, margin = 0) %>%
+subplot(map, tour, nrows = 2, margin = 0) %>%
   subplot(dend, shareY = FALSE, margin = 0) %>%
   hide_legend() %>%
-  animation_opts(33, redraw = FALSE) %>%
+  animation_opts(33, easing = "cubic", redraw = FALSE) %>%
   highlight(persistent = TRUE, dynamic = TRUE)
