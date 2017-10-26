@@ -1,5 +1,6 @@
-*.png
-inst/
 .Rproj.user
 .Rhistory
 .DS_Store
+Untitled*
+node_modules/
+todo.R

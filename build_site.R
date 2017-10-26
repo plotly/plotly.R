@@ -1,37 +1,45 @@
 # requires my fork
-# devtools::install_github("cpsievert/staticdocs") 
 # $ nohup R CMD BATCH ./build_site.R & 
 
-library(grid)
-library(ggplot2)
-printly <- function(x) {
-  if (ggplot2::is.ggplot(x)) {
-    u <- plotly::plotly_POST(x, filename = Sys.time())
-    message("Click on the png below to view the interactive version")
-    id <- sub("/", ":", strsplit(u$url, "~")[[1]][2])
-    src <- sprintf("https://api.plot.ly/v2/files/%s/image?image_name=default", id)
-    a <- sprintf(
-      '<a href="%s"> <img src="%s" width="540" height="400" /> </a>', 
-      u$url, src
-    )
-    structure(a, class = "html")
-  } else {
-    x
-  }
-}
+# Make sure this script is being run in the right place
+repo_head <- git2r::head(git2r::repository())
+is_gh_pgs <- identical(repo_head@name, "gh-pages") &&
+  grepl("plotly", repo_head@repo@path)
+if (!is_gh_pgs) stop("Must be run on the 'gh-pages' branch of ropensci/plotly.")
 
+# download tidyverse/ggplot2@master
+curl::curl_download(
+  "https://github.com/tidyverse/ggplot2/archive/master.zip",
+  "ggplot2-master.zip"
+)
+unzip("ggplot2-master.zip")
+
+# install tidyverse/ggplot2@master
+devtools::install("ggplot2-master")
+
+# override print.ggplot with our own custom function that sends ggplot objects
+# to plotly's cloud service
+printly <- function(x) {
+  if (!ggplot2::is.ggplot(x)) return(x)
+  u <- plotly::api_create(x, filename = as.character(Sys.time()))
+  message("Click on the png below to view the interactive version")
+  a <- sprintf(
+    '<a href="%s"> <img src="%s" width="540" height="400" /> </a>', 
+    u$web_url, u$image_urls$default
+  )
+  structure(a, class = "html")
+}
 assignInNamespace("print.ggplot", printly, asNamespace("ggplot2"))
 
-# WARNING: this takes close to an hour and was giving me memory leaks in RStudio
-# (I ended up running this on my remote machine to avoid memory issues)
-staticdocs::build_site("../ggplot2")
+# build the site with https://github.com/hadley/pkgdown
+pkgdown::build_site("ggplot2-master")
 
-# push changes to gh-pages
-# system("git checkout gh-pages")
-# git error messages seem to be OK here
-# (remember we're ignoring inst in .gitignore)
-# system("git checkout master -- inst/web")
-# system("cp -r inst/web/* ggplot2/")
+# update the target directory, so site is available at http://ropensci.github.io/plotly/ggplot2/
+unlink("ggplot2")
+file.rename("ggplot2-master/docs", "ggplot2")
+
+# clean-up
+unlink("ggplot2-master")
 
 
 # this is essentially what staticdocs is doing
@@ -40,15 +48,3 @@ staticdocs::build_site("../ggplot2")
 #str(y)
 
 
-# old non-local version
-# printly <- function(x) {
-#   if (ggplot2::is.ggplot(x)) {
-#     p <- plotly:::plotly_iframe(plotly::plotly_POST(x)$url)
-#     structure(p, class = "html")
-#   } else {
-#     x
-#   }
-# }
-# assignInNamespace("print.ggplot", printly, asNamespace("ggplot2"))
-# # should be printly
-# # getS3method("print", "ggplot")
