@@ -7,7 +7,8 @@ is_gh_pgs <- identical(repo_head@name, "gh-pages") &&
   grepl("plotly", repo_head@repo@path)
 if (!is_gh_pgs) stop("Must be run on the 'gh-pages' branch of ropensci/plotly.")
 
-# download tidyverse/ggplot2@master
+# download a fresh version of tidyverse/ggplot2@master
+unlink("ggplot2-master", recursive = TRUE)
 curl::curl_download(
   "https://github.com/tidyverse/ggplot2/archive/master.zip",
   "ggplot2-master.zip"
@@ -20,6 +21,7 @@ devtools::install("ggplot2-master")
 # override print.ggplot with our own custom function that sends ggplot objects
 # to plotly's cloud service
 printly <- function(x) {
+  stop("wtf")
   if (!ggplot2::is.ggplot(x)) return(x)
   u <- plotly::api_create(x, filename = as.character(Sys.time()))
   message("Click on the png below to view the interactive version")
@@ -30,12 +32,19 @@ printly <- function(x) {
   structure(a, class = "html")
 }
 assignInNamespace("print.ggplot", printly, asNamespace("ggplot2"))
+# verify with `getFromNamespace("print.ggplot", asNamespace("ggplot2"))`
 
-# build the site with https://github.com/hadley/pkgdown
-pkgdown::build_site("ggplot2-master")
+render_site <- function() {
+  owd <- setwd("ggplot2-master")
+  on.exit(setwd(owd), add = TRUE)
+  # requires my fork of pkgdown `devtools::install_github('cpsievert/pkgdown')`
+  pkgdown::build_site()
+}
+render_site()
+
 
 # update the target directory, so site is available at http://ropensci.github.io/plotly/ggplot2/
-unlink("ggplot2")
+unlink("ggplot2", recursive = TRUE)
 file.rename("ggplot2-master/docs", "ggplot2")
 
 # clean-up
