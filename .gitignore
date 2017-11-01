@@ -6,6 +6,7 @@ Rapp.history
 *.DS_Store
 node_modules/
 build_site.R
+abbvie.R
 todo.R
 inst/examples/rmd/*.html
 inst/examples/*/rsconnect/*
