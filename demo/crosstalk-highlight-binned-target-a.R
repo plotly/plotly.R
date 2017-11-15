@@ -7,10 +7,10 @@ dots <- plot_ly(d, color = ~class, x = ~displ, y = ~cyl)
 boxs <- plot_ly(d, color = ~class, x = ~class, y = ~cty) %>% add_boxplot()
 bars <- plot_ly(d, x = ~class, color = ~class)
 
-subplot(dots, boxs) %>%
-  subplot(bars, nrows = 2) %>%
+subplot(dots, boxs, titleX = TRUE, titleY = TRUE) %>%
+  subplot(bars, nrows = 2, titleX = TRUE, titleY = TRUE) %>%
   layout(
-    dragmode = "select",
+    title = "Click and drag on scatterplot",
     barmode = "overlay",
     showlegend = FALSE
   ) %>%

@@ -11,14 +11,16 @@ sp <- plot_ly(d, x = ~mpg, y = ~disp) %>%
 hist <- plot_ly(d, x = ~factor(cyl)) %>% 
   add_histogram(color = I("black"))
 box <- plot_ly(d, y = ~disp, color = I("black")) %>% 
-  add_boxplot(name = "overall")
+  add_boxplot(name = " ")
 violin <- plot_ly(d, y = ~disp, color = I("black")) %>%
-  add_trace(type = "violin", name = "overall")
+  add_trace(type = "violin", name = " ")
 
-subplot(sp, hist, box, violin, nrows = 1) %>%
+subplot(sp, box, violin, shareY = TRUE, titleX = TRUE, titleY = TRUE) %>%
+  subplot(hist, widths = c(.75, .25), titleX = TRUE, titleY = TRUE) %>%
   layout(
     barmode = "overlay", 
-    title = "Click and drag scatterplot"
+    title = "Click and drag scatterplot",
+    showlegend = FALSE
   ) %>%
   highlight(
     "plotly_selected",
