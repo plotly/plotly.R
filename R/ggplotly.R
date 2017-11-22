@@ -43,17 +43,16 @@
 #'   geom_point(aes(text = name, size = pop), colour = "red", alpha = 1/2)
 #' ggplotly(viz, tooltip = c("text", "size"))
 #' 
-#' 
-#' # highlighting lines
-#' demo("highlight-ggplotly", package = "plotly")
-#' 
-#' # client-side linked brushing
+#' # linked scatterplot brushing
 #' library(crosstalk)
 #' d <- SharedData$new(mtcars)
 #' subplot(
 #'  qplot(data = d, x = mpg, y = wt),
 #'  qplot(data = d, x = mpg, y = vs)
 #' )
+#' 
+#' # more brushing (i.e. highlighting) examples
+#' demo("crosstalk-highlight-ggplotly", package = "plotly")
 #' 
 #' # client-side linked brushing in a scatterplot matrix
 #' SharedData$new(iris) %>%
