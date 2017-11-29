@@ -713,7 +713,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
       if (inherits(p$coordinates, fixed_coords)) {
         axisObj$scaleanchor <- anchor
-        ratio <- p$coordinates$ratio %||% p$coordinates$aspect(rng) %||% 1
+        ratio <- p$coordinates$ratio %||% 1
+        # a la CoordSf$aspect
+        if (isTRUE(sf::st_is_longlat(rng$crs))) {
+          ratio <- cos(mean(rng$y_range) * pi/180)
+        }
         axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
       }
       
