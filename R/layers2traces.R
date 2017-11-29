@@ -10,28 +10,31 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     
-    # by default, show all user-specified and generated aesthetics in hovertext
-    stat_aes <- y$stat$default_aes
-    map <- c(y$mapping, stat_aes[grepl("^\\.\\.", as.character(stat_aes))])
+    # consider "calculated" aesthetics (e.g., density, count, etc)
+    calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]
+    map <- c(y$mapping, calc_aes)
+    
     # add on plot-level mappings, if they're inherited
     if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
-    # "hidden" names should be taken verbatim
-    idx <- grepl("^\\.\\.", map) & grepl("\\.\\.$", map)
-    map <- setNames(
-      sub("^\\.\\.", "", sub("\\.\\.$", "", as.character(map))),
-      names(map)
-    )
+    
+    # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
+    map <- ggfun("make_labels")(map)
+
+    # filter tooltip aesthetics down to those specified in `tooltip` arg 
     if (!identical(p$tooltip, "all")) {
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
+    
     # throw out positional coordinates if we're hovering on fill
     if (identical("fills", hover_on(x))) {
       map <- map[!names(map) %in% c("x", "xmin", "xmax", "y", "ymin", "ymax")]
     }
+    
     # disregard geometry mapping in hovertext for GeomSf
     if ("GeomSf" %in% class(y$geom)) {
       map <- map[!names(map) %in% "geometry"]
     }
+    
     param[["hoverTextAes"]] <- map
     param
   }, data, p$layers)
