@@ -351,12 +351,9 @@ verify_attr_names <- function(p) {
 # ensure both the layout and trace attributes adhere to the plot schema
 verify_attr_spec <- function(p) {
   if (!is.null(p$x$layout)) {
-    layoutNames <- names(p$x$layout)
-    layoutNew <- verify_attr(
-      setNames(p$x$layout, sub("[0-9]+$", "", layoutNames)),
-      Schema$layout$layoutAttributes
+    p$x$layout <- verify_attr(
+      p$x$layout, Schema$layout$layoutAttributes
     )
-    p$x$layout <- setNames(layoutNew, layoutNames)
   }
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
@@ -372,7 +369,7 @@ verify_attr_spec <- function(p) {
 
 verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
-    attrSchema <- schema[[attr]]
+    attrSchema <- schema[[sub("[2-9]+$", "", attr)]]
     # if schema is missing (i.e., this is an un-official attr), move along
     if (is.null(attrSchema)) next
     
