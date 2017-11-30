@@ -291,7 +291,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   # return a list of data frames...one for every geometry (a la, GeomSmooth)
   d <- split(dat, dat[[".plotlySfType"]])
   for (i in seq_along(d)) {
-    d[[i]] <- prefix_class(d[[i]], names(d)[[i]])
+    d[[i]] <- prefix_class(d[[i]], c("GeomSf", names(d)[[i]]))
   }
   if (length(d) == 1) d[[1]] else d
 }
@@ -970,8 +970,17 @@ ribbon_dat <- function(dat) {
 
 aes2plotly <- function(data, params, aes = "size") {
   geom <- class(data)[1]
-  vals <- uniq(data[[aes]]) %||% params[[aes]] %||%
-    ggfun(geom)$default_aes[[aes]] %||% NA
+  
+  # Hack to support this geom_sf hack 
+  # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
+  defaults <- if (identical(geom, "GeomSf")) {
+    type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
+    ggfun("default_aesthetics")(type)
+  } else {
+    ggfun(geom)$default_aes
+  }
+  
+  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
   converter <- switch(
     aes, 
     size = mm2pixels, 
