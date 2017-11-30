@@ -28,8 +28,8 @@ test_that("geom_sf() polygons with fill/text.", {
   p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME))
   
   l <- save_outputs(p, "sf-fill-text")
-  # one trace for graticule, one for colorbar, and one for each row
-  expect_length(l$data, nrow(nc) + 2)
+  # one trace for every fillcolor, one for graticule, one for colorbar
+  expect_length(l$data, length(unique(nc$AREA)) + 2)
   expect_true(
     all(unlist(lapply(l$data, "[[", "hoverinfo")) %in% c("none", "text"))
   )
