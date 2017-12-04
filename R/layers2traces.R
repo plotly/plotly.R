@@ -275,27 +275,18 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
   data <- expand(data)
   
+  # logic based on GeomSf$draw_key
+  geomBasic <- switch(
+    params$legend %||% "", 
+    point = "GeomPoint", 
+    line = "GeomPath", 
+    "GeomPolygon"
+  )
+  
   # determine the type of simple feature for each row
   # recode the simple feature with the type of geometry used to render it
-  data[[".plotlySfType"]] <- sapply(data$geometry, function(x) class(x)[2])
-  dat <- dplyr::mutate(
-    data, .plotlySfType = dplyr::recode(.plotlySfType,
-      MULTIPOLYGON = "GeomPolygon",
-      MULTILINESTRING = "GeomLine",
-      MULTIPOINT = "GeomPoint",
-      POLYGON = "GeomPolygon",
-      LINESTRING = "GeomLine",
-      POINT = "GeomPoint"
-  ))
-  
-  # return a list of data frames...one for every geometry (a la, GeomSmooth)
-  d <- split(dat, dat[[".plotlySfType"]])
-  for (i in seq_along(d)) {
-    d[[i]] <- prefix_class(d[[i]], c("GeomSf", names(d)[[i]]))
-  }
-  if (length(d) == 1) d[[1]] else d
+  prefix_class(data, c("GeomSf", geomBasic))
 }
-utils::globalVariables(c(".plotlySfType"))
 
 #' @export
 to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {

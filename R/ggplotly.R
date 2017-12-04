@@ -631,8 +631,8 @@ gg2list <- function(p, width = NULL, height = NULL,
           grill$hoverinfo <- "none"
           grill$showlegend <- FALSE
           grill$`_isGraticule` <- TRUE
-          grill$xaxis <- lay$xaxis
-          grill$yaxis <- lay$yaxis
+          grill$xaxis <- sub("axis", "", lay$xaxis)
+          grill$yaxis <- sub("axis", "", lay$yaxis)
           
           traces <- c(list(grill), traces)
         }
