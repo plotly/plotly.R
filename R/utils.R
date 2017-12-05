@@ -369,7 +369,7 @@ verify_attr_spec <- function(p) {
 
 verify_attr <- function(proposed, schema) {
   for (attr in names(proposed)) {
-    attrSchema <- schema[[sub("[2-9]+$", "", attr)]]
+    attrSchema <- schema[[attr]] %||% schema[[sub("[0-9]+$", "", attr)]]
     # if schema is missing (i.e., this is an un-official attr), move along
     if (is.null(attrSchema)) next
     

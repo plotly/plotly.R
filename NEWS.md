@@ -9,6 +9,7 @@
 
 ## BUG FIXES
 
+Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
 
 # 4.7.1
 
