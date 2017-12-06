@@ -42,7 +42,8 @@ Imports:
     lazyeval (>= 0.2.0),
     crosstalk,
     purrr,
-    data.table
+    data.table,
+    sf
 Suggests:
     MASS,
     maps,
@@ -61,7 +62,6 @@ Suggests:
     webshot,
     listviewer,
     dendextend,
-    sf,
     RSelenium,
     png,
     IRdisplay
