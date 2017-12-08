@@ -9,9 +9,7 @@ An R package for creating interactive web graphics via the open source JavaScrip
 
 ## Announcements
 
-Seats are still available for a 2 day, plotly for R class in NYC, Nov 18-19.
-
-[Details & registration here](https://plotcon.plot.ly/workshops) 🎨 📈 🗽
+Learn plotly and shiny during [our 2-day R workshop](https://plotcon.plot.ly/workshops/r-shiny-dash-r)! [Read more](https://blog.cpsievert.me/2017/12/04/components-of-a-successful-r-workshop/) about [Carson](https://cpsievert.me)'s (the maintainer of plotly) prior experiences and philosophy for the workshop.
 
 ## Installation
 
