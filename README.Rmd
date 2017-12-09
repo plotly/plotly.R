@@ -93,7 +93,7 @@ To date, [this slide deck](https://cpsievert.github.io/plotcon17/workshop/day2) 
 
 ## Examples and documentation
 
-We have numerous online examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive write-up is also available at <https://plotly-book.cpsievert.me/>. The package itself ships with a number of demos (list them by running `demo(package = "plotly")`) and shiny/rmarkdown examples (list them by running `plotly_example("shiny")` or `plotly_example("rmd")`).  Carson Sievert also keeps numerous [slide decks](https://talks.github.me) with useful topics and demos.
+We have numerous online examples on <https://plot.ly/r/> and <https://plot.ly/ggplot2/>, but a more comprehensive write-up is also available at <https://plotly-book.cpsievert.me/>. The package itself ships with a number of demos (list them by running `demo(package = "plotly")`) and shiny/rmarkdown examples (list them by running `plotly_example("shiny")` or `plotly_example("rmd")`). [Carson](https://cpsievert.me) also keeps numerous [slide decks](https://talks.cpsievert.me) with useful examples and concepts.
 
 ## Contributing
 
