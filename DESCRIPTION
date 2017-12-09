@@ -67,7 +67,7 @@ Suggests:
     IRdisplay
 Remotes:
   tidyverse/ggplot2,
-  ramnathv/htmlwidgets
+  r-spatial/sf
 LazyData: true
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
