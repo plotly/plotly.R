@@ -12,6 +12,7 @@
 * The selection (i.e., linked-brushing) mode can now switch from 'transient' to 'persistent' by holding the 'shift' key. It's still possible to _force_ persistent selection by setting `persistent = TRUE` in `highlight()`, but `persistent = FALSE` (the default) is now recommended since it allows one to switch between [persistent/transient selection](https://plotly-book.cpsievert.me/linking-views-without-shiny.html#transient-versus-persistent-selection) in the browser, rather than at the command line.
 * The `highlight()` function gains a `debounce` argument for throttling the rate at which `on` events may be fired. This is mainly useful for improving user experience when `highlight(on = "plotly_hover")` and mousing over relevant markers at a rapid rate (see #1277)
 * The `animation_button()` function gains a `label` argument, making it easier to control the label of an animation button generated through the `frame` API (see #1205).
+* You can now do async rendering of Plotly plots with Shiny, using the [promises](https://rstudio.github.io/promises/) package.
 
 ## CHANGES
 
