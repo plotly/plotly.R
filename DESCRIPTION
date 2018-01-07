@@ -42,7 +42,8 @@ Imports:
     lazyeval (>= 0.2.0),
     crosstalk,
     purrr,
-    data.table
+    data.table,
+    xml2
 Suggests:
     MASS,
     maps,

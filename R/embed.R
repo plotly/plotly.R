@@ -35,7 +35,8 @@ embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
     on.exit(unlink(file), add = TRUE)
   }
 
-  res <- htmlwidgets::saveWidget(p, file, selfcontained=FALSE)
+  #res <- htmlwidgets::saveWidget(p, file, selfcontained=FALSE)
+  res <- writePlotToFileXML2(p, x, file, width, height)
 
   # wrap in an iframe as *nteract* won't do this automatically
   if( ext_html ){
