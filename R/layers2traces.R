@@ -111,7 +111,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     separator <- new_id()
     fac <- factor(
       apply(d[split_vars], 1, paste, collapse = separator),
-      levels = apply(lvls, 1, paste, collapse = separator)
+      levels = unique(apply(lvls, 1, paste, collapse = separator))
     )
     if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
@@ -273,15 +273,24 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 #' @export 
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
-  data <- expand(data)
+  browser()
+  sf_data <- sf::st_as_sf(data)
+  sf_d <- lapply(1:nrow(data), function(i) {
+    sf_as_plotly(sf_data[i, , drop = FALSE])
+  })
+    
+    sf_as_plotly()
   
-  # logic based on GeomSf$draw_key
+  # logic based on GeomSf$draw_panel
+  #p$coord$transform(data, layout$panel_params[[1]])
+  
   geomBasic <- switch(
     params$legend %||% "", 
     point = "GeomPoint", 
     line = "GeomPath", 
     "GeomPolygon"
   )
+  
   
   # determine the type of simple feature for each row
   # recode the simple feature with the type of geometry used to render it
@@ -498,7 +507,7 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   # from GeomCrossbar$draw_panel()
-  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  middle <- base::transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
