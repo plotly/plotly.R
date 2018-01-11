@@ -58,7 +58,8 @@
 #' # client-side linked brushing in a scatterplot matrix
 #' SharedData$new(iris) %>%
 #'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
-#'   ggplotly(tooltip = c("x", "y", "colour"))
+#'   ggplotly(tooltip = c("x", "y", "colour")) %>%
+#'   highlight("plotly_selected")
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
