@@ -431,15 +431,7 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
-      
-      
-      
-          
-      
-      
-    }
+    } // end of selectionChange
     
   } // end of renderValue
 }); // end of widget definition
@@ -712,6 +704,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       
       if (tracesToDim.length > 0) {
         Plotly.restyle(this.gd, {"opacity": opacities}, tracesToDim);
+        // this is an unfortunate consequence of the selected/unselected API
+        // https://codepen.io/cpsievert/pen/opOawp
+        Plotly.restyle(this.gd, {"unselected": {"marker": {"opacity": 1}}});
       }
       
     }
