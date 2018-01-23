@@ -137,6 +137,15 @@ highlight <- function(p, on = "plotly_click", off,
     off <- default(off_default %||% "plotly_relayout")
   }
   
+  if (isTRUE(persistent)) {
+    message(
+      "Persistent selection can now be enabled via the 'shift' button. ",
+      "Thus, it's recommended to use the default (persistent = FALSE) since ",
+      "this allows one to switch between persistent/transient selection ",
+      "'on-demand' (in the browser)."
+    )
+  }
+  
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
   p$x$highlight <- list(
     # NULL may be used to disable on/off events
