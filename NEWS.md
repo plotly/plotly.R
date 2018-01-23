@@ -2,14 +2,16 @@
 
 ## NEW FEATURES & IMPROVEMENTS
 
+* Upgraded to plotly.js v1.33.0. A _huge_ amount of features and improvements have been made since v1.29.2 (i.e., the version included in the last CRAN release of the R package - v4.7.1). Read the complete list of changes here: <https://github.com/plotly/plotly.js/releases>.
+* Persistent selection can now be enabled via the 'shift' button. It's still possible to _force_ persistent selection by setting `persistent = TRUE` in `highlight()`, but `persistent = FALSE` (the default) is now recommended since it allows one to switch between [transient/persistent selection](https://plotly-book.cpsievert.me/linking-views-without-shiny.html#transient-versus-persistent-selection) in the browser, rather than at the command line.
+
 ## CHANGES
 
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
-* Upgraded to plotly.js v1.32.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.32.0
 
 ## BUG FIXES
 
-Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
+* Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
 
 # 4.7.1
 
