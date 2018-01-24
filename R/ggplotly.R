@@ -592,7 +592,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisText <- theme_el("axis.text")
       axisTitle <- theme_el("axis.title")
       axisLine <- theme_el("axis.line")
-      panelGrid <- theme_el("panel.grid.major")
+      panelGrid <- theme_el("panel.grid.major") %||% theme_el("panel.grid") 
       stripText <- theme_el("strip.text")
       
       axisName <- lay[, paste0(xy, "axis")]
