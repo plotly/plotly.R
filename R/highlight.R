@@ -102,12 +102,12 @@ highlight <- function(p, on = "plotly_click", off,
     stop("opacityDim must be between 0 and 1", call. = FALSE)
   }
   if (dynamic && length(color) < 2) {
-    message("Adding more colors to the selection color palette")
+    message("Adding more colors to the selection color palette.")
     color <- c(color, RColorBrewer::brewer.pal(4, "Set1"))
   }
   if (!dynamic && length(color) > 1) {
     warning(
-      "Can only use a single color for selections when dynamic=FALSE",
+      "Can only use a single color for selections when `dynamic = FALSE`.",
       call. = FALSE
     )
     color <- color[1] 
@@ -139,10 +139,9 @@ highlight <- function(p, on = "plotly_click", off,
   
   if (isTRUE(persistent)) {
     message(
-      "Persistent selection can now be enabled via the 'shift' key. ",
-      "Thus, it's recommended to use the default (persistent = FALSE) since ",
-      "this allows one to switch between persistent/transient selection ",
-      "'on-demand' (in the browser)."
+      "We recommend setting `persistent` to `FALSE` (the default) because ",
+      "persistent selection mode can now be used by holding the shift key ",
+      "(while triggering the `on` event)."
     )
   }
   
