@@ -54,3 +54,14 @@ test_that("geom_sf() with basic polygons and points.", {
   expect_equivalent(l$data[[2]]$mode, "lines")
   expect_equivalent(l$data[[3]]$mode, "markers")
 })
+
+test_that("sf aspect ratio is correct", {
+  skip_if_not_installed("sf")
+  
+  p <- ggplot(nc) + geom_sf() 
+  
+  l <- save_outputs(p, "sf-aspect")
+  
+  expect_equivalent(l$layout$xaxis$scaleanchor, "y")
+  expect_equal(l$layout$xaxis$scaleratio, 0.81678435872298)
+})
