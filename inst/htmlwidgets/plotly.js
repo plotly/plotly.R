@@ -16,6 +16,15 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
+    
+    /* 
+    / 'inform the world' about highlighting options this is so other
+    / crosstalk libraries have a chance to respond to special settings 
+    / such as persistent selection. 
+    / AFAIK, leaflet is the only library with such intergration
+    / https://github.com/rstudio/leaflet/pull/346/files#diff-ad0c2d51ce5fdf8c90c7395b102f4265R154
+    */
+    var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(x.highlight);
       
     if (typeof(window) !== "undefined") {
       // make sure plots don't get created outside the network (for on-prem)
