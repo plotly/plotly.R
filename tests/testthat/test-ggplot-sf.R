@@ -33,7 +33,11 @@ test_that("geom_sf() polygons with fill/text.", {
   expect_true(
     all(unlist(lapply(l$data, "[[", "hoverinfo")) %in% c("none", "text"))
   )
-  unlist(lapply(l$data, "[[", "text"))
+  # graticule styling should inherit from panel.grid.major
+  expect_equivalent(
+    l$data[[1]]$line$color, 
+    toRGB(ggplot2::calc_element("panel.grid.major", ggplot2::theme_gray())[["colour"]])
+  )
 })
 
 
@@ -53,4 +57,15 @@ test_that("geom_sf() with basic polygons and points.", {
   expect_equivalent(l$data[[1]]$line$color, "rgba(255,0,0,1)")
   expect_equivalent(l$data[[2]]$mode, "lines")
   expect_equivalent(l$data[[3]]$mode, "markers")
+})
+
+test_that("sf aspect ratio is correct", {
+  skip_if_not_installed("sf")
+  
+  p <- ggplot(nc) + geom_sf() 
+  
+  l <- save_outputs(p, "sf-aspect")
+  
+  expect_equivalent(l$layout$xaxis$scaleanchor, "y")
+  expect_equal(l$layout$xaxis$scaleratio, 0.81678435872298)
 })
