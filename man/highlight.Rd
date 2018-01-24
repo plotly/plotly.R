@@ -34,7 +34,10 @@ events altogether, use \code{NULL}. Currently the following are supported:
 of the plot changes.
 }}
 
-\item{persistent}{should selections persist (i.e., accumulate)?}
+\item{persistent}{should selections persist (i.e., accumulate)? We often
+refer to the default (\code{FALSE}) as a 'transient' selection mode;
+which is recommended, because one may switch from 'transient' to
+'persistent' selection by holding the shift key.}
 
 \item{dynamic}{should a widget for changing selection colors be included?}
 
@@ -55,6 +58,8 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 \item{selected}{attributes of the selection, see \code{\link[=attrs_selected]{attrs_selected()}}.}
 
 \item{...}{currently not supported.}
+
+\item{unselected}{attributes of the non-selected marks, see \code{\link[=attrs_unselected]{attrs_unselected()}}.}
 }
 \description{
 This function sets a variety of options for brushing (i.e., highlighting)

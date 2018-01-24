@@ -28,7 +28,10 @@
 #'  (i.e., clicking the home button in the modebar) or whenever the height/width
 #'  of the plot changes.
 #' }
-#' @param persistent should selections persist (i.e., accumulate)?
+#' @param persistent should selections persist (i.e., accumulate)? We often
+#' refer to the default (`FALSE`) as a 'transient' selection mode; 
+#' which is recommended, because one may switch from 'transient' to 
+#' 'persistent' selection by holding the shift key.
 #' @param dynamic should a widget for changing selection colors be included? 
 #' @param color character string of color(s) to use for 
 #' highlighting selections. See [toRGB()] for valid color
@@ -41,6 +44,7 @@
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param selected attributes of the selection, see [attrs_selected()].
+#' @param unselected attributes of the non-selected marks, see [attrs_unselected()].
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
