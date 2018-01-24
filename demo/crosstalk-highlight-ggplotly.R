@@ -6,7 +6,7 @@ d <- SharedData$new(txhousing, ~city, "Select a city")
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 ggplotly(p, tooltip = "city") %>%
   layout(title = "Click on a line to highlight a year") %>%
-  highlight(dynamic = TRUE, selectize = TRUE, persistent = TRUE)
+  highlight(dynamic = TRUE, selectize = TRUE)
 
 # crosstalk keys are automatically added to the group aesthetic...
 # if you want to avoid adding the key to group for a layer,

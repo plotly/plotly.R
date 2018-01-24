@@ -6,7 +6,7 @@ library(htmltools)
 
 # leaflet should respect these "global" highlight() options
 options(
-  opacityDim = 1, persistent = TRUE
+  opacityDim = 0.5, persistent = TRUE
 )
 
 sd <- SharedData$new(quakes)
