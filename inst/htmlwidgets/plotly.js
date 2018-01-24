@@ -21,6 +21,22 @@ HTMLWidgets.widget({
       // make sure plots don't get created outside the network (for on-prem)
       window.PLOTLYENV = window.PLOTLYENV || {};
       window.PLOTLYENV.BASE_URL = x.base_url;
+      
+      // Enable persistent selection when shift key is down
+      // https://stackoverflow.com/questions/1828613/check-if-a-key-is-down
+       var persistOnShift = function(e) {
+        if (!e) window.event;
+        if (e.shiftKey) { 
+          x.highlight.persistent = true; 
+        } else {
+          x.highlight.persistent = false; 
+        }
+      };
+      
+      // Only relevant if we haven't forced persistent mode at command line
+      if (!x.highlight.persistent) {
+        window.onmousemove = persistOnShift;
+      }
     }
 
     var graphDiv = document.getElementById(el.id);

@@ -139,7 +139,7 @@ highlight <- function(p, on = "plotly_click", off,
   
   if (isTRUE(persistent)) {
     message(
-      "Persistent selection can now be enabled via the 'shift' button. ",
+      "Persistent selection can now be enabled via the 'shift' key. ",
       "Thus, it's recommended to use the default (persistent = FALSE) since ",
       "this allows one to switch between persistent/transient selection ",
       "'on-demand' (in the browser)."
