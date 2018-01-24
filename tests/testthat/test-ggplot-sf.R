@@ -33,7 +33,11 @@ test_that("geom_sf() polygons with fill/text.", {
   expect_true(
     all(unlist(lapply(l$data, "[[", "hoverinfo")) %in% c("none", "text"))
   )
-  unlist(lapply(l$data, "[[", "text"))
+  # graticule styling should inherit from panel.grid.major
+  expect_equivalent(
+    l$data[[1]]$line$color, 
+    toRGB(ggplot2::calc_element("panel.grid.major", ggplot2::theme_gray())[["colour"]])
+  )
 })
 
 
