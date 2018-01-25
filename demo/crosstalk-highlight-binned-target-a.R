@@ -19,7 +19,7 @@ bars <- plot_ly(d, colors = "Set1", x = ~class, color = ~class)
 subplot(dots, boxs, titleX = TRUE, titleY = TRUE) %>%
   subplot(bars, nrows = 2, titleX = TRUE, titleY = TRUE) %>%
   layout(
-    title = "Dynamic 2-way ANOVA (clik & drag on scatterplot)",
+    title = "Dynamic 2-way ANOVA (click & drag on scatterplot)",
     barmode = "overlay",
     showlegend = FALSE
   ) %>%
