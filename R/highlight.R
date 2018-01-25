@@ -28,7 +28,10 @@
 #'  (i.e., clicking the home button in the modebar) or whenever the height/width
 #'  of the plot changes.
 #' }
-#' @param persistent should selections persist (i.e., accumulate)?
+#' @param persistent should selections persist (i.e., accumulate)? We often
+#' refer to the default (`FALSE`) as a 'transient' selection mode; 
+#' which is recommended, because one may switch from 'transient' to 
+#' 'persistent' selection by holding the shift key.
 #' @param dynamic should a widget for changing selection colors be included? 
 #' @param color character string of color(s) to use for 
 #' highlighting selections. See [toRGB()] for valid color
@@ -41,6 +44,7 @@
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param selected attributes of the selection, see [attrs_selected()].
+#' @param unselected attributes of the non-selected marks, see [attrs_unselected()].
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
@@ -56,13 +60,11 @@
 #' d <- SharedData$new(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 
-#' highlight(gg, persistent = TRUE, dynamic = TRUE)
+#' highlight(gg, dynamic = TRUE)
 #' 
 #' # supply custom colors to the brush 
 #' cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
-#' highlight(
-#'   gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
-#' )
+#' highlight(gg, on = "plotly_hover", color = cols, dynamic = TRUE)
 #' 
 #' # Use attrs_selected() for complete control over the selection appearance
 #' # note any relevant colors you specify here should override the color argument
@@ -72,10 +74,7 @@
 #'   marker = list(symbol = "x")
 #' )
 #' 
-#' highlight(
-#'  layout(gg, showlegend = TRUE),  
-#'  selected = s, persistent = TRUE
-#' )
+#' highlight(layout(gg, showlegend = TRUE), selected = s)
 #' 
 
 highlight <- function(p, on = "plotly_click", off, 
@@ -102,12 +101,12 @@ highlight <- function(p, on = "plotly_click", off,
     stop("opacityDim must be between 0 and 1", call. = FALSE)
   }
   if (dynamic && length(color) < 2) {
-    message("Adding more colors to the selection color palette")
+    message("Adding more colors to the selection color palette.")
     color <- c(color, RColorBrewer::brewer.pal(4, "Set1"))
   }
   if (!dynamic && length(color) > 1) {
     warning(
-      "Can only use a single color for selections when dynamic=FALSE",
+      "Can only use a single color for selections when `dynamic = FALSE`.",
       call. = FALSE
     )
     color <- color[1] 
@@ -135,6 +134,14 @@ highlight <- function(p, on = "plotly_click", off,
       plotly_hover = "plotly_doubleclick"
     )
     off <- default(off_default %||% "plotly_relayout")
+  }
+  
+  if (isTRUE(persistent)) {
+    message(
+      "We recommend setting `persistent` to `FALSE` (the default) because ",
+      "persistent selection mode can now be used by holding the shift key ",
+      "(while triggering the `on` event)."
+    )
   }
   
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()

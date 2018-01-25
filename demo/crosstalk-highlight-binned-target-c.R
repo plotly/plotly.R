@@ -10,7 +10,4 @@ p2 <- plot_ly(tx, x = ~median, color = I("black")) %>%
 
 subplot(gg1, p2, titleX = TRUE, titleY = TRUE) %>% 
   layout(barmode = "overlay") %>%
-  highlight(
-    dynamic = TRUE, persistent = TRUE, 
-    selected = attrs_selected(opacity = 0.3)
-  )
+  highlight(dynamic = TRUE, selected = attrs_selected(opacity = 0.3))

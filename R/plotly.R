@@ -373,7 +373,7 @@ typedArrayPolyfill <- function() {
 # and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
-    "plotlyjs", "1.31.2.9000",
+    "plotlyjs", "1.33.1",
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
     stylesheet = "plotly-htmlwidgets.css"

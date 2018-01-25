@@ -16,11 +16,36 @@ HTMLWidgets.widget({
   },  
   
   renderValue: function(el, x, instance) {
+    
+    /* 
+    / 'inform the world' about highlighting options this is so other
+    / crosstalk libraries have a chance to respond to special settings 
+    / such as persistent selection. 
+    / AFAIK, leaflet is the only library with such intergration
+    / https://github.com/rstudio/leaflet/pull/346/files#diff-ad0c2d51ce5fdf8c90c7395b102f4265R154
+    */
+    var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(x.highlight);
       
     if (typeof(window) !== "undefined") {
       // make sure plots don't get created outside the network (for on-prem)
       window.PLOTLYENV = window.PLOTLYENV || {};
       window.PLOTLYENV.BASE_URL = x.base_url;
+      
+      // Enable persistent selection when shift key is down
+      // https://stackoverflow.com/questions/1828613/check-if-a-key-is-down
+       var persistOnShift = function(e) {
+        if (!e) window.event;
+        if (e.shiftKey) { 
+          x.highlight.persistent = true; 
+        } else {
+          x.highlight.persistent = false; 
+        }
+      };
+      
+      // Only relevant if we haven't forced persistent mode at command line
+      if (!x.highlight.persistent) {
+        window.onmousemove = persistOnShift;
+      }
     }
 
     var graphDiv = document.getElementById(el.id);
@@ -431,15 +456,7 @@ HTMLWidgets.widget({
           }
         });
       }
-      
-      
-      
-      
-      
-          
-      
-      
-    }
+    } // end of selectionChange
     
   } // end of renderValue
 }); // end of widget definition
@@ -551,9 +568,6 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     var selectionColour = crosstalk.group(group).var("plotlySelectionColour").get() || 
       this.highlight.color[0];
 
-    // selection brush attributes
-    var selectAttrs = Object.keys(this.highlight.selected);
-
     for (var i = 0; i < this.origData.length; i++) {
       // TODO: try using Lib.extendFlat() as done in  
       // https://github.com/plotly/plotly.js/pull/1136 
@@ -570,50 +584,31 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (!trace._isSimpleKey) {
           trace = subsetArrayAttrs(trace, matches);
         }
-        // Apply selection brush attributes (supplied from R)
-        // TODO: it would be neat to have a dropdown to dynamically specify these
-        for (var j = 0; j < selectAttrs.length; j++) {
-          var attr = selectAttrs[j];
-          trace[attr] = this.highlight.selected[attr];
-        }
+        // reach into the full trace object so we can properly reflect the 
+        // selection attributes in every view
+        var d = this.gd._fullData[i];
+        
+        /* 
+        / Recursively inherit selection attributes from various sources, 
+        / in order of preference:
+        /  (1) official plotly.js selected attribute
+        /  (2) highlight(selected = attrs_selected(...))
+        */
+        // TODO: it would be neat to have a dropdown to dynamically specify these!
+        $.extend(true, trace, this.highlight.selected, d.selected);
         
         // if it is defined, override color with the "dynamic brush color""
-        // TODO: DRY this up
-        var d = this.gd._fullData[i];
         if (d.marker) {
           trace.marker = trace.marker || {};
           trace.marker.color =  selectionColour || trace.marker.color || d.marker.color;
-          
-          // adopt any user-defined styling for the selection
-          var selected = this.highlight.selected.marker || {};
-          var attrs = Object.keys(selected);
-          for (var j = 0; j < attrs.length; j++) {
-            trace.marker[attrs[j]] = selected[attrs[j]];
-          }
         }
-        
         if (d.line) {
           trace.line = trace.line || {};
           trace.line.color =  selectionColour || trace.line.color || d.line.color;
-          
-          // adopt any user-defined styling for the selection
-          var selected = this.highlight.selected.line || {};
-          var attrs = Object.keys(selected);
-          for (var j = 0; j < attrs.length; j++) {
-            trace.line[attrs[j]] = selected[attrs[j]];
-          }
         }
-        
         if (d.textfont) {
           trace.textfont = trace.textfont || {};
           trace.textfont.color =  selectionColour || trace.textfont.color || d.textfont.color;
-          
-          // adopt any user-defined styling for the selection
-          var selected = this.highlight.selected.textfont || {};
-          var attrs = Object.keys(selected);
-          for (var j = 0; j < attrs.length; j++) {
-            trace.textfont[attrs[j]] = selected[attrs[j]];
-          }
         }
         // attach a sensible name/legendgroup
         trace.name = trace.name || keys.join("<br />");
@@ -712,6 +707,9 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       
       if (tracesToDim.length > 0) {
         Plotly.restyle(this.gd, {"opacity": opacities}, tracesToDim);
+        // this is an unfortunate consequence of the selected/unselected API
+        // https://codepen.io/cpsievert/pen/opOawp
+        Plotly.restyle(this.gd, {"unselected": {"marker": {"opacity": 1}}});
       }
       
     }
