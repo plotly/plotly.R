@@ -46,9 +46,9 @@ p %>%
 
 # By default, all selections are transient, meaning prior selections are 
 # removed from the selection set before new selections are added. To prevent
-# prior selections from being removed, simply set the persistent argument to 
-# `TRUE`.
-highlight(p, on = "plotly_hover", persistent = TRUE)
+# prior selections from being removed, hold down the shift key while triggering
+# the event
+highlight(p, on = "plotly_hover")
 
 # Sometimes its useful to compare two or more different selection sets. 
 # For example, how do patients with a high response on visit 1 compare to those 
@@ -57,10 +57,10 @@ highlight(p, on = "plotly_hover", persistent = TRUE)
 # a colourpicker htmlwidget (@colourpicker) will appear just above the plotly 
 # visualization. At any given time, the value of this widget controls the 
 # color of new selection(s).
-highlight(p, on = "plotly_hover", persistent = TRUE, dynamic = TRUE)
+highlight(p, on = "plotly_hover", dynamic = TRUE)
 
 # By default, the colourpicker widget uses colors from the "Set1" 
 # colour brewer palette (@RColorBrewer), but any set of valid R colors can 
 # be supplied to the color argument.
 colors <- RColorBrewer::brewer.pal(4, "Dark2")
-highlight(p, on = "plotly_hover", color = colors, dynamic = TRUE, persistent = TRUE)
+highlight(p, on = "plotly_hover", color = colors, dynamic = TRUE)

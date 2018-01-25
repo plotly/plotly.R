@@ -79,13 +79,11 @@ library(crosstalk)
 d <- SharedData$new(txhousing, ~city)
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 gg <- ggplotly(p, tooltip = "city") 
-highlight(gg, persistent = TRUE, dynamic = TRUE)
+highlight(gg, dynamic = TRUE)
 
 # supply custom colors to the brush 
 cols <- toRGB(RColorBrewer::brewer.pal(3, "Dark2"), 0.5)
-highlight(
-  gg, on = "plotly_hover", color = cols, persistent = TRUE, dynamic = TRUE
-)
+highlight(gg, on = "plotly_hover", color = cols, dynamic = TRUE)
 
 # Use attrs_selected() for complete control over the selection appearance
 # note any relevant colors you specify here should override the color argument
@@ -95,10 +93,7 @@ s <- attrs_selected(
   marker = list(symbol = "x")
 )
 
-highlight(
- layout(gg, showlegend = TRUE),  
- selected = s, persistent = TRUE
-)
+highlight(layout(gg, showlegend = TRUE), selected = s)
 
 }
 \references{

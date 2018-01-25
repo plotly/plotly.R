@@ -37,7 +37,6 @@ gg <- ggplotly(p, width = 1050, height = 600, tooltip = "team")
 
 highlight(
   gg, 
-  persistent = TRUE,
   dynamic = TRUE, 
   selectize = TRUE,
   color = RColorBrewer::brewer.pal(12, "Paired")
