@@ -624,7 +624,11 @@ gg2list <- function(p, width = NULL, height = NULL,
           d <- expand(rng$graticule)
           d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
-          params <- with(panelGrid, list(colour = colour, size = size, linetype = linetype))
+          params <- list(
+            colour = panelGrid$colour, 
+            size = panelGrid$size, 
+            linetype = panelGrid$linetype
+          )
           grill <- geom2trace.GeomPath(d, params)
           grill$hoverinfo <- "none"
           grill$showlegend <- FALSE

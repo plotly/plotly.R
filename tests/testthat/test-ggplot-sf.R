@@ -69,3 +69,17 @@ test_that("sf aspect ratio is correct", {
   expect_equivalent(l$layout$xaxis$scaleanchor, "y")
   expect_equal(l$layout$xaxis$scaleratio, 0.81678435872298)
 })
+
+
+test_that("works with a blank theme", {
+  skip_if_not_installed("sf")
+  
+  p <- ggplot(nc) + geom_sf() + 
+    ggthemes::theme_map()
+  
+  l <- save_outputs(p, "sf-theme-map")
+  
+  # TODO: perhaps the graticule shouldn't be included at all?
+  expect_length(l$data, 2)
+  expect_equivalent(l$data[[1]]$line$color, "transparent")
+})
