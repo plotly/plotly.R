@@ -270,31 +270,29 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
-#' @export 
+#' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
-  browser()
-  sf_data <- sf::st_as_sf(data)
-  sf_d <- lapply(1:nrow(data), function(i) {
-    sf_as_plotly(sf_data[i, , drop = FALSE])
-  })
-    
-    sf_as_plotly()
-  
-  # logic based on GeomSf$draw_panel
-  #p$coord$transform(data, layout$panel_params[[1]])
-  
-  geomBasic <- switch(
-    params$legend %||% "", 
-    point = "GeomPoint", 
-    line = "GeomPath", 
-    "GeomPolygon"
+  # map sf geometry types to a suitable "basic geom"
+  # TODO: support more of the esoteric geometry types, see sf::st_geometry_type
+  # most important is probable geometry collection
+  geom_type <- sf::st_geometry_type(sf::st_as_sf(data))
+  basic_type <- dplyr::recode(
+    as.character(geom_type),
+    MULTIPOLYGON = "GeomPolygon",
+    MULTILINESTRING = "GeomPath",
+    MULTIPOINT = "GeomPoint",
+    POLYGON = "GeomPolygon",
+    LINESTRING = "GeomPath",
+    POINT = "GeomPoint"
   )
   
-  
-  # determine the type of simple feature for each row
-  # recode the simple feature with the type of geometry used to render it
-  prefix_class(data, c("GeomSf", geomBasic))
+  # return a list of data frames...one for every geometry (a la, GeomSmooth)
+  d <- split(data, basic_type)
+  for (i in seq_along(d)) {
+    d[[i]] <- prefix_class(d[[i]], names(d)[[i]])
+  }
+  if (length(d) == 1) d[[1]] else d
 }
 
 #' @export
@@ -724,7 +722,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
-  
+
   data <- group2NA(data)
   
   L <- list(
@@ -913,7 +911,7 @@ split_on <- function(dat) {
 
 # given a geom, are we hovering over points or fill?
 hover_on <- function(data) {
-  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap")) ||
+  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap", "GeomSf")) ||
       # is this a "basic" polygon?
       identical("GeomPolygon", grep("^Geom", class(data), value = T))) {
     "fills"
@@ -973,7 +971,7 @@ aes2plotly <- function(data, params, aes = "size") {
   
   # Hack to support this geom_sf hack 
   # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
-  defaults <- if (identical(geom, "GeomSf")) {
+  defaults <- if (inherits(data, "GeomSf")) {
     type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
     ggfun("default_aesthetics")(type)
   } else {
