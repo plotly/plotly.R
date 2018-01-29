@@ -46,10 +46,11 @@
 #' # linked scatterplot brushing
 #' library(crosstalk)
 #' d <- SharedData$new(mtcars)
-#' subplot(
-#'  qplot(data = d, x = mpg, y = wt),
-#'  qplot(data = d, x = mpg, y = vs)
-#' )
+#' qplot(data = d, x = mpg, y = wt) %>%
+#'   subplot(qplot(data = d, x = mpg, y = vs)) %>% 
+#'   layout(title = "Click and drag to select points") %>%
+#'   highlight("plotly_selected")
+#' 
 #' 
 #' # more brushing (i.e. highlighting) examples
 #' demo("crosstalk-highlight-ggplotly", package = "plotly")
@@ -57,7 +58,8 @@
 #' # client-side linked brushing in a scatterplot matrix
 #' SharedData$new(iris) %>%
 #'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
-#'   ggplotly(tooltip = c("x", "y", "colour"))
+#'   ggplotly(tooltip = c("x", "y", "colour")) %>%
+#'   highlight("plotly_selected")
 #' }
 #'
 ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
@@ -592,7 +594,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisText <- theme_el("axis.text")
       axisTitle <- theme_el("axis.title")
       axisLine <- theme_el("axis.line")
-      panelGrid <- theme_el("panel.grid.major")
+      panelGrid <- theme_el("panel.grid.major") %||% theme_el("panel.grid") 
       stripText <- theme_el("strip.text")
       
       axisName <- lay[, paste0(xy, "axis")]
@@ -623,9 +625,9 @@ gg2list <- function(p, width = NULL, height = NULL,
           d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
-            colour = theme$panel.grid.major$colour,
-            size = theme$panel.grid.major$size,
-            linetype = theme$panel.grid.major$linetype
+            colour = panelGrid$colour, 
+            size = panelGrid$size, 
+            linetype = panelGrid$linetype
           )
           grill <- geom2trace.GeomPath(d, params)
           grill$hoverinfo <- "none"
@@ -711,20 +713,28 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       
       # set scaleanchor/scaleratio if these are fixed coordinates
+      # the logic here is similar to what p$coordinates$aspect() does,
+      # but the ratio is scaled to the data range by plotly.js 
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
       if (inherits(p$coordinates, fixed_coords)) {
         axisObj$scaleanchor <- anchor
         ratio <- p$coordinates$ratio %||% 1
-        # a la CoordSf$aspect
+        axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
+        
         if (inherits(p$coordinates, "CoordSf")) {
           if (isTRUE(sf::st_is_longlat(rng$crs))) {
             ratio <- cos(mean(rng$y_range) * pi/180)
           }
+          # note how ratio is flipped in CoordSf$aspect() vs CoordFixed$aspect()
+          axisObj$scaleratio <- if (xy == "y") 1 / ratio else ratio
         }
-        axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
       }
       
-      # TODO: should we implement aspect ratios?
+      # TODO: seems like we _could_ support this with scaleanchors, 
+      # but inverse transform by the panel ranges?
+      # also, note how aspect.ratio overwrites fixed coordinates:
+      # ggplot(mtcars, aes(wt, mpg)) + geom_point() + coord_fixed(0.5)
+      # ggplot(mtcars, aes(wt, mpg)) + geom_point() + coord_fixed(0.5) + theme(aspect.ratio = 1)
       if (!is.null(theme$aspect.ratio)) {
         warning(
           "Aspect ratios aren't yet implemented, but you can manually set", 

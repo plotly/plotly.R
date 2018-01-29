@@ -267,12 +267,6 @@ supply_defaults <- function(p) {
 supply_highlight_attrs <- function(p) {
   # set "global" options via crosstalk variable
   p$x$highlight <- p$x$highlight %||% highlight_defaults()
-  p <- htmlwidgets::onRender(
-    p, sprintf(
-      "function(el, x) { var ctConfig = crosstalk.var('plotlyCrosstalkOpts').set(%s); }", 
-      to_JSON(p$x$highlight)
-    )
-  )
   
   # defaults are now populated, allowing us to populate some other 
   # attributes such as the selectize widget definition

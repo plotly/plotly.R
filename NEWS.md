@@ -2,14 +2,16 @@
 
 ## NEW FEATURES & IMPROVEMENTS
 
+* Upgraded to plotly.js v1.33.1. A _huge_ amount of features and improvements have been made since v1.29.2 (i.e., the version included in the last CRAN release of the R package - v4.7.1). Highlights include a complete re-write of `scattergl` to make it nearly feature complete with `scatter`, localization of text rendering (i.e., international translations), and two new trace types (`violin` & `table`). Read more about the v1.32.0 release [here](https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21) and the complete list of changes [here](https://github.com/plotly/plotly.js/releases).
+* The selection mode can now switch from 'transient' to 'persistent' by holding the 'shift' key. It's still possible to _force_ persistent selection by setting `persistent = TRUE` in `highlight()`, but `persistent = FALSE` (the default) is now recommended since it allows one to switch between [persistent/transient selection](https://plotly-book.cpsievert.me/linking-views-without-shiny.html#transient-versus-persistent-selection) in the browser, rather than at the command line.
+
 ## CHANGES
 
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
-* Upgraded to plotly.js v1.31.2 -- https://github.com/plotly/plotly.js/releases/tag/v1.31.2
 
 ## BUG FIXES
 
-Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
+* Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
 
 # 4.7.1
 

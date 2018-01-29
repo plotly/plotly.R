@@ -1,6 +1,6 @@
 library(httr)
 # download latest GitHub release
-# for a particular version: `zip <- "https://github.com/plotly/plotly.js/archive/v1.25.0.zip"`
+# for a particular version: `zip <- "https://github.com/plotly/plotly.js/archive/v1.33.1.zip"`
 x <- GET('https://api.github.com/repos/plotly/plotly.js/releases/latest')
 zip <- content(x)$zipball_url
 tmp <- tempfile(fileext = ".zip")
