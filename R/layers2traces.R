@@ -911,7 +911,7 @@ split_on <- function(dat) {
 
 # given a geom, are we hovering over points or fill?
 hover_on <- function(data) {
-  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap", "GeomSf")) ||
+  if (inherits(data, c("GeomHex", "GeomRect", "GeomMap", "GeomMosaic", "GeomAnnotationMap")) ||
       # is this a "basic" polygon?
       identical("GeomPolygon", grep("^Geom", class(data), value = T))) {
     "fills"
