@@ -12,6 +12,7 @@
 ## BUG FIXES
 
 * Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
+* grid conversions in `ggplotly()` weren't respected a specified `height`/`width` in RStudio (see #1190).
 
 # 4.7.1
 
