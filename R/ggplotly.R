@@ -171,12 +171,6 @@ gg2list <- function(p, width = NULL, height = NULL,
   # To avoid undesirable side effects, we may need to open a 
   # non-interactive device and close it on exit...
   # https://github.com/att/rcloud.htmlwidgets/issues/2
-  
-  # Note that we never have to open a non-interactive device 
-  # in RStudio since it ships with one. Plus, calling dev.size()
-  # adds it to dev.list() & should ensure grid can query the correct device size
-  rStudioDevSize <- if (is_rstudio()) grDevices::dev.size("px")
-  
   if (is.null(grDevices::dev.list())) {
     dev_fun <- if (system.file(package = "Cairo") != "") {
       Cairo::Cairo
@@ -194,7 +188,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         call. = FALSE
       )
     }
-    dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
+    width <- width %||% grDevices::dev.size("px")[1] %||% 640
+    height <- height %||% grDevices::dev.size("px")[2] %||% 480
+    dev_fun(file = tempfile(), width = width, height = height)
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
