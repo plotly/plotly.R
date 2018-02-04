@@ -1,21 +1,23 @@
-sf_fortify <- function(model, ...) {
+fortify_sf <- function(model, ...) {
   # TODO: 
   # (1) avoid converting redundant features
   # (2) warn/error if data already contains x/y 
   geoms <- sf::st_geometry(sf::st_as_sf(model))
   xy <- lapply(geoms, st_as_plotly)
   ids <- rep(seq_len(nrow(model)), sapply(xy, nrow))
+  # TODO: faster way to row bind matrices?
   xy_all <- cbind(do.call(rbind, xy), ids)
-  sf_key_name <- ".sf-group-id"
-  xy_dat <- setNames(as.data.frame(xy_all), c("x", "y", sf_key_name))
+  xy_dat <- setNames(as.data.frame(xy_all), c("x", "y", sf_key()))
   
   d <- as.data.frame(model)
   d$geometry <- NULL
-  d[[sf_key_name]] <- seq_len(nrow(d))
-  xy_dat <- dplyr::left_join(xy_dat, d, by = sf_key_name)
-  xy_dat[[sf_key_name]] <- NULL
+  d[[sf_key()]] <- seq_len(nrow(d))
+  xy_dat <- dplyr::left_join(xy_dat, d, by = sf_key())
+  xy_dat[[sf_key()]] <- NULL
   xy_dat
 }
+
+sf_key <- function() ".sf-group-id"
 
 # kind of like sf_as_grob(), but maps to a plotly data structure, rather than a grob
 st_as_plotly <- function(x, ...) {
@@ -82,7 +84,6 @@ st_as_plotly.CURVEPOLYGON = st_as_plotly.GEOMETRYCOLLECTION
 
 #' @export
 st_as_plotly.COMPOUNDCURVE = st_as_plotly.GEOMETRYCOLLECTION
-
 
 
 empty_xy <- function() {

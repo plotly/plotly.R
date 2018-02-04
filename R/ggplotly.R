@@ -621,7 +621,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         
         if (sum(isGrill) == 0) {
           # TODO: reduce the number of points (via coord_munch?)
-          d <- sf_fortify(rng$graticule)
+          d <- fortify_sf(rng$graticule)
           d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(

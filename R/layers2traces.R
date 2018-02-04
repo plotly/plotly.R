@@ -273,12 +273,27 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
-  # map sf geometry types to a suitable "basic geom"
-  # TODO: support more of the esoteric geometry types, see sf::st_geometry_type
-  # most important is probable geometry collection
-  geom_type <- sf::st_geometry_type(sf::st_as_sf(data))
+  data <- sf::st_as_sf(data)
+  geom_type <- sf::st_geometry_type(data)
+  # st_cast should "expand" a collection into multiple rows (one per feature)
+  if ("GEOMETRYCOLLECTION" %in% geom_type) {
+    data <- sf::st_cast(data)
+    geom_type <- sf::st_geometry_type(data)
+  }
+  data <- remove_class(data, "sf")
+  
   basic_type <- dplyr::recode(
     as.character(geom_type),
+    TRIANGLE = "GeomPolygon",
+    TIN = "GeomPolygon",
+    POLYHEDRALSURFACE = "GeomPolygon",
+    SURFACE = "GeomPolygon",
+    CURVE = "GeomPath",
+    MULTISURFACE = "GeomPolygon",
+    MULTICURVE = "GeomPath",
+    CURVEPOLYGON = "GeomPolygon",
+    COMPOUNDCURVE = "GeomPath",
+    CIRCULARSTRING = "GeomPath",
     MULTIPOLYGON = "GeomPolygon",
     MULTILINESTRING = "GeomPath",
     MULTIPOINT = "GeomPoint",
@@ -290,7 +305,9 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   # return a list of data frames...one for every geometry (a la, GeomSmooth)
   d <- split(data, basic_type)
   for (i in seq_along(d)) {
-    d[[i]] <- prefix_class(d[[i]], names(d)[[i]])
+    d[[i]] <- prefix_class(
+      fortify_sf(d[[i]]), c(names(d)[[i]], "GeomSf")
+    )
   }
   if (length(d) == 1) d[[1]] else d
 }
