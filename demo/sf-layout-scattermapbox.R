@@ -1,11 +1,7 @@
-library(albersusa)
 library(sf)
-library(dplyr)
 library(plotly)
 
-d <- counties_sf() %>%
-  st_transform('+proj=longlat +datum=WGS84') %>%
-  filter(!state %in% c("Alaska", "Hawaii"))
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 
 # TODO: is there a way to do this without writing to disk?
 sf_to_geojson <- function(x) {
@@ -14,22 +10,24 @@ sf_to_geojson <- function(x) {
   geojsonio::geojson_read(tmp, "local")
 }
 
-plot_mapbox(lat = 45.5017, lon = -73.5673) %>%
+# By converting sf to geojson and routing to mapbox.layers, rendering 
+# should be more performant (and correct in all cases). However, compared to
+# `demo("sf-data-scattermapbox.R", package = "plotly")`, you lose the ability 
+# to interact with (and link) the features.
+plot_mapbox(x = -80, y = 35) %>%
   layout(
-    height = 600,
-    autosize = TRUE,
     hovermode = 'closest',
     mapbox = list(
       layers = list(
         list(
           sourcetype = 'geojson',
-          source = sf_to_geojson(d),
+          source = sf_to_geojson(nc),
           type = 'fill',
           color = 'transparent'
         )
       ),
       bearing = 0,
-      center = list(lat = 27.8, lon = -83),
+      center = list(lat = 35, lon = -80),
       pitch = 0,
       zoom = 5.2,
       style = 'light'
