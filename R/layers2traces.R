@@ -111,7 +111,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     separator <- new_id()
     fac <- factor(
       apply(d[split_vars], 1, paste, collapse = separator),
-      levels = apply(lvls, 1, paste, collapse = separator)
+      levels = unique(apply(lvls, 1, paste, collapse = separator))
     )
     if (all(is.na(fac))) fac <- 1
     dl <- split(d, fac, drop = TRUE)
@@ -270,22 +270,46 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(dat, c("GeomPolygon", "GeomRect"))
 }
 
-#' @export 
+#' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
-  data <- expand(data)
+  data <- sf::st_as_sf(data)
+  geom_type <- sf::st_geometry_type(data)
+  # st_cast should "expand" a collection into multiple rows (one per feature)
+  if ("GEOMETRYCOLLECTION" %in% geom_type) {
+    data <- sf::st_cast(data)
+    geom_type <- sf::st_geometry_type(data)
+  }
+  data <- remove_class(data, "sf")
   
-  # logic based on GeomSf$draw_key
-  geomBasic <- switch(
-    params$legend %||% "", 
-    point = "GeomPoint", 
-    line = "GeomPath", 
-    "GeomPolygon"
+  basic_type <- dplyr::recode(
+    as.character(geom_type),
+    TRIANGLE = "GeomPolygon",
+    TIN = "GeomPolygon",
+    POLYHEDRALSURFACE = "GeomPolygon",
+    SURFACE = "GeomPolygon",
+    CURVE = "GeomPath",
+    MULTISURFACE = "GeomPolygon",
+    MULTICURVE = "GeomPath",
+    CURVEPOLYGON = "GeomPolygon",
+    COMPOUNDCURVE = "GeomPath",
+    CIRCULARSTRING = "GeomPath",
+    MULTIPOLYGON = "GeomPolygon",
+    MULTILINESTRING = "GeomPath",
+    MULTIPOINT = "GeomPoint",
+    POLYGON = "GeomPolygon",
+    LINESTRING = "GeomPath",
+    POINT = "GeomPoint"
   )
   
-  # determine the type of simple feature for each row
-  # recode the simple feature with the type of geometry used to render it
-  prefix_class(data, c("GeomSf", geomBasic))
+  # return a list of data frames...one for every geometry (a la, GeomSmooth)
+  d <- split(data, basic_type)
+  for (i in seq_along(d)) {
+    d[[i]] <- prefix_class(
+      fortify_sf(d[[i]]), c(names(d)[[i]], "GeomSf")
+    )
+  }
+  if (length(d) == 1) d[[1]] else d
 }
 
 #' @export
@@ -498,7 +522,7 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   # from GeomCrossbar$draw_panel()
-  middle <- transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  middle <- base::transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
@@ -715,7 +739,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
-  
+
   data <- group2NA(data)
   
   L <- list(
@@ -964,7 +988,7 @@ aes2plotly <- function(data, params, aes = "size") {
   
   # Hack to support this geom_sf hack 
   # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
-  defaults <- if (identical(geom, "GeomSf")) {
+  defaults <- if (inherits(data, "GeomSf")) {
     type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
     ggfun("default_aesthetics")(type)
   } else {
