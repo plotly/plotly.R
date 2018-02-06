@@ -295,7 +295,7 @@ supply_highlight_attrs <- function(p) {
       p <- htmlwidgets::onRender(
         p, sprintf(
           "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
-          i, jsonlite::toJSON(vals, auto_unbox = FALSE)
+          i, jsonlite::toJSON(as.character(vals), auto_unbox = FALSE)
         )
       )
     }
