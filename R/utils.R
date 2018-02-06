@@ -209,6 +209,31 @@ mapbox_token <- function() {
   token
 }
 
+mapbox_fit_bounds <- function(p) {
+  mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
+  for (id in mapboxIDs) {
+    bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$subplot)) tr[["_bbox"]])
+    # intentionally an array of numbers in [west, south, east, north] order
+    # https://www.mapbox.com/mapbox-gl-js/api/#lnglatboundslike
+    p$x$layout[[id]]$`_fitBounds` <- list(
+      bounds = c(
+        min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
+        min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
+        max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE),
+        max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
+      ),
+      options = list(
+        padding = 10, 
+        linear = FALSE,
+        # NOTE TO SELF: can do something like this to customize easing
+        # easing = htmlwidgets::JS("function(x) { return 1; }"),
+        offset = c(0, 0)
+      )
+    )
+  }
+  p
+}
+
 # rename attrs (unevaluated arguments) from geo locations (lat/lon) to cartesian
 geo2cartesian <- function(p) {
   p$x$attrs <- lapply(p$x$attrs, function(tr) {

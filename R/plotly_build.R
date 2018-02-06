@@ -117,6 +117,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     
     # set special defaults for sf
     if (inherits(dat, "sf")) {
+      # TODO: 
+      # (1) check/change the crs? https://github.com/rstudio/leaflet/blob/d489e2cd/R/normalize-sf.R#L94-L113
+      # (2) One trace/layer can sometime map to multiple traces (e.g., an sf object with points and lines)   
+      # (3) st_cast() if a geometry collection?
+      x$`_bbox` <- sf::st_bbox(dat)
       dat <- fortify_sf(dat)
       x$x <- ~x
       x$y <- ~y
@@ -332,6 +337,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     tr
   })
+  
+  # Compute sensible bounding boxes for each mapbox subplot
+  # TODO: could/should we do this for plot_ly()/plot_geo() as well?
+  p <- mapbox_fit_bounds(p)
   
   # polar charts don't like null width/height keys
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL

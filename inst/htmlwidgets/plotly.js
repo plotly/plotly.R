@@ -192,6 +192,22 @@ HTMLWidgets.widget({
           Plotly[msg.method].apply(null, args);
         });
       }
+      
+      // plotly's mapbox API doesn't currently support setting bounding boxes
+      // https://www.mapbox.com/mapbox-gl-js/example/fitbounds/
+      // so we do this manually...
+      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox;
+      for (var i = 0; i < mapboxIDs.length; i++) {
+        var id = mapboxIDs[i];
+        var mapOpts = x.layout[id] || {};
+        var args = mapOpts._fitBounds || {}
+        if (!args) {
+          continue;
+        }
+        var mapObj = graphDiv._fullLayout[id]._subplot.map;
+        mapObj.fitBounds(args.bounds, args.options);
+      }
+      
     });
     
     // Attach attributes (e.g., "key", "z") to plotly event data
