@@ -114,6 +114,14 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     
     # perform the evaluation
     dat <- plotly_data(p, y)
+    
+    # set special defaults for sf
+    if (inherits(dat, "sf")) {
+      dat <- fortify_sf(dat)
+      x$x <- ~x
+      x$y <- ~y
+    }
+    
     trace <- structure(
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
@@ -527,6 +535,7 @@ train_data <- function(data, trace) {
     dat[idx2, "y"] <- data[["yend"]]
     data <- dplyr::group_by_(dat, ".plotlyGroupIndex", add = TRUE)
   }
+  
   # TODO: a lot more geoms!!!
   data
 }

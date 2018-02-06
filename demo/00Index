@@ -1,3 +1,5 @@
+animation-tour-basic                A basic example of a grand tour
+animation-tour-USArrests            Linking a dendrogram to a tour
 crosstalk-highlight-intro           An introduction to linked views
 crosstalk-highlight-subplot         Basic scatterplot brushing with subplot()
 crosstalk-highlight-ggplotly        Linking ggplot2 plots
@@ -8,7 +10,7 @@ crosstalk-highlight-binned-target   Let plotly.js dynamically bin the raw data
 crosstalk-highlight-epl             An example of linked facets
 crosstalk-filter-lines              Using crosstalk's filter_select() to filter lines
 crosstalk-filter-dynamic-axis       Using crosstalk's filter_select() to dynamically change the y-axis
-animation-tour-basic                A basic example of a grand tour
-animation-tour-USArrests            Linking a dendrogram to a tour
 rotate                              Using htmlwidgets::onRender() to rotate the camera of a 3D graph
 ternary                             A basic ternary plot
+sf-data-scattermapbox               Mapping sf objects with mapbox
+sf-layout-scattermapbox             Mapping sf objects with mapbox (as a layer) 
