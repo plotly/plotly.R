@@ -250,6 +250,9 @@ mapbox_fit_bounds <- function(p) {
     ), f = 0.01)
   }
   
+  # Internal _bbox field no longer needed
+  p$x$data <- lapply(p$x$data, function(tr) { tr[["_bbox"]] <- NULL; tr })
+  
   p
 }
 
