@@ -72,6 +72,7 @@ plotly_data <- function(p, id = p$x$cur_data) {
 #' @export
 fortify.plotly <- function(p, id = p$x$cur_data) {
   f <- p$x$visdat[[id]]
+  if (is.null(f)) return(f)
   # if data has been specified, f should be a closure that, when called,
   # returns data
   if (!is.function(f)) stop("Expected a closure function", call. = FALSE)
