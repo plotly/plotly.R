@@ -210,6 +210,8 @@ mapbox_token <- function() {
 }
 
 mapbox_fit_bounds <- function(p) {
+  # Route trace[i]._bbox info to layout.mapboxid._fitBounds
+  # so that we have a sensible range for each mapbox subplot
   mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
   for (id in mapboxIDs) {
     bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$subplot)) tr[["_bbox"]])
@@ -232,6 +234,22 @@ mapbox_fit_bounds <- function(p) {
       )
     )
   }
+  
+  # Route trace[i]._bbox info to layout.geoid.lonaxis/layout.geoid.lataxis
+  geoIDs <- grep("^geo", sapply(p$x$data, "[[", "geo"), value = TRUE)
+  for (id in geoIDs) {
+    bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$geo)) tr[["_bbox"]])
+    if (sum(lengths(bboxes)) == 0) next
+    p$x$layout[[id]]$lataxis$range <- grDevices::extendrange(c(
+      min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
+      max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
+    ), f = 0.01)
+    p$x$layout[[id]]$lonaxis$range <- grDevices::extendrange(c(
+      min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
+      max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE)
+    ), f = 0.01)
+  }
+  
   p
 }
 
