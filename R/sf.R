@@ -2,6 +2,8 @@ fortify_sf <- function(model, ...) {
   # TODO: 
   # (1) avoid converting redundant features
   # (2) warn/error if data already contains x/y 
+  sf_crs_check(model)
+  
   geoms <- sf::st_geometry(sf::st_as_sf(model))
   xy <- lapply(geoms, st_as_plotly)
   ids <- rep(seq_len(nrow(model)), sapply(xy, nrow))
@@ -88,4 +90,25 @@ st_as_plotly.COMPOUNDCURVE = st_as_plotly.GEOMETRYCOLLECTION
 
 empty_xy <- function() {
   matrix(rep(NA, 2), ncol = 2)
+}
+
+
+# thanks Hadley Wickham https://github.com/rstudio/leaflet/blame/d489e2cd/R/normalize-sf.R#L94-L113
+sf_crs_check <- function(x) {
+  crs <- sf::st_crs(x)
+  
+  # Don't have enough information to check
+  if (is.na(crs)) return()
+  
+  if (identical(sf::st_is_longlat(x), FALSE)) {
+    warning("sf layer is not long-lat data", call. = FALSE)
+  }
+  
+  if (!grepl("+datum=WGS84", crs$proj4string, fixed = TRUE)) {
+    warning(
+      "sf layer has inconsistent datum (", crs$proj4string, ").\n",
+      "Need '+proj=longlat +datum=WGS84'",
+      call. = FALSE
+    )
+  }
 }

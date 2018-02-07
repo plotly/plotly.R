@@ -213,6 +213,7 @@ mapbox_fit_bounds <- function(p) {
   mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
   for (id in mapboxIDs) {
     bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$subplot)) tr[["_bbox"]])
+    if (sum(lengths(bboxes)) == 0) next
     # intentionally an array of numbers in [west, south, east, north] order
     # https://www.mapbox.com/mapbox-gl-js/api/#lnglatboundslike
     p$x$layout[[id]]$`_fitBounds` <- list(
