@@ -1,22 +1,51 @@
+# IMPORTANT: this function should only be used on collections of identical 
+# geometries -- https://github.com/r-spatial/sf/issues/584
+
+# TODO: avoid converting redundant features
 fortify_sf <- function(model, ...) {
-  # TODO: 
-  # (1) avoid converting redundant features
-  # (2) warn/error if data already contains x/y 
-  sf_crs_check(model)
+  # TODO: this should only apply for scattermapbox....
+  # sf_crs_check(model)
   
-  geoms <- sf::st_geometry(sf::st_as_sf(model))
-  xy <- lapply(geoms, st_as_plotly)
-  ids <- rep(seq_len(nrow(model)), sapply(xy, nrow))
-  # TODO: faster way to row bind matrices?
-  xy_all <- cbind(do.call(rbind, xy), ids)
-  xy_dat <- setNames(as.data.frame(xy_all), c("x", "y", sf_key()))
+  # matrix with coordinates (X, Y, possibly Z and/or M) in rows, possibly 
+  # followed by integer indicators L1,...,L3 that point out to which structure 
+  # the coordinate belongs; for POINT this is absent (each coordinate is a feature), 
+  # for LINESTRING L1 refers to the feature, for MULTIPOLYGON L1 refers to the main 
+  # ring or holes, L2 to the ring id in the MULTIPOLYGON, and L3 to the simple feature.
+  #browser()
+  coords <- sf::st_coordinates(model$geometry)
+  colnames(coords) <- tolower(colnames(coords))
+  lcols <- grep("^l", colnames(coords))
   
-  d <- as.data.frame(model)
-  d$geometry <- NULL
-  d[[sf_key()]] <- seq_len(nrow(d))
-  xy_dat <- dplyr::left_join(xy_dat, d, by = sf_key())
-  xy_dat[[sf_key()]] <- NULL
-  xy_dat
+  # no longer need to carry around geometry
+  model$geometry <- NULL
+  
+  # no join necessary
+  if (!length(lcols)) return(cbind(model, coords))
+  
+  # warn column name conflicts
+  nms <- intersect(names(model), colnames(coords))
+  if (length(nms)) {
+    warning(
+      sprintf("Found columns named: '%s' ", paste(nms, collapse = "', '")), 
+      "in your data. These names conflict with auto-generated sf coordinates ",
+      "it might be a good idea to change these names.",
+      call. = FALSE
+    )
+  }
+  
+  # generate unique key for joining data with coordinates
+  model[[sf_key()]] <- seq_len(nrow(model))
+  
+  # compute/attach a key for joining coordinates back with original data
+  key <- rle(apply(coords[, lcols, drop = FALSE], 1, paste, collapse = "-"))
+  coords <- tibble::as_tibble(coords)
+  coords[[sf_key()]] <- rep(seq_along(key$lengths), key$lengths)
+  
+  # insert NAs according to 
+  coords <- group2NA(coords, groupNames = sf_key())
+  
+  # join back together
+  dplyr::left_join(coords, model, by = sf_key())
 }
 
 sf_key <- function() ".sf-group-id"
@@ -40,6 +69,7 @@ st_as_plotly.MULTIPOINT = function(x, ...) {
 #' @export
 st_as_plotly.LINESTRING = function(x, ...) {
   if (nrow(x) == 0) return(empty_xy())
+  browser()
   matrix(c(x[, 1], x[, 2]), ncol = 2)
 }
 
