@@ -57,3 +57,28 @@ fortify_sf <- function(model, ...) {
 }
 
 sf_key <- function() ".sf-group-id"
+
+# Credit to Hadley Wickham 
+# https://github.com/rstudio/leaflet/blame/d489e2cd/R/normalize-sf.R#L94-L113
+st_cast_crs <- function(x) {
+  crs <- sf::st_crs(x)
+  
+  # Don't have enough information to check
+  if (is.na(crs)) return()
+  
+  isLongLat <- isTRUE(sf::st_is_longlat(x))
+  isWGS84 <- grepl("+datum=WGS84", crs$proj4string, fixed = TRUE)
+  
+  if (!(isLongLat && isWGS84)) {
+    warning(
+      "The trace types 'scattermapbox' and 'scattergeo' require a coordinate ",
+      "reference system (crs) which contains: '+proj=longlat +datum=WGS84'.\n",
+      "However, the crs of the sf data provided is: (", crs$proj4string, ").\n",
+      "Attempting transformation to the target coordinate system.",
+      call. = FALSE
+    )
+    x <- sf::st_transform(x, '+proj=longlat +datum=WGS84')
+  }
+  
+  x
+}

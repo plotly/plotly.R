@@ -121,6 +121,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     id <- names2(attrsToEval)[i]
     d <- plotly_data(p, id)
     if (!inherits(d, "sf")) next
+    if (is_mapbox(p) || is_geo(p)) d <- st_cast_crs(d)
     attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
     dat <- to_basic.GeomSf(d)
     # to_basic() returns either a single data frame or a list of data frames
