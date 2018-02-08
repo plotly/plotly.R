@@ -115,23 +115,31 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     })
   }
   
+  # special sf logic that casts and expands data since we might have to split
+  # into multiple traces (e.g., points & polygons need their own traces)
+  for (i in seq_along(attrsToEval)) {
+    id <- names2(attrsToEval)[i]
+    d <- plotly_data(p, id)
+    if (!inherits(d, "sf")) next
+    attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
+    dat <- to_basic.GeomSf(d)
+    # to_basic() returns either a single data frame or a list of data frames
+    if (is.data.frame(dat)) {
+      attrsToEval[[i]] <- modify_list(geom2trace(dat, params = list()), attrsToEval[[i]])
+    } else {
+      attrs <- lapply(dat, function(x) modify_list(geom2trace(x, params = list()), attrsToEval[[i]]))
+      # TODO: ordering isn't always correct here 
+      attrsToEval <- c(attrs, attrsToEval[setdiff(seq_along(attrsToEval), i)])
+    } 
+  }
+  
+  
   dats <- Map(function(x, y) {
     
-    # perform the evaluation
+    # grab the data for this trace
     dat <- plotly_data(p, y)
     
-      
-    
-    # set special defaults for sf
-    if (inherits(dat, "sf")) {
-      # TODO: 
-      # (1) One trace/layer can sometime map to multiple traces (e.g., an sf object with points and lines)   
-      # (2) st_cast() if a geometry collection?
-      x$`_bbox` <- sf::st_bbox(dat)
-      dat <- to_basic.GeomSf(dat)
-      x <- modify_list(geom2trace(dat, params = list()), x)
-    }
-    
+    # formula/symbol/attribute evaluation
     trace <- structure(
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
