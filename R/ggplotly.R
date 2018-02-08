@@ -69,6 +69,11 @@ ggplotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
 }
 
 #' @export
+ggplotly.NULL <- function(...) {
+  htmltools::browsable(htmltools::div(...))
+}
+
+#' @export
 ggplotly.plotly <- function(p = ggplot2::last_plot(), width = NULL, height = NULL,
                             tooltip = "all", dynamicTicks = FALSE, 
                             layerData = 1, originalData = TRUE, source = "A", ...) {
