@@ -209,7 +209,7 @@ mapbox_token <- function() {
   token
 }
 
-mapbox_fit_bounds <- function(p) {
+fit_bounds <- function(p) {
   # Route trace[i]._bbox info to layout.mapboxid._fitBounds
   # so that we have a sensible range for each mapbox subplot
   mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
@@ -265,6 +265,19 @@ geo2cartesian <- function(p) {
   })
   p
 }
+
+cartesian2geo <- function(p) {
+  p$x$data <- lapply(p$x$data, function(tr) {
+    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
+      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
+      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
+      tr[c("x", "y")] <- NULL
+    }
+    tr
+  })
+  p
+}
+
 
 is_subplot <- function(p) {
   isTRUE(p$x$subplot)

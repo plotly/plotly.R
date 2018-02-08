@@ -334,18 +334,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- supply_defaults(p)
   
   # attribute naming corrections for "geo-like" traces
-  p$x$data <- lapply(p$x$data, function(tr) {
-    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
-      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
-      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
-      tr[c("x", "y")] <- NULL
-    }
-    tr
-  })
+  p <- cartesian2geo(p)
   
-  # Compute sensible bounding boxes for each mapbox subplot
-  # TODO: could/should we do this for plot_ly()/plot_geo() as well?
-  p <- mapbox_fit_bounds(p)
+  # Compute sensible bounding boxes for each mapbox/geo subplot
+  p <- fit_bounds(p)
   
   # polar charts don't like null width/height keys
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
