@@ -39,7 +39,7 @@ fortify_sf <- function(model, ...) {
   model[[sf_key()]] <- seq_len(nrow(model))
   
   # last column of coords pertains to the simple feature row id
-  coords <- tibble::as_tibble(coords)
+  coords <- as.data.frame(coords)
   coords[[sf_key()]] <- coords[[ncol(coords)]]
   
   # join back together
@@ -50,7 +50,6 @@ fortify_sf <- function(model, ...) {
   
   # the combination of l1/l2/l3 should be treated like a new grouping var
   group_var <- d[names(d) %in% c("l1", "l2", "l3")]
-  if (!"group" %in% names(d)) d$group <- "-1"
   d$group <- paste(d$group, Reduce(paste0, group_var), sep = "-")
   
   # TODO: drop l1/l2/l3?
