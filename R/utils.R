@@ -209,6 +209,7 @@ mapbox_token <- function() {
   token
 }
 
+# TODO: set scaleanchor for cartesian plots!
 fit_bounds <- function(p) {
   # Route trace[i]._bbox info to layout.mapboxid._fitBounds
   # so that we have a sensible range for each mapbox subplot

@@ -45,8 +45,15 @@ fortify_sf <- function(model, ...) {
   # join back together
   d <- dplyr::left_join(coords, model, by = sf_key())
   
-  # retrain grouping variable (if it exists)
-  d$group <- paste(d$group, Reduce(paste0, d[names(d) %in% c("l1", "l2", "l3")]), sep = "-")
+  # drop simple feature row id
+  d[[sf_key()]] <- NULL
+  
+  # the combination of l1/l2/l3 should be treated like a new grouping var
+  group_var <- d[names(d) %in% c("l1", "l2", "l3")]
+  if (!"group" %in% names(d)) d$group <- "-1"
+  d$group <- paste(d$group, Reduce(paste0, group_var), sep = "-")
+  
+  # TODO: drop l1/l2/l3?
   d
 }
 
