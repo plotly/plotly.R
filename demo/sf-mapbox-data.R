@@ -9,8 +9,15 @@ subplot(
   plot_mapbox(nc, fillcolor = "gray", line = list(size = 0.01, color = "black"))
 )
 
-# can map custom hover text to each point
+# map custom hover text to each point
+# (unfortunately, scattermapbox does not yet support hoveron='fill')
 plot_mapbox(nc, text = ~AREA, hoverinfo = "text")
+
+# each trace may have at most one fill color, so if you'd like to
+# create choropleths, for instance, you should `split`  
+col_scale <- scales::col_numeric("Blues", range(nc$AREA))
+plot_mapbox(nc, split = ~factor(AREA), fillcolor = ~col_scale(AREA)) %>%
+  layout(showlegend = FALSE)
 
 # TODO: 
 # (1) this should create multiple traces!!! :(
@@ -20,6 +27,10 @@ plot_mapbox(nc, color = ~AREA, text = ~AREA, hoverinfo = "text", hoveron = "fill
 
 # TODO: animation
 
+
+# TODO: click to highlight
+ncsd <- crosstalk::SharedData$new(nc)
+plot_mapbox(ncsd)
 
 
 # TODO: perhaps during verification, if hoveron = 'fill' for a given trace,
