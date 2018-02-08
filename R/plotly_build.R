@@ -21,6 +21,11 @@ plotly_build <- function(p, registerFrames = TRUE) {
 }
 
 #' @export
+plotly_build.NULL <- function(...) {
+  htmltools::browsable(htmltools::div(...))
+}
+
+#' @export
 plotly_build.list <- function(p, registerFrames = TRUE) {
   plotly_build(as_widget(p))
 }

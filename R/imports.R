@@ -10,7 +10,7 @@
 #' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender prependContent
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
-#' @importFrom htmltools browsable tagList tags
+#' @importFrom htmltools browsable tagList tags div
 #' @importFrom purrr transpose
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom data.table as.data.table setorderv
