@@ -40,8 +40,8 @@ test_that("geom_sf() geometry collection.", {
   expect_equivalent(l$data[[2]]$y, c(0, 0))
   expect_equivalent(l$data[[3]]$x, I(1))
   expect_equivalent(l$data[[3]]$y, I(0))
-  expect_equivalent(l$data[[4]]$x, c(5.5, 7, 7, 6, 5.5, NA, 5.5))
-  expect_equivalent(l$data[[4]]$y, c(0, 0, -.5, -.5, 0, NA, 0))
+  expect_equivalent(l$data[[4]]$x, c(5.5, 7, 7, 6, 5.5, 5.5))
+  expect_equivalent(l$data[[4]]$y, c(0, 0, -.5, -.5, 0, 0))
 })
 
 test_that("geom_sf() polygons with fill/text.", {
