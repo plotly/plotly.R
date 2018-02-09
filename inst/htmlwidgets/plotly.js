@@ -37,8 +37,10 @@ HTMLWidgets.widget({
         if (!e) window.event;
         if (e.shiftKey) { 
           x.highlight.persistent = true; 
+          x.highlight.persistentShift = true;
         } else {
           x.highlight.persistent = false; 
+          x.highlight.persistentShift = false;
         }
       };
       
@@ -370,6 +372,17 @@ HTMLWidgets.widget({
       
       
       var selectionChange = function(e) {
+        
+        // Workaround for 'plotly_selected' now firing previously selected
+        // points (in addition to new ones) when holding shift key. In our case,
+        // we just want the new keys 
+        if (x.highlight.on === "plotly_selected" && x.highlight.persistentShift) {
+          // https://stackoverflow.com/questions/1187518/how-to-get-the-difference-between-two-arrays-in-javascript
+          Array.prototype.diff = function(a) {
+              return this.filter(function(i) {return a.indexOf(i) < 0;});
+          };
+          e.value = e.value.diff(e.oldValue);
+        }
         
         // array of "event objects" tracking the selection history
         // this is used to avoid adding redundant selections
