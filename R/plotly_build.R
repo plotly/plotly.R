@@ -123,6 +123,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     if (!inherits(d, "sf")) next
     if (is_mapbox(p) || is_geo(p)) d <- st_cast_crs(d)
     attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
+    attrsToEval[[i]]$set <- attr(d, "set")
     dat <- to_basic.GeomSf(d)
     # to_basic() returns either a single data frame or a list of data frames
     if (is.data.frame(dat)) {
