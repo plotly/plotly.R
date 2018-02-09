@@ -53,3 +53,11 @@ p1 %>%
   )
 
 
+# non-standard crs
+library(mapview)
+plot_mapbox(trails, text = ~district, hoverinfo = "text")
+
+tsd <- crosstalk::SharedData$new(trails)
+plot_mapbox(tsd)
+
+

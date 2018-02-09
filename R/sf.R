@@ -74,8 +74,8 @@ st_cast_crs <- function(x) {
   if (!(isLongLat && isWGS84)) {
     warning(
       "The trace types 'scattermapbox' and 'scattergeo' require a coordinate ",
-      "reference system (crs) which contains: '+proj=longlat +datum=WGS84'.\n",
-      "However, the crs of the sf data provided is: (", crs$proj4string, ").\n",
+      "reference system (crs) that contains: '+proj=longlat +datum=WGS84', ",
+      "but the crs provided is: '", crs$proj4string, "'. ",
       "Attempting transformation to the target coordinate system.",
       call. = FALSE
     )
