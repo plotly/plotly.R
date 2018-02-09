@@ -49,8 +49,10 @@ fortify_sf <- function(model, ...) {
   d[[sf_key()]] <- NULL
   
   # the combination of l1/l2/l3 should be treated like a new grouping var
-  group_var <- d[names(d) %in% c("l1", "l2", "l3")]
-  d$group <- paste(d$group, Reduce(paste0, group_var), sep = "-")
+  # TODO: group is included here for ggplotly() purposes...it should probably be taken out...
+  group_var <- d[names(d) %in% c("group", "l1", "l2", "l3")]
+  paste_ <- function(...) paste(..., sep = "-")
+  d$group <- Reduce(paste_, group_var)
   
   # TODO: drop l1/l2/l3?
   d
