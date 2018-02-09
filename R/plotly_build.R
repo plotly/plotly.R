@@ -125,6 +125,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
     attrsToEval[[i]]$set <- attr(d, "set")
     dat <- to_basic.GeomSf(d)
+    # down-stream formula mappings reference the *full* data (with NAs inserted)
+    p$x$visdat[[i]] <- function() group2NA(dat)
     # to_basic() returns either a single data frame or a list of data frames
     if (is.data.frame(dat)) {
       attrsToEval[[i]] <- modify_list(geom2trace(dat, params = list()), attrsToEval[[i]])
