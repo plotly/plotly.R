@@ -64,29 +64,28 @@ plotly_data <- function(p, id = p$x$cur_data) {
   if (!is.plotly(p)) {
     stop("`plotly_data()` expects a plotly object as it's first argument.", call. = FALSE)
   }
-  # TODO: attach a special class here so that it gets printed as a tibble?
-  # Or, maybe, add an `as_tibble = TRUE` argument and use FALSE internally
-  fortify(p)
-}
-
-#' @export
-fortify.plotly <- function(p, id = p$x$cur_data) {
   f <- p$x$visdat[[id]]
-  if (is.null(f)) return(f)
   # if data has been specified, f should be a closure that, when called,
   # returns data
-  if (!is.function(f)) stop("Expected a closure function", call. = FALSE)
-  fortify(f())
+  if (is.null(f)) return(f)
+  if (!is.function(f)) stop("Expected a closure", call. = FALSE)
+  dat <- f()
+  if (crosstalk::is.SharedData(dat)) {
+    key <- dat$key()
+    set <- dat$groupName()
+    dat <- dat$origData()
+    dat[[crosstalk_key()]] <- key
+    # not allowed for list-columns!
+    #dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
+    dat <- structure(dat, set = set)
+  }
+  prefix_class(dat, "plotly_data")
 }
 
 #' @export
-fortify.SharedData <- function(model, data, ...) {
-  key <- model$key()
-  set <- model$groupName()
-  data <- model$origData()
-  # need a consistent name so we know how to access it ggplotly()
-  data[[crosstalk_key()]] <- key
-  structure(data, set = set)
+print.plotly_data <- function(x, ...) {
+  print(tibble::as_tibble(x, ...))
+  x
 }
 
 
@@ -234,3 +233,28 @@ transmute_.plotly <- function(.data, ..., .dots) {
 # }
 # 
 # n_dots <- function(...) nargs()
+
+
+# ---------------------------------------------------------------------------
+# miscellanous methods
+# ---------------------------------------------------------------------------
+
+# Avoid errors when passing a shared data to ggplot2
+# qplot(data = crosstalk::SharedData$new(mtcars), mpg, wt)
+
+#' @export
+fortify.SharedData <- function(model, data, ...) {
+  key <- model$key()
+  set <- model$groupName()
+  data <- model$origData()
+  # need a consistent name so we know how to access it ggplotly()
+  data[[crosstalk_key()]] <- key
+  structure(data, set = set)
+}
+
+# yes, you can feed a plotly object into ggplot %^)
+#' @export
+ggplot.plotly <- function(data, mapping = aes(), ...,
+                          environment = parent.frame()) {
+  ggplot(plotly_data(data), mapping = mapping, ..., environment = environment)
+}
