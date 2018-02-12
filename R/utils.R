@@ -209,22 +209,23 @@ mapbox_token <- function() {
   token
 }
 
-# TODO: set scaleanchor for cartesian plots!
 fit_bounds <- function(p) {
-  # Route trace[i]._bbox info to layout.mapboxid._fitBounds
-  # so that we have a sensible range for each mapbox subplot
+  # Compute layout.mapboxid._fitBounds, an internal attr that has special client-side logic
+  # PS. how the hell does mapbox not have a way to set initial map bounds?
+  # https://github.com/mapbox/mapbox-gl-js/issues/1970
   mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
   for (id in mapboxIDs) {
     bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$subplot)) tr[["_bbox"]])
-    if (sum(lengths(bboxes)) == 0) next
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
     # intentionally an array of numbers in [west, south, east, north] order
     # https://www.mapbox.com/mapbox-gl-js/api/#lnglatboundslike
     p$x$layout[[id]]$`_fitBounds` <- list(
       bounds = c(
-        min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
-        min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
-        max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE),
-        max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
+        min(rng$xrng),
+        min(rng$yrng),
+        max(rng$xrng),
+        max(rng$yrng)
       ),
       options = list(
         padding = 10, 
@@ -234,27 +235,57 @@ fit_bounds <- function(p) {
         offset = c(0, 0)
       )
     )
+    p$x$layout[[id]]$center$lat <- mean(rng$yrng)
+    p$x$layout[[id]]$center$lon <- mean(rng$xrng)
   }
   
-  # Route trace[i]._bbox info to layout.geoid.lonaxis/layout.geoid.lataxis
+  # Compute layout.geoid.lonaxis.range & layout.geoid.lataxis.range
+  # for scattergeo
   geoIDs <- grep("^geo", sapply(p$x$data, "[[", "geo"), value = TRUE)
   for (id in geoIDs) {
     bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$geo)) tr[["_bbox"]])
-    if (sum(lengths(bboxes)) == 0) next
-    p$x$layout[[id]]$lataxis$range <- grDevices::extendrange(c(
-      min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
-      max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
-    ), f = 0.01)
-    p$x$layout[[id]]$lonaxis$range <- grDevices::extendrange(c(
-      min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
-      max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE)
-    ), f = 0.01)
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
+    p$x$layout[[id]]$lataxis$range <- rng$yrng
+    p$x$layout[[id]]$lonaxis$range <- rng$xrng
+  }
+  
+  # Compute layout.axisid.scaleanchor & layout.axisid.scaleratio
+  # for scatter/scattergl
+  rows <- compact(lapply(p$x$data, function(x) c(x[["xaxis"]], x[["yaxis"]])))
+  for (i in seq_along(rows)) {
+    xname <- rows[[i]][[1]]
+    yname <- rows[[i]][[2]]
+    bboxes <- lapply(p$x$data, function(tr) {
+      if (identical(xname, tr$xaxis) && identical(yname, tr$yaxis)) tr[["_bbox"]]
+    })
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
+    p$x$layout[[sub("x", "xaxis", xname)]]$scaleanchor <- yname
+    # TODO: only do this for lat/lon dat
+    p$x$layout[[sub("x", "xaxis", xname)]]$scaleratio <- cos(mean(rng$yrng) * pi/180)
   }
   
   # Internal _bbox field no longer needed
-  p$x$data <- lapply(p$x$data, function(tr) { tr[["_bbox"]] <- NULL; tr })
-  
+  #p$x$data <- lapply(p$x$data, function(tr) { tr[["_bbox"]] <- NULL; tr })
   p
+}
+
+# find the x/y layout range of a collection of trace._bboxes
+bboxes2range <- function(bboxes, ...) {
+  if (sum(lengths(bboxes)) == 0) return(NULL)
+  yrng <- c(
+    min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
+    max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
+  )
+  xrng <- c(
+    min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
+    max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE)
+  )
+  list(
+    yrng = grDevices::extendrange(yrng, ...),
+    xrng = grDevices::extendrange(xrng, ...)
+  )
 }
 
 # rename attrs (unevaluated arguments) from geo locations (lat/lon) to cartesian
@@ -394,7 +425,7 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox"), 
       thisTrace$type
     )
   }

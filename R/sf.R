@@ -4,9 +4,7 @@
 # Note how, in to_basic.GeomSf(), we split data into a list of data.frames
 # (each data frame has at most one geometry type).
 
-# TODO: 
-# (1) apply these same crs warnings/conversions to mapbox! https://github.com/rstudio/leaflet/blame/d489e2cd/R/normalize-sf.R#L94-L113
-# (2) speed this up -- avoid converting redundant features
+# TODO: speed this up by avoiding conversion redundant features (e.g. animation)
 fortify_sf <- function(model, ...) {
   # matrix with coordinates (X, Y, possibly Z and/or M) in rows, possibly 
   # followed by integer indicators L1,...,L3 that point out to which structure 
