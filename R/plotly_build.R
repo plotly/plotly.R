@@ -121,23 +121,28 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     id <- names2(attrsToEval)[i]
     d <- plotly_data(p, id)
     if (!inherits(d, "sf")) next
+    # TODO: impose the same restrictions on cartesian coordinates?
     if (is_mapbox(p) || is_geo(p)) d <- st_cast_crs(d)
     attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
     attrsToEval[[i]]$set <- attr(d, "set")
+    # This should *always* generate a group variable (thx to fortify_sf())
     dat <- to_basic.GeomSf(d)
-    # down-stream formula mappings reference the *full* data (with NAs inserted)
-    p$x$visdat[[i]] <- function() group2NA(dat)
+    p$x$visdat[[i]] <- function() group_by_(dat, "group", add = TRUE)
     # to_basic() returns either a single data frame or a list of data frames
+    # note that we don't want data arrays from geom2trace(), just the sensible
+    # mode/style defaults, because 
     if (is.data.frame(dat)) {
-      attrsToEval[[i]] <- modify_list(geom2trace(dat, params = list()), attrsToEval[[i]])
+      attrsToEval[[i]] <- modify_list(c(sf_default_attrs(dat), list(x = ~x, y = ~y)), attrsToEval[[i]])
     } else {
-      attrs <- lapply(dat, function(x) modify_list(geom2trace(x, params = list()), attrsToEval[[i]]))
+      attrs <- lapply(dat, function(d) {
+        modify_list(c(sf_default_attrs(d), list(x = ~x, y = ~y)), attrsToEval[[i]])
+      })
       # TODO: ordering isn't always correct here 
       attrsToEval <- c(attrs, attrsToEval[setdiff(seq_along(attrsToEval), i)])
-    } 
+    }
   }
   
-  
+
   dats <- Map(function(x, y) {
     
     # grab the data for this trace
@@ -160,6 +165,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       as.character(dplyr::groups(dat)),
       error = function(e) character(0)
     )
+    
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
@@ -206,7 +212,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text", "key"
+      ".plotlyGroupIndex", "text", "key", "fillcolor"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -222,7 +228,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
       # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
@@ -267,13 +273,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       )
       builtData <- train_data(builtData, trace)
       trace[[".plotlyVariableMapping"]] <- names(builtData)
-      
       # copy over to the trace data
       for (i in names(builtData)) {
         trace[[i]] <- builtData[[i]]
       }
     }
-    
     # TODO: provide a better way to clean up "high-level" attrs
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
     trace[lengths(trace) > 0]

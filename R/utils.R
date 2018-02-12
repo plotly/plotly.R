@@ -467,7 +467,12 @@ verify_attr <- function(proposed, schema) {
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving attributes)
     if (!isDataArray && !arrayOK && !identical(role, "object")) {
-      proposed[[attr]] <- retain(proposed[[attr]], unique)
+      proposed[[attr]] <- retain(proposed[[attr]], uniq)
+    }
+    
+    # plotly.js should really handle this logic
+    if (identical(proposed[["hoveron"]], "fill")) {
+      proposed[["text"]] <- retain(proposed[["text"]], uniq)
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
@@ -493,7 +498,7 @@ verify_attr <- function(proposed, schema) {
         isDataArray2 <- identical(valType2, "data_array")
         
         if (!isDataArray2 && !arrayOK2 && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
+          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], uniq)
         }
         
         # ensure data_arrays of length 1 are boxed up by to_JSON()
