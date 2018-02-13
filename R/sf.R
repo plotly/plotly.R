@@ -90,3 +90,9 @@ sf_default_attrs <- function(d) {
   if (inherits(d, "GeomPoint")) return(list(mode = "markers"))
   stop("Unexpected case. Please report an issue here https://github.com/ropensci/plotly/issues/new", call. = FALSE)
 }
+
+
+is_sf <- function(dat) {
+  if (crosstalk::is.SharedData(dat)) dat <- dat$origData()
+  inherits(dat, "sf")
+}

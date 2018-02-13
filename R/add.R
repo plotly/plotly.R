@@ -217,6 +217,52 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
 }
 
 
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   plot_ly() %>% add_sf(data = nc)
+#' }
+add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
+  dat <- data %||% plotly_data(p)
+  if (!is_sf(dat)) {
+    stop("Either `data` or `plotly_data(p) must be an sf object`", call. = FALSE)
+  }
+  if (is_mapbox(p) || is_geo(p)) dat <- st_cast_crs(dat)
+  bbox <- sf::st_bbox(dat)
+  set <- attr(dat, "set")
+  
+  # This should *always* generate a group variable (thx to fortify_sf())
+  d <- to_basic.GeomSf(dat)
+  
+  # to_basic() returns either a single data frame or a list of data frames
+  # (each data frame should be a a collection of the same feature type)
+  d <- if (is.data.frame(d)) list(d)
+  
+  for (i in seq_along(d)) {
+    # sensible mode/style defaults based on the feature type (e.g. polygon, path, point)
+    attrs <- modify_list(sf_default_attrs(d[[i]]), list(...))
+    args <- list(
+      p = p, 
+      class = "plotly_sf", 
+      x = x,
+      y = y,
+      `_bbox` = bbox,
+      set = set,
+      data = group_by_(d[[i]], "group", add = TRUE), 
+      inherit = inherit
+    )
+    p <- do.call(add_trace_classed, c(args, attrs))
+  }
+  
+  p
+}
+
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export

@@ -8,6 +8,7 @@
 \alias{add_lines}
 \alias{add_segments}
 \alias{add_polygons}
+\alias{add_sf}
 \alias{add_ribbons}
 \alias{add_area}
 \alias{add_pie}
@@ -42,6 +43,8 @@ add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
   data = NULL, inherit = TRUE)
 
 add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+
+add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
   inherit = TRUE)
@@ -141,6 +144,11 @@ ggplot2::map_data("world", "canada") \%>\%
   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
     data = maps::canada.cities) \%>\%
   layout(showlegend = FALSE)
+
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  plot_ly() \%>\% add_sf(data = nc)
+}
 
 plot_ly(economics, x = ~date) \%>\% 
   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)

@@ -90,6 +90,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # Attributes should be NULL if none exist (rather than an empty list)
   if (length(p$x$attrs) == 0) p$x$attrs <- NULL
   
+  # If there is just one trace and the data is sf, 
+  if (length(p$x$attrs) == 1 && is_sf(plotly_data(p))) {
+    p <- add_sf(p)
+  }
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
@@ -114,34 +119,6 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       tr
     })
   }
-  
-  # special sf logic that casts and expands data since we might have to split
-  # into multiple traces (e.g., points & polygons need their own traces)
-  for (i in seq_along(attrsToEval)) {
-    id <- names2(attrsToEval)[i]
-    d <- plotly_data(p, id)
-    if (!inherits(d, "sf")) next
-    # TODO: impose the same restrictions on cartesian coordinates?
-    if (is_mapbox(p) || is_geo(p)) d <- st_cast_crs(d)
-    attrsToEval[[i]]$`_bbox` <- sf::st_bbox(d)
-    attrsToEval[[i]]$set <- attr(d, "set")
-    # This should *always* generate a group variable (thx to fortify_sf())
-    dat <- to_basic.GeomSf(d)
-    p$x$visdat[[i]] <- function() group_by_(dat, "group", add = TRUE)
-    # to_basic() returns either a single data frame or a list of data frames
-    # note that we don't want data arrays from geom2trace(), just the sensible
-    # mode/style defaults, because 
-    if (is.data.frame(dat)) {
-      attrsToEval[[i]] <- modify_list(c(sf_default_attrs(dat), list(x = ~x, y = ~y)), attrsToEval[[i]])
-    } else {
-      attrs <- lapply(dat, function(d) {
-        modify_list(c(sf_default_attrs(d), list(x = ~x, y = ~y)), attrsToEval[[i]])
-      })
-      # TODO: ordering isn't always correct here 
-      attrsToEval <- c(attrs, attrsToEval[setdiff(seq_along(attrsToEval), i)])
-    }
-  }
-  
 
   dats <- Map(function(x, y) {
     
