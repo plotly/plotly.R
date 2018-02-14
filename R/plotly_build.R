@@ -90,8 +90,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # Attributes should be NULL if none exist (rather than an empty list)
   if (length(p$x$attrs) == 0) p$x$attrs <- NULL
   
-  # If there is just one trace and the data is sf, 
-  if (length(p$x$attrs) == 1 && is_sf(plotly_data(p))) {
+  # If there is just one (unevaluated) trace, and the data is sf, add an sf layer
+  if (length(p$x$attrs) == 1 && !inherits(p$x$attrs[[1]], "plotly_eval") && is_sf(plotly_data(p))) {
     p <- add_sf(p)
   }
   
