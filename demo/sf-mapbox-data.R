@@ -11,19 +11,12 @@ subplot(
 
 # map custom hover text to each point
 # (unfortunately, scattermapbox does not yet support hoveron='fill')
-plot_mapbox(nc, text = ~AREA, hoverinfo = "text")
+plot_mapbox(nc, text = ~paste0(NAME, ": ", AREA), hoverinfo = "text")
 
-# each trace may have at most one fill color, so if you'd like to
-# create choropleths, for instance, you should `split`  
+
 col_scale <- scales::col_numeric("Blues", range(nc$AREA))
-plot_mapbox(nc, split = ~factor(AREA), fillcolor = ~col_scale(AREA)) %>%
+plot_ly(nc, fillcolor = ~col_scale(AREA), text = ~AREA, hoveron = "fill") %>%
   layout(showlegend = FALSE)
-
-# TODO: 
-# (1) this should create multiple traces!!! :(
-# (2) perhaps the colorbar definition needs fixing?
-plot_mapbox(nc, color = ~AREA, text = ~AREA, hoverinfo = "text", hoveron = "fill") %>%
-  plotly_json()
 
 # TODO: animation
 
@@ -41,16 +34,7 @@ plot_mapbox(nc, split = ~AREA, text = ~NAME, hoveron = "fill")
 
 # add dropdown for changing baselayer
 # TODO: how to keep the bounding box fixed?
-styles <- schema(FALSE)$layout$layoutAttributes$mapbox$style$values
-style_buttons <- lapply(styles, function(s) {
-  list(label = s, method = "relayout", args = list("mapbox.style", s))
-})
 
-p1 %>%
-  layout(
-    title = "Changing the base layer",
-    updatemenus = list(list(y = 0.8, buttons = style_buttons))
-  )
 
 
 # non-standard crs
@@ -58,6 +42,7 @@ library(mapview)
 plot_mapbox(trails)
 
 library(crosstalk)
+load(url("https://github.com/r-spatial/mapview/raw/master/data/trails.rda"))
 tsd <- SharedData$new(trails)
 
 bscols(
@@ -66,4 +51,14 @@ bscols(
 )
 
 
+styles <- schema(FALSE)$layout$layoutAttributes$mapbox$style$values
+style_buttons <- lapply(styles, function(s) {
+  list(label = s, method = "relayout", args = list("mapbox.style", s))
+})
+
+plot_mapbox(trails, color = I("red")) %>%
+  layout(
+    title = "Changing the base layer",
+    updatemenus = list(list(y = 0.8, buttons = style_buttons))
+  )
 
