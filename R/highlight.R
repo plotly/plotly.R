@@ -44,7 +44,6 @@
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param selected attributes of the selection, see [attrs_selected()].
-#' @param unselected attributes of the non-selected marks, see [attrs_unselected()].
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert

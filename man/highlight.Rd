@@ -58,8 +58,6 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 \item{selected}{attributes of the selection, see \code{\link[=attrs_selected]{attrs_selected()}}.}
 
 \item{...}{currently not supported.}
-
-\item{unselected}{attributes of the non-selected marks, see \code{\link[=attrs_unselected]{attrs_unselected()}}.}
 }
 \description{
 This function sets a variety of options for brushing (i.e., highlighting)
