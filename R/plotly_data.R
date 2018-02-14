@@ -84,7 +84,7 @@ plotly_data <- function(p, id = p$x$cur_data) {
 
 #' @export
 print.plotly_data <- function(x, ...) {
-  print(tibble::as_tibble(x, ...))
+  print(remove_class(tibble::as_tibble(x, ...), "plotly_data"))
   x
 }
 
