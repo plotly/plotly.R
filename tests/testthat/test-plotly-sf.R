@@ -11,7 +11,7 @@ test_that("add_sf() is optional", {
   expect_identical(p1$x$data, p2$x$data)
   
   # all counties drawn in one trace
-  expect_length(p1$data, 1)
+  expect_length(p1$x$data, 1)
   
   # 108 polygons
   expect_equal(sum(is.na(p1$x$data[[1]]$x)), 107)
@@ -26,7 +26,7 @@ test_that("plot_ly() scaleanchor is set", {
   
   p <- plotly_build(plot_ly(nc))
   expect_true(p$x$layout$xaxis$scaleanchor == "y")
-  expect_equal(p$x$layout$xaxis$scaleratio, 0.8167844)
+  expect_equal(p$x$layout$xaxis$scaleratio, 0.8167844, tolerance = 1e-6)
 })
 
 test_that("plot_geo() lat/lon range is set", {
@@ -59,7 +59,7 @@ test_that("plot_mapbox() fitbounds is set", {
 
 test_that("sf defaults can be overriden", {
   p <- plotly_build(plot_mapbox(nc, color = I("red")))
-  expect_true(p$x$data[[1]]$type == "scatter")
+  expect_true(p$x$data[[1]]$type == "scattermapbox")
   expect_true(p$x$data[[1]]$fill == "toself")
   expect_true(p$x$data[[1]]$line$color == toRGB("red"))
   expect_true(p$x$data[[1]]$line$fillcolor == toRGB("red"))
