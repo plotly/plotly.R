@@ -53,7 +53,7 @@ test_that("plot_mapbox() fitbounds is set", {
   expect_equal(
     p$x$layout$mapbox$`_fitBounds`$bounds, 
     c(-84.41252, 33.85492, -75.36831, 36.61673),
-    tolerance = 1e-6
+    tolerance = 1e-5
   )
 })
 
