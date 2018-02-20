@@ -63,21 +63,25 @@ sf_key <- function() ".sf-group-id"
 st_cast_crs <- function(x) {
   crs <- sf::st_crs(x)
   
-  # Don't have enough information to check
-  if (is.na(crs)) return()
+  if (is.na(crs)) {
+    warning(
+      "Missing coordinate reference system (crs). Defaulting to EPSG:3857"
+    )
+    return(sf::st_set_crs(x, 3857))
+  }
   
   isLongLat <- isTRUE(sf::st_is_longlat(x))
   isWGS84 <- grepl("+datum=WGS84", crs$proj4string, fixed = TRUE)
   
   if (!(isLongLat && isWGS84)) {
     warning(
-      "The trace types 'scattermapbox' and 'scattergeo' require a coordinate ",
-      "reference system (crs) that contains: '+proj=longlat +datum=WGS84', ",
+      "The trace types 'scattermapbox' and 'scattergeo' require a projected ",
+      "coordinate system that is based on the WGS84 datum (EPSG:3857), ",
       "but the crs provided is: '", crs$proj4string, "'. ",
       "Attempting transformation to the target coordinate system.",
       call. = FALSE
     )
-    x <- sf::st_transform(x, '+proj=longlat +datum=WGS84')
+    return(sf::st_transform(x, 3857))
   }
   
   x

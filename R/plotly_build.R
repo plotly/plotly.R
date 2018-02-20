@@ -681,7 +681,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       colorObj$color <- color[[i]]
       if (hasLine[[i]]) {
         if (types[[i]] %in% c("scatter", "scattergl")) {
-          warning("Numeric color variables cannot (yet) be mapped to lines.\n",
+          warning("Numeric color variables cannot (yet) be mapped to lines",
                   " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
           traces[[i]]$mode <- paste0(traces[[i]]$mode, "+markers")
           hasMarker[[i]] <- TRUE
