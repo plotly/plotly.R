@@ -33,15 +33,16 @@ test_that("plot_geo() lat/lon range is set", {
   skip_if_not_installed("sf")
   
   p <- plotly_build(plot_geo(nc))
+  print(str(p$x$layout$geo))
   expect_equal(
     p$x$layout$geo$lataxis$range, 
     c(33.85492, 36.61673), 
-    tolerance = 1e-6
+    tolerance = 1e-4
   )
   expect_equal(
     p$x$layout$geo$lonaxis$range, 
     c(-84.41252, -75.36831), 
-    tolerance = 1e-6
+    tolerance = 1e-4
   )
 })
 
