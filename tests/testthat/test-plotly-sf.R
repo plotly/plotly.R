@@ -89,12 +89,19 @@ test_that("plot_ly() defaults to blank axes", {
   
   xaxis <- p$x$layout$xaxis
   yaxis <- p$x$layout$yaxis
+  
   expect_false(xaxis$showgrid)
-  expect_false(xaxis$showticklabels)
-  expect_false(xaxis$zeroline)
-  expect_true(xaxis$title == "just a test")
   expect_false(yaxis$showgrid)
+  
+  expect_false(xaxis$showticklabels)
   expect_false(yaxis$showticklabels)
+  
+  expect_false(xaxis$zeroline)
   expect_false(yaxis$zeroline)
+  
+  expect_true(xaxis$title == "just a test")
   expect_true(yaxis$title == "")
+  
+  expect_true(yaxis$ticks == "")
+  expect_true(yaxis$ticks == "")
 })
