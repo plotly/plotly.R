@@ -59,6 +59,8 @@ test_that("plot_mapbox() fitbounds is set", {
 
 
 test_that("sf defaults can be overriden", {
+  skip_if_not_installed("sf")
+  
   p <- plotly_build(plot_mapbox(nc, color = I("red")))
   expect_true(p$x$data[[1]]$type == "scattermapbox")
   expect_true(p$x$data[[1]]$fill == "toself")
@@ -67,7 +69,32 @@ test_that("sf defaults can be overriden", {
 })
 
 test_that("Can plot sfc with a missing crs", {
+  skip_if_not_installed("sf")
+  
   p <- plotly_build(plot_geo(storms, name = "Storms"))
   expect_true(p$x$data[[1]]$type == "scattermapbox")
   expect_true(p$x$data[[1]]$mode == "lines")
+})
+
+
+test_that("plot_ly() defaults to blank axes", {
+  skip_if_not_installed("sf")
+  
+  m <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
+  
+  p <- plot_ly() %>%
+    add_sf(data = m, color = I("black"), fillcolor = "transparent", hoverinfo = "none") %>%
+    layout(xaxis = list(title = "just a test")) %>%
+    plotly_build()
+  
+  xaxis <- p$x$layout$xaxis
+  yaxis <- p$x$layout$yaxis
+  expect_false(xaxis$showgrid)
+  expect_false(xaxis$showticklabels)
+  expect_false(xaxis$zeroline)
+  expect_true(xaxis$title == "just a test")
+  expect_false(yaxis$showgrid)
+  expect_false(yaxis$showticklabels)
+  expect_false(yaxis$zeroline)
+  expect_true(yaxis$title == "")
 })

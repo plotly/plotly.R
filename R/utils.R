@@ -254,16 +254,23 @@ fit_bounds <- function(p) {
   # for scatter/scattergl
   rows <- compact(lapply(p$x$data, function(x) c(x[["xaxis"]], x[["yaxis"]])))
   for (i in seq_along(rows)) {
-    xname <- rows[[i]][[1]]
-    yname <- rows[[i]][[2]]
+    xid <- rows[[i]][[1]]
+    yid <- rows[[i]][[2]]
     bboxes <- lapply(p$x$data, function(tr) {
-      if (identical(xname, tr$xaxis) && identical(yname, tr$yaxis)) tr[["_bbox"]]
+      if (identical(xid, tr$xaxis) && identical(yid, tr$yaxis)) tr[["_bbox"]]
     })
     rng <- bboxes2range(bboxes, f = 0.01)
     if (!length(rng)) next
-    p$x$layout[[sub("x", "xaxis", xname)]]$scaleanchor <- yname
+    xname <- sub("x", "xaxis", xid)
+    yname <- sub("y", "yaxis", yid)
+    # default to empty axes
+    # TODO: is there a set of projections where it makes sense to show a cartesian grid?
+    eaxis <- list(showticklabels = FALSE, showgrid = FALSE, zeroline = FALSE, title = "")
+    p$x$layout[[xname]] <- modify_list(eaxis, p$x$layout[[xname]])
+    p$x$layout[[yname]] <- modify_list(eaxis, p$x$layout[[yname]])
+    p$x$layout[[xname]]$scaleanchor <- yname
     # TODO: only do this for lat/lon dat
-    p$x$layout[[sub("x", "xaxis", xname)]]$scaleratio <- cos(mean(rng$yrng) * pi/180)
+    p$x$layout[[xname]]$scaleratio <- cos(mean(rng$yrng) * pi/180)
   }
   
   # Internal _bbox field no longer needed
