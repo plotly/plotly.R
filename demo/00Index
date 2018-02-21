@@ -20,3 +20,4 @@ sf-mapbox-layout                      Mapping sf objects with mapbox (as a layer
 sf-ggplot2                            Mapping sf objects via ggplot2 and geom_sf()
 sf-geo                                Mapping sf objects with scattergeo
 sf-plotly-storms                      Visualizing sf objects with >2 coordinates (e.g. altitude)
+sf-plotly-3D-globe                    Visualizing storms paths on a 3D globe
