@@ -230,7 +230,11 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
 add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
   dat <- data %||% plotly_data(p)
   if (!is_sf(dat)) {
-    stop("Either `data` or `plotly_data(p) must be an sf object`", call. = FALSE)
+    stop(
+      "The `data` for an `add_sf()` layer must be an sf object, ", 
+      "not an object of class: ", class(dat)[1],
+      call. = FALSE
+    )
   }
   if (is_mapbox(p) || is_geo(p)) dat <- st_cast_crs(dat)
   bbox <- sf::st_bbox(dat)
