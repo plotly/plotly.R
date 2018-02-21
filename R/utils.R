@@ -265,7 +265,7 @@ fit_bounds <- function(p) {
     yname <- sub("y", "yaxis", yid)
     # default to empty axes
     # TODO: is there a set of projections where it makes sense to show a cartesian grid?
-    eaxis <- list(showticklabels = FALSE, showgrid = FALSE, zeroline = FALSE, title = "")
+    eaxis <- list(showgrid = FALSE, zeroline = FALSE, title = "", ticks = "", showticklabels = FALSE)
     p$x$layout[[xname]] <- modify_list(eaxis, p$x$layout[[xname]])
     p$x$layout[[yname]] <- modify_list(eaxis, p$x$layout[[yname]])
     p$x$layout[[xname]]$scaleanchor <- yname
