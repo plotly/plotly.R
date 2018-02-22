@@ -1,15 +1,11 @@
 library(plotly)
+library(dplyr)
+library(crosstalk)
 
+# latitude, longitude, and altitiude of tropical storms
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
 
-empty_axis <- list(
-  showgrid = FALSE, 
-  zeroline = FALSE,
-  showticklabels = FALSE,
-  title = ""
-)
-
-# even grid of lat/lons along the whole globe
+# even grid of lat/lons spanning the globe (for creating the globe surface)
 nlat <- 200
 nlon <- 100
 lat <- seq(-180, 180, length.out = nlat)
@@ -17,38 +13,53 @@ lon <- seq(-90, 90, length.out = nlon)
 lat <- matrix(rep(lat, nlon), nrow = nlat)
 lon <- matrix(rep(lon, each = nlat), nrow = nlat)
 
-# helper function for converting polar -> cartesian
+# helper function for converting polar (lat/lon) -> cartesian (x/y/z)
 degrees2radians <- function(degree) degree * pi / 180 
 
-plot_ly() %>%
+# show as little as possible when hovering over surface
+empty_axis <- list(
+  showgrid = FALSE, 
+  zeroline = FALSE,
+  showticklabels = FALSE,
+  showspikes = FALSE,
+  spikesides = FALSE,
+  title = ""
+)
+
+# A 3D globe implemented with 3D lines and a spherical surface
+# Note that the globe has a radius of 1, but project the lines with 
+# a radius of 1.001 so that we appear on top of the surface
+globe <- plot_ly(height = 500) %>%
   add_sf(
     data = sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE)), 
     x = ~ 1.001 * cos(degrees2radians(x)) * cos(degrees2radians(y)),
     y = ~ 1.001 * sin(degrees2radians(x)) * cos(degrees2radians(y)),
     z = ~ 1.001 * sin(degrees2radians(y)),
-    color = I("black"), hoverinfo = "none", size = I(1),
-    showlegend = FALSE
+    color = I("black"), size = I(1),
+    hoverinfo = "none"
   ) %>%
   add_sf(
-    data = storms,
+    data = SharedData$new(storms, group = "storm paths"),
     name = "storm paths",
-    x = ~ cos(degrees2radians(x)) * cos(degrees2radians(y)),
-    y = ~ sin(degrees2radians(x)) * cos(degrees2radians(y)),
-    # TODO: this is just a guess, the rescaling range is not actually [0, 0.2]...
-    z = ~ sin(degrees2radians(y)) + scales::rescale(z, to = c(0, 0.2))
+    x = ~ 1.001 * cos(degrees2radians(x)) * cos(degrees2radians(y)),
+    y = ~ 1.001 * sin(degrees2radians(x)) * cos(degrees2radians(y)),
+    z = ~ 1.001 * sin(degrees2radians(y)),
+    color = ~z, size = I(6),
+    text = ~paste("Latitude:", y, "<br>", "Longitude:", x, "<br>", "Altitude:", z),
+    hoverinfo = "text"
   ) %>%
   add_surface(
     x = cos(degrees2radians(lon)) * cos(degrees2radians(lat)),
     y = sin(degrees2radians(lon)) * cos(degrees2radians(lat)),
-    z = sin(degrees2radians(lat)),
+    # The I() prevents plotly from mapping this value to color
+    z = I(sin(degrees2radians(lat))),
+    # NOTE: you can map a value to surfacecolor to encode, say air temp..
     # TODO: perhaps there is a better way to specify a constant surfacecolor?
-    surfacecolor = matrix(rep(0.5, nlat * nlon), nrow = nlat),
-    colorscale = data.frame(c(0, 0.5, 1), c("red", "white", "blue")),
-    showscale = FALSE,
-    hoverinfo = "none"
+    colorscale = list(c(0, "white"), c(1, "white")),
+    showscale = FALSE, hoverinfo = "none"
   ) %>%
-  # TODO: is there a way to turn on the spikelines?
   layout(
+    showlegend = FALSE,
     scene = list(
       xaxis = empty_axis,
       yaxis = empty_axis,
@@ -57,4 +68,44 @@ plot_ly() %>%
       camera = list(eye = list(x = .41, y = -.71, z = 0.57))
     )
   )
-  
+
+
+# spherical distance between the first point and every other point
+# https://en.wikipedia.org/wiki/Great-circle_distance
+arc_dist <- function(lon, lat) {
+  lon <- degrees2radians(lon)
+  lat <- degrees2radians(lat)
+  lon0 <- lon[1]
+  lat0 <- lat[1]
+  delta <- cos(abs(lon - lon0))
+  acos(sin(lat0) * sin(lat) + cos(lat0) * cos(lat) * delta)
+}
+
+# plot altitude of each storm versus the distance it has traveled
+distanceByAlt <- storms %>%
+  sf::st_coordinates() %>%
+  as.data.frame() %>%
+  group_by(L1) %>%
+  mutate(dist = arc_dist(X, Y)) %>%
+  rename(altitude = Z) %>%
+  SharedData$new(~L1, group = "storm paths") %>%
+  plot_ly(x = ~dist, y = ~altitude, height = 400) %>%
+  # plotly.js doesn't support color gradient along *2D* lines
+  add_lines(color = I("gray")) %>%
+  add_markers(
+    color = ~altitude, hoverinfo = "text",
+    text = ~paste("Distance:", round(dist, 2), "<br>", "Altitude:", altitude, "<br>", "Storm:", L1)
+  ) %>%
+  layout(
+    showlegend = FALSE,
+    title = "Tropical storm altitude by distance \n (click to highlight storm)",
+    font = list(size = 15, family = "Balta"),
+    margin = list(t = 60)
+  )
+
+# force persistent selection
+# TODO: persistence via shift should work with two separate graphs!!
+options(persistent = TRUE)
+
+library(htmltools)
+browsable(tagList(globe, distanceByAlt))
