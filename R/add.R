@@ -228,7 +228,7 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
 #'   plot_ly() %>% add_sf(data = nc)
 #' }
 add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
-  dat <- data %||% plotly_data(p)
+  dat <- plotly_data(add_data(p, data))
   if (!is_sf(dat)) {
     stop(
       "The `data` for an `add_sf()` layer must be an sf object, ", 
