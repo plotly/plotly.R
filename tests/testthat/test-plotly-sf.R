@@ -1,7 +1,7 @@
 context("add_sf")
 
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-storms <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
 
 test_that("add_sf() is optional", {
   skip_if_not_installed("sf")
@@ -19,16 +19,12 @@ test_that("add_sf() is optional", {
   expect_true(p1$x$data[[1]]$type == "scatter")
   expect_true(p1$x$data[[1]]$mode == "lines")
   expect_true(p1$x$data[[1]]$fill == "toself")
-})
-
-
-test_that("plot_ly() scaleanchor is set", {
-  skip_if_not_installed("sf")
   
-  p <- plotly_build(plot_ly(nc))
-  expect_true(p$x$layout$xaxis$scaleanchor == "y")
-  expect_equal(p$x$layout$xaxis$scaleratio, 0.8167844, tolerance = 1e-6)
+  # scaleanchor is set
+  expect_true(p1$x$layout$xaxis$scaleanchor == "y")
+  expect_equal(p1$x$layout$xaxis$scaleratio, 0.8167844, tolerance = 1e-6)
 })
+
 
 test_that("plot_geo() lat/lon range is set", {
   skip_if_not_installed("sf")
@@ -72,7 +68,7 @@ test_that("Can plot sfc with a missing crs", {
   skip_if_not_installed("sf")
   
   p <- plotly_build(plot_geo(storms, name = "Storms"))
-  expect_true(p$x$data[[1]]$type == "scattermapbox")
+  expect_true(p$x$data[[1]]$type == "scattergeo")
   expect_true(p$x$data[[1]]$mode == "lines")
 })
 
