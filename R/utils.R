@@ -268,7 +268,7 @@ fit_bounds <- function(p) {
     eaxis <- list(showgrid = FALSE, zeroline = FALSE, title = "", ticks = "", showticklabels = FALSE)
     p$x$layout[[xname]] <- modify_list(eaxis, p$x$layout[[xname]])
     p$x$layout[[yname]] <- modify_list(eaxis, p$x$layout[[yname]])
-    p$x$layout[[xname]]$scaleanchor <- yname
+    p$x$layout[[xname]]$scaleanchor <- yid
     # TODO: only do this for lat/lon dat
     p$x$layout[[xname]]$scaleratio <- cos(mean(rng$yrng) * pi/180)
   }
