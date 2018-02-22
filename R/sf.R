@@ -65,9 +65,9 @@ st_cast_crs <- function(x) {
   
   if (is.na(crs)) {
     warning(
-      "Missing coordinate reference system (crs). Defaulting to EPSG:3857"
+      "Missing coordinate reference system (crs). Defaulting to EPSG:4326"
     )
-    return(sf::st_set_crs(x, 3857))
+    return(sf::st_set_crs(x, 4326))
   }
   
   isLongLat <- isTRUE(sf::st_is_longlat(x))
@@ -76,12 +76,12 @@ st_cast_crs <- function(x) {
   if (!(isLongLat && isWGS84)) {
     warning(
       "The trace types 'scattermapbox' and 'scattergeo' require a projected ",
-      "coordinate system that is based on the WGS84 datum (EPSG:3857), ",
+      "coordinate system that is based on the WGS84 datum (EPSG:4326), ",
       "but the crs provided is: '", crs$proj4string, "'. ",
       "Attempting transformation to the target coordinate system.",
       call. = FALSE
     )
-    return(sf::st_transform(x, 3857))
+    return(sf::st_transform(x, 4326))
   }
   
   x
