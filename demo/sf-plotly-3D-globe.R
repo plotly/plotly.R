@@ -26,6 +26,9 @@ empty_axis <- list(
   title = ""
 )
 
+# for centering camera/lighting on the center of the storm paths
+xyzmean <- list(x = .41, y = -.71, z = 0.57)
+
 # A 3D globe implemented with 3D lines and a spherical surface
 # Note that the globe has a radius of 1, but project the lines with 
 # a radius of 1.001 so that we appear on top of the surface
@@ -56,7 +59,13 @@ globe <- plot_ly(height = 500) %>%
     # NOTE: you can map a value to surfacecolor to encode, say air temp..
     # TODO: perhaps there is a better way to specify a constant surfacecolor?
     colorscale = list(c(0, "white"), c(1, "white")),
-    showscale = FALSE, hoverinfo = "none"
+    showscale = FALSE, hoverinfo = "skip",
+    lightposition = xyzmean, 
+    contours = list(
+      x = list(highlight = FALSE), 
+      y = list(highlight = FALSE), 
+      z = list(highlight = FALSE)
+    )
   ) %>%
   layout(
     showlegend = FALSE,
@@ -65,7 +74,7 @@ globe <- plot_ly(height = 500) %>%
       yaxis = empty_axis,
       zaxis = empty_axis,
       aspectratio = list(x = 1, y = 1, z = 1),
-      camera = list(eye = list(x = .41, y = -.71, z = 0.57))
+      camera = list(eye = xyzmean)
     )
   )
 
