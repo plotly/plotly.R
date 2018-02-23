@@ -32,33 +32,11 @@ plot_mapbox(nc, split = ~AREA, text = ~NAME, hoveron = "fill")
 
 # TODO: how to best control hoverinfo?
 
-# add dropdown for changing baselayer
-# TODO: how to keep the bounding box fixed?
-
 
 
 # non-standard crs
 library(mapview)
 plot_mapbox(trails)
 
-library(crosstalk)
-load(url("https://github.com/r-spatial/mapview/raw/master/data/trails.rda"))
-tsd <- SharedData$new(trails)
 
-bscols(
-  plot_mapbox(tsd, text = ~district, hoverinfo = "text"),
-  DT::datatable(tsd)
-)
-
-
-styles <- schema(FALSE)$layout$layoutAttributes$mapbox$style$values
-style_buttons <- lapply(styles, function(s) {
-  list(label = s, method = "relayout", args = list("mapbox.style", s))
-})
-
-plot_mapbox(trails, color = I("red")) %>%
-  layout(
-    title = "Changing the base layer",
-    updatemenus = list(list(y = 0.8, buttons = style_buttons))
-  )
 
