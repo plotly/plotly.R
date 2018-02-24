@@ -315,4 +315,15 @@ test_that("animation frames are boxed up correctly", {
   
 })
 
-
+test_that("animation button can be customized", {
+  
+  p <- plot_ly(mtcars, x = ~mpg, y = ~wt, frame = ~vs) %>% 
+    animation_button(label = "Custom", bgcolor = "red", font = list(color = "white"))
+  
+  f <- plotly_build(p)$x
+  
+  menu <- f$layout$updatemenus[[1]]
+  expect_true(menu$bgcolor == "red")
+  expect_true(menu$font$color == "white")
+  expect_true(menu$buttons[[1]]$label == "Custom")
+})
