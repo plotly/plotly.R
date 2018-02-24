@@ -150,12 +150,16 @@ animation_slider <- function(p, hide = FALSE, ...) {
 
 
 #' @inheritParams animation_slider
+#' @param label a character string used for the animation button's label
 #' @export
 #' @rdname animation
-animation_button <- function(p, ...) {
+animation_button <- function(p, ..., label) {
 
   p <- plotly_build(p)
   isAniButton <- vapply(p$x$layout$updatemenus, is_ani_button, logical(1))
+  if (!missing(label)) {
+    p$x$layout$updatemenus[[which(isAniButton)]]$buttons[[1]]$label <- label
+  }
   p$x$layout$updatemenus[[which(isAniButton)]] <- modify_list(
     p$x$layout$updatemenus[[which(isAniButton)]], list(...)
   )

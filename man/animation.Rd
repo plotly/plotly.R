@@ -12,7 +12,7 @@ animation_opts(p, frame = 500, transition = frame, easing = "linear",
 
 animation_slider(p, hide = FALSE, ...)
 
-animation_button(p, ...)
+animation_button(p, ..., label)
 }
 \arguments{
 \item{p}{a plotly object.}
@@ -46,6 +46,8 @@ The definition of these attributes may be found here
 For \code{animation_button}, arguments are passed to a special
 layout.updatemenus button object tied to the animation
 \url{https://github.com/plotly/plotly.js/blob/master/src/components/updatemenus/attributes.js}}
+
+\item{label}{a character string used for the animation button's label}
 }
 \description{
 Animations can be created by either using the \code{frame} argument in
