@@ -1,0 +1,11 @@
+citHeader("To cite plotly in publications use:")
+
+bibentry(
+  bibtype = "Manual",
+  title = "plotly for R",
+  author = personList(as.person("Carson Sievert")),
+  year = "2018",
+  url = "https://plotly-book.cpsievert.me",
+  
+  textVersion = "Carson Sievert (2018) plotly for R. https://plotly-book.cpsievert.me"
+)
