@@ -46,6 +46,8 @@ Conversion of relative sizes depends on the size of the current
 graphics device (if no device is open, width/height of a new (off-screen)
 device defaults to 640/480). In other words, \code{height} and
 \code{width} must be specified at runtime to ensure sizing is correct.
+For examples on how to specify the output container's \code{height}/\code{width} in a
+shiny app, see \code{plotly_example("shiny", "ggplotly_sizing")}.
 }
 \examples{
 \dontrun{
