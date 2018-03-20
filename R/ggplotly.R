@@ -172,32 +172,30 @@ gg2list <- function(p, width = NULL, height = NULL,
                     layerData = 1, originalData = TRUE, source = "A", ...) {
   
   # To convert relative sizes correctly, we use grid::convertHeight(),
-  # which may open a new *screen* device, if none is currently open. 
-  # To avoid undesirable side effects, we may need to open a 
-  # non-interactive device and close it on exit...
-  # https://github.com/att/rcloud.htmlwidgets/issues/2
-  if (is.null(grDevices::dev.list())) {
-    dev_fun <- if (system.file(package = "Cairo") != "") {
-      Cairo::Cairo
-    } else if (capabilities("png")) {
-      grDevices::png
-    } else if (capabilities("jpeg")) {
-      grDevices::jpeg 
-    } else {
-      stop(
-        "No graphics device is currently open and no cairo or bitmap device is available.\n", 
-        "A graphics device is required to convert sizes correctly. You have three options:",
-        "  (1) Open a graphics device (with the desired size)  using ggplotly()",
-        "  (2) install.packages('Cairo')",
-        "  (3) compile R to use a bitmap device (png or jpeg)",
-        call. = FALSE
-      )
-    }
-    width <- width %||% grDevices::dev.size("px")[1] %||% 640
-    height <- height %||% grDevices::dev.size("px")[2] %||% 480
-    dev_fun(file = tempfile(), width = width, height = height)
-    on.exit(grDevices::dev.off(), add = TRUE)
+  # which requires a known output (device) size.
+  dev_fun <- if (system.file(package = "Cairo") != "") {
+    Cairo::Cairo
+  } else if (capabilities("png")) {
+    grDevices::png
+  } else if (capabilities("jpeg")) {
+    grDevices::jpeg 
+  } else {
+    stop(
+      "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
+      " You have two options:\n",
+      "  (1) install.packages('Cairo')\n",
+      "  (2) compile R to use a bitmap device (png or jpeg)",
+      call. = FALSE
+    )
   }
+  # if a device (or RStudio) is already open, use the device size as default size
+  if (!is.null(grDevices::dev.list()) || is_rstudio()) {
+    width <- width %||% grDevices::dev.size("px")[1]
+    height <- height %||% grDevices::dev.size("px")[2]
+  }
+  # open the device and make sure it closes on exit
+  dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
+  on.exit(grDevices::dev.off(), add = TRUE)
   
   # check the value of dynamicTicks
   dynamicValues <- c(FALSE, TRUE, "x", "y")
