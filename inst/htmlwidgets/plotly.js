@@ -738,11 +738,12 @@ function getMatchFunc(trace) {
 // find matches for "flat" keys
 function findMatches(haystack, needleSet) {
   var matches = [];
-  haystack.forEach(function(obj, i) {
+  for (var i = 0; i < haystack.length; i++) {
+    var obj = haystack[i];
     if (obj === null || needleSet.indexOf(obj) >= 0) {
       matches.push(i);
     }
-  });
+  }
   return matches;
 }
 
