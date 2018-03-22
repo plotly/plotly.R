@@ -619,7 +619,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
+  hasLineColor <- has_color_array(types, "line")
   hasText <- has_text(types, modes)
+  hasTextColor <- has_color_array(types, "text")
   hasZ <- has_attr(types, "colorscale") &
     any(vapply(traces, function(tr) {
       !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
@@ -681,15 +683,11 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       }
       colorObj$color <- color[[i]]
       if (hasLine[[i]]) {
-        if (types[[i]] %in% c("scatter", "scattergl")) {
-          warning("Numeric color variables cannot (yet) be mapped to lines",
-                  " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
-          traces[[i]]$mode <- paste0(traces[[i]]$mode, "+markers")
-          hasMarker[[i]] <- TRUE
-        } else {
-          # scatter3d supports data arrays for color
+        if (hasLineColor[[i]]) {
           traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
           traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
+        } else {
+          warning("Numeric color variables cannot (yet) be mapped to lines for this trace type", call. = FALSE)
         }
       }
       if (hasMarker[[i]]) {
@@ -697,9 +695,12 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
       if (hasText[[i]]) {
-        warning("Numeric color variables cannot (yet) be mapped to text.\n",
-                "Feel free to make a feature request \n",
-                "https://github.com/plotly/plotly.js", call. = FALSE)
+        if (hasTextColor[[i]]) {
+          traces[[i]][["text"]] <- modify_list(colorObj, traces[[i]][["text"]])
+          traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
+        } else {
+          warning("Numeric color variables cannot (yet) be mapped to text for this trace type", call. = FALSE)
+        }
       }
       if (hasFill[[i]]) {
         traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% 

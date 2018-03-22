@@ -831,12 +831,16 @@ has_marker <- function(types, modes) {
 
 has_line <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
-  ifelse(is_scatter, grepl("line", modes), has_attr(types, "line"))
+  ifelse(is_scatter, grepl("line", modes), has_attr(types, "line")) & has_color_array(types, "line")
 }
 
 has_text <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("text", modes), has_attr(types, "textfont"))
+}
+
+has_color_array <- function(types, mode = "marker") {
+  vapply(types, function(x) isTRUE(tryNULL(Schema$traces[[x]]$attributes[[mode]]$color$arrayOk)), logical(1))
 }
 
 has_attr <- function(types, attr = "marker") {
