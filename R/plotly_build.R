@@ -624,6 +624,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     any(vapply(traces, function(tr) {
       !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
     }, logical(1)))
+  hasFill <- has_attr(types, "fillcolor") & has_attr(types, "fill")
   
   colorDefaults <- traceColorDefaults()
   for (i in which(isConstant)) {
@@ -699,6 +700,10 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         warning("Numeric color variables cannot (yet) be mapped to text.\n",
                 "Feel free to make a feature request \n",
                 "https://github.com/plotly/plotly.js", call. = FALSE)
+      }
+      if (hasFill[[i]]) {
+        traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% 
+          colScale(mean(colorObj$color, na.rm = TRUE))
       }
     }
     if (any(hasZ)) return(traces)
