@@ -326,7 +326,8 @@ HTMLWidgets.widget({
         // selecting a point of a "simple" trace means: select the 
         // entire key attached to this trace, which is useful for,
         // say clicking on a fitted line to select corresponding observations 
-        var key = trace._isSimpleKey ? trace.key : trace.key[points[i].pointNumber];
+        var pts = points[i].pointNumber || points[i].pointNumbers;
+        var key = trace._isSimpleKey ? trace.key : Array.isArray(pts) ? pts.map(function(idx) { return trace.key[idx]; }) : trace.key[pts];
         // http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
         var keyFlat = trace._isNestedKey ? [].concat.apply([], key) : key;
         

@@ -19,7 +19,6 @@ altogether, use \code{NULL}. Currently the following are supported:
 \item \code{'plotly_hover'}
 \item \code{'plotly_selected'}: triggered through rectangular
 (layout.dragmode = 'select') or lasso (layout.dragmode = 'lasso') brush.
-Currently only works for scatter traces with mode 'markers'.
 }}
 
 \item{off}{turn off a selection on which event(s)? To disable off

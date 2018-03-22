@@ -39,7 +39,7 @@ plotly_example <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   
   if (type == "shiny") {
     try_library("shiny", "plotly_example")
-    getFromNamespace("runApp", asNamespace("shiny"))(finalDir, ...)
+    getFromNamespace("runApp", asNamespace("shiny"))(finalDir, display.mode = "showcase", ...)
   }
   
   if (type == "rmd") {

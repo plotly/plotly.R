@@ -15,7 +15,6 @@
 #'  \item `'plotly_hover'`
 #'  \item `'plotly_selected'`: triggered through rectangular 
 #'  (layout.dragmode = 'select') or lasso (layout.dragmode = 'lasso') brush.
-#'  Currently only works for scatter traces with mode 'markers'.
 #' }
 #' @param off turn off a selection on which event(s)? To disable off 
 #' events altogether, use `NULL`. Currently the following are supported:
