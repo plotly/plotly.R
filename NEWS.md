@@ -9,6 +9,8 @@
 
 ## CHANGES
 
+* The `color` argument now supplies a sensible default (trace-level mean) to `fillcolor`. This makes it much easier to map data values to polygon fills (e.g., choropleth maps). For an example, `plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, showlegend = FALSE, line = list(color = "black"))`.
+* The `color` argument no longer automatically add `"markers"` to the `mode` attribute for scatter/scattergl trace types. Those who wish to have the old behavior back, should add `"markers"` to the `mode` explicity (e.g., change `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines")` to `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines+markers")`)
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
 
 ## BUG FIXES
