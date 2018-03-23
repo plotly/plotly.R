@@ -96,7 +96,7 @@ test_that("plot_ly() defaults to blank axes", {
   expect_false(yaxis$zeroline)
   
   expect_true(xaxis$title == "just a test")
-  expect_true(yaxis$title == "")
+  expect_null(yaxis$title)
   
   expect_true(yaxis$ticks == "")
   expect_true(yaxis$ticks == "")
