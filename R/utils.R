@@ -834,7 +834,7 @@ has_marker <- function(types, modes) {
 
 has_line <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
-  ifelse(is_scatter, grepl("line", modes), has_attr(types, "line")) & has_color_array(types, "line")
+  ifelse(is_scatter, grepl("line", modes), has_attr(types, "line"))
 }
 
 has_text <- function(types, modes) {
