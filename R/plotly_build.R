@@ -160,9 +160,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       if (length(idx) == 1) {
         title <- deparse2(x[[idx]])
         if (is3d(trace$type) || i == "z") {
-          p$x$layout$scene[[nm]]$title <<- p$x$layout$scene[[nm]]$title %||% title
+          p$x$layout$scene[[nm]]$title <<- default(p$x$layout$scene[[nm]]$title %||% title)
         } else {
-          p$x$layout[[nm]]$title <<- p$x$layout[[nm]]$title %||% title
+          p$x$layout[[nm]]$title <<- default(p$x$layout[[nm]]$title %||% title)
         }
       }
     }
