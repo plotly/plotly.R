@@ -721,7 +721,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
-    # yay for consistency plotly.js
+    # 3D needs a z property
     if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
       colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
@@ -747,7 +747,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
     colScale <- scales::col_factor(pal, levels = names(pal) %||% lvls, na.color = na.color)
     for (i in which(isDiscrete)) {
       rgb <- toRGB(colScale(as.character(color[[i]])), traces[[i]]$alpha %||% 1)
+      if (hasFill[[i]] && isSingular[[i]]) traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% uniq(rgb)
       obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
+      if (is.null(obj)) next
       traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
       # match the plotly.js default of half transparency in the fill color
       traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
