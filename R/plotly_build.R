@@ -611,12 +611,12 @@ map_color <- function(traces, title = "", na.color = "transparent") {
   isConstant <- vapply(color, function(x) inherits(x, "AsIs") || is.null(x), logical(1))
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
   isDiscrete <- vapply(color, is.discrete, logical(1)) & !isConstant
-  if (any(isNumeric & isDiscrete)) {
-    stop("Can't have both discrete and numeric color mappings", call. = FALSE)
-  }
+  if (any(isNumeric & isDiscrete)) stop("Can't have both discrete and numeric color mappings", call. = FALSE)
+  isSingular <- vapply(color, function(x) length(uniq(x)) == 1, logical(1))
+  
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
-  types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
-  modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
+  types <- vapply(traces, function(tr) tr$type %||% "scatter", character(1))
+  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasMarker <- has_marker(types, modes)
   hasLine <- has_line(types, modes)
   hasLineColor <- has_color_array(types, "line")
@@ -669,6 +669,9 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showscale = FALSE
     )
     for (i in which(isNumeric)) {
+      
+      # when colorscale is being attached to `z`, we don't need color values in
+      # colorObj, so create colorbar trace now and exit early
       if (hasZ[[i]]) {
         colorObj[c("cmin", "cmax")] <- NULL
         colorObj[["showscale"]] <- TRUE
@@ -681,32 +684,48 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
         next
       }
-      colorObj$color <- color[[i]]
-      if (hasLine[[i]]) {
-        if (hasLineColor[[i]]) {
-          traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
-          traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
-        } else {
-          warning("Numeric color variables cannot (yet) be mapped to lines for this trace type", call. = FALSE)
+      
+      # if there is one unique color in this trace, no need for a colorscale
+      # TODO: are there are sensible color attributes we should be setting here?
+      if (isSingular[[i]]) {
+        
+        col <- uniq(color[[i]])
+        if (hasMarker[[i]]) traces[[i]]$marker$color <- traces[[i]]$marker$color %||% colScale(col)
+        if (hasLine[[i]]) traces[[i]]$line$color <- traces[[i]]$line$color %||% colScale(col)
+        if (hasText[[i]]) traces[[i]]$textfont$color <- traces[[i]]$textfont$color %||% colScale(col)
+        if (hasFill[[i]]) traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% colScale(col)
+        traces[[i]]$marker$colorscale <- NULL
+        
+      } else {
+        
+        colorObj$color <- color[[i]]
+        
+        if (hasMarker[[i]]) {
+          traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
         }
-      }
-      if (hasMarker[[i]]) {
-        traces[[i]][["marker"]] <- modify_list(colorObj, traces[[i]][["marker"]])
+        
+        if (hasLineColor[[i]]) {
+          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+        } else {
+          warning("line.color doesn't (yet) support data arrays", call. = FALSE)
+        }
+        
+        if (hasTextColor[[i]]) {
+          traces[[i]]$textfont <- modify_list(colorObj, traces[[i]]$textfont)
+        } else {
+          warning("textfont.color doesn't (yet) support data arrays", call. = FALSE)
+        }
+        
+        # TODO: how to make the summary stat customizable?
+        if (hasFill[[i]]) {
+          traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% colScale(mean(colorObj$color, na.rm = TRUE))
+        }
+        
+        # make sure the colorscale is going to convert to JSON nicely
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
-      if (hasText[[i]]) {
-        if (hasTextColor[[i]]) {
-          traces[[i]][["text"]] <- modify_list(colorObj, traces[[i]][["text"]])
-          traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
-        } else {
-          warning("Numeric color variables cannot (yet) be mapped to text for this trace type", call. = FALSE)
-        }
-      }
-      if (hasFill[[i]]) {
-        traces[[i]]$fillcolor <- traces[[i]]$fillcolor %||% 
-          colScale(mean(colorObj$color, na.rm = TRUE))
-      }
     }
+  
     if (any(hasZ)) return(traces)
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
