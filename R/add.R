@@ -247,9 +247,12 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
   # (each data frame should be a a collection of the same feature type)
   d <- if (is.data.frame(d)) list(d)
   
+  # inherit attributes from the "first layer" (except the plotly_eval class)
+  attrz <- if (inherit) modify_list(unclass(p$x$attrs[[1]]), list(...)) else list(...)
+  
   for (i in seq_along(d)) {
     # sensible mode/style defaults based on the feature type (e.g. polygon, path, point)
-    attrs <- modify_list(sf_default_attrs(d[[i]]), list(...))
+    attrs <- modify_list(sf_default_attrs(d[[i]]), attrz)
     args <- list(
       p = p, 
       class = "plotly_sf", 
