@@ -101,3 +101,61 @@ test_that("plot_ly() defaults to blank axes", {
   expect_true(yaxis$ticks == "")
   expect_true(yaxis$ticks == "")
 })
+
+test_that("discrete color informs fillcolor", {
+  res <- unique(mn_res$INDRESNAME)
+  cols <- viridis::magma(length(res))
+  
+  p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
+    plotly_build()
+  
+  d <- p$x$data
+  expect_length(d, length(res))
+  
+  fillcolors <- sapply(d, "[[", "fillcolor")
+  expect_identical(fillcolors, toRGB(cols))
+  
+  # 'stroke' should inherit from fillcolor
+  linecolors <- sapply(d, function(tr) tr$line$color)
+  expect_identical(linecolors, toRGB(cols))
+})
+
+
+test_that("discrete color informs fillcolor", {
+  res <- unique(mn_res$INDRESNAME)
+  cols <- viridis::magma(length(res))
+  
+  p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
+    plotly_build()
+  
+  d <- p$x$data
+  expect_length(d, length(res))
+  
+  fillcolors <- sapply(d, "[[", "fillcolor")
+  expect_identical(fillcolors, toRGB(cols))
+  
+  # 'stroke' should inherit from fillcolor
+  linecolors <- sapply(d, function(tr) tr$line$color)
+  expect_identical(linecolors, toRGB(cols))
+})
+
+
+test_that("numeric color informs fillcolor", {
+  res <- unique(mn_res$INDRESNAME)
+  cols <- viridis::magma(length(res))
+  p <- plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, colors = cols, showlegend = FALSE, line = list(color = "black")) %>%
+    plotly_build()
+  
+  d <- p$x$data
+  expect_length(d, length(res) + 1)
+  
+  area <- unique(mn_res$AREA)
+  fillcolors <- unlist(lapply(d, "[[", "fillcolor"))
+  expect_identical(sort(fillcolors), sort(scales::col_numeric(cols, range(area))(area)))
+  
+  # 'stroke' should inherit from fillcolor
+  linecolors <- unlist(lapply(d, function(tr) tr$line$color))
+  expect_identical(linecolors, rep("black", length(res)))
+})
+
+
