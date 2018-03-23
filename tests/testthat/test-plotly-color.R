@@ -75,9 +75,9 @@ test_that("axis titles get attached to scene object for 3D plots", {
   l <- expect_traces(p, 1, "scatterplot-scatter3d-axes")
   expect_identical(l$data[[1]]$type, "scatter3d")
   scene <- l$layout$scene
-  expect_identical(scene$xaxis$title, "Petal.Length")
-  expect_identical(scene$yaxis$title, "Petal.Width")
-  expect_identical(scene$zaxis$title, "Sepal.Width")
+  expect_true(scene$xaxis$title == "Petal.Length")
+  expect_true(scene$yaxis$title == "Petal.Width")
+  expect_true(scene$zaxis$title == "Sepal.Width")
 })
 
 test_that("Can specify a scale manually", {
