@@ -4,7 +4,7 @@ library(crosstalk)
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
 stormz <- SharedData$new(storms)
 
-xy <- plot_ly(stormz, color = ~z, line = list(color = "gray"), hoverinfo = "none")
+xy <- plot_ly(stormz, color = ~z, mode = "markers+lines", line = list(color = "gray"), hoverinfo = "none")
 xz <- add_sf(xy, y = ~z, color = ~y)
 yz <- add_sf(xy, x = ~z, color = ~x)
 xyz2D <- subplot(xy, xz, yz, titleX = TRUE, titleY = TRUE) %>%
