@@ -704,16 +704,20 @@ map_color <- function(traces, title = "", na.color = "transparent") {
           traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
         }
         
-        if (hasLineColor[[i]]) {
-          traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
-        } else {
-          warning("line.color doesn't (yet) support data arrays", call. = FALSE)
+        if (hasLine[[i]]) {
+          if (hasLineColor[[i]]) {
+            traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          } else {
+            warning("line.color doesn't (yet) support data arrays", call. = FALSE)
+          }
         }
         
-        if (hasTextColor[[i]]) {
-          traces[[i]]$textfont <- modify_list(colorObj, traces[[i]]$textfont)
-        } else {
-          warning("textfont.color doesn't (yet) support data arrays", call. = FALSE)
+        if (hasText[[i]]) {
+          if (hasTextColor[[i]]) {
+            traces[[i]]$textfont <- modify_list(colorObj, traces[[i]]$textfont)
+          } else {
+            warning("textfont.color doesn't (yet) support data arrays", call. = FALSE)
+          }
         }
         
         # TODO: how to make the summary stat customizable?
