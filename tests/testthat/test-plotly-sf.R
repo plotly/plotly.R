@@ -104,7 +104,7 @@ test_that("plot_ly() defaults to blank axes", {
 
 test_that("discrete color informs fillcolor", {
   res <- unique(mn_res$INDRESNAME)
-  cols <- viridis::magma(length(res))
+  cols <- viridisLite::magma(length(res))
   
   p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
     plotly_build()
@@ -123,7 +123,7 @@ test_that("discrete color informs fillcolor", {
 
 test_that("discrete color informs fillcolor", {
   res <- unique(mn_res$INDRESNAME)
-  cols <- viridis::magma(length(res))
+  cols <- viridisLite::magma(length(res))
   
   p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
     plotly_build()
@@ -142,7 +142,7 @@ test_that("discrete color informs fillcolor", {
 
 test_that("numeric color informs fillcolor", {
   res <- unique(mn_res$INDRESNAME)
-  cols <- viridis::magma(length(res))
+  cols <- viridisLite::magma(length(res))
   p <- plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, colors = cols, showlegend = FALSE, line = list(color = "black")) %>%
     plotly_build()
   
