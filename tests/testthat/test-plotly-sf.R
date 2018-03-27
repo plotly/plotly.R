@@ -103,10 +103,10 @@ test_that("plot_ly() defaults to blank axes", {
 })
 
 test_that("discrete color informs fillcolor", {
-  res <- unique(mn_res$INDRESNAME)
+  res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
   
-  p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
+  p <- plot_mapbox(res_mn, color = ~INDRESNAME, colors = cols) %>%
     plotly_build()
   
   d <- p$x$data
@@ -122,10 +122,10 @@ test_that("discrete color informs fillcolor", {
 
 
 test_that("discrete color informs fillcolor", {
-  res <- unique(mn_res$INDRESNAME)
+  res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
   
-  p <- plot_mapbox(mn_res, color = ~INDRESNAME, colors = cols) %>%
+  p <- plot_mapbox(res_mn, color = ~INDRESNAME, colors = cols) %>%
     plotly_build()
   
   d <- p$x$data
@@ -141,7 +141,7 @@ test_that("discrete color informs fillcolor", {
 
 
 test_that("numeric color informs fillcolor", {
-  res <- unique(mn_res$INDRESNAME)
+  res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
   p <- plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, colors = cols, showlegend = FALSE, line = list(color = "black")) %>%
     plotly_build()
@@ -149,7 +149,7 @@ test_that("numeric color informs fillcolor", {
   d <- p$x$data
   expect_length(d, length(res) + 1)
   
-  area <- unique(mn_res$AREA)
+  area <- unique(res_mn$AREA)
   fillcolors <- unlist(lapply(d, "[[", "fillcolor"))
   expect_identical(sort(fillcolors), sort(scales::col_numeric(cols, range(area))(area)))
   

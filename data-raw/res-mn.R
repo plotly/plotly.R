@@ -9,10 +9,10 @@ res <- st_read(file.path(dirname(f), "reservtn.shp"))
 # https://www.dot.state.mn.us/maps/gdma/gis-data.html
 st_crs(res) <- 26915
 
-mn_res <- st_transform(res, 4326)
+res_mn <- st_transform(res, 4326)
 
-# plot_mapbox(mn_res, text = ~INDRESNAME, hoverinfo = "text")
-devtools::use_data(mn_res, overwrite = TRUE)
+# plot_mapbox(res_mn, text = ~INDRESNAME, hoverinfo = "text")
+devtools::use_data(res_mn, overwrite = TRUE)
 
 
 # f <- tempfile(fileext = ".zip")

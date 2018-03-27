@@ -29,4 +29,4 @@
 #'
 #' @format An sf data frame with 13 features and 5 fields
 #' 
-"mn_res"
+"res_mn"
