@@ -563,7 +563,7 @@ map_size <- function(traces) {
     sizeI <- if (isConstant) {
       structure(s, class = setdiff(class(s), "AsIs"))
     } else {
-      scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
+      I(scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes))
     }
     if (hasMarker[[i]]) {
       traces[[i]]$marker <- modify_list(
