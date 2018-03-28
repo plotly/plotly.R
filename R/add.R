@@ -240,7 +240,6 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
   bbox <- sf::st_bbox(dat)
   set <- attr(dat, "set")
   
-  # This should *always* generate a group variable (thx to fortify_sf())
   d <- to_basic.GeomSf(dat)
   
   # to_basic() returns either a single data frame or a list of data frames
@@ -260,7 +259,7 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
       y = y,
       `_bbox` = bbox,
       set = set,
-      data = group_by_(d[[i]], "group", add = TRUE), 
+      data = if ("group" %in% names(d[[i]])) group_by_(d[[i]], "group", add = TRUE) else d[[i]], 
       inherit = inherit
     )
     p <- do.call(add_trace_classed, c(args, attrs))
