@@ -50,7 +50,7 @@ is.default <- function(x) {
 }
 
 default <- function(x) {
-  structure(x, class = "plotly_default")
+  structure(x %||% list(), class = "plotly_default")
 }
 
 compact <- function(x) {
@@ -75,7 +75,7 @@ retain <- function(x, f = identity) {
   attrs <- attributes(x)
   # TODO: do we set any other "special" attributes internally 
   # (grepping "structure(" suggests no)
-  attrs <- attrs[names(attrs) %in% c("defaultAlpha", "apiSrc")]
+  attrs <- attrs[names(attrs) %in% "apiSrc"]
   if (length(attrs)) {
     attributes(y) <- attrs
   }
@@ -118,13 +118,12 @@ has_group <- function(trace) {
 
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
-  c("color", "symbol", "linetype", "size", "split")
+  c("color", "stroke", "symbol", "linetype", "size", "span", "split")
 }
 
-# copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
-traceColorDefaults <- function() {
-  c('#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
-    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf')
+colorway <- function(p = NULL) {
+  colway <- p$x$layout$colorway %||% Schema$layout$layoutAttributes$colorway$dflt
+  lapply(as.list(colway), function(x) structure(x, class = "colorway"))
 }
 
 # column name for crosstalk key
@@ -639,21 +638,21 @@ verify_mode <- function(p) {
   for (tr in seq_along(p$x$data)) {
     trace <- p$x$data[[tr]]
     if (grepl("scatter", trace$type %||% "scatter")) {
-      if (!is.null(trace$marker) && !grepl("markers", trace$mode %||% "")) {
+      if (user_specified(trace$marker) && !grepl("markers", trace$mode %||% "")) {
         message(
           "A marker object has been specified, but markers is not in the mode\n",
           "Adding markers to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+markers")
       }
-      if (!is.null(trace$line) && !grepl("lines", trace$mode %||% "")) {
+      if (user_specified(trace$line) && !grepl("lines", trace$mode %||% "")) {
         message(
           "A line object has been specified, but lines is not in the mode\n",
           "Adding lines to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+lines")
       }
-      if (!is.null(trace$textfont) && !grepl("text", trace$mode %||% "")) {
+      if (user_specified(trace$textfont) && !grepl("text", trace$mode %||% "")) {
         warning(
           "A textfont object has been specified, but text is not in the mode\n",
           "Adding text to the mode..."
@@ -663,6 +662,12 @@ verify_mode <- function(p) {
     }
   }
   p
+}
+
+# if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified
+user_specified <- function(obj = NULL) {
+  if (!length(obj)) return(FALSE)
+  !all(rapply(obj, is.default))
 }
 
 # populate categorical axes using categoryorder="array" & categoryarray=[]

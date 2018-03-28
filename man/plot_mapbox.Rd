@@ -22,6 +22,9 @@ like \code{\link[=add_polygons]{add_polygons()}} to work
 \examples{
 \dontrun{
 
+plot_mapbox(res_mn)
+plot_mapbox(res_mn, color = ~INDRESNAME)
+
 map_data("world", "canada") \%>\%
   group_by(group) \%>\%
   plot_mapbox(x = ~long, y = ~lat) \%>\%

@@ -1,4 +1,10 @@
 library(sf)
+
+plot_mapbox(res_mn)
+plot_mapbox(res_mn, split = ~INDRESNAME)
+
+
+library(sf)
 library(plotly)
 
 nc <- st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)

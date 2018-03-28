@@ -83,8 +83,11 @@ add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
-Note that acceptable arguments depend on the value of \code{type}.}
+\item{...}{Arguments (i.e., attributes) passed along to the trace \code{type}.
+See \code{\link[=schema]{schema()}} for a list of acceptable attributes for a given trace \code{type}
+(by going to \code{traces} -> \code{type} -> \code{attributes}). Note that attributes
+provided at this level may override other arguments
+(e.g. \code{plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))}).}
 
 \item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
 
