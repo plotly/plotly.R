@@ -976,8 +976,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
       # flipping logic for bar positioning is in geom2trace.GeomBar
-      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% "box") {
+      if (!identical(tr$type, "bar")) traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (identical(tr$type, "box")) {
         traces[[i]]$orientation <- "h"
         traces[[i]]$hoverinfo <- "x"
       }
