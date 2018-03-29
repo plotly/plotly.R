@@ -6,7 +6,7 @@
 \usage{
 plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
   alpha = NULL, stroke, strokes = NULL, alpha_stroke = 1, size,
-  sizes = c(10, 100), span, spans = c(10, 100), symbol, symbols = NULL,
+  sizes = c(10, 100), span, spans = c(1, 20), symbol, symbols = NULL,
   linetype, linetypes = NULL, split, frame, width = NULL, height = NULL,
   source = "A")
 }
