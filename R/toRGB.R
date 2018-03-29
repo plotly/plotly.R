@@ -96,7 +96,7 @@ strip_alpha <- function(string = "rgba(255,255,255,1)", warn = TRUE) {
   if (length(string) == 0) return(string)
   if (warn) {
     if (any(!grepl(",1\\)$", string))) {
-      warning("Removing an alpha value lower than 1")
+      warning("Ignoring an alpha value lower than 1")
     }
   }
   string <- sub(",1\\)$", ")", string)
