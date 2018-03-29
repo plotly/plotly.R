@@ -793,8 +793,9 @@ verify_showlegend <- function(p) {
   }
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
   # respect only _user-specified_ defaults 
+  isSinglePie <- identical("pie", unlist(lapply(p$x$data, function(tr) tr$type))) 
   p$x$layout$showlegend <- p$x$layout$showlegend %|D|%
-    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend))
+    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend) || isSinglePie)
   p
 }
 

@@ -16,6 +16,10 @@ test_that("No cartesian axes are supplied to a pie chart", {
   
   expect_true(all(l$data[[1]]$labels == ds$labels))
   expect_true(all(l$data[[1]]$values == ds$values))
+  expect_null(l$data[[1]]$textfont)
   expect_null(l$layout$xaxis)
   expect_null(l$layout$yaxis)
+  expect_true(l$layout$showlegend)
 })
+
+
