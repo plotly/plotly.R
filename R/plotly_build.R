@@ -632,7 +632,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
   color <- if (stroke) {
     lapply(traces, function(x) { x[["stroke"]] %||% x[["color"]] })
   } else {
-    lapply(traces, function(x) { x[["color"]] %||% if (grepl("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["z"]] else NULL })
+    lapply(traces, function(x) { x[["color"]] %||% if (grepl("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["surfacecolor"]] %||% x[["z"]] })
   }
   alphas <- if (stroke) {
     vapply(traces, function(x) x$alpha_stroke %||% 1, numeric(1)) 
@@ -648,13 +648,14 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
   isSingular <- lengths(uniqColor) == 1
   
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
+  # TODO: remove these and make numeric colorscale mapping more like the rest
   types <- vapply(traces, function(tr) tr$type %||% "scatter", character(1))
   modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasLine <- has_line(types, modes)
   hasLineColor <- has_color_array(types, "line")
   hasText <- has_text(types, modes)
   hasTextColor <- has_color_array(types, "text")
-  hasZ <- has_attr(types, "colorscale") &
+  hasZ <- has_attr(types, "colorscale") & !stroke &
     any(vapply(traces, function(tr) {
       !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
     }, logical(1)))
@@ -753,19 +754,18 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     )
     colorObj <- list(
       colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
-        list(title = as.character(title), ticklen = 2),
-      cmin = rng[1],
-      cmax = rng[2],
-      colorscale = colorScale,
-      showscale = FALSE
+        lapply(list(title = as.character(title), ticklen = 2), default),
+      cmin = default(rng[1]),
+      cmax = default(rng[2]),
+      colorscale = default(colorScale),
+      showscale = default(FALSE)
     )
     for (i in which(isNumeric)) {
-      
       # when colorscale is being attached to `z`, we don't need color values in
       # colorObj, so create colorbar trace now and exit early
       if (hasZ[[i]]) {
         colorObj[c("cmin", "cmax")] <- NULL
-        colorObj[["showscale"]] <- TRUE
+        colorObj[["showscale"]] <- default(TRUE)
         traces[[i]] <- modify_list(colorObj, traces[[i]])
         traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
         # sigh, contour colorscale doesn't support alpha
@@ -783,7 +783,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         traces[[i]] <- mapColor(traces[[i]], toRGB(col, alphas[[i]]))
       } else {
         
-        colorObj$color <- color[[i]]
+        colorObj$color <- default(color[[i]])
         
         if (stroke) {
           traces[[i]]$marker$line <- modify_list(colorObj, traces[[i]]$marker$line)
