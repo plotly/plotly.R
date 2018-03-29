@@ -56,10 +56,10 @@ test_that("Mapping a numeric variable to color works", {
   idx <- vapply(l$data, is.colorbar, logical(1))
   markerScale <- l$data[[which(idx)]]$marker
   markerDat <- l$data[[which(!idx)]]$marker
-  expect_equivalent(markerDat$color, iris$Petal.Width)
-  expect_equivalent(markerScale$colorbar$title, "Petal.Width")
-  expect_equivalent(min(iris$Petal.Width), markerScale$cmin)
-  expect_equivalent(max(iris$Petal.Width), markerScale$cmax)
+  expect_true(all(markerDat$color == iris$Petal.Width))
+  expect_true(markerScale$colorbar$title == "Petal.Width")
+  expect_true(min(iris$Petal.Width) == markerScale$cmin)
+  expect_true(max(iris$Petal.Width) == markerScale$cmax)
   expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
 })
 
