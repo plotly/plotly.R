@@ -29,6 +29,7 @@ empty_axis <- list(
 # for centering camera/lighting on the center of the storm paths
 xyzmean <- list(x = .41, y = -.71, z = 0.57)
 
+
 # A 3D globe implemented with 3D lines and a spherical surface
 # Note that the globe has a radius of 1, but project the lines with 
 # a radius of 1.001 so that we appear on top of the surface
@@ -54,11 +55,11 @@ globe <- plot_ly(height = 500) %>%
   add_surface(
     x = cos(degrees2radians(lon)) * cos(degrees2radians(lat)),
     y = sin(degrees2radians(lon)) * cos(degrees2radians(lat)),
-    # The I() prevents plotly from mapping this value to color
-    z = I(sin(degrees2radians(lat))),
-    # NOTE: you can map a value to surfacecolor to encode, say air temp..
-    # TODO: perhaps there is a better way to specify a constant surfacecolor?
-    colorscale = list(c(0, "white"), c(1, "white")),
+    z = sin(degrees2radians(lat)),
+    # NOTE: you can map a value to surfacecolor to encode, say air temp
+    # for an example, see https://github.com/cpsievert/Weather_Stuff/blob/master/radiation-plot-3D.R
+    # But here is a trick to set the surface color to a constant white
+    surfacecolor = matrix(NA, nrow = nlat, ncol = nlon),
     showscale = FALSE, hoverinfo = "skip",
     lightposition = xyzmean, 
     contours = list(
