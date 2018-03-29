@@ -252,6 +252,8 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
   for (i in seq_along(d)) {
     # sensible mode/style defaults based on the feature type (e.g. polygon, path, point)
     attrs <- modify_list(sf_default_attrs(d[[i]]), attrz)
+    # scatter3d doesn't currently support fill
+    if ("z" %in% names(attrs)) attrs$fill <- NULL
     args <- list(
       p = p, 
       class = "plotly_sf", 
