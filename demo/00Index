@@ -18,7 +18,7 @@ ternary                               A basic ternary plot
 sf-mapbox-data                        Mapping sf objects with mapbox
 sf-mapbox-layout                      Mapping sf objects with mapbox (as a layer) 
 sf-mapbox-style                       Including a dropdown for mapbox's basemap style
-sf-mapbox-dt                          Querying simple features with mapbox with DT (datatables)
+sf-dt                                 Linked querying of simple features with DT (datatables)
 sf-plotly-3D-globe                    Exploring storms paths by linking a 3D globe with a 2D summary
 sf-plotly-storms                      Linking multiple 2D views of 3D storm paths
 sf-ggplot2                            Mapping sf objects via ggplot2 and geom_sf()
