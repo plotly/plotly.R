@@ -4,9 +4,9 @@ library(crosstalk)
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 ncsd <- SharedData$new(nc)
 
-map <- plot_mapbox(ncsd, text = ~CNTY_ID, hoverinfo = "text") %>%
-  highlight(persistent = TRUE) %>%
-  layout(title = "Click on counties to query them") %>%
+map <- plot_ly(ncsd, split = ~NAME, color = I("gray"), hoveron = "fill") %>%
+  highlight(persistent = TRUE, color = "red", opacityDim = 1) %>%
+  layout(title = "Click on counties to query them", showlegend = FALSE) %>%
   config(displayModeBar = FALSE)
 
 bscols(map, DT::datatable(ncsd))
