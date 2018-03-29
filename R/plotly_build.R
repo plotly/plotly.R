@@ -694,6 +694,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
       # TODO: any more attributes that make sense to include here?
       for (attr in c("marker", "textfont", "error_y", "error_x")) {
         if (!has_attr(type, attr)) next
+        if (is_colorway && "textfont" == attr) next
         col <- if (isSingular) rgba_ else if (array_ok(attrs[[attr]]$color)) rgba
         trace[[attr]] <- modify_list(list(color = default_(col)), trace[[attr]])
       }
