@@ -641,6 +641,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
           trace.textfont = trace.textfont || {};
           trace.textfont.color =  selectionColour || trace.textfont.color || d.textfont.color;
         }
+        if (d.fillcolor) {
+          // TODO: should selectionColour inherit alpha from the existing fillcolor?
+          trace.fillcolor = selectionColour || trace.fillcolor || d.fillcolor;
+        }
         // attach a sensible name/legendgroup
         trace.name = trace.name || keys.join("<br />");
         trace.legendgroup = trace.legendgroup || keys.join("<br />");
