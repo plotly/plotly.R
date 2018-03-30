@@ -15,6 +15,8 @@ env:
     - secure: "WsvmMHN4YVhnk0bLRE04APcLbs5s4vWKSHjEdU0bPXd0xdMTzZeP5D7pxyF1983C+P5LpSnGHv4dgwLMBkNzxJwBR7/Ta7lfO1akYILWwxib+1DVbCqUH5Z4Ba1FSCQptIrLNGR3P7+0Lem4hEhqKdPKltFnxhnXO0Y+MeG71IQ="
     # GITHUB_PAT (for pushing to plotly-test-table)
     - secure: "Ar5FRxsMJHxb8CQmmsoFx5Tm6ncFvF3LHtAMtfcOE2e9JAbXQ471PGzOMM7yudGa2vVuQJBpB6bWktuE30J68MQxgRmxeaJYmOp+ePqyW80y/zEa2P3R4//eb9Rif2lmsmaqz7HtVfX4xr3YX4N+ZjfyI8TFt5Phue18tXeMoJw="
+    # MAPBOX_TOKEN (for testing `plot_mapbox()`)
+    - secure: "QPBEqtLRdwb4ablJORzD0JdCT9ESe3nNdIehM1oxfcNKfpSdf2OFxH3TkeYY1nMpv0mLxiMNTy6xcj9Yk5MaaBCIA0P7q6OdZv9ruzQD1j3g84gP45KwBilbPGjb+/EvOS0fM25vR/pAmA8IyoUfPC2J8HwiNnW8DYdt/hJOJ9A="
 
 # installing Rserve from source requires non-standard R build (--enable-R-shlib) 
 r_binary_packages:

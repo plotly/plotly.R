@@ -1,91 +1,102 @@
+# IMPORTANT: fortify_sf() should only be used on collections of identical 
+# geometries -- https://github.com/r-spatial/sf/issues/584
+
+# Note how, in to_basic.GeomSf(), we split data into a list of data.frames
+# (each data frame has at most one geometry type).
+
+# TODO: speed this up by avoiding conversion redundant features (e.g. animation)
 fortify_sf <- function(model, ...) {
-  # TODO: 
-  # (1) avoid converting redundant features
-  # (2) warn/error if data already contains x/y 
-  geoms <- sf::st_geometry(sf::st_as_sf(model))
-  xy <- lapply(geoms, st_as_plotly)
-  ids <- rep(seq_len(nrow(model)), sapply(xy, nrow))
-  # TODO: faster way to row bind matrices?
-  xy_all <- cbind(do.call(rbind, xy), ids)
-  xy_dat <- setNames(as.data.frame(xy_all), c("x", "y", sf_key()))
+  # matrix with coordinates (X, Y, possibly Z and/or M) in rows, possibly 
+  # followed by integer indicators L1,...,L3 that point out to which structure 
+  # the coordinate belongs; for POINT this is absent (each coordinate is a feature), 
+  # for LINESTRING L1 refers to the feature, for MULTIPOLYGON L1 refers to the main 
+  # ring or holes, L2 to the ring id in the MULTIPOLYGON, and L3 to the simple feature.
+  coords <- sf::st_coordinates(model$geometry)
+  colnames(coords) <- tolower(colnames(coords))
+  lcols <- grep("^l", colnames(coords))
   
-  d <- as.data.frame(model)
-  d$geometry <- NULL
-  d[[sf_key()]] <- seq_len(nrow(d))
-  xy_dat <- dplyr::left_join(xy_dat, d, by = sf_key())
-  xy_dat[[sf_key()]] <- NULL
-  xy_dat
+  # no longer need to carry around sf class or geometry list-column
+  model <- remove_class(model, "sf")
+  model$geometry <- NULL
+  
+  # no join necessary for points
+  if (!length(lcols)) return(cbind(model, coords))
+  
+  # warn about potential column name conflicts
+  nms <- intersect(names(model), colnames(coords))
+  if (length(nms)) {
+    warning(
+      sprintf("Found columns named: '%s' ", paste(nms, collapse = "', '")), 
+      "in your data. These names conflict with auto-generated sf coordinates ",
+      "it might be a good idea to change these names.",
+      call. = FALSE
+    )
+  }
+  
+  # attach a simple feature row id (for joining data with coords)
+  model[[sf_key()]] <- seq_len(nrow(model))
+  
+  # last column of coords pertains to the simple feature row id
+  coords <- as.data.frame(coords)
+  coords[[sf_key()]] <- coords[[ncol(coords)]]
+  
+  # join back together
+  d <- dplyr::left_join(coords, model, by = sf_key())
+  
+  # drop simple feature row id
+  d[[sf_key()]] <- NULL
+  
+  # the combination of l1/l2/l3 should be treated like a new grouping var
+  # TODO: group is included here for ggplotly() purposes...it should probably be taken out...
+  group_var <- d[names(d) %in% c("group", "l1", "l2", "l3")]
+  paste_ <- function(...) paste(..., sep = "-")
+  d$group <- Reduce(paste_, group_var)
+  
+  # TODO: drop l1/l2/l3?
+  d
 }
 
 sf_key <- function() ".sf-group-id"
 
-# kind of like sf_as_grob(), but maps to a plotly data structure, rather than a grob
-st_as_plotly <- function(x, ...) {
-  UseMethod("st_as_plotly")
+# Credit to Hadley Wickham 
+# https://github.com/rstudio/leaflet/blame/d489e2cd/R/normalize-sf.R#L94-L113
+st_cast_crs <- function(x) {
+  crs <- sf::st_crs(x)
+  
+  if (is.na(crs)) {
+    warning(
+      "Missing coordinate reference system (crs). Defaulting to EPSG:4326"
+    )
+    return(sf::st_set_crs(x, 4326))
+  }
+  
+  isLongLat <- isTRUE(sf::st_is_longlat(x))
+  isWGS84 <- grepl("+datum=WGS84", crs$proj4string, fixed = TRUE)
+  
+  if (!(isLongLat && isWGS84)) {
+    warning(
+      "The trace types 'scattermapbox' and 'scattergeo' require a projected ",
+      "coordinate system that is based on the WGS84 datum (EPSG:4326), ",
+      "but the crs provided is: '", crs$proj4string, "'. ",
+      "Attempting transformation to the target coordinate system.",
+      call. = FALSE
+    )
+    return(sf::st_transform(x, 4326))
+  }
+  
+  x
 }
 
-#' @export
-st_as_plotly.POINT = function(x, ...) {
-  matrix(c(x[1], x[2]), ncol = 2)
+# the minimal set of attribute defaults
+sf_default_attrs <- function(d) {
+  if (inherits(d, "GeomPolygon")) return(list(mode = "lines", fill = "toself"))
+  if (inherits(d, "GeomPath")) return(list(mode = "lines"))
+  if (inherits(d, "GeomPoint")) return(list(mode = "markers"))
+  stop("Unexpected case. Please report an issue here https://github.com/ropensci/plotly/issues/new", call. = FALSE)
 }
 
-#' @export
-st_as_plotly.MULTIPOINT = function(x, ...) {
-  if (nrow(x) == 0) return(empty_xy())
-  matrix(c(x[, 1], x[, 2]), ncol = 2)
-}
 
-#' @export
-st_as_plotly.LINESTRING = function(x, ...) {
-  if (nrow(x) == 0) return(empty_xy())
-  matrix(c(x[, 1], x[, 2]), ncol = 2)
-}
-
-#' @export
-st_as_plotly.CIRCULARSTRING = function(x, y, ...) {
-  st_as_plotly(st_cast(x, "LINESTRING"),  ...)
-}
-
-#' @export
-st_as_plotly.MULTILINESTRING = function(x, ...) {
-  if (length(x) == 0) return(empty_xy())
-  xvals <- unlist(rbind(sapply(x, function(y) y[,1]), NA))
-  yvals <- unlist(rbind(sapply(x, function(y) y[,2]), NA))
-  matrix(c(xvals, yvals), ncol = 2)
-}
-
-#' @export
-st_as_plotly.POLYGON = function(x, ..., rule = "evenodd") {
-  if (length(x) == 0) return(empty_xy())
-  xvals <- unlist(rbind(sapply(x, function(y) y[,1]), NA))
-  yvals <- unlist(rbind(sapply(x, function(y) y[,2]), NA))
-  matrix(c(xvals, yvals), ncol = 2)
-}
-
-#' @export
-st_as_plotly.MULTIPOLYGON = function(x, ..., rule = "evenodd") {
-  if (length(x) == 0) return(empty_xy())
-  xvals <- unlist(sapply(x, function(y) rbind(sapply(y, function(z) z[,1]), NA)))
-  yvals <- unlist(sapply(x, function(y) rbind(sapply(y, function(z) z[,2]), NA)))
-  matrix(c(xvals, yvals), ncol = 2)
-}
-
-#' @export
-st_as_plotly.GEOMETRYCOLLECTION = function(x, ...) {
-  if (length(x) == 0) return(empty_xy())
-  lapply(x, st_as_plotly)
-}
-
-#' @export
-st_as_plotly.MULTISURFACE = st_as_plotly.GEOMETRYCOLLECTION
-
-#' @export
-st_as_plotly.CURVEPOLYGON = st_as_plotly.GEOMETRYCOLLECTION
-
-#' @export
-st_as_plotly.COMPOUNDCURVE = st_as_plotly.GEOMETRYCOLLECTION
-
-
-empty_xy <- function() {
-  matrix(rep(NA, 2), ncol = 2)
+is_sf <- function(dat) {
+  if (crosstalk::is.SharedData(dat)) dat <- dat$origData()
+  inherits(dat, "sf")
 }

@@ -144,7 +144,7 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   
   # default colors are the plotly.js defaults
   cols <- sapply(l$data, function(x) x$line$color)
-  defaultCols <- toRGB(traceColorDefaults()[1:3])
+  defaultCols <- toRGB(colorway()[1:3])
   expect_equivalent(cols, defaultCols)
   
   # trace names reflect the split/score (i.e., frames are removed)
@@ -271,7 +271,7 @@ test_that("simple animation targeting works", {
     # trace names are empty
     expect_equivalent(tr$name %||% "no-name", "no-name")
     # color defaults are retained
-    expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
+    expect_true(tr$marker$color == toRGB(colorway()[[i]]))
   }
   
   # frame trace names are empty
@@ -283,7 +283,7 @@ test_that("simple animation targeting works", {
       # trace names are empty
       expect_equivalent(tr$name %||% "no-name", "no-name")
       # color defaults are retained
-      expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
+      expect_true(tr$marker$color == toRGB(colorway()[[2]]))
     }
   }
   
