@@ -317,3 +317,22 @@ test_that("altogether now", {
 })
 
 
+
+test_that("color and stroke scales can be set independently", {
+  
+  n <- length(unique(res_mn$INDRESNAME))
+  p <- plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, span = I(2)) %>%
+    plotly_build()
+  
+  # two colorbars
+  d <- p$x$data
+  expect_true(length(d) == n + 2)
+  
+  colorbars <- d[vapply(d, is.colorbar, logical(1))]
+  
+  expect_true(colorbars[[1]]$marker$colorbar$title == "AREA")
+  expect_true(colorbars[[2]]$marker$colorbar$title == "PERIMETER")
+  expect_true(all(colorbars[[1]]$marker$color == range(res_mn$AREA)))
+  expect_true(all(colorbars[[2]]$marker$color == range(res_mn$PERIMETER)))
+  
+})

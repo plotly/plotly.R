@@ -1,48 +1,35 @@
-library(sf)
-
-plot_mapbox(res_mn)
-plot_mapbox(res_mn, split = ~INDRESNAME)
-
-
-library(sf)
 library(plotly)
+library(crosstalk)
 
-nc <- st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+# one trace
+plot_mapbox(res_mn)
+plot_mapbox(res_mn, stroke = I("#119dff"), span = I(1), color = I("#00cc96"))
 
-# can set multiple bounding boxes and overwrite attributes 
-subplot(
-  plot_mapbox(nc),
-  plot_mapbox(nc, fillcolor = "gray", line = list(size = 0.01, color = "black"))
+# multiple traces 
+plot_mapbox(res_mn, split = ~INDRESNAME, span = I(1))
+plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, span = I(1))
+
+# linking with DT
+mn <- crosstalk::SharedData$new(res_mn)
+bscols(
+  plot_mapbox(mn, split = ~INDRESNAME, text = ~INDRESNAME, hoverinfo = "text", hoveron = "fill") %>%
+    layout(title = "Click a reservation", showlegend = FALSE),
+  DT::datatable(mn)
 )
 
-# map custom hover text to each point
-# (unfortunately, scattermapbox does not yet support hoveron='fill')
-plot_mapbox(nc, text = ~paste0(NAME, ": ", AREA), hoverinfo = "text")
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+ncsd <- SharedData$new(nc)
 
 
-col_scale <- scales::col_numeric("Blues", range(nc$AREA))
-plot_ly(nc, fillcolor = ~col_scale(AREA), text = ~AREA, hoveron = "fill") %>%
-  layout(showlegend = FALSE)
-
-# TODO: animation
-
-
-# TODO: click to highlight
-ncsd <- crosstalk::SharedData$new(nc)
-plot_mapbox(ncsd)
-
-
-# TODO: perhaps during verification, if hoveron = 'fill' for a given trace,
-# we could check if text is unique or not...if it is, just take first element
-plot_mapbox(nc, split = ~AREA, text = ~NAME, hoveron = "fill")
-
-# TODO: how to best control hoverinfo?
-
-
-
-# non-standard crs
-library(mapview)
-plot_mapbox(trails)
-
+# note that brushing counties is currently possible with plot_ly(), but isn't quite working 
+# yet with plot_mapbox() -- https://github.com/plotly/plotly.js/issues/2512
+bscols(
+  plot_mapbox(ncsd) %>%
+    highlight(dynamic = TRUE, persistent = TRUE),
+  plot_ly(ncsd, x = ~AREA) %>% 
+    add_histogram(xbins = list(start = 0, end = 0.3, size = 0.02)) %>%
+    layout(barmode = "overlay") %>% 
+    highlight("plotly_selected", persistent = TRUE)
+)
 
 
