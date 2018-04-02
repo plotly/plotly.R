@@ -852,7 +852,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
-    colorObj$showscale <- TRUE
+    colorObj$showscale <- default(TRUE)
     colorBarTrace <- list(
       x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
       y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
