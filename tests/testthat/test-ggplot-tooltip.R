@@ -29,7 +29,9 @@ test_that("dates are displayed in tooltip properly", {
 })
 
 test_that("tooltip argument respects ordering", {
-  p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
+  # qplot() is broken in ggplot2 (as of c0a99a8)
+  #p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
+  p <- ggplot(mtcars, aes(x = mpg, fill = factor(cyl))) + geom_density()
   p <- ggplotly(p, tooltip = c("density", "x"))
   info <- plotly_build(p)$x
   txt <- strsplit(info$data[[1]]$text, br())
