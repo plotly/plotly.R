@@ -20,10 +20,10 @@ test_that("Can expand limits", {
   p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~cyl)
   p <- colorbar(p, limits = c(0, 20))
   l <- expect_traces(p, 2, "colorbar-expand")
-  expect_equivalent(l$data[[1]]$marker$cmin, 0)
-  expect_equivalent(l$data[[2]]$marker$cmin, 0)
-  expect_equivalent(l$data[[1]]$marker$cmax, 20)
-  expect_equivalent(l$data[[2]]$marker$cmax, 20)
+  expect_true(l$data[[1]]$marker$cmin == 0)
+  expect_true(l$data[[2]]$marker$cmin == 0)
+  expect_true(l$data[[1]]$marker$cmax == 20)
+  expect_true(l$data[[2]]$marker$cmax == 20)
 })
 
 test_that("Can restrict limits", {
@@ -31,8 +31,8 @@ test_that("Can restrict limits", {
   p <- colorbar(p, limits = c(5, 7))
   l <- expect_traces(p, 2, "colorbar-restrict")
   expect_equivalent(unique(l$data[[1]]$marker$color), c(6, NA))
-  expect_equivalent(l$data[[2]]$marker$cmin, 5)
-  expect_equivalent(l$data[[2]]$marker$cmax, 7)
+  expect_true(l$data[[2]]$marker$cmin == 5)
+  expect_true(l$data[[2]]$marker$cmax == 7)
 })
 
 test_that("Can expand z limits", {
