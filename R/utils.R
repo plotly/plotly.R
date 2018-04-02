@@ -50,7 +50,7 @@ is.default <- function(x) {
 }
 
 default <- function(x) {
-  structure(x %||% list(), class = "plotly_default")
+  prefix_class(x %||% list(), "plotly_default")
 }
 
 compact <- function(x) {

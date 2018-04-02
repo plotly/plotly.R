@@ -17,9 +17,9 @@ bscols(
   DT::datatable(mn)
 )
 
+# linking with plotly
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 ncsd <- SharedData$new(nc)
-
 
 # note that brushing counties is currently possible with plot_ly(), but isn't quite working 
 # yet with plot_mapbox() -- https://github.com/plotly/plotly.js/issues/2512
