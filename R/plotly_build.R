@@ -778,8 +778,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
       ncol = 2
     )
     colorObj <- list(
-      colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
-        lapply(list(title = as.character(title), ticklen = 2), default),
+      colorbar = lapply(list(title = as.character(title), ticklen = 2), default),
       cmin = default(rng[1]),
       cmax = default(rng[2]),
       colorscale = default(colorScale),
