@@ -53,12 +53,16 @@
 #' @param linetypes A character vector of `lty` values or [dash names](https://plot.ly/r/reference#scatter-line-dash)
 #' @param size (Numeric) values mapped to relevant 'fill-size' attribute(s) 
 #' (e.g., [marker.size](https://plot.ly/r/reference#scatter-marker-size), 
-#' [textfont.size](https://plot.ly/r/reference#scatter-textfont-size), etc).
+#' [textfont.size](https://plot.ly/r/reference#scatter-textfont-size),
+#' and [error_x.width](https://plot.ly/r/reference#scatter-error_x-width)).
 #' The mapping from data values to symbols may be controlled using
 #' `sizes`, or avoided altogether via [I()] (e.g., `size = I(30)`). 
 #' @param sizes A numeric vector of length 2 used to scale `size` to pixels.
 #' @param span (Numeric) values mapped to relevant 'stroke-size' attribute(s) 
-#' (e.g., [marker.line.width](https://plot.ly/r/reference#scatter-marker-line-width))
+#' (e.g., 
+#' [marker.line.width](https://plot.ly/r/reference#scatter-marker-line-width),
+#' [line.width](https://plot.ly/r/reference#scatter-line-width) for filled polygons,
+#' and [error_x.thickness](https://plot.ly/r/reference#scatter-error_x-thickness))
 #' The mapping from data values to symbols may be controlled using
 #' `spans`, or avoided altogether via [I()] (e.g., `span = I(30)`). 
 #' @param spans A numeric vector of length 2 used to scale `span` to pixels.

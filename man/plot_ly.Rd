@@ -48,14 +48,18 @@ for filled polygons). If not specified, \code{stroke} inherits from \code{color}
 
 \item{size}{(Numeric) values mapped to relevant 'fill-size' attribute(s)
 (e.g., \href{https://plot.ly/r/reference#scatter-marker-size}{marker.size},
-\href{https://plot.ly/r/reference#scatter-textfont-size}{textfont.size}, etc).
+\href{https://plot.ly/r/reference#scatter-textfont-size}{textfont.size},
+and \href{https://plot.ly/r/reference#scatter-error_x-width}{error_x.width}).
 The mapping from data values to symbols may be controlled using
 \code{sizes}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{size = I(30)}).}
 
 \item{sizes}{A numeric vector of length 2 used to scale \code{size} to pixels.}
 
 \item{span}{(Numeric) values mapped to relevant 'stroke-size' attribute(s)
-(e.g., \href{https://plot.ly/r/reference#scatter-marker-line-width}{marker.line.width})
+(e.g.,
+\href{https://plot.ly/r/reference#scatter-marker-line-width}{marker.line.width},
+\href{https://plot.ly/r/reference#scatter-line-width}{line.width} for filled polygons,
+and \href{https://plot.ly/r/reference#scatter-error_x-thickness}{error_x.thickness})
 The mapping from data values to symbols may be controlled using
 \code{spans}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{span = I(30)}).}
 

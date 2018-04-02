@@ -564,18 +564,29 @@ map_size <- function(traces, stroke = FALSE) {
       isSingular <- length(size_) == 1
       attrs <- Schema$traces[[type]]$attributes
       
+      # `span` controls marker.line.width
       if (has_attr(type, "marker")) {
         s <- if (isSingular) size_ else if (array_ok(attrs$marker$line$width)) sizes
         trace$marker$line <- modify_list(list(width = default(s)), trace$marker$line)
       }
+      
+      # `span` controls error_[x/y].thickness 
+      for (attr in c("error_y", "error_x")) {
+        if (!has_attr(type, attr)) next
+        s <- if (isSingular) size_ else if (array_ok(attrs[[attr]]$thickness)) sizes
+        trace[[attr]] <- modify_list(list(thickness = default(s)), trace[[attr]])
+      }
+      
+      # When fill exists, `span` controls line.width
       if (has_fill(trace) && has_attr(type, "line")) {
-        s <- if (isSingular) size_ else if (array_ok(attrs$line$width)) sizes
-        if (is.null(s)) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$line$width)) sizes else NA
+        if (is.na(s)) {
           warning("`line.width` does not currently support multiple values.", call. = FALSE)
         } else {
           trace[["line"]] <- modify_list(list(width = default(s)), trace[["line"]])
         }
       }
+      
       trace
     }, 
     size = function(trace, sizes) {
@@ -584,30 +595,34 @@ map_size <- function(traces, stroke = FALSE) {
       isSingular <- length(size_) == 1
       attrs <- Schema$traces[[type]]$attributes
       
-      # size controls marker.size (note 'bar' traces have marker but not marker.size)
+      # `size` controls marker.size (note 'bar' traces have marker but not marker.size)
       # TODO: always ensure an array? https://github.com/ropensci/plotly/pull/1176
       if (has_attr(type, "marker") && "size" %in% names(attrs$marker)) {
         s <- if (isSingular) size_ else if (array_ok(attrs$marker$size)) sizes
         trace$marker <- modify_list(list(size = default(s), sizemode = default("area")), trace$marker)
       }
       
-      # size controls textfont.size
+      # `size` controls textfont.size
       if (has_attr(type, "textfont")) {
         s <- if (isSingular) size_ else if (array_ok(attrs$textfont$size)) sizes
         trace$textfont <- modify_list(list(size = default(s)), trace$textfont)
       }
       
-      # TODO: should size set error_x.value?
-      #for (attr in c("error_y", "error_x")) {
-      #  if (!has_attr(type, attr)) next
-      #  s <- if (isSingular) size_ else if (array_ok(attrs[[attr]]$width)) sizes
-      #  trace[[attr]] <- modify_list(list(width = default(s)), trace[[attr]])
-      #}
+      # `size` controls error_[x/y].width 
+      for (attr in c("error_y", "error_x")) {
+        if (!has_attr(type, attr)) next
+        s <- if (isSingular) size_ else if (array_ok(attrs[[attr]]$width)) sizes
+        trace[[attr]] <- modify_list(list(width = default(s)), trace[[attr]])
+      }
       
-      # if fill does not exist, size controls line.width
+      # if fill does not exist, `size` controls line.width
       if (!has_fill(trace) && has_attr(type, "line")) {
-        s <- if (isSingular) size_ else if (array_ok(attrs$line$color)) sizes
-        trace[["line"]] <- modify_list(list(width = default(s)), trace[["line"]])
+        s <- if (isSingular) size_ else if (array_ok(attrs$line$width)) sizes else NA
+        if (is.na(s)) {
+          warning("`line.width` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[["line"]] <- modify_list(list(width = default(s)), trace[["line"]])
+        }
       }
       trace
     }
@@ -692,14 +707,20 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
       attrs <- Schema$traces[[type]]$attributes
       default_ <- if (is_colorway) function(x) prefix_class(default(x), "colorway") else default
       
+      # `color` controls marker.color, textfont.color, error_[x/y].color
       # TODO: any more attributes that make sense to include here?
       for (attr in c("marker", "textfont", "error_y", "error_x")) {
         if (!has_attr(type, attr)) next
         if (is_colorway && "textfont" == attr) next
-        col <- if (isSingular) rgba_ else if (array_ok(attrs[[attr]]$color)) rgba
-        trace[[attr]] <- modify_list(list(color = default_(col)), trace[[attr]])
+        col <- if (isSingular) rgba_ else if (array_ok(attrs[[attr]]$color)) rgba else NA
+        if (is.na(col)) {
+          warning("`", attr, ".color` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[[attr]] <- modify_list(list(color = default_(col)), trace[[attr]])
+        }
       }
       
+      # If trace has fill, `color` controls fillcolor; otherwise line.color
       if (has_fill(trace)) {
         if (!isSingular) warning("Only one fillcolor per trace allowed", call. = FALSE)
         # alpha defaults to 0.5 when applied to fillcolor
@@ -707,8 +728,12 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         if (isSingular) trace <- modify_list(list(fillcolor = default_(rgba_)), trace)
       } else if (has_attr(type, "line")) {
         # if fill does not exist, 'color' controls line.color
-        col <- if (isSingular) rgba_ else if (array_ok(attrs$line$color)) rgba
-        trace[["line"]] <- modify_list(list(color = default_(col)), trace[["line"]])
+        col <- if (isSingular) rgba_ else if (array_ok(attrs$line$color)) rgba else NA
+        if (is.na(col)) {
+          warning("`line.color` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[["line"]] <- modify_list(list(color = default_(col)), trace[["line"]])
+        }
       }
       trace
     }

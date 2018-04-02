@@ -13,6 +13,7 @@
 
 * The `color` argument now maps to `fillcolor`, making it much easier to use polygon fills to encode data values (e.g., choropleth maps). For backwards-compatibilty reasons, when `color` maps to `fillcolor`, `alpha` defaults to 0.5 (instead of 1). For an example, `plot_mapbox(mn_res, color = ~INDRESNAME)` or `plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, showlegend = FALSE, stroke = I("black"))`.
 * The `color` argument no longer automatically add `"markers"` to the `mode` attribute for scatter/scattergl trace types. Those who wish to have the old behavior back, should add `"markers"` to the `mode` explicity (e.g., change `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines")` to `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines+markers")`).
+* The `size` argument now informs a default [error_[x/y].width](https://plot.ly/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plot.ly/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`)
 * `layout.showlegend` now defaults to `TRUE` for a *single* pie trace. This is a more sensible default and matches pure plotly.js behavior.
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
 

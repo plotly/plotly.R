@@ -189,3 +189,23 @@ test_that("Complex example works", {
   
   l <- expect_traces(p, 3, "time-series-summary")
 })
+
+
+test_that("span/size controls errorbar thickness/width", {
+  
+  p <- plot_ly(x = 1:10, y = 1:10, error_x = list(value = 3), error_y = list(value = 2), span = I(5), size = I(10), stroke = I("black"), color = I("red")) %>%
+    plotly_build()
+  
+  d <- p$x$data
+  expect_length(d, 1)
+  
+  expect_true(d[[1]]$error_x$value == 3)
+  expect_true(d[[1]]$error_x$thickness == 5)
+  expect_true(d[[1]]$error_x$width == 10)
+  expect_true(d[[1]]$error_x$color == toRGB("red"))
+  
+  expect_true(d[[1]]$error_y$value == 2)
+  expect_true(d[[1]]$error_y$thickness == 5)
+  expect_true(d[[1]]$error_y$width == 10)
+  expect_true(d[[1]]$error_y$color == toRGB("red"))
+})
