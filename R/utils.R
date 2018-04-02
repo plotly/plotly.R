@@ -822,10 +822,13 @@ verify_guides <- function(p) {
     
     idx <- which(isBar)
     for (i in seq_along(idx)) {
-      p <- colorbar_built(
-        p, which = i, len = 1 / nGuides, y = 1 - ((i - 1) / nGuides), 
-        lenmode = "fraction",  yanchor = "top"
-      )
+      # TODO: account for marker.line.colorbar
+      j <- idx[[i]]
+      bar <- p$x$data[[j]]$marker$colorbar
+      p$x$data[[j]]$marker$colorbar$len <- bar$len %||% (1 / nGuides)
+      p$x$data[[j]]$marker$colorbar$lenmode <- bar$lenmode %||% "fraction"
+      p$x$data[[j]]$marker$colorbar$y <- bar$y %||% (1 - ((i - 1) / nGuides))
+      p$x$data[[j]]$marker$colorbar$yanchor <- bar$yanchor %||% "top"
     }
     
   }
