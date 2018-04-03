@@ -496,37 +496,11 @@ verify_attr <- function(proposed, schema) {
     }
     
     # do the same for "sub-attributes"
-    # TODO: should this be done recursively?
     if (identical(role, "object")) {
-      for (attr2 in names(proposed[[attr]])) {
-        if (is.null(attrSchema[[attr2]])) next
-        
-        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
-        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
-        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
-        isDataArray2 <- identical(valType2, "data_array")
-        
-        if (!isDataArray2 && !arrayOK2 && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], uniq)
-        }
-        
-        # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (isDataArray2) {
-          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
-        }
-        
-        # tag 'src-able' attributes (needed for api_create())
-        isSrcAble2 <- !is.null(schema[[attr]][[paste0(attr2, "src")]]) && 
-          length(proposed[[attr]][[attr2]]) > 1
-        if (isDataArray2 || isSrcAble2) {
-          proposed[[attr]][[attr2]] <- structure(
-            proposed[[attr]][[attr2]], apiSrc = TRUE
-          )
-        }
-        
-      }
+      proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
     }
   }
+  
   proposed
 }
 
@@ -822,7 +796,6 @@ verify_guides <- function(p) {
     
     idx <- which(isBar)
     for (i in seq_along(idx)) {
-      # TODO: account for marker.line.colorbar
       j <- idx[[i]]
       bar <- p$x$data[[j]]$marker$colorbar
       p$x$data[[j]]$marker$colorbar$len <- bar$len %||% (1 / nGuides)
