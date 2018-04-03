@@ -228,6 +228,7 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
 #'   plot_ly() %>% add_sf(data = nc)
 #' }
 add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
+  try_library("sf", "add_sf")
   dat <- plotly_data(add_data(p, data))
   if (!is_sf(dat)) {
     stop(

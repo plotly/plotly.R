@@ -113,6 +113,8 @@ test_that("plot_ly() defaults to blank axes", {
 })
 
 test_that("discrete color informs fillcolor", {
+  skip_if_not_installed("sf")
+  
   res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
   
@@ -132,6 +134,8 @@ test_that("discrete color informs fillcolor", {
 
 
 test_that("discrete color informs fillcolor", {
+  skip_if_not_installed("sf")
+  
   res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
   
@@ -166,6 +170,7 @@ test_that("discrete color informs fillcolor", {
 
 
 test_that("numeric color informs fillcolor", {
+  skip_if_not_installed("sf")
   
   p <- plot_mapbox(res_mn, color = ~AREA)
   expect_warning(plotly_build(p), "Only one fillcolor per trace allowed")
@@ -209,6 +214,7 @@ test_that("numeric color informs fillcolor", {
 
 
 test_that("sizing constants", {
+  skip_if_not_installed("sf")
   
   # span controls 'stroke-size'
   p <- plot_mapbox(res_mn, span = I(5)) %>% plotly_build()
@@ -253,6 +259,7 @@ test_that("sizing constants", {
 
 
 test_that("size mappings", {
+  skip_if_not_installed("sf")
   
   expect_warning(
     plotly_build(plot_mapbox(res_mn, span = ~PERIMETER)), 
@@ -287,6 +294,7 @@ test_that("size mappings", {
 
 
 test_that("altogether now", {
+  skip_if_not_installed("sf")
   
   s <- subplot(plot_ly(nc), plot_geo(nc), plot_mapbox(nc), nrows = 3) %>% plotly_build()
   d <- s$x$data
@@ -320,6 +328,7 @@ test_that("altogether now", {
 
 
 test_that("color and stroke scales can be set independently", {
+  skip_if_not_installed("sf")
   
   n <- length(unique(res_mn$INDRESNAME))
   p <- plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, span = I(2)) %>%
