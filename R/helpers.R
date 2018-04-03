@@ -144,7 +144,7 @@ hide_legend <- function(p) {
 #' @examples 
 #' 
 #' # currently no bargl trace type
-#' toWebGL(qplot(1:10))
+#' toWebGL(ggplot() + geom_bar(aes(1:10)))
 #' toWebGL(qplot(1:10, 1:10))
 #' 
 toWebGL <- function(p) {

@@ -47,7 +47,7 @@ The `api_create()` function also understands how to "upload" ggplot2/plotly obje
 
 
 ```{r}
-p <- api_create(qplot(1:10))
+p <- api_create(qplot(1:10, 1:10))
 p
 ```
 
