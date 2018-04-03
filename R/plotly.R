@@ -5,7 +5,7 @@
 #' abstractions for doing common things (e.g. mapping data values to 
 #' fill colors (via `color`) or creating [animation]s (via `frame`)) and sets
 #' some different defaults to make the interface feel more 'R-like' 
-#' (i.e., closer to [plot()] and [ggplot::qplot()]). 
+#' (i.e., closer to [plot()] and [ggplot2::qplot()]). 
 #'
 #' @details Unless `type` is specified, this function just initiates a plotly 
 #' object with 'global' attributes that are passed onto downstream uses of

@@ -86,6 +86,7 @@ test_that("plot_ly() defaults to blank axes", {
   skip_if_not_installed("sf")
   
   m <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
+  print(m)
   
   p <- plot_ly() %>%
     add_sf(data = m, color = I("black"), fillcolor = "transparent", hoverinfo = "none") %>%

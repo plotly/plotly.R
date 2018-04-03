@@ -97,7 +97,7 @@ an (MIT licensed) web-based interactive charting library. It provides
 abstractions for doing common things (e.g. mapping data values to
 fill colors (via \code{color}) or creating \link{animation}s (via \code{frame})) and sets
 some different defaults to make the interface feel more 'R-like'
-(i.e., closer to \code{\link[=plot]{plot()}} and \code{\link[ggplot:qplot]{ggplot::qplot()}}).
+(i.e., closer to \code{\link[=plot]{plot()}} and \code{\link[ggplot2:qplot]{ggplot2::qplot()}}).
 }
 \details{
 Unless \code{type} is specified, this function just initiates a plotly
