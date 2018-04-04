@@ -6,7 +6,7 @@ dist: trusty
 r:
   - oldrel
   - release
-#  - devel
+  - devel
 
 env:
   global:
