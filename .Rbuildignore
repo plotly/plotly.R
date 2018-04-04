@@ -5,6 +5,7 @@
 CONDUCT.md
 CONTRIBUTING.md
 build_site.R
+travis_debug.R
 todo.R
 .github/
 inst/examples/rmd/*.html

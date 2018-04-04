@@ -84,9 +84,10 @@ test_that("Can plot sfc with a missing crs", {
 
 test_that("plot_ly() defaults to blank axes", {
   skip_if_not_installed("sf")
+  skip_if_not_installed("maptools")
+  skip_if_not_installed("rgeos")
   
   m <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
-  print(m)
   
   p <- plot_ly() %>%
     add_sf(data = m, color = I("black"), fillcolor = "transparent", hoverinfo = "none") %>%
@@ -108,7 +109,7 @@ test_that("plot_ly() defaults to blank axes", {
   expect_true(xaxis$title == "just a test")
   expect_null(yaxis$title)
   
-  expect_true(yaxis$ticks == "")
+  expect_true(xaxis$ticks == "")
   expect_true(yaxis$ticks == "")
 })
 
@@ -165,7 +166,6 @@ test_that("discrete color informs fillcolor", {
   
   linecolors <- sapply(d, function(tr) tr$line$color)
   expect_match(linecolors, "rgba(0,0,0,1)", fixed = TRUE)
-  
 })
 
 
@@ -175,7 +175,6 @@ test_that("numeric color informs fillcolor", {
   p <- plot_mapbox(res_mn, color = ~AREA)
   expect_warning(plotly_build(p), "Only one fillcolor per trace allowed")
   
-  # TODO: shouldn't add markers to mode!
   d <- plotly_build(p)$x$data
   expect_true(d[[1]]$mode == "lines")
   
