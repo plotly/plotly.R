@@ -9,9 +9,6 @@
 #' @export
 embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
   try_library("IRdisplay", "embed_notebook")
-  if (!is.null(file)) {
-    warning("The file argument is no longer used", call. = FALSE)
-  }
   UseMethod("embed_notebook")
 }
 
@@ -19,7 +16,7 @@ embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
 embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
   # TODO: get rid of this and provide method for api_figure objects
   display <- getFromNamespace("display_html", asNamespace("IRdisplay"))
-  
+
   if (!is.null(x$x$url)) {
     html <- plotly_iframe(
       x$x$url,
@@ -29,16 +26,35 @@ embed_notebook.plotly <- function(x, width = NULL, height = NULL, file = NULL) {
     return(display(html))
   }
   p <- plotly_build(x)
-  tmp <- tempfile(fileext = ".html")
-  on.exit(unlink(tmp), add = TRUE)
-  res <- htmlwidgets::saveWidget(p, tmp)
+
+  ext_html <- TRUE
+  if( is.null(file) ){
+    warning('No file specified. Embedding in notebook')
+    ext_html <- FALSE
+    file <- tempfile(fileext = ".html")
+    on.exit(unlink(file), add = TRUE)
+  }
+
+  #res <- htmlwidgets::saveWidget(p, file, selfcontained=FALSE)
+  res <- writePlotToFileXML2(p, x, file, width, height)
+
   # wrap in an iframe as *nteract* won't do this automatically
-  html <- plotly_iframe(
-    base64enc::dataURI(mime = "text/html;charset=utf-8", file = tmp),
-    width %||% p$width %||% "100%", 
-    height %||% p$height %||% 400,
-    ""
-  )
+  if( ext_html ){
+    html <- plotly_iframe(
+      file, 
+      width %||% p$width %||% "100%",
+      height %||% p$height %||% 400,
+      ""
+    )
+  }else{
+    html <- plotly_iframe(
+      base64enc::dataURI(mime = "text/html;charset=utf-8", file = file),
+      width %||% p$width %||% "100%", 
+      height %||% p$height %||% 400,
+      ""
+    )
+  }
+
   display(html)
 }
 
