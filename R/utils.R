@@ -481,7 +481,7 @@ verify_attr <- function(proposed, schema) {
     
     # plotly.js should really handle this logic
     if (isTRUE(grepl("fill", proposed[["hoveron"]]))) {
-      proposed[["text"]] <- paste(proposed[["text"]], collapse = "\n")
+      proposed[["text"]] <- paste(uniq(proposed[["text"]]), collapse = "\n")
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()

@@ -742,7 +742,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
   # i.e., interpret values as color codes
   if (any(isConstant)) {
     colorCodes <- Map(`%||%`, color, rep(colorway, length.out = length(traces)))
-    colorCodes <- toRGB(colorCodes[isConstant], alphas[isConstant])
+    colorCodes <- Map(toRGB, colorCodes[isConstant], alphas[isConstant])
     isColorway <- lengths(color[isConstant]) == 0
     traces[isConstant] <- Map(mapColor, traces[isConstant], colorCodes, isColorway)
   }

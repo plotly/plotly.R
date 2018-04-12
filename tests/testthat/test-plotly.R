@@ -209,3 +209,43 @@ test_that("span/size controls errorbar thickness/width", {
   expect_true(d[[1]]$error_y$width == 10)
   expect_true(d[[1]]$error_y$color == toRGB("red"))
 })
+
+
+test_that("Vector of redundant text is reduced to string when hoveron=fills", {
+  
+  # see https://github.com/ropensci/plotly/issues/1233
+  d <- data.frame(
+    AA = c(2,3,3,2, NA, 6,7,7,6, NA),
+    BB = c(2,2,3,2, NA, 6,6,7,6, NA),
+    CC = c(rep('abc', 5), rep('xyz', 5)),
+    LL = c(rep('A', 5), rep('B', 5))
+  )
+  
+  
+  p <- plot_ly(d) %>%
+    add_trace(x = ~AA,
+              y = ~BB,
+              text = ~paste('<br> <b>Example</b> of <em>custom</em> hover text <br>', LL, '<br>', CC, '<br>.'),
+              split = ~LL, 
+              mode = "lines", 
+              fill = "toself", 
+              hoveron = 'fills',
+              type = "scatter", 
+              color = I(c(rep(toRGB("black", 1), 5),
+                          rep(toRGB("red", 1), 5)))
+    )
+  
+  b <- plotly_build(p)
+  d <- b$x$data
+  expect_length(d, 2)
+  expect_true(d[[1]]$line$color == toRGB("black"))
+  expect_true(d[[1]]$fillcolor == toRGB("black", 0.5))
+  expect_true(d[[2]]$line$color == toRGB("red"))
+  expect_true(d[[2]]$fillcolor == toRGB("red", 0.5))
+  expect_true(
+    d[[1]]$text == '<br> <b>Example</b> of <em>custom</em> hover text <br> A <br> abc <br>.'
+  )
+  expect_true(
+    d[[2]]$text == '<br> <b>Example</b> of <em>custom</em> hover text <br> B <br> xyz <br>.'
+  )
+})
