@@ -805,12 +805,12 @@ verify_guides <- function(p) {
       tr <- p$x$data[[j]]
       if (inherits(tr, "zcolor")) {
         p$x$data[[j]]$colorbar$len <- tr$colorbar$len %|D|% len
-        p$x$data[[j]]$colorbar$lenmode <- tr$colorbar$lenmode %|D|% "fraction"
+        p$x$data[[j]]$colorbar$lenmode <- tr$colorbar$lenmode %|D|% lenmode
         p$x$data[[j]]$colorbar$y <- tr$colorbar$y %|D|% y
         p$x$data[[j]]$colorbar$yanchor <- tr$colorbar$yanchor %|D|% yanchor
       } else {
         p$x$data[[j]]$marker$colorbar$len <- tr$marker$colorbar$len %|D|% len
-        p$x$data[[j]]$marker$colorbar$lenmode <- tr$marker$colorbar$lenmode %|D|% "fraction"
+        p$x$data[[j]]$marker$colorbar$lenmode <- tr$marker$colorbar$lenmode %|D|% lenmode
         p$x$data[[j]]$marker$colorbar$y <- tr$marker$colorbar$y %|D|% y
         p$x$data[[j]]$marker$colorbar$yanchor <- tr$marker$colorbar$yanchor %|D|% yanchor
       }
