@@ -781,7 +781,7 @@ verify_guides <- function(p) {
   }
   
   isVisibleBar <- function(tr) {
-    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
+    is.colorbar(tr) && (tr$showscale %||% TRUE)
   }
   isBar <- vapply(p$x$data, isVisibleBar, logical(1))
   nGuides <- sum(isBar) + has_legend(p)
@@ -789,19 +789,31 @@ verify_guides <- function(p) {
   if (nGuides > 1) {
     
     # place legend at bottom since its scrolly
-    p$x$layout$legend <- modify_list(
-      list(y = 1 - ((nGuides - 1) / nGuides), yanchor = "top"),
-      p$x$layout$legend
-    )
+    yanchor <- default("top")
+    y <- default(1 - ((nGuides - 1) / nGuides))
+    p$x$layout$legend$yanchor <- p$x$layout$legend$yanchor %|D|% yanchor
+    p$x$layout$legend$y <- p$x$layout$legend[["y"]] %|D|% y
     
+    # shrink/position colorbars
     idx <- which(isBar)
     for (i in seq_along(idx)) {
+      len     <- default(1 / nGuides)
+      lenmode <- default("fraction")
+      y       <- default(1 - ((i - 1) / nGuides))
+      
       j <- idx[[i]]
-      bar <- p$x$data[[j]]$marker$colorbar
-      p$x$data[[j]]$marker$colorbar$len <- bar$len %||% (1 / nGuides)
-      p$x$data[[j]]$marker$colorbar$lenmode <- bar$lenmode %||% "fraction"
-      p$x$data[[j]]$marker$colorbar$y <- bar$y %||% (1 - ((i - 1) / nGuides))
-      p$x$data[[j]]$marker$colorbar$yanchor <- bar$yanchor %||% "top"
+      tr <- p$x$data[[j]]
+      if (inherits(tr, "zcolor")) {
+        p$x$data[[j]]$colorbar$len <- tr$colorbar$len %|D|% len
+        p$x$data[[j]]$colorbar$lenmode <- tr$colorbar$lenmode %|D|% "fraction"
+        p$x$data[[j]]$colorbar$y <- tr$colorbar$y %|D|% y
+        p$x$data[[j]]$colorbar$yanchor <- tr$colorbar$yanchor %|D|% yanchor
+      } else {
+        p$x$data[[j]]$marker$colorbar$len <- tr$marker$colorbar$len %|D|% len
+        p$x$data[[j]]$marker$colorbar$lenmode <- tr$marker$colorbar$lenmode %|D|% "fraction"
+        p$x$data[[j]]$marker$colorbar$y <- tr$marker$colorbar$y %|D|% y
+        p$x$data[[j]]$marker$colorbar$yanchor <- tr$marker$colorbar$yanchor %|D|% yanchor
+      }
     }
     
   }

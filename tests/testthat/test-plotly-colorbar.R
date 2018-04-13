@@ -93,3 +93,50 @@ test_that("can control both fill and stroke colorbars", {
   expect_true(bar_stroke$title == "stroke color")
   
 })
+
+test_that("positioning with multiple colorbars and legends", {
+  
+  s <- subplot(
+    plot_ly(z = ~volcano),
+    plot_ly(x = 1:10, y = 1:10, color = 1:10)
+  )
+  
+  b <- plotly_build(s)
+  d <- b$x$data
+  expect_length(d, 3)
+  
+  expect_true(d[[1]]$colorbar$len == 1/3)
+  expect_true(d[[1]]$colorbar$lenmode == "fraction")
+  expect_true(d[[1]]$colorbar$yanchor == "top")
+  expect_true(d[[1]]$colorbar$y == 1)
+  
+  expect_true(d[[3]]$marker$colorbar$len == 1/3)
+  expect_true(d[[3]]$marker$colorbar$lenmode == "fraction")
+  expect_true(d[[3]]$marker$colorbar$yanchor == "top")
+  expect_equal(as.numeric(d[[3]]$marker$colorbar$y), 2/3, tolerance = 0.01)
+  
+  expect_true(b$x$layout$legend$yanchor == "top")
+  expect_equal(as.numeric(b$x$layout$legend$y), 1/3, tolerance = 0.01)
+  
+  
+  s <- subplot(
+    plot_ly(z = ~volcano),
+    plot_ly(x = 1:10, y = 1:10, color = factor(1:10))
+  )
+  
+  b <- plotly_build(s)
+  d <- b$x$data
+  expect_length(d, 11)
+  
+  expect_true(d[[1]]$colorbar$len == 0.5)
+  expect_true(d[[1]]$colorbar$lenmode == "fraction")
+  expect_true(d[[1]]$colorbar$yanchor == "top")
+  expect_true(d[[1]]$colorbar$y == 1)
+  
+  expect_true(b$x$layout$legend$y == 0.5)
+  expect_true(b$x$layout$legend$yanchor == "top")
+  
+  
+  
+  
+})
