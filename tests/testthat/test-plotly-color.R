@@ -56,10 +56,10 @@ test_that("Mapping a numeric variable to color works", {
   idx <- vapply(l$data, is.colorbar, logical(1))
   markerScale <- l$data[[which(idx)]]$marker
   markerDat <- l$data[[which(!idx)]]$marker
-  expect_equivalent(markerDat$color, iris$Petal.Width)
-  expect_equivalent(markerScale$colorbar$title, "Petal.Width")
-  expect_equivalent(min(iris$Petal.Width), markerScale$cmin)
-  expect_equivalent(max(iris$Petal.Width), markerScale$cmax)
+  expect_true(all(markerDat$color == iris$Petal.Width))
+  expect_true(markerScale$colorbar$title == "Petal.Width")
+  expect_true(min(iris$Petal.Width) == markerScale$cmin)
+  expect_true(max(iris$Petal.Width) == markerScale$cmax)
   expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
 })
 
@@ -75,9 +75,9 @@ test_that("axis titles get attached to scene object for 3D plots", {
   l <- expect_traces(p, 1, "scatterplot-scatter3d-axes")
   expect_identical(l$data[[1]]$type, "scatter3d")
   scene <- l$layout$scene
-  expect_identical(scene$xaxis$title, "Petal.Length")
-  expect_identical(scene$yaxis$title, "Petal.Width")
-  expect_identical(scene$zaxis$title, "Sepal.Width")
+  expect_true(scene$xaxis$title == "Petal.Length")
+  expect_true(scene$yaxis$title == "Petal.Width")
+  expect_true(scene$zaxis$title == "Sepal.Width")
 })
 
 test_that("Can specify a scale manually", {

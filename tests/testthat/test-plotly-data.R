@@ -11,7 +11,7 @@ test_that("plotly_data returns empty data frame when none is specified", {
 
 test_that("plotly_data returns data frame", {
   d <- plotly_data(plot_ly(economics))
-  expect_identical(economics, d)
+  expect_identical(as.data.frame(economics), as.data.frame(d))
 })
 
 test_that("plotly_data preserves groups in data", {

@@ -4,14 +4,17 @@
 \alias{plotly_json}
 \title{Inspect JSON sent to plotly.js}
 \usage{
-plotly_json(p = last_plot(), jsonedit = interactive(), ...)
+plotly_json(p = last_plot(), jsonedit = interactive(), pretty = TRUE, ...)
 }
 \arguments{
 \item{p}{a plotly or ggplot object.}
 
-\item{jsonedit}{use \code{listviewer::jsonedit} to view the JSON?}
+\item{jsonedit}{use \link[listviewer:jsonedit]{listviewer::jsonedit} to view the JSON?}
 
-\item{...}{other options passed onto \code{listviewer::jsonedit}}
+\item{pretty}{adds indentation whitespace to JSON output. Can be TRUE/FALSE
+or a number specifying the number of spaces to indent. See \link[jsonlite:prettify]{jsonlite::prettify}.}
+
+\item{...}{other options passed onto \link[listviewer:jsonedit]{listviewer::jsonedit}}
 }
 \description{
 This function is useful for obtaining/viewing/debugging JSON

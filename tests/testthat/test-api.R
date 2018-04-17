@@ -140,10 +140,7 @@ test_that("Can create plots with non-trivial src attributes", {
   expect_srcified(trace$marker$colorsrc)
   
   # can src-ify layout.xaxis.tickvals
-  res <- api_create(qplot(1:10))
+  res <- api_create(ggplot() + geom_bar(aes(1:10)))
   expect_srcified(res$figure$layout$xaxis$tickvalssrc)
   
 })
-
-
-

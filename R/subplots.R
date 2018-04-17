@@ -249,8 +249,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     data = Reduce(c, traces),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
-  # retrain default coloring
-  p$data <- retrain_color_defaults(p$data)
+  
   
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
@@ -274,6 +273,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   p$source <- ensure_one(plots, "source")
   p$config <- ensure_one(plots, "config")
   p$highlight <- ensure_one(plots, "highlight")
+  
+  # retrain default coloring
+  p$data <- colorway_retrain(p$data, p$layout$colorway %||% colorway())
+  
   p$subplot <- TRUE
   as_widget(p)
 }
@@ -407,19 +410,19 @@ reposition <- function(obj, domains) {
 }
 
 
-retrain_color_defaults <- function(traces, colorDefaults = traceColorDefaults()) {
+colorway_retrain <- function(traces, colorway = colorway()) {
+  colorway <- rep(colorway, length.out = length(traces))
   for (i in seq_along(traces)) {
-    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults)
-    if (idx == 0) idx <- length(colorDefaults)
-    newDefault <- colorDefaults[[idx]]
-    for (j in c("marker", "line", "text")) {
-      obj <- traces[[i]][[j]]
-      if (!"color" %in% names(obj)) next
-      alpha <- attr(obj[["color"]], "defaultAlpha")
-      if (is.null(alpha)) next
-      traces[[i]][[j]][["color"]] <- toRGB(colorDefaults[[idx]], alpha)
-    }
+    col <- prefix_class(default(colorway[[i]]), "colorway")
+    traces[[i]] <- rapply(traces[[i]], function(x) { if (inherits(x, "colorway")) alpha_inherit(col, x) else x }, how = "replace")
   }
-  traces
+  traces 
+}
+
+
+# retrieve the alpha of an 'old' color code and apply it to a new color code
+alpha_inherit <- function(new, old) {
+  # should return the alpha in a rgba() code
+  alphas <- as.numeric(col2rgb(rgb2hex(old), alpha = TRUE)["alpha", ] / 255)
+  prefix_class(default(toRGB(new, alphas)), "colorway")
 }

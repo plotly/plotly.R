@@ -57,3 +57,16 @@ test_that("can plot on sub-second time scale", {
   info <- save_outputs(g, "point-size-alpha2")
   expect_equivalent(info$data[[1]]$x, as.numeric(d$x))
 })
+
+
+test_that("can flip axes", {
+  # https://github.com/ropensci/plotly/issues/1074
+  p <- ggplot(diamonds[sample(nrow(diamonds), 1000),]) +
+    geom_point(aes(carat, price)) +
+    expand_limits(y = 0) +
+    coord_flip()
+  
+  info <- save_outputs(p, "point-flip")
+  expect_equivalent(info$layout$xaxis$title, "price")
+  expect_equivalent(info$layout$yaxis$title, "carat")
+})

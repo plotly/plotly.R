@@ -14,3 +14,4 @@ inst/examples/*/rsconnect/*
 Untitled*
 rsconnect/
 revdep/
+travis_debug.R

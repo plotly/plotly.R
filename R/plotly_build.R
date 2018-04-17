@@ -90,6 +90,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # Attributes should be NULL if none exist (rather than an empty list)
   if (length(p$x$attrs) == 0) p$x$attrs <- NULL
   
+  # If there is just one (unevaluated) trace, and the data is sf, add an sf layer
+  if (length(p$x$attrs) == 1 && !inherits(p$x$attrs[[1]], "plotly_eval") && is_sf(plotly_data(p))) {
+    p <- add_sf(p)
+  }
+  
   # If type was not specified in plot_ly(), it doesn't create a trace unless
   # there are no other traces
   if (is.null(p$x$attrs[[1]][["type"]]) && length(p$x$attrs) > 1) {
@@ -114,11 +119,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       tr
     })
   }
-  
+
   dats <- Map(function(x, y) {
     
-    # perform the evaluation
+    # grab the data for this trace
     dat <- plotly_data(p, y)
+    
+    # formula/symbol/attribute evaluation
     trace <- structure(
       rapply(x, eval_attr, data = dat, how = "list"),
       class = oldClass(x)
@@ -135,6 +142,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       as.character(dplyr::groups(dat)),
       error = function(e) character(0)
     )
+    
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
@@ -150,7 +158,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       nm <- paste0(i, "axis")
       idx <- which(names(trace) %in% i)
       if (length(idx) == 1) {
-        title <- deparse2(x[[idx]])
+        title <- default(deparse2(x[[idx]]))
         if (is3d(trace$type) || i == "z") {
           p$x$layout$scene[[nm]]$title <<- p$x$layout$scene[[nm]]$title %||% title
         } else {
@@ -181,7 +189,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text", "key"
+      ".plotlyGroupIndex", "text", "key", "fillcolor"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -197,7 +205,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
       # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype", "frame") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
@@ -242,13 +250,11 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       )
       builtData <- train_data(builtData, trace)
       trace[[".plotlyVariableMapping"]] <- names(builtData)
-      
       # copy over to the trace data
       for (i in names(builtData)) {
         trace[[i]] <- builtData[[i]]
       }
     }
-    
     # TODO: provide a better way to clean up "high-level" attrs
     trace[c("ymin", "ymax", "yend", "xend")] <- NULL
     trace[lengths(trace) > 0]
@@ -283,20 +289,26 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     x
   })
-  # "transforms" of (i.e., apply scaling to) special arguments
-  # IMPORTANT: scales are applied at the plot-level!!
-  colorTitle <- unlist(lapply(p$x$attrs, function(x) {
-    deparse2(x[["color"]] %||% x[["z"]])
-  }))
-  traces <- map_color(traces, title = paste(colorTitle, collapse = br()))
-  traces <- map_size(traces)
-  traces <- map_symbol(traces)
-  traces <- map_linetype(traces)
+  
+  # Map special plot_ly() arguments to plotly.js trace attributes.
+  # Note that symbol/linetype can modify the mode, so those are applied first
+  # TODO: use 'legends 2.0' to create legends for these discrete mappings
+  # https://github.com/plotly/plotly.js/issues/1668
+  if (length(traces)) {
+    traces <- map_symbol(traces)
+    traces <- map_linetype(traces)
+    traces <- map_size(traces)
+    traces <- map_size(traces, stroke = TRUE) #i.e., span
+    colorTitle <- unlist(lapply(p$x$attrs, function(x) { deparse2(x[["color"]] %||% x[["z"]]) }))
+    strokeTitle <- unlist(lapply(p$x$attrs, function(x) deparse2(x[["stroke"]])))
+    traces <- map_color(traces, title = paste(colorTitle, collapse = br()), colorway = colorway(p))
+    traces <- map_color(traces, stroke = TRUE, title = paste(strokeTitle, collapse = br()), colorway = colorway(p))
+  }
   
   for (i in seq_along(traces)) {
     # remove special mapping attributes
     mappingAttrs <- c(
-      "alpha", npscales(), paste0(npscales(), "s"),
+      "alpha", "alpha_stroke", npscales(), paste0(npscales(), "s"),
       ".plotlyGroupIndex", ".plotlyMissingIndex",
       ".plotlyTraceIndex", ".plotlyVariableMapping"
     )
@@ -321,14 +333,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- supply_defaults(p)
   
   # attribute naming corrections for "geo-like" traces
-  p$x$data <- lapply(p$x$data, function(tr) {
-    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
-      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
-      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
-      tr[c("x", "y")] <- NULL
-    }
-    tr
-  })
+  p <- cartesian2geo(p)
+  
+  # Compute sensible bounding boxes for each mapbox/geo subplot
+  p <- fit_bounds(p)
   
   # polar charts don't like null width/height keys
   if (is.null(p$x$layout[["height"]])) p$x$layout[["height"]] <- NULL
@@ -479,11 +487,9 @@ registerFrames <- function(p, frameMapping = NULL) {
   })
   
   # retrain color defaults
-  p$x$data <- retrain_color_defaults(p$x$data)
+  p$x$data <- colorway_retrain(p$x$data, colorway(p))
   p$x$frames <- lapply(p$x$frames, function(f) {
-    f$data <- retrain_color_defaults(
-      f$data, colorDefaults = traceColorDefaults()[f$traces + 1]
-    )
+    f$data <- colorway_retrain(f$data, colorway(p)[f$traces + 1])
     f
   })
   
@@ -532,30 +538,95 @@ train_data <- function(data, trace) {
     dat[idx2, "y"] <- data[["yend"]]
     data <- dplyr::group_by_(dat, ".plotlyGroupIndex", add = TRUE)
   }
+  
   # TODO: a lot more geoms!!!
   data
 }
 
 
-map_size <- function(traces) {
-  sizeList <- lapply(traces, "[[", "size")
+map_size <- function(traces, stroke = FALSE) {
+  sizeList <- lapply(traces, "[[", if (stroke) "span" else "size")
   nSizes <- lengths(sizeList)
-  # if no "top-level" color is present, return traces untouched
-  if (all(nSizes == 0)) {
-    return(traces)
-  }
+  # if no "top-level" size is present, return traces untouched
+  if (all(nSizes == 0)) return(traces)
+  
   allSize <- unlist(compact(sizeList))
   if (!is.null(allSize) && is.discrete(allSize)) {
-    stop("Size must be mapped to a numeric variable\n",
-         "symbols only make sense for discrete variables", call. = FALSE)
+    stop("`size`/`width` values must be numeric .", call. = FALSE)
   }
   sizeRange <- range(allSize, na.rm = TRUE)
   
-  types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
-  modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
-  hasMarker <- has_marker(types, modes)
-  hasLine <- has_line(types, modes)
-  hasText <- has_text(types, modes)
+  mapSize <- switch(
+    if (stroke) "span" else "size",
+    span = function(trace, sizes) {
+      type <- trace$type %||% "scatter"
+      size_ <- uniq(sizes)
+      isSingular <- length(size_) == 1
+      attrs <- Schema$traces[[type]]$attributes
+      
+      # `span` controls marker.line.width
+      if (has_attr(type, "marker")) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$marker$line$width)) sizes
+        trace$marker$line <- modify_list(list(width = default(s)), trace$marker$line)
+      }
+      
+      # `span` controls error_[x/y].thickness 
+      for (attr in c("error_y", "error_x")) {
+        if (!has_attr(type, attr)) next
+        s <- if (isSingular) size_ else if (array_ok(attrs[[attr]]$thickness)) sizes
+        trace[[attr]] <- modify_list(list(thickness = default(s)), trace[[attr]])
+      }
+      
+      # When fill exists, `span` controls line.width
+      if (has_fill(trace) && has_attr(type, "line")) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$line$width)) sizes else NA
+        if (is.na(s)) {
+          warning("`line.width` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[["line"]] <- modify_list(list(width = default(s)), trace[["line"]])
+        }
+      }
+      
+      trace
+    }, 
+    size = function(trace, sizes) {
+      type <- trace$type %||% "scatter"
+      size_ <- uniq(sizes)
+      isSingular <- length(size_) == 1
+      attrs <- Schema$traces[[type]]$attributes
+      
+      # `size` controls marker.size (note 'bar' traces have marker but not marker.size)
+      # TODO: always ensure an array? https://github.com/ropensci/plotly/pull/1176
+      if (has_attr(type, "marker") && "size" %in% names(attrs$marker)) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$marker$size)) sizes
+        trace$marker <- modify_list(list(size = default(s), sizemode = default("area")), trace$marker)
+      }
+      
+      # `size` controls textfont.size
+      if (has_attr(type, "textfont")) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$textfont$size)) sizes
+        trace$textfont <- modify_list(list(size = default(s)), trace$textfont)
+      }
+      
+      # `size` controls error_[x/y].width 
+      for (attr in c("error_y", "error_x")) {
+        if (!has_attr(type, attr)) next
+        s <- if (isSingular) size_ else if (array_ok(attrs[[attr]]$width)) sizes
+        trace[[attr]] <- modify_list(list(width = default(s)), trace[[attr]])
+      }
+      
+      # if fill does not exist, `size` controls line.width
+      if (!has_fill(trace) && has_attr(type, "line")) {
+        s <- if (isSingular) size_ else if (array_ok(attrs$line$width)) sizes else NA
+        if (is.na(s)) {
+          warning("`line.width` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[["line"]] <- modify_list(list(width = default(s)), trace[["line"]])
+        }
+      }
+      trace
+    }
+  )
   
   for (i in which(nSizes > 0)) {
     s <- sizeList[[i]]
@@ -563,87 +634,139 @@ map_size <- function(traces) {
     sizeI <- if (isConstant) {
       structure(s, class = setdiff(class(s), "AsIs"))
     } else {
-      scales::rescale(s, from = sizeRange, to = traces[[1]]$sizes)
+      to <- if (stroke) traces[[1]][["spans"]] else traces[[1]][["sizes"]]
+      scales::rescale(s, from = sizeRange, to = to)
     }
-    if (hasMarker[[i]]) {
-      traces[[i]]$marker <- modify_list(
-        list(size = sizeI, sizemode = "area"),
-        traces[[i]]$marker
-      )
-    }
-    if (hasLine[[i]]) {
-      if (!isConstant || length(sizeI) > 1) {
-        warning(
-          "plotly.js doesn't yet support line.width arrays, track this issue for progress\n",
-          "  https://github.com/plotly/plotly.js/issues/147",
-          call. = FALSE
-        )
-      }
-      traces[[i]]$line <- modify_list(
-        list(width = sizeI[1]),
-        traces[[i]]$line
-      )
-    }
-    if (hasText[[i]]) {
-      if (!isConstant || length(sizeI) > 1) {
-        warning(
-          "plotly.js doesn't yet support textfont.size arrays",
-          call. = FALSE
-        )
-      }
-      traces[[i]]$textfont <- modify_list(
-        list(size = sizeI[1]),
-        traces[[i]]$textfont
-      )
-    }
+    traces[[i]] <- mapSize(traces[[i]], sizeI)
   }
   traces
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
-map_color <- function(traces, title = "", na.color = "transparent") {
-  color <- lapply(traces, function(x) {
-    x[["color"]] %||% if (grepl("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["z"]] else NULL
-  })
+map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "transparent") {
+  color <- if (stroke) {
+    lapply(traces, function(x) { x[["stroke"]] %||% x[["color"]] })
+  } else {
+    lapply(traces, function(x) { x[["color"]] %||% if (grepl("histogram2d", x[["type"]])) c(0, 1) else if (has_attr(x[["type"]], "colorscale")) x[["surfacecolor"]] %||% x[["z"]] })
+  }
+  alphas <- if (stroke) {
+    vapply(traces, function(x) x$alpha_stroke %||% 1, numeric(1)) 
+  } else {
+    vapply(traces, function(x) x[["alpha"]] %||% 1, numeric(1)) 
+  }
+  
   isConstant <- vapply(color, function(x) inherits(x, "AsIs") || is.null(x), logical(1))
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
   isDiscrete <- vapply(color, is.discrete, logical(1)) & !isConstant
-  if (any(isNumeric & isDiscrete)) {
-    stop("Can't have both discrete and numeric color mappings", call. = FALSE)
-  }
+  if (any(isNumeric & isDiscrete)) stop("Can't have both discrete and numeric color mappings", call. = FALSE)
+  uniqColor <- lapply(color, uniq)
+  isSingular <- lengths(uniqColor) == 1
+  
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
-  types <- unlist(lapply(traces, function(tr) tr$type %||% "scatter"))
-  modes <- unlist(lapply(traces, function(tr) tr$mode %||% "lines"))
-  hasMarker <- has_marker(types, modes)
+  # TODO: remove these and make numeric colorscale mapping more like the rest
+  types <- vapply(traces, function(tr) tr$type %||% "scatter", character(1))
+  modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasLine <- has_line(types, modes)
+  hasLineColor <- has_color_array(types, "line")
   hasText <- has_text(types, modes)
-  hasZ <- has_attr(types, "colorscale") &
+  hasTextColor <- has_color_array(types, "text")
+  hasZ <- has_attr(types, "colorscale") & !stroke &
     any(vapply(traces, function(tr) {
       !is.null(tr[["z"]]) || grepl("histogram2d", tr[["type"]])
     }, logical(1)))
   
-  colorDefaults <- traceColorDefaults()
-  for (i in which(isConstant)) {
-    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults)
-    if (idx == 0) idx <- 10
-    col <- color[[i]] %||% colorDefaults[[idx]]
-    alpha <- traces[[i]]$alpha %||% 1
-    rgb <- toRGB(col, alpha)
-    # we need some way to identify pre-specified defaults in subplot to retrain them
-    if (is.null(color[[i]])) attr(rgb, "defaultAlpha") <- alpha
-    obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
-    if (is.null(obj)) next
-    traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
-    traces[[i]][[obj]] <- modify_list(list(fillcolor = rgb), traces[[i]][[obj]])
+  # IDEA - attach color codes whether they make sense, unless there is a 
+  # vector of color codes and the target is a constant
+  mapColor <- switch(
+    if (stroke) "stroke" else "fill",
+    stroke = function(trace, rgba, is_colorway = FALSE) {
+      type <- trace$type %||% "scatter"
+      rgba_ <- uniq(rgba)
+      isSingular <- length(rgba_) == 1
+      attrs <- Schema$traces[[type]]$attributes
+      default_ <- if (is_colorway) function(x) prefix_class(default(x), "colorway") else default
+      
+      if (has_attr(type, "marker")) {
+        col <- if (isSingular) rgba_ else if (array_ok(attrs$marker$line$color)) rgba
+        trace$marker$line <- modify_list(list(color = default_(col)), trace$marker$line)
+      }
+      if (has_fill(trace)) {
+        col <- if (isSingular) rgba_ else if (array_ok(attrs$line$color)) rgba
+        if (is.null(col)) {
+          warning("`line.color` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace$line <- modify_list(list(color = default_(col)), trace$line)
+        }
+      }
+      trace
+    },
+    fill = function(trace, rgba, is_colorway = FALSE) {
+      type <- trace$type %||% "scatter"
+      rgba_ <- uniq(rgba)
+      isSingular <- length(rgba_) == 1
+      attrs <- Schema$traces[[type]]$attributes
+      default_ <- if (is_colorway) function(x) prefix_class(default(x), "colorway") else default
+      
+      # `color` controls marker.color, textfont.color, error_[x/y].color
+      # TODO: any more attributes that make sense to include here?
+      for (attr in c("marker", "textfont", "error_y", "error_x")) {
+        if (!has_attr(type, attr)) next
+        if (is_colorway && "textfont" == attr) next
+        col <- if (isSingular) rgba_ else if (array_ok(attrs[[attr]]$color)) rgba else NA
+        if (is.na(col)) {
+          warning("`", attr, ".color` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[[attr]] <- modify_list(list(color = default_(col)), trace[[attr]])
+        }
+      }
+      
+      # If trace has fill, `color` controls fillcolor; otherwise line.color
+      if (has_fill(trace)) {
+        if (!isSingular) warning("Only one fillcolor per trace allowed", call. = FALSE)
+        # alpha defaults to 0.5 when applied to fillcolor
+        if (is.null(trace[["alpha"]])) rgba_ <- toRGB(rgba_, 0.5)
+        if (isSingular) trace <- modify_list(list(fillcolor = default_(rgba_)), trace)
+      } else if (has_attr(type, "line")) {
+        # if fill does not exist, 'color' controls line.color
+        col <- if (isSingular) rgba_ else if (array_ok(attrs$line$color)) rgba else NA
+        if (is.na(col)) {
+          warning("`line.color` does not currently support multiple values.", call. = FALSE)
+        } else {
+          trace[["line"]] <- modify_list(list(color = default_(col)), trace[["line"]])
+        }
+      }
+      trace
+    }
+  )
+  
+  # i.e., interpret values as color codes
+  if (any(isConstant)) {
+    colorCodes <- Map(`%||%`, color, rep(colorway, length.out = length(traces)))
+    colorCodes <- Map(toRGB, colorCodes[isConstant], alphas[isConstant])
+    isColorway <- lengths(color[isConstant]) == 0
+    traces[isConstant] <- Map(mapColor, traces[isConstant], colorCodes, isColorway)
+  }
+  
+  # since stroke inherits from color, it should inherit the palette too
+  palette <- if (stroke) traces[[1]][["strokes"]] %||% traces[[1]][["colors"]] else traces[[1]][["colors"]]
+  
+  if (any(isDiscrete)) {
+    # unlist() does _not_ preserve order factors
+    isOrdered <- all(vapply(color[isDiscrete], is.ordered, logical(1)))
+    lvls <- getLevels(unlist(color[isDiscrete]))
+    N <- length(lvls)
+    pal <- palette %||% if (isOrdered) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
+    colScale <- scales::col_factor(pal, levels = names(pal) %||% lvls, na.color = na.color)
+    color_codes <- Map(function(x, y) toRGB(colScale(as.character(x)), y), color[isDiscrete], alphas[isDiscrete])
+    traces[isDiscrete] <- Map(mapColor, traces[isDiscrete], color_codes)
   }
   
   if (any(isNumeric)) {
-    palette <- traces[[1]][["colors"]] %||% viridisLite::viridis(10)
+    pal <- palette %||% viridisLite::viridis(10)
     # TODO: use ggstat::frange() when it's on CRAN?
     allColor <- unlist(color[isNumeric])
     rng <- range(allColor, na.rm = TRUE)
-    colScale <- scales::col_numeric(palette, rng, na.color = na.color)
+    colScale <- scales::col_numeric(pal, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
     vals <- if (diff(rng) > 0) {
       as.numeric(stats::quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE))
@@ -651,21 +774,22 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       c(0, 1)
     }
     colorScale <- matrix(
-      c(scales::rescale(vals), toRGB(colScale(vals), traces[[1]]$alpha %||% 1)),
+      c(scales::rescale(vals), toRGB(colScale(vals), alphas[[1]])),
       ncol = 2
     )
     colorObj <- list(
-      colorbar = Reduce(modify_list, lapply(traces, function(x) x$marker[["colorbar"]])) %||%
-        list(title = as.character(title), ticklen = 2),
-      cmin = rng[1],
-      cmax = rng[2],
-      colorscale = colorScale,
-      showscale = FALSE
+      colorbar = lapply(list(title = as.character(title), ticklen = 2), default),
+      cmin = default(rng[1]),
+      cmax = default(rng[2]),
+      colorscale = default(colorScale),
+      showscale = default(FALSE)
     )
     for (i in which(isNumeric)) {
+      # when colorscale is being attached to `z`, we don't need color values in
+      # colorObj, so create colorbar trace now and exit early
       if (hasZ[[i]]) {
         colorObj[c("cmin", "cmax")] <- NULL
-        colorObj[["showscale"]] <- TRUE
+        colorObj[["showscale"]] <- default(TRUE)
         traces[[i]] <- modify_list(colorObj, traces[[i]])
         traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
         # sigh, contour colorscale doesn't support alpha
@@ -675,33 +799,59 @@ map_color <- function(traces, title = "", na.color = "transparent") {
         traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
         next
       }
-      colorObj$color <- color[[i]]
-      if (hasLine[[i]]) {
-        if (types[[i]] %in% c("scatter", "scattergl")) {
-          warning("Numeric color variables cannot (yet) be mapped to lines.\n",
-                  " when the trace type is 'scatter' or 'scattergl'.\n", call. = FALSE)
-          traces[[i]]$mode <- paste0(traces[[i]]$mode, "+markers")
-          hasMarker[[i]] <- TRUE
+      
+      # if trace is singular (i.e., one unique color in this trace), then there 
+      # is no need for a colorscale, and both stroke/color have relevancy
+      if (isSingular[[i]]) {
+        col <- colScale(uniq(color[[i]]))
+        traces[[i]] <- mapColor(traces[[i]], toRGB(col, alphas[[i]]))
+      } else {
+        
+        colorObj$color <- default(color[[i]])
+        
+        if (stroke) {
+          traces[[i]]$marker$line <- modify_list(colorObj, traces[[i]]$marker$line)
         } else {
-          # scatter3d supports data arrays for color
-          traces[[i]][["line"]] <- modify_list(colorObj, traces[[i]][["line"]])
-          traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
+          traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
         }
-      }
-      if (hasMarker[[i]]) {
-        traces[[i]][["marker"]] <- modify_list(colorObj, traces[[i]][["marker"]])
+        
+        if (hasLine[[i]]) {
+          if (hasLineColor[[i]]) {
+            traces[[i]]$line <- modify_list(colorObj, traces[[i]]$line)
+          } else {
+            warning("line.color doesn't (yet) support data arrays", call. = FALSE)
+          }
+        }
+        
+        if (hasText[[i]]) {
+          if (hasTextColor[[i]]) {
+            traces[[i]]$textfont <- modify_list(colorObj, traces[[i]]$textfont)
+          } else {
+            warning("textfont.color doesn't (yet) support data arrays", call. = FALSE)
+          }
+        }
+        
+        # TODO: how to make the summary stat (mean) customizable?
+        if (has_fill(traces[[i]])) {
+          warning("Only one fillcolor per trace allowed", call. = FALSE)
+          col <- toRGB(colScale(mean(colorObj$color, na.rm = TRUE)), alphas[[i]])
+          if (is.null(traces[[i]][["alpha"]])) col <- toRGB(col, 0.5)
+          traces[[i]] <- modify_list(list(fillcolor = col), traces[[i]])
+        }
+        
+        # make sure the colorscale is going to convert to JSON nicely
+        # TODO: 
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
-      if (hasText[[i]]) {
-        warning("Numeric color variables cannot (yet) be mapped to text.\n",
-                "Feel free to make a feature request \n",
-                "https://github.com/plotly/plotly.js", call. = FALSE)
-      }
     }
+  
+    # exit early if no additional colorbar trace is needed
     if (any(hasZ)) return(traces)
+    if (stroke && sum(lengths(lapply(traces, "[[", "stroke"))) == 0) return(traces)
+    
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
-    colorObj$showscale <- TRUE
+    colorObj$showscale <- default(TRUE)
     colorBarTrace <- list(
       x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
       y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
@@ -712,7 +862,7 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       showlegend = FALSE,
       marker = colorObj
     )
-    # yay for consistency plotly.js
+    # 3D needs a z property
     if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
       colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
@@ -725,39 +875,6 @@ map_color <- function(traces, title = "", na.color = "transparent") {
       colorBarTrace[["y"]] <- NULL
     }
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
-  }
-  
-  if (any(isDiscrete)) {
-    # unlist() does _not_ preserve order factors
-    isOrdered <- all(vapply(color[isDiscrete], is.ordered, logical(1)))
-    allColor <- unlist(color[isDiscrete])
-    lvls <- getLevels(allColor)
-    N <- length(lvls)
-    pal <- traces[[1]][["colors"]] %||%
-      if (isOrdered) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
-    colScale <- scales::col_factor(pal, levels = names(pal) %||% lvls, na.color = na.color)
-    for (i in which(isDiscrete)) {
-      rgb <- toRGB(colScale(as.character(color[[i]])), traces[[i]]$alpha %||% 1)
-      obj <- if (hasLine[[i]]) "line" else if (hasMarker[[i]]) "marker" else if (hasText[[i]]) "textfont"
-      traces[[i]][[obj]] <- modify_list(list(color = rgb), traces[[i]][[obj]])
-      # match the plotly.js default of half transparency in the fill color
-      traces[[i]][[obj]] <- modify_list(list(fillcolor = toRGB(rgb, 0.5)), traces[[i]][[obj]])
-    }
-  }
-  
-  # marker.line.color (stroke) inherits from marker.color (color)
-  # TODO: allow users to control via a `stroke`` argument
-  # to make consistent, in "filled polygons", color -> fillcolor, stroke -> line.color
-  for (i in seq_along(color)) {
-    if (!is.null(traces[[i]]$marker$color)) {
-      traces[[i]]$marker$line$color <- traces[[i]]$marker$line$color %||% "transparent"
-      for (j in c("error_x", "error_y")) {
-        if (!is.null(traces[[i]][[j]])) {
-          traces[[i]][[j]][["color"]] <- traces[[i]][[j]][["color"]] %||%
-            traces[[i]]$marker[["color"]]
-        }
-      }
-    }
   }
   
   traces
@@ -791,7 +908,7 @@ map_symbol <- function(traces) {
       )
     }
     traces[[i]][["marker"]] <- modify_list(
-      list(symbol = symbols), traces[[i]][["marker"]]
+      list(symbol = default(symbols)), traces[[i]][["marker"]]
     )
     # ensure the mode is set so that the symbol is relevant
     if (!grepl("markers", traces[[i]]$mode %||% "")) {
@@ -806,9 +923,7 @@ map_linetype <- function(traces) {
   linetypeList <- lapply(traces, "[[", "linetype")
   nLinetypes <- lengths(linetypeList)
   # if no "top-level" linetype is present, return traces untouched
-  if (all(nLinetypes == 0)) {
-    return(traces)
-  }
+  if (all(nLinetypes == 0)) return(traces)
   linetype <- unlist(compact(linetypeList))
   lvls <- getLevels(linetype)
   # get a sensible default palette
@@ -833,7 +948,7 @@ map_linetype <- function(traces) {
       )
     }
     traces[[i]][["line"]] <- modify_list(
-      list(dash = dashes), traces[[i]][["line"]]
+      list(dash = default(dashes)), traces[[i]][["line"]]
     )
     # ensure the mode is set so that the linetype is relevant
     if (!grepl("lines", traces[[i]]$mode %||% "")) {
@@ -881,3 +996,8 @@ supplyUserPalette <- function(default, user) {
   }
   default
 }
+
+
+# helper functions
+array_ok <- function(attr) isTRUE(tryNULL(attr$arrayOk))
+has_fill <- function(trace) isTRUE(trace$fill %in% c('tozeroy', 'tozerox', 'tonexty', 'tonextx', 'toself', 'tonext'))
