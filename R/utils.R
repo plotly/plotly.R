@@ -434,7 +434,7 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey",  "_keyMap", "_isGraticule", "_bbox"), 
       thisTrace$type
     )
   }
@@ -715,8 +715,9 @@ verify_key_type <- function(p) {
     k <- keys[[i]]
     if (is.null(k)) next
     # does it *ever* make sense to have a missing key value?
-    uk <- uniq(k)
-    if (length(uk) == 1) {
+    uk <- unique(k)
+    un <- length(uk)
+    if (un == 1) {
       # i.e., the key for this trace has one value. In this case, 
       # we don't have iterate through the entire key, so instead, 
       # we provide a flag to inform client side logic to match the _entire_
@@ -724,6 +725,11 @@ verify_key_type <- function(p) {
       p$x$data[[i]]$key <- uk[[1]]
       p$x$data[[i]]$`_isSimpleKey` <- TRUE
       p$x$data[[i]]$`_isNestedKey` <- FALSE
+    }
+    if (un < length(k)) {
+      # construct an associative array where the key names map to row inidicies
+      uk <- uk[!is.na(uk)]
+      p$x$data[[i]]$`_keyMap` <- setNames(lapply(uk, function(x) which(k %in% x)), uk)
     }
     p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !lazyeval::is_atomic(k)
     # key values should always be strings

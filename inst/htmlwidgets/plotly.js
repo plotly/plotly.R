@@ -538,7 +538,8 @@ TraceManager.prototype.updateFilter = function(group, keys) {
         continue;
       }
       var matchFunc = getMatchFunc(trace);
-      var matches = matchFunc(trace.key, keys);
+      var hayStack = trace._keyMap || trace.key;
+      var matches = matchFunc(hayStack, keys);
       
       if (matches.length > 0) {
         if (!trace._isSimpleKey) {
@@ -608,7 +609,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       }
       // Get sorted array of matching indices in trace.key
       var matchFunc = getMatchFunc(trace);
-      var matches = matchFunc(trace.key, keys);
+      var hayStack = trace._keyMap || trace.key;
+      var matches = matchFunc(hayStack, keys);
       
       if (matches.length > 0) {
         // If this is a "simple" key, that means select the entire trace
@@ -768,11 +770,27 @@ function getMatchFunc(trace) {
 // find matches for "flat" keys
 function findMatches(haystack, needleSet) {
   var matches = [];
-  haystack.forEach(function(obj, i) {
-    if (obj === null || needleSet.indexOf(obj) >= 0) {
-      matches.push(i);
-    }
-  });
+  
+  // A haystack object is an associative array (values are row indicies)
+  if (typeof (haystack) === "object") {
+    
+    var hay = Object.keys(haystack);
+    hay.forEach(function(obj, i) {
+      if (needleSet.indexOf(obj) >= 0) {
+        matches = matches.concat(haystack[obj]);
+      }
+    });
+    
+  } else {
+    
+    haystack.forEach(function(obj, i) {
+      if (obj === null || needleSet.indexOf(obj) >= 0) {
+        matches.push(i);
+      }
+    });
+    
+  }
+  
   return matches;
 }
 
