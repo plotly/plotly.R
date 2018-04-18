@@ -743,7 +743,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       if (tracesToDim.length > 0) {
         Plotly.restyle(this.gd, {"opacity": opacities}, tracesToDim);
         // turn off the selected/unselected API
-        Plotly.restyle(gd, {"selectedpoints": null});
+        Plotly.restyle(this.gd, {"selectedpoints": null});
       }
       
     }
