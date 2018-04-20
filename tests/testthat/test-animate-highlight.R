@@ -24,6 +24,32 @@ test_that("SharedData produces key/set in ggplotly", {
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
 
+
+
+test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
+  
+  p <- txhousing %>%
+    group_by(city) %>%
+    crosstalk::SharedData$new(~city, "Select a city") %>%
+    plot_ly(x = ~date, y = ~median) %>%
+    add_lines(alpha = 0.2) %>%
+    add_ribbons(
+      x = c(2016, 2017), ymin = c(150000, 160000), ymax = c(200000, 190000),
+      inherit = FALSE
+    )
+  
+  b <- plotly_build(p)
+  # second trace should have key/set info
+  expect_null(b$x$data[[2]][["key"]])
+  expect_null(b$x$data[[2]][["set"]])
+  # first trace should
+  k <- unique(b$x$data[[1]]$key)
+  expect_equal(sort(k[!is.na(k)]), sort(unique(txhousing$city)))
+  expect_true(b$x$data[[1]][["set"]] == "Select a city")
+})
+
+
+
 # Ignore for now https://github.com/ggobi/ggally/issues/264
 #test_that("SharedData produces key/set in ggpairs", {
 #  p <- GGally::ggpairs(m, columns = 1:3)
