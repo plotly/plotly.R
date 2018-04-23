@@ -24,8 +24,6 @@ test_that("SharedData produces key/set in ggplotly", {
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
 
-
-
 test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
   
   p <- txhousing %>%
@@ -46,6 +44,22 @@ test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
   k <- unique(b$x$data[[1]]$key)
   expect_equal(sort(k[!is.na(k)]), sort(unique(txhousing$city)))
   expect_true(b$x$data[[1]][["set"]] == "Select a city")
+})
+
+test_that("Simple scatterplot brushing with plot_ly() and subplot()", {
+  
+  p <- mtcars %>%
+    crosstalk::SharedData$new(group = "testing") %>%
+    plot_ly(x = ~mpg, y = ~wt)
+  
+  b <- subplot(p, p) %>% 
+    highlight("plotly_selected") %>%
+    plotly_build()
+  
+  expect_true(all(b$x$data[[1]]$key == row.names(mtcars)))
+  expect_true(all(b$x$data[[2]]$key == row.names(mtcars)))
+  expect_true(b$x$data[[1]]$set == "testing")
+  expect_true(b$x$layout$dragmode == "select")
 })
 
 
