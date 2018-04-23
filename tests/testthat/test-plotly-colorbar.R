@@ -176,3 +176,17 @@ test_that("Colorbar limits controls marker.color and line.color", {
   expect_true(b3$x$data[[1]]$line$cmin == 20)
   expect_true(b3$x$data[[1]]$line$cmax == 100)
 })
+
+test_that("colorbar limits shouldn't control non-color-scale mapping(s)", {
+  
+  p <- plot_ly(x = 1:10, y = 1:10, color = 1:10) %>% 
+    add_markers() %>% 
+    add_lines(x  = 1:3, y = 1:3, color = I('red')) %>% 
+    colorbar(limits = c(1, 5))
+  
+  b <- plotly_build(p)
+  expect_length(b$x$data, 3)
+  
+  expect_true(sum(is.na(b$x$data[[1]]$marker$color)) == 5)
+  expect_true(b$x$data[[2]]$line$color == toRGB("red"))
+})

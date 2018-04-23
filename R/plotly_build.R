@@ -840,7 +840,6 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         }
         
         # make sure the colorscale is going to convert to JSON nicely
-        # TODO: 
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
     }
