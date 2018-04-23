@@ -132,7 +132,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     )
     
     # attach crosstalk info, if necessary
-    if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]])) {
+    if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]] %||% TRUE)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
     }
