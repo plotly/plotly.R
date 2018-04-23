@@ -66,6 +66,10 @@ colorbar_built <- function(p, ..., limits = NULL, which = 1) {
           x$marker[["color"]][col < limits[1] | limits[2] < col] <- default(NA)
           x$marker[["cmin"]] <- default(limits[1])
           x$marker[["cmax"]] <- default(limits[2])
+          col <- x$line[["color"]]
+          x$line[["color"]][col < limits[1] | limits[2] < col] <- default(NA)
+          x$line[["cmin"]] <- default(limits[1])
+          x$line[["cmax"]] <- default(limits[2])
           x
         })
       }
