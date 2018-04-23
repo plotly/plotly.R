@@ -22,6 +22,8 @@
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (see #1218).
 * Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
 * grid conversions in `ggplotly()` weren't respected a specified `height`/`width` in RStudio (see #1190).
+* `add_*()` no longer inherits `crosstalk::SharedData` key information when `inherit = FALSE`, see #1242.
+* The `limits` argument of `colorbar()` wasn't being applied to `line.color`/`line.cmin`/`line.cmax` (see #1236)
 
 # 4.7.1
 

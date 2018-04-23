@@ -135,8 +135,58 @@ test_that("positioning with multiple colorbars and legends", {
   
   expect_true(b$x$layout$legend$y == 0.5)
   expect_true(b$x$layout$legend$yanchor == "top")
+})
+
+
+test_that("Colorbar limits controls marker.color and line.color", {
   
+  # https://github.com/ropensci/plotly/issues/1236
+  p <- plot_ly(
+    mtcars, x = ~hp, y = ~cyl, z = ~mpg, color = ~mpg,
+    type = "scatter3d", mode = "lines+markers"
+  )
   
+  b <- plotly_build(p)
+  expect_length(b$x$data, 2)
+  expect_true(all(b$x$data[[1]]$marker$color == mtcars$mpg))
+  expect_true(all(b$x$data[[1]]$line$color == mtcars$mpg))
+  expect_true(b$x$data[[1]]$marker$cmin == min(mtcars$mpg))
+  expect_true(b$x$data[[1]]$marker$cmax == max(mtcars$mpg))
+  expect_true(b$x$data[[1]]$line$cmin == min(mtcars$mpg))
+  expect_true(b$x$data[[1]]$line$cmax == max(mtcars$mpg))
   
+  p2 <- colorbar(p, limits = c(0, 100))
+  b2 <- plotly_build(p2)
+  expect_length(b2$x$data, 2)
+  expect_true(all(b2$x$data[[1]]$marker$color == mtcars$mpg))
+  expect_true(all(b2$x$data[[1]]$line$color == mtcars$mpg))
+  expect_true(b2$x$data[[1]]$marker$cmin == 0)
+  expect_true(b2$x$data[[1]]$marker$cmax == 100)
+  expect_true(b2$x$data[[1]]$line$cmin == 0)
+  expect_true(b2$x$data[[1]]$line$cmax == 100)
   
+  p3 <- colorbar(p, limits = c(20, 100))
+  b3 <- plotly_build(p3)
+  mpg <- mtcars$mpg
+  mpg[mpg < 20] <- NA
+  expect_true(Reduce(`&`, Map(identical, b3$x$data[[1]]$marker$color, mpg)))
+  expect_true(Reduce(`&`, Map(identical, b3$x$data[[1]]$line$color, mpg)))
+  expect_true(b3$x$data[[1]]$marker$cmin == 20)
+  expect_true(b3$x$data[[1]]$marker$cmax == 100)
+  expect_true(b3$x$data[[1]]$line$cmin == 20)
+  expect_true(b3$x$data[[1]]$line$cmax == 100)
+})
+
+test_that("colorbar limits shouldn't control non-color-scale mapping(s)", {
+  
+  p <- plot_ly(x = 1:10, y = 1:10, color = 1:10) %>% 
+    add_markers() %>% 
+    add_lines(x  = 1:3, y = 1:3, color = I('red')) %>% 
+    colorbar(limits = c(1, 5))
+  
+  b <- plotly_build(p)
+  expect_length(b$x$data, 3)
+  
+  expect_true(sum(is.na(b$x$data[[1]]$marker$color)) == 5)
+  expect_true(b$x$data[[2]]$line$color == toRGB("red"))
 })

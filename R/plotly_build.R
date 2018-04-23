@@ -132,7 +132,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     )
     
     # attach crosstalk info, if necessary
-    if (crosstalk_key() %in% names(dat)) {
+    if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]])) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
       trace[["set"]] <- trace[["set"]] %||% attr(dat, "set")
     }
@@ -310,7 +310,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     mappingAttrs <- c(
       "alpha", "alpha_stroke", npscales(), paste0(npscales(), "s"),
       ".plotlyGroupIndex", ".plotlyMissingIndex",
-      ".plotlyTraceIndex", ".plotlyVariableMapping"
+      ".plotlyTraceIndex", ".plotlyVariableMapping", "inherit"
     )
     for (j in mappingAttrs) {
       traces[[i]][[j]] <- NULL
@@ -840,7 +840,6 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         }
         
         # make sure the colorscale is going to convert to JSON nicely
-        # TODO: 
         traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
     }

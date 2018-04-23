@@ -57,6 +57,7 @@ add_trace <- function(p, ...,
   
   # "native" plotly arguments
   attrs <- list(...)
+  attrs$inherit <- inherit
   
   if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() or split instead.")
