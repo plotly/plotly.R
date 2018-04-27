@@ -305,19 +305,16 @@ HTMLWidgets.widget({
     // TODO: make this more consistent with Graph() props?
     if (instance.setProps) {
       graphDiv.on('plotly_relayout', function(d) {
-        instance.setProps({"input_plotly_relayout": JSON.stringify(d) });
+        instance.setProps({"input_plotly_relayout": d});
       });
       graphDiv.on('plotly_hover', function(d) {
-        var val = JSON.stringify(eventDataWithKey(d));
-        instance.setProps({"input_plotly_hover": val});
+        instance.setProps({"input_plotly_hover": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_click', function(d) {
-        var val = JSON.stringify(eventDataWithKey(d));
-        instance.setProps({"input_plotly_click": val});
+        instance.setProps({"input_plotly_click": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_selected', function(d) {
-        var val = JSON.stringify(eventDataWithKey(d));
-        instance.setProps({"input_plotly_selected": val});
+        instance.setProps({"input_plotly_selected": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_unhover', function(eventData) {
         instance.setProps({"input_plotly_hover": null});
