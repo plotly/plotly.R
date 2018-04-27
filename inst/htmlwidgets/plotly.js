@@ -303,7 +303,7 @@ HTMLWidgets.widget({
     
     // send user input event data to dashR
     // TODO: make this more consistent with Graph() props?
-    if (instance.setProps) {
+    if (typeof instance.setProps === "function") {
       graphDiv.on('plotly_relayout', function(d) {
         instance.setProps({"input_plotly_relayout": d});
       });
