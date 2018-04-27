@@ -301,6 +301,38 @@ HTMLWidgets.widget({
     } 
     
     
+    // send user input event data to dashR
+    // TODO: make this more consistent with Graph() props?
+    if (instance.setProps) {
+      graphDiv.on('plotly_relayout', function(d) {
+        instance.setProps({"input_plotly_relayout": JSON.stringify(d) });
+      });
+      graphDiv.on('plotly_hover', function(d) {
+        var val = JSON.stringify(eventDataWithKey(d));
+        instance.setProps({"input_plotly_hover": val});
+      });
+      graphDiv.on('plotly_click', function(d) {
+        var val = JSON.stringify(eventDataWithKey(d));
+        instance.setProps({"input_plotly_click": val});
+      });
+      graphDiv.on('plotly_selected', function(d) {
+        var val = JSON.stringify(eventDataWithKey(d));
+        instance.setProps({"input_plotly_selected": val});
+      });
+      graphDiv.on('plotly_unhover', function(eventData) {
+        instance.setProps({"input_plotly_hover": null});
+      });
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        instance.setProps({"input_plotly_click": null});
+      });
+      // 'plotly_deselect' is code for doubleclick when in select mode
+      graphDiv.on('plotly_deselect', function(eventData) {
+        instance.setProps({"input_plotly_selected": null});
+        instance.setProps({"input_plotly_click": null});
+      });
+    } 
+    
+    
     // Given an array of {curveNumber: x, pointNumber: y} objects,
     // return a hash of {
     //   set1: {value: [key1, key2, ...], _isSimpleKey: false}, 
