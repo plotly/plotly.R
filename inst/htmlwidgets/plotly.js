@@ -303,29 +303,29 @@ HTMLWidgets.widget({
     
     // send user input event data to dashR
     // TODO: make this more consistent with Graph() props?
-    if (typeof instance.setProps === "function") {
+    if (typeof el.setProps === "function") {
       graphDiv.on('plotly_relayout', function(d) {
-        instance.setProps({"input_plotly_relayout": d});
+        el.setProps({"input_plotly_relayout": d});
       });
       graphDiv.on('plotly_hover', function(d) {
-        instance.setProps({"input_plotly_hover": eventDataWithKey(d)});
+        el.setProps({"input_plotly_hover": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_click', function(d) {
-        instance.setProps({"input_plotly_click": eventDataWithKey(d)});
+        el.setProps({"input_plotly_click": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_selected', function(d) {
-        instance.setProps({"input_plotly_selected": eventDataWithKey(d)});
+        el.setProps({"input_plotly_selected": eventDataWithKey(d)});
       });
       graphDiv.on('plotly_unhover', function(eventData) {
-        instance.setProps({"input_plotly_hover": null});
+        el.setProps({"input_plotly_hover": null});
       });
       graphDiv.on('plotly_doubleclick', function(eventData) {
-        instance.setProps({"input_plotly_click": null});
+        el.setProps({"input_plotly_click": null});
       });
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
-        instance.setProps({"input_plotly_selected": null});
-        instance.setProps({"input_plotly_click": null});
+        el.setProps({"input_plotly_selected": null});
+        el.setProps({"input_plotly_click": null});
       });
     } 
     
