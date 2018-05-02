@@ -33,7 +33,7 @@ HTMLWidgets.widget({
       
       // Enable persistent selection when shift key is down
       // https://stackoverflow.com/questions/1828613/check-if-a-key-is-down
-       var persistOnShift = function(e) {
+      var persistOnShift = function(e) {
         if (!e) window.event;
         if (e.shiftKey) { 
           x.highlight.persistent = true; 
@@ -194,6 +194,23 @@ HTMLWidgets.widget({
           Plotly[msg.method].apply(null, args);
         });
       }
+      
+      // plotly's mapbox API doesn't currently support setting bounding boxes
+      // https://www.mapbox.com/mapbox-gl-js/example/fitbounds/
+      // so we do this manually...
+      // TODO: make sure this triggers on a redraw and relayout as well as on initial draw
+      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox;
+      for (var i = 0; i < mapboxIDs.length; i++) {
+        var id = mapboxIDs[i];
+        var mapOpts = x.layout[id] || {};
+        var args = mapOpts._fitBounds || {}
+        if (!args) {
+          continue;
+        }
+        var mapObj = graphDiv._fullLayout[id]._subplot.map;
+        mapObj.fitBounds(args.bounds, args.options);
+      }
+      
     });
     
     // Attach attributes (e.g., "key", "z") to plotly event data
@@ -609,7 +626,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         /  (2) highlight(selected = attrs_selected(...))
         */
         // TODO: it would be neat to have a dropdown to dynamically specify these!
-        $.extend(true, trace, this.highlight.selected, d.selected);
+        $.extend(true, trace, this.highlight.selected);
         
         // if it is defined, override color with the "dynamic brush color""
         if (d.marker) {
@@ -623,6 +640,10 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         if (d.textfont) {
           trace.textfont = trace.textfont || {};
           trace.textfont.color =  selectionColour || trace.textfont.color || d.textfont.color;
+        }
+        if (d.fillcolor) {
+          // TODO: should selectionColour inherit alpha from the existing fillcolor?
+          trace.fillcolor = selectionColour || trace.fillcolor || d.fillcolor;
         }
         // attach a sensible name/legendgroup
         trace.name = trace.name || keys.join("<br />");
@@ -721,9 +742,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
       
       if (tracesToDim.length > 0) {
         Plotly.restyle(this.gd, {"opacity": opacities}, tracesToDim);
-        // this is an unfortunate consequence of the selected/unselected API
-        // https://codepen.io/cpsievert/pen/opOawp
-        Plotly.restyle(this.gd, {"unselected": {"marker": {"opacity": 1}}});
+        // turn off the selected/unselected API
+        Plotly.restyle(this.gd, {"selectedpoints": null});
       }
       
     }

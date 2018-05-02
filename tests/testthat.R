@@ -92,7 +92,7 @@ save_outputs <- function(gg, name) {
       ggFile <- paste("ggplot", filename, sep = "-")
       res <- tryCatch(ggsave(ggFile, gg), 
                       error = function(e) {
-                        err <- qplot() + 
+                        err <- ggplot() + 
                           annotate('text', label = paste('Error:', e$message), 
                                    x = 1, y = 1, color = 'red')
                         ggsave(ggFile, err, width = 3, height = 2, units = 'in')
@@ -100,7 +100,7 @@ save_outputs <- function(gg, name) {
       img <- function(x, f) {
         tryCatch(plotly_IMAGE(x, out_file = f, width = 300, height = 400),
                  error = function(e) {
-                   err <- qplot() + 
+                   err <- ggplot() + 
                      annotate('text', label = paste('Error:', e$message), 
                               x = 1, y = 1, color = 'red')
                    # TODO: convert pixels to inches?

@@ -26,7 +26,7 @@ test_that("geom_sf() geometry collection.", {
   a <- sf::st_polygon(list(cbind(c(0,0,7.5,7.5,0),c(0,-1,-1,0,0))))
   b <- sf::st_polygon(list(cbind(c(0,1,2,3,4,5,6,7,7,0),c(1,0,.5,0,0,0.5,-0.5,-0.5,1,1))))
   i <- sf::st_intersection(a, b)
-  cd <- sf::st_as_sf(data.frame(x = 1, geometry = sf::st_sfc(i)))
+  cd <- sf::st_as_sf(data.frame(d = 1, geometry = sf::st_sfc(i)))
   
   p <- ggplot(cd) + geom_sf()
   l <- save_outputs(p, "sf-geom-collection")
@@ -40,8 +40,8 @@ test_that("geom_sf() geometry collection.", {
   expect_equivalent(l$data[[2]]$y, c(0, 0))
   expect_equivalent(l$data[[3]]$x, I(1))
   expect_equivalent(l$data[[3]]$y, I(0))
-  expect_equivalent(l$data[[4]]$x, c(5.5, 7, 7, 6, 5.5, NA, 5.5))
-  expect_equivalent(l$data[[4]]$y, c(0, 0, -.5, -.5, 0, NA, 0))
+  expect_equivalent(l$data[[4]]$x, c(5.5, 7, 7, 6, 5.5, 5.5))
+  expect_equivalent(l$data[[4]]$y, c(0, 0, -.5, -.5, 0, 0))
 })
 
 test_that("geom_sf() polygons with fill/text.", {

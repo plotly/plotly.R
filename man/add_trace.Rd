@@ -8,6 +8,7 @@
 \alias{add_lines}
 \alias{add_segments}
 \alias{add_polygons}
+\alias{add_sf}
 \alias{add_ribbons}
 \alias{add_area}
 \alias{add_pie}
@@ -42,6 +43,8 @@ add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
   data = NULL, inherit = TRUE)
 
 add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+
+add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
   inherit = TRUE)
@@ -80,8 +83,11 @@ add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
 \arguments{
 \item{p}{a plotly object}
 
-\item{...}{These arguments are documented at \url{https://plot.ly/r/reference/}
-Note that acceptable arguments depend on the value of \code{type}.}
+\item{...}{Arguments (i.e., attributes) passed along to the trace \code{type}.
+See \code{\link[=schema]{schema()}} for a list of acceptable attributes for a given trace \code{type}
+(by going to \code{traces} -> \code{type} -> \code{attributes}). Note that attributes
+provided at this level may override other arguments
+(e.g. \code{plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))}).}
 
 \item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
 
@@ -141,6 +147,11 @@ ggplot2::map_data("world", "canada") \%>\%
   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
     data = maps::canada.cities) \%>\%
   layout(showlegend = FALSE)
+
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  plot_ly() \%>\% add_sf(data = nc)
+}
 
 plot_ly(economics, x = ~date) \%>\% 
   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)

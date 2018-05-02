@@ -264,10 +264,9 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # save the domain of the group for display in tooltips
   groupDomains <- Map(function(x, y) {
-    tryCatch(
-      eval(y$mapping[["group"]] %||% plot$mapping[["group"]], x), 
-      error = function(e) NULL
-    )
+    aes_g <- y$mapping[["group"]] %||% plot$mapping[["group"]]
+    eval_ <- if (is_dev_ggplot2()) rlang::eval_tidy else base::eval
+    tryNULL(eval_(aes_g, x))
   }, data, layers)
   
   # for simple (StatIdentity) geoms, add crosstalk key to aes mapping
@@ -979,8 +978,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
       # flipping logic for bar positioning is in geom2trace.GeomBar
-      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% "box") {
+      if (!identical(tr$type, "bar")) traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (identical(tr$type, "box")) {
         traces[[i]]$orientation <- "h"
         traces[[i]]$hoverinfo <- "x"
       }

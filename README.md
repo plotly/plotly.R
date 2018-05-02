@@ -2,7 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <img src="man/figures/plotly.png" width="200" />
 
-[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly) [![CRAN Status](http://www.r-pkg.org/badges/version/plotly)](http://cran.r-project.org/package=plotly) [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/plotly)](http://cran.r-project.org/package=plotly)
+[![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly) [![CRAN Status](http://www.r-pkg.org/badges/version/plotly)](http://cran.r-project.org/package=plotly) [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://www.rpackages.io/package/plotly) [![monthly](https://cranlogs.r-pkg.org/badges/plotly)](https://www.rpackages.io/package/plotly)
 
 An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
 

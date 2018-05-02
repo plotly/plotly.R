@@ -40,6 +40,7 @@ Imports:
     dplyr,
     tibble,
     lazyeval (>= 0.2.0),
+    rlang,
     crosstalk,
     purrr,
     data.table
@@ -62,11 +63,14 @@ Suggests:
     listviewer,
     dendextend,
     sf,
+    maptools,
+    rgeos,
     RSelenium,
     png,
     IRdisplay
 Remotes:
   tidyverse/ggplot2
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
+Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

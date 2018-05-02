@@ -24,20 +24,61 @@ test_that("SharedData produces key/set in ggplotly", {
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
 
-test_that("SharedData produces key/set in ggpairs", {
-  p <- GGally::ggpairs(m, columns = 1:3)
-  l <- plotly_build(p)$x
+test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
   
-  for (i in seq_along(l$data)) {
-    tr <- l$data[[i]]
-    if (tr$mode != "markers") next
-    expect_true(all(tr$key == m$key()))
-    expect_identical(tr$set, m$groupName())
-    expect_false(tr$`_isNestedKey` %||% FALSE)
-    expect_false(tr$`_isSimpleKey` %||% FALSE)
-  }
+  p <- txhousing %>%
+    group_by(city) %>%
+    crosstalk::SharedData$new(~city, "Select a city") %>%
+    plot_ly(x = ~date, y = ~median) %>%
+    add_lines(alpha = 0.2) %>%
+    add_ribbons(
+      x = c(2016, 2017), ymin = c(150000, 160000), ymax = c(200000, 190000),
+      inherit = FALSE
+    )
   
+  b <- plotly_build(p)
+  # second trace should have key/set info
+  expect_null(b$x$data[[2]][["key"]])
+  expect_null(b$x$data[[2]][["set"]])
+  # first trace should
+  k <- unique(b$x$data[[1]]$key)
+  expect_equal(sort(k[!is.na(k)]), sort(unique(txhousing$city)))
+  expect_true(b$x$data[[1]][["set"]] == "Select a city")
 })
+
+test_that("Simple scatterplot brushing with plot_ly() and subplot()", {
+  
+  p <- mtcars %>%
+    crosstalk::SharedData$new(group = "testing") %>%
+    plot_ly(x = ~mpg, y = ~wt)
+  
+  b <- subplot(p, p) %>% 
+    highlight("plotly_selected") %>%
+    plotly_build()
+  
+  expect_true(all(b$x$data[[1]]$key == row.names(mtcars)))
+  expect_true(all(b$x$data[[2]]$key == row.names(mtcars)))
+  expect_true(b$x$data[[1]]$set == "testing")
+  expect_true(b$x$layout$dragmode == "select")
+})
+
+
+
+# Ignore for now https://github.com/ggobi/ggally/issues/264
+#test_that("SharedData produces key/set in ggpairs", {
+#  p <- GGally::ggpairs(m, columns = 1:3)
+#  l <- plotly_build(p)$x
+#  
+#  for (i in seq_along(l$data)) {
+#    tr <- l$data[[i]]
+#    if (tr$mode != "markers") next
+#    expect_true(all(tr$key == m$key()))
+#    expect_identical(tr$set, m$groupName())
+#    expect_false(tr$`_isNestedKey` %||% FALSE)
+#    expect_false(tr$`_isSimpleKey` %||% FALSE)
+#  }
+#  
+#})
 
 
 test_that("When key is equivalent to group, produce simple keys", {
@@ -144,7 +185,7 @@ test_that("can handle inconsistent # of traces across frames & supply default co
   
   # default colors are the plotly.js defaults
   cols <- sapply(l$data, function(x) x$line$color)
-  defaultCols <- toRGB(traceColorDefaults()[1:3])
+  defaultCols <- toRGB(colorway()[1:3])
   expect_equivalent(cols, defaultCols)
   
   # trace names reflect the split/score (i.e., frames are removed)
@@ -271,7 +312,7 @@ test_that("simple animation targeting works", {
     # trace names are empty
     expect_equivalent(tr$name %||% "no-name", "no-name")
     # color defaults are retained
-    expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[i]]))
+    expect_true(tr$marker$color == toRGB(colorway()[[i]]))
   }
   
   # frame trace names are empty
@@ -283,7 +324,7 @@ test_that("simple animation targeting works", {
       # trace names are empty
       expect_equivalent(tr$name %||% "no-name", "no-name")
       # color defaults are retained
-      expect_equivalent(tr$marker$color, toRGB(traceColorDefaults()[[2]]))
+      expect_true(tr$marker$color == toRGB(colorway()[[2]]))
     }
   }
   

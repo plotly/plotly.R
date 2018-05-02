@@ -4,16 +4,18 @@
 #' sent to plotly.js.
 #' 
 #' @param p a plotly or ggplot object.
-#' @param jsonedit use `listviewer::jsonedit` to view the JSON?
-#' @param ... other options passed onto `listviewer::jsonedit`
+#' @param jsonedit use [listviewer::jsonedit] to view the JSON?
+#' @param pretty adds indentation whitespace to JSON output. Can be TRUE/FALSE
+#' or a number specifying the number of spaces to indent. See [jsonlite::prettify].
+#' @param ... other options passed onto [listviewer::jsonedit]
 #' @export
 #' @examples 
 #'   
 #' plotly_json(plot_ly())
 #' plotly_json(plot_ly(), FALSE)
 
-plotly_json <- function(p = last_plot(), jsonedit = interactive(), ...) {
-  plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = TRUE)
+plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE, ...) {
+  plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = pretty)
   if (jsonedit) {
     try_library("listviewer", "plotly_json")
     listviewer::jsonedit(plotlyJSON, mode = "form", ...)

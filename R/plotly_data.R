@@ -62,7 +62,7 @@
 #' 
 plotly_data <- function(p, id = p$x$cur_data) {
   if (!is.plotly(p)) {
-    stop("This function can only retrieve data from plotly objects.")
+    stop("`plotly_data()` expects a plotly object as it's first argument.", call. = FALSE)
   }
   f <- p$x$visdat[[id]]
   # if data has been specified, f should be a closure that, when called,
@@ -79,8 +79,15 @@ plotly_data <- function(p, id = p$x$cur_data) {
     #dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
     dat <- structure(dat, set = set)
   }
-  if (is.data.frame(dat)) tibble::as_tibble(dat) else dat
+  prefix_class(dat, "plotly_data")
 }
+
+#' @export
+print.plotly_data <- function(x, ...) {
+  print(remove_class(tibble::as_tibble(x, ...), "plotly_data"))
+  x
+}
+
 
 #' @rdname plotly_data
 #' @export

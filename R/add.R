@@ -57,6 +57,7 @@ add_trace <- function(p, ...,
   
   # "native" plotly arguments
   attrs <- list(...)
+  attrs$inherit <- inherit
   
   if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() or split instead.")
@@ -214,6 +215,61 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
     type = "scatter", fill = "toself", mode = "lines",  
     ..., data = data, inherit = inherit
   )
+}
+
+
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   plot_ly() %>% add_sf(data = nc)
+#' }
+add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
+  try_library("sf", "add_sf")
+  dat <- plotly_data(add_data(p, data))
+  if (!is_sf(dat)) {
+    stop(
+      "The `data` for an `add_sf()` layer must be an sf object, ", 
+      "not an object of class: ", class(dat)[1],
+      call. = FALSE
+    )
+  }
+  if (is_mapbox(p) || is_geo(p)) dat <- st_cast_crs(dat)
+  bbox <- sf::st_bbox(dat)
+  set <- attr(dat, "set")
+  
+  d <- to_basic.GeomSf(dat)
+  
+  # to_basic() returns either a single data frame or a list of data frames
+  # (each data frame should be a a collection of the same feature type)
+  d <- if (is.data.frame(d)) list(d)
+  
+  # inherit attributes from the "first layer" (except the plotly_eval class)
+  attrz <- if (inherit) modify_list(unclass(p$x$attrs[[1]]), list(...)) else list(...)
+  
+  for (i in seq_along(d)) {
+    # sensible mode/style defaults based on the feature type (e.g. polygon, path, point)
+    attrs <- modify_list(sf_default_attrs(d[[i]]), attrz)
+    # scatter3d doesn't currently support fill
+    if ("z" %in% names(attrs)) attrs$fill <- NULL
+    args <- list(
+      p = p, 
+      class = "plotly_sf", 
+      x = x,
+      y = y,
+      `_bbox` = bbox,
+      set = set,
+      data = if ("group" %in% names(d[[i]])) group_by_(d[[i]], "group", add = TRUE) else d[[i]], 
+      inherit = inherit
+    )
+    p <- do.call(add_trace_classed, c(args, attrs))
+  }
+  
+  p
 }
 
 
