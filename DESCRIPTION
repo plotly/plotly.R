@@ -33,7 +33,7 @@ Imports:
     viridisLite,
     base64enc,
     htmltools,
-    htmlwidgets (>= 1.1),
+    htmlwidgets (>= 1.2),
     tidyr,
     hexbin,
     RColorBrewer,
@@ -66,9 +66,7 @@ Suggests:
     png,
     IRdisplay
 Remotes:
-  tidyverse/ggplot2,
-  ramnathv/htmlwidgets,
-  rstudio/shiny
+  tidyverse/ggplot2
 LazyData: true
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
