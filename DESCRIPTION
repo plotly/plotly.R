@@ -33,7 +33,7 @@ Imports:
     viridisLite,
     base64enc,
     htmltools,
-    htmlwidgets (>= 0.9),
+    htmlwidgets (>= 1.2),
     tidyr,
     hexbin,
     RColorBrewer,

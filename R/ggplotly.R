@@ -7,6 +7,9 @@
 #' graphics device (if no device is open, width/height of a new (off-screen) 
 #' device defaults to 640/480). In other words, `height` and
 #' `width` must be specified at runtime to ensure sizing is correct.
+#' For examples on how to specify the output container's `height`/`width` in a 
+#' shiny app, see `plotly_example("shiny", "ggplotly_sizing")`.
+#' 
 #'
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).

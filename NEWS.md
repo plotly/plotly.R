@@ -5,6 +5,7 @@
 * Upgraded to plotly.js v1.37.0. A _huge_ amount of features and improvements have been made since v1.29.2 (i.e., the version included in the last CRAN release of the R package - v4.7.1). Highlights include a complete re-write of `scattergl` to make it nearly feature complete with `scatter`, localization of text rendering (i.e., international translations), and two new trace types (`violin` & `table`). Read more about the v1.32.0 release [here](https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21) and the complete list of changes [here](https://github.com/plotly/plotly.js/releases).
 * Support for **sf** (simple feature) data structures was added to `plot_ly()`, `plot_mapbox()`, and `plot_geo()` (via the new `add_sf()` function). See [this blog post](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly) for an overview.
 * New "special arguments" `stroke`, `strokes`, `alpha_stroke`, `span`, and `spans` were added for easier control over the stroke (i.e., outline) appearance of various (filled) graphical marks. For an overview, see the **sf** blog post linked to in the bullet point above and the new package demos (list all demos with `demo(package = "plotly")`).
+* One may now inform `ggplotly()` about the relevant **shiny** output size via `session$clientData`. This ensures `ggplotly()` sizing is closer to **ggplot2** sizing, even on window resize. For an example, run `plotly_example("shiny", "ggplotly_sizing")`.
 * The selection (i.e., linked-brushing) mode can now switch from 'transient' to 'persistent' by holding the 'shift' key. It's still possible to _force_ persistent selection by setting `persistent = TRUE` in `highlight()`, but `persistent = FALSE` (the default) is now recommended since it allows one to switch between [persistent/transient selection](https://plotly-book.cpsievert.me/linking-views-without-shiny.html#transient-versus-persistent-selection) in the browser, rather than at the command line.
 * Instead of an error, `ggplotly(NULL, "message")` and `plotly_build(NULL, "message")` now returns `htmltools::div("message")`, making it easier to relay messages in shiny when data isn't yet ready to plot (see #1116)
 * The `animation_button()` function gains a `label` argument, making it easier to control the label of an animation button generated through the `frame` API (see #1205).
@@ -13,7 +14,7 @@
 
 * The `color` argument now maps to `fillcolor`, making it much easier to use polygon fills to encode data values (e.g., choropleth maps). For backwards-compatibilty reasons, when `color` maps to `fillcolor`, `alpha` defaults to 0.5 (instead of 1). For an example, `plot_mapbox(mn_res, color = ~INDRESNAME)` or `plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, showlegend = FALSE, stroke = I("black"))`.
 * The `color` argument no longer automatically add `"markers"` to the `mode` attribute for scatter/scattergl trace types. Those who wish to have the old behavior back, should add `"markers"` to the `mode` explicity (e.g., change `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines")` to `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines+markers")`).
-* The `size` argument now informs a default [error_[x/y].width](https://plot.ly/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plot.ly/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`)
+* The `size` argument now informs a default [error_[x/y].width](https://plot.ly/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plot.ly/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`).
 * `layout.showlegend` now defaults to `TRUE` for a *single* pie trace. This is a more sensible default and matches pure plotly.js behavior.
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (see #985).
 
@@ -21,9 +22,10 @@
 
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (see #1218).
 * Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
-* grid conversions in `ggplotly()` weren't respected a specified `height`/`width` in RStudio (see #1190).
-* `add_*()` no longer inherits `crosstalk::SharedData` key information when `inherit = FALSE`, see #1242.
-* The `limits` argument of `colorbar()` wasn't being applied to `line.color`/`line.cmin`/`line.cmax` (see #1236)
+* The default `height`/`width` that `ggplotly()` assumes is now more consistently correct in various context, but it also now requires access to one of the following devices: `Cairo::Cairo()`, `png()`, or `jpg()`. 
+* In RStudio, `ggplotly()` was ignoring `height`/`width` (see #1190).
+* `add_*()` no longer inherits `crosstalk::SharedData` key information when `inherit = FALSE` (see #1242).
+* The `limits` argument of `colorbar()` wasn't being applied to `line.color`/`line.cmin`/`line.cmax` (see #1236).
 
 # 4.7.1
 
