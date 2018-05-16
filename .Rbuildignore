@@ -6,6 +6,7 @@ CONDUCT.md
 CONTRIBUTING.md
 build_site.R
 travis_debug.R
+revdep_email.R
 todo.R
 .github/
 inst/examples/rmd/*.html
@@ -17,3 +18,4 @@ revdep/
 ^LICENSE\.md$
 README.Rmd
 abbvie.R
+^\.httr-oauth$

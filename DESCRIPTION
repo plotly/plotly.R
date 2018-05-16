@@ -22,7 +22,7 @@ URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     R (>= 3.2.0),
-    ggplot2 (>= 2.2.1)
+    ggplot2 (> 2.2.1)
 Imports:
     tools,
     scales,
@@ -68,8 +68,6 @@ Suggests:
     RSelenium,
     png,
     IRdisplay
-Remotes:
-  tidyverse/ggplot2
 LazyData: true
 RoxygenNote: 6.0.1.9000
 Encoding: UTF-8

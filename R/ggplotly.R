@@ -211,26 +211,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     )
   }
   
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (!is_dev_ggplot2()) {
-    message(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('tidyverse/ggplot2')`"
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
-    )
-  }
-  
   # ------------------------------------------------------------------------
   # Our internal version of ggplot2::ggplot_build(). Modified from
   # https://github.com/hadley/ggplot2/blob/0cd0ba/R/plot-build.r#L18-L92
@@ -265,8 +245,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # save the domain of the group for display in tooltips
   groupDomains <- Map(function(x, y) {
     aes_g <- y$mapping[["group"]] %||% plot$mapping[["group"]]
-    eval_ <- if (is_dev_ggplot2()) rlang::eval_tidy else base::eval
-    tryNULL(eval_(aes_g, x))
+    tryNULL(rlang::eval_tidy(aes_g, x))
   }, data, layers)
   
   # for simple (StatIdentity) geoms, add crosstalk key to aes mapping
@@ -1284,10 +1263,6 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
     yref = "paper",
     xref = "paper"
   )
-}
-
-is_dev_ggplot2 <- function() {
-  packageVersion("ggplot2") > "2.2.1"
 }
 
 # We need access to internal ggplot2 functions in several places

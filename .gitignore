@@ -6,6 +6,7 @@ Rapp.history
 *.DS_Store
 node_modules/
 build_site.R
+revdep_email.R
 abbvie.R
 todo.R
 inst/examples/rmd/*.html
@@ -15,3 +16,4 @@ Untitled*
 rsconnect/
 revdep/
 travis_debug.R
+.httr-oauth
