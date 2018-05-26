@@ -193,8 +193,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   }
   # if a device (or RStudio) is already open, use the device size as default size
   if (!is.null(grDevices::dev.list()) || is_rstudio()) {
-    width <- width %||% grDevices::dev.size("px")[1]
-    height <- height %||% grDevices::dev.size("px")[2]
+    width <- width %||% default(grDevices::dev.size("px")[1])
+    height <- height %||% default(grDevices::dev.size("px")[2])
   }
   # open the device and make sure it closes on exit
   dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
@@ -1035,8 +1035,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
   
-  gglayout$width <- width
-  gglayout$height <- height
+  gglayout$width <- width %|D|% NULL
+  gglayout$height <- height %|D|% NULL
   gglayout$barmode <- gglayout$barmode %||% "relative"
   
   l <- list(
