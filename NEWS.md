@@ -20,10 +20,12 @@
 
 ## BUG FIXES
 
+
+* The default `height`/`width` that `ggplotly()` assumes is now more consistently correct in various context, but it also now requires access to one of the following devices: `Cairo::Cairo()`, `png()`, or `jpg()`. 
+* In RStudio, `ggplotly()` was ignoring a specified `height`/`width` (see #1190).
+* `ggplotly()` now uses fixed heights for facet strips meaning that their height is still correct after a window resize (see #1265).
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (see #1218).
 * Fixed algorithm for coercing the proposed layout to the plot schema (see #1156).
-* The default `height`/`width` that `ggplotly()` assumes is now more consistently correct in various context, but it also now requires access to one of the following devices: `Cairo::Cairo()`, `png()`, or `jpg()`. 
-* In RStudio, `ggplotly()` was ignoring `height`/`width` (see #1190).
 * `add_*()` no longer inherits `crosstalk::SharedData` key information when `inherit = FALSE` (see #1242).
 * The `limits` argument of `colorbar()` wasn't being applied to `line.color`/`line.cmin`/`line.cmax` (see #1236).
 
