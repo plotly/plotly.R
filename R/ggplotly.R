@@ -1242,21 +1242,31 @@ uniq <- function(x) {
 make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   rekt <- rect2shape(theme[["strip.background"]])
   stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-  xTextSize <- unitConvert(stripTextX$size, "npc", "width")
+  topSize <- 
+    mm2pixels(grid::convertHeight(stripTextX$margin[1], "mm")) +
+    mm2pixels(grid::convertHeight(stripTextX$margin[3], "mm")) +
+    mm2pixels(grid::convertHeight(grid::unit(stripTextX$size, units = "points"), "mm"))
   stripTextY <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
-  yTextSize <- unitConvert(stripTextY$size, "npc", "height")
+  rightSize <- 
+    mm2pixels(grid::convertWidth(stripTextX$margin[2], "mm")) +
+    mm2pixels(grid::convertWidth(stripTextX$margin[4], "mm")) +
+    mm2pixels(grid::convertWidth(grid::unit(stripTextY$size, units = "points"), "mm"))
   if ("right" %in% side) {
     # x-padding should be accounted for in `layout.margin.r`
-    rekt$x0 <- xdom[2]
-    rekt$x1 <- xdom[2] + xTextSize
     rekt$y0 <- ydom[1]
     rekt$y1 <- ydom[2]
+    rekt$x0 <- 0
+    rekt$x1 <- rightSize
+    rekt$xanchor <- xdom[2]
+    rekt$xsizemode <- "pixel"
   }
   if ("top" %in% side) {
     rekt$x0 <- xdom[1]
     rekt$x1 <- xdom[2]
-    rekt$y0 <- ydom[2]
-    rekt$y1 <- ydom[2] + yTextSize
+    rekt$y0 <- 0
+    rekt$y1 <- topSize
+    rekt$yanchor <- ydom[2]
+    rekt$ysizemode <- "pixel"
   }
   list(rekt)
 }
