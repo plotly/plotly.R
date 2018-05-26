@@ -358,7 +358,7 @@ supply_defaults <- function(p) {
     }
     for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
-        list(domain = c(0, 1)), p$x$layout[[axis]]
+        list(domain = c(0, 1), automargin = TRUE), p$x$layout[[axis]]
       )
     }
   }
