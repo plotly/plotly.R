@@ -34,3 +34,10 @@ test_that("angled ticks are translated correctly", {
   info <- save_outputs(ggiris, "labels-angles")
   expect_identical(info$layout$xaxis$tickangle, -45)
 })
+
+test_that("xaxis/yaxis automargin defaults to TRUE", {
+  p <- ggplot(iris, aes(Species)) + geom_bar() + coord_flip()
+  l <- plotly_build(p)$x
+  expect_true(l$layout$xaxis$automargin)
+  expect_true(l$layout$yaxis$automargin)
+})

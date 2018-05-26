@@ -62,6 +62,8 @@ test_that("plot_ly() handles a simple scatterplot", {
   expect_equivalent(l$data[[1]]$y, iris$Petal.Length)
   expect_true(l$layout$xaxis$title == "Sepal.Length")
   expect_true(l$layout$yaxis$title == "Petal.Length")
+  expect_true(l$layout$xaxis$automargin)
+  expect_true(l$layout$yaxis$automargin)
 })
 
 test_that("type inference + add_data + layering works as expected", {
