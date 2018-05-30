@@ -32,8 +32,6 @@
 #'
 
 
-# TODO: implement type = 'auto' which would attempts to find the smallest partial bundle that can render `p`.
-# this would require, however, knowing the bundle -> trace mapping *for `p`'s plotly.js version*
 partial_bundle <- function(p, type = "auto", local = TRUE, minified = TRUE) {
   
   if (!is.plotly(p)) stop("The first argument to `partial_bundle()` must be a plotly object", call. = FALSE)
@@ -45,6 +43,8 @@ partial_bundle <- function(p, type = "auto", local = TRUE, minified = TRUE) {
   p$dependencies[[idx]]$minified <- minified
   p$dependencies[[idx]]$partial_bundle <- match.arg(type, c("auto", "main", names(bundleTraceMap)))
   
+  # unfortunately, htmlwidgets doesn't appear to support manipulation of 
+  # dependencies field during preRenderHook(), so we need to explicitly build
   plotly_build(p)
 }
 
@@ -69,8 +69,8 @@ verify_partial_bundle <- function(p) {
     }
     
     if (identical(bundleType, "auto")) {
-      message(
-        "Couldn't find a single partial bundle that would support this plotly",
+      warning(
+        "Couldn't find a single partial bundle that would support this plotly ",
         "visualization. Using the main (full) bundle instead."
       )
       p$dependencies[[plotlyjsBundleIDX(p)]] <- plotlyMainBundle()
