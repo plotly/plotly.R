@@ -90,24 +90,29 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
 #' @param cloud include the send data to cloud button?
-#' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info
+#' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
 #' @author Carson Sievert
 #' @export
 #' @examples
 #' 
-#' p <- plot_ly(x = rnorm(1000))
+#' today <- Sys.Date()
+#' x <- seq.Date(today, today + 360, by = "day")
+#' p <- plot_ly(x = x, y = rnorm(length(x))) %>%
+#'   add_lines()
 #' 
 #' # remove the plotly logo and collaborate button from modebar
 #' config(p, displaylogo = FALSE, collaborate = FALSE)
 #' 
+#' #' # japanese
+#' config(p, locale = "ja")
+#' #' # german
+#' config(p, locale = "de")
+#' # swiss-german
+#' config(p, locale = "de-CH")
 #' # spanish
 #' config(p, locale = "es")
-#' # german
-#' config(p, locale = "de")
 #' # french
 #' config(p, locale = "fr")
-#' # japanese
-#' config(p, locale = "ja")
 #' 
 
 config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {

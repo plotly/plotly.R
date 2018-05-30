@@ -16,26 +16,31 @@ config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL)
 
 \item{cloud}{include the send data to cloud button?}
 
-\item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info}
+\item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
 }
 \description{
 Set the default configuration for plotly
 }
 \examples{
 
-p <- plot_ly(x = rnorm(1000))
+today <- Sys.Date()
+x <- seq.Date(today, today + 360, by = "day")
+p <- plot_ly(x = x, y = rnorm(length(x))) \%>\%
+  add_lines()
 
 # remove the plotly logo and collaborate button from modebar
 config(p, displaylogo = FALSE, collaborate = FALSE)
 
+#' # japanese
+config(p, locale = "ja")
+#' # german
+config(p, locale = "de")
+# swiss-german
+config(p, locale = "de-CH")
 # spanish
 config(p, locale = "es")
-# german
-config(p, locale = "de")
 # french
 config(p, locale = "fr")
-# japanese
-config(p, locale = "ja")
 
 }
 \author{
