@@ -27,7 +27,7 @@ test_that("Can find the right bundle", {
   
   p3 <- plot_ly(z = ~volcano) %>% add_surface()
   p4 <- partial_bundle(p3)
-  expect_match(plotlyjsBundle(p3)$name, "gl3d")
+  expect_match(plotlyjsBundle(p4)$name, "gl3d")
   
   # At least right now, we don't support multiple partial bundles
   expect_warning(
