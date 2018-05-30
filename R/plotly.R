@@ -461,7 +461,9 @@ locale_dependency <- function(locale) {
   scripts <- paste0(locale, ".js")
   if (grepl("-", locale)) {
     locale_main <- strsplit(locale, "-")[[1]][1]
-    scripts <- c(scripts, paste0(locale_main, ".js"))
+    if (locale_main %in% locales_all) {
+      scripts <- c(scripts, paste0(locale_main, ".js"))
+    }
   }
   
   htmltools::htmlDependency(

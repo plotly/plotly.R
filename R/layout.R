@@ -103,9 +103,9 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' # remove the plotly logo and collaborate button from modebar
 #' config(p, displaylogo = FALSE, collaborate = FALSE)
 #' 
-#' #' # japanese
+#' # japanese
 #' config(p, locale = "ja")
-#' #' # german
+#' # german
 #' config(p, locale = "de")
 #' # swiss-german
 #' config(p, locale = "de-CH")
@@ -113,6 +113,8 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "es")
 #' # french
 #' config(p, locale = "fr")
+#' # chinese
+#' config(p, locale = "zh-CN")
 #' 
 
 config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {

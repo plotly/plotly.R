@@ -31,9 +31,9 @@ p <- plot_ly(x = x, y = rnorm(length(x))) \%>\%
 # remove the plotly logo and collaborate button from modebar
 config(p, displaylogo = FALSE, collaborate = FALSE)
 
-#' # japanese
+# japanese
 config(p, locale = "ja")
-#' # german
+# german
 config(p, locale = "de")
 # swiss-german
 config(p, locale = "de-CH")
@@ -41,6 +41,8 @@ config(p, locale = "de-CH")
 config(p, locale = "es")
 # french
 config(p, locale = "fr")
+# chinese
+config(p, locale = "zh-CN")
 
 }
 \author{
