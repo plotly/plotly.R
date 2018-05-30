@@ -405,6 +405,7 @@ as_widget <- function(x, ...) {
     dependencies = c(
       list(typedArrayPolyfill()),
       crosstalk::crosstalkLibs(),
+      list(plotlyHtmlwidgetsCSS()),
       list(plotlyMainBundle())
     )
   )
@@ -414,7 +415,8 @@ typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
     "typedarray", "0.1",
     src = depPath("typedarray"),
-    script = "typedarray.min.js"
+    script = "typedarray.min.js",
+    all_files = FALSE
   )
 }
 
@@ -422,10 +424,19 @@ typedArrayPolyfill <- function() {
 # and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
-    "plotlyjs", "1.38.1",
+    "plotly-main", "1.38.1",
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
-    stylesheet = "plotly-htmlwidgets.css"
+    all_files = FALSE
+  )
+}
+
+plotlyHtmlwidgetsCSS <- function() {
+  htmltools::htmlDependency(
+    "plotly-htmlwidgets-css", "1.38.1",
+    src = depPath("plotlyjs"),
+    stylesheet = "plotly-htmlwidgets.css",
+    all_files = FALSE
   )
 }
 
