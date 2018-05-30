@@ -375,6 +375,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # box up 'data_array' attributes where appropriate
   p <- verify_attr_spec(p)
   
+  # if a partial bundle was specified, make sure it supports the visualization
+  p <- verify_partial_bundle(p)
+  
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   p
