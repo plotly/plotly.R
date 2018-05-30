@@ -10,7 +10,7 @@ partial_bundle(p, type = "auto", local = TRUE, minified = TRUE)
 \item{p}{a plotly object.}
 
 \item{type}{name of the (partial) bundle. The default, \code{'auto'}, attempts to
-find the smallest single bundle that can render \code{p}. If no single partial bundle,
+find the smallest single bundle that can render \code{p}. If no single partial bundle
 can render \code{p}, then the full bundle is used.}
 
 \item{local}{whether or not to download the partial bundle so that it can be
@@ -38,11 +38,7 @@ See the examples section for an example.
 # ----------------------------------------------------------------------
 
 library(plotly)
-p1 <- plot_ly(x = 1:10, y = 1:10) \%>\% add_markers()
-p2 <- partial_bundle(p1)
-f1 <- tempfile(fileext = ".html")
-f2 <- tempfile(fileext = ".html")
-
+p <- plot_ly(x = 1:10, y = 1:10) \%>\% add_markers()
 save_widget <- function(p, f) {
   owd <- setwd(dirname(f))
   on.exit(setwd(owd))
@@ -50,8 +46,10 @@ save_widget <- function(p, f) {
   mb <- round(file.info(f)$size / 1e6, 3)
   message("File is: ", mb," MB")
 }
-save_widget(p1, f1)
-save_widget(p2, f2)
+f1 <- tempfile(fileext = ".html")
+f2 <- tempfile(fileext = ".html")
+save_widget(p, f1)
+save_widget(partial_bundle(p), f2)
 
 # ----------------------------------------------------------------------
 # But, since plotly.js bundles override one another, 

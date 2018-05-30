@@ -7,7 +7,7 @@ tmp <- tempfile(fileext = ".zip")
 download.file(zip, tmp)
 unzip(tmp)
 
-# update the plotly.js bundle
+# update the default bundle
 file.copy(
   Sys.glob("*plotly.js*/dist/plotly.min.js"), 
   "inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", 
@@ -17,6 +17,13 @@ file.copy(
 file.copy(
   Sys.glob("*plotly.js*/LICENSE"), 
   "inst/htmlwidgets/lib/plotlyjs/LICENSE", 
+  overwrite = TRUE
+)
+# update the locale files
+locales <- Sys.glob("*plotly.js*/dist/plotly-locale-*.js")
+file.copy(
+  locales,
+  file.path("inst/htmlwidgets/lib/plotlyjs/locales", sub("^plotly-locale-", "", basename(locales))),
   overwrite = TRUE
 )
 # update the plot schema

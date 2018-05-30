@@ -4,7 +4,7 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ..., collaborate = TRUE, cloud = FALSE)
+config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -15,13 +15,34 @@ config(p, ..., collaborate = TRUE, cloud = FALSE)
 \item{collaborate}{include the collaborate mode bar button (unique to the R pkg)?}
 
 \item{cloud}{include the send data to cloud button?}
+
+\item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
 }
 \description{
 Set the default configuration for plotly
 }
 \examples{
 
-config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+today <- Sys.Date()
+x <- seq.Date(today, today + 360, by = "day")
+p <- plot_ly(x = x, y = rnorm(length(x))) \%>\%
+  add_lines()
+
+# remove the plotly logo and collaborate button from modebar
+config(p, displaylogo = FALSE, collaborate = FALSE)
+
+# japanese
+config(p, locale = "ja")
+# german
+config(p, locale = "de")
+# swiss-german
+config(p, locale = "de-CH")
+# spanish
+config(p, locale = "es")
+# french
+config(p, locale = "fr")
+# chinese
+config(p, locale = "zh-CN")
 
 }
 \author{

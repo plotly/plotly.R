@@ -440,6 +440,41 @@ plotlyHtmlwidgetsCSS <- function() {
   )
 }
 
+locale_dependency <- function(locale) {
+  if (!is.character(locale) || length(locale) != 1) {
+    stop("locale must be a character string (vector of length 1)", call. = FALSE)
+  }
+  
+  locale_dir <- depPath("plotlyjs", "locales")
+  locales_all <- sub("\\.js$", "", list.files(locale_dir))
+  if (!tolower(locale) %in% locales_all) {
+    stop(
+      "Invalid locale: '", locale, "'.\n\n",
+      sprintf("Supported locales include: '%s'", paste(locales_all, collapse = "', '")),
+      call. = FALSE
+    )
+  }
+  
+  
+  # some locales rely on a base/main locale (e.g. de-CH relies on de)
+  # https://codepen.io/etpinard/pen/pKvLVX?editors=1010
+  scripts <- paste0(locale, ".js")
+  if (grepl("-", locale)) {
+    locale_main <- strsplit(locale, "-")[[1]][1]
+    if (locale_main %in% locales_all) {
+      scripts <- c(scripts, paste0(locale_main, ".js"))
+    }
+  }
+  
+  htmltools::htmlDependency(
+    name = paste0("plotly-locale-", locale),
+    version = plotlyMainBundle()$version,
+    src = list(file = locale_dir),
+    script = scripts,
+    all_files = FALSE
+  )
+}
+
 #' Remove TypedArray polyfill
 #'
 #' By default, plotly.js' TypedArray polyfill is included as a dependency, so

@@ -90,14 +90,42 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
 #' @param cloud include the send data to cloud button?
+#' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
 #' @author Carson Sievert
 #' @export
 #' @examples
 #' 
-#' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+#' today <- Sys.Date()
+#' x <- seq.Date(today, today + 360, by = "day")
+#' p <- plot_ly(x = x, y = rnorm(length(x))) %>%
+#'   add_lines()
+#' 
+#' # remove the plotly logo and collaborate button from modebar
+#' config(p, displaylogo = FALSE, collaborate = FALSE)
+#' 
+#' # japanese
+#' config(p, locale = "ja")
+#' # german
+#' config(p, locale = "de")
+#' # swiss-german
+#' config(p, locale = "de-CH")
+#' # spanish
+#' config(p, locale = "es")
+#' # french
+#' config(p, locale = "fr")
+#' # chinese
+#' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {
+  
+  if (!is.null(locale)) {
+    p$dependencies <- c(
+      p$dependencies,
+      list(locale_dependency(locale))
+    )
+    p$x$config$locale <- locale
+  }
   
   p$x$config <- modify_list(p$x$config, list(...))
   
