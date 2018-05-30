@@ -199,7 +199,7 @@ HTMLWidgets.widget({
       // https://www.mapbox.com/mapbox-gl-js/example/fitbounds/
       // so we do this manually...
       // TODO: make sure this triggers on a redraw and relayout as well as on initial draw
-      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox;
+      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox || [];
       for (var i = 0; i < mapboxIDs.length; i++) {
         var id = mapboxIDs[i];
         var mapOpts = x.layout[id] || {};
