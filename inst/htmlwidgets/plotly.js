@@ -203,7 +203,7 @@ HTMLWidgets.widget({
       for (var i = 0; i < mapboxIDs.length; i++) {
         var id = mapboxIDs[i];
         var mapOpts = x.layout[id] || {};
-        var args = mapOpts._fitBounds || {}
+        var args = mapOpts._fitBounds || {};
         if (!args) {
           continue;
         }
@@ -297,6 +297,38 @@ HTMLWidgets.widget({
       graphDiv.on('plotly_deselect', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
+    } 
+    
+    
+    // send user input event data to dashR
+    // TODO: make this more consistent with Graph() props?
+    var dashRwidgets = window.dashRwidgets || {};
+    var dashRmode = typeof el.setProps === "function" &&
+                    typeof dashRwidgets.htmlwidget === "function";
+    if (dashRmode) {
+      graphDiv.on('plotly_relayout', function(d) {
+        el.setProps({"input_plotly_relayout": d});
+      });
+      graphDiv.on('plotly_hover', function(d) {
+        el.setProps({"input_plotly_hover": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_click', function(d) {
+        el.setProps({"input_plotly_click": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_selected', function(d) {
+        el.setProps({"input_plotly_selected": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_unhover', function(eventData) {
+        el.setProps({"input_plotly_hover": null});
+      });
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        el.setProps({"input_plotly_click": null});
+      });
+      // 'plotly_deselect' is code for doubleclick when in select mode
+      graphDiv.on('plotly_deselect', function(eventData) {
+        el.setProps({"input_plotly_selected": null});
+        el.setProps({"input_plotly_click": null});
       });
     } 
     
