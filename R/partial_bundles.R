@@ -1,17 +1,18 @@
 #' Use a partial bundle of plotly.js
 #'
+#' Leveraging plotly.js' partial bundles can lead to smaller file sizes 
+#' and faster rendering. The full list of available bundles, and the
+#' trace types that they support, are available [here](https://github.com/plotly/plotly.js/blob/master/dist/README.md) 
 #'
 #' @param p a plotly object.
-#' @param type name of the (partial) bundle. The default `'auto'` attempts to 
-#' @param version version number (e.g. 1.30.0). See [here](https://github.com/plotly/plotly.js/releases)
-#' for a list of valid versions and changelogs.
-#' @param local either "local", "cdn", or "rawgit".
+#' @param type name of the (partial) bundle. The default, `'auto'`, attempts to  
+#' find the smallest single bundle that can render `p`. If no single partial bundle,
+#' can render `p`, then the full bundle is used.
+#' @param local whether or not to download the partial bundle so that it can be
+#' viewed later without an internet connection.
 #' @param minified whether or not to use a minified js file (non-minified file can be useful for debugging plotly.js)
-#' @export
 #' @author Carson Sievert
-#' @references <https://github.com/plotly/plotly.js/blob/master/dist/README.md>
-#' @seealso `[plotly_bundle_info]()`
-#'
+#' @export
 #' @examples
 #'
 #' library(plotly)
@@ -129,8 +130,7 @@ plotlyjsBundle <- function(p) {
   p$dependencies[[plotlyjsBundleIDX(p)]]
 }
 
-
-# TODO: create this object from the dist/README.md
+# TODO: create this object in inst/plotlyjs.R from the dist/README.md
 bundleTraceMap <- list(
   basic = c(
     "scatter",
@@ -184,26 +184,3 @@ bundleTraceMap <- list(
     "candlestick"
   )
 )
-
-
-
-##' List trace types supported by a particular bundle
-##'
-##' @export
-#partial_bundle_info <- function() {
-#  for (i in seq_along(bundle_traces)) {
-#    bundle_name <- names(bundle_traces)[[i]]
-#    msg <- sprintf(
-#      "The '%s' bundle size is %s MB and contains the '%s' traces",
-#      bundle_name,
-#      round(file.info(bundle_file(bundle_name))$size / 1000000, 3),
-#      paste(bundle_traces[[i]], collapse = "', '")
-#    )
-#    message(msg)
-#  }
-#}
-#
-#bundle_file <- function(bundle = "basic") {
-#  bundle <- match.arg(bundle, names(bundle_traces))
-#  system.file("lib", paste0("plotly-", bundle, ".min.js"), package = "plotlyDepends")
-#}

@@ -9,17 +9,19 @@ partial_bundle(p, type = "auto", local = TRUE, minified = TRUE)
 \arguments{
 \item{p}{a plotly object.}
 
-\item{type}{name of the (partial) bundle. The default \code{'auto'} attempts to}
+\item{type}{name of the (partial) bundle. The default, \code{'auto'}, attempts to
+find the smallest single bundle that can render \code{p}. If no single partial bundle,
+can render \code{p}, then the full bundle is used.}
 
-\item{local}{either "local", "cdn", or "rawgit".}
+\item{local}{whether or not to download the partial bundle so that it can be
+viewed later without an internet connection.}
 
 \item{minified}{whether or not to use a minified js file (non-minified file can be useful for debugging plotly.js)}
-
-\item{version}{version number (e.g. 1.30.0). See \href{https://github.com/plotly/plotly.js/releases}{here}
-for a list of valid versions and changelogs.}
 }
 \description{
-Use a partial bundle of plotly.js
+Leveraging plotly.js' partial bundles can lead to smaller file sizes
+and faster rendering. The full list of available bundles, and the
+trace types that they support, are available \href{https://github.com/plotly/plotly.js/blob/master/dist/README.md}{here}
 }
 \examples{
 
@@ -39,12 +41,6 @@ save_widget <- function(p, f) {
 save_widget(p1, f1)
 save_widget(p2, f2)
 
-}
-\references{
-\url{https://github.com/plotly/plotly.js/blob/master/dist/README.md}
-}
-\seealso{
-\code{[plotly_bundle_info]()}
 }
 \author{
 Carson Sievert
