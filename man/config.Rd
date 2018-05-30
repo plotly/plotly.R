@@ -23,8 +23,10 @@ Set the default configuration for plotly
 }
 \examples{
 
-config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
-config(plot_ly(), locale = "de-CH")
+p <- plot_ly(x = rnorm(1000))
+
+config(p, displaylogo = FALSE, collaborate = FALSE)
+config(p, locale = "de")
 }
 \author{
 Carson Sievert
