@@ -446,7 +446,7 @@ locale_dependency <- function(locale) {
   }
   
   locale_dir <- depPath("plotlyjs", "locales")
-  locales_all <- sub("\\.js$", "", list.files(localeDir))
+  locales_all <- sub("\\.js$", "", list.files(locale_dir))
   if (!tolower(locale) %in% locales_all) {
     stop(
       "Invalid locale: '", locale, "'.\n\n",
