@@ -203,7 +203,7 @@ HTMLWidgets.widget({
       for (var i = 0; i < mapboxIDs.length; i++) {
         var id = mapboxIDs[i];
         var mapOpts = x.layout[id] || {};
-        var args = mapOpts._fitBounds || {}
+        var args = mapOpts._fitBounds || {};
         if (!args) {
           continue;
         }
