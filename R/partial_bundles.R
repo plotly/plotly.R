@@ -109,10 +109,9 @@ verify_partial_bundle <- function(p) {
   # (at this point, bundleType should never be 'auto' or 'main')
   missingTypes <- setdiff(types, bundleTraceMap[[bundleType]])
   if (length(missingTypes)) {
-    msg <- sprint(
-      "The '%s' bundle supports the following trace types: '%s'.\n\n",
-      "This plotly visualization contains the following trace types: '%s'",
-      bundle, paste(missingTypes, collapse = "', '"), paste(missingTypes, collapse = "', '")
+    msg <- sprintf(
+      "The '%s' bundle supports the following trace types: '%s'.\n\n This plotly visualization contains the following trace types: '%s'",
+      bundleType, paste(bundleTraceMap[[bundleType]], collapse = "', '"), paste(missingTypes, collapse = "', '")
     )
     stop(msg, call. = FALSE)
   }

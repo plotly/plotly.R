@@ -37,6 +37,15 @@ test_that("Can find the right bundle", {
   )
 })
 
+test_that("Throws an informative error if wrong bundle is specified", {
+  p1 <- plot_ly(z = ~volcano) %>% add_heatmap()
+  
+  expect_error(
+    partial_bundle(p1, type = "basic"),
+    "The 'basic' bundle supports the following trace types: 'scatter', 'bar', 'pie'"
+  )
+})
+
 test_that("Can specify the partial bundle", {
   skip_on_cran()
   
