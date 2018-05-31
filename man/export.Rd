@@ -21,7 +21,7 @@ jpeg/png/pdf arguments are passed along to \code{webshot::webshot()}.
 Otherwise, they are ignored.}
 }
 \description{
-Export a plotly graph to a static file
+This function is in the process of being deprecated. Use the \code{[orca]()} function instead.
 }
 \details{
 For SVG plots, a screenshot is taken via \code{webshot::webshot()}.
@@ -33,17 +33,6 @@ the RSelenium package is used for exporting WebGL plots.
 \dontrun{
 export(plot_ly(economics, x = ~date, y = ~pce))
 export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
-
-# svg/webp output or WebGL conversion can be done via RSelenium
-if (requireNamespace("RSelenium")) {
- rD <- RSelenium::rsDriver(browser = "chrome")
- export(
-   plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
- )
- export(
-   plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
- )
-}
 
 # If you can't get a selenium server running, another option is to
 # use Plotly.downloadImage() via htmlwidgets::onRender()...

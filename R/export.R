@@ -1,5 +1,7 @@
 #' Export a plotly graph to a static file
 #' 
+#' This function is in the process of being deprecated. Use the `[orca]()` function instead.
+#' 
 #' @details For SVG plots, a screenshot is taken via `webshot::webshot()`.
 #' Since `phantomjs` (and hence `webshot`) does not support WebGL,
 #' the RSelenium package is used for exporting WebGL plots. 
@@ -21,17 +23,6 @@
 #' export(plot_ly(economics, x = ~date, y = ~pce))
 #' export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
 #' 
-#' # svg/webp output or WebGL conversion can be done via RSelenium
-#' if (requireNamespace("RSelenium")) {
-#'  rD <- RSelenium::rsDriver(browser = "chrome")
-#'  export(
-#'    plot_ly(economics, x = ~date, y = ~pce), "plot.svg", rD
-#'  )
-#'  export(
-#'    plot_ly(economics, x = ~date, y = ~pce, z = ~pop), "yay.svg", rD
-#'  )
-#' }
-#' 
 #' # If you can't get a selenium server running, another option is to
 #' # use Plotly.downloadImage() via htmlwidgets::onRender()...
 #' # Downloading images won't work inside RStudio, but you can set the viewer
@@ -46,6 +37,11 @@
 #'  )
 #'}
 export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
+  message(
+    "The `export()` function is in the process of being deprecated. ",
+    "Please use the `orca()` function instead."
+  )
+  
   # infer the file type
   fileType <- tolower(tools::file_ext(file))
   if (!fileType %in% c('jpeg', 'png', 'webp', 'svg', 'pdf')) {
