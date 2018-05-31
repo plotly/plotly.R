@@ -1,6 +1,6 @@
 #' Export a plotly graph to a static file
 #' 
-#' This function is in the process of being deprecated. Use the `[orca]()` function instead.
+#' This function is in the process of being deprecated (use [orca] instead).
 #' 
 #' @details For SVG plots, a screenshot is taken via `webshot::webshot()`.
 #' Since `phantomjs` (and hence `webshot`) does not support WebGL,
@@ -11,36 +11,15 @@
 #' Valid extensions include 'jpeg' | 'png' | 'webp' | 'svg' | 'pdf'
 #' @param selenium used only when `p` is a WebGL plot or the output 
 #' format is 'webp' or 'svg'. Should be an object of class "rsClientServer"
-#' returned by `RSelenium::rsDriver` (see examples).
+#' returned by `RSelenium::rsDriver`.
 #' @param ... if `p` is non-WebGL and the output file format is 
 #' jpeg/png/pdf arguments are passed along to `webshot::webshot()`.
 #' Otherwise, they are ignored.
 #' @export
 #' @author Carson Sievert
-#' @examples 
-#' # The webshot package handles non-WebGL conversion to jpeg/png/pdf
-#' \dontrun{
-#' export(plot_ly(economics, x = ~date, y = ~pce))
-#' export(plot_ly(economics, x = ~date, y = ~pce), "plot.pdf")
-#' 
-#' # If you can't get a selenium server running, another option is to
-#' # use Plotly.downloadImage() via htmlwidgets::onRender()...
-#' # Downloading images won't work inside RStudio, but you can set the viewer
-#' # option to NULL to prompt your default web browser
-#' options(viewer = NULL)
-#' plot_ly(economics, x = ~date, y = ~pce, z = ~pop) %>%
-#'   htmlwidgets::onRender(
-#'    "function(el, x) {
-#'      var gd = document.getElementById(el.id); 
-#'      Plotly.downloadImage(gd, {format: 'png', width: 600, height: 400, filename: 'plot'});
-#'    }"
-#'  )
-#'}
+#'
 export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
-  message(
-    "The `export()` function is in the process of being deprecated. ",
-    "Please use the `orca()` function instead."
-  )
+  .Deprecated("orca")
   
   # infer the file type
   fileType <- tolower(tools::file_ext(file))

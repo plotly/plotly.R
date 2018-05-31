@@ -65,7 +65,6 @@ Suggests:
     sf,
     maptools,
     rgeos,
-    RSelenium,
     png,
     IRdisplay,
     processx
