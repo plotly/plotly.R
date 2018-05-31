@@ -4,12 +4,16 @@
 \alias{plot_geo}
 \title{Initiate a plotly-geo object}
 \usage{
-plot_geo(data = data.frame(), ...)
+plot_geo(data = data.frame(), ..., offline = FALSE)
 }
 \arguments{
 \item{data}{A data frame (optional).}
 
 \item{...}{arguments passed along to \code{\link[=plot_ly]{plot_ly()}}.}
+
+\item{offline}{whether or not to include geo assets so that the map
+can be viewed with or without an internet connection. The plotlyGeoAssets
+package is required for this functionality.}
 }
 \description{
 Use this function instead of \code{\link[=plot_ly]{plot_ly()}} to initialize

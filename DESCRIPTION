@@ -67,7 +67,8 @@ Suggests:
     rgeos,
     png,
     IRdisplay,
-    processx
+    processx,
+    plotlyGeoAssets
 Remotes:
   tidyverse/ggplot2
 LazyData: true
