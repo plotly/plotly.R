@@ -455,7 +455,6 @@ locale_dependency <- function(locale) {
     )
   }
   
-  
   # some locales rely on a base/main locale (e.g. de-CH relies on de)
   # https://codepen.io/etpinard/pen/pKvLVX?editors=1010
   scripts <- paste0(locale, ".js")
@@ -471,6 +470,7 @@ locale_dependency <- function(locale) {
     version = plotlyMainBundle()$version,
     src = list(file = locale_dir),
     script = scripts,
+    package = "plotly",
     all_files = FALSE
   )
 }
