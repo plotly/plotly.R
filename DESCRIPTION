@@ -65,9 +65,9 @@ Suggests:
     sf,
     maptools,
     rgeos,
-    RSelenium,
     png,
-    IRdisplay
+    IRdisplay,
+    processx
 Remotes:
   tidyverse/ggplot2
 LazyData: true
