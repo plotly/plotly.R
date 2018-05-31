@@ -37,15 +37,17 @@ the PLOTLY_MATHJAX_PATH environment variable to the location of MathJax.}
 hang during image generating are skipped.}
 }
 \description{
-The function requires the orca command-line utility,
+The function makes a system call to the orca command-line utility,
 see the installation instructions \href{https://github.com/plotly/orca#installation}{here}
 }
 \examples{
 
+\dontrun{
 p <- plot_ly(z = ~volcano) \%>\% add_surface()
 orca(p, "surface-plot.png")
 orca(p, "surface-plot.svg")
 orca(p, "surface-plot.pdf")
+}
 
 }
 \author{

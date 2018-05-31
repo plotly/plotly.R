@@ -1,6 +1,6 @@
 #' Static image export via orca
 #' 
-#' The function requires the orca command-line utility, 
+#' The function makes a system call to the orca command-line utility, 
 #' see the installation instructions [here](https://github.com/plotly/orca#installation)
 #' 
 #' @param p a plotly object.
@@ -23,10 +23,12 @@
 #' @author Carson Sievert
 #' @examples
 #' 
+#' \dontrun{
 #' p <- plot_ly(z = ~volcano) %>% add_surface()
 #' orca(p, "surface-plot.png")
 #' orca(p, "surface-plot.svg")
 #' orca(p, "surface-plot.pdf")
+#' }
 #' 
 
 orca <- function(p, file = "plot.png", format = tools::file_ext(file), 
@@ -49,7 +51,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
   
   args <- c(
-    "graph", plotly:::to_JSON(b$x[c("data", "layout")]), 
+    "graph", to_JSON(b$x[c("data", "layout")]), 
     "-o", file,
     "--format", format,
     "--plotlyjs", plotlyjs_file,
