@@ -469,7 +469,7 @@ locale_dependency <- function(locale) {
     name = paste0("plotly-locale-", locale),
     version = plotlyMainBundle()$version,
     src = list(file = locale_dir),
-    script = scripts,
+    script = tolower(scripts),
     all_files = FALSE
   )
 }
