@@ -470,7 +470,6 @@ locale_dependency <- function(locale) {
     version = plotlyMainBundle()$version,
     src = list(file = locale_dir),
     script = scripts,
-    package = "plotly",
     all_files = FALSE
   )
 }
