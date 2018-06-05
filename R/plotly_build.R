@@ -189,7 +189,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text", "key", "fillcolor", "name"
+      ".plotlyGroupIndex", "text", "key", "fillcolor", "name", "legendgroup"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -210,11 +210,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
         splitVars <- builtData[isSplit]
-        traceIndex <- Reduce(paste2, splitVars)
-        if (!is.null(trace$name)) {
-          traceIndex <- paste2(traceIndex, trace$name)
-        }
-        builtData[[".plotlyTraceIndex"]] <- traceIndex
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, splitVars)
         # in registerFrames() we need to strip the frame from .plotlyTraceIndex
         # so keep track of which variable it is...
         trace$frameOrder <- which(names(splitVars) %in% "frame")
