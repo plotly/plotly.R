@@ -34,8 +34,8 @@ test_that("can override name argument", {
 
 test_that("doesn't break old behavior", {
   # from https://community.plot.ly/t/manual-color-bug/10479
-  density1 <- density(diamonds[diamonds$cut %in% "Fair",])
-  density2 <- density(diamonds[diamonds$cut %in% "Ideal",])
+  density1 <- density(diamonds[diamonds$cut %in% "Fair", ]$carat)
+  density2 <- density(diamonds[diamonds$cut %in% "Ideal",]$carat)
   
   l <- plot_ly(x = ~density1$x, y = ~density1$y, type = 'scatter', mode = 'lines', name = 'Fair cut', fill = 'tozeroy',
           fillcolor = 'rgba(168, 216, 234, 0.5)',
