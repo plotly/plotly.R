@@ -375,7 +375,7 @@ test_that("sf works with crosstalk", {
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))
   # shared data will make the polygons "query-able"
-  ncsd <- SharedData$new(nc)
+  ncsd <- crosstalk::SharedData$new(nc)
   p <- ggplot(ncsd) +
     geom_sf(aes(fill = AREA, text = paste0(NAME, "\n", "FIPS: ", FIPS))) +
     ggthemes::theme_map()
