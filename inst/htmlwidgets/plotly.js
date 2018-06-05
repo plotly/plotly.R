@@ -471,8 +471,10 @@ HTMLWidgets.widget({
           }
         }
       };
-      
-      graphDiv.on(x.highlight.on, debounce(turnOn, x.highlight.debounce));
+      if (x.highlight.debounce > 0) {
+        turnOn = debounce(turnOn, x.highlight.debounce);
+      }
+      graphDiv.on(x.highlight.on, turnOn);
       
       graphDiv.on(x.highlight.off, function turnOff(e) {
         // remove any visual clues
