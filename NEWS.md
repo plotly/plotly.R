@@ -48,13 +48,14 @@
 ### `plot_ly()` specific fixes
 
 * The `limits` argument of `colorbar()` wasn't being applied to `line.color`/`line.cmin`/`line.cmax` (#1236).
+* The `legendgroup` can now properly map data values (#1148).
 
 ### Other fixes relevant for all **plotly** objects
 
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (#1218).
+* Resizing behavior, after updating `height`/`width` via **shiny** reactive values, is now correct (#1068).
 * Fixed algorithm for coercing the proposed layout to the plot schema (#1156).
 * `add_*()` no longer inherits `crosstalk::SharedData` key information when `inherit = FALSE` (#1242).
-
 
 
 # 4.7.1
