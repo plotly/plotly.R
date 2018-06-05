@@ -7,7 +7,7 @@
 highlight(p, on = "plotly_click", off, persistent = getOption("persistent",
   FALSE), dynamic = FALSE, color = NULL, selectize = FALSE,
   defaultValues = NULL, opacityDim = getOption("opacityDim", 0.2),
-  selected = attrs_selected(), ...)
+  selected = attrs_selected(), debounce = 0, ...)
 }
 \arguments{
 \item{p}{a plotly visualization.}
@@ -55,6 +55,11 @@ These values should match the key attribute.}
 opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{selected}{attributes of the selection, see \code{\link[=attrs_selected]{attrs_selected()}}.}
+
+\item{debounce}{amount of time to wait before firing an event (in milliseconds).
+The default of 0 means do not debounce at all.
+Debouncing is mainly useful when \code{on = "plotly_hover"} to avoid firing too many events
+when users clickly move the mouse over relevant graphical marks.}
 
 \item{...}{currently not supported.}
 }

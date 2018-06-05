@@ -166,10 +166,15 @@ HTMLWidgets.widget({
       
     } else {
       
+      // new x data could contain a new height/width...
+      // attach to instance so that resize logic knows about the new size
+      instance.width = x.layout.width || instance.width;
+      instance.height = x.layout.height || instance.height;
+      
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
       // a new webgl context
       // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
-      
+
       // TODO: restore crosstalk selections?
       Plotly.purge(graphDiv);
       // TODO: why is this necessary to get crosstalk working?
@@ -199,11 +204,11 @@ HTMLWidgets.widget({
       // https://www.mapbox.com/mapbox-gl-js/example/fitbounds/
       // so we do this manually...
       // TODO: make sure this triggers on a redraw and relayout as well as on initial draw
-      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox;
+      var mapboxIDs = graphDiv._fullLayout._subplots.mapbox || [];
       for (var i = 0; i < mapboxIDs.length; i++) {
         var id = mapboxIDs[i];
         var mapOpts = x.layout[id] || {};
-        var args = mapOpts._fitBounds || {}
+        var args = mapOpts._fitBounds || {};
         if (!args) {
           continue;
         }
@@ -297,6 +302,38 @@ HTMLWidgets.widget({
       graphDiv.on('plotly_deselect', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+      });
+    } 
+    
+    
+    // send user input event data to dashR
+    // TODO: make this more consistent with Graph() props?
+    var dashRwidgets = window.dashRwidgets || {};
+    var dashRmode = typeof el.setProps === "function" &&
+                    typeof dashRwidgets.htmlwidget === "function";
+    if (dashRmode) {
+      graphDiv.on('plotly_relayout', function(d) {
+        el.setProps({"input_plotly_relayout": d});
+      });
+      graphDiv.on('plotly_hover', function(d) {
+        el.setProps({"input_plotly_hover": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_click', function(d) {
+        el.setProps({"input_plotly_click": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_selected', function(d) {
+        el.setProps({"input_plotly_selected": eventDataWithKey(d)});
+      });
+      graphDiv.on('plotly_unhover', function(eventData) {
+        el.setProps({"input_plotly_hover": null});
+      });
+      graphDiv.on('plotly_doubleclick', function(eventData) {
+        el.setProps({"input_plotly_click": null});
+      });
+      // 'plotly_deselect' is code for doubleclick when in select mode
+      graphDiv.on('plotly_deselect', function(eventData) {
+        el.setProps({"input_plotly_selected": null});
+        el.setProps({"input_plotly_click": null});
       });
     } 
     
@@ -428,7 +465,7 @@ HTMLWidgets.widget({
       selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
-      graphDiv.on(x.highlight.on, function turnOn(e) {
+      var turnOn = function(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
           // Keys are group names, values are array of selected keys from group.
@@ -438,7 +475,11 @@ HTMLWidgets.widget({
             }
           }
         }
-      });
+      };
+      if (x.highlight.debounce > 0) {
+        turnOn = debounce(turnOn, x.highlight.debounce);
+      }
+      graphDiv.on(x.highlight.on, turnOn);
       
       graphDiv.on(x.highlight.off, function turnOff(e) {
         // remove any visual clues
@@ -846,3 +887,25 @@ function removeBrush(el) {
     outlines[i].remove();
   }
 }
+
+
+// https://davidwalsh.name/javascript-debounce-function
+
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};

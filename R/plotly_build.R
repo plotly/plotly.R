@@ -189,7 +189,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text", "key", "fillcolor"
+      ".plotlyGroupIndex", "text", "key", "fillcolor", "name", "legendgroup"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -205,16 +205,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
       # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor", "name") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
         splitVars <- builtData[isSplit]
-        traceIndex <- Reduce(paste2, splitVars)
-        if (!is.null(trace$name)) {
-          traceIndex <- paste2(traceIndex, trace$name)
-        }
-        builtData[[".plotlyTraceIndex"]] <- traceIndex
+        builtData[[".plotlyTraceIndex"]] <- Reduce(paste2, splitVars)
         # in registerFrames() we need to strip the frame from .plotlyTraceIndex
         # so keep track of which variable it is...
         trace$frameOrder <- which(names(splitVars) %in% "frame")
@@ -374,6 +370,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
   p <- verify_attr_spec(p)
+  
+  # if a partial bundle was specified, make sure it supports the visualization
+  p <- verify_partial_bundle(p)
   
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
@@ -977,7 +976,7 @@ traceify <- function(dat, x = NULL) {
   new_dat <- list()
   for (j in seq_along(lvls)) {
     new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
-    new_dat[[j]]$name <- lvls[j]
+    new_dat[[j]]$name <- new_dat[[j]]$name %||% lvls[j]
   }
   return(new_dat)
 }

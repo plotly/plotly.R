@@ -43,7 +43,8 @@ Imports:
     rlang,
     crosstalk,
     purrr,
-    data.table
+    data.table,
+    promises
 Suggests:
     MASS,
     maps,
@@ -52,7 +53,7 @@ Suggests:
     testthat,
     knitr,
     devtools,
-    shiny (>= 0.14),
+    shiny (>= 1.1.0),
     curl,
     rmarkdown,
     Rserve,
@@ -65,9 +66,9 @@ Suggests:
     sf,
     maptools,
     rgeos,
-    RSelenium,
     png,
-    IRdisplay
+    IRdisplay,
+    processx
 LazyData: true
 RoxygenNote: 6.0.1.9000
 Encoding: UTF-8

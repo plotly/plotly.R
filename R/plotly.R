@@ -23,6 +23,9 @@
 #' (e.g. `plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))`).
 #' @param type A character string specifying the trace type (e.g. `"scatter"`, `"bar"`, `"box"`, etc).
 #' If specified, it *always* creates a trace, otherwise 
+#' @param name Values mapped to the trace's name attribute. Since a trace can 
+#' only have one name, this argument acts very much like `split` in that it 
+#' creates one trace for every unique value.
 #' @param color Values mapped to relevant 'fill-color' attribute(s) 
 #' (e.g. [fillcolor](https://plot.ly/r/reference#scatter-fillcolor), 
 #' [marker.color](https://plot.ly/r/reference#scatter-marker-color), 
@@ -124,7 +127,7 @@
 #' 
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = NULL, 
+plot_ly <- function(data = data.frame(), ..., type = NULL, name,
                     color, colors = NULL, alpha = NULL, 
                     stroke, strokes = NULL, alpha_stroke = 1,
                     size, sizes = c(10, 100), 
@@ -160,6 +163,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   
   # tack on variable mappings
+  attrs$name <- if (!missing(name)) name
   attrs$color <- if (!missing(color)) color
   attrs$stroke <- if (!missing(stroke)) stroke
   attrs$size <- if (!missing(size)) size
@@ -193,10 +197,10 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
     # we always deal with a _list_ of traces and _list_ of layouts 
     # since they can each have different data
     layout = list(
-        width = width, 
-        height = height,
-        # sane margin defaults (mainly for RStudio)
-        margin = list(b = 40, l = 60, t = 25, r = 10)
+      width = width, 
+      height = height,
+      # sane margin defaults (mainly for RStudio)
+      margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     source = source
   )
@@ -405,6 +409,7 @@ as_widget <- function(x, ...) {
     dependencies = c(
       list(typedArrayPolyfill()),
       crosstalk::crosstalkLibs(),
+      list(plotlyHtmlwidgetsCSS()),
       list(plotlyMainBundle())
     )
   )
@@ -414,7 +419,8 @@ typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
     "typedarray", "0.1",
     src = depPath("typedarray"),
-    script = "typedarray.min.js"
+    script = "typedarray.min.js",
+    all_files = FALSE
   )
 }
 
@@ -422,10 +428,55 @@ typedArrayPolyfill <- function() {
 # and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
-    "plotlyjs", "1.37.1",
+    "plotly-main", 
+    version = "1.38.2",
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
-    stylesheet = "plotly-htmlwidgets.css"
+    all_files = FALSE
+  )
+}
+
+plotlyHtmlwidgetsCSS <- function() {
+  htmltools::htmlDependency(
+    "plotly-htmlwidgets-css", 
+    version = plotlyMainBundle()$version,
+    src = depPath("plotlyjs"),
+    stylesheet = "plotly-htmlwidgets.css",
+    all_files = FALSE
+  )
+}
+
+locale_dependency <- function(locale) {
+  if (!is.character(locale) || length(locale) != 1) {
+    stop("locale must be a character string (vector of length 1)", call. = FALSE)
+  }
+  
+  locale_dir <- depPath("plotlyjs", "locales")
+  locales_all <- sub("\\.js$", "", list.files(locale_dir))
+  if (!tolower(locale) %in% locales_all) {
+    stop(
+      "Invalid locale: '", locale, "'.\n\n",
+      sprintf("Supported locales include: '%s'", paste(locales_all, collapse = "', '")),
+      call. = FALSE
+    )
+  }
+  
+  # some locales rely on a base/main locale (e.g. de-CH relies on de)
+  # https://codepen.io/etpinard/pen/pKvLVX?editors=1010
+  scripts <- paste0(locale, ".js")
+  if (grepl("-", locale)) {
+    locale_main <- strsplit(locale, "-")[[1]][1]
+    if (locale_main %in% locales_all) {
+      scripts <- c(scripts, paste0(locale_main, ".js"))
+    }
+  }
+  
+  htmltools::htmlDependency(
+    name = paste0("plotly-locale-", locale),
+    version = plotlyMainBundle()$version,
+    src = list(file = locale_dir),
+    script = tolower(scripts),
+    all_files = FALSE
   )
 }
 
