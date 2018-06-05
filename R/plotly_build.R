@@ -189,7 +189,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       dataArrayAttrs, special_attrs(trace), npscales(), "frame",
       # for some reason, text isn't listed as a data array in some traces
       # I'm looking at you scattergeo...
-      ".plotlyGroupIndex", "text", "key", "fillcolor"
+      ".plotlyGroupIndex", "text", "key", "fillcolor", "name"
     )
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
@@ -205,7 +205,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       isAsIs <- vapply(builtData, function(x) inherits(x, "AsIs"), logical(1))
       isDiscrete <- vapply(builtData, is.discrete, logical(1))
       # note: can only have one linetype per trace
-      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor") |
+      isSplit <- names(builtData) %in% c("split", "linetype", "frame", "fillcolor", "name") |
         !isAsIs & isDiscrete & names(builtData) %in% c("symbol", "color")
       if (any(isSplit)) {
         paste2 <- function(x, y) if (identical(x, y)) x else paste(x, y, sep = br())
@@ -980,7 +980,7 @@ traceify <- function(dat, x = NULL) {
   new_dat <- list()
   for (j in seq_along(lvls)) {
     new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
-    new_dat[[j]]$name <- lvls[j]
+    new_dat[[j]]$name <- new_dat[[j]]$name %||% lvls[j]
   }
   return(new_dat)
 }

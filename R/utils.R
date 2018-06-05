@@ -492,6 +492,10 @@ verify_attr <- function(proposed, schema) {
       proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
+    if (length(proposed$name) > 0) {
+      proposed$name <- uniq(proposed$name)
+    }
+    
     # do the same for "sub-attributes"
     if (identical(role, "object")) {
       proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
