@@ -23,6 +23,9 @@
 #' (e.g. `plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))`).
 #' @param type A character string specifying the trace type (e.g. `"scatter"`, `"bar"`, `"box"`, etc).
 #' If specified, it *always* creates a trace, otherwise 
+#' @param name Values mapped to the trace's name attribute. Since a trace can 
+#' only have one name, this argument acts very much like `split` in that it 
+#' creates one trace for every unique value.
 #' @param color Values mapped to relevant 'fill-color' attribute(s) 
 #' (e.g. [fillcolor](https://plot.ly/r/reference#scatter-fillcolor), 
 #' [marker.color](https://plot.ly/r/reference#scatter-marker-color), 
@@ -124,7 +127,7 @@
 #' 
 #' }
 #' 
-plot_ly <- function(data = data.frame(), ..., type = NULL, 
+plot_ly <- function(data = data.frame(), ..., type = NULL, name,
                     color, colors = NULL, alpha = NULL, 
                     stroke, strokes = NULL, alpha_stroke = 1,
                     size, sizes = c(10, 100), 
@@ -160,6 +163,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
   }
   
   # tack on variable mappings
+  attrs$name <- if (!missing(name)) name
   attrs$color <- if (!missing(color)) color
   attrs$stroke <- if (!missing(stroke)) stroke
   attrs$size <- if (!missing(size)) size
@@ -193,10 +197,10 @@ plot_ly <- function(data = data.frame(), ..., type = NULL,
     # we always deal with a _list_ of traces and _list_ of layouts 
     # since they can each have different data
     layout = list(
-        width = width, 
-        height = height,
-        # sane margin defaults (mainly for RStudio)
-        margin = list(b = 40, l = 60, t = 25, r = 10)
+      width = width, 
+      height = height,
+      # sane margin defaults (mainly for RStudio)
+      margin = list(b = 40, l = 60, t = 25, r = 10)
     ),
     source = source
   )
