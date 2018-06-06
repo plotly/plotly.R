@@ -4,7 +4,8 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL)
+config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL,
+  mathjax = FALSE)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -17,6 +18,13 @@ config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL)
 \item{cloud}{include the send data to cloud button?}
 
 \item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
+
+\item{mathjax}{whether or not to add \href{https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax}{MathJax rendering support}.
+Note that plotly uses SVG-based mathjax rendering which won't play nicely with
+HTML-based rendering (e.g., rmarkdown documents). In this case, you may want to
+consider \code{<iframe>}-ing your plotly graph(s) into the larger document.
+Currently mathjax is loaded externally (meaning an internet
+connection is needed to view the graph). Future versions may not have this requirement.}
 }
 \description{
 Set the default configuration for plotly
@@ -31,16 +39,18 @@ p <- plot_ly(x = x, y = rnorm(length(x))) \%>\%
 # remove the plotly logo and collaborate button from modebar
 config(p, displaylogo = FALSE, collaborate = FALSE)
 
+# enable mathjax
+# see more examples at https://plot.ly/r/LaTeX/
+plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) \%>\%
+  layout(title = "$\\\\text{Some mathjax: }\\\\alpha+\\\\beta x$") \%>\%
+  config(mathjax = TRUE)
+
 # japanese
 config(p, locale = "ja")
 # german
 config(p, locale = "de")
-# swiss-german
-config(p, locale = "de-CH")
 # spanish
 config(p, locale = "es")
-# french
-config(p, locale = "fr")
 # chinese
 config(p, locale = "zh-CN")
 

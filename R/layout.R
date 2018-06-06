@@ -91,6 +91,12 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
 #' @param cloud include the send data to cloud button?
 #' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
+#' @param mathjax whether or not to add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
+#' Note that plotly uses SVG-based mathjax rendering which won't play nicely with 
+#' HTML-based rendering (e.g., rmarkdown documents). In this case, you may want to 
+#' consider `<iframe>`-ing your plotly graph(s) into the larger document.
+#' Currently mathjax is loaded externally (meaning an internet
+#' connection is needed to view the graph). Future versions may not have this requirement.
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -103,16 +109,18 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' # remove the plotly logo and collaborate button from modebar
 #' config(p, displaylogo = FALSE, collaborate = FALSE)
 #' 
+#' # enable mathjax
+#' # see more examples at https://plot.ly/r/LaTeX/
+#' plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) %>%
+#'   layout(title = "$\\text{Some mathjax: }\\alpha+\\beta x$") %>%
+#'   config(mathjax = TRUE)
+#' 
 #' # japanese
 #' config(p, locale = "ja")
 #' # german
 #' config(p, locale = "de")
-#' # swiss-german
-#' config(p, locale = "de-CH")
 #' # spanish
 #' config(p, locale = "es")
-#' # french
-#' config(p, locale = "fr")
 #' # chinese
 #' config(p, locale = "zh-CN")
 #' 
@@ -129,7 +137,7 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
   
   if (!identical(mathjax, FALSE)) {
     p$dependencies <- c(
-      list(mathjax_dependency()),
+      list(mathjax_cdn()),
       p$dependencies
     )
   }
