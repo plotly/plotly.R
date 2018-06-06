@@ -368,3 +368,22 @@ test_that("animation button can be customized", {
   expect_true(menu$font$color == "white")
   expect_true(menu$buttons[[1]]$label == "Custom")
 })
+
+
+test_that("sf works with crosstalk", {
+  skip_if_not_installed("sf")
+  
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  # shared data will make the polygons "query-able"
+  ncsd <- crosstalk::SharedData$new(nc)
+  p <- ggplot(ncsd) +
+    geom_sf(aes(fill = AREA, text = paste0(NAME, "\n", "FIPS: ", FIPS))) +
+    ggthemes::theme_map()
+  gg <- ggplotly(p, tooltip = "text")
+  d <- gg$x$data
+  for (i in seq_along(d)) {
+    if (!isTRUE(d[["_isGraticule"]])) next
+    expect_false(is.null(d[[i]]$key))
+    expect_false(is.null(d[[i]]$set))
+  }
+})

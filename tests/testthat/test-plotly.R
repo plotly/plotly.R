@@ -251,3 +251,31 @@ test_that("Vector of redundant text is reduced to string when hoveron=fills", {
     d[[2]]$text == '<br> <b>Example</b> of <em>custom</em> hover text <br> B <br> xyz <br>.'
   )
 })
+
+
+test_that("Can map data to legendgroup", {
+  d <- data.frame(
+    x = 1:100,
+    y = runif(100),
+    group = letters[1:5]
+  )
+  
+  l <- plot_ly(data = d, x = ~x, y = ~y) %>%
+    add_bars(color = ~group,  legendgroup = ~group) %>%
+    add_markers(color = ~group, legendgroup = ~group) %>%
+    plotly_build()
+  
+  expect_length(l$x$data, 10)
+  
+  markers <- compact(lapply(l$x$data, function(tr) if (tr$type == "scatter") tr))
+  for (i in seq_along(markers)) {
+    expect_length(markers[[i]]$legendgroup, 1)
+    expect_true(markers[[i]]$legendgroup == letters[[i]])
+  }
+  
+  bars <- compact(lapply(l$x$data, function(tr) if (tr$type == "bar") tr))
+  for (i in seq_along(bars)) {
+    expect_length(bars[[i]]$legendgroup, 1)
+    expect_true(bars[[i]]$legendgroup == letters[[i]])
+  }
+})

@@ -4,7 +4,7 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = NULL, color, colors = NULL,
+plot_ly(data = data.frame(), ..., type = NULL, name, color, colors = NULL,
   alpha = NULL, stroke, strokes = NULL, alpha_stroke = 1, size,
   sizes = c(10, 100), span, spans = c(1, 20), symbol, symbols = NULL,
   linetype, linetypes = NULL, split, frame, width = NULL, height = NULL,
@@ -21,6 +21,10 @@ provided at this level may override other arguments
 
 \item{type}{A character string specifying the trace type (e.g. \code{"scatter"}, \code{"bar"}, \code{"box"}, etc).
 If specified, it \emph{always} creates a trace, otherwise}
+
+\item{name}{Values mapped to the trace's name attribute. Since a trace can
+only have one name, this argument acts very much like \code{split} in that it
+creates one trace for every unique value.}
 
 \item{color}{Values mapped to relevant 'fill-color' attribute(s)
 (e.g. \href{https://plot.ly/r/reference#scatter-fillcolor}{fillcolor},

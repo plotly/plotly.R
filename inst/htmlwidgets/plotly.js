@@ -166,10 +166,15 @@ HTMLWidgets.widget({
       
     } else {
       
+      // new x data could contain a new height/width...
+      // attach to instance so that resize logic knows about the new size
+      instance.width = x.layout.width || instance.width;
+      instance.height = x.layout.height || instance.height;
+      
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
       // a new webgl context
       // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
-      
+
       // TODO: restore crosstalk selections?
       Plotly.purge(graphDiv);
       // TODO: why is this necessary to get crosstalk working?
@@ -460,7 +465,7 @@ HTMLWidgets.widget({
       selection.on("change", selectionChange);
       
       // Set a crosstalk variable selection value, triggering an update
-      graphDiv.on(x.highlight.on, function turnOn(e) {
+      var turnOn = function(e) {
         if (e) {
           var selectedKeys = pointsToKeys(e.points);
           // Keys are group names, values are array of selected keys from group.
@@ -470,7 +475,11 @@ HTMLWidgets.widget({
             }
           }
         }
-      });
+      };
+      if (x.highlight.debounce > 0) {
+        turnOn = debounce(turnOn, x.highlight.debounce);
+      }
+      graphDiv.on(x.highlight.on, turnOn);
       
       graphDiv.on(x.highlight.off, function turnOff(e) {
         // remove any visual clues
@@ -878,3 +887,25 @@ function removeBrush(el) {
     outlines[i].remove();
   }
 }
+
+
+// https://davidwalsh.name/javascript-debounce-function
+
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
