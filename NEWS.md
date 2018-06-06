@@ -22,7 +22,7 @@
 * The `plot_geo()` function gains a `offline` argument for rendering `"scattergeo"` traces with or without an internet connection (#356). Leveraging this argument requires the new **plotlyGeoAssets** package.
 * Instead of an error, `ggplotly(NULL, "message")` and `plotly_build(NULL, "message")` now returns `htmltools::div("message")`, making it easier to relay messages in shiny when data isn't yet ready to plot (#1116).
 * The `animation_button()` function gains a `label` argument, making it easier to control the label of an animation button generated through the `frame` API (#1205).
-* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209).
+* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209). For an example, run `plotly_example("shiny", "async")`.
 
 ## CHANGES
 
@@ -36,6 +36,7 @@
 
 ### Other changes relevant for all **plotly** objects
 
+* All axis objects now default to `automargin = TRUE`. The majority of the time this should make axis labels more readable, but may have un-intended consequences in some rare cases (#1252). 
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (#985).
 
 ## BUG FIXES
