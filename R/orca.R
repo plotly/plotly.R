@@ -71,19 +71,3 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   try_library("processx", "orca")
   invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE))
 }
-
-
-mathjax_path <- function() {
-  if (is_rstudio()) {
-    try_library("rmarkdown", "orca")
-    return(getFromNamespace("pandoc_mathjax_local_path", "rmarkdown")())
-  }
-  path <- Sys.getenv("PLOTLY_MATHJAX_PATH", Sys.getenv("RMARKDOWN_MATHJAX_PATH", NA))
-  if (!is.na(path)) return(normalizePath(path, mustWork = TRUE))
-  stop(
-    "Please set either the RMARKDOWN_MATHJAX_PATH or PLOTLY_MATHJAX_PATH ",
-    "environment variable to the location of MathJax. ",
-    "On Linux systems you can also install MathJax using your system package manager.",
-    call. = FALSE
-  )
-}

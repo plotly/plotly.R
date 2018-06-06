@@ -117,7 +117,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = FALSE) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -125,6 +125,13 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {
       list(locale_dependency(locale))
     )
     p$x$config$locale <- locale
+  }
+  
+  if (!identical(mathjax, FALSE)) {
+    p$dependencies <- c(
+      list(mathjax_dependency()),
+      p$dependencies
+    )
   }
   
   p$x$config <- modify_list(p$x$config, list(...))
