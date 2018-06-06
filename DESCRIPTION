@@ -69,6 +69,7 @@ Suggests:
     png,
     IRdisplay,
     processx,
+    plotlyGeoAssets,
     rstudioapi
 Remotes:
   tidyverse/ggplot2
