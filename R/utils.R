@@ -1025,3 +1025,11 @@ try_library <- function(pkg, fun = NULL) {
 is_rstudio <- function() {
   requireNamespace('rstudioapi', quietly = TRUE) && rstudioapi::isAvailable()
 }
+
+
+# TODO: warn Windows users to use 1.2.x in some scenarios?
+# https://github.com/ropensci/plotly/issues/1211
+rstudio_version <- function() {
+  if (!is_rstudio()) return(NA)
+  rstudioapi::versionInfo()$version
+}
