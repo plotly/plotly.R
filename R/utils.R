@@ -1023,5 +1023,5 @@ try_library <- function(pkg, fun = NULL) {
 }
 
 is_rstudio <- function() {
-  identical(Sys.getenv("RSTUDIO", NA), "1")
+  requireNamespace('rstudioapi', quietly = TRUE) && rstudioapi::isAvailable()
 }

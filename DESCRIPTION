@@ -68,7 +68,8 @@ Suggests:
     rgeos,
     png,
     IRdisplay,
-    processx
+    processx,
+    rstudioapi
 Remotes:
   tidyverse/ggplot2
 LazyData: true
