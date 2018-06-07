@@ -91,12 +91,13 @@ print.plotly_data <- function(x, ...) {
 #' Shared data
 #' 
 #' This is simply a wrapper around `crosstalk::SharedData$new()` to make it easier
-#' to use and explain conceptually.
+#' to use and explain conceptually. It also makes it more discoverable if one
+#' is already aware of [highlight].
 #' 
 #' @param ... arguments passed to crosstalk::SharedData$new()
 #' @export
 #' @return An object of class [crosstalk::SharedData]
-shared_data <- function(...) {
+highlight_unit <- function(...) {
   crosstalk::SharedData$new(...)
 }
 
