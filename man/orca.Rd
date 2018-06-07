@@ -23,9 +23,10 @@ Applies to all output images.}
 \item{height}{Sets the image height. If not set, defaults to \code{layout.height} value.
 Applies to all output images.}
 
-\item{mathjax}{whether or not to specify a path to mathjax (required to export LaTeX characters).
-This should 'just work' in RStudio, but outside RStudio, you may have to set
-the PLOTLY_MATHJAX_PATH environment variable to the location of MathJax.}
+\item{mathjax}{whether or not to include MathJax (required to render \link{TeX}).
+If \code{TRUE}, the PLOTLY_MATHJAX_PATH environment variable must be set and point
+to the location of MathJax (this variable is also used to render \link{TeX} in
+interactive graphs, see \link{config}).}
 
 \item{parallel_limit}{Sets the limit of parallel tasks run.}
 
@@ -44,9 +45,7 @@ see the installation instructions \href{https://github.com/plotly/orca#installat
 
 \dontrun{
 p <- plot_ly(z = ~volcano) \%>\% add_surface()
-orca(p, "surface-plot.png")
 orca(p, "surface-plot.svg")
-orca(p, "surface-plot.pdf")
 }
 
 }
