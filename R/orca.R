@@ -11,9 +11,10 @@
 #' Applies to all output images.
 #' @param height Sets the image height. If not set, defaults to `layout.height` value. 
 #' Applies to all output images.
-#' @param mathjax whether or not to specify a path to mathjax (required to export LaTeX characters).
-#' This should 'just work' in RStudio, but outside RStudio, you may have to set 
-#' the PLOTLY_MATHJAX_PATH environment variable to the location of MathJax.
+#' @param mathjax whether or not to include MathJax (required to render [TeX]).
+#' If `TRUE`, the PLOTLY_MATHJAX_PATH environment variable must be set and point 
+#' to the location of MathJax (this variable is also used to render [TeX] in 
+#' interactive graphs, see [config]).
 #' @param parallel_limit Sets the limit of parallel tasks run.
 #' @param verbose Turn on verbose logging on stdout.
 #' @param debug Starts app in debug mode and turn on verbose logs on stdout.
@@ -25,9 +26,7 @@
 #' 
 #' \dontrun{
 #' p <- plot_ly(z = ~volcano) %>% add_surface()
-#' orca(p, "surface-plot.png")
 #' orca(p, "surface-plot.svg")
-#' orca(p, "surface-plot.pdf")
 #' }
 #' 
 
@@ -65,7 +64,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   if (!is.null(height)) args <- c(args, "--height", height)
   if (!is.null(parallel_limit)) args <- c(args, "--parallel-limit", parallel_limit)
   if (!is.na(mapbox_token())) args <- c(args, "--mapbox-access-token", mapbox_token())
-  if (isTRUE(mathjax)) args <- c(args, "--mathjax", mathjax_path())
+  if (isTRUE(mathjax)) args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
      
   # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
   try_library("processx", "orca")

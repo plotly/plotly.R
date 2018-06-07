@@ -20,12 +20,12 @@ config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL,
 \item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
 
 \item{mathjax}{add \href{https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax}{MathJax rendering support}.
-If \code{cdn}, mathjax is loaded externally (meaning an internet connection is needed to
-view the graph). If \code{local}, mathjax must be available locally. IMPORTANT: plotly uses
-SVG-based mathjax rendering which doesn't play nicely with HTML-based rendering
-(e.g., rmarkdown documents). In this case, you may want to consider \code{<iframe>}-ing
-your plotly graph(s) into the larger document.
-See \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here} for an example.}
+If \code{"cdn"}, mathjax is loaded externally (meaning an internet connection is needed for
+TeX rendering). If \code{"local"}, the PLOTLY_MATHJAX_PATH environment variable must be
+set to the location (a local file path) of MathJax. IMPORTANT: plotly uses SVG-based
+mathjax rendering which doesn't play nicely with HTML-based rendering (e.g., rmarkdown documents).
+In this case, consider \code{<iframe>}-ing your plotly graph(s) into the larger document
+(see \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here} for an example).}
 }
 \description{
 Set the default configuration for plotly

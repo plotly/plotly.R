@@ -92,12 +92,12 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @param cloud include the send data to cloud button?
 #' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
 #' @param mathjax add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
-#' If `cdn`, mathjax is loaded externally (meaning an internet connection is needed to 
-#' view the graph). If `local`, mathjax must be available locally. IMPORTANT: plotly uses 
-#' SVG-based mathjax rendering which doesn't play nicely with HTML-based rendering 
-#' (e.g., rmarkdown documents). In this case, you may want to consider `<iframe>`-ing 
-#' your plotly graph(s) into the larger document. 
-#' See [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for an example.
+#' If `"cdn"`, mathjax is loaded externally (meaning an internet connection is needed for 
+#' TeX rendering). If `"local"`, the PLOTLY_MATHJAX_PATH environment variable must be
+#' set to the location (a local file path) of MathJax. IMPORTANT: plotly uses SVG-based 
+#' mathjax rendering which doesn't play nicely with HTML-based rendering (e.g., rmarkdown documents). 
+#' In this case, consider `<iframe>`-ing your plotly graph(s) into the larger document 
+#' (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for an example).
 #' @author Carson Sievert
 #' @export
 #' @examples

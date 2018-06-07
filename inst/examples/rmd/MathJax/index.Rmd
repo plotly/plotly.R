@@ -7,7 +7,7 @@ Some HTML-based MathJax:
 
 $$ \alpha+\beta $$
 
-You _could_ print this this **plotly** graph with SVG-based rendering, but it would break the HTML-based rendering of **rmarkdown**!
+You _could_ print this **plotly** graph with SVG-based rendering, but it would break the HTML-based rendering of **rmarkdown**!
 
 ```{r message = FALSE}
 library(plotly)
@@ -17,13 +17,13 @@ p <- plotly_empty() %>%
   config(mathjax = "cdn")
 ```
 
-Instead, use something like the **widgetframe** package to create a responsive iframe. This ensures the SVG-based rendering that plotly requires is done in isolation (i.e., independent of **rmarkdown**'s HTML-based rendering).
+Instead, use something like the **widgetframe** package to create a responsive iframe which ensure the SVG-based rendering that plotly requires is done independently of **rmarkdown**'s HTML-based rendering.
 
 ```{r}
 widgetframe::frameableWidget(p)
 ```
 
-Or, do it the old-fashioned way by saving your plotly graph to an HTML file and use an HTML `<iframe>` to 
+Or, do it the old-fashioned way: save your plotly graph to an HTML file via `htmlwidgets::saveWidget()` then use an HTML `<iframe>`
 
 ```{r}
 htmlwidgets::saveWidget(p, "my-plotly-plot.html")
