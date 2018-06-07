@@ -88,6 +88,17 @@ print.plotly_data <- function(x, ...) {
   x
 }
 
+#' Shared data
+#' 
+#' This is simply a wrapper around `crosstalk::SharedData$new()` to make it easier
+#' to use and explain conceptually.
+#' 
+#' @param ... arguments passed to crosstalk::SharedData$new()
+#' @export
+#' @return An object of class [crosstalk::SharedData]
+shared_data <- function(...) {
+  crosstalk::SharedData$new(...)
+}
 
 #' @rdname plotly_data
 #' @export
