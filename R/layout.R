@@ -113,8 +113,8 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' # enable mathjax
 #' # see more examples at https://plot.ly/r/LaTeX/
 #' plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) %>%
-#'   layout(title = "$\\text{Some mathjax: }\\alpha+\\beta x$") %>%
-#'   config(mathjax = TRUE)
+#'   layout(title = TeX("\\text{Some mathjax: }\\alpha+\\beta x")) %>%
+#'   config(mathjax = "cdn")
 #' 
 #' # japanese
 #' config(p, locale = "ja")
