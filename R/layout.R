@@ -91,12 +91,13 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
 #' @param cloud include the send data to cloud button?
 #' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
-#' @param mathjax whether or not to add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
-#' Note that plotly uses SVG-based mathjax rendering which won't play nicely with 
-#' HTML-based rendering (e.g., rmarkdown documents). In this case, you may want to 
-#' consider `<iframe>`-ing your plotly graph(s) into the larger document.
-#' Currently mathjax is loaded externally (meaning an internet
-#' connection is needed to view the graph). Future versions may not have this requirement.
+#' @param mathjax add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
+#' If `cdn`, mathjax is loaded externally (meaning an internet connection is needed to 
+#' view the graph). If `local`, mathjax must be available locally. IMPORTANT: plotly uses 
+#' SVG-based mathjax rendering which doesn't play nicely with HTML-based rendering 
+#' (e.g., rmarkdown documents). In this case, you may want to consider `<iframe>`-ing 
+#' your plotly graph(s) into the larger document. 
+#' See [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for an example.
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -125,7 +126,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = FALSE) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -135,11 +136,19 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
     p$x$config$locale <- locale
   }
   
-  if (!identical(mathjax, FALSE)) {
-    p$dependencies <- c(
-      list(mathjax_cdn()),
-      p$dependencies
+  if (!is.null(mathjax)) {
+    mj <- switch(
+      match.arg(mathjax, c("cdn", "local")),
+      cdn = mathjax_cdn(),
+      local = mathjax_local()
     )
+    # if mathjax is already supplied overwrite it; otherwise, prepend it
+    depNames <- sapply(p$dependencies, "[[", "name")
+    if (any(idx <- depNames %in% "mathjax")) {
+      p$dependencies[[which(idx)]] <- mathjax
+    } else {
+      p$dependencies <- c(list(mj), p$dependencies)
+    }
   }
   
   p$x$config <- modify_list(p$x$config, list(...))

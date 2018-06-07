@@ -371,6 +371,27 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # box up 'data_array' attributes where appropriate
   p <- verify_attr_spec(p)
   
+  
+  verify_mathjax <- function(p) {
+    hasMathjax <- "mathjax" %in% sapply(p$dependencies, "[[", "name")
+    if (hasMathjax) return(p)
+    
+    hasTeX <- any(rapply(p$x, is.TeX))
+    if (!hasTeX) return(p)
+    
+    # TODO: it would be much better to add the dependency here, but
+    # htmlwidgets doesn't currently support adding dependencies at print-time!
+    warning(
+      "Detected the use of `TeX()`, but mathjax has not been specified. ",
+      "Try running `config(.Last.value, mathjax = 'cdn')`",
+      call. = FALSE
+    )
+    p
+  }
+  
+  # make sure we're including mathjax (if TeX() is used)
+  p <- verify_mathjax(p)
+  
   # if a partial bundle was specified, make sure it supports the visualization
   p <- verify_partial_bundle(p)
   
