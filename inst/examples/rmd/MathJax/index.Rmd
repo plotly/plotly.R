@@ -13,7 +13,7 @@ You _could_ print this **plotly** graph with SVG-based rendering, but it would b
 library(plotly)
 
 p <- plotly_empty() %>%
-  add_trace(x = 1, y = 1, text = "$\\alpha$", mode = "text", size = I(1000)) %>%
+  add_trace(x = 1, y = 1, text = TeX("\\alpha"), mode = "text", size = I(1000)) %>%
   config(mathjax = "cdn")
 ```
 
