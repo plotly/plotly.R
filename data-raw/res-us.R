@@ -9,7 +9,7 @@ res <- sf::st_read("~/Downloads/tl_2017_us_aiannh/tl_2017_us_aiannh.shp")
 # (2) crosstalk highlight should set fillcolor...
 
 res %>%
-  SharedData$new(~NAME) %>%
+  highlight_unit(~NAME) %>%
   plot_ly(text = ~NAME) %>%
   highlight(selectize = TRUE, dynamic = TRUE)
 

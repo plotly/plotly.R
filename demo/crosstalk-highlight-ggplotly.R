@@ -1,8 +1,7 @@
 library(plotly)
-library(crosstalk)
 
 # see https://vimeo.com/202647310
-d <- SharedData$new(txhousing, ~city, "Select a city")
+d <- highlight_unit(txhousing, ~city, "Select a city")
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 ggplotly(p, tooltip = "city") %>%
   layout(title = "Click on a line to highlight a year") %>%
@@ -11,8 +10,7 @@ ggplotly(p, tooltip = "city") %>%
 # crosstalk keys are automatically added to the group aesthetic...
 # if you want to avoid adding the key to group for a layer,
 # use the original data
-sd <- SharedData$new(txhousing, ~city)
-p <- ggplot(sd, aes(month, median)) +
+p <- ggplot(d, aes(month, median)) +
   geom_line(aes(group = city)) + 
   geom_smooth(data = txhousing, method = "gam") + 
   facet_wrap(~ year)
@@ -20,7 +18,7 @@ ggplotly(p) %>%
   layout(title = "Click on a line to highlight a year")
 
 # perhaps a more useful example
-sd <- SharedData$new(txhousing, ~year)
+sd <- highlight_unit(txhousing, ~year)
 p <- ggplot(sd, aes(month, median)) +
   geom_line(aes(group = year)) + 
   geom_smooth(data = txhousing, method = "gam") + 

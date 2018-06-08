@@ -1,8 +1,7 @@
 # These examples demonstrate ways to display binned/aggregated selections
-library(crosstalk)
 library(plotly)
 
-d <- SharedData$new(mpg)
+d <- highlight_unit(mpg)
 dots <- plot_ly(d, colors = "Set1", color = ~class, x = ~displ, y = ~cyl) %>%
   layout(
     xaxis = list(title = "Engine displacement"),

@@ -2,7 +2,6 @@ library(engsoccerdata)
 library(dplyr)
 library(tidyr)
 library(plotly)
-library(crosstalk)
 
 # shape data into desired format
 dat <- england %>% 
@@ -21,7 +20,7 @@ dat <- england %>%
   mutate(meanP = mean(cumpts)) %>%
   filter(Season > 2006)
 
-sd <- SharedData$new(dat, ~team, "Select a team")
+sd <- highlight_unit(dat, ~team, "Select a team")
 
 # a 'wormchart' like fig 8 here http://www.gradaanwr.net/wp-content/uploads/2016/06/dataApr16.pdf
 p <- ggplot(sd, aes(x = gameno, y = cumpts - meanP)) + 
@@ -33,7 +32,7 @@ p <- ggplot(sd, aes(x = gameno, y = cumpts - meanP)) +
     y = "Cumulative points (above/below) average"
   ) 
 
-gg <- ggplotly(p, width = 1050, height = 600, tooltip = "team")
+gg <- ggplotly(p, tooltip = "team")
 
 highlight(
   gg, 

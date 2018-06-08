@@ -10,7 +10,7 @@ plot_mapbox(res_mn, split = ~INDRESNAME, span = I(1))
 plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, span = I(1))
 
 # linking with DT
-mn <- crosstalk::SharedData$new(res_mn)
+mn <- highlight_unit(res_mn)
 bscols(
   plot_mapbox(mn, split = ~INDRESNAME, text = ~INDRESNAME, hoverinfo = "text", hoveron = "fills") %>%
     layout(title = "Click a reservation", showlegend = FALSE),
@@ -19,7 +19,7 @@ bscols(
 
 # linking with plotly
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-ncsd <- SharedData$new(nc)
+ncsd <- highlight_unit(nc)
 
 # note that brushing counties is currently possible with plot_ly(), but isn't quite working 
 # yet with plot_mapbox() -- https://github.com/plotly/plotly.js/issues/2512

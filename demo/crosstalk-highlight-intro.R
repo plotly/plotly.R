@@ -1,5 +1,4 @@
 library(plotly)
-library(crosstalk)
 
 nPatients <- 50
 nVisits <- 10
@@ -11,7 +10,7 @@ df <- data.frame(
 )
 
 # delare the patient variable as the "unit of interest"
-sd <- SharedData$new(df, ~patient)
+sd <- highlight_unit(df, ~patient)
 
 p <- plot_ly(sd, x = ~visit, y = ~perc, color = I("black"),
              text = ~paste("Patient:", patient)) %>%

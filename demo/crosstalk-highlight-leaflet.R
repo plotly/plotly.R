@@ -7,7 +7,7 @@ library(htmltools)
 # leaflet should respect these "global" highlight() options
 options(opacityDim = 0.5)
 
-sd <- SharedData$new(quakes)
+sd <- crosstalk_unit(quakes)
 
 p <- plot_ly(sd, x = ~depth, y = ~mag) %>% 
   add_markers(alpha = 0.5) %>%
