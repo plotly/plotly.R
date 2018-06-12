@@ -1,4 +1,5 @@
 library(plotly)
+library(crosstalk)
 
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 ncsd <- highlight_unit(nc)
