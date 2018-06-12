@@ -70,7 +70,8 @@ Suggests:
     IRdisplay,
     processx,
     plotlyGeoAssets,
-    rstudioapi
+    rstudioapi,
+    forcats
 Remotes:
   tidyverse/ggplot2
 LazyData: true
