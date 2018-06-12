@@ -36,7 +36,7 @@ Set the default configuration for plotly
 \examples{
 
 # remove the plotly logo and collaborate button from modebar
-config(p, displaylogo = FALSE, collaborate = FALSE)
+config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
 
 # enable mathjax
 # see more examples at https://plot.ly/r/LaTeX/
