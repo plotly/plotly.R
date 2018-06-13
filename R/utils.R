@@ -499,6 +499,7 @@ verify_attr <- function(proposed, schema) {
     # if marker.sizemode='area', make sure marker.size is boxed up 
     # (otherwise, when marker.size is a constant, it always sets the diameter!)
     # https://codepen.io/cpsievert/pen/zazXgw
+    # https://github.com/plotly/plotly.js/issues/2735
     if ("area" %in% proposed$marker$sizemode) {
       proposed$marker[["size"]] <- i(proposed$marker[["size"]])
     }

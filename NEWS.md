@@ -56,6 +56,7 @@
 
 ### Other fixes relevant for all **plotly** objects
 
+* Marker sizes (i.e., `marker.size`) are now _always_ based on the area when `marker.sizemode='area'` (which is the default sizemode when using the `size` argument). Previously, traces with one just one value supplied to `marker.size` were being sized by their diameter (#1133).
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (#1218).
 * Resizing behavior, after updating `height`/`width` via **shiny** reactive values, is now correct (#1068).
 * Fixed algorithm for coercing the proposed layout to the plot schema (#1156).
