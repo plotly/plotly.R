@@ -496,6 +496,13 @@ verify_attr <- function(proposed, schema) {
       proposed$name <- uniq(proposed$name)
     }
     
+    # if marker.sizemode='area', make sure marker.size is boxed up 
+    # (otherwise, when marker.size is a constant, it always sets the diameter!)
+    # https://codepen.io/cpsievert/pen/zazXgw
+    if ("area" %in% proposed$marker$sizemode) {
+      proposed$marker[["size"]] <- i(proposed$marker[["size"]])
+    }
+    
     # do the same for "sub-attributes"
     if (identical(role, "object")) {
       proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
