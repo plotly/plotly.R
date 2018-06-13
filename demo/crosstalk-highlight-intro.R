@@ -10,7 +10,7 @@ df <- data.frame(
 )
 
 # delare the patient variable as the "unit of interest"
-sd <- highlight_unit(df, ~patient)
+sd <- highlight_key(df, ~patient)
 
 p <- plot_ly(sd, x = ~visit, y = ~perc, color = I("black"),
              text = ~paste("Patient:", patient)) %>%

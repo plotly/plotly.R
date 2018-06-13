@@ -42,7 +42,7 @@ globe <- plot_ly(height = 500) %>%
     hoverinfo = "none"
   ) %>%
   add_sf(
-    data = highlight_unit(storms, group = "storm paths"),
+    data = highlight_key(storms, group = "storm paths"),
     name = "storm paths",
     x = ~ 1.001 * cos(degrees2radians(x)) * cos(degrees2radians(y)),
     y = ~ 1.001 * sin(degrees2radians(x)) * cos(degrees2radians(y)),
@@ -97,7 +97,7 @@ distanceByAlt <- storms %>%
   group_by(L1) %>%
   mutate(dist = arc_dist(X, Y)) %>%
   rename(altitude = Z) %>%
-  highlight_unit(~L1, group = "storm paths") %>%
+  highlight_key(~L1, group = "storm paths") %>%
   plot_ly(x = ~dist, y = ~altitude, height = 400) %>%
   # plotly.js doesn't support color gradient along *2D* lines
   add_lines(color = I("gray")) %>%

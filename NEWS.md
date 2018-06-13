@@ -21,9 +21,10 @@
 * The new `partial_bundle()` function makes it easy to leverage [partial bundles of plotly.js](https://github.com/plotly/plotly.js#partial-bundles) for reduced file sizes and faster render times.
 * The `config()` function gains a `locale` argument for easily changing localization defaults (#1270). This makes it possible localize date axes, and in some cases, modebar buttons (#1270).
 * The `plot_geo()` function gains a `offline` argument for rendering `"scattergeo"` traces with or without an internet connection (#356). Leveraging this argument requires the new **plotlyGeoAssets** package.
+* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209). For an example, run `plotly_example("shiny", "async")`.
 * Instead of an error, `ggplotly(NULL, "message")` and `plotly_build(NULL, "message")` now returns `htmltools::div("message")`, making it easier to relay messages in shiny when data isn't yet ready to plot (#1116).
 * The `animation_button()` function gains a `label` argument, making it easier to control the label of an animation button generated through the `frame` API (#1205).
-* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209). For an example, run `plotly_example("shiny", "async")`.
+* The new `highlight_key()` function provides a wrapper around `crosstalk::SharedData$new()`, making it easier to teach others how to leverage `SharedData` objects with **plotly** and **crosstalk**.
 
 ## CHANGES
 

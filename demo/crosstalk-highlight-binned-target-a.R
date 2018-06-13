@@ -1,7 +1,7 @@
 # These examples demonstrate ways to display binned/aggregated selections
 library(plotly)
 
-d <- highlight_unit(mpg)
+d <- highlight_key(mpg)
 dots <- plot_ly(d, colors = "Set1", color = ~class, x = ~displ, y = ~cyl) %>%
   layout(
     xaxis = list(title = "Engine displacement"),

@@ -1,7 +1,7 @@
 library(plotly)
 
 # see https://vimeo.com/202647310
-d <- highlight_unit(txhousing, ~city, "Select a city")
+d <- highlight_key(txhousing, ~city, "Select a city")
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 ggplotly(p, tooltip = "city") %>%
   layout(title = "Click on a line to highlight a year") %>%
@@ -18,7 +18,7 @@ ggplotly(p) %>%
   layout(title = "Click on a line to highlight a year")
 
 # perhaps a more useful example
-sd <- highlight_unit(txhousing, ~year)
+sd <- highlight_key(txhousing, ~year)
 p <- ggplot(sd, aes(month, median)) +
   geom_line(aes(group = year)) + 
   geom_smooth(data = txhousing, method = "gam") + 

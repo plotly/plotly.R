@@ -57,7 +57,7 @@ onRender(p, "
 
 # combine highlight() api with custom javascript
 mtcars %>%
-  highlight_unit() %>%
+  highlight_key() %>%
   plot_ly(x = ~wt, y = ~mpg, customdata = ~url) %>%
   highlight(color = "red") %>%
   onRender("

@@ -1,7 +1,7 @@
 library(plotly)
 
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
-stormz <- highlight_unit(storms)
+stormz <- highlight_key(storms)
 
 xy <- plot_ly(stormz, color = ~z, mode = "markers+lines", line = list(color = "gray"), hoverinfo = "none")
 xz <- add_sf(xy, y = ~z, color = ~y)

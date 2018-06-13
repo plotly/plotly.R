@@ -16,7 +16,7 @@ dat <- england %>%
   group_by(Season, team) %>% 
   mutate(gameno = row_number(), cumpts = cumsum(pts))
 
-sd <- highlight_unit(dat, ~Season, "Select a season")
+sd <- highlight_key(dat, ~Season, "Select a season")
 
 p <- ggplot(sd, aes(x = gameno, y = cumpts)) + 
   geom_line(aes(color = Season, group = Season), alpha = 0.5) + 

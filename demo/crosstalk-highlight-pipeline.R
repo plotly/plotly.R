@@ -1,6 +1,6 @@
 library(plotly)
 
-sd <- highlight_unit(txhousing, ~city, "Select a city")
+sd <- highlight_key(txhousing, ~city, "Select a city")
 
 base <- plot_ly(sd, color = I("black"), height = 400) %>%
   group_by(city)

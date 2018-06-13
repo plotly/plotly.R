@@ -1,7 +1,7 @@
 # These examples demonstrate ways to display binned/aggregated selections
 library(plotly)
 
-d <- highlight_unit(mtcars)
+d <- highlight_key(mtcars)
 sp <- plot_ly(d, x = ~mpg, y = ~disp) %>%
   add_markers(color = I("black"))
 

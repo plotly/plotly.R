@@ -20,7 +20,7 @@ dat <- england %>%
   mutate(meanP = mean(cumpts)) %>%
   filter(Season > 2006)
 
-sd <- highlight_unit(dat, ~team, "Select a team")
+sd <- highlight_key(dat, ~team, "Select a team")
 
 # a 'wormchart' like fig 8 here http://www.gradaanwr.net/wp-content/uploads/2016/06/dataApr16.pdf
 p <- ggplot(sd, aes(x = gameno, y = cumpts - meanP)) + 

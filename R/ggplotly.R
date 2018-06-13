@@ -47,7 +47,7 @@
 #' ggplotly(viz, tooltip = c("text", "size"))
 #' 
 #' # linked scatterplot brushing
-#' d <- highlight_unit(mtcars)
+#' d <- highlight_key(mtcars)
 #' qplot(data = d, x = mpg, y = wt) %>%
 #'   subplot(qplot(data = d, x = mpg, y = vs)) %>% 
 #'   layout(title = "Click and drag to select points") %>%
@@ -58,7 +58,7 @@
 #' demo("crosstalk-highlight-ggplotly", package = "plotly")
 #' 
 #' # client-side linked brushing in a scatterplot matrix
-#' highlight_unit(iris) %>%
+#' highlight_key(iris) %>%
 #'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
 #'   ggplotly(tooltip = c("x", "y", "colour")) %>%
 #'   highlight("plotly_selected")
