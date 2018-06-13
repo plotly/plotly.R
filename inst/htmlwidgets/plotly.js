@@ -360,11 +360,15 @@ HTMLWidgets.widget({
           _isSimpleKey: trace._isSimpleKey
         };
         
+        // Use pointNumber by default, but aggregated traces should emit pointNumbers
+        var ptNum = points[i].pointNumber;
+        var hasPtNum = typeof ptNum === "number";
+        var ptNum = hasPtNum ? ptNum : points[i].pointNumbers;
+        
         // selecting a point of a "simple" trace means: select the 
         // entire key attached to this trace, which is useful for,
         // say clicking on a fitted line to select corresponding observations 
-        var pts = points[i].pointNumber || points[i].pointNumbers;
-        var key = trace._isSimpleKey ? trace.key : Array.isArray(pts) ? pts.map(function(idx) { return trace.key[idx]; }) : trace.key[pts];
+        var key = trace._isSimpleKey ? trace.key : Array.isArray(ptNum) ? ptNum.map(function(idx) { return trace.key[idx]; }) : trace.key[ptNum];
         // http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
         var keyFlat = trace._isNestedKey ? [].concat.apply([], key) : key;
         
@@ -443,6 +447,8 @@ HTMLWidgets.widget({
           }
         }
         
+        //console.log(e.value);
+        
         // accumulate history for persistent selection
         if (!x.highlight.persistent) {
           selectionHistory = [event];
@@ -467,7 +473,9 @@ HTMLWidgets.widget({
       // Set a crosstalk variable selection value, triggering an update
       var turnOn = function(e) {
         if (e) {
+          
           var selectedKeys = pointsToKeys(e.points);
+          console.log(selectedKeys);
           // Keys are group names, values are array of selected keys from group.
           for (var set in selectedKeys) {
             if (selectedKeys.hasOwnProperty(set)) {
