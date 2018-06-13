@@ -447,8 +447,6 @@ HTMLWidgets.widget({
           }
         }
         
-        //console.log(e.value);
-        
         // accumulate history for persistent selection
         if (!x.highlight.persistent) {
           selectionHistory = [event];
@@ -473,9 +471,7 @@ HTMLWidgets.widget({
       // Set a crosstalk variable selection value, triggering an update
       var turnOn = function(e) {
         if (e) {
-          
           var selectedKeys = pointsToKeys(e.points);
-          console.log(selectedKeys);
           // Keys are group names, values are array of selected keys from group.
           for (var set in selectedKeys) {
             if (selectedKeys.hasOwnProperty(set)) {
