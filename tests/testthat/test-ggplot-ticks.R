@@ -175,6 +175,8 @@ test_that("The breaks can be spaced unevenly", {
 })
 
 test_that("R line breaks are translated to HTML line breaks", {
+  skip_if_not_installed("stringr")
+  
   df_x <- data.frame(
     x = "this is very loooooooooooong text to illustrate",
     y = 100
