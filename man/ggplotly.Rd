@@ -63,8 +63,7 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
 ggplotly(viz, tooltip = c("text", "size"))
 
 # linked scatterplot brushing
-library(crosstalk)
-d <- SharedData$new(mtcars)
+d <- highlight_key(mtcars)
 qplot(data = d, x = mpg, y = wt) \%>\%
   subplot(qplot(data = d, x = mpg, y = vs)) \%>\% 
   layout(title = "Click and drag to select points") \%>\%
@@ -75,7 +74,7 @@ qplot(data = d, x = mpg, y = wt) \%>\%
 demo("crosstalk-highlight-ggplotly", package = "plotly")
 
 # client-side linked brushing in a scatterplot matrix
-SharedData$new(iris) \%>\%
+highlight_key(iris) \%>\%
   GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
   ggplotly(tooltip = c("x", "y", "colour")) \%>\%
   highlight("plotly_selected")

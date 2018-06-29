@@ -45,7 +45,7 @@ ax <- list(
 # for nicely formatted slider labels
 options(digits = 3)
 
-tour_dat <- crosstalk::SharedData$new(tour_dat, ~state, group = "A")
+tour_dat <- highlight_key(tour_dat, ~state, group = "A")
 
 tour <- proj_dat %>%
   plot_ly(x = ~x, y = ~y, frame = ~step, color = I("black")) %>%

@@ -57,9 +57,8 @@
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
 #' 
-#' 
 #' library(crosstalk)
-#' d <- SharedData$new(txhousing, ~city)
+#' d <- highlight_key(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 
 #' highlight(gg, dynamic = TRUE)

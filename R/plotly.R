@@ -257,6 +257,9 @@ plot_mapbox <- function(data = data.frame(), ...) {
 #' 
 #' @param data A data frame (optional).
 #' @param ... arguments passed along to [plot_ly()].
+#' @param offline whether or not to include geo assets so that the map
+#' can be viewed with or without an internet connection. The plotlyGeoAssets
+#' package is required for this functionality.
 #' @export
 #' @author Carson Sievert
 #' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
@@ -267,8 +270,22 @@ plot_mapbox <- function(data = data.frame(), ...) {
 #'   plot_geo(x = ~long, y = ~lat) %>%
 #'   add_markers(size = I(1))
 #' 
-plot_geo <- function(data = data.frame(), ...) {
+plot_geo <- function(data = data.frame(), ..., offline = FALSE) {
   p <- plot_ly(data, ...)
+  
+  if (isTRUE(offline)) {
+    if (system.file(package = "plotlyGeoAssets") == "") {
+      stop(
+        "The plotlyGeoAssets package is required to make 'offline' maps. ",
+        "Please install and try again.",
+        call. = FALSE
+      )
+    }
+    p$dependencies <- c(
+      list(plotlyGeoAssets::geo_assets()),
+      p$dependencies
+    )
+  }
   # not only do we use this for is_geo(), but also setting the layout attr
   # https://plot.ly/r/reference/#layout-geo
   p$x$layout$mapType <- "geo"
@@ -429,7 +446,7 @@ typedArrayPolyfill <- function() {
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     "plotly-main", 
-    version = "1.38.2",
+    version = "1.38.3",
     src = depPath("plotlyjs"),
     script = "plotly-latest.min.js",
     all_files = FALSE

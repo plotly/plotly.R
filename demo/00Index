@@ -13,6 +13,7 @@ crosstalk-highlight-epl               Exploring English Premier League performac
 crosstalk-highlight-epl-2             A 'wormchart' version of the epl demo
 crosstalk-filter-lines                Using crosstalk's filter_select() to filter lines
 crosstalk-filter-dynamic-axis         Using crosstalk's filter_select() to dynamically change the y-axis
+custom-javascript                     Using htmlwidgets::onRender() to add custom interactivity features (e.g google search on click)
 rotate                                Using htmlwidgets::onRender() to rotate the camera of a 3D graph
 ternary                               A basic ternary plot
 sf-mapbox-data                        Mapping sf objects with mapbox

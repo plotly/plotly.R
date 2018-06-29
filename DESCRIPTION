@@ -68,7 +68,10 @@ Suggests:
     rgeos,
     png,
     IRdisplay,
-    processx
+    processx,
+    plotlyGeoAssets,
+    rstudioapi,
+    forcats
 LazyData: true
 RoxygenNote: 6.0.1.9000
 Encoding: UTF-8

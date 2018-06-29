@@ -1,0 +1,33 @@
+---
+title: "Render plotly MathJax inside rmarkdown"
+output: html_document
+---
+
+Some HTML-based MathJax:
+
+$$ \alpha+\beta $$
+
+You _could_ print this **plotly** graph with SVG-based rendering, but it would break the HTML-based rendering of **rmarkdown**!
+
+```{r message = FALSE}
+library(plotly)
+
+p <- plotly_empty() %>%
+  add_trace(x = 1, y = 1, text = TeX("\\alpha"), mode = "text", size = I(1000)) %>%
+  config(mathjax = "cdn")
+```
+
+Instead, use something like the **widgetframe** package to create a responsive iframe which ensure the SVG-based rendering that plotly requires is done independently of **rmarkdown**'s HTML-based rendering.
+
+```{r}
+widgetframe::frameableWidget(p)
+```
+
+Or, do it the old-fashioned way: save your plotly graph to an HTML file via `htmlwidgets::saveWidget()` then use an HTML `<iframe>`
+
+```{r}
+htmlwidgets::saveWidget(p, "my-plotly-plot.html")
+```
+
+
+<iframe src="my-plotly-plot.html" width="100%" height="400" id="igraph" scrolling="no" seamless="seamless" frameBorder="0"> </iframe>

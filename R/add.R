@@ -274,6 +274,38 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
 
 
 #' @inheritParams add_trace
+#' @param rownames whether or not to display the rownames of `data`.
+#' @rdname add_trace
+#' @export
+#' @examples 
+#' 
+#' plot_ly(economics) %>% 
+#'   add_table()
+add_table <- function(p, ..., rownames = TRUE, data = NULL, inherit = TRUE) {
+  attrs <- list(...)
+  dat <- plotly_data(add_data(p, data))
+  if (is.data.frame(dat)) {
+    vals <- lapply(names(dat), function(x) list(x))
+    if (isTRUE(rownames)) vals <- c(list(""), vals)
+    header_defaults <- list(
+      values = vals,
+      align = "right"
+    )
+    vals <- setNames(as.list(dat), NULL)
+    if (isTRUE(rownames)) vals <- c(list(row.names(dat)), vals)
+    cell_defaults <- list(
+      values = vals,
+      align = "right"
+    )
+    attrs$header <- modify_list(header_defaults, attrs$header)
+    attrs$cells <- modify_list(cell_defaults, attrs$cells)
+  }
+  
+  do.call(add_trace_classed, c(list(p = p, class = "plotly_table", type = "table"), attrs))
+}
+
+
+#' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 #' @examples 

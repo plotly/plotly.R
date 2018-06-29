@@ -2,7 +2,7 @@ library(plotly)
 library(crosstalk)
 
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-ncsd <- SharedData$new(nc)
+ncsd <- highlight_key(nc)
 
 map <- plot_ly(ncsd, split = ~NAME, color = I("gray"), hoveron = "fills") %>%
   highlight(persistent = TRUE, color = "red", opacityDim = 1) %>%

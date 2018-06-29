@@ -1,8 +1,7 @@
-library(htmltools)
-library(crosstalk)
+library(plotly)
 
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
-stormz <- SharedData$new(storms)
+stormz <- highlight_key(storms)
 
 xy <- plot_ly(stormz, color = ~z, mode = "markers+lines", line = list(color = "gray"), hoverinfo = "none")
 xz <- add_sf(xy, y = ~z, color = ~y)
@@ -61,5 +60,5 @@ xyz3D <- plot_ly(stormz, color = ~z, z = ~z) %>%
   )
 
 
-
+library(htmltools)
 browsable(tagList(xyz2D, xyz3D))

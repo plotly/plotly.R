@@ -9,6 +9,7 @@
 \alias{add_segments}
 \alias{add_polygons}
 \alias{add_sf}
+\alias{add_table}
 \alias{add_ribbons}
 \alias{add_area}
 \alias{add_pie}
@@ -45,6 +46,8 @@ add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
 add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
+
+add_table(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
 
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
   inherit = TRUE)
@@ -105,6 +108,8 @@ provided at this level may override other arguments
 
 \item{yend}{"final" y position (in this context, y represents "start")}
 
+\item{rownames}{whether or not to display the rownames of \code{data}.}
+
 \item{ymin}{a variable used to define the lower boundary of a polygon.}
 
 \item{ymax}{a variable used to define the upper boundary of a polygon.}
@@ -152,6 +157,9 @@ if (requireNamespace("sf", quietly = TRUE)) {
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   plot_ly() \%>\% add_sf(data = nc)
 }
+
+plot_ly(economics) \%>\% 
+  add_table()
 
 plot_ly(economics, x = ~date) \%>\% 
   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)

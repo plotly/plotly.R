@@ -91,33 +91,47 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
 #' @param cloud include the send data to cloud button?
 #' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
+#' @param mathjax add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
+#' If `"cdn"`, mathjax is loaded externally (meaning an internet connection is needed for 
+#' TeX rendering). If `"local"`, the PLOTLY_MATHJAX_PATH environment variable must be
+#' set to the location (a local file path) of MathJax. IMPORTANT: **plotly** uses SVG-based 
+#' mathjax rendering which doesn't play nicely with HTML-based rendering 
+#' (e.g., **rmarkdown** documents and **shiny** apps). To leverage both types of rendering, 
+#' you must `<iframe>` your plotly graph(s) into the larger document 
+#' (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) 
+#' for an **rmarkdown** example and 
+#' [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
 #' @author Carson Sievert
 #' @export
 #' @examples
 #' 
+#' # remove the plotly logo and collaborate button from modebar
+#' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+#' 
+#' # enable mathjax
+#' # see more examples at https://plot.ly/r/LaTeX/
+#' plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) %>%
+#'   layout(title = TeX("\\text{Some mathjax: }\\alpha+\\beta x")) %>%
+#'   config(mathjax = "cdn")
+#' 
+#' # change the language used to render date axes and on-graph text 
+#' # (e.g., modebar buttons)
 #' today <- Sys.Date()
 #' x <- seq.Date(today, today + 360, by = "day")
 #' p <- plot_ly(x = x, y = rnorm(length(x))) %>%
 #'   add_lines()
 #' 
-#' # remove the plotly logo and collaborate button from modebar
-#' config(p, displaylogo = FALSE, collaborate = FALSE)
-#' 
 #' # japanese
 #' config(p, locale = "ja")
 #' # german
 #' config(p, locale = "de")
-#' # swiss-german
-#' config(p, locale = "de-CH")
 #' # spanish
 #' config(p, locale = "es")
-#' # french
-#' config(p, locale = "fr")
 #' # chinese
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -125,6 +139,21 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL) {
       list(locale_dependency(locale))
     )
     p$x$config$locale <- locale
+  }
+  
+  if (!is.null(mathjax)) {
+    mj <- switch(
+      match.arg(mathjax, c("cdn", "local")),
+      cdn = mathjax_cdn(),
+      local = mathjax_local()
+    )
+    # if mathjax is already supplied overwrite it; otherwise, prepend it
+    depNames <- sapply(p$dependencies, "[[", "name")
+    if (any(idx <- depNames %in% "mathjax")) {
+      p$dependencies[[which(idx)]] <- mathjax
+    } else {
+      p$dependencies <- c(list(mj), p$dependencies)
+    }
   }
   
   p$x$config <- modify_list(p$x$config, list(...))

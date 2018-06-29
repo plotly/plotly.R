@@ -3,7 +3,7 @@ library(tidyr)
 library(crosstalk)
 
 m <- gather(mtcars, variable, value, -vs)
-msd <- SharedData$new(m, ~variable)
+msd <- highlight_key(m, ~variable)
 gg <- ggplot(msd, aes(factor(vs), value)) + 
   geom_jitter(alpha = 0.3)
 

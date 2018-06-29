@@ -1,6 +1,5 @@
 library(plotly)
 library(dplyr)
-library(crosstalk)
 
 # latitude, longitude, and altitiude of tropical storms
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
@@ -43,7 +42,7 @@ globe <- plot_ly(height = 500) %>%
     hoverinfo = "none"
   ) %>%
   add_sf(
-    data = SharedData$new(storms, group = "storm paths"),
+    data = highlight_key(storms, group = "storm paths"),
     name = "storm paths",
     x = ~ 1.001 * cos(degrees2radians(x)) * cos(degrees2radians(y)),
     y = ~ 1.001 * sin(degrees2radians(x)) * cos(degrees2radians(y)),
@@ -98,7 +97,7 @@ distanceByAlt <- storms %>%
   group_by(L1) %>%
   mutate(dist = arc_dist(X, Y)) %>%
   rename(altitude = Z) %>%
-  SharedData$new(~L1, group = "storm paths") %>%
+  highlight_key(~L1, group = "storm paths") %>%
   plot_ly(x = ~dist, y = ~altitude, height = 400) %>%
   # plotly.js doesn't support color gradient along *2D* lines
   add_lines(color = I("gray")) %>%

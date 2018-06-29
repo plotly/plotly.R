@@ -496,6 +496,14 @@ verify_attr <- function(proposed, schema) {
       proposed$name <- uniq(proposed$name)
     }
     
+    # if marker.sizemode='area', make sure marker.size is boxed up 
+    # (otherwise, when marker.size is a constant, it always sets the diameter!)
+    # https://codepen.io/cpsievert/pen/zazXgw
+    # https://github.com/plotly/plotly.js/issues/2735
+    if ("area" %in% proposed$marker$sizemode) {
+      proposed$marker[["size"]] <- i(proposed$marker[["size"]])
+    }
+    
     # do the same for "sub-attributes"
     if (identical(role, "object")) {
       proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
@@ -1023,5 +1031,13 @@ try_library <- function(pkg, fun = NULL) {
 }
 
 is_rstudio <- function() {
-  identical(Sys.getenv("RSTUDIO", NA), "1")
+  requireNamespace('rstudioapi', quietly = TRUE) && rstudioapi::isAvailable()
+}
+
+
+# TODO: warn Windows users to use 1.2.x in some scenarios?
+# https://github.com/ropensci/plotly/issues/1211
+rstudio_version <- function() {
+  if (!is_rstudio()) return(NA)
+  rstudioapi::versionInfo()$version
 }

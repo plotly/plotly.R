@@ -4,7 +4,7 @@
 
 ### plotly.js and `plot_ly()` specific improvements
 
-* Upgraded to plotly.js v1.38.2. A _huge_ amount of features and improvements have been made since v1.29.2 (i.e., the version included in the last CRAN release of the R package - v4.7.1). Highlights include a complete re-write of `scattergl` to make it nearly feature complete with `scatter`, localization of text rendering (i.e., international translations), and six new trace types (`cone`, `scatterpolar`, `scatterpolargl`, `splom`, `table`, & `violin`)! See [here](https://github.com/plotly/plotly.js/releases) for a complete list of plotly.js-specific improvements.
+* Upgraded to plotly.js v1.38.3. A _huge_ amount of features and improvements have been made since v1.29.2 (i.e., the version included in the last CRAN release of the R package - v4.7.1). Highlights include a complete re-write of `scattergl` to make it nearly feature complete with `scatter`, localization of text rendering (i.e., international translations), and six new trace types (`cone`, `scatterpolar`, `scatterpolargl`, `splom`, `table`, & `violin`)! See [here](https://github.com/plotly/plotly.js/releases) for a complete list of plotly.js-specific improvements.
 * Support for **sf** (simple feature) data structures was added to `plot_ly()`, `plot_mapbox()`, and `plot_geo()` (via the new `add_sf()` function). See [this blog post](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly) for an overview.
 * Better control over the stroke (i.e., outline) appearance of various filled graphical marks via the new "special arguments" (`stroke`, `strokes`, `alpha_stroke`, `span`, and `spans`). For an overview, see the **sf** blog post linked to in the bullet point above and the new package demos (list all demos with `demo(package = "plotly")`).
 
@@ -15,13 +15,16 @@
 
 ### Other improvements relevant for all **plotly** objects
 
+* LaTeX rendering via MathJax is now supported and the new `TeX()` function may be used to flag a character vector as LaTeX (#375). Use the new `mathjax` argument in `config()` to specify either external (`mathjax="cdn"`) or local (`mathjax="local"`) MathJaX. If `"cdn"`, mathjax is loaded externally (meaning an internet connection is needed for TeX rendering). If `"local"`, the PLOTLY_MATHJAX_PATH environment variable must be set to the location (a local file path) of MathJax. IMPORTANT: **plotly** uses SVG-based mathjax rendering which doesn't play nicely with HTML-based rendering (e.g., **rmarkdown** documents and **shiny** apps). To leverage both types of rendering, you must `<iframe>` your plotly graph(s) into the larger document (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for an **rmarkdown** example  and [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
 * The selection (i.e., linked-brushing) mode can now switch from 'transient' to 'persistent' by holding the 'shift' key. It's still possible to _force_ persistent selection by setting `persistent = TRUE` in `highlight()`, but `persistent = FALSE` (the default) is now recommended since it allows one to switch between [persistent/transient selection](https://plotly-book.cpsievert.me/linking-views-without-shiny.html#transient-versus-persistent-selection) in the browser, rather than at the command line.
 * The `highlight()` function gains a `debounce` argument for throttling the rate at which `on` events may be fired. This is mainly useful for improving user experience when `highlight(on = "plotly_hover")` and mousing over relevant markers at a rapid rate (#1277)
 * The new `partial_bundle()` function makes it easy to leverage [partial bundles of plotly.js](https://github.com/plotly/plotly.js#partial-bundles) for reduced file sizes and faster render times.
 * The `config()` function gains a `locale` argument for easily changing localization defaults (#1270). This makes it possible localize date axes, and in some cases, modebar buttons (#1270).
+* The `plot_geo()` function gains a `offline` argument for rendering `"scattergeo"` traces with or without an internet connection (#356). Leveraging this argument requires the new **plotlyGeoAssets** package.
+* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209). For an example, run `plotly_example("shiny", "async")`.
 * Instead of an error, `ggplotly(NULL, "message")` and `plotly_build(NULL, "message")` now returns `htmltools::div("message")`, making it easier to relay messages in shiny when data isn't yet ready to plot (#1116).
 * The `animation_button()` function gains a `label` argument, making it easier to control the label of an animation button generated through the `frame` API (#1205).
-* Support for async rendering of inside **shiny** apps using the [promises](https://rstudio.github.io/promises/) package (#1209).
+* The new `highlight_key()` function provides a wrapper around `crosstalk::SharedData$new()`, making it easier to teach others how to leverage `SharedData` objects with **plotly** and **crosstalk**.
 
 ## CHANGES
 
@@ -35,6 +38,7 @@
 
 ### Other changes relevant for all **plotly** objects
 
+* All axis objects now default to `automargin = TRUE`. The majority of the time this should make axis labels more readable, but may have un-intended consequences in some rare cases (#1252). 
 * The `elementId` field is no longer populated, which fixes the "Ignoring explicitly provided widget ID" warning in shiny applications (#985).
 
 ## BUG FIXES
@@ -52,6 +56,7 @@
 
 ### Other fixes relevant for all **plotly** objects
 
+* Marker sizes (i.e., `marker.size`) are now _always_ based on the area when `marker.sizemode='area'` (which is the default sizemode when using the `size` argument). Previously, traces with one just one value supplied to `marker.size` were being sized by their diameter (#1133).
 * Bug fix for linking views with crosstalk where the source of the selection is an aggregated trace (#1218).
 * Resizing behavior, after updating `height`/`width` via **shiny** reactive values, is now correct (#1068).
 * Fixed algorithm for coercing the proposed layout to the plot schema (#1156).

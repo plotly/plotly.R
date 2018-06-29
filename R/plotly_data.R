@@ -88,6 +88,21 @@ print.plotly_data <- function(x, ...) {
   x
 }
 
+#' Highlight/query data based on primary key
+#' 
+#' This function simply creates an object of class [crosstalk::SharedData].
+#' The reason it exists is to make it easier to teach others how to leverage
+#' it's functionality in plotly. It also makes it more discoverable if one
+#' is already aware of [highlight].
+#' 
+#' @param ... arguments passed to `crosstalk::SharedData$new()`
+#' @export
+#' @author Carson Sievert
+#' @return An object of class [crosstalk::SharedData]
+#' @seealso [highlight]
+highlight_key <- function(...) {
+  crosstalk::SharedData$new(...)
+}
 
 #' @rdname plotly_data
 #' @export
