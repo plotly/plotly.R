@@ -11,7 +11,7 @@ workweek <- matrix(
 test_that("geom_tile is translated to type=heatmap", {
   skip_if_not_installed("reshape2")
   
-  ww <- reshape2::melt(workweek)
+  ww <- getFromNamespace("melt", "reshape2")(workweek)
   ww$day <- factor(ww$day, wdays)
   ww$time <- factor(ww$time, dtimes)
   # Plot a heatmap using geom_tile

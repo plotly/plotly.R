@@ -183,7 +183,7 @@ test_that("R line breaks are translated to HTML line breaks", {
   )
   p <- ggplot(aes(x = x, y = y), data = df_x) +
     geom_bar(stat = "identity") +
-    scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
+    scale_x_discrete(labels = function(x) getFromNamespace("str_wrap", "stringr")(x, width = 10))
   info <- expect_traces(p, 1, "line-breaks")
   expect_length(
     strsplit(info$layout$xaxis$ticktext, "<br />", fixed = T)[[1]], 5
