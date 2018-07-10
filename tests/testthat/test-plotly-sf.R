@@ -3,6 +3,10 @@ context("add_sf")
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
 
+has_mapbox <- function() {
+  !is.null(tryNULL(mapbox_token()))
+}
+
 test_that("add_sf() is optional", {
   skip_if_not_installed("sf")
   
@@ -44,6 +48,7 @@ test_that("plot_geo() lat/lon range is set", {
 
 test_that("plot_mapbox() fitbounds is set", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   p <- plotly_build(plot_mapbox(nc))
   expect_equal(
@@ -56,6 +61,7 @@ test_that("plot_mapbox() fitbounds is set", {
 
 test_that("sf defaults can be overriden", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   # when applied to fillcolor, alpha defaults to 0.5
   p <- plotly_build(plot_mapbox(nc, color = I("red")))
@@ -115,6 +121,7 @@ test_that("plot_ly() defaults to blank axes", {
 
 test_that("discrete color informs fillcolor", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
@@ -136,6 +143,7 @@ test_that("discrete color informs fillcolor", {
 
 test_that("discrete color informs fillcolor", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   res <- unique(res_mn$INDRESNAME)
   cols <- viridisLite::magma(length(res))
@@ -171,6 +179,7 @@ test_that("discrete color informs fillcolor", {
 
 test_that("numeric color informs fillcolor", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   p <- plot_mapbox(res_mn, color = ~AREA)
   expect_warning(plotly_build(p), "Only one fillcolor per trace allowed")
@@ -214,6 +223,7 @@ test_that("numeric color informs fillcolor", {
 
 test_that("sizing constants", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   # span controls 'stroke-size'
   p <- plot_mapbox(res_mn, span = I(5)) %>% plotly_build()
@@ -259,6 +269,7 @@ test_that("sizing constants", {
 
 test_that("size mappings", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   expect_warning(
     plotly_build(plot_mapbox(res_mn, span = ~PERIMETER)), 
@@ -294,6 +305,7 @@ test_that("size mappings", {
 
 test_that("altogether now", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   s <- subplot(plot_ly(nc), plot_geo(nc), plot_mapbox(nc), nrows = 3) %>% plotly_build()
   d <- s$x$data
@@ -328,6 +340,7 @@ test_that("altogether now", {
 
 test_that("color and stroke scales can be set independently", {
   skip_if_not_installed("sf")
+  skip_if_not(has_mapbox())
   
   n <- length(unique(res_mn$INDRESNAME))
   p <- plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, span = I(2)) %>%

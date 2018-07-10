@@ -7,13 +7,16 @@ workweek <- matrix(
   nrow = 5, ncol = 3, byrow = TRUE,
   dimnames = list(day = wdays, time = dtimes)
 )
-ww <- reshape2::melt(workweek)
-ww$day <- factor(ww$day, wdays)
-ww$time <- factor(ww$time, dtimes)
-# Plot a heatmap using geom_tile
-hm <- ggplot(ww) + geom_tile(aes(x = day, y = time, fill = value))
 
 test_that("geom_tile is translated to type=heatmap", {
+  skip_if_not_installed("reshape2")
+  
+  ww <- getFromNamespace("melt", "reshape2")(workweek)
+  ww$day <- factor(ww$day, wdays)
+  ww$time <- factor(ww$time, dtimes)
+  # Plot a heatmap using geom_tile
+  hm <- ggplot(ww) + geom_tile(aes(x = day, y = time, fill = value))
+  
   L <- save_outputs(hm, "heatmap")
   # one trace is for the colorbar
   expect_equivalent(length(L$data), 2)
