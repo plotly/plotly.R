@@ -70,7 +70,6 @@ Suggests:
     IRdisplay,
     processx,
     plotlyGeoAssets,
-    rstudioapi,
     forcats
 LazyData: true
 RoxygenNote: 6.0.1.9000
