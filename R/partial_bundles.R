@@ -47,6 +47,7 @@
 #' # heatmap (part of the cartesian bundle) doesn't...
 #' # ----------------------------------------------------------------------
 #' 
+#' \dontrun{
 #' library(htmltools)
 #' p1 <- plot_ly(z = ~volcano) %>% 
 #'   add_heatmap() %>%
@@ -55,6 +56,7 @@
 #'   add_surface() %>%
 #'   partial_bundle()
 #' browsable(tagList(p1, p2))
+#' }
 #'
 
 
