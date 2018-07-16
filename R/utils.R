@@ -854,7 +854,7 @@ verify_scattergl_platform <- function(p) {
   types <- vapply(p$x$data, function(x) x[["type"]] %||% "scatter", character(1))
   if ("scattergl" %in% types) {
     warning(
-      "'scattergl' trace types don't currently render in RStudio on Windows",
+      "'scattergl' trace types don't currently render in RStudio on Windows. ",
       "Open in another web browser (IE, Chrome, Firefox, etc).",
       call. = FALSE
     )
