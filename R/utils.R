@@ -830,6 +830,22 @@ verify_guides <- function(p) {
   p
 }
 
+verify_scattergl_platform <- function(p) {
+  if (!identical(.Platform$OS.type, "windows")) return(p)
+  if (!is_rstudio()) return(p)
+  
+  types <- vapply(p, function(x) x[["type"]] %||% "scatter", character(1))
+  if ("scattergl" %in% types) {
+    warning(
+      "'scattergl' trace types don't currently render in RStudio on Windows",
+      "Open in another web browser (IE, Chrome, Firefox, etc).",
+      call. = FALSE
+    )
+  }
+  
+  p
+}
+
 has_marker <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("marker", modes), has_attr(types, "marker"))
