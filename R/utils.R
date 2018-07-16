@@ -830,6 +830,23 @@ verify_guides <- function(p) {
   p
 }
 
+verify_mathjax <- function(p) {
+  hasMathjax <- "mathjax" %in% sapply(p$dependencies, "[[", "name")
+  if (hasMathjax) return(p)
+  
+  hasTeX <- any(rapply(p$x, is.TeX))
+  if (!hasTeX) return(p)
+  
+  # TODO: it would be much better to add the dependency here, but
+  # htmlwidgets doesn't currently support adding dependencies at print-time!
+  warning(
+    "Detected the use of `TeX()`, but mathjax has not been specified. ",
+    "Try running `config(.Last.value, mathjax = 'cdn')`",
+    call. = FALSE
+  )
+  p
+}
+
 verify_scattergl_platform <- function(p) {
   if (!identical(.Platform$OS.type, "windows")) return(p)
   if (!is_rstudio()) return(p)
