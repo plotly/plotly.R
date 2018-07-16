@@ -2,6 +2,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+cran-release.Rmd
 CONDUCT.md
 CONTRIBUTING.md
 build_site.R
