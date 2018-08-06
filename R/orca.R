@@ -49,8 +49,11 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   plotlyjs <- plotlyjsBundle(b)
   plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
   
+  tmp <- tempfile(fileext = ".json")
+  cat(to_JSON(b$x[c("data", "layout")]), file = tmp)
+  
   args <- c(
-    "graph", to_JSON(b$x[c("data", "layout")]), 
+    "graph", tmp, 
     "-o", file,
     "--format", format,
     "--plotlyjs", plotlyjs_file,
