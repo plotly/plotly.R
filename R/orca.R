@@ -66,7 +66,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   if (!is.null(width)) args <- c(args, "--width", width)
   if (!is.null(height)) args <- c(args, "--height", height)
   if (!is.null(parallel_limit)) args <- c(args, "--parallel-limit", parallel_limit)
-  if (!is.na(mapbox_token())) args <- c(args, "--mapbox-access-token", mapbox_token())
+  if (!is.null(tryNULL(mapbox_token()))) args <- c(args, "--mapbox-access-token", mapbox_token())
   if (isTRUE(mathjax)) args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
      
   # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
