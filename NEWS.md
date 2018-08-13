@@ -1,5 +1,12 @@
 # 4.8.0.9000
 
+## IMPROVEMENTS
+
+* The `orca()` function now supports conversion of much larger figures (#1322)
+
+## BUG FIXES
+
+* Recursive attribute validation is now only performed on recursive objects (#1315)
 
 # 4.8.0
 
