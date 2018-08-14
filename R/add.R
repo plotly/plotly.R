@@ -337,7 +337,8 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
       data = if ("group" %in% names(d[[i]])) group_by_(d[[i]], "group", add = TRUE) else d[[i]], 
       inherit = inherit
     )
-    p <- do.call(add_trace_classed, c(args, attrs))
+    args <- modify_list(args, attrs)
+    p <- do.call(add_trace_classed, args)
   }
   
   p
