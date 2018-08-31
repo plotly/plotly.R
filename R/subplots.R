@@ -214,8 +214,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
       newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
+      # also map annotation[i].xref/annotation[i].yref
       annAnchor <- list(xaxis = "xref", yaxis = "yref")[[key]]
       if (is.null(annAnchor)) next
+      if (is.null(annotations[[i]])) next
       annotations[[i]] <- Map(function(ann, a) { ann[[annAnchor]] <- a; ann}, annotations[[i]], newAnchors)
     }
     
