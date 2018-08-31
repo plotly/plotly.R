@@ -7,6 +7,7 @@
 
 ## BUG FIXES
 
+* `subplot()` now bumps annotation `xref`/`yref` anchors correctly (#1181)
 * Recursive attribute validation is now only performed on recursive objects (#1315)
 
 # 4.8.0
