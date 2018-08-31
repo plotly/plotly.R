@@ -214,7 +214,11 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
       newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
+      annAnchor <- list(xaxis = "xref", yaxis = "yref")[[key]]
+      if (is.null(annAnchor)) next
+      annotations[[i]] <- Map(function(ann, a) { ann[[annAnchor]] <- a; ann}, annotations[[i]], newAnchors)
     }
+    
     # rescale domains according to the tabular layout
     xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
     yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
@@ -391,14 +395,16 @@ reposition <- function(obj, domains) {
     o <- obj[[i]]
     # TODO: this implementation currently assumes xref/yref == "paper"
     # should we support references to axis objects as well?
-    for (j in c("x", "x0", "x1")) {
+    xs <- if (identical(o$xref, "paper")) c("x", "x0", "x1")
+    for (j in xs) {
       if (is.numeric(o[[j]])) {
         obj[[i]][[j]] <- scales::rescale(
           o[[j]], as.numeric(domains[c("xstart", "xend")]), from = c(0, 1)
         )
       }
     }
-    for (j in c("y", "y0", "y1")) {
+    ys <- if (identical(o$xref, "paper")) c("y", "y0", "y1")
+    for (j in ys) {
       if (is.numeric(o[[j]])) {
         obj[[i]][[j]] <- scales::rescale(
           o[[j]], as.numeric(domains[c("yend", "ystart")]), from = c(0, 1)

@@ -135,9 +135,38 @@ test_that("subplot accepts a list of plots", {
 })
 
 # Ignore for now https://github.com/ggobi/ggally/issues/264
-#test_that("ggplotly understands ggmatrix", {
-#  L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
-#})
+test_that("ggplotly understands ggmatrix", {
+  L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+})
+
+test_that("annotation xref/yref are bumped correctly", {
+  
+  p1 <- plot_ly(mtcars) %>%
+    add_annotations(text = ~cyl, x = ~wt, y = ~mpg)
+  p2 <- plot_ly(mtcars) %>%
+    add_annotations(text = ~am, x = ~wt, y = ~mpg)
+  s <- subplot(p1, p2)
+  ann <- plotly_build(s)$x$layout$annotations
+  
+  txt <- sapply(ann, "[[", "text")
+  xref <- sapply(ann, "[[", "xref")
+  yref <- sapply(ann, "[[", "yref")
+  
+  expect_length(ann, 64)
+  expect_equal(txt, c(mtcars$cyl, mtcars$am))
+  expect_equal(xref, rep(c("x", "x2"), each = 32))
+  expect_equal(yref, rep(c("y", "y2"), each = 32))
+  
+  s2 <- subplot(p1, p2, shareY = TRUE)
+  ann2 <- plotly_build(s2)$x$layout$annotations
+  
+  xref2 <- sapply(ann2, "[[", "xref")
+  yref2 <- sapply(ann2, "[[", "yref")
+  expect_equal(xref2, rep(c("x", "x2"), each = 32))
+  expect_equal(yref2, rep(c("y", "y"), each = 32))
+})
+
+
 
 test_that("geo+cartesian behaves", {
   # specify some map projection/options
