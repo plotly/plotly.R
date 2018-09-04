@@ -120,6 +120,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
   shapes <- lapply(layouts, "[[", "shapes")
+  images <- lapply(layouts, "[[", "images")
   annotations <- lapply(layouts, function(x) {
     # keep non axis title annotations (for rescaling)
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
@@ -263,11 +264,13 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
+  images <- Map(reposition, images, split(domainInfo, seq_along(plots)))
   p$layout$annotations <- Reduce(c, annotations)
   p$layout$shapes <- Reduce(c, shapes)
+  p$layout$images <- Reduce(c, images)
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) {
-    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes", names(x))] %||% list()
+    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes|images", names(x))] %||% list()
   })
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
@@ -396,24 +399,27 @@ list2df <- function(x, nms) {
 # (useful mostly for repositioning annotations/shapes in subplots)
 reposition <- function(obj, domains) {
   # we need x and y in order to rescale them!
+  xdom <- as.numeric(domains[c("xstart", "xend")])
+  ydom <- as.numeric(domains[c("yend", "ystart")])
+  
   for (i in seq_along(obj)) {
     o <- obj[[i]]
-    # TODO: this implementation currently assumes xref/yref == "paper"
-    # should we support references to axis objects as well?
-    xs <- if (identical(o$xref, "paper")) c("x", "x0", "x1")
+    xs <- if (identical(o$xref, "paper")) {
+      if (is.numeric(o$sizex)) obj[[i]]$sizex <- o$sizex * abs(diff(xdom))
+      c("x", "x0", "x1")
+    }
     for (j in xs) {
       if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("xstart", "xend")]), from = c(0, 1)
-        )
+        obj[[i]][[j]] <- scales::rescale(o[[j]], xdom, from = c(0, 1))
       }
     }
-    ys <- if (identical(o$xref, "paper")) c("y", "y0", "y1")
+    ys <- if (identical(o$yref, "paper")) {
+      if (is.numeric(o$sizey)) obj[[i]]$sizey <- o$sizey * abs(diff(ydom))
+      c("y", "y0", "y1")
+    }
     for (j in ys) {
       if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("yend", "ystart")]), from = c(0, 1)
-        )
+        obj[[i]][[j]] <- scales::rescale(o[[j]], ydom, from = c(0, 1))
       }
     }
   }

@@ -166,6 +166,39 @@ test_that("annotation xref/yref are bumped correctly", {
   expect_equal(yref2, rep(c("y", "y"), each = 32))
 })
 
+test_that("images accumulate and paper coordinates are repositioned", {
+  
+  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+  
+  # embed the raster as an image
+  p <- plot_ly(x = 1, y = 1) %>% 
+    layout(
+      images = list(list(
+        source = raster2uri(r),
+        sizing = "fill",
+        xref = "paper", 
+        yref = "paper", 
+        x = 0, 
+        y = 0, 
+        sizex = 0.5, 
+        sizey = 0.5, 
+        xanchor = "left", 
+        yanchor = "bottom"
+      ))
+    ) 
+  
+  s <- subplot(p, p, nrows = 1, margin = 0.02)
+  imgs <- plotly_build(s)$x$layout$images
+  expect_true(imgs[[1]]$x == 0)
+  expect_true(imgs[[1]]$y == 0)
+  expect_true(imgs[[1]]$sizex == 0.24)
+  expect_true(imgs[[1]]$sizey == 0.5)
+  expect_true(imgs[[2]]$x == 0.52)
+  expect_true(imgs[[2]]$y == 0)
+  expect_true(imgs[[2]]$sizex == 0.24)
+  expect_true(imgs[[2]]$sizey == 0.5)
+})
+
 
 
 test_that("geo+cartesian behaves", {
