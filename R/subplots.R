@@ -63,7 +63,7 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
- 
+  
   
   plots <- dots2plots(...)
   
@@ -215,15 +215,24 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
       newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
-      # also map annotation[i].xref/annotation[i].yref
+      # also map annotation and image xaxis/yaxis references
+      # TODO: do this for shapes as well?
       ref <- list(xaxis = "xref", yaxis = "yref")[[key]]
       if (is.null(ref)) next
-      if (is.null(annotations[[i]])) next
-      annotations[[i]] <- Map(function(ann, a) { 
-        if (!identical(ann[[ref]], "paper")) ann[[ref]] <- a
-        ann
-      }, annotations[[i]], newAnchors)
+      if (length(annotations[[i]])) {
+        annotations[[i]] <- Map(function(x, y) { 
+          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
+          x
+        }, annotations[[i]], newAnchors)
+      }
+      if (length(images[[i]])) {
+        images[[i]] <- Map(function(x, y) { 
+          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
+          x
+        }, images[[i]], newAnchors)
+      }
     }
+    
     
     # rescale domains according to the tabular layout
     xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])

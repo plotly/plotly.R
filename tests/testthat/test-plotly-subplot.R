@@ -199,6 +199,39 @@ test_that("images accumulate and paper coordinates are repositioned", {
   expect_true(imgs[[2]]$sizey == 0.5)
 })
 
+test_that("images axis references are remapped", {
+  
+  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+  
+  # embed the raster as an image
+  p <- plot_ly(x = 1, y = 1) %>% 
+    layout(
+      images = list(list(
+        source = raster2uri(r),
+        sizing = "fill",
+        xref = "x", 
+        yref = "y", 
+        x = 0, 
+        y = 0, 
+        sizex = 1, 
+        sizey = 1, 
+        xanchor = "left", 
+        yanchor = "bottom"
+      ))
+    )
+  
+  s <- subplot(p, p, nrows = 1, margin = 0.02)
+  imgs <- plotly_build(s)$x$layout$images
+  expect_true(imgs[[1]]$x == 0)
+  expect_true(imgs[[1]]$y == 0)
+  expect_true(imgs[[1]]$xref == "x")
+  expect_true(imgs[[1]]$yref == "y")
+  expect_true(imgs[[2]]$x == 0)
+  expect_true(imgs[[2]]$y == 0)
+  expect_true(imgs[[2]]$xref == "x2")
+  expect_true(imgs[[2]]$yref == "y2")
+})
+
 
 
 test_that("geo+cartesian behaves", {
