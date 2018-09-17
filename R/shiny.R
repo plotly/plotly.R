@@ -45,6 +45,9 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
   if (promises::is.promising(x)) {
+    if (utils::packageVersion("htmlwidgets") < "1.2.1") {
+      warning("Async rendering of htmlwidgets requires v1.2.1 (or higher) of the htmlwidgets package.")
+    }
     promises::then(x, ggplotly)
   } else {
     ggplotly(x)
