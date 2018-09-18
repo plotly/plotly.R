@@ -4,11 +4,11 @@
 \alias{plot_ly}
 \title{Initiate a plotly visualization}
 \usage{
-plot_ly(data = data.frame(), ..., type = NULL, name, color, colors = NULL,
-  alpha = NULL, stroke, strokes = NULL, alpha_stroke = 1, size,
-  sizes = c(10, 100), span, spans = c(1, 20), symbol, symbols = NULL,
-  linetype, linetypes = NULL, split, frame, width = NULL, height = NULL,
-  source = "A")
+plot_ly(data = data.frame(), ..., type = NULL, name, color,
+  colors = NULL, alpha = NULL, stroke, strokes = NULL,
+  alpha_stroke = 1, size, sizes = c(10, 100), span, spans = c(1, 20),
+  symbol, symbols = NULL, linetype, linetypes = NULL, split, frame,
+  width = NULL, height = NULL, source = "A")
 }
 \arguments{
 \item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}

@@ -4,9 +4,9 @@
 \alias{subplot}
 \title{View multiple plots in a single view}
 \usage{
-subplot(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02,
-  shareX = FALSE, shareY = FALSE, titleX = shareX, titleY = shareY,
-  which_layout = "merge")
+subplot(..., nrows = 1, widths = NULL, heights = NULL,
+  margin = 0.02, shareX = FALSE, shareY = FALSE, titleX = shareX,
+  titleY = shareY, which_layout = "merge")
 }
 \arguments{
 \item{...}{One of the following
