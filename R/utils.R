@@ -723,6 +723,13 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
+    if (identical(p$x$layout$clickmode, "select")) {
+      warning(
+        "`layout.clickmode` = 'select' is not designed to work well with ",
+        "the R package's linking framework (i.e. crosstalk support).",
+        call. = FALSE
+      )
+    }
     # does it *ever* make sense to have a missing key value?
     uk <- uniq(k)
     if (length(uk) == 1) {

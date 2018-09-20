@@ -13,6 +13,13 @@ test_that("SharedData produces key/set in plot_ly", {
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
 
+test_that("Warning is thrown when clickmode='select' is used with crosstalk", {
+  expect_warning(
+    plotly_build(layout(p, clickmode = "select")),
+    "not designed to work well"
+  )
+})
+
 test_that("SharedData produces key/set in ggplotly", {
   p <- ggplot(m, aes(x = wt, y = mpg)) + geom_point()
   tr <- plotly_build(p)$x$data[[1]]
@@ -23,6 +30,8 @@ test_that("SharedData produces key/set in ggplotly", {
   expect_false(tr$`_isNestedKey` %||% FALSE)
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
+
+
 
 test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
   
