@@ -1,12 +1,10 @@
 context("highlighting and animation")
 
 m <- crosstalk::SharedData$new(mtcars, ~vs)
+p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()
 
 test_that("SharedData produces key/set in plot_ly", {
-  m <- crosstalk::SharedData$new(mtcars, ~vs)
-  p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()
   tr <- plotly_build(p)$x$data[[1]]
-  
   expect_true(all(tr$key == m$key()))
   expect_identical(tr$set, m$groupName())
   expect_false(tr$`_isNestedKey` %||% FALSE)
