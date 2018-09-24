@@ -13,14 +13,8 @@ env:
     - _R_CHECK_FORCE_SUGGESTS_=false R_PKG="$(basename $TRAVIS_REPO_SLUG)"
     # plotly_api_key (for posting to plot.ly)
     - secure: "WsvmMHN4YVhnk0bLRE04APcLbs5s4vWKSHjEdU0bPXd0xdMTzZeP5D7pxyF1983C+P5LpSnGHv4dgwLMBkNzxJwBR7/Ta7lfO1akYILWwxib+1DVbCqUH5Z4Ba1FSCQptIrLNGR3P7+0Lem4hEhqKdPKltFnxhnXO0Y+MeG71IQ="
-    # GITHUB_PAT (for pushing to plotly-test-table)
-    - secure: "Ar5FRxsMJHxb8CQmmsoFx5Tm6ncFvF3LHtAMtfcOE2e9JAbXQ471PGzOMM7yudGa2vVuQJBpB6bWktuE30J68MQxgRmxeaJYmOp+ePqyW80y/zEa2P3R4//eb9Rif2lmsmaqz7HtVfX4xr3YX4N+ZjfyI8TFt5Phue18tXeMoJw="
     # MAPBOX_TOKEN (for testing `plot_mapbox()`)
     - secure: "QPBEqtLRdwb4ablJORzD0JdCT9ESe3nNdIehM1oxfcNKfpSdf2OFxH3TkeYY1nMpv0mLxiMNTy6xcj9Yk5MaaBCIA0P7q6OdZv9ruzQD1j3g84gP45KwBilbPGjb+/EvOS0fM25vR/pAmA8IyoUfPC2J8HwiNnW8DYdt/hJOJ9A="
-
-# installing Rserve from source requires non-standard R build (--enable-R-shlib) 
-r_binary_packages:
-  - rserve
 
 r_packages:
   - devtools
@@ -40,15 +34,3 @@ before_script:
   - git config --global user.email "cpsievert1@gmail.com"
   - git config --global user.name "cpsievert"
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
-  - git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
-  - cd ..; rm -f *.tar.gz; R CMD build $R_PKG
-
-script:
-  # run R CMD check on the non-pull request build
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' = 'false' ]; then R CMD check ${R_PKG}_*.tar.gz --no-manual; fi"
-  # we do some fancy stuff on the pull request build that confuses R CMD check
-  - sh -c "if [ '$TRAVIS_PULL_REQUEST' != 'false' ]; then Rscript -e 'source(\"plotly/tests/testthat.R\", chdir = T)'; fi"
-
-after_success:
-  - cd plotly-test-table
-  - Rscript ../plotly/inst/build-push-comment.R
