@@ -12,48 +12,48 @@ dat <- data.frame(
 #    B 19.319909163 19.647899863
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
   geom_point(shape=1)      # Use hollow circles
-save_outputs(g, "scatterplots-hollow")
+expect_doppelganger(g, "scatterplots-hollow")
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
   geom_point(shape=1) +
   geom_smooth(method=lm)   # Add linear regression line
-save_outputs(g, "scatterplots-smooth-lm")
+expect_doppelganger(g, "scatterplots-smooth-lm")
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
   geom_point(shape=1) +
   geom_smooth(method=lm, se=FALSE)    # Don't add shaded confidence region
-save_outputs(g, "scatterplots-smooth-lm-se-false")
+expect_doppelganger(g, "scatterplots-smooth-lm-se-false")
 
 
 g <- ggplot(dat, aes(x=xvar, y=yvar)) +
   geom_point(shape=1) +    # Use hollow circles
   geom_smooth()            # Add a loess smoothed fit curve with confidence region
-save_outputs(g, "scatterplots-loess")
+expect_doppelganger(g, "scatterplots-loess")
 
 # Set color by cond
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1)
-save_outputs(g, "scatterplots-color")
+expect_doppelganger(g, "scatterplots-color")
 
 # # Same, but with different colors and add regression lines
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1) +
   scale_colour_hue(l=50) + # Use a slightly darker palette than normal
   geom_smooth(method=lm, se=FALSE)
-save_outputs(g, "scatterplots-scale-color-hue")
+expect_doppelganger(g, "scatterplots-scale-color-hue")
 
 # Extend the regression lines beyond the domain of the data
 g <- ggplot(dat, aes(x=xvar, y=yvar, color=cond)) + geom_point(shape=1) +
   scale_colour_hue(l=50) +
   geom_smooth(method=lm, se=FALSE, fullrange=T)
-save_outputs(g, "scatterplots-full-range")
+expect_doppelganger(g, "scatterplots-full-range")
 
 # Set shape by cond
 g <- ggplot(dat, aes(x=xvar, y=yvar, shape=cond)) + geom_point()
-save_outputs(g, "scatterplots-shape")
+expect_doppelganger(g, "scatterplots-shape")
 
 # Same, but with different shapes
 g <- ggplot(dat, aes(x=xvar, y=yvar, shape=cond)) + geom_point() +
   scale_shape_manual(values=c(1,2))  # Use a hollow circle and triangle
-save_outputs(g, "scatterplots-shape-manual")
+expect_doppelganger(g, "scatterplots-shape-manual")
 
 # Round xvar and yvar to the nearest 5
 dat$xrnd <- round(dat$xvar/5)*5
@@ -64,19 +64,19 @@ dat$yrnd <- round(dat$yvar/5)*5
 g <- ggplot(dat, aes(x=xrnd, y=yrnd)) +
   geom_point(shape=19,      # Use solid circles
              alpha=1/4)     # 1/4 opacity
-save_outputs(g, "scatterplots-overlap")
+expect_doppelganger(g, "scatterplots-overlap")
 
 # Jitter the points
 # Jitter range is 1 on the x-axis, .5 on the y-axis
 g <- ggplot(dat, aes(x=xrnd, y=yrnd)) +
   geom_point(shape=1,      # Use hollow circles
              position=position_jitter(width=1,height=.5))
-save_outputs(g, "scatterplots-jitter")
+expect_doppelganger(g, "scatterplots-jitter")
 
 # Jitter the points using geom_jitter
 # Jitter range is 1 on the x-axis, .5 on the y-axis
 g <- ggplot(dat, aes(x = xrnd, y = yrnd)) +
   geom_jitter(shape = 1,      # Use hollow circles
              width = 1, height = 0.5)
-save_outputs(g, "scatterplots-geom_jitter")
+expect_doppelganger(g, "scatterplots-geom_jitter")
 

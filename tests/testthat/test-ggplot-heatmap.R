@@ -17,7 +17,7 @@ test_that("geom_tile is translated to type=heatmap", {
   # Plot a heatmap using geom_tile
   hm <- ggplot(ww) + geom_tile(aes(x = day, y = time, fill = value))
   
-  L <- save_outputs(hm, "heatmap")
+  L <- expect_doppelganger(hm, "heatmap")
   # one trace is for the colorbar
   expect_equivalent(length(L$data), 2)
   expect_equivalent(L$data[[1]]$type, "heatmap")
@@ -42,7 +42,7 @@ p <- ggplot(data = d, aes(x, y)) +
   scale_fill_gradient2(low = '#67001f', mid = 'white', high = '#053061', midpoint = .5)
 
 test_that("geom_tile() scale_fill_gradient2()", {
-  L <- save_outputs(p, "heatmap-midpoint")
+  L <- expect_doppelganger(p, "heatmap-midpoint")
   # one trace is for the colorbar
   expect_equivalent(length(L$data), 2)
   expect_equivalent(L$data[[1]]$type, "heatmap")
@@ -57,7 +57,7 @@ d <- tidy_cor(mtcars)
 p <- ggplot(d, aes(var1, var2, fill = cor)) + geom_tile()
 
 test_that("geom_tile() with discrete x/y", {
-  L <- save_outputs(p, "heatmap-discrete")
+  L <- expect_doppelganger(p, "heatmap-discrete")
   # one trace is for the colorbar
   expect_equivalent(length(L$data), 2)
   expect_equivalent(L$data[[1]]$type, "heatmap")

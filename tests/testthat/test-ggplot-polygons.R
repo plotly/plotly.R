@@ -2,7 +2,7 @@ context("polygon")
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(gg, paste0("polygon-", name))
+  L <- expect_doppelganger(gg, paste0("polygon-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -143,7 +143,7 @@ test_that("geom_polygon(aes(size), fill, colour)", {
 test_that("borders become one trace with NA", {
   gg <- ggplot(maps::canada.cities, aes(long, lat)) +
     borders(regions = "canada")
-  info <- save_outputs(gg, "polygons-canada-borders")
+  info <- expect_doppelganger(gg, "polygons-canada-borders")
   expect_equivalent(length(info$data), 1)
   expect_true(any(is.na(info$data[[1]]$x)))
   expect_equivalent(nchar(info$data[[1]]$text), 0)

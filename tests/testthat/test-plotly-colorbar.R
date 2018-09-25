@@ -2,7 +2,7 @@ context("colorbar")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-", name))
+  L <- expect_doppelganger(p, paste0("plotly-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }

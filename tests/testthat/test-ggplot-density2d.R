@@ -4,7 +4,7 @@ context("Density2d")
 m <- ggplot(MASS::geyser, aes(x=duration, y=waiting)) + 
   geom_point(alpha = 0.4) +
   geom_density2d()
-L <- save_outputs(m, "density2d")
+L <- expect_doppelganger(m, "density2d")
 
 test_that("geom_density2d translates to path(s)", {
   expect_equivalent(length(L$data), 2)
@@ -18,7 +18,7 @@ m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
   geom_point(aes(colour = col)) +
   xlim(0.5, 6) + ylim(40, 110)
 
-L <- save_outputs(m, "density2dfill")
+L <- expect_doppelganger(m, "density2dfill")
 
 test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
   # only the marker traces should be shown in the legend

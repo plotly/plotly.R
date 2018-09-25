@@ -10,7 +10,7 @@ g <- ggplot(crimesm, aes(map_id = state)) +
 
 
 test_that("basic geom_map works",  {
-  l <- save_outputs(g, "map-facet")
+  l <- expect_doppelganger(g, "map-facet")
   expect_true(length(l$data) > 1)
 })
 
