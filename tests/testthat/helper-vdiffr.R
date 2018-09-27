@@ -18,6 +18,7 @@ if (!requireNamespace("vdiffr", quietly = TRUE) ||
 expect_doppelganger <- function(p, name, ...) {
   
   if (enable_vdiffr) {
+    if (ggplot2::is.ggplot(p)) p <- ggplotly(p)
     ignore <- vdiffr::expect_doppelganger(name, p, ...)
   }
   # return 'built' data/layout
