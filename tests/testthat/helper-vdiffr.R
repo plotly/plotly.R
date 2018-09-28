@@ -14,7 +14,7 @@ if (!requireNamespace("vdiffr", quietly = TRUE) ||
   enable_vdiffr <- FALSE
 }
 
-# start up the image server and inform vdiffr how to write plotly svg
+# start up the image server and let vdiffr's svg writing method know about it
 if (enable_vdiffr) {
   # generate random (port) number between 3000 & 8000
   port <- floor(runif(1, 3001, 8000))
@@ -43,21 +43,20 @@ if (enable_vdiffr) {
   assignInNamespace(
     "write_svg.plotly",
     function(p, file, title, user_fonts = NULL) {
-      
-      # before image export, specify trace[i].uid so it's deterministic in the resulting svg
+      # before exporting, specify trace[i].uid so resulting svg is deterministic
       # https://github.com/plotly/orca/issues/133
       p <- plotly::plotly_build(p)
       uid_data <- paste0("-vdiffr-plotly-", seq_along(p$x$data))
       p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
       
       # write svg to disk
-      withr::with_dir(
-        dirname(file), orcaImageServer$export(p, basename(file))
-      )
+      owd <- setwd(dirname(file))
+      on.exit(setwd(owd))
+      orcaImageServer$export(p, basename(file))
       
       # strip out non-deterministic fullLayout.uid
       # TODO: if and when plotly provides an API to pre-specify, use it!
-      svg_txt <- readLines(file)
+      svg_txt <- readLines(file, warn = FALSE)
       def <- strextract(svg_txt, 'defs id=\\"defs-[[:alnum:]]+\\"')
       uid <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
       svg_txt <- gsub(uid, "", svg_txt, fixed = TRUE)
@@ -65,6 +64,10 @@ if (enable_vdiffr) {
     },
     asNamespace("vdiffr")
   )
+  
+  # force the vdiffr shiny app to open in a real browser 
+  # (some svg files seem to not render properly in RStudio)
+  options(shiny.launch.browser = TRUE)
 }
 
 
