@@ -19,8 +19,8 @@ api_create(x = last_plot(), filename = NULL, fileopt = c("overwrite",
 \method{api_create}{ggplot}(x = last_plot(), filename = NULL,
   fileopt = "overwrite", sharing = "public", ...)
 
-\method{api_create}{data.frame}(x, filename = NULL, fileopt = "overwrite",
-  sharing = "public", ...)
+\method{api_create}{data.frame}(x, filename = NULL,
+  fileopt = "overwrite", sharing = "public", ...)
 
 api_download_plot(id, username)
 
