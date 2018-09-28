@@ -4,10 +4,6 @@
 \name{orca_serve}
 \alias{orca_serve}
 \title{Orca image export server}
-\format{An object of class \code{R6ClassGenerator} of length 24.}
-\usage{
-orca_serve
-}
 \description{
 Compared to \link{orca}, \link{orca_serve} is more efficient at exporting many plotly
 graphs because the former must startup/shutdown an external process for every image.
@@ -16,10 +12,20 @@ The server (background) process is launched upon initialization of a \link{orca_
 object as input and spits out an image file to disk. To kill the background server process,
 use \code{close()}.
 }
-\section{Constructor}{
+\section{Initialization}{
 
+A new 'orcaServe'-object is initialized using the new() method on the generator:
 
-\code{orca_serve$new(port = 5151)}
+\strong{Usage}
+
+\code{
+  orca_serve$new(
+    port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL, keep_alive = TRUE, 
+    window_max_number = NULL, quiet = FALSE, debug = FALSE, ...
+  )
+ }
+
+\strong{Arguments}
 
 \describe{
 \item{\code{port}}{Sets the server's port number.}
@@ -46,6 +52,26 @@ Sets maximum number of browser windows the server can keep open at a given time.
 }
 }
 
+\section{Methods}{
+
+
+\describe{
+\item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
+Export a static image of a plotly graph. Arguments found here are the same as those found in \link{orca}.
+}
+\item{\code{close()}}{Close down the orca server and kill the underlying node process.}
+}
+}
+
+\section{Fields}{
+
+
+\describe{
+\item{\code{port}}{The port number that the server is listening to.}
+\item{\code{process}}{An R6 class for controlling and querying the underlying node process.}
+}
+}
+
 \examples{
 
 \dontrun{
@@ -67,7 +93,6 @@ server$close()
 unlink("test1.pdf")
 unlink("test2.pdf")
 }
-
 }
 \seealso{
 \link{orca}

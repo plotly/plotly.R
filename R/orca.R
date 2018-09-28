@@ -71,16 +71,29 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 
 #' Orca image export server
 #' 
-#' @description Compared to [orca], [orca_serve] is more efficient at exporting many plotly 
+#' Compared to [orca], [orca_serve] is more efficient at exporting many plotly 
 #' graphs because the former must startup/shutdown an external process for every image. 
 #' The server (background) process is launched upon initialization of a [orca_serve] class 
 #' (i.e., when the `new()` method is called). The `export()` method accepts any valid plotly 
 #' object as input and spits out an image file to disk. To kill the background server process, 
 #' use `close()`.
 #' 
-#' @section Constructor:
+#' @usage NULL
+#' @format NULL
 #' 
-#' \code{orca_serve$new(port = 5151)}
+#' @section Initialization:
+#' A new 'orcaServe'-object is initialized using the new() method on the generator:
+#' 
+#' \strong{Usage}
+#' 
+#' \code{
+#'   orca_serve$new(
+#'     port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL, keep_alive = TRUE, 
+#'     window_max_number = NULL, quiet = FALSE, debug = FALSE, ...
+#'   )
+#'  }
+#' 
+#' \strong{Arguments}
 #' 
 #' \describe{
 #'   \item{\code{port}}{Sets the server's port number.}
@@ -104,6 +117,22 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #'   }
 #'   \item{\code{quiet}}{Suppress all logging info.}
 #'   \item{\code{debug}}{Starts app in debug mode.}
+#' }
+#' 
+#' @section Methods:
+#' 
+#' \describe{
+#'   \item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
+#'     Export a static image of a plotly graph. Arguments found here are the same as those found in [orca].
+#'   }
+#'   \item{\code{close()}}{Close down the orca server and kill the underlying node process.}
+#' }
+#' 
+#' @section Fields:
+#' 
+#' \describe{
+#'   \item{\code{port}}{The port number that the server is listening to.}
+#'   \item{\code{process}}{An R6 class for controlling and querying the underlying node process.}
 #' }
 #' 
 #' @export
@@ -130,20 +159,19 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' unlink("test1.pdf")
 #' unlink("test2.pdf")
 #' }
-#' 
+
 orca_serve <- R6::R6Class(
   "orcaServe",
   public = list(
     process = NULL,
     port = NULL,
-    
     initialize = function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
                           keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
                           debug = FALSE, ...) {
       
       # make sure we have the required infrastructure
       orca_available()
-      try_library("processx", "orca")
+      try_library("processx", "orca_serve")
       
       # use main bundle since any plot can be thrown at the server
       plotlyjs <- plotlyMainBundle()
@@ -175,7 +203,7 @@ orca_serve <- R6::R6Class(
       self$process <- processx::process$new("orca", args, ...)
       self$port <- port
     },
-    export = function(p, file = "plot.png", format = tools::file_ext(file), width = 1000, height = 500) {
+    export = function(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL) {
       
       # request/response model works similarly to plotly_IMAGE()
       bod <- list(
