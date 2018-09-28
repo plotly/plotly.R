@@ -182,7 +182,7 @@ orca_serve <- R6::R6Class(
         "-p", port,
         "--plotly", plotlyjs_file,
         if (safe) "--safe-mode",
-        if (orca_version() >= "1.1.1") "--graph-only",
+        #if (orca_version() >= "1.1.1") "--graph-only",
         if (keep_alive) "--keep-alive",
         if (debug) "--debug",
         if (quiet) "--quiet"
