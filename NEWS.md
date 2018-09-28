@@ -1,5 +1,9 @@
 # 4.8.0.9000
 
+## NEW FEATURES
+
+* The `orca_serve` R6 class was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
+
 ## IMPROVEMENTS
 
 * Upgraded to plotly.js v1.40.1.
