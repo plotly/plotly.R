@@ -42,23 +42,24 @@ if (enable_vdiffr) {
   assignInNamespace(
     "write_svg.plotly",
     function(p, file, title, user_fonts = NULL) {
-      # set our own deterministic fullData[i].uid
-      # https://github.com/plotly/orca/issues/133
-      uid_data <- "-vdiffr-plotly"
-      p <- plotly::style(p, uid = uid_data)
       
-      # generate static pdf
+      # before image export, specify trace[i].uid so it's deterministic in the resulting svg
+      # https://github.com/plotly/orca/issues/133
+      p <- plotly::plotly_build(p)
+      uid_data <- paste0("-vdiffr-plotly-", seq_along(p$x$data))
+      p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
+      
+      # write svg to disk
       withr::with_dir(
         dirname(file), orcaImageServer$export(p, basename(file))
       )
       
-      # strip out random layout.uid
-      # TODO: if and when plotly provides an api for specifying
-      # fullLayout.uid, use it!
+      # strip out non-deterministic fullLayout.uid
+      # TODO: if and when plotly provides an API to pre-specify, use it!
       svg_txt <- readLines(file)
       def <- strextract(svg_txt, 'defs id=\\"defs-[[:alnum:]]+\\"')
-      id <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
-      svg_txt <- gsub(id, "", svg_txt, fixed = TRUE)
+      uid <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
+      svg_txt <- gsub(uid, "", svg_txt, fixed = TRUE)
       writeLines(svg_txt, file)
     },
     asNamespace("vdiffr")
