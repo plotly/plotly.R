@@ -50,7 +50,7 @@ test_that("Formula resulting in logical vector works", {
 test_that("Can specify a scale manually", {
   pal <- c("1" = "cross", "0" = "diamond")
   p <- plot_ly(mtcars, x = ~mpg, y = ~disp, symbol = ~factor(vs), symbols = pal)
-  l <- expect_traces(p, 2, "symbol-manual")
+  l <- expect_warning(expect_traces(p, 2, "symbol-manual"), "maximum of 6 discrete values")
   markers <- lapply(l$data, "[[", "marker")
   expected <- setNames(pal[sapply(l$data, "[[", "name")], NULL)
   expect_equivalent(expected, sapply(markers, "[[", "symbol"))
