@@ -20,7 +20,7 @@ if (enable_vdiffr) {
   port <- floor(runif(1, 3001, 8000))
   
   # check to see if this port is usable
-  # TODO: this is how shiny does -- is there a lighter-weight solution?
+  # TODO: this is how shiny does it -- is there a lighter-weight solution?
   tmp <- try(httpuv::startServer("0.0.0.0", port, list()), silent = TRUE)
   if (inherits(tmp, 'try-error')) {
     stop(
@@ -34,6 +34,7 @@ if (enable_vdiffr) {
   # start up the node process
   orcaImageServer <- orca_serve$new(port)
   
+  # TODO: best place to put this?
   strextract <- function(str, pattern) {
     regmatches(str, regexpr(pattern, str))
   }
@@ -70,6 +71,9 @@ if (enable_vdiffr) {
 expect_doppelganger <- function(p, name, ...) {
   
   if (enable_vdiffr) {
+    # some plots have random characteristics, so make sure we always have the same seed,
+    # otherwise comparing svg produces false positives
+    set.seed(555)
     if (ggplot2::is.ggplot(p)) p <- ggplotly(p)
     ignore <- vdiffr::expect_doppelganger(name, p, ...)
   }
