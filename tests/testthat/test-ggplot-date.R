@@ -8,7 +8,7 @@ test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
   df <- rbind(data.frame(who = "me", time.obj, dollars = c(1.1, 5.6)),
               data.frame(who = "you", time.obj, dollars = c(10.2, 0)))
   gg <- qplot(time.obj, dollars, data = df, color = who, geom = "line")
-  info <- expect_doppelganger(gg, "date-strings")
+  info <- expect_doppelganger_built(gg, "date-strings")
   expect_equivalent(length(info$data), 2)
   for(trace in info$data[1:2]){
     expect_equivalent(as.numeric(time.obj), trace$x)
@@ -22,7 +22,7 @@ test_that("class Date is supported", {
   )
   df$x <- as.Date(df$x)
   gg <- ggplot(df) + geom_line(aes(x = x, y = y))
-  info <- expect_doppelganger(gg, "date-class-Date")
+  info <- expect_doppelganger_built(gg, "date-class-Date")
   expect_equivalent(length(info$data), 1)
 })
 
@@ -33,5 +33,5 @@ test_that("scale_x_date and irregular time series work", {
   )
   df <- df[order(df$date), ]
   dt <- qplot(date, price, data = df, geom = "line") + theme(aspect.ratio = 1/4)
-  info <- expect_doppelganger(dt, "date-irregular-time-series")
+  info <- expect_doppelganger_built(dt, "date-irregular-time-series")
 })

@@ -2,7 +2,7 @@ context("Boxplot")
 
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.numeric(n.traces))
-  expect_doppelganger(gg, paste0("boxplot-", name))
+  expect_doppelganger_built(gg, paste0("boxplot-", name))
   L <- gg2list(gg)
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
@@ -16,7 +16,7 @@ expect_traces <- function(gg, n.traces, name) {
 test_that("geom_boxplot gives a boxplot", {
   gg <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_boxplot()
   
-  L <- expect_doppelganger(gg, "boxplot")
+  L <- expect_doppelganger_built(gg, "boxplot")
 
   expect_length(L$data, 1)
   expect_true(L$data[[1]]$type == "box")
@@ -44,7 +44,7 @@ test_that("you can make a boxplot for a distribution of datetimes", {
   
   bp <- ggplot(df) + geom_boxplot(aes(x, y))
   
-  L <- expect_doppelganger(bp, "boxplot-datetime")
+  L <- expect_doppelganger_built(bp, "boxplot-datetime")
   
   expect_equivalent(length(L$data), 1)  # 1 trace
   expect_equivalent(L$data[[1]]$type, "box")
@@ -78,7 +78,7 @@ g <- ggplot(dat, aes(x = cond, y = rating)) +
   geom_boxplot(outlier.shape = NA, aes(fill = col))
 
 test_that("correct # of unique fillcolors", {
-  L <- expect_doppelganger(g, "boxplot-fillcolor")
+  L <- expect_doppelganger_built(g, "boxplot-fillcolor")
   expect_equivalent(length(L$data), 2)
   expect_identical(L$data[[1]]$type, "box")
   fills <- sapply(L$data, "[[", "fillcolor")

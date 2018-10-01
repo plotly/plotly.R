@@ -12,7 +12,7 @@ test_that("geom_errorbarh gives horizontal errorbars", {
   # Define the limits of the horizontal errorbars
   g <- g + geom_errorbarh(aes(xmax = resp + se, xmin = resp - se))
 
-  L <- expect_doppelganger(g, "errorbar-horizontal")
+  L <- expect_doppelganger_built(g, "errorbar-horizontal")
 
   # Expect scatter plot and its error bars to have the same color
   expect_equivalent(L$data[[1]]$marker$color, L$data[[3]]$error_x$color)

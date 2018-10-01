@@ -2,7 +2,7 @@ context("subplot")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- expect_doppelganger(p, paste0("plotly-subplot-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-subplot-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
@@ -136,7 +136,7 @@ test_that("subplot accepts a list of plots", {
 
 # Ignore for now https://github.com/ggobi/ggally/issues/264
 test_that("ggplotly understands ggmatrix", {
-  L <- expect_doppelganger(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+  L <- expect_doppelganger_built(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
 })
 
 test_that("annotation xref/yref are bumped correctly", {

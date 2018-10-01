@@ -2,7 +2,7 @@ context("ribbon")
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- expect_doppelganger(gg, paste0("ribbon-", name))
+  L <- expect_doppelganger_built(gg, paste0("ribbon-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])

@@ -2,7 +2,7 @@ context("plotly-symbol")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- expect_doppelganger(p, paste0("plotly-symbol-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-symbol-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }

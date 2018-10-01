@@ -7,7 +7,7 @@ test_that("geom_sf() basic polygons.", {
   
   p <- ggplot(nc) + geom_sf()
   
-  l <- expect_doppelganger(p, "sf")
+  l <- expect_doppelganger_built(p, "sf")
   # one trace is for the graticule
   expect_length(l$data, 2)
   # can translate degree symbol
@@ -29,7 +29,7 @@ test_that("geom_sf() geometry collection.", {
   cd <- sf::st_as_sf(data.frame(d = 1, geometry = sf::st_sfc(i)))
   
   p <- ggplot(cd) + geom_sf()
-  l <- expect_doppelganger(p, "sf-geom-collection")
+  l <- expect_doppelganger_built(p, "sf-geom-collection")
   
   # graticule, point, line, polygon
   expect_length(l$data, 4)
@@ -49,7 +49,7 @@ test_that("geom_sf() polygons with fill/text.", {
   
   p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME))
   
-  l <- expect_doppelganger(p, "sf-fill-text")
+  l <- expect_doppelganger_built(p, "sf-fill-text")
   # one trace for every fillcolor, one for graticule, one for colorbar
   expect_length(l$data, length(unique(nc$AREA)) + 2)
   expect_true(
@@ -70,7 +70,7 @@ test_that("geom_sf() with basic polygons and points.", {
     annotate("point", x = -80, y = 35, colour = "red", size = 4) +
     theme(panel.grid.major = element_line(colour = "red"))
   
-  l <- expect_doppelganger(p, "sf-points")
+  l <- expect_doppelganger_built(p, "sf-points")
   # one trace for graticule, one for point, and one polygons
   expect_length(l$data, 3)
   # graticule should be red
@@ -84,7 +84,7 @@ test_that("sf aspect ratio is correct", {
   
   p <- ggplot(nc) + geom_sf() 
   
-  l <- expect_doppelganger(p, "sf-aspect")
+  l <- expect_doppelganger_built(p, "sf-aspect")
   expect_equivalent(l$layout$xaxis$scaleanchor, "y")
   expect_equal(l$layout$xaxis$scaleratio, 0.81678435872298)
 })
@@ -96,7 +96,7 @@ test_that("works with a blank theme", {
   p <- ggplot(nc) + geom_sf() + 
     ggthemes::theme_map()
   
-  l <- expect_doppelganger(p, "sf-theme-map")
+  l <- expect_doppelganger_built(p, "sf-theme-map")
   
   # TODO: perhaps the graticule shouldn't be included at all?
   expect_length(l$data, 2)

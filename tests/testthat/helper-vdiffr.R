@@ -56,6 +56,10 @@ if (enable_vdiffr) {
   # force the vdiffr shiny app to open in a real browser 
   # (some svg files seem to not render properly in RStudio)
   options(shiny.launch.browser = TRUE)
+} else {
+  
+  skip("Visual testing is not enabled/")
+  
 }
 
 
@@ -66,9 +70,15 @@ expect_doppelganger <- function(p, name, ...) {
     # otherwise comparing svg produces false positives
     set.seed(555)
     if (ggplot2::is.ggplot(p)) p <- ggplotly(p)
-    ignore <- vdiffr::expect_doppelganger(name, p, ...)
+    vdiffr::expect_doppelganger(name, p, ...)
+  } else {
+    invisible(NULL)
   }
   
-  # return 'built' data/layout
+}
+
+# run visual test and return 'built' data/layout
+expect_doppelganger_built <- function(p, name, ...) {
+  expect_doppelganger(p, name, ...)
   plotly_build(p)$x[c("data", "layout")]
 }

@@ -3,7 +3,7 @@ context("geom_jitter")
 # Expect trace function
 expect_traces <- function(gg, n_traces, name) {
   stopifnot(is.numeric(n_traces))
-  expect_doppelganger(gg, paste0("jitter-", name))
+  expect_doppelganger_built(gg, paste0("jitter-", name))
   L <- gg2list(gg)
   all_traces <- L$data
   no_data <- sapply(all_traces, function(tr) {

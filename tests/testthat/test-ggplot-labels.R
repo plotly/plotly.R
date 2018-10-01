@@ -4,7 +4,7 @@ test_that("ggtitle is translated correctly", {
   ggiris <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ggtitle("My amazing plot!")
-  info <- expect_doppelganger(ggiris, "labels-ggtitle")
+  info <- expect_doppelganger_built(ggiris, "labels-ggtitle")
   expect_identical(info$layout$title, "My amazing plot!")
 })
 
@@ -12,7 +12,7 @@ test_that("ylab is translated correctly", {
   ggiris <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ylab("sepal width")
-  info <- expect_doppelganger(ggiris, "labels-ylab")
+  info <- expect_doppelganger_built(ggiris, "labels-ylab")
   labs <- c(info$layout$xaxis$title, info$layout$yaxis$title)
   expect_identical(labs, c("Petal.Width", "sepal width"))
 })
@@ -22,7 +22,7 @@ test_that("ylab is translated correctly", {
 #  ggiris <- ggplot(iris) +
 #    geom_point(aes(Petal.Width, Sepal.Width)) +
 #    scale_x_continuous("petal width")
-#  info <- expect_doppelganger(ggiris, "labels-scale_x_continuous_name")
+#  info <- expect_doppelganger_built(ggiris, "labels-scale_x_continuous_name")
 #  labs <- unlist(lapply(info$layout$annotations, "[[", "text"))
 #  expect_identical(sort(labs), c("petal width", "Sepal.Width"))
 #})
@@ -31,7 +31,7 @@ test_that("angled ticks are translated correctly", {
   ggiris <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width)) +
     theme(axis.text.x = element_text(angle = 45))
-  info <- expect_doppelganger(ggiris, "labels-angles")
+  info <- expect_doppelganger_built(ggiris, "labels-angles")
   expect_identical(info$layout$xaxis$tickangle, -45)
 })
 

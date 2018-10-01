@@ -6,7 +6,7 @@ boxes <- ggplot(PlantGrowth, aes(x = group, y = weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- expect_doppelganger(gg, paste0("ticks-", name))
+  L <- expect_doppelganger_built(gg, paste0("ticks-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])

@@ -10,7 +10,7 @@ one.line.df <- data.frame(
 test_that("only asymmetric error bars", {
   error.gg <- ggplot(one.line.df, aes(x, y)) +
     geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array))
-  L <- expect_doppelganger(error.gg, "error-simple")
+  L <- expect_doppelganger_built(error.gg, "error-simple")
 })
 
 test_that("asymmetric error bars, geom_errorbar last", {
@@ -18,7 +18,7 @@ test_that("asymmetric error bars, geom_errorbar last", {
     geom_line() +
     geom_point() +
     geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array))
-  L <- expect_doppelganger(one.line.gg, "error-simple-line")
+  L <- expect_doppelganger_built(one.line.gg, "error-simple-line")
 })
 
 test_that("asymmetric error bars, geom_errorbar first", {
@@ -26,7 +26,7 @@ test_that("asymmetric error bars, geom_errorbar first", {
     geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array)) +
     geom_line() +
     geom_point()
-  L <- expect_doppelganger(one.line.gg, "error-simple-line-point")
+  L <- expect_doppelganger_built(one.line.gg, "error-simple-line-point")
 })
 
 test_that("different colors for error bars, points, and lines", {
@@ -34,7 +34,7 @@ test_that("different colors for error bars, points, and lines", {
     geom_errorbar(aes(ymin = y - arrayminus, ymax = y + array), color = "red") +
     geom_line(color = "violet") +
     geom_point(color = "blue", size = 14)
-  L <- expect_doppelganger(one.line.gg, "error-simple-line-point-crazy")
+  L <- expect_doppelganger_built(one.line.gg, "error-simple-line-point-crazy")
 })
 
 # example from https://github.com/ropensci/plotly/issues/513
@@ -52,5 +52,5 @@ fig1 <- ggplot(d, aes(x = x, y = y, text = label, colour = group)) +
   theme_bw()
 
 test_that("error bars respect trace ordering", {
-  L <- expect_doppelganger(fig1, "error-rect-alpha")
+  L <- expect_doppelganger_built(fig1, "error-rect-alpha")
 })
