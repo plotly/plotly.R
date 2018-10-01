@@ -47,5 +47,5 @@ r_packages: devtools
 # live on bleeding edge
 r_github_packages: 
   - tidyverse/ggplot2
-  - cpsievert/vdiffr@plotly
+  - cpsievert/vdiffr@write-svg
   - cpsievert/diffobj@css

@@ -40,30 +40,27 @@ if (enable_vdiffr) {
   }
   
   # define logic for writing svg in vdiffr
-  assignInNamespace(
-    "write_svg.plotly",
-    function(p, file, title, user_fonts = NULL) {
-      # before exporting, specify trace[i].uid so resulting svg is deterministic
-      # https://github.com/plotly/orca/issues/133
-      p <- plotly::plotly_build(p)
-      uid_data <- paste0("-vdiffr-plotly-", seq_along(p$x$data))
-      p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
-      
-      # write svg to disk
-      owd <- setwd(dirname(file))
-      on.exit(setwd(owd))
-      orcaImageServer$export(p, basename(file))
-      
-      # strip out non-deterministic fullLayout.uid
-      # TODO: if and when plotly provides an API to pre-specify, use it!
-      svg_txt <- readLines(file, warn = FALSE)
-      def <- strextract(svg_txt, 'defs id=\\"defs-[[:alnum:]]+\\"')
-      uid <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
-      svg_txt <- gsub(uid, "", svg_txt, fixed = TRUE)
-      writeLines(svg_txt, file)
-    },
-    asNamespace("vdiffr")
-  )
+  write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
+    # before exporting, specify trace[i].uid so resulting svg is deterministic
+    # https://github.com/plotly/orca/issues/133
+    p <- plotly::plotly_build(p)
+    uid_data <- paste0("-vdiffr-plotly-", seq_along(p$x$data))
+    p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
+    
+    # write svg to disk
+    owd <- setwd(dirname(file))
+    on.exit(setwd(owd))
+    orcaImageServer$export(p, basename(file))
+    
+    # strip out non-deterministic fullLayout.uid
+    # TODO: if and when plotly provides an API to pre-specify, use it!
+    svg_txt <- readLines(file, warn = FALSE)
+    strextract <- function(str, pattern) regmatches(str, regexpr(pattern, str))
+    def <- strextract(svg_txt, 'defs id=\\"defs-[[:alnum:]]+\\"')
+    uid <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
+    svg_txt <- gsub(uid, "", svg_txt, fixed = TRUE)
+    writeLines(svg_txt, file)
+  }
   
   # force the vdiffr shiny app to open in a real browser 
   # (some svg files seem to not render properly in RStudio)
