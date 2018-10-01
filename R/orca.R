@@ -117,6 +117,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #'   }
 #'   \item{\code{quiet}}{Suppress all logging info.}
 #'   \item{\code{debug}}{Starts app in debug mode.}
+#'   \item{\code{xvfb}}{Whether to run orca via X virtual framebuffer. May be necessary in a headless environment}
 #' }
 #' 
 #' @section Methods:
@@ -167,7 +168,7 @@ orca_serve <- R6::R6Class(
     port = NULL,
     initialize = function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
                           keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
-                          debug = FALSE, ...) {
+                          debug = FALSE, xvfb = FALSE, ...) {
       
       # make sure we have the required infrastructure
       orca_available()
@@ -200,7 +201,12 @@ orca_serve <- R6::R6Class(
       if (isTRUE(mathjax)) 
         args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
       
-      self$process <- processx::process$new("orca", args, ...)
+      if (xvfb) {
+        self$process <- processx::process$new("xvfb-run", c("orca", args), ...)
+      } else {
+        self$process <- processx::process$new("orca", args, ...)
+      }
+      
       self$port <- port
     },
     export = function(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL) {

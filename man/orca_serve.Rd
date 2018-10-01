@@ -49,6 +49,7 @@ Sets maximum number of browser windows the server can keep open at a given time.
 }
 \item{\code{quiet}}{Suppress all logging info.}
 \item{\code{debug}}{Starts app in debug mode.}
+\item{\code{xvfb}}{Whether to run orca via X virtual framebuffer. May be necessary in a headless environment}
 }
 }
 

@@ -8,7 +8,9 @@ matrix:
   include:
   - r: devel
   - r: release
-    env: USE_VDIFFR=true
+    env: 
+      - USE_VDIFFR=true
+      - USE_XVFB=true
   - r: oldrel
 
 env:

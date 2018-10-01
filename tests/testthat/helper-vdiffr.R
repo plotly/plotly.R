@@ -18,17 +18,16 @@ if (!requireNamespace("vdiffr", quietly = TRUE) ||
 if (enable_vdiffr) {
   # generate random (port) number between 3000 & 8000
   port <- floor(runif(1, 3001, 8000))
-  
-  # try and start up the node process
+  # make sure orca cli is available
   orca_available()
-  orcaImageServer <- try(orca_serve$new(port), silent = TRUE)
+  # try and start up the node process
+  orcaImageServer <- try(orca_serve$new(port, xvfb = Sys.getenv("USE_XVFB", FALSE)), silent = TRUE)
   if (inherits(orcaImageServer, 'try-error')) {
     stop(
       "Tried to open orca server on port '", port, "', but it's not available. ", 
       "Try (possibly restarting R) and running `test()` again"
     )
   }
-  
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
