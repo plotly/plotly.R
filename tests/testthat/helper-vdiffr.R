@@ -19,25 +19,16 @@ if (enable_vdiffr) {
   # generate random (port) number between 3000 & 8000
   port <- floor(runif(1, 3001, 8000))
   
-  # check to see if this port is usable
-  # TODO: this is how shiny does it -- is there a lighter-weight solution?
-  tmp <- try(httpuv::startServer("0.0.0.0", port, list()), silent = TRUE)
-  if (inherits(tmp, 'try-error')) {
+  # try and start up the node process
+  orca_available()
+  orcaImageServer <- try(orca_serve$new(port), silent = TRUE)
+  if (inherits(orcaImageServer, 'try-error')) {
     stop(
       "Tried to open orca server on port '", port, "', but it's not available. ", 
-      "Try running `test()` again"
+      "Try (possibly restarting R) and running `test()` again"
     )
-  } else {
-    httpuv::stopServer(tmp)
   }
   
-  # start up the node process
-  orcaImageServer <- orca_serve$new(port)
-  
-  # TODO: best place to put this?
-  strextract <- function(str, pattern) {
-    regmatches(str, regexpr(pattern, str))
-  }
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
