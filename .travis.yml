@@ -30,14 +30,10 @@ before_install:
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
   - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
-  - sudo apt-get install --yes nodejs npm
-  - npm install -g electron@1.8.4 orca
-  ## orca standalone binary
-  #- cd ..
-  #- wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage
-  #- chmod 777 orca-1.1.1-x86_64.AppImage 
-  #- ln -s ./orca-1.1.1-x86_64.AppImage ./orca
-  #- export PATH="$PATH:$PWD"
+  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage
+  - chmod 777 orca-1.1.1-x86_64.AppImage 
+  - ln -s ./orca-1.1.1-x86_64.AppImage ./orca
+  - export PATH="$PATH:$PWD"
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
 
