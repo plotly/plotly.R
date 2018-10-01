@@ -33,14 +33,16 @@ env:
 
 before_install:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
-  # mainly for installing sf (which requires units/rgeos/rgdal)
+  # sf system dependencies
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
-  # infrastructure for running orca -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
-  # using `orca()`/`orca_serve`
+  # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
   - sudo apt-get install libgtk2.0-0 libgconf-2-4 google-chrome-stable
-  - sudo apt-get install --yes nodejs npm
-  - npm install -g electron@1.8.4 orca
+  # orca standalone binary
+  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage
+  - chmod 777 orca-1.1.1-x86_64.AppImage 
+  - ln -s ./orca-1.1.1-x86_64.AppImage ./orca
+  - export PATH="$PATH:$PWD"
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
