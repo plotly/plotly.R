@@ -10,8 +10,6 @@ matrix:
   - r: release
     env: USE_VDIFFR=true
   - r: oldrel
-#  - r: 3.2
-#  - r: 3.1
 
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  

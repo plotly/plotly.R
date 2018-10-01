@@ -76,6 +76,3 @@ LazyData: true
 RoxygenNote: 6.1.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Remotes:
-    cpsievert/diffobj@css,
-    cpsievert/vdiffr@plotly
