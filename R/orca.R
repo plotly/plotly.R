@@ -220,7 +220,7 @@ orca_serve <- R6::R6Class(
         scale = scale
       )
       res <- httr::POST(
-        paste0("http://localhost:", self$port), 
+        paste0("http://127.0.0.1:", self$port), 
         body = to_JSON(bod)
       )
       httr::stop_for_status(res)
