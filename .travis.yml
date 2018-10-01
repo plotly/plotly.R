@@ -11,12 +11,6 @@ matrix:
     env: USE_VDIFFR=true
   - r: oldrel
 
-# work around temporary travis + R 3.5 bug
-r_packages: devtools  
-
-# live on bleeding edge
-r_github_packages: tidyverse/ggplot2
-
 env:
   global:
     # don't treat missing suggested packages as error
@@ -28,7 +22,6 @@ env:
     # MAPBOX_TOKEN (for testing `plot_mapbox()`)
     - secure: "QPBEqtLRdwb4ablJORzD0JdCT9ESe3nNdIehM1oxfcNKfpSdf2OFxH3TkeYY1nMpv0mLxiMNTy6xcj9Yk5MaaBCIA0P7q6OdZv9ruzQD1j3g84gP45KwBilbPGjb+/EvOS0fM25vR/pAmA8IyoUfPC2J8HwiNnW8DYdt/hJOJ9A="
 
-
 before_install:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   # sf system dependencies
@@ -36,11 +29,23 @@ before_install:
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
-  - sudo apt-get install libgtk2.0-0 libgconf-2-4 google-chrome-stable
-  # orca standalone binary
-  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage
-  - chmod 777 orca-1.1.1-x86_64.AppImage 
-  - ln -s ./orca-1.1.1-x86_64.AppImage ./orca
-  - export PATH="$PATH:$PWD"
+  - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
+  - sudo apt-get install --yes nodejs npm
+  - npm install -g electron@1.8.4 orca
+  ## orca standalone binary
+  #- cd ..
+  #- wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage
+  #- chmod 777 orca-1.1.1-x86_64.AppImage 
+  #- ln -s ./orca-1.1.1-x86_64.AppImage ./orca
+  #- export PATH="$PATH:$PWD"
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
+
+# work around temporary travis + R 3.5 bug
+r_packages: devtools  
+
+# live on bleeding edge
+r_github_packages: 
+  - tidyverse/ggplot2
+  - cpsievert/vdiffr@plotly
+  - cpsievert/diffobj@css
