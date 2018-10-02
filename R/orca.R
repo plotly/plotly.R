@@ -87,7 +87,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' \strong{Usage}
 #' 
 #' \code{
-#'   orca_serve$new(
+#'   orca_serve(
 #'     port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL, keep_alive = TRUE, 
 #'     window_max_number = NULL, quiet = FALSE, debug = FALSE, ...
 #'   )
@@ -143,7 +143,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' 
 #' \dontrun{
 #' # launch the server
-#' server <- orca_serve$new()
+#' server <- orca_serve()
 #' 
 #' # export as many graphs as you'd like
 #' server$export(qplot(1:10), "test1.pdf")
@@ -161,56 +161,54 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' unlink("test2.pdf")
 #' }
 
-orca_serve <- R6::R6Class(
-  "orcaServe",
-  public = list(
-    process = NULL,
-    port = NULL,
-    initialize = function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
-                          keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
-                          debug = FALSE, xvfb = FALSE, ...) {
-      
-      # make sure we have the required infrastructure
-      orca_available()
-      try_library("processx", "orca_serve")
-      
-      # use main bundle since any plot can be thrown at the server
-      plotlyjs <- plotlyMainBundle()
-      plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
-      
-      args <- c(
-        "serve",
-        "-p", port,
-        "--plotly", plotlyjs_file,
-        if (safe) "--safe-mode",
-        #if (orca_version() >= "1.1.1") "--graph-only",
-        if (keep_alive) "--keep-alive",
-        if (debug) "--debug",
-        if (quiet) "--quiet"
-      )
-      
-      if (!is.null(request_limit))
-        args <- c(args, "--request-limit", request_limit)
-      
-      if (!is.null(window_max_number))
-        args <- c(args, "--window-max-number", window_max_number)
-      
-      if (!is.null(tryNULL(mapbox_token()))) 
-        args <- c(args, "--mapbox-access-token", mapbox_token())
-      
-      if (isTRUE(mathjax)) 
-        args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
-      
-      if (xvfb) {
-        self$process <- processx::process$new("xvfb-run", c("orca", args), ...)
-      } else {
-        self$process <- processx::process$new("orca", args, ...)
-      }
-      
-      self$port <- port
+
+orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
+                       keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
+                       debug = FALSE, xvfb = FALSE, ...) {
+  
+  # make sure we have the required infrastructure
+  orca_available()
+  try_library("processx", "orca_serve")
+  
+  # use main bundle since any plot can be thrown at the server
+  plotlyjs <- plotlyMainBundle()
+  plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
+  
+  args <- c(
+    "serve",
+    "-p", port,
+    "--plotly", plotlyjs_file,
+    if (safe) "--safe-mode",
+    #if (orca_version() >= "1.1.1") "--graph-only",
+    if (keep_alive) "--keep-alive",
+    if (debug) "--debug",
+    if (quiet) "--quiet"
+  )
+  
+  if (!is.null(request_limit))
+    args <- c(args, "--request-limit", request_limit)
+  
+  if (!is.null(window_max_number))
+    args <- c(args, "--window-max-number", window_max_number)
+  
+  if (!is.null(tryNULL(mapbox_token()))) 
+    args <- c(args, "--mapbox-access-token", mapbox_token())
+  
+  if (isTRUE(mathjax)) 
+    args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
+  
+  process <- if (xvfb) {
+    processx::process$new("xvfb-run", c("orca", args), ...)
+  } else {
+    processx::process$new("orca", args, ...)
+  }
+  
+  list(
+    port = port,
+    close = function() {
+      process$kill()
     },
     export = function(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL) {
-      
       # request/response model works similarly to plotly_IMAGE()
       bod <- list(
         figure = plotly_build(p)$x[c("data", "layout")],
@@ -220,19 +218,17 @@ orca_serve <- R6::R6Class(
         scale = scale
       )
       res <- httr::POST(
-        paste0("http://127.0.0.1:", self$port), 
+        paste0("http://127.0.0.1:", port), 
         body = to_JSON(bod)
       )
       httr::stop_for_status(res)
       httr::warn_for_status(res)
       con <- httr::content(res, as = "raw")
       writeBin(con, file)
-    },
-    close = function() {
-      self$process$kill()
     }
   )
-)
+}
+
 
 orca_available <- function() {
   if (Sys.which("orca") == "") {

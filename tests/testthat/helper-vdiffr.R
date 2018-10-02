@@ -21,7 +21,7 @@ if (enable_vdiffr) {
   # make sure orca cli is available
   orca_available()
   # try and start up the node process
-  orcaImageServer <- try(orca_serve$new(port, xvfb = Sys.getenv("USE_XVFB", FALSE)), silent = TRUE)
+  orcaImageServer <- try(orca_serve(port, xvfb = as.logical(Sys.getenv("USE_XVFB", FALSE))), silent = TRUE)
   if (inherits(orcaImageServer, 'try-error')) {
     stop(
       "Tried to open orca server on port '", port, "', but it's not available. ", 
@@ -55,9 +55,11 @@ if (enable_vdiffr) {
   # force the vdiffr shiny app to open in a real browser 
   # (some svg files seem to not render properly in RStudio)
   options(shiny.launch.browser = TRUE)
+  
+  message("Visual testing is enabled.")
 } else {
   
-  skip("Visual testing is not enabled/")
+  message("Visual testing is not enabled.")
   
 }
 

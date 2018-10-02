@@ -44,8 +44,7 @@ Imports:
     crosstalk,
     purrr,
     data.table,
-    promises,
-    R6
+    promises
 Suggests:
     MASS,
     maps,
