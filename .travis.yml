@@ -31,25 +31,26 @@ env:
 before_install:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   # sf system dependencies
-  - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
-  - sudo apt-get --yes --force-yes update -qq
-  - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get --yes --force-yes update -qq
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
-  - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
-  # Setup orca AppImage as a executable binary 
-  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P $HOME
-  - chmod 777 $HOME/orca-1.1.1-x86_64.AppImage 
-  - mkdir /home/travis/.orca
-  - mkdir /home/travis/.orca/bin
-  - printf '#!/bin/bash \nxvfb-run $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca
-  - chmod 777 /home/travis/.orca/bin/orca
-  - export PATH="$PATH:/home/travis/.orca/bin"
-  # 
-  - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-  - sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-  - if [[ "$USE_VDIFFR" == "osx" ]]; brew install node
-  - if [[ "$USE_VDIFFR" == "osx" ]]; brew install npm
-  - if [[ "$USE_VDIFFR" == "osx" ]]; npm install -g electron@1.8.4 orca
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get update
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
+  # Setup orca AppImage as a executable binary on linux
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P $HOME
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; chmod 777 $HOME/orca-1.1.1-x86_64.AppImage 
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; mkdir /home/travis/.orca
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; mkdir /home/travis/.orca/bin
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; printf '#!/bin/bash \nxvfb-run $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; chmod 777 /home/travis/.orca/bin/orca
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; export PATH="$PATH:/home/travis/.orca/bin"
+  # install orca on mac
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; brew install node
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; brew install npm
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; npm install -g electron@1.8.4 orca
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
 
