@@ -33,6 +33,7 @@ test_that("add_sf() is optional", {
 test_that("plot_geo() lat/lon range is set", {
   skip_if_not_installed("sf")
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- plotly_build(plot_geo(nc))
   expect_equal(
     p$x$layout$geo$lataxis$range, 
@@ -50,6 +51,7 @@ test_that("plot_mapbox() fitbounds is set", {
   skip_if_not_installed("sf")
   skip_if_not(has_mapbox())
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- plotly_build(plot_mapbox(nc))
   expect_equal(
     p$x$layout$mapbox$`_fitBounds`$bounds, 
@@ -63,6 +65,7 @@ test_that("sf defaults can be overriden", {
   skip_if_not_installed("sf")
   skip_if_not(has_mapbox())
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   # when applied to fillcolor, alpha defaults to 0.5
   p <- plotly_build(plot_mapbox(nc, color = I("red")))
   expect_true(p$x$data[[1]]$type == "scattermapbox")
@@ -82,6 +85,7 @@ test_that("sf defaults can be overriden", {
 test_that("Can plot sfc with a missing crs", {
   skip_if_not_installed("sf")
   
+  storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
   p <- plotly_build(plot_geo(storms, name = "Storms"))
   expect_true(p$x$data[[1]]$type == "scattergeo")
   expect_true(p$x$data[[1]]$mode == "lines")
@@ -307,6 +311,7 @@ test_that("altogether now", {
   skip_if_not_installed("sf")
   skip_if_not(has_mapbox())
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   s <- subplot(plot_ly(nc), plot_geo(nc), plot_mapbox(nc), nrows = 3) %>% plotly_build()
   d <- s$x$data
   expect_length(d, 3)

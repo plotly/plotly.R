@@ -47,6 +47,7 @@ test_that("geom_sf() geometry collection.", {
 test_that("geom_sf() polygons with fill/text.", {
   skip_if_not_installed("sf")
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME))
   
   l <- expect_doppelganger_built(p, "sf-fill-text")
@@ -65,6 +66,7 @@ test_that("geom_sf() polygons with fill/text.", {
 test_that("geom_sf() with basic polygons and points.", {
   skip_if_not_installed("sf")
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) +
     geom_sf() +
     annotate("point", x = -80, y = 35, colour = "red", size = 4) +
@@ -82,6 +84,7 @@ test_that("geom_sf() with basic polygons and points.", {
 test_that("sf aspect ratio is correct", {
   skip_if_not_installed("sf")
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) + geom_sf() 
   
   l <- expect_doppelganger_built(p, "sf-aspect")
@@ -93,6 +96,7 @@ test_that("sf aspect ratio is correct", {
 test_that("works with a blank theme", {
   skip_if_not_installed("sf")
   
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) + geom_sf() + 
     ggthemes::theme_map()
   
