@@ -20,16 +20,24 @@ if (enable_vdiffr) {
   port <- floor(runif(1, 3001, 8000))
   # make sure orca cli is available
   orca_available()
-  # try and start up the node process
-  args <- Sys.getenv("ARGS_VDIFFR", NA)
-  args <- if (is.na(args)) NULL else args
-  orcaImageServer <- try(orca_serve(port, more_args = args), silent = TRUE)
-  if (inherits(orcaImageServer, 'try-error')) {
-    stop(
-      "Tried to open orca server on port '", port, "', but it's not available. ", 
-      "Try (possibly restarting R) and running `test()` again"
-    )
+  
+  doOrcaServe <- as.logical(Sys.getenv("ORCA_SERVE", FALSE))
+  orca_fun <- if (isTRUE(doOrcaServe)) {
+    args <- Sys.getenv("ARGS_VDIFFR", NA)
+    args <- if (is.na(args)) NULL else args
+    # try and start up the node process
+    orcaImageServer <- try(orca_serve(port, more_args = args), silent = TRUE)
+    if (inherits(orcaImageServer, 'try-error')) {
+      stop(
+        "Tried to open orca server on port ", port, " but it's not available. ", 
+        "Try (possibly restarting R) and running `test()` again"
+      )
+    }
+    orcaImageServer$export
+  } else {
+    orca
   }
+  
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
@@ -42,7 +50,7 @@ if (enable_vdiffr) {
     # write svg to disk
     owd <- setwd(dirname(file))
     on.exit(setwd(owd))
-    orcaImageServer$export(p, basename(file), width = 600, height = 400)
+    orca_fun(p, file = basename(file), width = 600, height = 400)
     
     # strip out non-deterministic fullLayout.uid
     # TODO: if and when plotly provides an API to pre-specify, use it!
