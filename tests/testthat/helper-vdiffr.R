@@ -42,7 +42,7 @@ if (enable_vdiffr) {
     # write svg to disk
     owd <- setwd(dirname(file))
     on.exit(setwd(owd))
-    orcaImageServer$export(p, basename(file))
+    orcaImageServer$export(p, basename(file), width = 600, height = 400)
     
     # strip out non-deterministic fullLayout.uid
     # TODO: if and when plotly provides an API to pre-specify, use it!
