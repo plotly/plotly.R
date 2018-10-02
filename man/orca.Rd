@@ -2,12 +2,17 @@
 % Please edit documentation in R/orca.R
 \name{orca}
 \alias{orca}
-\title{Static image export via orca}
+\alias{orca_serve}
+\title{Static image exporting}
 \usage{
 orca(p, file = "plot.png", format = tools::file_ext(file),
   scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
   parallel_limit = NULL, verbose = FALSE, debug = FALSE,
   safe = FALSE)
+
+orca_serve(port = 5151, mathjax = FALSE, safe = FALSE,
+  request_limit = NULL, keep_alive = TRUE, window_max_number = NULL,
+  quiet = FALSE, debug = FALSE, xvfb = FALSE, ...)
 }
 \arguments{
 \item{p}{a plotly object.}
@@ -37,21 +42,79 @@ interactive graphs, see \link{config}).}
 
 \item{safe}{Turns on safe mode: where figures likely to make browser window
 hang during image generating are skipped.}
+
+\item{port}{Sets the server's port number.}
+
+\item{request_limit}{Sets a request limit that makes orca exit when reached.}
+
+\item{keep_alive}{Turn on keep alive mode where orca will (try to) relaunch server if process unexpectedly exits.}
+
+\item{window_max_number}{Sets maximum number of browser windows the server can keep open at a given time.}
+
+\item{quiet}{Suppress all logging info.}
+
+\item{xvfb}{Whether to run orca via X virtual framebuffer. May be necessary in a headless environment}
 }
 \description{
-The function makes a system call to the orca command-line utility,
-see the installation instructions \href{https://github.com/plotly/orca#installation}{here}
+Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
+\href{https://github.com/plotly/orca#installation}{orca command-line utility}.
 }
+\details{
+The \code{orca()} function is designed for exporting one plotly graph whereas \code{orca_serve()}
+is meant for exporting many graphs at once. The former starts and stops an external (nodejs)
+process everytime it is called whereas the latter starts up a process when called, then
+returns an \code{export()} method for exporting graphs as well as a \code{close()} method for stopping
+the external (background) process.
+}
+\section{Methods}{
+
+
+The \code{orca_serve()} function returns an object with two methods:
+
+\describe{
+\item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
+Export a static image of a plotly graph. Arguments found here are the same as those found in \link{orca}.
+}
+\item{\code{close()}}{Close down the orca server and kill the underlying node process.}
+}
+}
+
+\section{Fields}{
+
+
+The \code{orca_serve()} function returns an object with two fields:
+
+\describe{
+\item{\code{port}}{The port number that the server is listening to.}
+\item{\code{process}}{An R6 class for controlling and querying the underlying node process.}
+}
+}
+
 \examples{
 
 \dontrun{
 p <- plot_ly(z = ~volcano) \%>\% add_surface()
 orca(p, "surface-plot.svg")
+
+#' # launch the server
+server <- orca_serve()
+
+# export as many graphs as you'd like
+server$export(qplot(1:10), "test1.pdf")
+server$export(plot_ly(x = 1:10, y = 1:10), "test2.pdf")
+
+# the underlying process is exposed as a field, so you
+# have full control over the external process
+server$process$is_alive()
+
+# convenience method for closing down the server
+server$close()
+
+# remove the exported files from disk
+unlink("test1.pdf")
+unlink("test2.pdf")
 }
 
-}
-\seealso{
-\link{orca_serve}
 }
 \author{
 Carson Sievert

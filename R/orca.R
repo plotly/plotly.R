@@ -1,7 +1,13 @@
-#' Static image export via orca
+#' Static image exporting 
 #' 
-#' The function makes a system call to the orca command-line utility, 
-#' see the installation instructions [here](https://github.com/plotly/orca#installation)
+#' Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
+#' [orca command-line utility](https://github.com/plotly/orca#installation).
+#' 
+#' The `orca()` function is designed for exporting one plotly graph whereas `orca_serve()`
+#' is meant for exporting many graphs at once. The former starts and stops an external (nodejs)
+#' process everytime it is called whereas the latter starts up a process when called, then
+#' returns an `export()` method for exporting graphs as well as a `close()` method for stopping 
+#' the external (background) process.
 #' 
 #' @param p a plotly object.
 #' @param file output filename.
@@ -22,12 +28,31 @@
 #' hang during image generating are skipped.
 #' @export
 #' @author Carson Sievert
-#' @seealso [orca_serve]
+#' @md
+#' @rdname orca
 #' @examples
 #' 
 #' \dontrun{
 #' p <- plot_ly(z = ~volcano) %>% add_surface()
 #' orca(p, "surface-plot.svg")
+#' 
+#' #' # launch the server
+#' server <- orca_serve()
+#' 
+#' # export as many graphs as you'd like
+#' server$export(qplot(1:10), "test1.pdf")
+#' server$export(plot_ly(x = 1:10, y = 1:10), "test2.pdf")
+#' 
+#' # the underlying process is exposed as a field, so you
+#' # have full control over the external process
+#' server$process$is_alive()
+#' 
+#' # convenience method for closing down the server
+#' server$close()
+#' 
+#' # remove the exported files from disk
+#' unlink("test1.pdf")
+#' unlink("test2.pdf")
 #' }
 #' 
 
@@ -71,65 +96,28 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 
 #' Orca image export server
 #' 
-#' Compared to [orca], [orca_serve] is more efficient at exporting many plotly 
-#' graphs because the former must startup/shutdown an external process for every image. 
-#' The server (background) process is launched upon initialization of a [orca_serve] class 
-#' (i.e., when the `new()` method is called). The `export()` method accepts any valid plotly 
-#' object as input and spits out an image file to disk. To kill the background server process, 
-#' use `close()`.
-#' 
-#' @usage NULL
-#' @format NULL
-#' 
-#' @section Initialization:
-#' A new 'orcaServe'-object is initialized using the new() method on the generator:
-#' 
-#' \strong{Usage}
-#' 
-#' \code{
-#'   orca_serve(
-#'     port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL, keep_alive = TRUE, 
-#'     window_max_number = NULL, quiet = FALSE, debug = FALSE, ...
-#'   )
-#'  }
-#' 
-#' \strong{Arguments}
-#' 
-#' \describe{
-#'   \item{\code{port}}{Sets the server's port number.}
-#'   \item{\code{mathjax}}{
-#'     whether or not to include MathJax (required to render [TeX]).
-#'     If `TRUE`, the PLOTLY_MATHJAX_PATH environment variable must be set and point 
-#'     to the location of MathJax (this variable is also used to render [TeX] in 
-#'     interactive graphs, see [config]).
-#'   }
-#'   \item{\code{safe}}{
-#'     Turns on safe mode: where figures likely to make browser window hang during image generating are skipped.
-#'   }
-#'   \item{\code{request_limit}}{
-#'     Sets a request limit that makes orca exit when reached.
-#'   }
-#'   \item{\code{keep_alive}}{
-#'     Turn on keep alive mode where orca will (try to) relaunch server if process unexpectedly exits.
-#'   }
-#'   \item{\code{window_max_number}}{
-#'     Sets maximum number of browser windows the server can keep open at a given time.
-#'   }
-#'   \item{\code{quiet}}{Suppress all logging info.}
-#'   \item{\code{debug}}{Starts app in debug mode.}
-#'   \item{\code{xvfb}}{Whether to run orca via X virtual framebuffer. May be necessary in a headless environment}
-#' }
+#' @inheritParams orca
+#' @param port Sets the server's port number.
+#' @param keep_alive Turn on keep alive mode where orca will (try to) relaunch server if process unexpectedly exits.
+#' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
+#' @param request_limit Sets a request limit that makes orca exit when reached.
+#' @param quiet Suppress all logging info.
+#' @param xvfb Whether to run orca via X virtual framebuffer. May be necessary in a headless environment
 #' 
 #' @section Methods:
 #' 
+#' The `orca_serve()` function returns an object with two methods:
+#' 
 #' \describe{
 #'   \item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
-#'     Export a static image of a plotly graph. Arguments found here are the same as those found in [orca].
+#'     Export a static image of a plotly graph. Arguments found here are the same as those found in `orca()`
 #'   }
 #'   \item{\code{close()}}{Close down the orca server and kill the underlying node process.}
 #' }
 #' 
 #' @section Fields:
+#' 
+#' The `orca_serve()` function returns an object with two fields:
 #' 
 #' \describe{
 #'   \item{\code{port}}{The port number that the server is listening to.}
@@ -137,30 +125,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' }
 #' 
 #' @export
-#' @author Carson Sievert
-#' @seealso [orca]
-#' @examples 
-#' 
-#' \dontrun{
-#' # launch the server
-#' server <- orca_serve()
-#' 
-#' # export as many graphs as you'd like
-#' server$export(qplot(1:10), "test1.pdf")
-#' server$export(plot_ly(x = 1:10, y = 1:10), "test2.pdf")
-#' 
-#' # the underlying process is exposed as a field, so you
-#' # have full control over the external process
-#' server$process$is_alive()
-#' 
-#' # convenience method for closing down the server
-#' server$close()
-#' 
-#' # remove the exported files from disk
-#' unlink("test1.pdf")
-#' unlink("test2.pdf")
-#' }
-
+#' @rdname orca
 
 orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
                        keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
@@ -205,9 +170,8 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   
   list(
     port = port,
-    close = function() {
-      process$kill()
-    },
+    process = process,
+    close = function() process$kill(),
     export = function(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL) {
       # request/response model works similarly to plotly_IMAGE()
       bod <- list(
@@ -218,7 +182,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
         scale = scale
       )
       res <- httr::POST(
-        paste0("http://127.0.0.1:", port), 
+        paste0("http://localhost:", port), 
         body = to_JSON(bod)
       )
       httr::stop_for_status(res)
