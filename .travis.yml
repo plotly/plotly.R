@@ -34,9 +34,9 @@ before_install:
   # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
   - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
   # orca binary
-  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /home
-  - chmod 777 /home/orca-1.1.1-x86_64.AppImage 
-  - printf '#!/bin/bash \nxvfb-run /home/orca-1.1.1-x86_64.AppImage "$@"' > /usr/bin/orca
+  - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P $HOME
+  - chmod 777 $HOME/orca-1.1.1-x86_64.AppImage 
+  - printf '#!/bin/bash \nxvfb-run $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /usr/bin/orca
   - chmod 777 /usr/bin/orca
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
