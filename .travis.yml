@@ -48,7 +48,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod 777 /home/travis/.orca/bin/orca; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PATH="$PATH:/home/travis/.orca/bin"; fi
   # install orca on mac
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install npm; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm install -g electron@1.8.4 orca; fi
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
