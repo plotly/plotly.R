@@ -1,9 +1,9 @@
 context("geom_sf")
 
-nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-
 test_that("geom_sf() basic polygons.", {
   skip_if_not_installed("sf")
+  
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   
   p <- ggplot(nc) + geom_sf()
   

@@ -141,6 +141,8 @@ test_that("geom_polygon(aes(size), fill, colour)", {
 })
 
 test_that("borders become one trace with NA", {
+  skip_if_not_installed("maps")
+  
   gg <- ggplot(maps::canada.cities, aes(long, lat)) +
     borders(regions = "canada")
   info <- expect_doppelganger_built(gg, "polygons-canada-borders")

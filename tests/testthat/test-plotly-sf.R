@@ -1,14 +1,14 @@
 context("add_sf")
 
-nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
-
 has_mapbox <- function() {
   !is.null(tryNULL(mapbox_token()))
 }
 
 test_that("add_sf() is optional", {
   skip_if_not_installed("sf")
+  
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
   
   p1 <- plotly_build(plot_ly(nc))
   p2 <- plotly_build(plot_ly() %>% add_sf(data = nc))
