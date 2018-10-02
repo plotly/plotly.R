@@ -181,7 +181,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
         scale = scale
       )
       res <- httr::POST(
-        paste0("http://localhost:", port), 
+        paste0("http://127.0.0.1:", port), 
         body = to_JSON(bod)
       )
       httr::stop_for_status(res)
