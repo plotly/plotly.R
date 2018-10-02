@@ -21,7 +21,9 @@ if (enable_vdiffr) {
   # make sure orca cli is available
   orca_available()
   # try and start up the node process
-  orcaImageServer <- try(orca_serve(port, xvfb = as.logical(Sys.getenv("USE_XVFB", FALSE))), silent = TRUE)
+  args <- Sys.getenv("ARGS_VDIFFR", NA)
+  args <- if (is.na(args)) NULL else args
+  orcaImageServer <- try(orca_serve(port, more_args = args), silent = TRUE)
   if (inherits(orcaImageServer, 'try-error')) {
     stop(
       "Tried to open orca server on port '", port, "', but it's not available. ", 

@@ -102,7 +102,9 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
 #' @param request_limit Sets a request limit that makes orca exit when reached.
 #' @param quiet Suppress all logging info.
-#' @param xvfb Whether to run orca via X virtual framebuffer. May be necessary in a headless environment
+#' @param more_args additional arguments to pass along to system command. This is mainly useful
+#' for specifying electron options, such as `--disable-gpu`.
+#' @param ... arguments passed along to `processx::process$new()`.
 #' 
 #' @section Methods:
 #' 
@@ -129,7 +131,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 
 orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
                        keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
-                       debug = FALSE, xvfb = FALSE, ...) {
+                       debug = FALSE, more_args = NULL, ...) {
   
   # make sure we have the required infrastructure
   orca_available()
@@ -144,10 +146,11 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
     "-p", port,
     "--plotly", plotlyjs_file,
     if (safe) "--safe-mode",
-    #if (orca_version() >= "1.1.1") "--graph-only",
+    if (orca_version() >= "1.1.1") "--graph-only",
     if (keep_alive) "--keep-alive",
     if (debug) "--debug",
-    if (quiet) "--quiet"
+    if (quiet) "--quiet",
+    more_args
   )
   
   if (!is.null(request_limit))
@@ -162,11 +165,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   if (isTRUE(mathjax)) 
     args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
   
-  process <- if (xvfb) {
-    processx::process$new("xvfb-run", c("orca", args), ...)
-  } else {
-    processx::process$new("orca", args, ...)
-  }
+  process <- processx::process$new("orca", args, ...)
   
   list(
     port = port,

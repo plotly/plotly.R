@@ -10,7 +10,7 @@ matrix:
   - r: release
     env: 
       - USE_VDIFFR=true
-      - USE_XVFB=true
+      - ARGS_VDIFFR="--disable-gpu"
   - r: oldrel
 
 env:

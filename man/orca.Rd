@@ -12,7 +12,7 @@ orca(p, file = "plot.png", format = tools::file_ext(file),
 
 orca_serve(port = 5151, mathjax = FALSE, safe = FALSE,
   request_limit = NULL, keep_alive = TRUE, window_max_number = NULL,
-  quiet = FALSE, debug = FALSE, xvfb = FALSE, ...)
+  quiet = FALSE, debug = FALSE, more_args = NULL, ...)
 }
 \arguments{
 \item{p}{a plotly object.}
@@ -53,7 +53,10 @@ hang during image generating are skipped.}
 
 \item{quiet}{Suppress all logging info.}
 
-\item{xvfb}{Whether to run orca via X virtual framebuffer. May be necessary in a headless environment}
+\item{more_args}{additional arguments to pass along to system command. This is mainly useful
+for specifying electron options, such as \code{--disable-gpu}.}
+
+\item{...}{arguments passed along to \code{processx::process$new()}.}
 }
 \description{
 Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
@@ -73,7 +76,7 @@ The \code{orca_serve()} function returns an object with two methods:
 
 \describe{
 \item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
-Export a static image of a plotly graph. Arguments found here are the same as those found in \link{orca}.
+Export a static image of a plotly graph. Arguments found here are the same as those found in \code{orca()}
 }
 \item{\code{close()}}{Close down the orca server and kill the underlying node process.}
 }
