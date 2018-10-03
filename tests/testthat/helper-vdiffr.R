@@ -4,9 +4,8 @@ enable_vdiffr <- as.logical(Sys.getenv("VDIFFR", FALSE))
 # start up the image server and let vdiffr's svg writing method know about it
 if (enable_vdiffr) {
   
-  args <- Sys.getenv("VDIFFR_ARGS", NA)
-  args <- if (is.na(args)) NULL else args
-  orcaServer <- orca_serve(more_args = args)
+  # init image server with webgl enabled
+  orcaServer <- orca_serve(more_args = "--enable-webgl")
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {

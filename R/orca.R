@@ -26,6 +26,9 @@
 #' @param debug Starts app in debug mode and turn on verbose logs on stdout.
 #' @param safe Turns on safe mode: where figures likely to make browser window 
 #' hang during image generating are skipped.
+#' @param more_args additional arguments to pass along to system command. This is useful
+#' for specifying display and/or electron options, such as `--enable-webgl` or `--disable-gpu`.
+#' @param ... additional arguments passed along to `processx::run()`
 #' @export
 #' @author Carson Sievert
 #' @md
@@ -33,6 +36,8 @@
 #' @examples
 #' 
 #' \dontrun{
+#' # NOTE: in a headless environment, you may need to set `more_args="--enable-webgl"`
+#' # to export webgl correctly
 #' p <- plot_ly(z = ~volcano) %>% add_surface()
 #' orca(p, "surface-plot.svg")
 #' 
@@ -59,7 +64,7 @@
 orca <- function(p, file = "plot.png", format = tools::file_ext(file), 
                  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
-                 safe = FALSE) {
+                 safe = FALSE, more_args = NULL, ...) {
   
   orca_available()
   
@@ -79,7 +84,8 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
     "--plotlyjs", plotlyjs_file,
     if (debug) "--debug",
     if (verbose) "--verbose",
-    if (safe) "--safe-mode"
+    if (safe) "--safe-mode",
+    more_args
   )
   
   if (!is.null(scale)) args <- c(args, "--scale", scale)
@@ -91,7 +97,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   
   # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
   try_library("processx", "orca")
-  invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE))
+  invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE, ...))
 }
 
 #' Orca image export server
@@ -102,8 +108,6 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
 #' @param request_limit Sets a request limit that makes orca exit when reached.
 #' @param quiet Suppress all logging info.
-#' @param more_args additional arguments to pass along to system command. This is mainly useful
-#' for specifying electron options, such as `--disable-gpu`.
 #' @param ... arguments passed along to `processx::process$new()`.
 #' 
 #' @section Methods:

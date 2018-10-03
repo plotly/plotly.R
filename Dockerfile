@@ -96,7 +96,6 @@ RUN R -e "install.packages('roxygen2')"
 
 # configure for visual testing
 ENV VDIFFR=true
-ENV VDIFFR_ARGS="--disable-gpu"
 EXPOSE 3838
 COPY ./ /home/plotly
 
