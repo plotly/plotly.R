@@ -1,27 +1,12 @@
-# default is equal to whether NOT_CRAN is true or not
-enable_vdiffr <- identical(Sys.getenv("NOT_CRAN"), "true")
-
-# disable or enable vdiffr based on the state of USE_VDIFFR, if set
-if (identical(Sys.getenv("USE_VDIFFR"), "true")) {
-  enable_vdiffr <- TRUE
-} else if (identical(Sys.getenv("USE_VDIFFR"), "false")) {
-  enable_vdiffr <- FALSE
-}
-
-# disable vdiffr if version is old
-if (!requireNamespace("vdiffr", quietly = TRUE) ||
-    utils::packageVersion("vdiffr") < "0.2.3.9001") {
-  enable_vdiffr <- FALSE
-}
+# If VDIFFR is TRUE, enable visual testing
+enable_vdiffr <- as.logical(Sys.getenv("VDIFFR", FALSE))
 
 # start up the image server and let vdiffr's svg writing method know about it
 if (enable_vdiffr) {
-  # generate random (port) number between 3000 & 8000
-  port <- floor(runif(1, 3001, 8000))
-  # make sure orca cli is available
-  orca_available()
   
-  
+  args <- Sys.getenv("VDIFFR_ARGS", NA)
+  args <- if (is.na(args)) NULL else args
+  orcaServer <- orca_serve(more_args = args)
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
@@ -38,7 +23,7 @@ if (enable_vdiffr) {
     owd <- setwd(dirname(file))
     on.exit(setwd(owd))
     # NOTE: the dimensions here should match the server args part of xvfb-run
-    orca(p, file = basename(file), width = 640, height = 480)
+    orcaServer$export(p, file = basename(file), width = 640, height = 480)
     
     # strip out non-deterministic fullLayout.uid
     # TODO: if and when plotly provides an API to pre-specify, use it!
