@@ -2,6 +2,7 @@ language: R
 cache: packages
 sudo: true
 dist: trusty
+warnings_are_errors: false
 
 # build matrix; turn on vdiffr only on r release
 matrix:
