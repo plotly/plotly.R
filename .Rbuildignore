@@ -2,6 +2,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+Dockerfile
 cran-release.Rmd
 CONDUCT.md
 CONTRIBUTING.md
