@@ -28,7 +28,8 @@
 #' hang during image generating are skipped.
 #' @param more_args additional arguments to pass along to system command. This is useful
 #' for specifying display and/or electron options, such as `--enable-webgl` or `--disable-gpu`.
-#' @param ... additional arguments passed along to `processx::run()`
+#' @param ... additional arguments passed along to `processx::run()` (for `orca()`) or 
+#' `processx::process()` (for `orca_serve()`).
 #' @export
 #' @author Carson Sievert
 #' @md
@@ -108,7 +109,6 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 #' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
 #' @param request_limit Sets a request limit that makes orca exit when reached.
 #' @param quiet Suppress all logging info.
-#' @param ... arguments passed along to `processx::process$new()`.
 #' 
 #' @section Methods:
 #' 

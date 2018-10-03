@@ -46,7 +46,8 @@ hang during image generating are skipped.}
 \item{more_args}{additional arguments to pass along to system command. This is useful
 for specifying display and/or electron options, such as \code{--enable-webgl} or \code{--disable-gpu}.}
 
-\item{...}{additional arguments passed along to \code{processx::run()}}
+\item{...}{additional arguments passed along to \code{processx::run()} (for \code{orca()}) or
+\code{processx::process()} (for \code{orca_serve()}).}
 
 \item{port}{Sets the server's port number.}
 
@@ -57,8 +58,6 @@ for specifying display and/or electron options, such as \code{--enable-webgl} or
 \item{window_max_number}{Sets maximum number of browser windows the server can keep open at a given time.}
 
 \item{quiet}{Suppress all logging info.}
-
-\item{...}{arguments passed along to \code{processx::process$new()}.}
 }
 \description{
 Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
