@@ -21,6 +21,8 @@ if (enable_vdiffr) {
   # make sure orca cli is available
   orca_available()
   
+  
+  
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
     # before exporting, specify trace[i].uid so resulting svg is deterministic
@@ -30,9 +32,13 @@ if (enable_vdiffr) {
     p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
     
     # write svg to disk
+    # NOTE TO SELF: yes, it would be great to use `orca_serve()` here, but it gives 
+    # slightly different results from `orca()` (ordering of attributes are different)
+    # and `orca_serve()` doesn't seem to run reliably everywhere
     owd <- setwd(dirname(file))
     on.exit(setwd(owd))
-    orca(p, file = basename(file), width = 600, height = 400)
+    # NOTE: the dimensions here should match the server args part of xvfb-run
+    orca(p, file = basename(file), width = 640, height = 480)
     
     # strip out non-deterministic fullLayout.uid
     # TODO: if and when plotly provides an API to pre-specify, use it!
@@ -46,7 +52,7 @@ if (enable_vdiffr) {
   
   # force the vdiffr shiny app to open in a real browser 
   # (some svg files seem to not render properly in RStudio)
-  options(shiny.launch.browser = TRUE)
+  options(shiny.launch.browser = interactive())
   
   message("Visual testing is enabled.")
 } else {

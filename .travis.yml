@@ -12,8 +12,7 @@ matrix:
   - r: oldrel
   - os: osx
     r: release
-    env: 
-     - USE_VDIFFR=true
+    env: USE_VDIFFR=true
     
 
 env:
@@ -43,7 +42,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod 777 $HOME/orca-1.1.1-x86_64.AppImage ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir /home/travis/.orca; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir /home/travis/.orca/bin; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then printf '#!/bin/bash \nxvfb-run $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640x480x24" $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod 777 /home/travis/.orca/bin/orca; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PATH="$PATH:/home/travis/.orca/bin"; fi
   # install orca on mac
