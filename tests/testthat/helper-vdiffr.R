@@ -21,36 +21,18 @@ if (enable_vdiffr) {
   # make sure orca cli is available
   orca_available()
   
-  doOrcaServe <- as.logical(Sys.getenv("ORCA_SERVE", FALSE))
-  orca_fun <- if (isTRUE(doOrcaServe)) {
-    args <- Sys.getenv("ARGS_VDIFFR", NA)
-    args <- if (is.na(args)) NULL else args
-    # try and start up the node process
-    orcaImageServer <- try(orca_serve(port, more_args = args), silent = TRUE)
-    if (inherits(orcaImageServer, 'try-error')) {
-      stop(
-        "Tried to open orca server on port ", port, " but it's not available. ", 
-        "Try (possibly restarting R) and running `test()` again"
-      )
-    }
-    orcaImageServer$export
-  } else {
-    orca
-  }
-  
-  
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
     # before exporting, specify trace[i].uid so resulting svg is deterministic
     # https://github.com/plotly/orca/issues/133
-    p <- plotly::plotly_build(p)
+    p <- plotly_build(p)
     uid_data <- paste0("-vdiffr-plotly-", seq_along(p$x$data))
     p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
     
     # write svg to disk
     owd <- setwd(dirname(file))
     on.exit(setwd(owd))
-    orca_fun(p, file = basename(file), width = 600, height = 400)
+    orca(p, file = basename(file), width = 600, height = 400)
     
     # strip out non-deterministic fullLayout.uid
     # TODO: if and when plotly provides an API to pre-specify, use it!
