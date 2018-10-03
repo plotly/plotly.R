@@ -91,12 +91,13 @@ RUN R -e "install.packages('plotly', dependencies = T)"
 RUN R -e "devtools::install_github('cpsievert/vdiffr@diffObj')"
 RUN R -e "devtools::install_github('cpsievert/diffobj@css')"
 
+# TODO: why does roxygen2 install fail above?
+RUN R -e "install.packages('roxygen2')"
+
 # configure for visual testing
 ENV VDIFFR=true
 ENV VDIFFR_ARGS="--disable-gpu"
 EXPOSE 3838
 COPY ./ /home/plotly
-RUN cd /home/plotly
 
-
-CMD R -e "vdiffr::manage_cases(); devtools::test()"
+CMD R -e "vdiffr::manage_cases('home/plotly'); devtools::test('home/plotly')"
