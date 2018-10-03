@@ -8,7 +8,7 @@
 orca(p, file = "plot.png", format = tools::file_ext(file),
   scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
   parallel_limit = NULL, verbose = FALSE, debug = FALSE,
-  safe = FALSE)
+  safe = FALSE, more_args = NULL, ...)
 
 orca_serve(port = 5151, mathjax = FALSE, safe = FALSE,
   request_limit = NULL, keep_alive = TRUE, window_max_number = NULL,
@@ -43,6 +43,11 @@ interactive graphs, see \link{config}).}
 \item{safe}{Turns on safe mode: where figures likely to make browser window
 hang during image generating are skipped.}
 
+\item{more_args}{additional arguments to pass along to system command. This is useful
+for specifying display and/or electron options, such as \code{--enable-webgl} or \code{--disable-gpu}.}
+
+\item{...}{additional arguments passed along to \code{processx::run()}}
+
 \item{port}{Sets the server's port number.}
 
 \item{request_limit}{Sets a request limit that makes orca exit when reached.}
@@ -52,9 +57,6 @@ hang during image generating are skipped.}
 \item{window_max_number}{Sets maximum number of browser windows the server can keep open at a given time.}
 
 \item{quiet}{Suppress all logging info.}
-
-\item{more_args}{additional arguments to pass along to system command. This is mainly useful
-for specifying electron options, such as \code{--disable-gpu}.}
 
 \item{...}{arguments passed along to \code{processx::process$new()}.}
 }
@@ -96,6 +98,8 @@ The \code{orca_serve()} function returns an object with two fields:
 \examples{
 
 \dontrun{
+# NOTE: in a headless environment, you may need to set `more_args="--enable-webgl"`
+# to export webgl correctly
 p <- plot_ly(z = ~volcano) \%>\% add_surface()
 orca(p, "surface-plot.svg")
 
