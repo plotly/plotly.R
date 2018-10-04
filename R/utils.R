@@ -723,7 +723,7 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
-    if (identical(p$x$layout$clickmode, "select")) {
+    if ("select" %in% p$x$layout$clickmode && "plotly_click" %in% p$x$highlight$on) {
       warning(
         "`layout.clickmode` = 'select' is not designed to work well with ",
         "the R package's linking framework (i.e. crosstalk support).",
