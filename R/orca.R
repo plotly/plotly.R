@@ -150,7 +150,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
     "-p", port,
     "--plotly", plotlyjs_file,
     if (safe) "--safe-mode",
-    if (tryFALSE(orca_version() >= "1.1.1")) "--graph-only",
+    if (orca_version() >= "1.1.1") "--graph-only",
     if (keep_alive) "--keep-alive",
     if (debug) "--debug",
     if (quiet) "--quiet",
@@ -211,5 +211,9 @@ orca_available <- function() {
 
 orca_version <- function() {
   orca_available()
-  as.package_version(system("orca --version", intern = TRUE))
+  # default to initial release if we can't correctly parse version
+  tryCatch(
+    as.package_version(system("orca --version", intern = TRUE)), 
+    error = function(e) "1.0.0"
+  )
 }

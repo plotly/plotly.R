@@ -62,7 +62,7 @@ RUN apt-get -y update
 RUN apt-get install -y libudunits2-dev libproj-dev libgeos-dev libgdal-dev
 
 # Install all plotly's dependencies
-RUN R -e "install.packages('plotly', dependencies = T)"
+RUN R -e "devtools::install_deps(dep = T)"
 
 # system dependencies related to running orca
 RUN apt-get install -y \
