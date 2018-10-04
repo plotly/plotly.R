@@ -15,11 +15,11 @@ test_that("Whole update works as expected", {
 
 
 test_that("Partial update works as expected", {
-  p4 <- style(p, marker.color = "red")
+  p4 <- style(p1, marker.color = "red")
   marker4 <- plotly_build(p4)$x$data[[1]]$marker
   expect_equal(marker4, modifyList(marker4, list(color = "red")))
   
-  p5 <- style(p, marker.line.color = "red")
+  p5 <- style(p1, marker.line.color = "red")
   marker5 <- plotly_build(p5)$x$data[[1]]$marker
   expect_equal(marker5, modifyList(marker5, list(line = list(color = "red"))))
 })
