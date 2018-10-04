@@ -150,7 +150,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
     "-p", port,
     "--plotly", plotlyjs_file,
     if (safe) "--safe-mode",
-    if (isTRUE(orca_version() >= "1.1.1")) "--graph-only",
+    if (tryFALSE(orca_version() >= "1.1.1")) "--graph-only",
     if (keep_alive) "--keep-alive",
     if (debug) "--debug",
     if (quiet) "--quiet",
