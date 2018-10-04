@@ -20,9 +20,30 @@ conjunction with \code{\link[=get_figure]{get_figure()}}.
 }
 \examples{
 
-p <- qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))
-# keep the hover info for points, but remove it for the line/ribbon
+# style() is especially useful in conjunction with ggplotly()
+# It allows you to leverage the underlying plotly.js library to change 
+# the return result of ggplotly()
+(p <- ggplotly(qplot(data = mtcars, wt, mpg, geom = c("point", "smooth"))))
+
+# removes hoverinfo for the line/ribbon traces (use `plotly_json()` to verify!)
 style(p, hoverinfo = "none", traces = c(2, 3))
+
+# another example with plot_ly() instead of ggplotly()
+marker <- list(
+  color = "red",
+  line = list(
+    width = 20, 
+    color = "black"
+ )
+)
+(p <- plot_ly(x = 1:10, y = 1:10, marker = marker))
+
+# note how the entire (marker) object is replaced if a list is provided
+style(p, marker = list(line = list(color = "blue")))
+
+# similar to plotly.js, you can update a particular attribute like so 
+# https://github.com/plotly/plotly.js/issues/1866#issuecomment-314115744
+style(p, marker.line.color = "blue") 
 
 }
 \seealso{

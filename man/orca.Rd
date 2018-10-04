@@ -4,9 +4,10 @@
 \alias{orca}
 \title{Static image export via orca}
 \usage{
-orca(p, file = "plot.png", format = tools::file_ext(file), scale = NULL,
-  width = NULL, height = NULL, mathjax = FALSE, parallel_limit = NULL,
-  verbose = FALSE, debug = FALSE, safe = FALSE)
+orca(p, file = "plot.png", format = tools::file_ext(file),
+  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
+  parallel_limit = NULL, verbose = FALSE, debug = FALSE,
+  safe = FALSE)
 }
 \arguments{
 \item{p}{a plotly object.}
