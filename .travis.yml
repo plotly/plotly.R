@@ -28,10 +28,7 @@ before_install:
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # orca system dependencies -- https://github.com/plotly/orca/#linux-troubleshooting-cannot-open-shared-object
-  - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-  - sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-  - sudo apt-get update
-  - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 google-chrome-stable desktop-file-utils
+  - sudo apt-get install --yes libgtk2.0-0 libgconf-2-4 desktop-file-utils
   # Setup orca AppImage as a executable binary on linux
   - wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P $HOME
   - chmod 777 $HOME/orca-1.1.1-x86_64.AppImage 
