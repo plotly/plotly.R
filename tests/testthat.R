@@ -85,7 +85,7 @@ save_outputs <- function(gg, name) {
   } else FALSE
   if (has_diff || build_table) {
     RSassign(conn, gg)
-    pm <- RSeval(conn, "tryCatch(suppressWarnings(plotly::plotly_build(gg))$x[c('data', 'layout')], error = function(e) e$message)")
+    pm <- RSeval(conn, "tryCatch(plotly::plotly_build(gg)$x[c('data', 'layout')], error = function(e) e$message)")
     if (build_table) {
       # save pngs of ggplot
       filename <- paste0(gsub("\\s+", "-", name), ".png")
