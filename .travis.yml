@@ -3,6 +3,8 @@ cache: packages
 sudo: true
 dist: trusty
 warnings_are_errors: false
+addons:
+  chrome: stable
 
 # build matrix; turn on vdiffr only on r release
 matrix:
@@ -34,7 +36,7 @@ before_install:
   - chmod 777 $HOME/orca-1.1.1-x86_64.AppImage 
   - mkdir /home/travis/.orca
   - mkdir /home/travis/.orca/bin
-  - printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640x480x24" $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca
+  - printf '#!/bin/bash \nxvfb-run --server-args "-screen 0 640x480x24" $HOME/orca-1.1.1-x86_64.AppImage "$@"' > /home/travis/.orca/bin/orca
   - chmod 777 /home/travis/.orca/bin/orca
   - export PATH="$PATH:/home/travis/.orca/bin"
   # make sure R pkgs are upt-to-date
