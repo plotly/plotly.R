@@ -1,7 +1,7 @@
 context("style/restyle functionality")
 
 p1 <- plot_ly(x = 1:10, y = 1:10, symbol = I(15))
-marker1 <- plotly_build(p)$x$data[[1]]$marker
+marker1 <- plotly_build(p1)$x$data[[1]]$marker
 
 test_that("Whole update works as expected", {
   p2 <- style(p1, marker = list(color = "red"))
