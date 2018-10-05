@@ -56,8 +56,7 @@ Suggests:
     shiny (>= 1.1.0),
     curl,
     rmarkdown,
-    Rserve,
-    RSclient,
+    vdiffr,
     Cairo,
     broom,
     webshot,
@@ -72,6 +71,6 @@ Suggests:
     plotlyGeoAssets,
     forcats
 LazyData: true
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -2,7 +2,7 @@ context("subplot")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-subplot-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-subplot-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
@@ -136,7 +136,8 @@ test_that("subplot accepts a list of plots", {
 
 # Ignore for now https://github.com/ggobi/ggally/issues/264
 test_that("ggplotly understands ggmatrix", {
-  L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+  skip_if_not_installed("GGally")
+  L <- expect_doppelganger_built(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
 })
 
 test_that("annotation xref/yref are bumped correctly", {
@@ -167,6 +168,7 @@ test_that("annotation xref/yref are bumped correctly", {
 })
 
 test_that("images accumulate and paper coordinates are repositioned", {
+  skip_if_not_installed("png")
   
   r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
   
@@ -200,6 +202,7 @@ test_that("images accumulate and paper coordinates are repositioned", {
 })
 
 test_that("images axis references are remapped", {
+  skip_if_not_installed("png")
   
   r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
   
