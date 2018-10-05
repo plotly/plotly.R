@@ -21,6 +21,8 @@ env:
     - secure: "QPBEqtLRdwb4ablJORzD0JdCT9ESe3nNdIehM1oxfcNKfpSdf2OFxH3TkeYY1nMpv0mLxiMNTy6xcj9Yk5MaaBCIA0P7q6OdZv9ruzQD1j3g84gP45KwBilbPGjb+/EvOS0fM25vR/pAmA8IyoUfPC2J8HwiNnW8DYdt/hJOJ9A="
 
 before_install:
+  # run visual tests on r-release
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e VMODE="ci" -v $(pwd):/home/plotly cpsievert/plotly-orca; fi
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
   # sf system dependencies
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
@@ -28,9 +30,6 @@ before_install:
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
-  
-script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e VMODE="ci" -v $(pwd):/home/plotly cpsievert/plotly-orca; fi
 
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
