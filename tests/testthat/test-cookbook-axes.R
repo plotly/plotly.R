@@ -25,7 +25,7 @@ flevels <- rev(flevels)
 bp.flevels <- bp + scale_x_discrete(limits = flevels)
 
 test_that("factor levels determine tick order", {
-  info <- expect_traces(bp.flevels, 1, "flevels")
+  info <- expect_traces(bp, 1, "flevels")
   expect_equivalent(info$layout$xaxis$ticktext, c("trt2", "trt1", "ctrl"))
 })
 
