@@ -3,10 +3,17 @@ cache: packages
 sudo: true
 dist: trusty
 warnings_are_errors: false
-r:
-  - oldrel
-  - release
-  - devel
+
+matrix:
+  include:
+    - r:
+      - devel
+      - oldrel
+      - release
+        # run visual tests
+        # TODO: push the svg files somewhere on after_failure?
+        before_script: docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca
+      
     
 env:
   global:
@@ -25,11 +32,6 @@ before_install:
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   # make sure R pkgs are upt-to-date
   - Rscript -e 'update.packages(ask = FALSE)'
-  
-# run visual tests on r-release
-before_script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -v $(pwd):/home/plotly -it --privileged cpsievert/plotly-orca bash; fi
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then R -e "res <- devtools::test('/home/plotly', reporter='summary'); df <- as.data.frame(res); if (sum(df$failed) > 0 || any(df$error)) q(status=1)"; fi
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then exit; fi
+
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
