@@ -28,7 +28,8 @@ before_install:
   
 # run visual tests on r-release
 before_script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
-
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -v $(pwd):/home/plotly -it --privileged cpsievert/plotly-orca bash; fi
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then R -e "res <- devtools::test('/home/plotly', reporter='summary'); df <- as.data.frame(res); if (sum(df$failed) > 0 || any(df$error)) q(status=1)"; fi
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then exit; fi
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
