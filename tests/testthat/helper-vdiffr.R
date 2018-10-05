@@ -6,8 +6,18 @@ message("Visual testing is ", if (!enable_vdiffr) "not ", "enabled.")
 # start up the image server and let vdiffr's svg writing method know about it
 if (enable_vdiffr) {
   
-  # init image server with webgl enabled
-  orcaServer <- orca_serve(more_args = "--enable-webgl")
+  # try 20 random ports
+  for (i in 1:20) {
+    port <- floor(runif(1, 3001, 8000))
+    success <- tryFALSE({
+      # init image server with webgl enabled
+      # maybe someday this won't be necessary 
+      # https://github.com/plotly/orca/issues/127
+      orcaServer <- orca_serve(port = port, more_args = "--enable-webgl")
+      orcaServer$process$is_alive() && is.null(orcaServer$process$get_exit_status())
+    })
+    if (success) break
+  }
   
   # define logic for writing svg in vdiffr
   write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
