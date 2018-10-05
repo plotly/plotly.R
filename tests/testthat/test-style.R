@@ -23,3 +23,35 @@ test_that("Partial update works as expected", {
   marker5 <- plotly_build(p5)$x$data[[1]]$marker
   expect_equal(marker5, modifyList(marker5, list(line = list(color = "red"))))
 })
+
+test_that("Partial update works as expected", {
+  p4 <- style(p1, marker.color = "red")
+  marker4 <- plotly_build(p4)$x$data[[1]]$marker
+  expect_equal(marker4, modifyList(marker4, list(color = "red")))
+  
+  p5 <- style(p1, marker.line.color = "red")
+  marker5 <- plotly_build(p5)$x$data[[1]]$marker
+  expect_equal(marker5, modifyList(marker5, list(line = list(color = "red"))))
+})
+
+
+test_that("Partial update works as expected", {
+  trace <- list(
+    x = 1:5,
+    y = 6:10,
+    marker = list(line = list(color = "red", width = 20))
+  )
+  
+  trace_new <- trace_replace(trace, c("marker", "line"), list(width = 10))
+  trace$marker$line <- list(width = 10)
+  expect_equal(trace_new, trace)
+  
+  trace <- list(
+    x = 1:5,
+    y = 6:10,
+    marker = list(line = list(color = "red", width = 20))
+  )
+  trace_new <- trace_replace(trace, c("marker", "line", "width"), 10)
+  trace$marker$line$width <- 10
+  expect_equal(trace_new, trace)
+})

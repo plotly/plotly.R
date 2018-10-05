@@ -37,39 +37,35 @@
 #' # similar to plotly.js, you can update a particular attribute like so 
 #' # https://github.com/plotly/plotly.js/issues/1866#issuecomment-314115744
 #' style(p, marker.line.color = "blue") 
+#' # this clobbers the previously supplied marker.line.color
+#' style(p, marker.line = list(width = 2.5), marker.size = 10)
 #' 
 style <- function(p, ..., traces = NULL) {
   p <- plotly_build(p)
-  nTraces <- length(p$x$data)
-  traces <- traces %||% seq_len(nTraces)
-  idx <- traces > nTraces
-  traces <- traces[!idx]
-  if (any(idx)) warning("You've referenced non-existent traces", call. = FALSE)
-  argz <- list(...)
-  
-  # argument names that contain a '.' signify a "partial update"
-  isPartialUpdate <- grepl("\\.", names(argz))
-  # expand these special arguments to a suitable list object,
-  # `list(marker.color = "red")`, to `list(marker = list(color = "red"))`
-  nms <- strsplit(names(argz), "\\.")
-  for (i in seq_along(nms)) {
-    nm <- nms[[i]]
-    if (length(nm) == 1) next
-    val <- argz[[i]]
-    for (j in seq(length(nm), 2)) {
-      val <- setNames(list(val), nm[j])
-    }
-    argz[[i]] <- val
+  n_traces <- length(p$x$data)
+  trace_idx <- traces %||% seq_len(n_traces)
+  if (any(trace_idx > n_traces)) {
+    warning("You've referenced non-existent traces", call. = FALSE)
   }
-  argz <- setNames(argz, unlist(lapply(nms, `[[`, 1)))
   
-  # perform the replacement
-  for (i in traces) {
-    for (j in seq_along(argz)) {
-      attr <- names(argz)[j]
-      p$x$data[[i]][[attr]] <- if (isPartialUpdate[j]) modify_list(p$x$data[[i]][[attr]], argz[[attr]]) else argz[[attr]]
+  values <- list(...)
+  paths <- strsplit(names(values), "\\.")
+  
+  p$x$data[trace_idx] <- lapply(p$x$data[trace_idx], function(trace) {
+    for (i in seq_along(paths)) {
+      trace <- trace_replace(trace, paths[[i]], values[[i]])
     }
-  }
+    trace
+  })
   
   p
+}
+
+#' @param path character vector of path elements: c("marker", "line", "size")
+  if (length(path) == 0) return(trace)
+  if (length(path == 1)) {
+    trace[[path]] <- value
+    return(trace)
+  }
+  trace_replace(trace[[path[1]]], path[-1], value)
 }
