@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
-# Remove the VMODE env var to run vdiffr::manage_cases() 
-# $ docker build -t cpsievert/plotly-orca .
-# $ docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
+# Remove VMODE to run vdiffr::manage_cases()
+# $ docker build -t cpsievert/plotly-vtest .
+# $ docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-vtest
 # ------------------------------------------------------------------------------
 
 FROM ubuntu:16.04
