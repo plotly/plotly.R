@@ -1,7 +1,8 @@
-# IMPORTANT: for this to work you need the --privileged
-#
-# docker build -t plotly-orca .
-# docker run --privileged -p 3838:3838 plotly-orca
+# ------------------------------------------------------------------------------
+# Remove the VMODE env var to run vdiffr::manage_cases() 
+# $ docker build -t cpsievert/plotly-orca .
+# $ docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
+# ------------------------------------------------------------------------------
 
 FROM ubuntu:16.04
 MAINTAINER Carson Sievert "carson@rstudio.com"
@@ -62,7 +63,7 @@ RUN apt-get -y update
 RUN apt-get install -y libudunits2-dev libproj-dev libgeos-dev libgdal-dev
 
 # Install all plotly's dependencies
-RUN R -e "devtools::install_deps(dep = T)"
+RUN R -e "install.packages('plotly', dependencies = T)"
 
 # system dependencies related to running orca
 RUN apt-get install -y \
@@ -88,9 +89,8 @@ RUN chmod 777 /usr/bin/orca
 RUN R -e "devtools::install_github('cpsievert/vdiffr@diffObj')"
 RUN R -e "devtools::install_github('cpsievert/diffobj@css')"
 
-# configure for visual testing
+# switch on visual testing
 ENV VDIFFR=true
 EXPOSE 3838
-COPY ./ /home/plotly
 
-CMD R -e "vdiffr::manage_cases('home/plotly')"
+CMD R -e "devtools::install_deps('/home/plotly', dep = T); if (Sys.getenv('VMODE') == 'ci') devtools::test('home/plotly') else vdiffr::manage_cases('home/plotly')"
