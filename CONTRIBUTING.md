@@ -12,23 +12,21 @@ If your pull request fixes a bug and/or implements a new feature, please [write 
 
 ### Running visual tests via docker
 
-The **plotly** package ships with a [Dockerfile](https://github.com/ropensci/plotly/blob/master/Dockerfile) for running visual tests in a consistent and reproducible environment. You can build and run the docker container like so:
+To ensure a consistent and reproducible environment, visual tests should be run against the [cpsievert/plotly-orca](https://hub.docker.com/r/cpsievert/plotly-orca/) docker image. If you add a new visual test and/or expect any differences, run a container like so:
 
 ```shell
 git clone https://github.com/ropensci/plotly.git
 cd plotly
-docker build -t plotly-vdiffr .
-docker run --privileged -p 3838:3838 plotly-orca
+docker run -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
 ```
 
-This will launch a shiny app for inspecting and validating any visual differences. To see the shiny app, open your browser to <http://0.0.0.0/3838>. If there are differences that look 'good', you should validate them, then copy the new "baseline" figures over to your host machine (so that you can git add/commit/push the new baselines).
+This will launch a shiny app for inspecting and validating any visual differences. To see the shiny app, open your browser to <http://0.0.0.0/3838>. If there are differences that look 'good', you should validate them via the shiny app. This will automatically copy over the new "baseline" figures over to your host machine (so that you can git add/commit/push the new baselines).
+
+If, for some reason, you want to just run the visual tests to see if they'll pass, do:
 
 ```shell
-# assuming the most recent container you've run has the new baselines
-docker cp $(docker ps -aq | head -n 1):/home/plotly/tests/figs ./tests
+docker run -e VMODE="ci" -v $(pwd):/home/plotly cpsievert/plotly-orca
 ```
-
-Say your changes produce changes in the corresponding svg of existing tests and/or you want to do write new tests (hooray!). In that case, you'll want to run `vdiffr::manage_cases()`, which should eventually launch a shiny app of "mismatched" and "new" to visually inspect before approving the changes.
 
 ## Code of Conduct
 
