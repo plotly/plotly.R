@@ -93,4 +93,12 @@ RUN R -e "devtools::install_github('cpsievert/diffobj@css')"
 ENV VDIFFR=true
 EXPOSE 3838
 
-CMD R -e "devtools::install_deps('/home/plotly', dep = T); if (Sys.getenv('VMODE') == 'ci') devtools::test('home/plotly') else vdiffr::manage_cases('home/plotly')"
+# install any new dependencies, then either manage cases (the default) or run tests
+# note the workaround to get docker to run a proper exit status when there are testthat errors
+# https://github.com/r-lib/testthat/issues/515#issuecomment-304169376
+
+CMD R -e "devtools::install_deps('/home/plotly', dep = T); \
+  if (!identical(Sys.getenv('VMODE'), 'ci')) vdiffr::manage_cases('/home/plotly'); \
+  res <- devtools::test('/home/plotly', reporter='summary'); \
+  df <- as.data.frame(res); \
+  if (sum(df\$failed) > 0 || any(df\$error)) q(status=1)"
