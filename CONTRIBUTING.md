@@ -25,7 +25,7 @@ This will launch a shiny app for inspecting and validating any visual difference
 If, for some reason, you want to just run the visual tests to see if they'll pass, do:
 
 ```shell
-docker run -e VMODE="ci" -v $(pwd):/home/plotly cpsievert/plotly-orca
+docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca
 ```
 
 ## Code of Conduct
