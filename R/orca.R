@@ -28,8 +28,8 @@
 #' hang during image generating are skipped.
 #' @param more_args additional arguments to pass along to system command. This is useful
 #' for specifying display and/or electron options, such as `--enable-webgl` or `--disable-gpu`.
-#' @param ... additional arguments passed along to `processx::run()` (for `orca()`) or 
-#' `processx::process()` (for `orca_serve()`).
+#' @param ... for `orca()`, additional arguments passed along to `processx::run`. For 
+#' `orca_serve()`, additional arguments passed along to `processx::process`.
 #' @export
 #' @author Carson Sievert
 #' @md

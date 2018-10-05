@@ -46,8 +46,8 @@ hang during image generating are skipped.}
 \item{more_args}{additional arguments to pass along to system command. This is useful
 for specifying display and/or electron options, such as \code{--enable-webgl} or \code{--disable-gpu}.}
 
-\item{...}{additional arguments passed along to \code{processx::run()} (for \code{orca()}) or
-\code{processx::process()} (for \code{orca_serve()}).}
+\item{...}{for \code{orca()}, additional arguments passed along to \code{processx::run}. For
+\code{orca_serve()}, additional arguments passed along to \code{processx::process}.}
 
 \item{port}{Sets the server's port number.}
 

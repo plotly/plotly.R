@@ -2,7 +2,8 @@
 
 ## NEW FEATURES
 
-* The `orca_serve` R6 class was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
+* The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
+* The `orca()` function gains new arguments `more_args` and `...` for finer control over the underlying system commands.
 
 ## IMPROVEMENTS
 
