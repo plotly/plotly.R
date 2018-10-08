@@ -8,7 +8,7 @@ gg <- ggplot(df, aes(x, y)) + geom_point()
 test_that("second trace be the vline", {
   p <- gg + geom_vline(xintercept = 1.1, colour = "green", size = 3)
   
-  L <- save_outputs(p, "vline")
+  L <- expect_doppelganger_built(p, "vline")
   l <- L$data[[2]]
   
   expect_equivalent(length(L$data), 2)
@@ -22,7 +22,7 @@ test_that("second trace be the vline", {
 test_that("vector xintercept results in multiple vertical lines", {
   p <- gg + geom_vline(xintercept = 1:2, colour = "blue", size = 3)
   
-  L <- save_outputs(p, "vline-multiple")
+  L <- expect_doppelganger_built(p, "vline-multiple")
   expect_equivalent(length(L$data), 2)
   l <- L$data[[2]]
   xs <- unique(l$x)

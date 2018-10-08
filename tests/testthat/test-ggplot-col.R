@@ -15,7 +15,7 @@ p <- df %>%
   geom_text(aes(label = scales::percent(prop)), position = position_stack(vjust = 0.5))  
 
 test_that("geom_col is supported", {
-  l <- save_outputs(p, "col")
+  l <- expect_doppelganger_built(p, "col")
   barDat <- l$data[sapply(l$data, "[[", "type") %in% "bar"]
   expect_equivalent(
     unlist(lapply(barDat, "[[", "x")),

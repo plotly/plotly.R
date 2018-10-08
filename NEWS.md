@@ -1,5 +1,10 @@
 # 4.8.0.9000
 
+## NEW FEATURES
+
+* The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
+* The `orca()` function gains new arguments `more_args` and `...` for finer control over the underlying system commands.
+
 ## IMPROVEMENTS
 
 * Upgraded to plotly.js v1.41.3.

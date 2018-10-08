@@ -3,7 +3,7 @@ context("size")
 test_that("size is a vector if it is specified", {
   iplot <- ggplot(iris) +
     geom_point(aes(Petal.Width, Sepal.Width, size=Petal.Length))
-  L <- save_outputs(iplot, "size-is-a-vector")
+  L <- expect_doppelganger_built(iplot, "size-is-a-vector")
   m <- L$data[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
@@ -21,7 +21,7 @@ gg <- ggplot(countrypop, aes(edu, illn, colour = country, size = population)) +
   geom_point()
 
 test_that("global scaling works for sizes over different traces", {
-  L <- save_outputs(gg, "size-global-scaling")
+  L <- expect_doppelganger_built(gg, "size-global-scaling")
   expect_equivalent(length(L$data), 3)  # 1 trace per country (3)
   expect_true(as.numeric(L$data[[1]]$marker$size) <
                 as.numeric(L$data[[2]]$marker$size))

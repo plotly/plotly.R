@@ -12,7 +12,7 @@ test_that("geom_errorbar gives errorbars", {
   g <- ggplot(d, aes(x = cyl, y = m)) + geom_line() +
     geom_errorbar(aes(ymin = q1, ymax = q3))
 
-  L <- save_outputs(g, "errorbar")
+  L <- expect_doppelganger_built(g, "errorbar")
   
   # 1 trace should have error_y
   idx <- vapply(L$data, function(x) is.null(x$error_y), logical(1))
@@ -34,7 +34,7 @@ p <- ggplot(df, aes(trt, resp, colour = group))
 g <- p + geom_errorbar(aes(ymin = lower, ymax = upper))
 
 test_that("geom_errorbar boxes an array of length 1", {
-  L <- save_outputs(g, "errorbar-unique-groups")
+  L <- expect_doppelganger_built(g, "errorbar-unique-groups")
   expect_equivalent(L$data[[1]]$error_y$array, I(0.1))
   expect_equivalent(L$data[[1]]$error_y$arrayminus, I(0.2))
 })
