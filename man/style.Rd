@@ -44,6 +44,8 @@ style(p, marker = list(line = list(color = "blue")))
 # similar to plotly.js, you can update a particular attribute like so 
 # https://github.com/plotly/plotly.js/issues/1866#issuecomment-314115744
 style(p, marker.line.color = "blue") 
+# this clobbers the previously supplied marker.line.color
+style(p, marker.line = list(width = 2.5), marker.size = 10)
 
 }
 \seealso{

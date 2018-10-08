@@ -9,6 +9,8 @@ p <- ggplot(mtcars, aes(mpg, wt)) +
 
 
 test_that("Basic annotation_raster() example works", {
+  # annotations require this package
+  skip_if_not_installed("png")
   
   l <- plotly_build(p)$x
   
@@ -38,15 +40,15 @@ test_that("Basic annotation_raster() example works", {
 })
 
 
-
-usamap <- map_data("state")
-seal.sub <- subset(seals, long > -130 & lat < 45 & lat > 40)
-p <- ggplot(seal.sub, aes(x = long, y = lat)) +
-  annotation_map(usamap, fill = "NA", colour = "grey50") +
-  geom_segment(aes(xend = long + delta_long, yend = lat + delta_lat))
-
-
 test_that("Basic annotation_map() example works", {
+  
+  skip_if_not_installed("maps")
+  
+  usamap <- map_data("state")
+  seal.sub <- subset(seals, long > -130 & lat < 45 & lat > 40)
+  p <- ggplot(seal.sub, aes(x = long, y = lat)) +
+    annotation_map(usamap, fill = "NA", colour = "grey50") +
+    geom_segment(aes(xend = long + delta_long, yend = lat + delta_lat))
   
   l <- plotly_build(p)$x
   

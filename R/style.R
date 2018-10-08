@@ -62,6 +62,7 @@ style <- function(p, ..., traces = NULL) {
 }
 
 #' @param path character vector of path elements: c("marker", "line", "size")
+trace_replace <- function(trace, path, value) {
   if (length(path) == 0) return(trace)
   if (length(path == 1)) {
     trace[[path]] <- value

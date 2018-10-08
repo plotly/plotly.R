@@ -2,7 +2,7 @@ context("plotly-color")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-color-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-color-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
