@@ -9,7 +9,7 @@ test_that("segments become one path", {
   )
   gg <- ggplot() +
     geom_segment(aes(x, y, xend  =  xend, yend = yend), data = seg.df)
-  info <- save_outputs(gg, "segment")
+  info <- expect_doppelganger_built(gg, "segment")
   tr <- info$data[[1]]
   expect_true(any(is.na(tr$x)))
   expect_true(any(is.na(tr$y)))
@@ -38,7 +38,7 @@ test_that("with non-numeric data, we can have more than one segment", {
     geom_segment(data = seg1, aes(x, y, xend = xend, yend = yend)) +
     geom_segment(data = seg2, aes(x, y, xend = xend, yend = yend))
   
-  fig <- save_outputs(gg, "segment-multiple-non-numeric")
+  fig <- expect_doppelganger_built(gg, "segment-multiple-non-numeric")
   # one trace is for the colorbar
   expect_equivalent(length(fig$data), 4)
   expect_equivalent(fig$data[[2]]$x[1], seg1$x)

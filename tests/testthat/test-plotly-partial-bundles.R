@@ -2,6 +2,7 @@ context("partial-bundles")
 
 test_that("Can reduce saved file size with an basic (auto) partial bundle by half", {
   skip_on_cran()
+  skip_if_not(Sys.which("pandoc") != "", "pandoc needed for this test")
   
   p1 <- plot_ly(x = 1:10, y = 1:10) %>% add_markers()
   p2 <- partial_bundle(p1)

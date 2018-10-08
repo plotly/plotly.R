@@ -43,14 +43,15 @@ add_lines(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
 add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
   data = NULL, inherit = TRUE)
 
-add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+add_polygons(p, x = NULL, y = NULL, ..., data = NULL,
+  inherit = TRUE)
 
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
 add_table(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
 
-add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...,
+  data = NULL, inherit = TRUE)
 
 add_area(p, r = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
 
@@ -59,7 +60,8 @@ add_pie(p, values = NULL, labels = NULL, ..., data = NULL,
 
 add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+add_histogram(p, x = NULL, y = NULL, ..., data = NULL,
+  inherit = TRUE)
 
 add_histogram2d(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
   inherit = TRUE)
@@ -72,7 +74,8 @@ add_heatmap(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
 
 add_contour(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+add_boxplot(p, x = NULL, y = NULL, ..., data = NULL,
+  inherit = TRUE)
 
 add_surface(p, z = NULL, ..., data = NULL, inherit = TRUE)
 

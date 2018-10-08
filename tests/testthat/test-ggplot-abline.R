@@ -4,7 +4,7 @@ context("Abline")
 
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(gg, paste0("cookbook-axes-", name))
+  L <- expect_doppelganger_built(gg, paste0("cookbook-axes-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])

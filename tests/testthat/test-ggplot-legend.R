@@ -2,7 +2,7 @@ context("legends")
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(gg, paste0("legend-", name))
+  L <- expect_doppelganger_built(gg, paste0("legend-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -16,7 +16,7 @@ p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs), shape = factor(cyl)
   geom_point()
 
 test_that("Discrete colour and shape get merged into one legend", {
-  info <- save_outputs(p, "scatter_legend")
+  info <- expect_doppelganger_built(p, "scatter_legend")
   expect_equivalent(length(info$data), 5)
   expect_true(info$layout$showlegend)
   # 5 legend entries
