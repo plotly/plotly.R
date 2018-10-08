@@ -7,7 +7,7 @@
 
 ## IMPROVEMENTS
 
-* Upgraded to plotly.js v1.40.1.
+* Upgraded to plotly.js v1.41.3.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 
 ## BUG FIXES
