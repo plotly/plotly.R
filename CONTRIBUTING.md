@@ -20,9 +20,7 @@ cd plotly
 docker run -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
 ```
 
-This will launch a shiny app for inspecting and validating any visual differences. To see the shiny app, open your browser to <http://0.0.0.0/3838>. If there are differences that look 'good', you should validate them via the shiny app. This will automatically copy over the new "baseline" figures over to your host machine (so that you can git add/commit/push the new baselines).
-
-If, for some reason, you want to just run the visual tests to see if they'll pass, do:
+This will launch a shiny app for inspecting and validating any visual differences. To see the shiny app, open your browser to <http://0.0.0.0/3838>. If there are differences that look 'good', you should validate them via the shiny app. This will automatically copy over the new "baseline" figures over to your host machine (so that you can git add/commit/push the new baselines). If, for some reason, you want to just run the visual tests to see if they'll pass, do:
 
 ```shell
 docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca
