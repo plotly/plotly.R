@@ -1,16 +1,21 @@
 context("highlighting and animation")
 
 m <- crosstalk::SharedData$new(mtcars, ~vs)
+p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()
 
 test_that("SharedData produces key/set in plot_ly", {
-  m <- crosstalk::SharedData$new(mtcars, ~vs)
-  p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()
   tr <- plotly_build(p)$x$data[[1]]
-  
   expect_true(all(tr$key == m$key()))
   expect_identical(tr$set, m$groupName())
   expect_false(tr$`_isNestedKey` %||% FALSE)
   expect_false(tr$`_isSimpleKey` %||% FALSE)
+})
+
+test_that("Warning is thrown when clickmode='select' is used with crosstalk", {
+  expect_warning(
+    plotly_build(layout(p, clickmode = "select")),
+    "not designed to work well"
+  )
 })
 
 test_that("SharedData produces key/set in ggplotly", {
@@ -23,6 +28,8 @@ test_that("SharedData produces key/set in ggplotly", {
   expect_false(tr$`_isNestedKey` %||% FALSE)
   expect_false(tr$`_isSimpleKey` %||% FALSE)
 })
+
+
 
 test_that("crosstalk keys are inherited in a layer with inherit = FALSE", {
   
