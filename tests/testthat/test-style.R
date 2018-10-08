@@ -54,4 +54,12 @@ test_that("Partial update works as expected", {
   trace_new <- trace_replace(trace, c("marker", "line", "width"), 10)
   trace$marker$line$width <- 10
   expect_equal(trace_new, trace)
+  
+  trace <- list(
+    x = 1:5,
+    y = 6:10
+  )
+  trace_new <- trace_replace(trace, c("marker", "line", "width"), 10)
+  trace$marker$line$width <- 10
+  expect_equal(trace_new, trace)
 })

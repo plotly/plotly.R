@@ -61,13 +61,16 @@ style <- function(p, ..., traces = NULL) {
   p
 }
 
-#' @param path character vector of path elements: c("marker", "line", "size")
+#' @param trace a single plotly trace
+#' @param path character vector of path elements pointing to a trace property: c("marker", "line", "size")
+#' @param value a value to assign to that trace property
 trace_replace <- function(trace, path, value) {
   if (length(path) == 0) return(trace)
   if (length(path) == 1) {
     trace[[path]] <- value
     return(trace)
   }
+  trace[[path[1]]] <- trace[[path[1]]] %||% setNames(list(NULL), path[2])
   trace[[path[1]]] <- trace_replace(trace[[path[1]]], path[-1], value)
   trace
 }
