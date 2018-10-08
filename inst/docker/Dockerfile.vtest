@@ -87,7 +87,7 @@ RUN chmod 777 /usr/bin/orca
 
 # install visual testing packages
 RUN R -e "devtools::install_github('cpsievert/vdiffr@diffObj')"
-RUN R -e "devtools::install_github('cpsievert/diffobj@css')"
+RUN R -e "devtools::install_github('brodieG/diffobj@development')"
 
 # switch on visual testing
 ENV VDIFFR=true
