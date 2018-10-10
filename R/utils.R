@@ -88,7 +88,7 @@ deparse2 <- function(x) {
 }
 
 new_id <- function() {
-  basename(tempfile(""))
+  digest::digest(runif(3), "xxhash64")
 }
 
 names2 <- function(x) {
