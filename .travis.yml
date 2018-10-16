@@ -4,15 +4,12 @@ sudo: true
 dist: trusty
 warnings_are_errors: false
 
-matrix:
-  include:
-    - r:
-      - devel
-      - oldrel
-      - release
-        # run visual tests
-        # TODO: push the svg files somewhere on after_failure?
-        before_script: docker run -e MAPBOX_TOKEN=$MAPBOX_TOKEN -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca R -e "devtools::install_deps('/home/plotly', dep = T); res <- devtools::test('/home/plotly', reporter='summary'); df <- as.data.frame(res); if (sum(df\$failed) > 0 || any(df\$error)) q(status=1)"
+
+r:
+  - devel
+  - oldrel
+  - release
+        
       
     
 env:
