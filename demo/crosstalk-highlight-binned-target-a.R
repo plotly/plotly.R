@@ -2,7 +2,7 @@
 library(plotly)
 
 d <- highlight_key(mpg)
-dots <- plot_ly(d, colors = "Set1", color = ~class, x = ~displ, y = ~cyl) %>%
+dots <- plot_ly(d, colors = "Set1", color = ~class, x = ~displ, y = ~jitter(cyl)) %>%
   layout(
     xaxis = list(title = "Engine displacement"),
     yaxis = list(title = "Number of cylinders")
