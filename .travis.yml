@@ -27,7 +27,7 @@ before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 
 before_script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e MAPBOX_TOKEN=$MAPBOX_TOKEN -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca R -e "devtools::install_deps('/home/plotly', dep = T); res <- devtools::test('/home/plotly', reporter='summary'); df <- as.data.frame(res); if (sum(df\$failed) > 0 || any(df\$error)) q(status=1)"; fi
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e MAPBOX_TOKEN=$MAPBOX_TOKEN -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
 
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
