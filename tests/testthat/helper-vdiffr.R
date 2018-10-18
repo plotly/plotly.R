@@ -20,7 +20,7 @@ if (enable_vdiffr) {
   }
   
   # define logic for writing svg in vdiffr
-  write_svg.plotly <- function(p, file, title, user_fonts = NULL) {
+  write_plotly_svg <- function(p, file, title) {
     # before exporting, specify trace[i].uid so resulting svg is deterministic
     # https://github.com/plotly/orca/issues/133
     p <- plotly_build(p)
@@ -58,7 +58,7 @@ expect_doppelganger <- function(p, name, ...) {
     # otherwise comparing svg produces false positives
     set.seed(555)
     if (ggplot2::is.ggplot(p)) p <- ggplotly(p)
-    vdiffr::expect_doppelganger(name, p, ...)
+    vdiffr::expect_doppelganger(name, p, ..., writer = write_plotly_svg)
   } else {
     invisible(NULL)
   }
