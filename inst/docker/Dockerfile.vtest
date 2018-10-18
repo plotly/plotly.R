@@ -86,7 +86,7 @@ RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640
 RUN chmod 777 /usr/bin/orca
 
 # install visual testing packages
-RUN R -e "devtools::install_github('lionel-/vdiffr#48')"
+RUN R -e "devtools::install_github('lionel-/vdiffr')"
 RUN R -e "devtools::install_github('brodieG/diffobj@development')"
 
 # switch on visual testing
