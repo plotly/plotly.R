@@ -1300,7 +1300,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
       type = "scatter",
       mode = "markers",
       opacity = 0,
-      hoverinfo = "none",
+      hoverinfo = "skip",
       showlegend = FALSE,
       # do everything on a 0-1 scale
       marker = list(
