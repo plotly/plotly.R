@@ -54,7 +54,7 @@ test_that("geom_sf() polygons with fill/text.", {
   # one trace for every fillcolor, one for graticule, one for colorbar
   expect_length(l$data, length(unique(nc$AREA)) + 2)
   expect_true(
-    all(unlist(lapply(l$data, "[[", "hoverinfo")) %in% c("none", "text"))
+    all(unlist(lapply(l$data, "[[", "hoverinfo")) %in% c("skip", "none", "text"))
   )
   # graticule styling should inherit from panel.grid.major
   expect_equivalent(
