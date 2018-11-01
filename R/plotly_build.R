@@ -775,7 +775,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     colScale <- scales::col_numeric(pal, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
     vals <- if (diff(rng) > 0) {
-      as.numeric(stats::quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE))
+      seq(rng[1], rng[2], length.out = 25)
     } else {
       c(0, 1)
     }
