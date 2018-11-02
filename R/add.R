@@ -374,6 +374,28 @@ add_table <- function(p, ..., rownames = TRUE, data = NULL, inherit = TRUE) {
 
 
 #' @inheritParams add_trace
+#' @param rownames whether or not to display the rownames of `data`.
+#' @rdname add_trace
+#' @export
+add_parcoords <- function(p, ..., data = NULL, inherit = TRUE) {
+  attrs <- list(...)
+  dat <- plotly_data(add_data(p, data))
+  # if a dataset is provided, and dimensions are not pre-specified
+  dimensions <- attrs$dimensions %||% if (inherit) p$x$attrs[[1]]$dimensions
+  if (is.data.frame(dat) && is.null(dimensions)) {
+    d <- dat[sapply(dat, is.numeric)]
+    dimensions <- Map(function(x, y) {
+      list(values = x, range = range(x, na.rm = TRUE), label = y)
+    }, d, names(d), USE.NAMES = FALSE)
+  }
+  add_trace_classed(
+    p = p, class = "plotly_parcoords", type = "parcoords",
+    dimensions = dimensions, ...
+  )
+}
+
+
+#' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
 add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,

@@ -10,6 +10,7 @@
 \alias{add_polygons}
 \alias{add_sf}
 \alias{add_table}
+\alias{add_parcoords}
 \alias{add_ribbons}
 \alias{add_area}
 \alias{add_pie}
@@ -49,6 +50,8 @@ add_polygons(p, x = NULL, y = NULL, ..., data = NULL,
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
 add_table(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
+
+add_parcoords(p, ..., data = NULL, inherit = TRUE)
 
 add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...,
   data = NULL, inherit = TRUE)
@@ -124,6 +127,8 @@ provided at this level may override other arguments
 \item{values}{the value to associated with each slice of the pie.}
 
 \item{labels}{the labels (categories) corresponding to \code{values}.}
+
+\item{rownames}{whether or not to display the rownames of \code{data}.}
 }
 \description{
 Add trace(s) to a plotly visualization
