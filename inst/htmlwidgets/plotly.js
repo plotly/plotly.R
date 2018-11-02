@@ -274,6 +274,12 @@ HTMLWidgets.widget({
           JSON.stringify(d)
         );
       });
+      graphDiv.on('plotly_restyle', function(d) {
+        Shiny.onInputChange(
+          ".clientValue-plotly_restyle-" + x.source, 
+          JSON.stringify(d)
+        );
+      });
       graphDiv.on('plotly_hover', function(d) {
         Shiny.onInputChange(
           ".clientValue-plotly_hover-" + x.source, 
