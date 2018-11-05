@@ -16,6 +16,8 @@ env:
     - secure: "WsvmMHN4YVhnk0bLRE04APcLbs5s4vWKSHjEdU0bPXd0xdMTzZeP5D7pxyF1983C+P5LpSnGHv4dgwLMBkNzxJwBR7/Ta7lfO1akYILWwxib+1DVbCqUH5Z4Ba1FSCQptIrLNGR3P7+0Lem4hEhqKdPKltFnxhnXO0Y+MeG71IQ="
     # MAPBOX_TOKEN (for testing `plot_mapbox()`)
     - secure: "QPBEqtLRdwb4ablJORzD0JdCT9ESe3nNdIehM1oxfcNKfpSdf2OFxH3TkeYY1nMpv0mLxiMNTy6xcj9Yk5MaaBCIA0P7q6OdZv9ruzQD1j3g84gP45KwBilbPGjb+/EvOS0fM25vR/pAmA8IyoUfPC2J8HwiNnW8DYdt/hJOJ9A="
+    # GITHUB_PAT
+    - secure: "lZf7GBt1+ogux5WAXmIZ6/VBTmR1G7rv+8Aevogfan7GWb32K3IVatsrKr1pSvz0hysP0MDueQqTv0GcNOvrFnYvobyo6fFpx+n33WkXQCGybUOHyfJpPdw1L2wtAy88ugNJDl+n9fdXr4yL2cWvRqq4WBKeeSi6hpdiKOaoB3Y="
 
 before_install:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
@@ -27,7 +29,7 @@ before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 
 before_script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e MAPBOX_TOKEN=$MAPBOX_TOKEN -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
+  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e GITHUB_PAT=$GITHUB_PAT -e MAPBOX_TOKEN=$MAPBOX_TOKEN -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
 
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
