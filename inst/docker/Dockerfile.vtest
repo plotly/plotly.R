@@ -97,12 +97,14 @@ EXPOSE 3838
 # http://r-sig-geo.2731867.n2.nabble.com/Re-Unexpected-configure-error-following-recent-rgeos-release-td7592423.html
 RUN R -e "install.packages('rgeos', repos='http://R-Forge.R-project.org', type='source')"
 
+RUN R -e "update.packages(ask=FALSE)"
+
 # install any new dependencies, then either manage cases (the default) or run tests
 # note the workaround to get docker to run a proper exit status when there are testthat errors
 # https://github.com/r-lib/testthat/issues/515#issuecomment-304169376
 
-CMD R -e "devtools::install_deps('/home/plotly', dep = T); \
-  if (!identical(Sys.getenv('VMODE'), 'ci')) vdiffr::manage_cases('/home/plotly'); \
-  res <- devtools::test('/home/plotly', reporter='summary'); \
+CMD cd /home/plotly && R -e "devtools::install_deps(dep = T); \
+  if (!identical(Sys.getenv('VMODE'), 'ci')) vdiffr::manage_cases(); \
+  res <- devtools::test(reporter='summary'); \
   df <- as.data.frame(res); \
   if (sum(df\$failed) > 0 || any(df\$error)) q(status=1)"
