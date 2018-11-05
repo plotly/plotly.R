@@ -7,7 +7,7 @@ message("Visual testing is ", if (!enable_vdiffr) "not ", "enabled.")
 if (enable_vdiffr) {
   
   # try 20 random ports
-  for (i in 1:20) {
+  for (vdiff_port_tries in 1:20) {
     port <- floor(runif(1, 3001, 8000))
     success <- tryFALSE({
       # init image server with webgl enabled
