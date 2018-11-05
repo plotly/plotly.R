@@ -39,7 +39,18 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   # this makes it possible to pass a ggplot2 object to renderPlotly()
   # https://github.com/ramnathv/htmlwidgets/issues/166#issuecomment-153000306
   expr <- as.call(list(call(":::", quote("plotly"), quote("prepareWidget")), expr))
-  shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+  renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+  # remove 'internal' plotly attributes that are known to cause false
+  # positive test results in shinytest (snapshotPreprocessOutput was added 
+  # in shiny 1.0.3.9002, but we require >= 1.1)
+  shiny::snapshotPreprocessOutput(
+    renderFunc,
+    function(value) {
+      json <- from_JSON_safe(value)
+      json$x <- json$x[!names(json$x) %in% c("visdat", "cur_data", "attrs")]
+      to_JSON(json)
+    }
+  )
 }
 
 # Converts a plot, OR a promise of a plot, to plotly
