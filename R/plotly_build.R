@@ -1005,4 +1005,13 @@ supplyUserPalette <- function(default, user) {
 
 # helper functions
 array_ok <- function(attr) isTRUE(tryNULL(attr$arrayOk))
-has_fill <- function(trace) isTRUE(trace$fill %in% c('tozeroy', 'tozerox', 'tonexty', 'tonextx', 'toself', 'tonext'))
+has_fill <- function(trace) {
+  trace_type <- trace[["type"]] %||% "scatter"
+  # if trace type has fillcolor, but no fill attribute, then fill is always relevant
+  has_fillcolor <- has_attr(trace_type, "fillcolor")
+  has_fill <- has_attr(trace_type, "fill")
+  if (has_fillcolor && !has_fill) return(TRUE)
+  fill <- trace[["fill"]] %||% "none"
+  if (has_fillcolor && isTRUE(fill != "none")) return(TRUE)
+  FALSE
+}
