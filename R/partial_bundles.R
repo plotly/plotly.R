@@ -139,6 +139,8 @@ verify_partial_bundle <- function(p) {
     if (!file.exists(tmpfile)) {
       curl::curl_download(paste0("https://cdn.plot.ly/", bundle_script), tmpfile)
     }
+    # file src is no longer in plotly's path (it's a temp file)
+    p$dependencies[[idx]]$package <- NULL
   }
   
   p
