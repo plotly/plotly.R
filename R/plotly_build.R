@@ -144,7 +144,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     
     # if appropriate, tack on a group index
-    grps <- if (has_group(trace)) dplyr::group_vars(dat)
+    grps <- if (has_group(trace)) tryNULL(dplyr::group_vars(dat))
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
