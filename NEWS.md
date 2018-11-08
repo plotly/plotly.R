@@ -7,7 +7,7 @@
 
 ## IMPROVEMENTS
 
-* Upgraded to plotly.js v1.42.4.
+* Upgraded to plotly.js v1.42.5.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 
