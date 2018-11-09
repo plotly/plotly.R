@@ -131,6 +131,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       class = oldClass(x)
     )
     
+    # determine trace type (if not specified, can depend on the # of data points)
+    # note that this should also determine a sensible mode, if appropriate
+    trace <- verify_type(trace)
+    # verify orientation of boxes/bars
+    trace <- verify_orientation(trace)
+    
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]] %||% TRUE)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
@@ -138,20 +144,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     
     # if appropriate, tack on a group index
-    grps <- tryCatch(
-      as.character(dplyr::groups(dat)),
-      error = function(e) character(0)
-    )
-    
+    grps <- if (has_group(trace)) tryNULL(dplyr::group_vars(dat))
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
-    
-    # determine trace type (if not specified, can depend on the # of data points)
-    # note that this should also determine a sensible mode, if appropriate
-    trace <- verify_type(trace)
-    # verify orientation of boxes/bars
-    trace <- verify_orientation(trace)
     
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
