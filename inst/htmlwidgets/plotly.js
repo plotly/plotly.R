@@ -243,13 +243,15 @@ HTMLWidgets.widget({
         var gd = document.getElementById(el.id);
         var trace = gd.data[pt.curveNumber];
         
-        // Add other attributes here, if desired
+        // Heatmap z event data should derive from _z calc attribute
+        // https://github.com/ropensci/plotly/issues/1141
+        var z = trace.type === "heatmap" ? "_z" : "z";
         if (!trace._isSimpleKey) {
-          var attrsToAttach = ["key", "z"];
+          var attrsToAttach = ["key", z];
         } else {
           // simple keys fire the whole key
           obj.key = trace.key;
-          var attrsToAttach = ["z"];
+          var attrsToAttach = [z];
         }
         
         for (var i = 0; i < attrsToAttach.length; i++) {
