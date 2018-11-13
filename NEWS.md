@@ -16,6 +16,7 @@
 * `subplot()` now bumps annotation `xref`/`yref` anchors correctly (#1181).
 * `subplot()` now accumulates images, repositions paper coordinates, and reanchors axis references (#1332).
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
+* The `color` and `stroke` arguments now work as expected for trace types with `fillcolor` but no `fill` attribute (e.g. `box` traces) (#1292).
 * Information emitted by in `event_data()` for heatmaps with atomic vectors for `x`/`y`/`z` is now correct (#1141).
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
 * In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).  
