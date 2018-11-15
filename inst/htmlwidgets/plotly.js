@@ -289,10 +289,12 @@ HTMLWidgets.widget({
         );
       });
       graphDiv.on('plotly_selected', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_selected-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
-        );
+        if (d) {
+          Shiny.onInputChange(
+            ".clientValue-plotly_selected-" + x.source, 
+            JSON.stringify(eventDataWithKey(d))
+          );
+        }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
