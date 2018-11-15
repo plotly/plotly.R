@@ -277,29 +277,71 @@ HTMLWidgets.widget({
         );
       });
       graphDiv.on('plotly_hover', function(d) {
+        
         Shiny.onInputChange(
           ".clientValue-plotly_hover-" + x.source, 
           JSON.stringify(eventDataWithKey(d))
         );
-      });
-      graphDiv.on('plotly_click', function(d) {
+        
+        // When persistent selection is enabled (either through
+        // shift or highlight()), remember click data
+        if (x.highlight.persistentShift) {
+          var dShift = graphDiv._shiny_plotly_hover || {points: []};
+          var pts = [].concat(dShift.points, d.points);
+          var d = {points: pts, event: d.event};
+          graphDiv._shiny_plotly_hover = d;
+        } else {
+          graphDiv._shiny_plotly_hover = undefined;
+        }
+        
         Shiny.onInputChange(
-          ".clientValue-plotly_click-" + x.source, 
+          ".clientValue-plotly_hover_persist_on_shift-" + x.source,
           JSON.stringify(eventDataWithKey(d))
         );
+        
       });
+      graphDiv.on('plotly_click', function(d) {
+        
+        Shiny.onInputChange(
+          ".clientValue-plotly_click-" + x.source,
+          JSON.stringify(eventDataWithKey(d))
+        );
+        
+        // When persistent selection is enabled (either through
+        // shift or highlight()), remember click data
+        if (x.highlight.persistentShift) {
+          var dShift = graphDiv._shiny_plotly_click || {points: []};
+          var pts = [].concat(dShift.points, d.points);
+          var d = {points: pts, event: d.event};
+          graphDiv._shiny_plotly_click = d;
+        } else {
+          graphDiv._shiny_plotly_click = undefined;
+        }
+        
+        Shiny.onInputChange(
+          ".clientValue-plotly_click_persist_on_shift-" + x.source,
+          JSON.stringify(eventDataWithKey(d))
+        );
+        
+      });
+      
       graphDiv.on('plotly_selected', function(d) {
         Shiny.onInputChange(
           ".clientValue-plotly_selected-" + x.source, 
           JSON.stringify(eventDataWithKey(d))
         );
       });
+      
       graphDiv.on('plotly_unhover', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
+        if (!x.highlight.persistentShift) {
+          Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
+        }
       });
+      
       graphDiv.on('plotly_doubleclick', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
       });
+      
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
