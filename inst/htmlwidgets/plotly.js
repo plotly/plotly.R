@@ -289,10 +289,18 @@ HTMLWidgets.widget({
         );
       });
       graphDiv.on('plotly_selected', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_selected-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
-        );
+        // If 'plotly_selected' has already been fired, and you click
+        // on the plot afterwards, this event fires `undefined`?!?
+        // That might be considered a plotly.js bug, but it doesn't make 
+        // sense for this input change to occur if `d` is falsy because,
+        // even in the empty selection case, `d` is truthy (an object),
+        // and the 'plotly_deselect' event will reset this input
+        if (d) {
+          Shiny.onInputChange(
+            ".clientValue-plotly_selected-" + x.source, 
+            JSON.stringify(eventDataWithKey(d))
+          );
+        }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
