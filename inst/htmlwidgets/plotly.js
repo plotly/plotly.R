@@ -309,6 +309,11 @@ HTMLWidgets.widget({
             ".clientValue-plotly_selected-" + x.source, 
             JSON.stringify(eventDataWithKey(d))
           );
+          var limits = d.range ? d.range : d.lassoPoints;
+          Shiny.onInputChange(
+            ".clientValue-plotly_brush-" + x.source, 
+            JSON.stringify(limits)
+          );
         }
       });
       graphDiv.on('plotly_unhover', function(eventData) {

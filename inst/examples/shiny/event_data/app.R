@@ -6,7 +6,8 @@ ui <- fluidPage(
   plotlyOutput("plot"),
   verbatimTextOutput("hover"),
   verbatimTextOutput("click"),
-  verbatimTextOutput("brush")
+  verbatimTextOutput("brush"),
+  verbatimTextOutput("brush_limits")
 )
 
 server <- function(input, output, session) {
@@ -36,6 +37,11 @@ server <- function(input, output, session) {
   output$brush <- renderPrint({
     d <- event_data("plotly_selected")
     if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else d
+  })
+  
+  output$brush_limits <- renderPrint({
+    d <- event_data("plotly_brush")
+    if (is.null(d)) "Extents of the selection brush will appear here." else d
   })
   
 }
