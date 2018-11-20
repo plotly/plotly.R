@@ -230,6 +230,12 @@ HTMLWidgets.widget({
           x: pt.x,
           y: pt.y
         };
+        
+        // If 'z' is reported with the event data, then use it!
+        if (pt.hasOwnProperty("z")) {
+          obj.z = pt.z;
+        }
+        
         /* 
           TL;DR: (I think) we have to select the graph div (again) to attach keys...
           
@@ -243,15 +249,12 @@ HTMLWidgets.widget({
         var gd = document.getElementById(el.id);
         var trace = gd.data[pt.curveNumber];
         
-        // Heatmap z event data should derive from _z calc attribute
-        // https://github.com/ropensci/plotly/issues/1141
-        var z = trace.type === "heatmap" ? "_z" : "z";
         if (!trace._isSimpleKey) {
-          var attrsToAttach = ["key", z];
+          var attrsToAttach = ["key"];
         } else {
           // simple keys fire the whole key
           obj.key = trace.key;
-          var attrsToAttach = [z];
+          var attrsToAttach = [];
         }
         
         for (var i = 0; i < attrsToAttach.length; i++) {
