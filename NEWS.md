@@ -20,7 +20,8 @@
 * The `color` and `stroke` arguments now work as expected for trace types with `fillcolor` but no `fill` attribute (e.g. `box` traces) (#1292).
 * Information emitted by in `event_data()` for heatmaps with atomic vectors for `x`/`y`/`z` is now correct (#1141).
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
-* In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).  
+* In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).
+* An articial marker no longer appears when clearing a crosstalk selection of a plot with a colorbar (#1406).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 
 # 4.8.0
