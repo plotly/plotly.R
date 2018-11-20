@@ -65,3 +65,22 @@ test_that("Groups are ignored if grouping is irrelevant for the geom", {
   expect_length(l$data[[1]][["x"]], 32)
   expect_length(l$data[[1]][["y"]], 32)
 })
+
+
+test_that("Ordering of marker.color should not change in a simple scatterplot", {
+  
+  # https://github.com/ropensci/plotly/issues/1351
+  l <- mtcars %>%
+    mutate(id = seq_len(nrow(.))) %>%
+    group_by(cyl) %>%
+    plot_ly(
+      x = ~mpg, y = ~wt, text = ~id,
+      marker = list(color = ~ifelse(id == 1, "black", "red")),
+      mode = "marker+text", textposition = "right"
+    ) %>%
+    expect_doppelganger_built("simple-scatter-marker-color-group")
+  
+  expect_true(
+    all(l$data[[1]]$marker$color == c("black", rep("red", 31)))
+  )
+})
