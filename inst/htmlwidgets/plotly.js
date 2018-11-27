@@ -316,6 +316,19 @@ HTMLWidgets.widget({
           );
         }
       });
+      graphDiv.on('plotly_selecting', function(d) {
+        if (d) {
+          Shiny.onInputChange(
+            ".clientValue-plotly_selecting-" + x.source, 
+            JSON.stringify(eventDataWithKey(d))
+          );
+          var limits = d.range ? d.range : d.lassoPoints;
+          Shiny.onInputChange(
+            ".clientValue-plotly_brushing-" + x.source, 
+            JSON.stringify(limits)
+          );
+        }
+      });
       graphDiv.on('plotly_unhover', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
       });
@@ -325,6 +338,9 @@ HTMLWidgets.widget({
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
+        Shiny.onInputChange(".clientValue-plotly_selecting-" + x.source, null);
+        Shiny.onInputChange(".clientValue-plotly_brush-" + x.source, null);
+        Shiny.onInputChange(".clientValue-plotly_brushing-" + x.source, null);
         Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
       });
     } 
