@@ -434,8 +434,10 @@ as_widget <- function(x, ...) {
 
 typedArrayPolyfill <- function() {
   htmltools::htmlDependency(
-    "typedarray", "0.1",
-    src = depPath("typedarray"),
+    name = "typedarray", 
+    version = "0.1",
+    package = "plotly",
+    src = dependency_dir("typedarray"),
     script = "typedarray.min.js",
     all_files = FALSE
   )
@@ -445,9 +447,10 @@ typedArrayPolyfill <- function() {
 # and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
-    "plotly-main", 
+    name = "plotly-main", 
     version = "1.41.3",
-    src = depPath("plotlyjs"),
+    package = "plotly",
+    src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",
     all_files = FALSE
   )
@@ -455,9 +458,10 @@ plotlyMainBundle <- function() {
 
 plotlyHtmlwidgetsCSS <- function() {
   htmltools::htmlDependency(
-    "plotly-htmlwidgets-css", 
+    name = "plotly-htmlwidgets-css", 
     version = plotlyMainBundle()$version,
-    src = depPath("plotlyjs"),
+    package = "plotly",
+    src = dependency_dir("plotlyjs"),
     stylesheet = "plotly-htmlwidgets.css",
     all_files = FALSE
   )
@@ -468,8 +472,8 @@ locale_dependency <- function(locale) {
     stop("locale must be a character string (vector of length 1)", call. = FALSE)
   }
   
-  locale_dir <- depPath("plotlyjs", "locales")
-  locales_all <- sub("\\.js$", "", list.files(locale_dir))
+  locale_dir <- dependency_dir("plotlyjs", "locales")
+  locales_all <- sub("\\.js$", "", list.files(system.file(locale_dir, package = "plotly")))
   if (!tolower(locale) %in% locales_all) {
     stop(
       "Invalid locale: '", locale, "'.\n\n",
@@ -491,6 +495,7 @@ locale_dependency <- function(locale) {
   htmltools::htmlDependency(
     name = paste0("plotly-locale-", locale),
     version = plotlyMainBundle()$version,
+    package = "plotly",
     src = list(file = locale_dir),
     script = tolower(scripts),
     all_files = FALSE
