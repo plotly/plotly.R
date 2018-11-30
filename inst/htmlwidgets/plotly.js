@@ -343,6 +343,11 @@ HTMLWidgets.widget({
         Shiny.setInputValue(".clientValue-plotly_brushing-" + x.source, null);
         Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null);
       });
+      
+      graphDiv.on('plotly_clickannotation', function(d) {
+        Shiny.setInputValue(".clientValue-plotly_clickannotation-" + x.source, JSON.stringify(d.fullAnnotation));
+      });
+      
     } 
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
