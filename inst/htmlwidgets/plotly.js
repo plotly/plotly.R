@@ -274,25 +274,25 @@ HTMLWidgets.widget({
     if (HTMLWidgets.shinyMode) {
       // https://plot.ly/javascript/zoom-events/
       graphDiv.on('plotly_relayout', function(d) {
-        Shiny.onInputChange(
+        Shiny.setInputValue(
           ".clientValue-plotly_relayout-" + x.source, 
           JSON.stringify(d)
         );
       });
       graphDiv.on('plotly_restyle', function(d) {
-        Shiny.onInputChange(
+        Shiny.setInputValue(
           ".clientValue-plotly_restyle-" + x.source, 
           JSON.stringify(d)
         );
       });
       graphDiv.on('plotly_hover', function(d) {
-        Shiny.onInputChange(
+        Shiny.setInputValue(
           ".clientValue-plotly_hover-" + x.source, 
           JSON.stringify(eventDataWithKey(d))
         );
       });
       graphDiv.on('plotly_click', function(d) {
-        Shiny.onInputChange(
+        Shiny.setInputValue(
           ".clientValue-plotly_click-" + x.source, 
           JSON.stringify(eventDataWithKey(d))
         );
@@ -305,12 +305,12 @@ HTMLWidgets.widget({
         // even in the empty selection case, `d` is truthy (an object),
         // and the 'plotly_deselect' event will reset this input
         if (d) {
-          Shiny.onInputChange(
+          Shiny.setInputValue(
             ".clientValue-plotly_selected-" + x.source, 
             JSON.stringify(eventDataWithKey(d))
           );
           var limits = d.range ? d.range : d.lassoPoints;
-          Shiny.onInputChange(
+          Shiny.setInputValue(
             ".clientValue-plotly_brush-" + x.source, 
             JSON.stringify(limits)
           );
@@ -318,30 +318,30 @@ HTMLWidgets.widget({
       });
       graphDiv.on('plotly_selecting', function(d) {
         if (d) {
-          Shiny.onInputChange(
+          Shiny.setInputValue(
             ".clientValue-plotly_selecting-" + x.source, 
             JSON.stringify(eventDataWithKey(d))
           );
           var limits = d.range ? d.range : d.lassoPoints;
-          Shiny.onInputChange(
+          Shiny.setInputValue(
             ".clientValue-plotly_brushing-" + x.source, 
             JSON.stringify(limits)
           );
         }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_hover-" + x.source, null);
       });
       graphDiv.on('plotly_doubleclick', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null);
       });
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
-        Shiny.onInputChange(".clientValue-plotly_selecting-" + x.source, null);
-        Shiny.onInputChange(".clientValue-plotly_brush-" + x.source, null);
-        Shiny.onInputChange(".clientValue-plotly_brushing-" + x.source, null);
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_selected-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_selecting-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_brush-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_brushing-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null);
       });
     } 
     
