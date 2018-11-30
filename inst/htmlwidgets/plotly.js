@@ -352,6 +352,29 @@ HTMLWidgets.widget({
         Shiny.setInputValue(".clientValue-plotly_afterplot-" + x.source, "afterplot", {priority: "event"});
       });
       
+      var legendEventData = function(d) {
+        // if legendgroup is not relevant just return the trace
+        var trace = d.data[d.curveNumber];
+        if (!trace.legendgroup) {
+          Shiny.setInputValue(".clientValue-plotly_legendclick-" + x.source, trace);
+          return;
+        }
+        
+        // if legendgroup was specified, return all traces that match the group
+        var legendgrps = d.data.map(function(trace){ return trace.legendgroup; });
+        var traces = [];
+        for (i = 0; i < legendgrps.length; i++) {
+          if (legendgrps[i] == trace.legendgroup) {
+            traces.push(d.data[i]);
+          }
+        }
+        
+        Shiny.setInputValue(".clientValue-plotly_legendclick-" + x.source, traces);
+      };
+      
+      graphDiv.on('plotly_legendclick', legendEventData);
+      graphDiv.on('plotly_legenddoubleclick', legendEventData);
+      
     } 
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
