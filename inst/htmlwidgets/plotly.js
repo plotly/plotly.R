@@ -348,6 +348,10 @@ HTMLWidgets.widget({
         Shiny.setInputValue(".clientValue-plotly_clickannotation-" + x.source, JSON.stringify(d.fullAnnotation));
       });
       
+      graphDiv.on('plotly_afterplot', function() {
+        Shiny.setInputValue(".clientValue-plotly_afterplot-" + x.source, "afterplot", {priority: "event"});
+      });
+      
     } 
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
