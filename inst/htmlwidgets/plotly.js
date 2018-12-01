@@ -366,10 +366,7 @@ HTMLWidgets.widget({
       var legendEventData = function(d) {
         // if legendgroup is not relevant just return the trace
         var trace = d.data[d.curveNumber];
-        if (!trace.legendgroup) {
-          Shiny.setInputValue(".clientValue-plotly_legendclick-" + x.source, trace);
-          return;
-        }
+        if (!trace.legendgroup) return trace;
         
         // if legendgroup was specified, return all traces that match the group
         var legendgrps = d.data.map(function(trace){ return trace.legendgroup; });
@@ -380,13 +377,25 @@ HTMLWidgets.widget({
           }
         }
         
-        Shiny.setInputValue(".clientValue-plotly_legendclick-" + x.source, traces);
+        return traces;
       };
       
-      graphDiv.on('plotly_legendclick', legendEventData);
-      graphDiv.on('plotly_legenddoubleclick', legendEventData);
+      graphDiv.on('plotly_legendclick', function(d) {
+        Shiny.setInputValue(
+          ".clientValue-plotly_legendclick-" + x.source, 
+          JSON.stringify(legendEventData(d)),
+          priority
+        );
+      });
+      graphDiv.on('plotly_legenddoubleclick', function(d) {
+        Shiny.setInputValue(
+          ".clientValue-plotly_legenddoubleclick-" + x.source, 
+          JSON.stringify(legendEventData(d)),
+          priority
+        );
+      });
       
-    } 
+    }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
     // return a hash of {
