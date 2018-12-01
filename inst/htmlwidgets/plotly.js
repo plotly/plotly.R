@@ -272,29 +272,35 @@ HTMLWidgets.widget({
     
     // send user input event data to shiny
     if (HTMLWidgets.shinyMode) {
+      var priority = x.config.priority ? {priority: x.config.priority} : undefined;
+      
       // https://plot.ly/javascript/zoom-events/
       graphDiv.on('plotly_relayout', function(d) {
         Shiny.setInputValue(
           ".clientValue-plotly_relayout-" + x.source, 
-          JSON.stringify(d)
+          JSON.stringify(d),
+          priority
         );
       });
       graphDiv.on('plotly_restyle', function(d) {
         Shiny.setInputValue(
           ".clientValue-plotly_restyle-" + x.source, 
-          JSON.stringify(d)
+          JSON.stringify(d),
+          priority
         );
       });
       graphDiv.on('plotly_hover', function(d) {
         Shiny.setInputValue(
           ".clientValue-plotly_hover-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
+          JSON.stringify(eventDataWithKey(d)),
+          priority
         );
       });
       graphDiv.on('plotly_click', function(d) {
         Shiny.setInputValue(
           ".clientValue-plotly_click-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
+          JSON.stringify(eventDataWithKey(d)),
+          priority
         );
       });
       graphDiv.on('plotly_selected', function(d) {
@@ -307,12 +313,14 @@ HTMLWidgets.widget({
         if (d) {
           Shiny.setInputValue(
             ".clientValue-plotly_selected-" + x.source, 
-            JSON.stringify(eventDataWithKey(d))
+            JSON.stringify(eventDataWithKey(d)),
+            priority
           );
           var limits = d.range ? d.range : d.lassoPoints;
           Shiny.setInputValue(
             ".clientValue-plotly_brush-" + x.source, 
-            JSON.stringify(limits)
+            JSON.stringify(limits),
+            priority
           );
         }
       });
@@ -320,34 +328,37 @@ HTMLWidgets.widget({
         if (d) {
           Shiny.setInputValue(
             ".clientValue-plotly_selecting-" + x.source, 
-            JSON.stringify(eventDataWithKey(d))
+            JSON.stringify(eventDataWithKey(d)),
+            priority
           );
           var limits = d.range ? d.range : d.lassoPoints;
           Shiny.setInputValue(
             ".clientValue-plotly_brushing-" + x.source, 
-            JSON.stringify(limits)
+            JSON.stringify(limits),
+            priority
           );
         }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_hover-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_hover-" + x.source, null, priority);
       });
       graphDiv.on('plotly_doubleclick', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null, priority);
       });
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_selected-" + x.source, null);
-        Shiny.setInputValue(".clientValue-plotly_selecting-" + x.source, null);
-        Shiny.setInputValue(".clientValue-plotly_brush-" + x.source, null);
-        Shiny.setInputValue(".clientValue-plotly_brushing-" + x.source, null);
-        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null);
+        Shiny.setInputValue(".clientValue-plotly_selected-" + x.source, null, priority);
+        Shiny.setInputValue(".clientValue-plotly_selecting-" + x.source, null, priority);
+        Shiny.setInputValue(".clientValue-plotly_brush-" + x.source, null, priority);
+        Shiny.setInputValue(".clientValue-plotly_brushing-" + x.source, null, priority);
+        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null, priority);
       });
       
       graphDiv.on('plotly_clickannotation', function(d) {
-        Shiny.setInputValue(".clientValue-plotly_clickannotation-" + x.source, JSON.stringify(d.fullAnnotation));
+        Shiny.setInputValue(".clientValue-plotly_clickannotation-" + x.source, JSON.stringify(d.fullAnnotation), priority);
       });
       
+      // This is a 'true' event -- always give it priority
       graphDiv.on('plotly_afterplot', function() {
         Shiny.setInputValue(".clientValue-plotly_afterplot-" + x.source, "afterplot", {priority: "event"});
       });
