@@ -68,14 +68,21 @@ prepareWidget <- function(x) {
 #' plotly_example("shiny", "event_data")
 #' }
 
-event_data <- function(event = c("plotly_hover", "plotly_click", "plotly_selected", 
-                                 "plotly_relayout"), source = "A",
-                       session = shiny::getDefaultReactiveDomain()) {
+event_data <- function(
+  event = c(
+    "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
+    "plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", 
+    "plotly_deselect", "plotly_relayout", "plotly_legendclick", 
+    "plotly_legenddoubleclick", "plotly_afterplot"
+  ), 
+  source = "A",
+  session = shiny::getDefaultReactiveDomain()
+) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
-  src <- sprintf(".clientValue-%s-%s", event[1], source)
+  src <- sprintf(".clientValue-%s-%s", match.arg(event), source)
   val <- session$rootScope()$input[[src]]
   if (is.null(val)) val else jsonlite::fromJSON(val)
 }
