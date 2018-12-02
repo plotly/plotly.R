@@ -347,27 +347,79 @@ HTMLWidgets.widget({
         }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_hover-" + x.source, null, priority);
+        Shiny.setInputValue(
+          ".clientValue-plotly_hover-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_unhover-" + x.source, 
+          JSON.stringify(el.id), 
+          {priority: "event"}
+        );
       });
       graphDiv.on('plotly_doubleclick', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null, priority);
+        Shiny.setInputValue(
+          ".clientValue-plotly_click-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_doubleclick-" + x.source, 
+          JSON.stringify(el.id), 
+          {priority: "event"}
+        );
       });
+      
       // 'plotly_deselect' is code for doubleclick when in select mode
       graphDiv.on('plotly_deselect', function(eventData) {
-        Shiny.setInputValue(".clientValue-plotly_selected-" + x.source, null, priority);
-        Shiny.setInputValue(".clientValue-plotly_selecting-" + x.source, null, priority);
-        Shiny.setInputValue(".clientValue-plotly_brush-" + x.source, null, priority);
-        Shiny.setInputValue(".clientValue-plotly_brushing-" + x.source, null, priority);
-        Shiny.setInputValue(".clientValue-plotly_click-" + x.source, null, priority);
+        Shiny.setInputValue(
+          ".clientValue-plotly_selected-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_selecting-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_brush-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_brushing-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_click-" + x.source, 
+          null, 
+          priority
+        );
+        Shiny.setInputValue(
+          ".clientValue-plotly_deselect-" + x.source, 
+          JSON.stringify(el.id), 
+          {priority: "event"}
+        );
       });
       
       graphDiv.on('plotly_clickannotation', function(d) {
-        Shiny.setInputValue(".clientValue-plotly_clickannotation-" + x.source, JSON.stringify(d.fullAnnotation), priority);
+        Shiny.setInputValue(
+          ".clientValue-plotly_clickannotation-" + x.source, 
+          JSON.stringify(d.fullAnnotation), 
+          priority
+        );
       });
       
       // This is a 'true' event -- always give it priority
       graphDiv.on('plotly_afterplot', function() {
-        Shiny.setInputValue(".clientValue-plotly_afterplot-" + x.source, "afterplot", {priority: "event"});
+        Shiny.setInputValue(
+          ".clientValue-plotly_afterplot-" + x.source, 
+          JSON.stringify(el.id), 
+          {priority: "event"}
+        );
       });
       
       var legendEventData = function(d) {
