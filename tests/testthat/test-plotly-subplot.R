@@ -2,7 +2,7 @@ context("subplot")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-subplot-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-subplot-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
@@ -134,10 +134,108 @@ test_that("subplot accepts a list of plots", {
   expect_true(l$layout[[sub("y", "yaxis", xaxes[[1]]$anchor)]]$domain[1] == 0)
 })
 
-
+# Ignore for now https://github.com/ggobi/ggally/issues/264
 test_that("ggplotly understands ggmatrix", {
-  L <- save_outputs(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+  skip_if_not_installed("GGally")
+  L <- expect_doppelganger_built(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
 })
+
+test_that("annotation xref/yref are bumped correctly", {
+  
+  p1 <- plot_ly(mtcars) %>%
+    add_annotations(text = ~cyl, x = ~wt, y = ~mpg)
+  p2 <- plot_ly(mtcars) %>%
+    add_annotations(text = ~am, x = ~wt, y = ~mpg)
+  s <- subplot(p1, p2)
+  ann <- plotly_build(s)$x$layout$annotations
+  
+  txt <- sapply(ann, "[[", "text")
+  xref <- sapply(ann, "[[", "xref")
+  yref <- sapply(ann, "[[", "yref")
+  
+  expect_length(ann, 64)
+  expect_equal(txt, c(mtcars$cyl, mtcars$am))
+  expect_equal(xref, rep(c("x", "x2"), each = 32))
+  expect_equal(yref, rep(c("y", "y2"), each = 32))
+  
+  s2 <- subplot(p1, p2, shareY = TRUE)
+  ann2 <- plotly_build(s2)$x$layout$annotations
+  
+  xref2 <- sapply(ann2, "[[", "xref")
+  yref2 <- sapply(ann2, "[[", "yref")
+  expect_equal(xref2, rep(c("x", "x2"), each = 32))
+  expect_equal(yref2, rep(c("y", "y"), each = 32))
+})
+
+test_that("images accumulate and paper coordinates are repositioned", {
+  skip_if_not_installed("png")
+  
+  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+  
+  # embed the raster as an image
+  p <- plot_ly(x = 1, y = 1) %>% 
+    layout(
+      images = list(list(
+        source = raster2uri(r),
+        sizing = "fill",
+        xref = "paper", 
+        yref = "paper", 
+        x = 0, 
+        y = 0, 
+        sizex = 0.5, 
+        sizey = 0.5, 
+        xanchor = "left", 
+        yanchor = "bottom"
+      ))
+    ) 
+  
+  s <- subplot(p, p, nrows = 1, margin = 0.02)
+  imgs <- plotly_build(s)$x$layout$images
+  expect_true(imgs[[1]]$x == 0)
+  expect_true(imgs[[1]]$y == 0)
+  expect_true(imgs[[1]]$sizex == 0.24)
+  expect_true(imgs[[1]]$sizey == 0.5)
+  expect_true(imgs[[2]]$x == 0.52)
+  expect_true(imgs[[2]]$y == 0)
+  expect_true(imgs[[2]]$sizex == 0.24)
+  expect_true(imgs[[2]]$sizey == 0.5)
+})
+
+test_that("images axis references are remapped", {
+  skip_if_not_installed("png")
+  
+  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+  
+  # embed the raster as an image
+  p <- plot_ly(x = 1, y = 1) %>% 
+    layout(
+      images = list(list(
+        source = raster2uri(r),
+        sizing = "fill",
+        xref = "x", 
+        yref = "y", 
+        x = 0, 
+        y = 0, 
+        sizex = 1, 
+        sizey = 1, 
+        xanchor = "left", 
+        yanchor = "bottom"
+      ))
+    )
+  
+  s <- subplot(p, p, nrows = 1, margin = 0.02)
+  imgs <- plotly_build(s)$x$layout$images
+  expect_true(imgs[[1]]$x == 0)
+  expect_true(imgs[[1]]$y == 0)
+  expect_true(imgs[[1]]$xref == "x")
+  expect_true(imgs[[1]]$yref == "y")
+  expect_true(imgs[[2]]$x == 0)
+  expect_true(imgs[[2]]$y == 0)
+  expect_true(imgs[[2]]$xref == "x2")
+  expect_true(imgs[[2]]$yref == "y2")
+})
+
+
 
 test_that("geo+cartesian behaves", {
   # specify some map projection/options

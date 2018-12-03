@@ -21,19 +21,6 @@ add_annotations(p, text = NULL, ..., data = NULL, inherit = TRUE)
 \description{
 Add an annotation(s) to a plot
 }
-\examples{
-
-# single annotation
-plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
-  slice(which.max(mpg)) \%>\%
-  add_annotations(text = "Good mileage")
-  
-# multiple annotations
-plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
-  filter(gear == 5) \%>\%
-  add_annotations("five cylinder", ax = 40) 
-  
-}
 \author{
 Carson Sievert
 }

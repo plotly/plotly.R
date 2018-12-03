@@ -7,6 +7,9 @@
 #' graphics device (if no device is open, width/height of a new (off-screen) 
 #' device defaults to 640/480). In other words, `height` and
 #' `width` must be specified at runtime to ensure sizing is correct.
+#' For examples on how to specify the output container's `height`/`width` in a 
+#' shiny app, see `plotly_example("shiny", "ggplotly_sizing")`.
+#' 
 #'
 #' @param p a ggplot object.
 #' @param width Width of the plot in pixels (optional, defaults to automatic sizing).
@@ -44,8 +47,7 @@
 #' ggplotly(viz, tooltip = c("text", "size"))
 #' 
 #' # linked scatterplot brushing
-#' library(crosstalk)
-#' d <- SharedData$new(mtcars)
+#' d <- highlight_key(mtcars)
 #' qplot(data = d, x = mpg, y = wt) %>%
 #'   subplot(qplot(data = d, x = mpg, y = vs)) %>% 
 #'   layout(title = "Click and drag to select points") %>%
@@ -56,7 +58,7 @@
 #' demo("crosstalk-highlight-ggplotly", package = "plotly")
 #' 
 #' # client-side linked brushing in a scatterplot matrix
-#' SharedData$new(iris) %>%
+#' highlight_key(iris) %>%
 #'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
 #'   ggplotly(tooltip = c("x", "y", "colour")) %>%
 #'   highlight("plotly_selected")
@@ -190,8 +192,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   }
   # if a device (or RStudio) is already open, use the device size as default size
   if (!is.null(grDevices::dev.list()) || is_rstudio()) {
-    width <- width %||% grDevices::dev.size("px")[1]
-    height <- height %||% grDevices::dev.size("px")[2]
+    width <- width %||% default(grDevices::dev.size("px")[1])
+    height <- height %||% default(grDevices::dev.size("px")[2])
   }
   # open the device and make sure it closes on exit
   dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
@@ -205,26 +207,6 @@ gg2list <- function(p, width = NULL, height = NULL,
        "`dynamicValues` accepts the following values: '%s'", 
        paste(dynamicValues, collapse = "', '")
      ), call. = FALSE
-    )
-  }
-  
-  # we currently support ggplot2 >= 2.2.1 (see DESCRIPTION)
-  # there are too many naming changes in 2.2.1.9000 to realistically 
-  if (!is_dev_ggplot2()) {
-    message(
-      "We recommend that you use the dev version of ggplot2 with `ggplotly()`\n",
-      "Install it with: `devtools::install_github('tidyverse/ggplot2')`"
-    )
-    if (!identical(dynamicTicks, FALSE)) {
-      warning(
-        "You need the dev version of ggplot2 to use `dynamicTicks`", call. = FALSE
-      )
-    }
-    return(
-      gg2list_legacy(
-        p, width = width, height = height, tooltip = tooltip,
-        layerData = layerData, originalData = originalData, source = source, ...
-      )
     )
   }
   
@@ -261,10 +243,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # save the domain of the group for display in tooltips
   groupDomains <- Map(function(x, y) {
-    tryCatch(
-      eval(y$mapping[["group"]] %||% plot$mapping[["group"]], x), 
-      error = function(e) NULL
-    )
+    aes_g <- y$mapping[["group"]] %||% plot$mapping[["group"]]
+    tryNULL(rlang::eval_tidy(aes_g, x))
   }, data, layers)
   
   # for simple (StatIdentity) geoms, add crosstalk key to aes mapping
@@ -976,8 +956,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     for (i in seq_along(traces)) {
       tr <- traces[[i]]
       # flipping logic for bar positioning is in geom2trace.GeomBar
-      if (tr$type != "bar") traces[[i]][c("x", "y")] <- tr[c("y", "x")]
-      if (tr$type %in% "box") {
+      if (!identical(tr$type, "bar")) traces[[i]][c("x", "y")] <- tr[c("y", "x")]
+      if (identical(tr$type, "box")) {
         traces[[i]]$orientation <- "h"
         traces[[i]]$hoverinfo <- "x"
       }
@@ -1033,8 +1013,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   # If a trace isn't named, it shouldn't have additional hoverinfo
   traces <- lapply(compact(traces), function(x) { x$name <- x$name %||% ""; x })
   
-  gglayout$width <- width
-  gglayout$height <- height
+  gglayout$width <- width %|D|% NULL
+  gglayout$height <- height %|D|% NULL
   gglayout$barmode <- gglayout$barmode %||% "relative"
   
   l <- list(
@@ -1240,21 +1220,31 @@ uniq <- function(x) {
 make_strip_rect <- function(xdom, ydom, theme, side = "top") {
   rekt <- rect2shape(theme[["strip.background"]])
   stripTextX <- theme[["strip.text.x"]] %||% theme[["strip.text"]]
-  xTextSize <- unitConvert(stripTextX$size, "npc", "width")
+  topSize <- 
+    mm2pixels(grid::convertHeight(stripTextX$margin[1], "mm")) +
+    mm2pixels(grid::convertHeight(stripTextX$margin[3], "mm")) +
+    mm2pixels(grid::convertHeight(grid::unit(stripTextX$size, units = "points"), "mm"))
   stripTextY <- theme[["strip.text.y"]] %||% theme[["strip.text"]]
-  yTextSize <- unitConvert(stripTextY$size, "npc", "height")
+  rightSize <- 
+    mm2pixels(grid::convertWidth(stripTextX$margin[2], "mm")) +
+    mm2pixels(grid::convertWidth(stripTextX$margin[4], "mm")) +
+    mm2pixels(grid::convertWidth(grid::unit(stripTextY$size, units = "points"), "mm"))
   if ("right" %in% side) {
     # x-padding should be accounted for in `layout.margin.r`
-    rekt$x0 <- xdom[2]
-    rekt$x1 <- xdom[2] + xTextSize
     rekt$y0 <- ydom[1]
     rekt$y1 <- ydom[2]
+    rekt$x0 <- 0
+    rekt$x1 <- rightSize
+    rekt$xanchor <- xdom[2]
+    rekt$xsizemode <- "pixel"
   }
   if ("top" %in% side) {
     rekt$x0 <- xdom[1]
     rekt$x1 <- xdom[2]
-    rekt$y0 <- ydom[2]
-    rekt$y1 <- ydom[2] + yTextSize
+    rekt$y0 <- 0
+    rekt$y1 <- topSize
+    rekt$yanchor <- ydom[2]
+    rekt$ysizemode <- "pixel"
   }
   list(rekt)
 }
@@ -1284,10 +1274,6 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
   )
 }
 
-is_dev_ggplot2 <- function() {
-  packageVersion("ggplot2") > "2.2.1"
-}
-
 # We need access to internal ggplot2 functions in several places
 # this helps us import functions in a way that R CMD check won't cry about
 ggfun <- function(x) {
@@ -1314,7 +1300,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
       type = "scatter",
       mode = "markers",
       opacity = 0,
-      hoverinfo = "none",
+      hoverinfo = "skip",
       showlegend = FALSE,
       # do everything on a 0-1 scale
       marker = list(

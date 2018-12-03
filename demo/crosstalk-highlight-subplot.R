@@ -1,7 +1,6 @@
 library(plotly)
-library(crosstalk)
 
-d <- SharedData$new(mtcars)
+d <- highlight_key(mtcars)
 s <- subplot(
   qplot(data = d, x = mpg, y = wt),
   qplot(data = d, x = mpg, y = vs)

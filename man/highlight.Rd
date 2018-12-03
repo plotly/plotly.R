@@ -4,10 +4,11 @@
 \alias{highlight}
 \title{Query graphical elements in multiple linked views}
 \usage{
-highlight(p, on = "plotly_click", off, persistent = getOption("persistent",
-  FALSE), dynamic = FALSE, color = NULL, selectize = FALSE,
-  defaultValues = NULL, opacityDim = getOption("opacityDim", 0.2),
-  selected = attrs_selected(), ...)
+highlight(p, on = "plotly_click", off,
+  persistent = getOption("persistent", FALSE), dynamic = FALSE,
+  color = NULL, selectize = FALSE, defaultValues = NULL,
+  opacityDim = getOption("opacityDim", 0.2),
+  selected = attrs_selected(), debounce = 0, ...)
 }
 \arguments{
 \item{p}{a plotly visualization.}
@@ -56,6 +57,11 @@ opacity of non-selected traces (by multiplying with the existing opacity).}
 
 \item{selected}{attributes of the selection, see \code{\link[=attrs_selected]{attrs_selected()}}.}
 
+\item{debounce}{amount of time to wait before firing an event (in milliseconds).
+The default of 0 means do not debounce at all.
+Debouncing is mainly useful when \code{on = "plotly_hover"} to avoid firing too many events
+when users clickly move the mouse over relevant graphical marks.}
+
 \item{...}{currently not supported.}
 }
 \description{
@@ -71,9 +77,8 @@ in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
 # These examples are designed to show you how to highlight/brush a *single*
 # view. For examples of multiple linked views, see `demo(package = "plotly")` 
 
-
 library(crosstalk)
-d <- SharedData$new(txhousing, ~city)
+d <- highlight_key(txhousing, ~city)
 p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 gg <- ggplotly(p, tooltip = "city") 
 highlight(gg, dynamic = TRUE)

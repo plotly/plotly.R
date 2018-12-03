@@ -61,11 +61,23 @@ colorbar_built <- function(p, ..., limits = NULL, which = 1) {
         p$x$data[[i]]$zmax <- limits[2]
       } else {
         # since the colorscale is in a different trace, retrain all traces
+        # TODO: without knowing which traces are tied to the colorscale,
+        # there are always going to be corner-cases where limits are applied 
+        # to more traces than it should
         p$x$data <- lapply(p$x$data, function(x) {
+          type <- x[["type"]] %||% "scatter"
           col <- x$marker[["color"]]
-          x$marker[["color"]][col < limits[1] | limits[2] < col] <- NA
-          x$marker[["cmin"]] <- limits[1]
-          x$marker[["cmax"]] <- limits[2]
+          if (has_color_array(type, "marker") && is.numeric(col)) {
+            x$marker[["color"]][col < limits[1] | limits[2] < col] <- default(NA)
+            x$marker[["cmin"]] <- default(limits[1])
+            x$marker[["cmax"]] <- default(limits[2])
+          }
+          col <- x$line[["color"]]
+          if (has_color_array(type, "line") && is.numeric(col)) {
+            x$line[["color"]][col < limits[1] | limits[2] < col] <- default(NA)
+            x$line[["cmin"]] <- default(limits[1])
+            x$line[["cmax"]] <- default(limits[2])
+          }
           x
         })
       }
@@ -110,10 +122,10 @@ hide_colorbar <- function(p) {
   for (i in seq_along(p$x$data)) {
     trace <- p$x$data[[i]]
     if (has_attr(trace$type, "showscale")) {
-      p$x$data[[i]]$showscale <- FALSE
+      p$x$data[[i]]$showscale <- default(FALSE)
     }
     if (has_attr(trace$type, "marker")) {
-      p$x$data[[i]]$marker$showscale <- FALSE
+      p$x$data[[i]]$marker$showscale <- default(FALSE)
     }
   }
   p
@@ -144,7 +156,7 @@ hide_legend <- function(p) {
 #' @examples 
 #' 
 #' # currently no bargl trace type
-#' toWebGL(qplot(1:10))
+#' toWebGL(ggplot() + geom_bar(aes(1:10)))
 #' toWebGL(qplot(1:10, 1:10))
 #' 
 toWebGL <- function(p) {

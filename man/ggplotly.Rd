@@ -46,6 +46,8 @@ Conversion of relative sizes depends on the size of the current
 graphics device (if no device is open, width/height of a new (off-screen)
 device defaults to 640/480). In other words, \code{height} and
 \code{width} must be specified at runtime to ensure sizing is correct.
+For examples on how to specify the output container's \code{height}/\code{width} in a
+shiny app, see \code{plotly_example("shiny", "ggplotly_sizing")}.
 }
 \examples{
 \dontrun{
@@ -61,8 +63,7 @@ viz <- ggplot(canada.cities, aes(long, lat)) +
 ggplotly(viz, tooltip = c("text", "size"))
 
 # linked scatterplot brushing
-library(crosstalk)
-d <- SharedData$new(mtcars)
+d <- highlight_key(mtcars)
 qplot(data = d, x = mpg, y = wt) \%>\%
   subplot(qplot(data = d, x = mpg, y = vs)) \%>\% 
   layout(title = "Click and drag to select points") \%>\%
@@ -73,7 +74,7 @@ qplot(data = d, x = mpg, y = wt) \%>\%
 demo("crosstalk-highlight-ggplotly", package = "plotly")
 
 # client-side linked brushing in a scatterplot matrix
-SharedData$new(iris) \%>\%
+highlight_key(iris) \%>\%
   GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
   ggplotly(tooltip = c("x", "y", "colour")) \%>\%
   highlight("plotly_selected")

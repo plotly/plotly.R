@@ -2,7 +2,7 @@ context("Text")
 
 gg <- ggplot(mtcars, aes(x = wt, y = mpg, label = rownames(mtcars))) +
   geom_text(size = 18)
-info <- save_outputs(gg, "text")
+info <- expect_doppelganger_built(gg, "text")
 
 test_that("label is translated correctly", {
   greps <- Map(function(x, y) grepl(x, y), rownames(mtcars), info$data[[1]]$text)
@@ -31,7 +31,7 @@ test_that("geom_text splits along colour", {
   gg <- ggplot(mds) +
     geom_text(aes(x = coord.1, y = coord.2, label = City, colour = Division))
   
-  L <- save_outputs(gg, "text-colour")
+  L <- expect_doppelganger_built(gg, "text-colour")
   
   expect_equivalent(length(L$data), 2)  # 2 traces
   # Proper type and mode conversion

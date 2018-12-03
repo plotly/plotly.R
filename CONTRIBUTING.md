@@ -6,28 +6,24 @@ See the [opening issues template](https://github.com/ropensci/plotly/blob/master
 
 ## Development guidelines
 
-If you'd like to contribute changes to plotly, we use [the GitHub flow](https://guides.github.com/introduction/flow/index.html) for proposing, submitting, reviewing, and accepting changes. If you haven't done this before, Hadley Wickham provides a nice overview of git (<http://r-pkgs.had.co.nz/git.html>), as well as best practices for submitting pull requests (<http://r-pkgs.had.co.nz/git.html#pr-make>). We also recommend using his style guide when writing code (<http://adv-r.had.co.nz/Style.html>).
+If you'd like to contribute changes to plotly, we use [the GitHub flow](https://guides.github.com/introduction/flow/index.html) for proposing, submitting, reviewing, and accepting changes. If you aren't familiar with git and/or GitHub, we recommend studying these excellent free resources by [Hadley Wickham](http://r-pkgs.had.co.nz/git.html) and [Jenny Bryan](http://happygitwithr.com). We also prefer R coding style that adheres to <http://style.tidyverse.org/>.
 
-If your pull request fixes a bug, or implements a new feature, it's a good idea to write a test (<http://r-pkgs.had.co.nz/tests.html>) to demonstrate it's working. If you'd like to closely simulate the tests that run when you submit your pull request, open R under your local plotly git repo, then do the following:
+If your pull request fixes a bug and/or implements a new feature, please [write a test via testthat](http://r-pkgs.had.co.nz/tests.html) to demonstrate it's working. Tests should generally check the return value of `plotly_build()`, but can also use **vdiffr**'s `expect_doppelganger()` to add a visual test! By default, `devtools::tests()` won't run the visual tests, but you *can* run visual tests on your machine via `Sys.setenv("VDIFFR" = "true"); devtools::test()`. That being said, false positives are likely to occur simply due to superfluous differences in your system environment, so we recommend running visual tests via docker.
 
-```r
-# the pull request number is arbitrary when running locally
-Sys.setenv('TRAVIS_PULL_REQUEST' = '1')
-Sys.setenv('TRAVIS_COMMIT' = substr(system('git rev-parse HEAD', intern = T), 1, 7))
-devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
-```
+### Running visual tests via docker
 
-You can also build a ggplot2/plotly comparison table. To do so, you'll first need to clone the [plotly-test-table](https://github.com/cpsievert/plotly-test-table) repo.
+To ensure a consistent and reproducible environment, visual tests should be run against the [cpsievert/plotly-orca](https://hub.docker.com/r/cpsievert/plotly-orca/) docker image. If you add a new visual test and/or expect any differences, run a container like so:
 
 ```shell
-$ git clone https://github.com/cpsievert/plotly-test-table.git ../plotly-test-table
+git clone https://github.com/ropensci/plotly.git
+cd plotly
+docker run -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
 ```
 
-Then, from R:
+This will launch a shiny app for inspecting and validating any visual differences. To see the shiny app, open your browser to <http://0.0.0.0/3838>. If there are differences that look 'good', you should validate them via the shiny app. This will automatically copy over the new "baseline" figures over to your host machine (so that you can git add/commit/push the new baselines). If, for some reason, you want to just run the visual tests to see if they'll pass, do:
 
-```r
-Sys.setenv('PLOTLY_TABLE' = 'TRUE')
-devtools::load_all(); source('tests/testthat.R', chdir = TRUE)
+```shell
+docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca
 ```
 
 ## Code of Conduct

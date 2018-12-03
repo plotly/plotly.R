@@ -1,8 +1,7 @@
 # These examples demonstrate ways to display binned/aggregated selections
-library(crosstalk)
 library(plotly)
 
-tx <- SharedData$new(txhousing, ~city)
+tx <- highlight_key(txhousing, ~city)
 p1 <- ggplot(tx, aes(date, median, group = city)) + geom_line() + xlab(NULL)
 gg1 <- ggplotly(p1, tooltip = c("city", "date", "median"))
 p2 <- plot_ly(tx, x = ~median, color = I("black")) %>% 

@@ -7,7 +7,7 @@ test <- data.frame(
 p <- ggplot(test, aes(time, x)) + geom_point()
 
 test_that("datetimes are displayed in tooltip properly", {
-  l <- save_outputs(p, "tooltip-datetime")
+  l <- expect_doppelganger_built(p, "tooltip-datetime")
   txt <- strsplit(l$data[[1]]$text, br())
   expect_identical(
     paste0("time: ", test$time), sapply(txt, "[[", 1)
@@ -21,7 +21,7 @@ test <- data.frame(
 p <- ggplot(test, aes(time, x)) + geom_point()
 
 test_that("dates are displayed in tooltip properly", {
-  l <- save_outputs(p, "tooltip-date")
+  l <- expect_doppelganger_built(p, "tooltip-date")
   txt <- strsplit(l$data[[1]]$text, br())
   expect_identical(
     paste0("time: ", test$time), sapply(txt, "[[", 1)
@@ -29,7 +29,9 @@ test_that("dates are displayed in tooltip properly", {
 })
 
 test_that("tooltip argument respects ordering", {
-  p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
+  # qplot() is broken in ggplot2 (as of c0a99a8)
+  #p <- qplot(mpg, fill = factor(cyl), data = mtcars, geom = "density")
+  p <- ggplot(mtcars, aes(x = mpg, fill = factor(cyl))) + geom_density()
   p <- ggplotly(p, tooltip = c("density", "x"))
   info <- plotly_build(p)$x
   txt <- strsplit(info$data[[1]]$text, br())
@@ -48,7 +50,7 @@ cars <- ggplot(mtcars, aes(mpg, factor(cyl)))
 p <- cars + stat_bin2d(aes(fill = ..density..), binwidth = c(3,1))
 
 test_that("geom_tile() displays correct info in tooltip with discrete y", {
-  L <- save_outputs(p, "heatmap-discrete-tooltip")
+  L <- expect_doppelganger_built(p, "heatmap-discrete-tooltip")
   expect_equivalent(length(L$data), 2)
   expect_equivalent(L$data[[1]]$type, "heatmap")
   txt <- c(L$data[[1]]$text)
@@ -61,7 +63,7 @@ p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
   geom_line(alpha = 0.3)
 
 test_that("group domain is included in hovertext", {
-  L <- save_outputs(p, "group-lines-hovertext")
+  L <- expect_doppelganger_built(p, "group-lines-hovertext")
   expect_equivalent(length(L$data), 1)
   txt <- L$data[[1]]$text
   txt <- txt[!is.na(txt)]
@@ -110,7 +112,7 @@ myPlot <- ggplot(data = labelDF, aes(x = x, y = y)) +
   geom_text(data = labelDF, aes(x = x, y = y, label = label), size = 10)
 
 test_that("Hoverinfo is only displayed if no tooltip variables are present", {
-  L <- save_outputs(p, "hovertext-display")
+  L <- expect_doppelganger_built(p, "hovertext-display")
   L <- plotly_build(ggplotly(myPlot, tooltip = "label"))[["x"]]
   expect_equivalent(length(L$data), 2)
   expect_equivalent(sum(nchar(L$data[[1]]$text)), 0)

@@ -100,7 +100,8 @@ plotlyProxyInvoke <- function(p, method, ...) {
 plotlyjs_methods <- function() {
   c(
     "restyle", "relayout", "update", "addTraces", "deleteTraces", "moveTraces",
-    "extendTraces", "prependTraces", "purge", "toImage", "downloadImage", "animate"
+    "extendTraces", "prependTraces", "purge", "toImage", "downloadImage", "animate",
+    "newPlot", "react", "validate", "makeTemplate", "validateTemplate", "addFrames"
   )
 }
 

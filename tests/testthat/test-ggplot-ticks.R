@@ -6,7 +6,7 @@ boxes <- ggplot(PlantGrowth, aes(x = group, y = weight)) + geom_boxplot()
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(gg, paste0("ticks-", name))
+  L <- expect_doppelganger_built(gg, paste0("ticks-", name))
   all.traces <- L$data
   no.data <- sapply(all.traces, function(tr) {
     is.null(tr[["x"]]) && is.null(tr[["y"]])
@@ -175,13 +175,15 @@ test_that("The breaks can be spaced unevenly", {
 })
 
 test_that("R line breaks are translated to HTML line breaks", {
+  skip_if_not_installed("stringr")
+  
   df_x <- data.frame(
     x = "this is very loooooooooooong text to illustrate",
     y = 100
   )
   p <- ggplot(aes(x = x, y = y), data = df_x) +
     geom_bar(stat = "identity") +
-    scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
+    scale_x_discrete(labels = function(x) getFromNamespace("str_wrap", "stringr")(x, width = 10))
   info <- expect_traces(p, 1, "line-breaks")
   expect_length(
     strsplit(info$layout$xaxis$ticktext, "<br />", fixed = T)[[1]], 5

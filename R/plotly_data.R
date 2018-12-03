@@ -62,7 +62,7 @@
 #' 
 plotly_data <- function(p, id = p$x$cur_data) {
   if (!is.plotly(p)) {
-    stop("This function can only retrieve data from plotly objects.")
+    stop("`plotly_data()` expects a plotly object as it's first argument.", call. = FALSE)
   }
   f <- p$x$visdat[[id]]
   # if data has been specified, f should be a closure that, when called,
@@ -79,7 +79,29 @@ plotly_data <- function(p, id = p$x$cur_data) {
     #dat <- dplyr::group_by_(dat, crosstalk_key(), add = TRUE)
     dat <- structure(dat, set = set)
   }
-  if (is.data.frame(dat)) tibble::as_tibble(dat) else dat
+  prefix_class(dat, "plotly_data")
+}
+
+#' @export
+print.plotly_data <- function(x, ...) {
+  print(remove_class(tibble::as_tibble(x, ...), "plotly_data"))
+  x
+}
+
+#' Highlight/query data based on primary key
+#' 
+#' This function simply creates an object of class [crosstalk::SharedData].
+#' The reason it exists is to make it easier to teach others how to leverage
+#' it's functionality in plotly. It also makes it more discoverable if one
+#' is already aware of [highlight].
+#' 
+#' @param ... arguments passed to `crosstalk::SharedData$new()`
+#' @export
+#' @author Carson Sievert
+#' @return An object of class [crosstalk::SharedData]
+#' @seealso [highlight]
+highlight_key <- function(...) {
+  crosstalk::SharedData$new(...)
 }
 
 #' @rdname plotly_data

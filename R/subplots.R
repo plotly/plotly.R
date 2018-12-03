@@ -63,7 +63,7 @@
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
                     shareX = FALSE, shareY = FALSE, titleX = shareX, 
                     titleY = shareY, which_layout = "merge") {
- 
+  
   
   plots <- dots2plots(...)
   
@@ -120,6 +120,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   traces <- lapply(plots, "[[", "data")
   layouts <- lapply(plots, "[[", "layout")
   shapes <- lapply(layouts, "[[", "shapes")
+  images <- lapply(layouts, "[[", "images")
   annotations <- lapply(layouts, function(x) {
     # keep non axis title annotations (for rescaling)
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
@@ -214,7 +215,25 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
       newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
+      # also map annotation and image xaxis/yaxis references
+      # TODO: do this for shapes as well?
+      ref <- list(xaxis = "xref", yaxis = "yref")[[key]]
+      if (is.null(ref)) next
+      if (length(annotations[[i]])) {
+        annotations[[i]] <- Map(function(x, y) { 
+          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
+          x
+        }, annotations[[i]], newAnchors)
+      }
+      if (length(images[[i]])) {
+        images[[i]] <- Map(function(x, y) { 
+          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
+          x
+        }, images[[i]], newAnchors)
+      }
     }
+    
+    
     # rescale domains according to the tabular layout
     xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
     yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
@@ -249,17 +268,18 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     data = Reduce(c, traces),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
-  # retrain default coloring
-  p$data <- retrain_color_defaults(p$data)
+  
   
   # reposition shapes and annotations
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
+  images <- Map(reposition, images, split(domainInfo, seq_along(plots)))
   p$layout$annotations <- Reduce(c, annotations)
   p$layout$shapes <- Reduce(c, shapes)
+  p$layout$images <- Reduce(c, images)
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) {
-    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes", names(x))] %||% list()
+    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes|images", names(x))] %||% list()
   })
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
@@ -274,6 +294,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   p$source <- ensure_one(plots, "source")
   p$config <- ensure_one(plots, "config")
   p$highlight <- ensure_one(plots, "highlight")
+  
+  # retrain default coloring
+  p$data <- colorway_retrain(p$data, p$layout$colorway %||% colorway())
+  
   p$subplot <- TRUE
   as_widget(p)
 }
@@ -384,22 +408,27 @@ list2df <- function(x, nms) {
 # (useful mostly for repositioning annotations/shapes in subplots)
 reposition <- function(obj, domains) {
   # we need x and y in order to rescale them!
+  xdom <- as.numeric(domains[c("xstart", "xend")])
+  ydom <- as.numeric(domains[c("yend", "ystart")])
+  
   for (i in seq_along(obj)) {
     o <- obj[[i]]
-    # TODO: this implementation currently assumes xref/yref == "paper"
-    # should we support references to axis objects as well?
-    for (j in c("x", "x0", "x1")) {
+    xs <- if (identical(o$xref, "paper")) {
+      if (is.numeric(o$sizex)) obj[[i]]$sizex <- o$sizex * abs(diff(xdom))
+      c("x", "x0", "x1")
+    }
+    for (j in xs) {
       if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("xstart", "xend")]), from = c(0, 1)
-        )
+        obj[[i]][[j]] <- scales::rescale(o[[j]], xdom, from = c(0, 1))
       }
     }
-    for (j in c("y", "y0", "y1")) {
+    ys <- if (identical(o$yref, "paper")) {
+      if (is.numeric(o$sizey)) obj[[i]]$sizey <- o$sizey * abs(diff(ydom))
+      c("y", "y0", "y1")
+    }
+    for (j in ys) {
       if (is.numeric(o[[j]])) {
-        obj[[i]][[j]] <- scales::rescale(
-          o[[j]], as.numeric(domains[c("yend", "ystart")]), from = c(0, 1)
-        )
+        obj[[i]][[j]] <- scales::rescale(o[[j]], ydom, from = c(0, 1))
       }
     }
   }
@@ -407,19 +436,19 @@ reposition <- function(obj, domains) {
 }
 
 
-retrain_color_defaults <- function(traces, colorDefaults = traceColorDefaults()) {
+colorway_retrain <- function(traces, colorway = colorway()) {
+  colorway <- rep(colorway, length.out = length(traces))
   for (i in seq_along(traces)) {
-    # https://github.com/plotly/plotly.js/blob/c83735/src/plots/plots.js#L58
-    idx <- i %% length(colorDefaults)
-    if (idx == 0) idx <- length(colorDefaults)
-    newDefault <- colorDefaults[[idx]]
-    for (j in c("marker", "line", "text")) {
-      obj <- traces[[i]][[j]]
-      if (!"color" %in% names(obj)) next
-      alpha <- attr(obj[["color"]], "defaultAlpha")
-      if (is.null(alpha)) next
-      traces[[i]][[j]][["color"]] <- toRGB(colorDefaults[[idx]], alpha)
-    }
+    col <- prefix_class(default(colorway[[i]]), "colorway")
+    traces[[i]] <- rapply(traces[[i]], function(x) { if (inherits(x, "colorway")) alpha_inherit(col, x) else x }, how = "replace")
   }
-  traces
+  traces 
+}
+
+
+# retrieve the alpha of an 'old' color code and apply it to a new color code
+alpha_inherit <- function(new, old) {
+  # should return the alpha in a rgba() code
+  alphas <- as.numeric(col2rgb(rgb2hex(old), alpha = TRUE)["alpha", ] / 255)
+  prefix_class(default(toRGB(new, alphas)), "colorway")
 }

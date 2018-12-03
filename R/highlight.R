@@ -43,6 +43,10 @@
 #' @param opacityDim a number between 0 and 1 used to reduce the
 #' opacity of non-selected traces (by multiplying with the existing opacity).
 #' @param selected attributes of the selection, see [attrs_selected()].
+#' @param debounce amount of time to wait before firing an event (in milliseconds).
+#' The default of 0 means do not debounce at all. 
+#' Debouncing is mainly useful when `on = "plotly_hover"` to avoid firing too many events
+#' when users clickly move the mouse over relevant graphical marks.
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
@@ -53,9 +57,8 @@
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
 #' 
-#' 
 #' library(crosstalk)
-#' d <- SharedData$new(txhousing, ~city)
+#' d <- highlight_key(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 
 #' highlight(gg, dynamic = TRUE)
@@ -80,7 +83,8 @@ highlight <- function(p, on = "plotly_click", off,
                       dynamic = FALSE, color = NULL,
                       selectize = FALSE, defaultValues = NULL,
                       opacityDim = getOption("opacityDim", 0.2), 
-                      selected = attrs_selected(), ...) {
+                      selected = attrs_selected(), debounce = 0,
+                      ...) {
   
   # currently ... is not-supported and will catch 
   # some arguments we supported at one point 
@@ -154,7 +158,8 @@ highlight <- function(p, on = "plotly_click", off,
     selectize = selectize,
     defaultValues = defaultValues,
     opacityDim = opacityDim,
-    selected = selected
+    selected = selected,
+    debounce = debounce
   )
   
   p
@@ -201,7 +206,10 @@ highlight_defaults <- function() {
 
 selectizeLib <- function(bootstrap = TRUE) {
   htmltools::htmlDependency(
-    "selectize", "0.12.0", depPath("selectize"),
+    name = "selectize", 
+    version = "0.12.0", 
+    package = "plotly",
+    src = dependency_dir("selectize"),
     stylesheet = if (bootstrap) "selectize.bootstrap3.css",
     script = "selectize.min.js"
   )
@@ -209,12 +217,15 @@ selectizeLib <- function(bootstrap = TRUE) {
 
 colourPickerLib <- function() {
   htmltools::htmlDependency(
-    "colourpicker", "1.1", depPath("colourpicker"),
+    name = "colourpicker", 
+    version = "1.1", 
+    package = "plotly",
+    src = dependency_dir("colourpicker"),
     stylesheet = "colourpicker.min.css",
     script = "colourpicker.min.js"
   )
 }
 
-depPath <- function(...) {
-  system.file('htmlwidgets', 'lib', ..., package = 'plotly')
+dependency_dir <- function(...) {
+  file.path('htmlwidgets', 'lib', ...)
 }

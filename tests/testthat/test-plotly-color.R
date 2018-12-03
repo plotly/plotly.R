@@ -2,7 +2,7 @@ context("plotly-color")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-color-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-color-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
@@ -56,11 +56,22 @@ test_that("Mapping a numeric variable to color works", {
   idx <- vapply(l$data, is.colorbar, logical(1))
   markerScale <- l$data[[which(idx)]]$marker
   markerDat <- l$data[[which(!idx)]]$marker
-  expect_equivalent(markerDat$color, iris$Petal.Width)
-  expect_equivalent(markerScale$colorbar$title, "Petal.Width")
-  expect_equivalent(min(iris$Petal.Width), markerScale$cmin)
-  expect_equivalent(max(iris$Petal.Width), markerScale$cmax)
+  expect_true(all(markerDat$color == iris$Petal.Width))
+  expect_true(markerScale$colorbar$title == "Petal.Width")
+  expect_true(min(iris$Petal.Width) == markerScale$cmin)
+  expect_true(max(iris$Petal.Width) == markerScale$cmax)
   expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
+})
+
+test_that("color/stroke mapping with box translates correctly", {
+  d <- data.frame(x = rep(c("A", "B"), each = 5), y = rnorm(10))
+  l <- plot_ly(d) %>% 
+    add_boxplot(x = ~x, y = ~y, color = ~x, colors = c('A' = "blue", 'B' = "red"), stroke = I("black")) %>%
+    expect_traces(2, "box-color-stroke")
+  expect_true(l$data[[1]]$fillcolor == toRGB("blue", 0.5))
+  expect_true(l$data[[2]]$fillcolor == toRGB("red", 0.5))
+  expect_true(l$data[[1]]$line$color == toRGB("black"))
+  expect_true(l$data[[2]]$line$color == toRGB("black"))
 })
 
 test_that("Custom RColorBrewer pallette works for numeric variable", {
@@ -75,9 +86,9 @@ test_that("axis titles get attached to scene object for 3D plots", {
   l <- expect_traces(p, 1, "scatterplot-scatter3d-axes")
   expect_identical(l$data[[1]]$type, "scatter3d")
   scene <- l$layout$scene
-  expect_identical(scene$xaxis$title, "Petal.Length")
-  expect_identical(scene$yaxis$title, "Petal.Width")
-  expect_identical(scene$zaxis$title, "Sepal.Width")
+  expect_true(scene$xaxis$title == "Petal.Length")
+  expect_true(scene$yaxis$title == "Petal.Width")
+  expect_true(scene$zaxis$title == "Sepal.Width")
 })
 
 test_that("Can specify a scale manually", {

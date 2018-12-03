@@ -8,15 +8,11 @@ output: github_document
 
 [![Build Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
 [![CRAN Status](http://www.r-pkg.org/badges/version/plotly)](http://cran.r-project.org/package=plotly)
-[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/plotly)](http://cran.r-project.org/package=plotly)
+[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://www.rpackages.io/package/plotly)
+[![monthly](https://cranlogs.r-pkg.org/badges/plotly)](https://www.rpackages.io/package/plotly) 
 
 An R package for creating interactive web graphics via the open source JavaScript graphing library [plotly.js](https://github.com/plotly/plotly.js).
 
-## Announcements
-
-Learn plotly and shiny during [our 2-day R workshop](https://plotcon.plot.ly/workshops/r-shiny-dash-r)! `r emo::ji("woman_technologist")` `r emo::ji("man_technologist")` `r emo::ji("chart_with_upwards_trend")`
-
-[Read more](https://blog.cpsievert.me/2017/12/04/components-of-a-successful-r-workshop/) about [Carson](https://cpsievert.me)'s philosophy and experiences running the workshop.
 
 ## Installation
 
@@ -31,8 +27,6 @@ Or install the latest development version (on GitHub) via devtools:
 ```r
 devtools::install_github("ropensci/plotly")
 ```
-
-**NOTE:** The CRAN version of **plotly** is designed to work with the CRAN version of **ggplot2**, but at least for the time being, we recommend using the development versions of both **plotly** and **ggplot2** (`devtools::install_github("tidyverse/ggplot2")`).
 
 ## Getting started
 

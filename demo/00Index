@@ -1,14 +1,27 @@
-crosstalk-highlight-intro           An introduction to linked views
-crosstalk-highlight-subplot         Basic scatterplot brushing with subplot()
-crosstalk-highlight-ggplotly        Linking ggplot2 plots
-crosstalk-highlight-leaflet         Linking to leaflet
-crosstalk-highlight-ggpairs         Brushing a scatterplot matrix via ggpairs
-crosstalk-highlight-pipeline        Aggregating SharedData
-crosstalk-highlight-binned-target   Let plotly.js dynamically bin the raw data
-crosstalk-highlight-epl             An example of linked facets
-crosstalk-filter-lines              Using crosstalk's filter_select() to filter lines
-crosstalk-filter-dynamic-axis       Using crosstalk's filter_select() to dynamically change the y-axis
-animation-tour-basic                A basic example of a grand tour
-animation-tour-USArrests            Linking a dendrogram to a tour
-rotate                              Using htmlwidgets::onRender() to rotate the camera of a 3D graph
-ternary                             A basic ternary plot
+animation-tour-basic                  A basic example of a grand tour
+animation-tour-USArrests              Linking a dendrogram to a tour
+crosstalk-highlight-intro             An introduction to linked views
+crosstalk-highlight-subplot           Basic scatterplot brushing with subplot()
+crosstalk-highlight-ggplotly          Linking ggplot2 plots
+crosstalk-highlight-leaflet           Linking to leaflet
+crosstalk-highlight-ggpairs           Brushing a scatterplot matrix via ggpairs
+crosstalk-highlight-pipeline          Aggregating SharedData
+crosstalk-highlight-binned-target-a   Dynamic 2-way ANOVA 
+crosstalk-highlight-binned-target-b   Dynamically re-rendering a boxplot, violin plot, and bar-chart based on selections
+crosstalk-highlight-binned-target-c   Dynamically re-rendering a histogram based on selection
+crosstalk-highlight-epl               Exploring English Premier League performace across seasons and teams 
+crosstalk-highlight-epl-2             A 'wormchart' version of the epl demo
+crosstalk-filter-lines                Using crosstalk's filter_select() to filter lines
+crosstalk-filter-dynamic-axis         Using crosstalk's filter_select() to dynamically change the y-axis
+custom-javascript                     Using htmlwidgets::onRender() to add custom interactivity features (e.g google search on click)
+rotate                                Using htmlwidgets::onRender() to rotate the camera of a 3D graph
+ternary                               A basic ternary plot
+sf-mapbox-data                        Mapping sf objects with mapbox
+sf-mapbox-layout                      Mapping sf objects with mapbox (as a layer) 
+sf-mapbox-style                       Including a dropdown for mapbox's basemap style
+sf-dt                                 Linked querying of simple features with DT (datatables)
+sf-plotly-3D-globe                    Exploring storms paths by linking a 3D globe with a 2D summary
+sf-plotly-storms                      Linking multiple 2D views of 3D storm paths
+sf-ggplot2                            Mapping sf objects via ggplot2 and geom_sf()
+sf-geo                                Mapping sf objects with scattergeo
+

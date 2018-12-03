@@ -50,7 +50,7 @@ is.default <- function(x) {
 }
 
 default <- function(x) {
-  structure(x, class = "plotly_default")
+  prefix_class(x %||% list(), "plotly_default")
 }
 
 compact <- function(x) {
@@ -75,7 +75,7 @@ retain <- function(x, f = identity) {
   attrs <- attributes(x)
   # TODO: do we set any other "special" attributes internally 
   # (grepping "structure(" suggests no)
-  attrs <- attrs[names(attrs) %in% c("defaultAlpha", "apiSrc")]
+  attrs <- attrs[names(attrs) %in% "apiSrc"]
   if (length(attrs)) {
     attributes(y) <- attrs
   }
@@ -118,13 +118,12 @@ has_group <- function(trace) {
 
 # currently implemented non-positional scales in plot_ly()
 npscales <- function() {
-  c("color", "symbol", "linetype", "size", "split")
+  c("color", "stroke", "symbol", "linetype", "size", "span", "split")
 }
 
-# copied from https://github.com/plotly/plotly.js/blob/master/src/components/color/attributes.js
-traceColorDefaults <- function() {
-  c('#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
-    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf')
+colorway <- function(p = NULL) {
+  colway <- p$x$layout$colorway %||% Schema$layout$layoutAttributes$colorway$dflt
+  lapply(as.list(colway), function(x) structure(x, class = "colorway"))
 }
 
 # column name for crosstalk key
@@ -209,6 +208,95 @@ mapbox_token <- function() {
   token
 }
 
+fit_bounds <- function(p) {
+  # Compute layout.mapboxid._fitBounds, an internal attr that has special client-side logic
+  # PS. how the hell does mapbox not have a way to set initial map bounds?
+  # https://github.com/mapbox/mapbox-gl-js/issues/1970
+  mapboxIDs <- grep("^mapbox", sapply(p$x$data, "[[", "subplot"), value = TRUE)
+  for (id in mapboxIDs) {
+    bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$subplot)) tr[["_bbox"]])
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
+    # intentionally an array of numbers in [west, south, east, north] order
+    # https://www.mapbox.com/mapbox-gl-js/api/#lnglatboundslike
+    p$x$layout[[id]]$`_fitBounds` <- list(
+      bounds = c(
+        min(rng$xrng),
+        min(rng$yrng),
+        max(rng$xrng),
+        max(rng$yrng)
+      ),
+      options = list(
+        padding = 10, 
+        linear = FALSE,
+        # NOTE TO SELF: can do something like this to customize easing
+        # easing = htmlwidgets::JS("function(x) { return 1; }"),
+        offset = c(0, 0)
+      )
+    )
+    p$x$layout[[id]]$center$lat <- mean(rng$yrng)
+    p$x$layout[[id]]$center$lon <- mean(rng$xrng)
+  }
+  
+  # Compute layout.geoid.lonaxis.range & layout.geoid.lataxis.range
+  # for scattergeo
+  geoIDs <- grep("^geo", sapply(p$x$data, "[[", "geo"), value = TRUE)
+  for (id in geoIDs) {
+    bboxes <- lapply(p$x$data, function(tr) if (identical(id, tr$geo)) tr[["_bbox"]])
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
+    p$x$layout[[id]]$lataxis$range <- rng$yrng
+    p$x$layout[[id]]$lonaxis$range <- rng$xrng
+  }
+  
+  # Compute layout.axisid.scaleanchor & layout.axisid.scaleratio
+  # for scatter/scattergl
+  rows <- compact(lapply(p$x$data, function(x) c(x[["xaxis"]], x[["yaxis"]])))
+  for (i in seq_along(rows)) {
+    xid <- rows[[i]][[1]]
+    yid <- rows[[i]][[2]]
+    bboxes <- lapply(p$x$data, function(tr) {
+      if (identical(xid, tr$xaxis) && identical(yid, tr$yaxis)) tr[["_bbox"]]
+    })
+    rng <- bboxes2range(bboxes, f = 0.01)
+    if (!length(rng)) next
+    xname <- sub("x", "xaxis", xid)
+    yname <- sub("y", "yaxis", yid)
+    # default to empty axes
+    # TODO: is there a set of projections where it makes sense to show a cartesian grid?
+    eaxis <- list(showgrid = FALSE, zeroline = FALSE, ticks = "", showticklabels = FALSE)
+    p$x$layout[[xname]] <- modify_list(eaxis, p$x$layout[[xname]])
+    p$x$layout[[yname]] <- modify_list(eaxis, p$x$layout[[yname]])
+    # remove default axis titles
+    p$x$layout[[xname]]$title <- p$x$layout[[xname]]$title %|D|% NULL
+    p$x$layout[[yname]]$title <- p$x$layout[[yname]]$title %|D|% NULL
+    p$x$layout[[xname]]$scaleanchor <- yid
+    # TODO: only do this for lat/lon dat
+    p$x$layout[[xname]]$scaleratio <- cos(mean(rng$yrng) * pi/180)
+  }
+  
+  # Internal _bbox field no longer needed
+  #p$x$data <- lapply(p$x$data, function(tr) { tr[["_bbox"]] <- NULL; tr })
+  p
+}
+
+# find the x/y layout range of a collection of trace._bboxes
+bboxes2range <- function(bboxes, ...) {
+  if (sum(lengths(bboxes)) == 0) return(NULL)
+  yrng <- c(
+    min(unlist(lapply(bboxes, "[[", "ymin")), na.rm = TRUE),
+    max(unlist(lapply(bboxes, "[[", "ymax")), na.rm = TRUE)
+  )
+  xrng <- c(
+    min(unlist(lapply(bboxes, "[[", "xmin")), na.rm = TRUE),
+    max(unlist(lapply(bboxes, "[[", "xmax")), na.rm = TRUE)
+  )
+  list(
+    yrng = grDevices::extendrange(yrng, ...),
+    xrng = grDevices::extendrange(xrng, ...)
+  )
+}
+
 # rename attrs (unevaluated arguments) from geo locations (lat/lon) to cartesian
 geo2cartesian <- function(p) {
   p$x$attrs <- lapply(p$x$attrs, function(tr) {
@@ -218,6 +306,19 @@ geo2cartesian <- function(p) {
   })
   p
 }
+
+cartesian2geo <- function(p) {
+  p$x$data <- lapply(p$x$data, function(tr) {
+    if (isTRUE(tr[["type"]] %in% c("scattermapbox", "scattergeo"))) {
+      tr[["lat"]] <- tr[["lat"]] %||% tr[["y"]]
+      tr[["lon"]] <- tr[["lon"]] %||% tr[["x"]]
+      tr[c("x", "y")] <- NULL
+    }
+    tr
+  })
+  p
+}
+
 
 is_subplot <- function(p) {
   isTRUE(p$x$subplot)
@@ -248,16 +349,13 @@ supply_defaults <- function(p) {
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
   } else {
-    axes <- if (is_type(p, "scatterternary"))  {
-      c("aaxis", "baxis", "caxis") 
-    } else if (is_type(p, "pie") || is_type(p, "parcoords") || is_type(p, "sankey") || is_type(p, "table")) {
-      NULL
-    } else {
-      c("xaxis", "yaxis")
-    }
+    types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
+    axes <- unlist(lapply(types, function(x) {
+      grep("^[a-z]axis$", names(Schema$traces[[x]]$attributes), value = TRUE) %||% NULL
+    }))
     for (axis in axes) {
       p$x$layout[[axis]] <- modify_list(
-        list(domain = c(0, 1)), p$x$layout[[axis]]
+        list(domain = c(0, 1), automargin = TRUE), p$x$layout[[axis]]
       )
     }
   }
@@ -333,7 +431,7 @@ verify_attr_names <- function(p) {
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule"), 
+      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox"), 
       thisTrace$type
     )
   }
@@ -375,7 +473,12 @@ verify_attr <- function(proposed, schema) {
     # where applicable, reduce single valued vectors to a constant 
     # (while preserving attributes)
     if (!isDataArray && !arrayOK && !identical(role, "object")) {
-      proposed[[attr]] <- retain(proposed[[attr]], unique)
+      proposed[[attr]] <- retain(proposed[[attr]], uniq)
+    }
+    
+    # plotly.js should really handle this logic
+    if (isTRUE(grepl("fill", proposed[["hoveron"]]))) {
+      proposed[["text"]] <- paste(uniq(proposed[["text"]]), collapse = "\n")
     }
     
     # ensure data_arrays of length 1 are boxed up by to_JSON()
@@ -389,38 +492,24 @@ verify_attr <- function(proposed, schema) {
       proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
+    if (length(proposed[["name"]]) > 0) {
+      proposed$name <- uniq(proposed$name)
+    }
+    
+    # if marker.sizemode='area', make sure marker.size is boxed up 
+    # (otherwise, when marker.size is a constant, it always sets the diameter!)
+    # https://codepen.io/cpsievert/pen/zazXgw
+    # https://github.com/plotly/plotly.js/issues/2735
+    if ("area" %in% proposed$marker$sizemode) {
+      proposed$marker[["size"]] <- i(proposed$marker[["size"]])
+    }
+    
     # do the same for "sub-attributes"
-    # TODO: should this be done recursively?
-    if (identical(role, "object")) {
-      for (attr2 in names(proposed[[attr]])) {
-        if (is.null(attrSchema[[attr2]])) next
-        
-        valType2 <- tryNULL(attrSchema[[attr2]][["valType"]]) %||% ""
-        role2 <- tryNULL(attrSchema[[attr2]][["role"]]) %||% ""
-        arrayOK2 <- tryNULL(attrSchema[[attr2]][["arrayOk"]]) %||% FALSE
-        isDataArray2 <- identical(valType2, "data_array")
-        
-        if (!isDataArray2 && !arrayOK2 && !identical(role2, "object")) {
-          proposed[[attr]][[attr2]] <- retain(proposed[[attr]][[attr2]], unique)
-        }
-        
-        # ensure data_arrays of length 1 are boxed up by to_JSON()
-        if (isDataArray2) {
-          proposed[[attr]][[attr2]] <- i(proposed[[attr]][[attr2]])
-        }
-        
-        # tag 'src-able' attributes (needed for api_create())
-        isSrcAble2 <- !is.null(schema[[attr]][[paste0(attr2, "src")]]) && 
-          length(proposed[[attr]][[attr2]]) > 1
-        if (isDataArray2 || isSrcAble2) {
-          proposed[[attr]][[attr2]] <- structure(
-            proposed[[attr]][[attr2]], apiSrc = TRUE
-          )
-        }
-        
-      }
+    if (identical(role, "object") && is.recursive(proposed[[attr]])) {
+      proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
     }
   }
+  
   proposed
 }
 
@@ -532,21 +621,21 @@ verify_mode <- function(p) {
   for (tr in seq_along(p$x$data)) {
     trace <- p$x$data[[tr]]
     if (grepl("scatter", trace$type %||% "scatter")) {
-      if (!is.null(trace$marker) && !grepl("markers", trace$mode %||% "")) {
+      if (user_specified(trace$marker) && !grepl("markers", trace$mode %||% "")) {
         message(
           "A marker object has been specified, but markers is not in the mode\n",
           "Adding markers to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+markers")
       }
-      if (!is.null(trace$line) && !grepl("lines", trace$mode %||% "")) {
+      if (user_specified(trace$line) && !grepl("lines", trace$mode %||% "")) {
         message(
           "A line object has been specified, but lines is not in the mode\n",
           "Adding lines to the mode..."
         )
         p$x$data[[tr]]$mode <- paste0(p$x$data[[tr]]$mode, "+lines")
       }
-      if (!is.null(trace$textfont) && !grepl("text", trace$mode %||% "")) {
+      if (user_specified(trace$textfont) && !grepl("text", trace$mode %||% "")) {
         warning(
           "A textfont object has been specified, but text is not in the mode\n",
           "Adding text to the mode..."
@@ -556,6 +645,12 @@ verify_mode <- function(p) {
     }
   }
   p
+}
+
+# if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified
+user_specified <- function(obj = NULL) {
+  if (!length(obj)) return(FALSE)
+  !all(rapply(obj, is.default))
 }
 
 # populate categorical axes using categoryorder="array" & categoryarray=[]
@@ -628,6 +723,13 @@ verify_key_type <- function(p) {
   for (i in seq_along(keys)) {
     k <- keys[[i]]
     if (is.null(k)) next
+    if ("select" %in% p$x$layout$clickmode && "plotly_click" %in% p$x$highlight$on) {
+      warning(
+        "`layout.clickmode` = 'select' is not designed to work well with ",
+        "the R package's linking framework (i.e. crosstalk support).",
+        call. = FALSE
+      )
+    }
     # does it *ever* make sense to have a missing key value?
     uk <- uniq(k)
     if (length(uk) == 1) {
@@ -681,8 +783,9 @@ verify_showlegend <- function(p) {
   }
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
   # respect only _user-specified_ defaults 
+  isSinglePie <- identical("pie", unlist(lapply(p$x$data, function(tr) tr$type))) 
   p$x$layout$showlegend <- p$x$layout$showlegend %|D|%
-    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend))
+    default(sum(show) > 1 || isTRUE(p$x$highlight$showInLegend) || isSinglePie)
   p
 }
 
@@ -694,7 +797,7 @@ verify_guides <- function(p) {
   }
   
   isVisibleBar <- function(tr) {
-    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
+    is.colorbar(tr) && (tr$showscale %||% TRUE)
   }
   isBar <- vapply(p$x$data, isVisibleBar, logical(1))
   nGuides <- sum(isBar) + has_legend(p)
@@ -702,19 +805,66 @@ verify_guides <- function(p) {
   if (nGuides > 1) {
     
     # place legend at bottom since its scrolly
-    p$x$layout$legend <- modify_list(
-      list(y = 1 - ((nGuides - 1) / nGuides), yanchor = "top"),
-      p$x$layout$legend
-    )
+    yanchor <- default("top")
+    y <- default(1 - ((nGuides - 1) / nGuides))
+    p$x$layout$legend$yanchor <- p$x$layout$legend$yanchor %|D|% yanchor
+    p$x$layout$legend$y <- p$x$layout$legend[["y"]] %|D|% y
     
+    # shrink/position colorbars
     idx <- which(isBar)
     for (i in seq_along(idx)) {
-      p <- colorbar_built(
-        p, which = i, len = 1 / nGuides, y = 1 - ((i - 1) / nGuides), 
-        lenmode = "fraction",  yanchor = "top"
-      )
+      len     <- default(1 / nGuides)
+      lenmode <- default("fraction")
+      y       <- default(1 - ((i - 1) / nGuides))
+      
+      j <- idx[[i]]
+      tr <- p$x$data[[j]]
+      if (inherits(tr, "zcolor")) {
+        p$x$data[[j]]$colorbar$len <- tr$colorbar$len %|D|% len
+        p$x$data[[j]]$colorbar$lenmode <- tr$colorbar$lenmode %|D|% lenmode
+        p$x$data[[j]]$colorbar$y <- tr$colorbar$y %|D|% y
+        p$x$data[[j]]$colorbar$yanchor <- tr$colorbar$yanchor %|D|% yanchor
+      } else {
+        p$x$data[[j]]$marker$colorbar$len <- tr$marker$colorbar$len %|D|% len
+        p$x$data[[j]]$marker$colorbar$lenmode <- tr$marker$colorbar$lenmode %|D|% lenmode
+        p$x$data[[j]]$marker$colorbar$y <- tr$marker$colorbar$y %|D|% y
+        p$x$data[[j]]$marker$colorbar$yanchor <- tr$marker$colorbar$yanchor %|D|% yanchor
+      }
     }
     
+  }
+  
+  p
+}
+
+verify_mathjax <- function(p) {
+  hasMathjax <- "mathjax" %in% sapply(p$dependencies, "[[", "name")
+  if (hasMathjax) return(p)
+  
+  hasTeX <- any(rapply(p$x, is.TeX))
+  if (!hasTeX) return(p)
+  
+  # TODO: it would be much better to add the dependency here, but
+  # htmlwidgets doesn't currently support adding dependencies at print-time!
+  warning(
+    "Detected the use of `TeX()`, but mathjax has not been specified. ",
+    "Try running `config(.Last.value, mathjax = 'cdn')`",
+    call. = FALSE
+  )
+  p
+}
+
+verify_scattergl_platform <- function(p) {
+  if (!identical(.Platform$OS.type, "windows")) return(p)
+  if (!is_rstudio()) return(p)
+  
+  types <- vapply(p$x$data, function(x) x[["type"]] %||% "scatter", character(1))
+  if ("scattergl" %in% types) {
+    warning(
+      "'scattergl' trace types don't currently render in RStudio on Windows. ",
+      "Open in another web browser (IE, Chrome, Firefox, etc).",
+      call. = FALSE
+    )
   }
   
   p
@@ -733,6 +883,10 @@ has_line <- function(types, modes) {
 has_text <- function(types, modes) {
   is_scatter <- grepl("scatter", types)
   ifelse(is_scatter, grepl("text", modes), has_attr(types, "textfont"))
+}
+
+has_color_array <- function(types, mode = "marker") {
+  vapply(types, function(x) isTRUE(tryNULL(Schema$traces[[x]]$attributes[[mode]]$color$arrayOk)), logical(1))
 }
 
 has_attr <- function(types, attr = "marker") {
@@ -916,6 +1070,7 @@ try_library <- function(pkg, fun = NULL) {
        "Please install and try again.", call. = FALSE)
 }
 
+# similar logic to rstudioapi::isAvailable()
 is_rstudio <- function() {
-  identical(Sys.getenv("RSTUDIO", NA), "1")
+  identical(.Platform$GUI, "RStudio")
 }

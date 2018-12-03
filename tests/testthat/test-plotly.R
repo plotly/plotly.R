@@ -2,7 +2,7 @@ context("plotly")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
-  L <- save_outputs(p, paste0("plotly-", name))
+  L <- expect_doppelganger_built(p, paste0("plotly-", name))
   expect_equivalent(length(L$data), n.traces)
   L
 }
@@ -60,8 +60,10 @@ test_that("plot_ly() handles a simple scatterplot", {
   expect_equivalent(l$data[[1]]$mode, "markers")
   expect_equivalent(l$data[[1]]$x, iris$Sepal.Length)
   expect_equivalent(l$data[[1]]$y, iris$Petal.Length)
-  expect_equivalent(l$layout$xaxis$title, "Sepal.Length")
-  expect_equivalent(l$layout$yaxis$title, "Petal.Length")
+  expect_true(l$layout$xaxis$title == "Sepal.Length")
+  expect_true(l$layout$yaxis$title == "Petal.Length")
+  expect_true(l$layout$xaxis$automargin)
+  expect_true(l$layout$yaxis$automargin)
 })
 
 test_that("type inference + add_data + layering works as expected", {
@@ -188,4 +190,92 @@ test_that("Complex example works", {
     add_ribbons(ymin = ~q1, ymax = ~q3, color = I("red"), name = "IQR")
   
   l <- expect_traces(p, 3, "time-series-summary")
+})
+
+
+test_that("span/size controls errorbar thickness/width", {
+  
+  p <- plot_ly(x = 1:10, y = 1:10, error_x = list(value = 3), error_y = list(value = 2), span = I(5), size = I(10), stroke = I("black"), color = I("red")) %>%
+    plotly_build()
+  
+  d <- p$x$data
+  expect_length(d, 1)
+  
+  expect_true(d[[1]]$error_x$value == 3)
+  expect_true(d[[1]]$error_x$thickness == 5)
+  expect_true(d[[1]]$error_x$width == 10)
+  expect_true(d[[1]]$error_x$color == toRGB("red"))
+  
+  expect_true(d[[1]]$error_y$value == 2)
+  expect_true(d[[1]]$error_y$thickness == 5)
+  expect_true(d[[1]]$error_y$width == 10)
+  expect_true(d[[1]]$error_y$color == toRGB("red"))
+})
+
+
+test_that("Vector of redundant text is reduced to string when hoveron=fills", {
+  
+  # see https://github.com/ropensci/plotly/issues/1233
+  d <- data.frame(
+    AA = c(2,3,3,2, NA, 6,7,7,6, NA),
+    BB = c(2,2,3,2, NA, 6,6,7,6, NA),
+    CC = c(rep('abc', 5), rep('xyz', 5)),
+    LL = c(rep('A', 5), rep('B', 5))
+  )
+  
+  
+  p <- plot_ly(d) %>%
+    add_trace(x = ~AA,
+              y = ~BB,
+              text = ~paste('<br> <b>Example</b> of <em>custom</em> hover text <br>', LL, '<br>', CC, '<br>.'),
+              split = ~LL, 
+              mode = "lines", 
+              fill = "toself", 
+              hoveron = 'fills',
+              type = "scatter", 
+              color = I(c(rep(toRGB("black", 1), 5),
+                          rep(toRGB("red", 1), 5)))
+    )
+  
+  b <- plotly_build(p)
+  d <- b$x$data
+  expect_length(d, 2)
+  expect_true(d[[1]]$line$color == toRGB("black"))
+  expect_true(d[[1]]$fillcolor == toRGB("black", 0.5))
+  expect_true(d[[2]]$line$color == toRGB("red"))
+  expect_true(d[[2]]$fillcolor == toRGB("red", 0.5))
+  expect_true(
+    d[[1]]$text == '<br> <b>Example</b> of <em>custom</em> hover text <br> A <br> abc <br>.'
+  )
+  expect_true(
+    d[[2]]$text == '<br> <b>Example</b> of <em>custom</em> hover text <br> B <br> xyz <br>.'
+  )
+})
+
+
+test_that("Can map data to legendgroup", {
+  d <- data.frame(
+    x = 1:100,
+    y = runif(100),
+    group = letters[1:5]
+  )
+  
+  l <- plot_ly(data = d, x = ~x, y = ~y) %>%
+    add_bars(color = ~group,  legendgroup = ~group) %>%
+    add_markers(color = ~group, legendgroup = ~group) %>%
+    plotly_build()
+  
+  expect_length(l$x$data, 10)
+  
+  markers <- compact(lapply(l$x$data, function(tr) if (tr$type == "scatter") tr))
+  for (i in seq_along(markers)) {
+    expect_length(markers[[i]]$legendgroup, 1)
+    expect_true(markers[[i]]$legendgroup == letters[[i]])
+  }
+  
+  bars <- compact(lapply(l$x$data, function(tr) if (tr$type == "bar") tr))
+  for (i in seq_along(bars)) {
+    expect_length(bars[[i]]$legendgroup, 1)
+    expect_true(bars[[i]]$legendgroup == letters[[i]])
+  }
 })

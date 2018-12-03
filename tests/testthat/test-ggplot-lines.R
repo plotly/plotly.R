@@ -11,7 +11,7 @@ test_that("6 different automatic lty converted to plotly's 6 types", {
       "dashdot",
       "longdash",
       "longdashdot")
-  info <- save_outputs(gg, "linetype-types")
+  info <- expect_doppelganger_built(gg, "linetype-types")
   generated <- sapply(info$data[1:6], function(L) L$line$dash)
   expect_true(all(generated %in% expected))
   expect_true(all(expected %in% generated))
@@ -30,7 +30,7 @@ test_that("different colored lines become different colored traces", {
   gg <- ggplot(data = df, aes(x = x, y = value, colour = variable))+
     geom_line()+
     scale_color_manual(values=c(y1="blue", y2="red"))
-  info <- save_outputs(gg, "linetype-colors")
+  info <- expect_doppelganger_built(gg, "linetype-colors")
   expect_equivalent(length(info$data), 2)
   expect_identical(info$data[[1]]$line$color, toRGB("blue"))
   n <- length(x)
@@ -111,9 +111,11 @@ test_that("geom_linerange() without a y aesthetic translates to a path", {
   expect_equivalent(
     unlist(l$data[[1]]$text),
     c(
-      'x: 1<br />ymin: 0', 'x: 1<br />ymax: 1', NA, 'x: 2<br />ymin: 0', 
-      'x: 2<br />ymax: 2', NA, 'x: 3<br />ymin: 0', 'x: 3<br />ymax: 3', NA, 
-      'x: 4<br />ymin: 0', 'x: 4<br />ymax: 4', NA, 'x: 5<br />ymin: 0', 'x: 5<br />ymax: 5'
+      'x: 1<br />ymax: 1<br />ymin: 0', 'x: 1<br />ymax: 1<br />ymin: 0', NA, 
+      'x: 2<br />ymax: 2<br />ymin: 0', 'x: 2<br />ymax: 2<br />ymin: 0', NA, 
+      'x: 3<br />ymax: 3<br />ymin: 0', 'x: 3<br />ymax: 3<br />ymin: 0', NA, 
+      'x: 4<br />ymax: 4<br />ymin: 0', 'x: 4<br />ymax: 4<br />ymin: 0', NA, 
+      'x: 5<br />ymax: 5<br />ymin: 0', 'x: 5<br />ymax: 5<br />ymin: 0'
     )
   )
   

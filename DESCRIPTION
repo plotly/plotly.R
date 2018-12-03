@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.7.1.9000
+Version: 4.8.0.9000
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com", comment = c(ORCID = "0000-0002-4958-2844")),
     person("Chris", "Parmer", role = "aut",
@@ -22,7 +22,7 @@ URL: https://plot.ly/r, https://cpsievert.github.io/plotly_book/, https://github
 BugReports: https://github.com/ropensci/plotly/issues
 Depends:
     R (>= 3.2.0),
-    ggplot2 (>= 2.2.1)
+    ggplot2 (>= 3.0.0)
 Imports:
     tools,
     scales,
@@ -32,17 +32,19 @@ Imports:
     digest,
     viridisLite,
     base64enc,
-    htmltools,
-    htmlwidgets (>= 0.9),
+    htmltools (>= 0.3.6),
+    htmlwidgets (>= 1.3),
     tidyr,
     hexbin,
     RColorBrewer,
     dplyr,
     tibble,
     lazyeval (>= 0.2.0),
+    rlang,
     crosstalk,
     purrr,
-    data.table
+    data.table,
+    promises
 Suggests:
     MASS,
     maps,
@@ -51,22 +53,24 @@ Suggests:
     testthat,
     knitr,
     devtools,
-    shiny (>= 0.14),
+    shiny (>= 1.1.0),
     curl,
     rmarkdown,
-    Rserve,
-    RSclient,
+    vdiffr,
     Cairo,
     broom,
     webshot,
     listviewer,
     dendextend,
     sf,
-    RSelenium,
+    maptools,
+    rgeos,
     png,
-    IRdisplay
-Remotes:
-  tidyverse/ggplot2
+    IRdisplay,
+    processx,
+    plotlyGeoAssets,
+    forcats
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
+Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

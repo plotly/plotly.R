@@ -18,28 +18,3 @@ modified plotly object.}
 Useful when you need two or more layers that apply a summary statistic
 to the original data.
 }
-\examples{
-
-txhousing \%>\% 
-  group_by(city) \%>\%
-  plot_ly(x = ~date, y = ~median) \%>\%
-  add_lines(alpha = 0.2, name = "Texan Cities") \%>\%
-  add_fun(function(plot) {
-    plot \%>\% filter(city == "Houston") \%>\% add_lines(name = "Houston")
-  }) \%>\%
-  add_fun(function(plot) {
-    plot \%>\% filter(city == "San Antonio") \%>\% add_lines(name = "San Antonio")
-  })
-
-plot_ly(mtcars, x = ~wt, y = ~mpg) \%>\%
-  add_markers() \%>\%
-  add_fun(function(p) {
-    p \%>\% slice(which.max(mpg)) \%>\% 
-      add_annotations("Good mileage")
-  }) \%>\%
-  add_fun(function(p) {
-    p \%>\% slice(which.min(mpg)) \%>\% 
-      add_annotations(text = "Bad mileage")
-  })
-
-}

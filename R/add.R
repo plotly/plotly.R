@@ -33,30 +33,122 @@ add_data <- function(p, data = NULL) {
 #' @param xend "final" x position (in this context, x represents "start")
 #' @param yend "final" y position (in this context, y represents "start")
 #' @seealso [plot_ly()]
-#' @references \url{https://plot.ly/r/reference/}
+#' @references \url{http://plotly-book.cpsievert.me/the-plotly-cookbook.html}
+#' 
+#' \url{https://plot.ly/r}
+#' 
+#' \url{https://plot.ly/r/reference/} 
 #' @author Carson Sievert
 #' @export
 #' @rdname add_trace
 #' @examples 
 #' 
+#' # the `plot_ly()` function initiates an object, and if no trace type
+#' # is specified, it sets a sensible default
 #' p <- plot_ly(economics, x = ~date, y = ~uempmed)
 #' p
-#' p %>% add_markers()
-#' p %>% add_lines()
-#' p %>% add_text(text = ".")
 #' 
-#' # attributes declared in plot_ly() carry over to downstream traces,
-#' # but can be overwritten
-#' plot_ly(economics, x = ~date, y = ~uempmed, color = I("red")) %>% 
+#' # some `add_*()` functions are a specific case of a trace type
+#' # for example, `add_markers()` is a scatter trace with mode of markers
+#' add_markers(p)
+#' 
+#' # scatter trace with mode of text
+#' add_text(p, text = "%")
+#' 
+#' # scatter trace with mode of lines 
+#' add_paths(p)
+#' 
+#' # like `add_paths()`, but ensures points are connected according to `x`
+#' add_lines(p)
+#' 
+#' # if you prefer to work with plotly.js more directly, can always
+#' # use `add_trace()` and specify the type yourself
+#' add_trace(p, type = "scatter", mode = "markers+lines")
+#' 
+#' # mappings provided to `plot_ly()` are "global", but can be overwritten
+#' plot_ly(economics, x = ~date, y = ~uempmed, color = I("red"), showlegend = FALSE) %>% 
 #'   add_lines() %>%
-#'   add_markers(color = ~pop) %>%
-#'   layout(showlegend = FALSE)
+#'   add_markers(color = ~pop)
+#' 
+#' # a number of `add_*()` functions are special cases of the scatter trace
+#' plot_ly(economics, x = ~date) %>% 
+#'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
+#'
+#' # use `group_by()` (or `group2NA()`) to apply visual mapping
+#' # once per group (e.g. one line per group)
+#' txhousing %>% 
+#'   group_by(city) %>% 
+#'   plot_ly(x = ~date, y = ~median) %>%
+#'   add_lines(color = I("black"))
+#' 
+#' \dontrun{
+#' # use `add_sf()` or `add_polygons()` to create geo-spatial maps
+#' # http://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   plot_ly() %>% add_sf(data = nc)
+#' }
+#' 
+#' # univariate summary statistics
+#' plot_ly(mtcars, x = ~factor(vs), y = ~mpg) %>% 
+#'   add_boxplot()
+#' plot_ly(mtcars, x = ~factor(vs), y = ~mpg) %>% 
+#'   add_trace(type = "violin")
+#'   
+#' # `add_histogram()` does binning for you...
+#' mtcars %>%
+#'   plot_ly(x = ~factor(vs)) %>%
+#'   add_histogram()
+#'   
+#' # ...but you can 'pre-compute' bar heights in R
+#' mtcars %>%
+#'   dplyr::count(vs) %>%
+#'   plot_ly(x = ~vs, y = ~n) %>%
+#'   add_bars()
+#'
+#' # the 2d analogy of add_histogram() is add_histogram2d()/add_histogram2dcontour()
+#' library(MASS)
+#' (p <- plot_ly(geyser, x = ~waiting, y = ~duration))
+#' add_histogram2d(p)
+#' add_histogram2dcontour(p)
+#' 
+#' # the 2d analogy of add_bars() is add_heatmap()/add_contour()
+#' # (i.e., bin counts must be pre-specified)
+#' den <- kde2d(geyser$waiting, geyser$duration)
+#' p <- plot_ly(x = den$x, y = den$y, z = den$z)
+#' add_heatmap(p)
+#' add_contour(p)
+#' 
+#' # `add_table()` makes it easy to map a data frame to the table trace type
+#' plot_ly(economics) %>% 
+#'   add_table()
+#' 
+#' # pie charts!
+#' ds <- data.frame(labels = c("A", "B", "C"), values = c(10, 40, 60))
+#' plot_ly(ds, labels = ~labels, values = ~values) %>%
+#'   add_pie() %>%
+#'   layout(title = "Basic Pie Chart using Plotly")
+#'   
+#' data(wind)
+#' plot_ly(wind, r = ~r, t = ~t) %>% 
+#'   add_area(color = ~nms) %>%
+#'   layout(radialaxis = list(ticksuffix = "%"), orientation = 270)
+#' 
+#' # ------------------------------------------------------------
+#' # 3D chart types
+#' # ------------------------------------------------------------
+#' plot_ly(z = ~volcano) %>% 
+#'   add_surface()
+#' plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) %>% 
+#'   add_mesh()
+#' }
 #' 
 add_trace <- function(p, ...,
                       data = NULL, inherit = TRUE) {
   
   # "native" plotly arguments
   attrs <- list(...)
+  attrs$inherit <- inherit
   
   if (!is.null(attrs[["group"]])) {
     warning("The group argument has been deprecated. Use group_by() or split instead.")
@@ -142,11 +234,6 @@ add_paths <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' txhousing %>% 
-#'   group_by(city) %>% 
-#'   plot_ly(x = ~date, y = ~median) %>%
-#'   add_lines(fill = "black")
 add_lines <- function(p, x = NULL, y = NULL, z = NULL, ...,
                       data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -191,15 +278,6 @@ add_segments <- function(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' 
-#' ggplot2::map_data("world", "canada") %>%
-#'   group_by(group) %>%
-#'   plot_ly(x = ~long, y = ~lat) %>%
-#'   add_polygons(hoverinfo = "none") %>%
-#'   add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text",
-#'     data = maps::canada.cities) %>%
-#'   layout(showlegend = FALSE)
 add_polygons <- function(p, x = NULL, y = NULL, ...,
                          data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -217,14 +295,87 @@ add_polygons <- function(p, x = NULL, y = NULL, ...,
 }
 
 
+
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' 
-#' plot_ly(economics, x = ~date) %>% 
-#'   add_ribbons(ymin = ~pce - 1e3, ymax = ~pce + 1e3)
+add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
+  try_library("sf", "add_sf")
+  dat <- plotly_data(add_data(p, data))
+  if (!is_sf(dat)) {
+    stop(
+      "The `data` for an `add_sf()` layer must be an sf object, ", 
+      "not an object of class: ", class(dat)[1],
+      call. = FALSE
+    )
+  }
+  if (is_mapbox(p) || is_geo(p)) dat <- st_cast_crs(dat)
+  bbox <- sf::st_bbox(dat)
+  set <- attr(dat, "set")
+  
+  d <- to_basic.GeomSf(dat)
+  
+  # to_basic() returns either a single data frame or a list of data frames
+  # (each data frame should be a a collection of the same feature type)
+  d <- if (is.data.frame(d)) list(d)
+  
+  # inherit attributes from the "first layer" (except the plotly_eval class)
+  attrz <- if (inherit) modify_list(unclass(p$x$attrs[[1]]), list(...)) else list(...)
+  
+  for (i in seq_along(d)) {
+    # sensible mode/style defaults based on the feature type (e.g. polygon, path, point)
+    attrs <- modify_list(sf_default_attrs(d[[i]]), attrz)
+    # scatter3d doesn't currently support fill
+    if ("z" %in% names(attrs)) attrs$fill <- NULL
+    args <- list(
+      p = p, 
+      class = "plotly_sf", 
+      x = x,
+      y = y,
+      `_bbox` = bbox,
+      set = set,
+      data = if ("group" %in% names(d[[i]])) group_by_(d[[i]], "group", add = TRUE) else d[[i]], 
+      inherit = inherit
+    )
+    args <- modify_list(args, attrs)
+    p <- do.call(add_trace_classed, args)
+  }
+  
+  p
+}
 
+
+#' @inheritParams add_trace
+#' @param rownames whether or not to display the rownames of `data`.
+#' @rdname add_trace
+#' @export
+add_table <- function(p, ..., rownames = TRUE, data = NULL, inherit = TRUE) {
+  attrs <- list(...)
+  dat <- plotly_data(add_data(p, data))
+  if (is.data.frame(dat)) {
+    vals <- lapply(names(dat), function(x) list(x))
+    if (isTRUE(rownames)) vals <- c(list(""), vals)
+    header_defaults <- list(
+      values = vals,
+      align = "right"
+    )
+    vals <- setNames(as.list(dat), NULL)
+    if (isTRUE(rownames)) vals <- c(list(row.names(dat)), vals)
+    cell_defaults <- list(
+      values = vals,
+      align = "right"
+    )
+    attrs$header <- modify_list(header_defaults, attrs$header)
+    attrs$cells <- modify_list(cell_defaults, attrs$cells)
+  }
+  
+  do.call(add_trace_classed, c(list(p = p, class = "plotly_table", type = "table"), attrs))
+}
+
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @export
 add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
                         data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -247,9 +398,6 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
 #' @param r For polar chart only. Sets the radial coordinates.
 #' @param t For polar chart only. Sets the radial coordinates.
 #' @export
-#' @examples 
-#' p <- plot_ly(plotly::wind, r = ~r, t = ~t) %>% add_area(color = ~nms)
-#' layout(p, radialaxis = list(ticksuffix = "%"), orientation = 270)
 add_area <- function(p, r = NULL, t = NULL, ...,
                      data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -270,15 +418,6 @@ add_area <- function(p, r = NULL, t = NULL, ...,
 #' @param values the value to associated with each slice of the pie.
 #' @param labels the labels (categories) corresponding to `values`.
 #' @export
-#' @examples 
-#' ds <- data.frame(
-#'   labels = c("A", "B", "C"),
-#'   values = c(10, 40, 60)
-#' )
-#' 
-#' plot_ly(ds, labels = ~labels, values = ~values) %>%
-#'   add_pie() %>%
-#'   layout(title = "Basic Pie Chart using Plotly")
 add_pie <- function(p, values = NULL, labels = NULL, ...,
                      data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -297,12 +436,6 @@ add_pie <- function(p, values = NULL, labels = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' library(dplyr)
-#' mtcars %>%
-#'   count(vs) %>%
-#'   plot_ly(x = ~vs, y = ~n) %>%
-#'   add_bars()
 add_bars <- function(p, x = NULL, y = NULL, ...,
                      data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -323,9 +456,6 @@ add_bars <- function(p, x = NULL, y = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' 
-#' plot_ly(x = ~rnorm(100)) %>% add_histogram()
 add_histogram <- function(p, x = NULL, y = NULL, ...,
                           data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -346,10 +476,6 @@ add_histogram <- function(p, x = NULL, y = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(x = ~LETTERS, y = ~LETTERS) %>% add_histogram2d()
-#' z <- as.matrix(table(LETTERS, LETTERS))
-#' plot_ly(x = ~LETTERS, y = ~LETTERS, z = ~z) %>% add_histogram2d()
 add_histogram2d <- function(p, x = NULL, y = NULL, z = NULL, ...,
                             data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -372,9 +498,6 @@ add_histogram2d <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(MASS::geyser, x = ~waiting, y = ~duration) %>% 
-#' add_histogram2dcontour()
 add_histogram2dcontour <- function(p, x = NULL, y = NULL, z = NULL, ...,
                                    data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -399,8 +522,6 @@ add_histogram2dcontour <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(z = ~volcano) %>% add_heatmap()
 add_heatmap <- function(p, x = NULL, y = NULL, z = NULL, ..., 
                         data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -420,8 +541,6 @@ add_heatmap <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(z = ~volcano) %>% add_contour()
 add_contour <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
@@ -439,8 +558,6 @@ add_contour <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(mtcars, x = ~factor(vs), y = ~mpg) %>% add_boxplot()
 add_boxplot <- function(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE) {
   if (inherit) {
     x <- x %||% p$x$attrs[[1]][["x"]]
@@ -459,8 +576,6 @@ add_boxplot <- function(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(z = ~volcano) %>% add_surface()
 add_surface <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
@@ -477,8 +592,6 @@ add_surface <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-#' @examples 
-#' plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) %>% add_mesh()
 add_mesh <- function(p, x = NULL, y = NULL, z = NULL, ..., 
                         data = NULL, inherit = TRUE) {
   if (inherit) {
@@ -566,30 +679,6 @@ special_attrs <- function(trace) {
 #' modified plotly object.
 #' @param ... arguments passed to `fun`.
 #' @export
-#' @examples
-#' 
-#' txhousing %>% 
-#'   group_by(city) %>%
-#'   plot_ly(x = ~date, y = ~median) %>%
-#'   add_lines(alpha = 0.2, name = "Texan Cities") %>%
-#'   add_fun(function(plot) {
-#'     plot %>% filter(city == "Houston") %>% add_lines(name = "Houston")
-#'   }) %>%
-#'   add_fun(function(plot) {
-#'     plot %>% filter(city == "San Antonio") %>% add_lines(name = "San Antonio")
-#'   })
-#'
-#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
-#'   add_markers() %>%
-#'   add_fun(function(p) {
-#'     p %>% slice(which.max(mpg)) %>% 
-#'       add_annotations("Good mileage")
-#'   }) %>%
-#'   add_fun(function(p) {
-#'     p %>% slice(which.min(mpg)) %>% 
-#'       add_annotations(text = "Bad mileage")
-#'   })
-#'
 add_fun <- function(p, fun, ...) {
   oldDat <- p$x$cur_data
   p <- fun(p, ...)
@@ -611,19 +700,6 @@ add_fun <- function(p, fun, ...) {
 #' @param inherit inherit attributes from [plot_ly()]?
 #' @author Carson Sievert
 #' @export
-#' @examples
-#' 
-#' # single annotation
-#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
-#'   slice(which.max(mpg)) %>%
-#'   add_annotations(text = "Good mileage")
-#'   
-#' # multiple annotations
-#' plot_ly(mtcars, x = ~wt, y = ~mpg) %>%
-#'   filter(gear == 5) %>%
-#'   add_annotations("five cylinder", ax = 40) 
-#'   
-
 add_annotations <- function(p, text = NULL, ..., data = NULL, inherit = TRUE) {
   p <- add_data(p, data)
   attrs <- list(text = text, ...)

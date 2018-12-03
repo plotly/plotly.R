@@ -82,7 +82,6 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # 2. geom_smooth() is really geom_path() + geom_ribbon()
   datz <- list()
   paramz <- list()
-  layout <- if (is_dev_ggplot2()) layout else list(layout = layout)
   for (i in seq_along(data)) {
     # This has to be done in a loop, since some layers are really two layers,
     # (and we need to replicate the data/params in those cases)
@@ -273,7 +272,8 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
   
-  data <- sf::st_as_sf(data)
+  data[["geometry"]] <- sf::st_sfc(data[["geometry"]])
+  data <- sf::st_as_sf(data, sf_column_name = "geometry")
   geom_type <- sf::st_geometry_type(data)
   # st_cast should "expand" a collection into multiple rows (one per feature)
   if ("GEOMETRYCOLLECTION" %in% geom_type) {
