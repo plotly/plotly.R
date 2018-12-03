@@ -56,13 +56,16 @@ prepareWidget <- function(x) {
 #' 
 #' This function must be called within a reactive shiny context.
 #' 
-#' @param event The type of plotly event. Currently 'plotly_hover',
-#' 'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.
+#' @param event The type of plotly event. All supported events are listed in the 
+#' function signature above (i.e., the usage section).
 #' @param source a character string of length 1. Match the value of this string 
-#' with the source argument in [plot_ly()] to retrieve the 
-#' event data corresponding to a specific plot (shiny apps can have multiple plots).
+#' with the `source` argument in [plot_ly()] (or [ggplotly()]) to respond to  
+#' events emitted from that specific plot.
 #' @param session a shiny session object (the default should almost always be used).
 #' @export
+#' @references 
+#'   * <https://plotly-book.cpsievert.me/shiny-plotly-inputs.html> 
+#'   * <https://plot.ly/javascript/plotlyjs-function-reference/>
 #' @author Carson Sievert
 #' @examples \dontrun{
 #' plotly_example("shiny", "event_data")
@@ -72,8 +75,8 @@ event_data <- function(
   event = c(
     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
     "plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", 
-    "plotly_deselect", "plotly_relayout", "plotly_legendclick", 
-    "plotly_legenddoubleclick", "plotly_afterplot"
+    "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
+    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   ), 
   source = "A",
   session = shiny::getDefaultReactiveDomain()
