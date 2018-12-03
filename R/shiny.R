@@ -82,7 +82,14 @@ event_data <- function(
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
-  src <- sprintf(".clientValue-%s-%s", match.arg(event), source)
+  
+  # obtain the input value
+  event <- match.arg(event)
+  src <- sprintf(".clientValue-%s-%s", event, source)
   val <- session$rootScope()$input[[src]]
-  if (is.null(val)) val else jsonlite::fromJSON(val)
+  
+  # legend clicking returns trace(s), which shouldn't be simplified...
+  fromJSONfunc <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) from_JSON else jsonlite::fromJSON
+  
+  if (is.null(val)) val else fromJSONfunc(val)
 }
