@@ -346,7 +346,7 @@ HTMLWidgets.widget({
           );
         }
       });
-      graphDiv.on('plotly_unhover', function(eventData) {
+      graphDiv.on('plotly_unhover', function(d) {
         Shiny.setInputValue(
           ".clientValue-plotly_hover-" + x.source, 
           null, 
@@ -354,11 +354,11 @@ HTMLWidgets.widget({
         );
         Shiny.setInputValue(
           ".clientValue-plotly_unhover-" + x.source, 
-          JSON.stringify(el.id), 
-          {priority: "event"}
+          JSON.stringify(eventDataWithKey(d)), 
+          priority
         );
       });
-      graphDiv.on('plotly_doubleclick', function(eventData) {
+      graphDiv.on('plotly_doubleclick', function() {
         Shiny.setInputValue(
           ".clientValue-plotly_click-" + x.source, 
           null, 
@@ -372,7 +372,7 @@ HTMLWidgets.widget({
       });
       
       // 'plotly_deselect' is code for doubleclick when in select mode
-      graphDiv.on('plotly_deselect', function(eventData) {
+      graphDiv.on('plotly_deselect', function() {
         Shiny.setInputValue(
           ".clientValue-plotly_selected-" + x.source, 
           null, 
