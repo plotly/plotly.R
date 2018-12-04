@@ -12,7 +12,7 @@ Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     person("Karthik", "Ram", role = "aut",
     email = "karthik.ram@gmail.com"),
     person("Marianne", "Corvellec", role = "aut",
-    email = "marianne@plot.ly"),
+    email = "marianne.corvellec@igdore.org", comment = c(ORCID = "0000-0002-1994-3581")),
     person("Pedro", "Despouy", role = "aut",
     email = "pedro@plot.ly"),
     person("Plotly Technologies Inc.", role = "cph"))
