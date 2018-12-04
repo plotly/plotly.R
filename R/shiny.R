@@ -79,16 +79,25 @@ event_data <- function(
     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   ), 
   source = "A",
-  session = shiny::getDefaultReactiveDomain()
+  session = shiny::getDefaultReactiveDomain(),
+  priority = "input"
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
   
+  # register event on client-side
+  session$onFlushed(function() {
+    session$sendCustomMessage(
+      type = "plotlyEventData", 
+      message = list(event = event, source = source, priority = priority)
+    )
+  }, once = TRUE)
+  
   # obtain the input value
   event <- match.arg(event)
-  src <- sprintf(".clientValue-%s-%s", event, source)
+  src <- sprintf(".clientValue-%s-%s-%s", event, source, priority)
   val <- session$rootScope()$input[[src]]
   
   # legend clicking returns trace(s), which shouldn't be simplified...
@@ -96,3 +105,45 @@ event_data <- function(
   
   if (is.null(val)) val else fromJSONfunc(val)
 }
+
+
+
+# 
+# 
+# event_data_reactive <- function(
+#   event = c(
+#     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
+#     "plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", 
+#     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
+#     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
+#   ), 
+#   source = "A",
+#   session = shiny::getDefaultReactiveDomain(),
+#   priority = "input"
+# ) {
+#   if (is.null(session)) {
+#     stop("No reactive domain detected. This function can only be called \n",
+#          "from within a reactive shiny context.")
+#   }
+#   
+#   # obtain the input value
+#   event <- match.arg(event)
+#   
+#   # register event on client-side
+#   session$sendCustomMessage(
+#     "plotly-register-event", 
+#     list(event = event, source = source, priority = priority)
+#   )
+#   
+#   # get input_value
+#   src <- sprintf(".clientValue-%s-%s-%s", event, source, priority)
+#   
+#   # legend clicking returns trace(s), which shouldn't be simplified...
+#   fromJSONfunc <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) from_JSON else jsonlite::fromJSON
+#   
+#   # return reactive
+#   reactive({
+#     val <- session$rootScope()$input[[src]]
+#     if (is.null(val)) val else fromJSONfunc(val)
+#   })
+# }
