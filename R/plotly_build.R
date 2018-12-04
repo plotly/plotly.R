@@ -131,6 +131,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       class = oldClass(x)
     )
     
+    # determine trace type (if not specified, can depend on the # of data points)
+    # note that this should also determine a sensible mode, if appropriate
+    trace <- verify_type(trace)
+    # verify orientation of boxes/bars
+    trace <- verify_orientation(trace)
+    
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]] %||% TRUE)) {
       trace[["key"]] <- trace[["key"]] %||% dat[[crosstalk_key()]]
@@ -138,20 +144,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     
     # if appropriate, tack on a group index
-    grps <- tryCatch(
-      as.character(dplyr::groups(dat)),
-      error = function(e) character(0)
-    )
-    
+    grps <- if (has_group(trace)) tryNULL(dplyr::group_vars(dat))
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
-    
-    # determine trace type (if not specified, can depend on the # of data points)
-    # note that this should also determine a sensible mode, if appropriate
-    trace <- verify_type(trace)
-    # verify orientation of boxes/bars
-    trace <- verify_orientation(trace)
     
     # add sensible axis names to layout
     for (i in c("x", "y", "z")) {
@@ -781,7 +777,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     colScale <- scales::col_numeric(pal, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
     vals <- if (diff(rng) > 0) {
-      as.numeric(stats::quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE))
+      seq(rng[1], rng[2], length.out = 25)
     } else {
       c(0, 1)
     }
@@ -1011,4 +1007,13 @@ supplyUserPalette <- function(default, user) {
 
 # helper functions
 array_ok <- function(attr) isTRUE(tryNULL(attr$arrayOk))
-has_fill <- function(trace) isTRUE(trace$fill %in% c('tozeroy', 'tozerox', 'tonexty', 'tonextx', 'toself', 'tonext'))
+has_fill <- function(trace) {
+  trace_type <- trace[["type"]] %||% "scatter"
+  # if trace type has fillcolor, but no fill attribute, then fill is always relevant
+  has_fillcolor <- has_attr(trace_type, "fillcolor")
+  has_fill <- has_attr(trace_type, "fill")
+  if (has_fillcolor && !has_fill) return(TRUE)
+  fill <- trace[["fill"]] %||% "none"
+  if (has_fillcolor && isTRUE(fill != "none")) return(TRUE)
+  FALSE
+}

@@ -29,7 +29,8 @@ mathjax_cdn <- function() {
   htmltools::htmlDependency(
     name = "mathjax",
     version = "2.7.4",
-    src = c(file = depPath("mathjax")),
+    package = "plotly",
+    src = dependency_dir("mathjax"),
     script = "cdn.js"
   )
 }

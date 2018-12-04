@@ -10,12 +10,19 @@
 * Upgraded to plotly.js v1.41.3.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
+* **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
 
 ## BUG FIXES
 
 * `subplot()` now bumps annotation `xref`/`yref` anchors correctly (#1181).
 * `subplot()` now accumulates images, repositions paper coordinates, and reanchors axis references (#1332).
-* In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).  
+* `event_data("plotly_selected")` is no longer too eager to clear. That is, it is no longer set to `NULL` when clicking on a plot *after* triggering the "plotly_selected" event (#1121) (#1122).
+* The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
+* The `color` and `stroke` arguments now work as expected for trace types with `fillcolor` but no `fill` attribute (e.g. `box` traces) (#1292).
+* Information emitted by in `event_data()` for heatmaps with atomic vectors for `x`/`y`/`z` is now correct (#1141).
+* Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
+* In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).
+* An articial marker no longer appears when clearing a crosstalk selection of a plot with a colorbar (#1406).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 
 # 4.8.0
