@@ -47,7 +47,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
     renderFunc,
     function(value) {
       json <- from_JSON_safe(value)
-      json$x <- json$x[!names(json$x) %in% c("visdat", "cur_data", "attrs")]
+      json$x <- json$x[setdiff(names(json$x), c("visdat", "cur_data", "attrs"))]
       to_JSON(json)
     }
   )
