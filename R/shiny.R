@@ -93,7 +93,7 @@ event_data <- function(
       type = "plotlyEventData", 
       message = list(event = event, source = source, priority = priority)
     )
-  }, once = TRUE)
+  }, once = FALSE)
   
   # obtain the input value
   event <- match.arg(event)
