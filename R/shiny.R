@@ -83,11 +83,24 @@ event_data <- function(
   ), 
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
-  priority = "input"
+  priority = c("input", "event")
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
+  }
+  
+  # make sure the input event is sensible
+  event <- match.arg(event)
+  priority <- match.arg(priority)
+  
+  isNullEvent <- event %in% c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")
+  if (isNullEvent && priority != "event") {
+    message(
+      "The input value tied to a '", event, "' event never changes. ", 
+      "Setting `priority = 'event'` so that the event actually triggers re-execution."
+    )
+    priority <- "event"
   }
   
   # register event on client-side
@@ -98,8 +111,7 @@ event_data <- function(
     )
   }, once = FALSE)
   
-  # obtain the input value
-  event <- match.arg(event)
+  
   src <- sprintf(".clientValue-%s-%s-%s", event, source, priority)
   val <- session$rootScope()$input[[src]]
   

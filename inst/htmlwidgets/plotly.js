@@ -325,10 +325,6 @@ HTMLWidgets.widget({
         }
         instance.plotlyEventData.push(msgID);
         
-        // If this event does not emit data, it always has event priority
-        var isBareEvents = ["plotly_doubleclick", "plotly_deselect", "plotly_afterplot"];
-        if (isBareEvents.indexOf(evt) > -1) priority = "event";
-        
         var eventDataFunctionMap = {
           plotly_click: eventDataWithKey,
           plotly_hover: eventDataWithKey,
@@ -351,8 +347,7 @@ HTMLWidgets.widget({
           plotly_legenddoubleclick: legendEventData,
           plotly_clickannotation: function(d) { return d.fullAnnotation }
         };
-        // TODO: how to handle bareEvents here? That os 
-        var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d };
+        var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
           
         // some events are unique to the R package
         var plotlyJSevent = (evt == "plotly_brush") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
