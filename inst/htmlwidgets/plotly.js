@@ -304,12 +304,9 @@ HTMLWidgets.widget({
         var priority = message.priority;
         
         var msgID = evt + "-" + src + "-" + priority;
-        if (instance[msgID]) return;
-        instance[msgID] = true;
-        
         // register event only if the source target matches this plot
-        if (x.source == src) {
-          
+        if (x.source == src && !instance[msgID]) {
+          instance[msgID] = true;
           // If this event does not emit data, it always has event priority
           var isBareEvents = ["plotly_doubleclick", "plotly_deselect", "plotly_afterplot"];
           if (isBareEvents.indexOf(evt) > 0) priority = "event";
@@ -327,10 +324,10 @@ HTMLWidgets.widget({
             plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
             plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
             plotly_brush: function(d) {
-              if (d) d.range ? d.range : d.lassoPoints;
+              if (d) { return d.range ? d.range : d.lassoPoints; }
             },
             plotly_brushing: function(d) {
-              if (d) d.range ? d.range : d.lassoPoints;
+              if (d) { return d.range ? d.range : d.lassoPoints; }
             },
             plotly_legendclick: legendEventData,
             plotly_legenddoubleclick: legendEventData,
@@ -340,8 +337,7 @@ HTMLWidgets.widget({
           var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d };
           
           // some events are unique to the R package
-          var plotlyJSevent = (evt == "plotly_brush" || evt == "plotly_brushing") ? "plotly_selected" : evt;
-          
+          var plotlyJSevent = (evt == "plotly_brush") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
           // register the event
           graphDiv.on(plotlyJSevent, function(d) {
             Shiny.setInputValue(
@@ -353,7 +349,7 @@ HTMLWidgets.widget({
             
           // Some events clear other input values
           var eventShouldClear = {
-            plotly_deselect: ["plotly_select", "plotly_selecting", "plotly_brush", "plotly_brushing", "plotly_click"],
+            plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", "plotly_click"],
             plotly_unhover: ["plotly_hover"],
             plotly_doubleclick: ["plotly_click"]
           }
