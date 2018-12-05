@@ -354,8 +354,8 @@ HTMLWidgets.widget({
         // TODO: how to handle bareEvents here? That os 
         var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d };
           
-         // some events are unique to the R package
-         var plotlyJSevent = (evt == "plotly_brush") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
+        // some events are unique to the R package
+        var plotlyJSevent = (evt == "plotly_brush") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
         // register the event
         graphDiv.on(plotlyJSevent, function(d) {
           Shiny.setInputValue(
@@ -376,15 +376,14 @@ HTMLWidgets.widget({
         evts.map(function(evt) {
           graphDiv.on(evt, function() {
             var inputsToClear = eventShouldClear[evt];
-            for (var j = 0; j < inputsToClear.length; j++) {
-              var inputName = ".clientValue-" + inputsToClear[j] + "-" + src + "-" + priority;
-               Shiny.setInputValue(inputName, null);
-             }
-           });
+            inputsToClear.map(function(input) {
+              Shiny.setInputValue(".clientValue-" + input + "-" + src + "-" + priority, null);
+            });
+          });
         });
-     });
-     
-  }
+        
+      });
+    }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
     // return a hash of {
