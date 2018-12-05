@@ -77,7 +77,7 @@ prepareWidget <- function(x) {
 event_data <- function(
   event = c(
     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
-    "plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", 
+    "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   ), 

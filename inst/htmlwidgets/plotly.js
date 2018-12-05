@@ -337,7 +337,7 @@ HTMLWidgets.widget({
           // and the 'plotly_deselect' event will reset this input
           plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
           plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
-          plotly_brush: function(d) {
+          plotly_brushed: function(d) {
             if (d) { return d.range ? d.range : d.lassoPoints; }
           },
           plotly_brushing: function(d) {
@@ -350,7 +350,7 @@ HTMLWidgets.widget({
         var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
           
         // some events are unique to the R package
-        var plotlyJSevent = (evt == "plotly_brush") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
+        var plotlyJSevent = (evt == "plotly_brushed") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
         // register the event
         graphDiv.on(plotlyJSevent, function(d) {
           Shiny.setInputValue(
@@ -362,7 +362,7 @@ HTMLWidgets.widget({
             
         // Some events clear other input values
         var eventShouldClear = {
-          plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brush", "plotly_brushing", "plotly_click"],
+          plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
           plotly_unhover: ["plotly_hover"],
           plotly_doubleclick: ["plotly_click"]
         }

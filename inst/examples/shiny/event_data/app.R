@@ -8,7 +8,7 @@ ui <- fluidPage(
   verbatimTextOutput("click"),
   verbatimTextOutput("selected"),
   verbatimTextOutput("selecting"),
-  verbatimTextOutput("brush"),
+  verbatimTextOutput("brushed"),
   verbatimTextOutput("brushing")
 )
 
@@ -47,7 +47,7 @@ server <- function(input, output, session) {
   })
   
   output$brush <- renderPrint({
-    d <- event_data("plotly_brush")
+    d <- event_data("plotly_brushed")
     if (is.null(d)) "Extents of the selection brush will appear here." else d
   })
   
