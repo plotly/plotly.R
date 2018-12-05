@@ -101,9 +101,6 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) 
 #' for an **rmarkdown** example and 
 #' [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
-#' @param priority the priority of shiny input events. If `NULL` (the default), then 
-#' [event_data()] becomes invalidated only when the input value changes. If `"event"`,
-#' then the event will always fire, regardless of whether the value has changed. 
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -134,7 +131,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL, priority = NULL) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -173,7 +170,6 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
   }
 
   p$x$config$cloud <- cloud
-  p$x$config$priority <- priority
 
   p
 }

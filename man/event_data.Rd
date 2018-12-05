@@ -9,7 +9,7 @@ event_data(event = c("plotly_hover", "plotly_unhover", "plotly_click",
   "plotly_brush", "plotly_brushing", "plotly_deselect", "plotly_relayout",
   "plotly_restyle", "plotly_legendclick", "plotly_legenddoubleclick",
   "plotly_clickannotation", "plotly_afterplot"), source = "A",
-  session = shiny::getDefaultReactiveDomain())
+  session = shiny::getDefaultReactiveDomain(), priority = "input")
 }
 \arguments{
 \item{event}{The type of plotly event. All supported events are listed in the
@@ -20,6 +20,10 @@ with the \code{source} argument in \code{\link[=plot_ly]{plot_ly()}} (or \code{\
 events emitted from that specific plot.}
 
 \item{session}{a shiny session object (the default should almost always be used).}
+
+\item{priority}{the priority of the relevant shiny input. If equal to \code{"event"},
+then \code{\link[=event_data]{event_data()}} always triggers re-execution, instead of re-executing
+only when the relevant shiny input value changes (the default).}
 }
 \description{
 This function must be called within a reactive shiny context.

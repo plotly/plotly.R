@@ -5,7 +5,7 @@
 \title{Set the default configuration for plotly}
 \usage{
 config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL,
-  mathjax = NULL, priority = NULL)
+  mathjax = NULL)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -29,10 +29,6 @@ you must \code{<iframe>} your plotly graph(s) into the larger document
 (see \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here}
 for an \strong{rmarkdown} example and
 \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here} for a \strong{shiny} example).}
-
-\item{priority}{the priority of shiny input events. If \code{NULL} (the default), then
-\code{\link[=event_data]{event_data()}} becomes invalidated only when the input value changes. If \code{"event"},
-then the event will always fire, regardless of whether the value has changed.}
 }
 \description{
 Set the default configuration for plotly
