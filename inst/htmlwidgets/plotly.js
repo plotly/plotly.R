@@ -319,7 +319,7 @@ HTMLWidgets.widget({
         // Note that this list is deleted on a re-draw
         var msgID = evt + "-" + src + "-" + priority;
         instance.plotlyEventData = instance.plotlyEventData || [];
-        var registered = instance.plotlyEventData.indexOf(msgID) > 0;
+        var registered = instance.plotlyEventData.indexOf(msgID) > -1;
         if (registered) {
           return;
         }
@@ -327,7 +327,7 @@ HTMLWidgets.widget({
         
         // If this event does not emit data, it always has event priority
         var isBareEvents = ["plotly_doubleclick", "plotly_deselect", "plotly_afterplot"];
-        if (isBareEvents.indexOf(evt) > 0) priority = "event";
+        if (isBareEvents.indexOf(evt) > -1) priority = "event";
         
         var eventDataFunctionMap = {
           plotly_click: eventDataWithKey,
