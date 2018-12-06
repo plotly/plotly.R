@@ -962,6 +962,13 @@ from_JSON <- function(x, ...) {
   jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
+from_JSON_safe <- function(txt, ...) {
+  if (!jsonlite::validate(txt)) {
+    stop("Expected a valid JSON string.")
+  }
+  from_JSON(txt, ...)
+}
+
 i <- function(x) {
   if (is.null(x)) {
     return(NULL)
