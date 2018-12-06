@@ -387,12 +387,10 @@ plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...
 }
 
 get_xy <- function(node) {
-  setNames(
-    tibble::as_tibble(dendextend::get_nodes_xy(node)), 
-    c("x", "y")
-  )
+  m <- dendextend::get_nodes_xy(node)
+  colnames(m) <- c("x", "y")
+  tibble::as_tibble(m)
 }
-
 
 
 #' Convert a list to a plotly htmlwidget object

@@ -348,6 +348,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
+  # throw warning if webgl is being used in shinytest
+  # currently, shinytest won't rely this warning, but it should
+  # https://github.com/rstudio/shinytest/issues/146
+  if (isTRUE(getOption("shiny.testmode"))) {
+    if (is.webgl(p)) warning("shinytest can't currently render WebGL-based graphics.")
+  }
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
   # added, which is confusing. So here we populate a sensible default.
   p <- verify_showlegend(p)

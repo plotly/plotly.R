@@ -21,7 +21,7 @@ shinyServer(function(input, output, session) {
 		facets <- paste(input$facet_row, '~', input$facet_col)
 		if (facets != '. ~ .') p <- p + facet_grid(facets)
     # return the ggplot object and renderPlotly() will know how to handle it
-		p
+		toWebGL(p)
 	})
 
 })
