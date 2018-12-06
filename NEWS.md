@@ -18,6 +18,7 @@
 * `subplot()` now accumulates images, repositions paper coordinates, and reanchors axis references (#1332).
 * `event_data("plotly_selected")` is no longer too eager to clear. That is, it is no longer set to `NULL` when clicking on a plot *after* triggering the "plotly_selected" event (#1121) (#1122).
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
+* When using **shinytest** to test a **shiny** that contains **plotly** graph, false positive differences are no longer reported (rstudio/shinytest#174). 
 * The `color` and `stroke` arguments now work as expected for trace types with `fillcolor` but no `fill` attribute (e.g. `box` traces) (#1292).
 * Information emitted by in `event_data()` for heatmaps with atomic vectors for `x`/`y`/`z` is now correct (#1141).
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
