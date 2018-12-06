@@ -3,7 +3,7 @@ library(shiny)
 
 ui <- fluidPage(
   plotlyOutput("parcoords"),
-  tableOutput("data")
+  verbatimTextOutput("data")
 )
 
 server <- function(input, output, session) {
@@ -14,7 +14,8 @@ server <- function(input, output, session) {
     dims <- Map(function(x, y) {
       list(values = x, range = range(x), label = y)
     }, iris_numeric, names(iris_numeric), USE.NAMES = FALSE)
-    plot_ly(type = 'parcoords', dimensions = dims, source = "pcoords")
+    plot_ly(type = 'parcoords', dimensions = dims, source = "pcoords") %>% 
+      layout(margin = list(r = 30))
   })
   
   # maintain a collection of selection ranges
@@ -31,6 +32,8 @@ server <- function(input, output, session) {
     d <- event_data("plotly_restyle", source = "pcoords")
     # what is the relevant dimension (i.e. variable)?
     dimension <- as.numeric(stringr::str_extract(names(d[[1]]), "[0-9]+"))
+    # If the restyle isn't related to a dimension, exit early.
+    if (!length(dimension)) return()
     # careful of the indexing in JS (0) versus R (1)!
     dimension_name <- names(iris_numeric)[[dimension + 1]]
     # a given dimension can have multiple selected ranges
@@ -59,8 +62,8 @@ server <- function(input, output, session) {
     iris[keep, ]
   })
   
-  output$data <- renderTable({
-    iris_selected()
+  output$data <- renderPrint({
+    tibble::as_tibble(iris_selected())
   })
 }
 
