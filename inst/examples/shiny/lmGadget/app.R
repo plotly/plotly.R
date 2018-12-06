@@ -1,3 +1,4 @@
+
 # Many thanks to RStudio for shiny gadgets
 # And special thanks to Winston Chang for the inspiration
 # https://gist.github.com/wch/c4b857d73493e6550cba
@@ -14,7 +15,7 @@ library(plotly)
 #' @param y a formula specifying the y variable
 #' @param key a vector specifying unique attributes for each row
 
-lmGadget <- function(dat, x, y, key = row.names(dat)) {
+lm_app <- function(dat, x, y, key = row.names(dat)) {
   
   ui <- miniPage(
     gadgetTitleBar("Interactive lm"),
@@ -30,51 +31,54 @@ lmGadget <- function(dat, x, y, key = row.names(dat)) {
     )
   )
   
-  # mechanism for managing selected points
-  init <- function() {
-    selected <- rep(FALSE, nrow(dat))
-    function(x) {
-      if (missing(x)) return(selected)
-      selected <<- xor(selected, x)
-      selected
-    }
-  }
-  selection <- init()
-  
-  server <- function(input, output) {
-
+  server <- function(input, output, session) {
+    
+    # mechanism for managing selected points
+    keys <- reactiveVal()
+    
+    observeEvent(event_data("plotly_click"), {
+      key_new <- event_data("plotly_click")$key
+      key_old <- keys()
+      
+      if (key_new %in% key_old) {
+        keys(setdiff(key_old, key_new))
+      } else {
+        keys(c(key_new, key_old))
+      }
+    })
+    
     output$plot1 <- renderPlotly({
       req(input$degree)
-      d <- event_data("plotly_click")
-      selected <- selection(key %in% d[["key"]])
-      modelDat <- dat[!selected, ]
+      is_outlier <- key %in% keys()
+      modelDat <- dat[!is_outlier, ]
       formula <- as.formula(
         sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
       )
       m <- lm(formula, modelDat)
       modelDat$yhat <- as.numeric(fitted(m))
-      mcolor <- rep(toRGB("black"), NROW(dat))
-      mcolor[selected] <- toRGB("grey90")
+      
+      cols <- ifelse(is_outlier, "gray90", "black")
       
       dat %>%
-        plot_ly(x = x, y = y) %>%
-        add_markers(key = key, marker = list(color = mcolor, size = 10)) %>%
+        plot_ly(x = ~wt, y = ~mpg) %>%
+        add_markers(key = row.names(mtcars), color = I(cols), marker = list(size = 10)) %>%
         add_lines(y = ~yhat, data = modelDat) %>%
         layout(showlegend = FALSE)
     })
     
     # Return the most recent fitted model, when we press "done"
     observeEvent(input$done, {
-      selected <- selection()
-      modelDat <- dat[!selected, ]
+      modelDat <- dat[!key %in% keys(), ]
       formula <- as.formula(
         sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
       )
-      stopApp(lm(formula, modelDat))
+      m <- lm(formula, modelDat)
+      print(summary(m))
+      stopApp(m)
     })
   }
   
-  runGadget(ui, server)
+  shinyApp(ui, server)
 }
 
-m <- lmGadget(mtcars, x = ~wt, y = ~mpg)
+lm_app(mtcars, x = ~wt, y = ~mpg)

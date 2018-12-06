@@ -5,20 +5,21 @@
 #' 
 #' @param type the type of example
 #' @param name the name of the example (valid names depend on `type`).
+#' @param edit whether to open the relevant source files using [file.edit]. Only relevant if `type` is `"shiny"` or `"rmd"`.
 #' @param ... arguments passed onto the suitable method.
 #' @export
 #' @author Carson Sievert
 
-plotly_example <- function(type = c("demo", "shiny", "rmd"), name, ...) {
+plotly_example <- function(type = c("demo", "shiny", "rmd"), name, edit = TRUE, ...) {
   
   type <- match.arg(type)
   
   # demos don't necessarily need a name
   if (type == "demo") {
     if (missing(name)) {
-      return(utils::demo(package = "plotly")) 
+      return(utils::demo(package = "plotly", ...)) 
     } else  {
-      return(utils::demo(topic = name, package = "plotly"))
+      return(utils::demo(topic = name, package = "plotly", ...))
     }
   }
   
@@ -36,10 +37,15 @@ plotly_example <- function(type = c("demo", "shiny", "rmd"), name, ...) {
   }
   
   finalDir <- system.file("examples", type, name, package = "plotly")
+  if (edit) {
+    files <- list.files(finalDir, full.names = TRUE)
+    scripts <- files[tools::file_ext(files) %in% c("R", "Rmd")]
+    file.edit(scripts)
+  }
   
   if (type == "shiny") {
     try_library("shiny", "plotly_example")
-    getFromNamespace("runApp", asNamespace("shiny"))(finalDir, display.mode = "showcase", ...)
+    getFromNamespace("runApp", asNamespace("shiny"))(finalDir, ...)
   }
   
   if (type == "rmd") {

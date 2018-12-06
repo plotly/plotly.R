@@ -1,9 +1,8 @@
 library(plotly)
 library(shiny)
 
-# compute a correlation matrix
+# cache computation of a correlation matrix
 correlation <- round(cor(mtcars), 3)
-nms <- names(mtcars)
 
 ui <- fluidPage(
   mainPanel(
@@ -14,15 +13,22 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  
   output$heat <- renderPlotly({
-    plot_ly(x = nms, y = nms, z = correlation, 
-            key = correlation, type = "heatmap", source = "heatplot") %>%
-      layout(xaxis = list(title = ""), 
-             yaxis = list(title = ""))
+    plot_ly(source = "heatmap") %>%
+      add_heatmap(
+        x = names(mtcars), 
+        y = names(mtcars), 
+        z = correlation
+      ) %>%
+      layout(
+        xaxis = list(title = ""), 
+        yaxis = list(title = "")
+      )
   })
   
   output$selection <- renderPrint({
-    s <- event_data("plotly_click", source = "heatplot")
+    s <- event_data("plotly_click", source = "heatmap")
     if (length(s) == 0) {
       "Click on a cell in the heatmap to display a scatterplot"
     } else {
@@ -32,20 +38,23 @@ server <- function(input, output, session) {
   })
   
   output$scatterplot <- renderPlotly({
-    s <- event_data("plotly_click", source = "heatplot")
-    if (length(s)) {
-      vars <- c(s[["x"]], s[["y"]])
-      d <- setNames(mtcars[vars], c("x", "y"))
-      yhat <- fitted(lm(y ~ x, data = d))
-      plot_ly(d, x = ~x) %>%
-        add_markers(y = ~y) %>%
-        add_lines(y = ~yhat) %>%
-        layout(xaxis = list(title = s[["x"]]), 
-               yaxis = list(title = s[["y"]]), 
-               showlegend = FALSE)
-    } else {
-      plotly_empty()
-    }
+    clickData <- event_data("plotly_click", source = "heatmap")
+    if (is.null(clickData)) return(NULL)
+    
+    # get the clicked x/y variables and fit model to those 2 vars
+    vars <- c(clickData[["x"]], clickData[["y"]])
+    d <- setNames(mtcars[vars], c("x", "y"))
+    yhat <- fitted(lm(y ~ x, data = d))
+    
+    # scatterplot with fitted line
+    plot_ly(d, x = ~x) %>%
+      add_markers(y = ~y) %>%
+      add_lines(y = ~yhat) %>%
+      layout(
+        xaxis = list(title = clickData[["x"]]), 
+        yaxis = list(title = clickData[["y"]]), 
+        showlegend = FALSE
+      )
   })
   
 }

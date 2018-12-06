@@ -230,6 +230,12 @@ HTMLWidgets.widget({
           x: pt.x,
           y: pt.y
         };
+        
+        // If 'z' is reported with the event data, then use it!
+        if (pt.hasOwnProperty("z")) {
+          obj.z = pt.z;
+        }
+        
         /* 
           TL;DR: (I think) we have to select the graph div (again) to attach keys...
           
@@ -243,13 +249,12 @@ HTMLWidgets.widget({
         var gd = document.getElementById(el.id);
         var trace = gd.data[pt.curveNumber];
         
-        // Add other attributes here, if desired
         if (!trace._isSimpleKey) {
-          var attrsToAttach = ["key", "z"];
+          var attrsToAttach = ["key"];
         } else {
           // simple keys fire the whole key
           obj.key = trace.key;
-          var attrsToAttach = ["z"];
+          var attrsToAttach = [];
         }
         
         for (var i = 0; i < attrsToAttach.length; i++) {
@@ -287,10 +292,18 @@ HTMLWidgets.widget({
         );
       });
       graphDiv.on('plotly_selected', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_selected-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
-        );
+        // If 'plotly_selected' has already been fired, and you click
+        // on the plot afterwards, this event fires `undefined`?!?
+        // That might be considered a plotly.js bug, but it doesn't make 
+        // sense for this input change to occur if `d` is falsy because,
+        // even in the empty selection case, `d` is truthy (an object),
+        // and the 'plotly_deselect' event will reset this input
+        if (d) {
+          Shiny.onInputChange(
+            ".clientValue-plotly_selected-" + x.source, 
+            JSON.stringify(eventDataWithKey(d))
+          );
+        }
       });
       graphDiv.on('plotly_unhover', function(eventData) {
         Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
@@ -520,7 +533,7 @@ function TraceManager(graphDiv, highlight) {
   // avoid doing this over and over
   this.origOpacity = [];
   for (var i = 0; i < this.origData.length; i++) {
-    this.origOpacity[i] = this.origData[i].opacity || 1;
+    this.origOpacity[i] = this.origData[i].opacity === 0 ? 0 : (this.origData[i].opacity || 1);
   }
 
   // key: group name, value: null or array of keys representing the
