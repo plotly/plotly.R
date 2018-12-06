@@ -1,76 +1,76 @@
-#' Static image exporting
-#'
+#' Static image exporting 
+#' 
 #' Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
 #' [orca command-line utility](https://github.com/plotly/orca#installation).
-#'
+#' 
 #' The `orca()` function is designed for exporting one plotly graph whereas `orca_serve()`
 #' is meant for exporting many graphs at once. The former starts and stops an external (nodejs)
 #' process everytime it is called whereas the latter starts up a process when called, then
-#' returns an `export()` method for exporting graphs as well as a `close()` method for stopping
+#' returns an `export()` method for exporting graphs as well as a `close()` method for stopping 
 #' the external (background) process.
-#'
+#' 
 #' @param p a plotly object.
 #' @param file output filename.
 #' @param format the output format (png, jpeg, webp, svg, pdf, eps).
 #' @param scale Sets the image scale. Applies to all output images.
-#' @param width Sets the image width. If not set, defaults to `layout.width` value.
+#' @param width Sets the image width. If not set, defaults to `layout.width` value. 
 #' Applies to all output images.
-#' @param height Sets the image height. If not set, defaults to `layout.height` value.
+#' @param height Sets the image height. If not set, defaults to `layout.height` value. 
 #' Applies to all output images.
 #' @param mathjax whether or not to include MathJax (required to render [TeX]).
-#' If `TRUE`, the PLOTLY_MATHJAX_PATH environment variable must be set and point
-#' to the location of MathJax (this variable is also used to render [TeX] in
+#' If `TRUE`, the PLOTLY_MATHJAX_PATH environment variable must be set and point 
+#' to the location of MathJax (this variable is also used to render [TeX] in 
 #' interactive graphs, see [config]).
 #' @param parallel_limit Sets the limit of parallel tasks run.
 #' @param verbose Turn on verbose logging on stdout.
 #' @param debug Starts app in debug mode and turn on verbose logs on stdout.
-#' @param safe Turns on safe mode: where figures likely to make browser window
+#' @param safe Turns on safe mode: where figures likely to make browser window 
 #' hang during image generating are skipped.
 #' @param more_args additional arguments to pass along to system command. This is useful
 #' for specifying display and/or electron options, such as `--enable-webgl` or `--disable-gpu`.
-#' @param ... for `orca()`, additional arguments passed along to `processx::run`. For
+#' @param ... for `orca()`, additional arguments passed along to `processx::run`. For 
 #' `orca_serve()`, additional arguments passed along to `processx::process`.
 #' @export
 #' @author Carson Sievert
 #' @md
 #' @rdname orca
 #' @examples
-#'
+#' 
 #' \dontrun{
 #' # NOTE: in a headless environment, you may need to set `more_args="--enable-webgl"`
 #' # to export webgl correctly
 #' p <- plot_ly(z = ~volcano) %>% add_surface()
 #' orca(p, "surface-plot.svg")
-#'
+#' 
 #' #' # launch the server
 #' server <- orca_serve()
-#'
+#' 
 #' # export as many graphs as you'd like
 #' server$export(qplot(1:10), "test1.pdf")
 #' server$export(plot_ly(x = 1:10, y = 1:10), "test2.pdf")
-#'
+#' 
 #' # the underlying process is exposed as a field, so you
 #' # have full control over the external process
 #' server$process$is_alive()
-#'
+#' 
 #' # convenience method for closing down the server
 #' server$close()
-#'
+#' 
 #' # remove the exported files from disk
 #' unlink("test1.pdf")
 #' unlink("test2.pdf")
 #' }
-#'
+#' 
 
-orca <- function(p, file = "plot.png", format = tools::file_ext(file),
+orca <- function(p, file = "plot.png", format = tools::file_ext(file), 
                  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
-                 parallel_limit = NULL, verbose = FALSE, debug = FALSE,
+                 parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
                  safe = FALSE, more_args = NULL, ...) {
-
+  
   orca_available()
-
+  
   b <- plotly_build(p)
-
+  
   # find the relevant plotly.js bundle
   plotlyjs <- plotlyjsBundle(b)
   plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
@@ -78,12 +78,12 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   if (!is.null(plotlyjs$package)) {
     plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
   }
-
+  
   tmp <- tempfile(fileext = ".json")
   cat(to_JSON(b$x[c("data", "layout")]), file = tmp)
-
+  
   args <- c(
-    "graph", tmp,
+    "graph", tmp, 
     "-o", file,
     "--format", format,
     "--plotlyjs", plotlyjs_path,
@@ -92,59 +92,59 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
     if (safe) "--safe-mode",
     more_args
   )
-
+  
   if (!is.null(scale)) args <- c(args, "--scale", scale)
   if (!is.null(width)) args <- c(args, "--width", width)
   if (!is.null(height)) args <- c(args, "--height", height)
   if (!is.null(parallel_limit)) args <- c(args, "--parallel-limit", parallel_limit)
   if (!is.null(tryNULL(mapbox_token()))) args <- c(args, "--mapbox-access-token", mapbox_token())
   if (isTRUE(mathjax)) args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
-
+  
   # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
   try_library("processx", "orca")
   invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE, ...))
 }
 
 #' Orca image export server
-#'
+#' 
 #' @inheritParams orca
 #' @param port Sets the server's port number.
 #' @param keep_alive Turn on keep alive mode where orca will (try to) relaunch server if process unexpectedly exits.
 #' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
 #' @param request_limit Sets a request limit that makes orca exit when reached.
 #' @param quiet Suppress all logging info.
-#'
+#' 
 #' @section Methods:
-#'
+#' 
 #' The `orca_serve()` function returns an object with two methods:
-#'
+#' 
 #' \describe{
 #'   \item{\code{export(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL)}}{
 #'     Export a static image of a plotly graph. Arguments found here are the same as those found in `orca()`
 #'   }
 #'   \item{\code{close()}}{Close down the orca server and kill the underlying node process.}
 #' }
-#'
+#' 
 #' @section Fields:
-#'
+#' 
 #' The `orca_serve()` function returns an object with two fields:
-#'
+#' 
 #' \describe{
 #'   \item{\code{port}}{The port number that the server is listening to.}
 #'   \item{\code{process}}{An R6 class for controlling and querying the underlying node process.}
 #' }
-#'
+#' 
 #' @export
 #' @rdname orca
 
 orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
-                       keep_alive = TRUE, window_max_number = NULL, quiet = FALSE,
+                       keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
                        debug = FALSE, more_args = NULL, ...) {
-
+  
   # make sure we have the required infrastructure
   orca_available()
   try_library("processx", "orca_serve")
-
+  
   # use main bundle since any plot can be thrown at the server
   plotlyjs <- plotlyMainBundle()
   plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
@@ -152,7 +152,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   if (!is.null(plotlyjs$package)) {
     plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
   }
-
+  
   args <- c(
     "serve",
     "-p", port,
@@ -164,21 +164,21 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
     if (quiet) "--quiet",
     more_args
   )
-
+  
   if (!is.null(request_limit))
     args <- c(args, "--request-limit", request_limit)
-
+  
   if (!is.null(window_max_number))
     args <- c(args, "--window-max-number", window_max_number)
-
-  if (!is.null(tryNULL(mapbox_token())))
+  
+  if (!is.null(tryNULL(mapbox_token()))) 
     args <- c(args, "--mapbox-access-token", mapbox_token())
-
-  if (isTRUE(mathjax))
+  
+  if (isTRUE(mathjax)) 
     args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
-
+  
   process <- processx::process$new("orca", args, ...)
-
+  
   list(
     port = port,
     process = process,
@@ -193,7 +193,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
         scale = scale
       )
       res <- httr::POST(
-        paste0("http://127.0.0.1:", port),
+        paste0("http://127.0.0.1:", port), 
         body = to_JSON(bod)
       )
       httr::stop_for_status(res)
@@ -204,20 +204,16 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   )
 }
 
-correct_orca <- function() {
-  orca_help <- processx::run("orca", "-h")
-  grepl("plotly", orca_help[["stdout"]], ignore.case = TRUE)
-}
 
 orca_available <- function() {
-  if (Sys.which("orca") == "" || !correct_orca()) {
+  if (Sys.which("orca") == "") {
     stop(
       "The orca command-line utility is required for this functionality.\n\n",
       "Please follow the installation instructions here -- https://github.com/plotly/orca#installation",
       call. = FALSE
     )
   }
-
+  
   TRUE
 }
 
@@ -225,7 +221,7 @@ orca_version <- function() {
   orca_available()
   # default to initial release if we can't correctly parse version
   tryCatch(
-    as.package_version(system("orca --version", intern = TRUE)),
+    as.package_version(system("orca --version", intern = TRUE)), 
     error = function(e) "1.0.0"
   )
 }
