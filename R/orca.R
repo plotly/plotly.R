@@ -204,9 +204,14 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   )
 }
 
+correct_orca <- function() {
+  orca_help <- processx::run("orca", "-h")
+  grepl("plotly", orca_help[["stdout"]], ignore.case = TRUE)
+}
+
 
 orca_available <- function() {
-  if (Sys.which("orca") == "") {
+  if (Sys.which("orca") == "" || !correct_orca()) {
     stop(
       "The orca command-line utility is required for this functionality.\n\n",
       "Please follow the installation instructions here -- https://github.com/plotly/orca#installation",
