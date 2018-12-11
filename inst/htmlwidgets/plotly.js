@@ -17,6 +17,23 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
+    // Maintain a 'global' mapping between plotly source IDs and DOM IDs
+    // This is needed for the 'plotlyEventData' message handler... 
+    // Due to the way `event_data()` is designed, we can only
+    // know the source ID of interest which may be tied to 
+    // multiple DOM elements
+    var sourceDomMap = crosstalk.var("plotlySourceDomMap").get() || {};
+    var thisMap = sourceDomMap[x.source] || [];
+    if (thisMap.indexOf(el.id) == -1) {
+      thisMap.push(el.id);
+    }
+    sourceDomMap[x.source] = thisMap;
+    crosstalk.var("plotlySourceDomMap").set(sourceDomMap);
+    
+    // event_data() events need to be re-registered
+    crosstalk.var("plotlyInputEvents").set(null);
+    
+    
     /* 
     / 'inform the world' about highlighting options this is so other
     / crosstalk libraries have a chance to respond to special settings 
@@ -166,9 +183,6 @@ HTMLWidgets.widget({
       
     } else {
       
-      // event_data() events need to be re-registered
-      instance.plotlyEventData = undefined;
-      
       // new x data could contain a new height/width...
       // attach to instance so that resize logic knows about the new size
       instance.width = x.layout.width || instance.width;
@@ -227,158 +241,6 @@ HTMLWidgets.widget({
       
     });
     
-    // Attach attributes (e.g., "key", "z") to plotly event data
-    function eventDataWithKey(eventData) {
-      if (eventData === undefined || !eventData.hasOwnProperty("points")) {
-        return null;
-      }
-      return eventData.points.map(function(pt) {
-        var obj = {
-          curveNumber: pt.curveNumber, 
-          pointNumber: pt.pointNumber, 
-          x: pt.x,
-          y: pt.y
-        };
-        
-        // If 'z' is reported with the event data, then use it!
-        if (pt.hasOwnProperty("z")) {
-          obj.z = pt.z;
-        }
-        
-        /* 
-          TL;DR: (I think) we have to select the graph div (again) to attach keys...
-          
-          Why? Remember that crosstalk will dynamically add/delete traces 
-          (see traceManager.prototype.updateSelection() below)
-          For this reason, we can't simply grab keys from x.data (like we did previously)
-          Moreover, we can't use _fullData, since that doesn't include 
-          unofficial attributes. It's true that click/hover events fire with 
-          pt.data, but drag events don't...
-        */
-        var gd = document.getElementById(el.id);
-        var trace = gd.data[pt.curveNumber];
-        
-        if (!trace._isSimpleKey) {
-          var attrsToAttach = ["key"];
-        } else {
-          // simple keys fire the whole key
-          obj.key = trace.key;
-          var attrsToAttach = [];
-        }
-        
-        for (var i = 0; i < attrsToAttach.length; i++) {
-          var attr = trace[attrsToAttach[i]];
-          if (Array.isArray(attr)) {
-              // pointNumber can be an array (e.g., heatmaps)
-              // TODO: can pointNumber be 3D?
-              obj[attrsToAttach[i]] = typeof pt.pointNumber === "number" ? 
-                attr[pt.pointNumber] : attr[pt.pointNumber[0]][pt.pointNumber[1]];
-          }
-        }
-        return obj;
-      });
-    }
-    
-    var legendEventData = function(d) {
-        // if legendgroup is not relevant just return the trace
-        var trace = d.data[d.curveNumber];
-        if (!trace.legendgroup) return trace;
-        
-        // if legendgroup was specified, return all traces that match the group
-        var legendgrps = d.data.map(function(trace){ return trace.legendgroup; });
-        var traces = [];
-        for (i = 0; i < legendgrps.length; i++) {
-          if (legendgrps[i] == trace.legendgroup) {
-            traces.push(d.data[i]);
-          }
-        }
-        
-        return traces;
-      };
-      
-    
-    if (HTMLWidgets.shinyMode) {
-      
-      // This message is sent everytime event_data() is called and everytime
-      // Shiny flushes the reactive system, but we only need to register
-      // events once after a draw/redraw, so this callback will exit early 
-      // if the proper events are already registered
-      Shiny.addCustomMessageHandler("plotlyEventData", function(message) {
-        // These three variables uniquely identify an event handler
-        var evt = message.event;
-        var src = message.source;
-        var priority = message.priority;
-        
-        // Event handlers only need registration if the source of the 
-        // event matches this widget's source ID
-        if (x.source != src) {
-          return;
-        }
-        
-        // DOM instance maintains a list of registered handlers
-        // Note that this list is deleted on a re-draw
-        var msgID = evt + "-" + src + "-" + priority;
-        instance.plotlyEventData = instance.plotlyEventData || [];
-        var registered = instance.plotlyEventData.indexOf(msgID) > -1;
-        if (registered) {
-          return;
-        }
-        instance.plotlyEventData.push(msgID);
-        
-        var eventDataFunctionMap = {
-          plotly_click: eventDataWithKey,
-          plotly_hover: eventDataWithKey,
-          plotly_unhover: eventDataWithKey,
-          // If 'plotly_selected' has already been fired, and you click
-          // on the plot afterwards, this event fires `undefined`?!?
-          // That might be considered a plotly.js bug, but it doesn't make 
-          // sense for this input change to occur if `d` is falsy because,
-          // even in the empty selection case, `d` is truthy (an object),
-          // and the 'plotly_deselect' event will reset this input
-          plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
-          plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
-          plotly_brushed: function(d) {
-            if (d) { return d.range ? d.range : d.lassoPoints; }
-          },
-          plotly_brushing: function(d) {
-            if (d) { return d.range ? d.range : d.lassoPoints; }
-          },
-          plotly_legendclick: legendEventData,
-          plotly_legenddoubleclick: legendEventData,
-          plotly_clickannotation: function(d) { return d.fullAnnotation }
-        };
-        var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
-          
-        // some events are unique to the R package
-        var plotlyJSevent = (evt == "plotly_brushed") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
-        // register the event
-        graphDiv.on(plotlyJSevent, function(d) {
-          Shiny.setInputValue(
-            ".clientValue-" + evt + "-" + src + "-" + priority,
-            JSON.stringify(eventDataPreProcessor(d)),
-            priority == "event" ? {priority: "event"} : undefined
-          );
-        });
-            
-        // Some events clear other input values
-        var eventShouldClear = {
-          plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
-          plotly_unhover: ["plotly_hover"],
-          plotly_doubleclick: ["plotly_click"]
-        }
-          
-        var evts = Object.keys(eventShouldClear);
-        evts.map(function(evt) {
-          graphDiv.on(evt, function() {
-            var inputsToClear = eventShouldClear[evt];
-            inputsToClear.map(function(input) {
-              Shiny.setInputValue(".clientValue-" + input + "-" + src + "-" + priority, null);
-            });
-          });
-        });
-        
-      });
-    }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
     // return a hash of {
@@ -955,3 +817,140 @@ function debounce(func, wait, immediate) {
 		if (callNow) func.apply(context, args);
 	};
 };
+
+
+
+// This Shiny.addCustomMessageHandler() callback is fired once 
+// per flush (not once per renderValue!)
+Shiny.addCustomMessageHandler("plotlyEventData", function(message) {
+  // These three variables uniquely identify an event handler
+  var evt = message.event;
+  var src = message.source;
+  var priority = message.priority;
+  
+  // DOM instance maintains a list of registered handlers
+  // Note that this list is deleted on a re-draw
+  var msgID = evt + "-" + src + "-" + priority;
+  var plotlyInputEvents = crosstalk.var("plotlyInputEvents").get() || [];
+  if (plotlyInputEvents.indexOf(msgID) > -1) {
+    return;
+  }
+  plotlyInputEvents.push(msgID);
+  crosstalk.var("plotlyInputEvents").set(plotlyInputEvents)
+  
+  var eventDataFunctionMap = {
+    plotly_click: eventDataWithKey,
+    plotly_hover: eventDataWithKey,
+    plotly_unhover: eventDataWithKey,
+    // If 'plotly_selected' has already been fired, and you click
+    // on the plot afterwards, this event fires `undefined`?!?
+    // That might be considered a plotly.js bug, but it doesn't make 
+    // sense for this input change to occur if `d` is falsy because,
+    // even in the empty selection case, `d` is truthy (an object),
+    // and the 'plotly_deselect' event will reset this input
+    plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
+    plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
+    plotly_brushed: function(d) {
+      if (d) { return d.range ? d.range : d.lassoPoints; }
+    },
+    plotly_brushing: function(d) {
+      if (d) { return d.range ? d.range : d.lassoPoints; }
+    },
+    plotly_legendclick: legendEventData,
+    plotly_legenddoubleclick: legendEventData,
+    plotly_clickannotation: function(d) { return d.fullAnnotation }
+  };
+  var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
+          
+  // some events are unique to the R package
+  var plotlyJSevent = (evt == "plotly_brushed") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
+  // Some events clear other input values
+  var eventClearMap = {
+    plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
+    plotly_unhover: ["plotly_hover"],
+    plotly_doubleclick: ["plotly_click"]
+  }
+        
+  // register events for all DOM elements connected to this source id
+  var idMap = crosstalk.var("plotlySourceDomMap").get() || {};
+  var gids = idMap[src];
+  gids.map(function(id) {
+    var gid = document.getElementById(id);
+    // register the event
+    gid.on(plotlyJSevent, function(d) {
+      Shiny.setInputValue(
+        ".clientValue-" + evt + "-" + src + "-" + priority,
+        JSON.stringify(eventDataPreProcessor(d)),
+        priority == "event" ? {priority: "event"} : undefined
+      );
+    });
+    Object.keys(eventClearMap).map(function(evt) {
+      gid.on(evt, function() {
+        var inputsToClear = eventClearMap[evt];
+        inputsToClear.map(function(input) {
+          Shiny.setInputValue(".clientValue-" + input + "-" + src + "-" + priority, null);
+        });
+      });
+    });
+  });
+});
+
+ // Attach attributes (e.g., "key", "z") to plotly event data
+function eventDataWithKey(eventData) {
+  if (eventData === undefined || !eventData.hasOwnProperty("points")) {
+    return null;
+  }
+  return eventData.points.map(function(pt) {
+    var obj = {
+      curveNumber: pt.curveNumber, 
+      pointNumber: pt.pointNumber, 
+      x: pt.x,
+      y: pt.y
+    };
+    
+    // If 'z' is reported with the event data, then use it!
+    if (pt.hasOwnProperty("z")) {
+      obj.z = pt.z;
+    }
+    
+    var trace = pt.data;
+    
+    if (!trace._isSimpleKey) {
+      var attrsToAttach = ["key"];
+    } else {
+      // simple keys fire the whole key
+      obj.key = trace.key;
+      var attrsToAttach = [];
+    }
+    
+    for (var i = 0; i < attrsToAttach.length; i++) {
+      var attr = trace[attrsToAttach[i]];
+      if (Array.isArray(attr)) {
+          // pointNumber can be an array (e.g., heatmaps)
+          // TODO: can pointNumber be 3D?
+          obj[attrsToAttach[i]] = typeof pt.pointNumber === "number" ? 
+            attr[pt.pointNumber] : attr[pt.pointNumber[0]][pt.pointNumber[1]];
+       }
+     }
+     return obj;
+   });
+}
+    
+var legendEventData = function(d) {
+  // if legendgroup is not relevant just return the trace
+  var trace = d.data[d.curveNumber];
+  if (!trace.legendgroup) return trace;
+  
+  // if legendgroup was specified, return all traces that match the group
+  var legendgrps = d.data.map(function(trace){ return trace.legendgroup; });
+  var traces = [];
+  for (i = 0; i < legendgrps.length; i++) {
+    if (legendgrps[i] == trace.legendgroup) {
+      traces.push(d.data[i]);
+    }
+  }
+  
+  return traces;
+};
+      
+
