@@ -17,11 +17,13 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
-    // Maintain a 'global' mapping between plotly source IDs and DOM IDs
-    // This is needed for the 'plotlyEventData' message handler... 
-    // Due to the way `event_data()` is designed, we can only
-    // know the source ID of interest which may be tied to 
-    // multiple DOM elements
+    /* 
+    / Maintain a 'global' mapping between plotly source IDs and DOM IDs
+    / This is needed for the 'plotlyEventData' message handler that
+    / dynamically registers event handlers for setting shiny input values.
+    / In that message, we can only know the source ID of interest 
+    / which may be tied to multiple DOM elements.
+    */
     var sourceDomMap = crosstalk.var("plotlySourceDomMap").get() || {};
     var thisMap = sourceDomMap[x.source] || [];
     if (thisMap.indexOf(el.id) == -1) {
@@ -30,7 +32,8 @@ HTMLWidgets.widget({
     sourceDomMap[x.source] = thisMap;
     crosstalk.var("plotlySourceDomMap").set(sourceDomMap);
     
-    // event_data() events need to be re-registered
+    // Let the 'plotlyEventData' message handler know to 
+    // re-register events on re-draw
     crosstalk.var("plotlyInputEvents").set(null);
     
     
@@ -820,16 +823,14 @@ function debounce(func, wait, immediate) {
 
 
 
-// This Shiny.addCustomMessageHandler() callback is fired once 
-// per flush (not once per renderValue!)
+// This Shiny.addCustomMessageHandler() callback is fired once per flush
+// (i.e. whenever an input value changes)
 Shiny.addCustomMessageHandler("plotlyEventData", function(message) {
-  // These three variables uniquely identify an event handler
   var evt = message.event;
   var src = message.source;
   var priority = message.priority;
   
-  // DOM instance maintains a list of registered handlers
-  // Note that this list is deleted on a re-draw
+  // Maintain a list of event definitions that we've already registered
   var msgID = evt + "-" + src + "-" + priority;
   var plotlyInputEvents = crosstalk.var("plotlyInputEvents").get() || [];
   if (plotlyInputEvents.indexOf(msgID) > -1) {
