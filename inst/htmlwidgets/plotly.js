@@ -822,79 +822,81 @@ function debounce(func, wait, immediate) {
 };
 
 
-
-// This Shiny.addCustomMessageHandler() callback is fired once per flush
-// (i.e. whenever an input value changes)
-Shiny.addCustomMessageHandler("plotlyEventData", function(message) {
-  var evt = message.event;
-  var src = message.source;
-  var priority = message.priority;
-  
-  // Maintain a list of event definitions that we've already registered
-  var msgID = evt + "-" + src + "-" + priority;
-  var plotlyInputEvents = crosstalk.var("plotlyInputEvents").get() || [];
-  if (plotlyInputEvents.indexOf(msgID) > -1) {
-    return;
-  }
-  plotlyInputEvents.push(msgID);
-  crosstalk.var("plotlyInputEvents").set(plotlyInputEvents)
-  
-  var eventDataFunctionMap = {
-    plotly_click: eventDataWithKey,
-    plotly_hover: eventDataWithKey,
-    plotly_unhover: eventDataWithKey,
-    // If 'plotly_selected' has already been fired, and you click
-    // on the plot afterwards, this event fires `undefined`?!?
-    // That might be considered a plotly.js bug, but it doesn't make 
-    // sense for this input change to occur if `d` is falsy because,
-    // even in the empty selection case, `d` is truthy (an object),
-    // and the 'plotly_deselect' event will reset this input
-    plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
-    plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
-    plotly_brushed: function(d) {
-      if (d) { return d.range ? d.range : d.lassoPoints; }
-    },
-    plotly_brushing: function(d) {
-      if (d) { return d.range ? d.range : d.lassoPoints; }
-    },
-    plotly_legendclick: legendEventData,
-    plotly_legenddoubleclick: legendEventData,
-    plotly_clickannotation: function(d) { return d.fullAnnotation }
-  };
-  var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
+if (HTMLWidgets.shinyMode) {
+  // This Shiny.addCustomMessageHandler() callback is fired once per flush
+  // (i.e. whenever an input value changes)
+  Shiny.addCustomMessageHandler("plotlyEventData", function(message) {
+    var evt = message.event;
+    var src = message.source;
+    var priority = message.priority;
+    
+    // Maintain a list of event definitions that we've already registered
+    var msgID = evt + "-" + src + "-" + priority;
+    var plotlyInputEvents = crosstalk.var("plotlyInputEvents").get() || [];
+    if (plotlyInputEvents.indexOf(msgID) > -1) {
+      return;
+    }
+    plotlyInputEvents.push(msgID);
+    crosstalk.var("plotlyInputEvents").set(plotlyInputEvents)
+    
+    var eventDataFunctionMap = {
+      plotly_click: eventDataWithKey,
+      plotly_hover: eventDataWithKey,
+      plotly_unhover: eventDataWithKey,
+      // If 'plotly_selected' has already been fired, and you click
+      // on the plot afterwards, this event fires `undefined`?!?
+      // That might be considered a plotly.js bug, but it doesn't make 
+      // sense for this input change to occur if `d` is falsy because,
+      // even in the empty selection case, `d` is truthy (an object),
+      // and the 'plotly_deselect' event will reset this input
+      plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
+      plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
+      plotly_brushed: function(d) {
+        if (d) { return d.range ? d.range : d.lassoPoints; }
+      },
+      plotly_brushing: function(d) {
+        if (d) { return d.range ? d.range : d.lassoPoints; }
+      },
+      plotly_legendclick: legendEventData,
+      plotly_legenddoubleclick: legendEventData,
+      plotly_clickannotation: function(d) { return d.fullAnnotation }
+    };
+    var eventDataPreProcessor = eventDataFunctionMap[evt] || function(d) { return d ? d : el.id };
           
-  // some events are unique to the R package
-  var plotlyJSevent = (evt == "plotly_brushed") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
-  // Some events clear other input values
-  var eventClearMap = {
-    plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
-    plotly_unhover: ["plotly_hover"],
-    plotly_doubleclick: ["plotly_click"]
-  }
+    // some events are unique to the R package
+    var plotlyJSevent = (evt == "plotly_brushed") ? "plotly_selected" : (evt == "plotly_brushing") ? "plotly_selecting" : evt;
+    // Some events clear other input values
+    var eventClearMap = {
+      plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
+      plotly_unhover: ["plotly_hover"],
+      plotly_doubleclick: ["plotly_click"]
+    }
         
-  // register events for all DOM elements connected to this source id
-  var idMap = crosstalk.var("plotlySourceDomMap").get() || {};
-  var gids = idMap[src];
-  gids.map(function(id) {
-    var gid = document.getElementById(id);
-    // register the event
-    gid.on(plotlyJSevent, function(d) {
-      Shiny.setInputValue(
-        ".clientValue-" + evt + "-" + src + "-" + priority,
-        JSON.stringify(eventDataPreProcessor(d)),
-        priority == "event" ? {priority: "event"} : undefined
-      );
-    });
-    Object.keys(eventClearMap).map(function(evt) {
-      gid.on(evt, function() {
-        var inputsToClear = eventClearMap[evt];
-        inputsToClear.map(function(input) {
-          Shiny.setInputValue(".clientValue-" + input + "-" + src + "-" + priority, null);
+    // register events for all DOM elements connected to this source id
+    var idMap = crosstalk.var("plotlySourceDomMap").get() || {};
+    var gids = idMap[src];
+    gids.map(function(id) {
+      var gid = document.getElementById(id);
+      // register the event
+      gid.on(plotlyJSevent, function(d) {
+        Shiny.setInputValue(
+          ".clientValue-" + evt + "-" + src + "-" + priority,
+          JSON.stringify(eventDataPreProcessor(d)),
+          priority == "event" ? {priority: "event"} : undefined
+        );
+      });
+      Object.keys(eventClearMap).map(function(evt) {
+        gid.on(evt, function() {
+          var inputsToClear = eventClearMap[evt];
+          inputsToClear.map(function(input) {
+            Shiny.setInputValue(".clientValue-" + input + "-" + src + "-" + priority, null);
+          });
         });
       });
     });
   });
-});
+}
+
 
  // Attach attributes (e.g., "key", "z") to plotly event data
 function eventDataWithKey(eventData) {
