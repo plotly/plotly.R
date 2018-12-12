@@ -117,13 +117,13 @@ event_data <- function(
   # register event on client-side
   session$onFlushed(function() {
     session$sendCustomMessage(
-      type = "plotlyEventData", 
+      type = "plotlyEventData",
       message = list(event = event, source = source, priority = priority)
     )
-  }, once = FALSE)
+  })
   
   
-  src <- sprintf(".clientValue-%s-%s-%s", event, source, priority)
+  src <- sprintf(".clientValue-%s-%s", event, source)
   val <- session$rootScope()$input[[src]]
   
   # legend clicking returns trace(s), which shouldn't be simplified...
