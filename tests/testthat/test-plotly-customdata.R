@@ -15,7 +15,7 @@ test_that("Can provide list-columns to customdata", {
     group_by(city) %>%
     highlight_key(~city) %>%
     plot_ly(x = ~date, y = ~median, hoverinfo = "name") %>%
-    add_lines(customdata = ~map2(date, median, ~list(.x, .y))) %>%
+    add_lines(customdata = ~purrr::map2(date, median, ~list(.x, .y))) %>%
     plotly_build()
   
   trace <- l$x$data[[1]]
