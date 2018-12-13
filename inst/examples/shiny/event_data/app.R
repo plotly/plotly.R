@@ -17,13 +17,26 @@ server <- function(input, output, session) {
   nms <- row.names(mtcars)
   
   output$plot <- renderPlotly({
-    if (identical(input$plotType, "ggplotly")) {
-      p <- ggplot(mtcars, aes(x = mpg, y = wt, key = nms)) + geom_point()
-      ggplotly(p) %>% layout(dragmode = "select")
+    p <- if (identical(input$plotType, "ggplotly")) {
+      ggplotly(
+        ggplot(mtcars, aes(x = mpg, y = wt, key = nms)) + geom_point()
+      )
     } else {
-      plot_ly(mtcars, x = ~mpg, y = ~wt, key = nms) %>%
-        layout(dragmode = "select")
+      plot_ly(mtcars, x = ~mpg, y = ~wt, key = nms) 
     }
+    p %>% 
+      layout(dragmode = "select") %>% 
+      config(
+        shinyInputs = c(
+          "plotly_hover", 
+          "plotly_hover", 
+          "plotly_click",
+          "plotly_selected",
+          "plotly_selecting",
+          "plotly_brushed",
+          "plotly_brushing"
+        ) 
+      )
   })
   
   output$hover <- renderPrint({

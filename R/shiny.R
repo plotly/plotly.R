@@ -73,9 +73,6 @@ prepareWidget <- function(x) {
 #' with the `source` argument in [plot_ly()] (or [ggplotly()]) to respond to  
 #' events emitted from that specific plot.
 #' @param session a shiny session object (the default should almost always be used).
-#' @param priority the priority of the relevant shiny input. If equal to `"event"`, 
-#' then [event_data()] always triggers re-execution, instead of re-executing
-#' only when the relevant shiny input value changes (the default).
 #' @export
 #' @references 
 #'   * <https://plotly-book.cpsievert.me/shiny-plotly-inputs.html> 
@@ -93,8 +90,7 @@ event_data <- function(
     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   ), 
   source = "A",
-  session = shiny::getDefaultReactiveDomain(),
-  priority = c("input", "event")
+  session = shiny::getDefaultReactiveDomain()
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
@@ -103,26 +99,6 @@ event_data <- function(
   
   # make sure the input event is sensible
   event <- match.arg(event)
-  priority <- match.arg(priority)
-  
-  isNullEvent <- event %in% c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")
-  if (isNullEvent && priority != "event") {
-    message(
-      "The input value tied to a '", event, "' event never changes. ", 
-      "Setting `priority = 'event'` so that the event actually triggers re-execution."
-    )
-    priority <- "event"
-  }
-  
-  # register event on client-side
-  session$onFlushed(function() {
-    session$sendCustomMessage(
-      type = "plotlyEventData",
-      message = list(event = event, source = source, priority = priority)
-    )
-  })
-  
-  
   src <- sprintf(".clientValue-%s-%s", event, source)
   val <- session$rootScope()$input[[src]]
   
