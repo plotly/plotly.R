@@ -948,7 +948,7 @@ grab <- function(what = "username") {
 
 # try to grab an object key from a JSON file (returns empty string on error)
 try_file <- function(f, what) {
-  tryCatch(jsonlite::fromJSON(f)[[what]], error = function(e) NULL)
+  tryCatch(jsonlite::read_json(f)[[what]], error = function(e) NULL)
 }
 
 # preferred defaults for toJSON mapping
@@ -959,14 +959,7 @@ to_JSON <- function(x, ...) {
 
 # preferred defaults for toJSON mapping
 from_JSON <- function(x, ...) {
-  jsonlite::fromJSON(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
-}
-
-from_JSON_safe <- function(txt, ...) {
-  if (!jsonlite::validate(txt)) {
-    stop("Expected a valid JSON string.")
-  }
-  from_JSON(txt, ...)
+  jsonlite::parse_json(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
 i <- function(x) {

@@ -46,7 +46,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   shiny::snapshotPreprocessOutput(
     renderFunc,
     function(value) {
-      json <- from_JSON_safe(value)
+      json <- from_JSON(value)
       json$x <- json$x[setdiff(names(json$x), c("visdat", "cur_data", "attrs"))]
       to_JSON(json)
     }
@@ -103,7 +103,7 @@ event_data <- function(
   val <- session$rootScope()$input[[src]]
   
   # legend clicking returns trace(s), which shouldn't be simplified...
-  fromJSONfunc <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) from_JSON else jsonlite::fromJSON
+  fromJSONfunc <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) from_JSON else jsonlite::parse_json
   
   if (is.null(val)) val else fromJSONfunc(val)
 }

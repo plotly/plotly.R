@@ -27,7 +27,7 @@ Imports:
     tools,
     scales,
     httr,
-    jsonlite,
+    jsonlite (>= 1.6),
     magrittr,
     digest,
     viridisLite,
