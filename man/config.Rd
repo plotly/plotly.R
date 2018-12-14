@@ -5,10 +5,7 @@
 \title{Set the default configuration for plotly}
 \usage{
 config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL,
-  mathjax = NULL, shinyInputs = c("plotly_hover", "plotly_click",
-  "plotly_selected", "plotly_relayout"),
-  shinyEvents = c("plotly_doubleclick", "plotly_deselect",
-  "plotly_afterplot"))
+  mathjax = NULL)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -32,10 +29,6 @@ you must \code{<iframe>} your plotly graph(s) into the larger document
 (see \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here}
 for an \strong{rmarkdown} example and
 \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here} for a \strong{shiny} example).}
-
-\item{shinyInputs}{plotly.js events to register as shiny input values}
-
-\item{shinyEvents}{plotly.js events to register as shiny input values with event priority}
 }
 \description{
 Set the default configuration for plotly

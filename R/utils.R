@@ -959,7 +959,7 @@ to_JSON <- function(x, ...) {
 
 # preferred defaults for toJSON mapping
 from_JSON <- function(x, ...) {
-  jsonlite::parse_json(x, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
+  jsonlite::parse_json(x, simplifyVector = TRUE, simplifyDataFrame = FALSE, simplifyMatrix = FALSE, ...)
 }
 
 i <- function(x) {

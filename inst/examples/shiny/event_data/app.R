@@ -25,18 +25,8 @@ server <- function(input, output, session) {
       plot_ly(mtcars, x = ~mpg, y = ~wt, key = nms) 
     }
     p %>% 
-      layout(dragmode = "select") %>% 
-      config(
-        shinyInputs = c(
-          "plotly_hover", 
-          "plotly_hover", 
-          "plotly_click",
-          "plotly_selected",
-          "plotly_selecting",
-          "plotly_brushed",
-          "plotly_brushing"
-        ) 
-      )
+      layout(dragmode = "select") %>%
+      event_register("plotly_selecting")
   })
   
   output$hover <- renderPrint({

@@ -352,11 +352,11 @@ HTMLWidgets.widget({
         });
       }
     
-      var shinyInputs = x.config.shinyInputs || [];
+      var shinyInputs = x.shinyInputs || [];
       shinyInputs.map(function(input) { 
         return registerShinyValue(input, false); 
       });
-      var shinyEvents = x.config.shinyEvents || [];
+      var shinyEvents = x.shinyEvents || [];
       shinyEvents.map(function(event) { 
         return registerShinyValue(event, true); 
       });

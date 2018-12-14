@@ -9,9 +9,12 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   output$gg <- renderPlotly({
-    ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
+    p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
       geom_point() + 
       facet_wrap(~vs)
+    ggplotly(p) %>%
+      event_register("plotly_legendclick") %>%
+      event_register("plotly_legenddoubleclick")
   })
   
   output$click <- renderPrint({

@@ -10,7 +10,8 @@ event_data(event = c("plotly_hover", "plotly_unhover", "plotly_click",
   "plotly_relayout", "plotly_restyle", "plotly_legendclick",
   "plotly_legenddoubleclick", "plotly_clickannotation",
   "plotly_afterplot"), source = "A",
-  session = shiny::getDefaultReactiveDomain())
+  session = shiny::getDefaultReactiveDomain(), priority = c("input",
+  "event"))
 }
 \arguments{
 \item{event}{The type of plotly event. All supported events are listed in the
@@ -35,6 +36,9 @@ plotly_example("shiny", "event_data")
 \item \url{https://plotly-book.cpsievert.me/shiny-plotly-inputs.html}
 \item \url{https://plot.ly/javascript/plotlyjs-function-reference/}
 }
+}
+\seealso{
+\link{event_register}, \link{event_unregister}
 }
 \author{
 Carson Sievert

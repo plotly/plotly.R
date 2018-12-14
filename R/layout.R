@@ -101,8 +101,6 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) 
 #' for an **rmarkdown** example and 
 #' [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
-#' @param shinyInputs plotly.js events to register as shiny input values
-#' @param shinyEvents plotly.js events to register as shiny input values with event priority
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -133,9 +131,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL, 
-                   shinyInputs = c("plotly_hover", "plotly_click", "plotly_selected", "plotly_relayout"),
-                   shinyEvents = c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")) {
+config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -174,8 +170,6 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
   }
 
   p$x$config$cloud <- cloud
-  p$x$config$shinyInputs <- I(validate_event_names(shinyInputs))
-  p$x$config$shinyEvents <- I(validate_event_names(shinyEvents))
 
   p
 }
@@ -190,14 +184,5 @@ validate_event_names <- function(events) {
       paste(illegalEvents, collapse = "', '")
     ),
     call. = FALSE
-  )
-}
-
-shiny_input_events <- function() {
-  c(
-    "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
-    "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
-    "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
-    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   )
 }

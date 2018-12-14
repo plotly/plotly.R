@@ -55,11 +55,27 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
-  if (promises::is.promising(x)) {
-    promises::then(x, ggplotly)
+  p <- if (promises::is.promising(x)) {
+    promises::then(x, plotly_build)
   } else {
-    ggplotly(x)
+    plotly_build(x)
   }
+  register_plot_events(p)
+  p
+}
+
+register_plot_events <- function(p) {
+  session <- getDefaultReactiveDomain()
+  eventIDs <- paste(p$x$shinyEvents, p$x$source, sep = "-")
+  inputIDs <- paste(p$x$shinyInputs, p$x$source, sep = "-")
+  session$userData$plotlyShinyEventIDs <- unique(c(
+    session$userData$plotlyShinyEventIDs,
+    eventIDs
+  ))
+  session$userData$plotlyShinyInputIDs <- unique(c(
+    session$userData$plotlyShinyInputIDs,
+    inputIDs
+  ))
 }
 
 
@@ -74,6 +90,7 @@ prepareWidget <- function(x) {
 #' events emitted from that specific plot.
 #' @param session a shiny session object (the default should almost always be used).
 #' @export
+#' @seealso [event_register], [event_unregister]
 #' @references 
 #'   * <https://plotly-book.cpsievert.me/shiny-plotly-inputs.html> 
 #'   * <https://plot.ly/javascript/plotlyjs-function-reference/>
@@ -90,20 +107,118 @@ event_data <- function(
     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
   ), 
   source = "A",
-  session = shiny::getDefaultReactiveDomain()
+  session = shiny::getDefaultReactiveDomain(),
+  priority = c("input", "event")
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
          "from within a reactive shiny context.")
   }
   
-  # make sure the input event is sensible
   event <- match.arg(event)
-  src <- sprintf(".clientValue-%s-%s", event, source)
-  val <- session$rootScope()$input[[src]]
+  # TODO: resolve priority
+  priority <- match.arg(priority)
+  # check to see if this event-source-priority combo is registered
+  eventID <- paste(event, source, sep = "-")
+  keyName <- if (priority == "event") "plotlyShinyEventIDs" else "plotlyShinyInputIDs"
+  if (!eventID %in% session$userData[[keyName]]) {
+    stop(
+      "The '", event, "' event has not been registered for a source ID ",
+      "of '", source, "' with priority '", priority, "'. ", 
+      "Please add `event_register(p, '", event, "', '", priority, "')` to your plot `p`."
+    )
+  }
+  
+  inputName <- sprintf(".clientValue-%s-%s", event, source)
+  val <- session$rootScope()$input[[inputName]]
   
   # legend clicking returns trace(s), which shouldn't be simplified...
-  fromJSONfunc <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) from_JSON else jsonlite::parse_json
+  parseJSON <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) {
+    from_JSON
+  } else {
+    function(x) jsonlite::parse_json(x, simplifyVector = TRUE)
+  }
   
-  if (is.null(val)) val else fromJSONfunc(val)
+  if (is.null(val)) val else parseJSON(val)
+}
+
+
+#' Register a shiny input value 
+#' 
+#' @inheritParams event_data
+#' @seealso [event_data]
+#' @export
+#' @author Carson Sievert
+event_register <- function(p, event = NULL, priority = c("input", "event")) {
+  priority <- match.arg(priority)
+  event <- match.arg(event, event_data_events())
+  if (priority == "event") shiny_event_add(p, event) else shiny_input_add(p, event)
+}
+
+#' Un-register a shiny input value
+#' 
+#' @inheritParams event_data
+#' @seealso [event_data]
+#' @export
+#' @author Carson Sievert
+event_unregister <- function(p, event = NULL, priority = c("input", "event")) {
+  priority <- match.arg(priority)
+  event <- match.arg(event, event_data_events())
+  if (priority == "event") shiny_event_remove(p, event) else shiny_input_remove(p, event)
+}
+
+
+# helpers
+shiny_event_add <- function(p, event) {
+  p <- shiny_defaults_set(p)
+  p$x$shinyEvents <- unique(c(p$x$shinyEvents, event))
+  p
+}
+
+shiny_input_add <- function(p, event) {
+  p <- shiny_defaults_set(p)
+  p$x$shinyInputs <- unique(c(p$x$shinyInputs, event))
+  p
+}
+
+shiny_event_remove <- function(p, event) {
+  p <- shiny_defaults_set(p)
+  p$x$shinyEvents <- setdiff(p$x$shinyEvents, event)
+  p
+}
+
+shiny_input_remove <- function(p, event) {
+  p <- shiny_defaults_set(p)
+  p$x$shinyInputs <- setdiff(p$x$shinyInputs, event)
+  p
+}
+
+shiny_defaults_set <- function(p) {
+  p$x$shinyEvents <- p$x$shinyEvents %||% shiny_event_defaults()
+  p$x$shinyInputs <- p$x$shinyInputs %||% shiny_input_defaults()
+  p
+}
+
+shiny_input_defaults <- function() {
+  c(
+    "plotly_hover", 
+    "plotly_click", 
+    "plotly_selected", 
+    "plotly_relayout", 
+    "plotly_brushed",
+    "plotly_brushing",
+    "plotly_clickannotation"
+  )
+}
+
+shiny_event_defaults <- function() {
+  c(
+    "plotly_doubleclick", 
+    "plotly_deselect", 
+    "plotly_afterplot"
+  )
+}
+
+event_data_events <- function() {
+  eval(formals(event_data)$event)
 }

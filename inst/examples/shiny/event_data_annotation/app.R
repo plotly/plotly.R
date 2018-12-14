@@ -10,8 +10,7 @@ server <- function(input, output, session) {
   
   output$p <- renderPlotly({
     plot_ly(mtcars) %>% 
-      add_annotations(x = ~wt, y = ~mpg, text = row.names(mtcars), captureevents = TRUE) %>%
-      config(shinyInputs = "plotly_clickannotation")
+      add_annotations(x = ~wt, y = ~mpg, text = row.names(mtcars), captureevents = TRUE)
   })
   
   observeEvent(input$edit, {
