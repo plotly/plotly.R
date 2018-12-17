@@ -173,16 +173,3 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
 
   p
 }
-
-validate_event_names <- function(events) {
-  illegalEvents <- setdiff(events, shiny_input_events())
-  if (!length(illegalEvents)) return(events)
-  
-  stop(
-    sprintf(
-      "The following shiny input events are not supported: '%s'", 
-      paste(illegalEvents, collapse = "', '")
-    ),
-    call. = FALSE
-  )
-}

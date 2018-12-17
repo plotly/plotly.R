@@ -16,7 +16,7 @@ server <- function(input, output, session) {
     }, iris_numeric, names(iris_numeric), USE.NAMES = FALSE)
     plot_ly(type = 'parcoords', dimensions = dims, source = "pcoords") %>% 
       layout(margin = list(r = 30)) %>%
-      config(shinyInputs = "plotly_restyle")
+      event_register("plotly_restyle")
   })
   
   # maintain a collection of selection ranges
@@ -40,37 +40,33 @@ server <- function(input, output, session) {
     # a given dimension can have multiple selected ranges
     # these will come in as 3D arrays, but a list of vectors 
     # is nicer to work with
-    browser()
-    ranges[[dimension_name]] <- d[[1]][[1]]
+    info <- d[[1]][[1]]
     
-    #print(info)
-    #browser()
-    #ranges[[dimension_name]] <- if (length(dim(info)) == 3) {
-    #  lapply(seq_len(dim(info)[2]), function(i) info[,i,])
-    #} else {
-    #  list(as.numeric(info))
-    #}
+    ranges[[dimension_name]] <- if (length(dim(info)) == 3) {
+      lapply(seq_len(dim(info)[2]), function(i) info[,i,])
+    } else {
+      list(as.numeric(info))
+    }
   })
   
   ## filter the dataset down to the rows that match the selection ranges
-  #iris_selected <- reactive({
-  #  keep <- TRUE
-  #  print(ranges)
-  #  for (i in names(ranges)) {
-  #    range_ <- ranges[[i]]
-  #    keep_var <- FALSE
-  #    for (j in seq_along(range_)) {
-  #      rng <- range_[[j]]
-  #      keep_var <- keep_var | dplyr::between(iris[[i]], min(rng), max(rng))
-  #    }
-  #    keep <- keep & keep_var
-  #  }
-  #  iris[keep, ]
-  #})
-  #
-  #output$data <- renderPrint({
-  #  tibble::as_tibble(iris_selected())
-  #})
+  iris_selected <- reactive({
+    keep <- TRUE
+    for (i in names(ranges)) {
+      range_ <- ranges[[i]]
+      keep_var <- FALSE
+      for (j in seq_along(range_)) {
+        rng <- range_[[j]]
+        keep_var <- keep_var | dplyr::between(iris[[i]], min(rng), max(rng))
+      }
+      keep <- keep & keep_var
+    }
+    iris[keep, ]
+  })
+  
+  output$data <- renderPrint({
+    tibble::as_tibble(iris_selected())
+  })
 }
 
 shinyApp(ui, server)
