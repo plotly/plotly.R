@@ -639,8 +639,8 @@ TraceManager.prototype.updateSelection = function(group, keys) {
   var nNewTraces = this.gd.data.length - this.origData.length;
   if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
     var tracesToRemove = [];
-    for (var i = this.origData.length; i < this.gd.data.length; i++) {
-      tracesToRemove.push(i);
+    for (var i = 0; i < this.gd.data.length; i++) {
+      if (this.gd.data[i]._isCrosstalkTrace) tracesToRemove.push(i);
     }
     Plotly.deleteTraces(this.gd, tracesToRemove);
     this.groupSelections[group] = keys;
@@ -722,6 +722,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
         // (necessary for updating frames to reflect the selection traces)
         trace._originalIndex = i;
         trace._newIndex = this.gd._fullData.length + traces.length;
+        trace._isCrosstalkTrace = true;
         traces.push(trace);
       }
     }

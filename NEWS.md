@@ -11,6 +11,7 @@
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
+* The `plotly_example()` will now attempt to open the source file(s) used to run the example. Set `edit = FALSE` to prevent the source file(s) from opening.
 
 ## BUG FIXES
 
@@ -24,6 +25,7 @@
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
 * In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).
 * An articial marker no longer appears when clearing a crosstalk selection of a plot with a colorbar (#1406).
+* Clearing a highlight event via crosstalk no longer deletes all the traces added since initial draw (#1436).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 
 # 4.8.0
