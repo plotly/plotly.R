@@ -25,6 +25,7 @@
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
 * In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).
 * An articial marker no longer appears when clearing a crosstalk selection of a plot with a colorbar (#1406).
+* Clearing a highlight event via crosstalk no longer deletes all the traces added since initial draw (#1436).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 
 # 4.8.0
