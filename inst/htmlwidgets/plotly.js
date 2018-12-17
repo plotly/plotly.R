@@ -338,27 +338,27 @@ HTMLWidgets.widget({
         plotly_clickannotation: function(d) { return d.fullAnnotation }
       };
       
-      var registerShinyValue = function(event, asShinyEvent) {
+      var registerShinyValue = function(event, priority) {
         var eventDataPreProcessor = eventDataFunctionMap[event] || function(d) { return d ? d : el.id };
         // some events are unique to the R package
         var plotlyJSevent = (event == "plotly_brushed") ? "plotly_selected" : (event == "plotly_brushing") ? "plotly_selecting" : event;
         // register the event
         graphDiv.on(plotlyJSevent, function(d) {
           Shiny.setInputValue(
-            ".clientValue-" + event + "-" + x.source,
+            ".clientValue-" + event + "-" + x.source + "-" + priority,
             JSON.stringify(eventDataPreProcessor(d)),
-            asShinyEvent ? {priority: "event"} : undefined
+            priority == "event" ? {priority: "event"} : undefined
           );
         });
       }
     
       var shinyInputs = x.shinyInputs || [];
       shinyInputs.map(function(input) { 
-        return registerShinyValue(input, false); 
+        return registerShinyValue(input, "input");
       });
       var shinyEvents = x.shinyEvents || [];
       shinyEvents.map(function(event) { 
-        return registerShinyValue(event, true); 
+        return registerShinyValue(event, "event"); 
       });
     }
     

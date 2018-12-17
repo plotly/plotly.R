@@ -129,7 +129,7 @@ event_data <- function(
     )
   }
   
-  inputName <- sprintf(".clientValue-%s-%s", event, source)
+  inputName <- sprintf(".clientValue-%s-%s-%s", event, source, priority)
   val <- session$rootScope()$input[[inputName]]
   
   # legend clicking returns trace(s), which shouldn't be simplified...

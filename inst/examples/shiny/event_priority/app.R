@@ -10,7 +10,8 @@ server <- function(input, output, session) {
   
   output$p <- renderPlotly({
     plot_ly(x = 1:2, y = 1:2, size = I(c(100, 150)))  %>%
-      add_markers()
+      add_markers() %>%
+      event_register("plotly_click", "event")
   })
   
   output$time1 <- renderText({
