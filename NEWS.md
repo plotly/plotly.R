@@ -15,8 +15,9 @@
 
 ## BUG FIXES
 
-* `subplot()` now automatically bumps non-paper `xref`/`yref` references sensibly for annotations, images, and shapes (#1181).
-* `subplot()` now accumulates images, repositions paper coordinates, and reanchors axis references (#1332).
+* `subplot()` now works much better with annotations, images, and shapes:
+  - When `xref`/`yref` references an x/y axis these references are bumped accordingly (#1181).
+  - When `xref`/`yref` references paper coordinates, these coordinates are updated accordingly (#1332).
 * `event_data("plotly_selected")` is no longer too eager to clear. That is, it is no longer set to `NULL` when clicking on a plot *after* triggering the "plotly_selected" event (#1121) (#1122).
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
 * When using **shinytest** to test a **shiny** that contains **plotly** graph, false positive differences are no longer reported (rstudio/shinytest#174). 
