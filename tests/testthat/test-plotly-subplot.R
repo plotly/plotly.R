@@ -134,13 +134,121 @@ test_that("subplot accepts a list of plots", {
   expect_true(l$layout[[sub("y", "yaxis", xaxes[[1]]$anchor)]]$domain[1] == 0)
 })
 
-# Ignore for now https://github.com/ggobi/ggally/issues/264
 test_that("ggplotly understands ggmatrix", {
   skip_if_not_installed("GGally")
   L <- expect_doppelganger_built(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
 })
 
-test_that("annotation xref/yref are bumped correctly", {
+test_that("annotation paper repositioning", {
+  p1 <- plot_ly() %>%
+    add_annotations(text = "foo", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
+  p2 <- plot_ly(mtcars) %>%
+    add_annotations(text = "bar", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
+  s <- subplot(p1, p2, margin = 0)
+  ann <- plotly_build(s)$x$layout$annotations
+  expect_length(ann, 2)
+  
+  text <- sapply(ann, "[[", "text")
+  x <- sapply(ann, "[[", "x")
+  y <- sapply(ann, "[[", "y")
+  xref <- sapply(ann, "[[", "xref")
+  yref <- sapply(ann, "[[", "yref")
+  
+  expect_equal(x, c(0.25, 0.75))
+  expect_equal(y, c(0.5, 0.5))
+  expect_equal(xref, rep("paper", 2))
+  expect_equal(yref, rep("paper", 2))
+})
+
+test_that("shape paper repositioning", {
+  
+  p1 <- plot_ly(mtcars) %>%
+    layout(
+      shapes = ~list(
+        type = "rect",
+        x0 = 0.25,
+        x1 = 0.75,
+        y0 = 0.25,
+        y1 = 0.75,
+        xref = "paper",
+        yref = "paper",
+        fillcolor = "red"
+      )
+    )
+  p2 <- plot_ly(mtcars) %>%
+    layout(
+      shapes = ~list(
+        type = "line",
+        type = "rect",
+        x0 = 0.25,
+        x1 = 0.75,
+        y0 = 0.25,
+        y1 = 0.75,
+        xref = "paper",
+        yref = "paper",
+        line = list(color = "blue")
+      )
+    )
+  
+  s <- subplot(p1, p2)
+  shapes <- plotly_build(s)$x$layout$shapes
+  expect_length(shapes, 2)
+  
+  x0 <- sapply(shapes, "[[", "x0")
+  x1 <- sapply(shapes, "[[", "x1")
+  y0 <- sapply(shapes, "[[", "y0")
+  y1 <- sapply(shapes, "[[", "y1")
+  xref <- sapply(shapes, "[[", "xref")
+  yref <- sapply(shapes, "[[", "yref")
+  
+  expect_equal(x0, c(0.12, 0.64))
+  expect_equal(x1, c(0.36, 0.88))
+  expect_equal(y0, rep(0.25, 2))
+  expect_equal(y1, rep(0.75, 2))
+  expect_equal(xref, rep("paper", 2))
+  expect_equal(yref, rep("paper", 2))
+})
+
+
+test_that("image paper repositioning", {
+  skip_if_not_installed("png")
+  
+  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+  
+  # embed the raster as an image
+  p <- plot_ly(x = 1, y = 1) %>% 
+    layout(
+      images = list(list(
+        source = raster2uri(r),
+        sizing = "fill",
+        xref = "paper", 
+        yref = "paper", 
+        x = 0, 
+        y = 0, 
+        sizex = 0.5, 
+        sizey = 0.5, 
+        xanchor = "left", 
+        yanchor = "bottom"
+      ))
+    ) 
+  
+  s <- subplot(p, p, nrows = 1, margin = 0.02)
+  imgs <- plotly_build(s)$x$layout$images
+  
+  expect_length(imgs, 2)
+  
+  x <- sapply(imgs, "[[", "x")
+  y <- sapply(imgs, "[[", "y")
+  sizex <- sapply(imgs, "[[", "sizex")
+  sizey <- sapply(imgs, "[[", "sizey")
+  
+  expect_equal(x, c(0, 0.52))
+  expect_equal(y, c(0, 0))
+  expect_equal(sizex, rep(0.24, 2))
+  expect_equal(sizey, rep(0.5, 2))
+})
+
+test_that("annotation xref/yref bumping", {
   
   p1 <- plot_ly(mtcars) %>%
     add_annotations(text = ~cyl, x = ~wt, y = ~mpg)
@@ -165,43 +273,85 @@ test_that("annotation xref/yref are bumped correctly", {
   yref2 <- sapply(ann2, "[[", "yref")
   expect_equal(xref2, rep(c("x", "x2"), each = 32))
   expect_equal(yref2, rep(c("y", "y"), each = 32))
+  
+  # now, with more traces than annotations
+  # https://github.com/ropensci/plotly/issues/1444
+  p1 <- plot_ly() %>%
+    add_markers(x = 1, y = 1) %>%
+    add_markers(x = 2, y = 2) %>%
+    add_annotations(text = "foo", x = 1.5, y = 1.5)
+  p2 <- plot_ly() %>%
+    add_markers(x = 1, y = 1) %>%
+    add_markers(x = 2, y = 2) %>%
+    add_annotations(text = "bar", x = 1.5, y = 1.5)
+  s <- subplot(p1, p2)
+  ann <- plotly_build(s)$x$layout$annotations
+  
+  txt <- sapply(ann, "[[", "text")
+  xref <- sapply(ann, "[[", "xref")
+  yref <- sapply(ann, "[[", "yref")
+  
+  expect_length(ann, 2)
+  expect_equal(txt, c("foo", "bar"))
+  expect_equal(xref, c("x", "x2"))
+  expect_equal(yref, c("y", "y2"))
+  
+  s2 <- subplot(p1, p2, shareY = TRUE)
+  ann2 <- plotly_build(s2)$x$layout$annotations
+  
+  xref2 <- sapply(ann2, "[[", "xref")
+  yref2 <- sapply(ann2, "[[", "yref")
+  expect_equal(xref2, c("x", "x2"))
+  expect_equal(yref2, c("y", "y"))
 })
 
-test_that("images accumulate and paper coordinates are repositioned", {
-  skip_if_not_installed("png")
+test_that("shape xref/yref bumping", {
   
-  r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
-  
-  # embed the raster as an image
-  p <- plot_ly(x = 1, y = 1) %>% 
+  p1 <- plot_ly(mtcars) %>%
     layout(
-      images = list(list(
-        source = raster2uri(r),
-        sizing = "fill",
-        xref = "paper", 
-        yref = "paper", 
-        x = 0, 
-        y = 0, 
-        sizex = 0.5, 
-        sizey = 0.5, 
-        xanchor = "left", 
-        yanchor = "bottom"
-      ))
-    ) 
+      shapes = ~list(
+        type = "rect",
+        x0 = min(cyl),
+        x1 = max(cyl),
+        y0 = min(am),
+        y1 = max(am),
+        fillcolor = "red"
+      )
+    )
+  p2 <- plot_ly(mtcars) %>%
+    layout(
+      shapes = ~list(
+        type = "line",
+        x0 = min(cyl),
+        x1 = max(cyl),
+        y0 = min(am),
+        y1 = max(am),
+        line = list(color = "blue")
+      )
+    )
   
-  s <- subplot(p, p, nrows = 1, margin = 0.02)
-  imgs <- plotly_build(s)$x$layout$images
-  expect_true(imgs[[1]]$x == 0)
-  expect_true(imgs[[1]]$y == 0)
-  expect_true(imgs[[1]]$sizex == 0.24)
-  expect_true(imgs[[1]]$sizey == 0.5)
-  expect_true(imgs[[2]]$x == 0.52)
-  expect_true(imgs[[2]]$y == 0)
-  expect_true(imgs[[2]]$sizex == 0.24)
-  expect_true(imgs[[2]]$sizey == 0.5)
+  s <- subplot(p1, p2)
+  shapes <- plotly_build(s)$x$layout$shapes
+  expect_length(shapes, 2)
+  
+  types <- sapply(shapes, "[[", "type")
+  expect_equal(types, c("rect", "line"))
+  
+  xref <- sapply(shapes, "[[", "xref")
+  yref <- sapply(shapes, "[[", "yref")
+  expect_equal(xref, c("x", "x2"))
+  expect_equal(yref, c("y", "y2"))
+  
+  s2 <- subplot(p1, p2, shareY = TRUE)
+  shapes2 <- plotly_build(s2)$x$layout$shapes
+  
+  xref2 <- sapply(shapes2, "[[", "xref")
+  yref2 <- sapply(shapes2, "[[", "yref")
+  expect_equal(xref2, c("x", "x2"))
+  expect_equal(yref2, c("y", "y"))
 })
 
-test_that("images axis references are remapped", {
+test_that("image xref/yref bumping", {
   skip_if_not_installed("png")
   
   r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
@@ -225,14 +375,18 @@ test_that("images axis references are remapped", {
   
   s <- subplot(p, p, nrows = 1, margin = 0.02)
   imgs <- plotly_build(s)$x$layout$images
-  expect_true(imgs[[1]]$x == 0)
-  expect_true(imgs[[1]]$y == 0)
-  expect_true(imgs[[1]]$xref == "x")
-  expect_true(imgs[[1]]$yref == "y")
-  expect_true(imgs[[2]]$x == 0)
-  expect_true(imgs[[2]]$y == 0)
-  expect_true(imgs[[2]]$xref == "x2")
-  expect_true(imgs[[2]]$yref == "y2")
+  
+  expect_length(imgs, 2)
+  
+  x <- sapply(imgs, "[[", "x")
+  y <- sapply(imgs, "[[", "y")
+  xref <- sapply(imgs, "[[", "xref")
+  yref <- sapply(imgs, "[[", "yref")
+  
+  expect_equal(x, c(0, 0))
+  expect_equal(y, c(0, 0))
+  expect_equal(xref, c("x", "x2"))
+  expect_equal(yref, c("y", "y2"))
 })
 
 
