@@ -144,8 +144,9 @@ test_that("annotation paper repositioning", {
     add_annotations(text = "foo", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
   p2 <- plot_ly(mtcars) %>%
     add_annotations(text = "bar", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
+  
   s <- subplot(p1, p2, margin = 0)
-  ann <- plotly_build(s)$x$layout$annotations
+  ann <- expect_doppelganger_built(s, "subplot-reposition-annotation")$layout$annotations
   expect_length(ann, 2)
   
   text <- sapply(ann, "[[", "text")
@@ -191,7 +192,7 @@ test_that("shape paper repositioning", {
     )
   
   s <- subplot(p1, p2)
-  shapes <- plotly_build(s)$x$layout$shapes
+  shapes <- expect_doppelganger_built(s, "subplot-reposition-shape")$layout$shapes
   expect_length(shapes, 2)
   
   x0 <- sapply(shapes, "[[", "x0")
@@ -233,7 +234,7 @@ test_that("image paper repositioning", {
     ) 
   
   s <- subplot(p, p, nrows = 1, margin = 0.02)
-  imgs <- plotly_build(s)$x$layout$images
+  imgs <- expect_doppelganger_built(s, "subplot-reposition-image")$layout$images
   
   expect_length(imgs, 2)
   
@@ -255,7 +256,7 @@ test_that("annotation xref/yref bumping", {
   p2 <- plot_ly(mtcars) %>%
     add_annotations(text = ~am, x = ~wt, y = ~mpg)
   s <- subplot(p1, p2)
-  ann <- plotly_build(s)$x$layout$annotations
+  ann <- expect_doppelganger_built(s, "subplot-bump-axis-annotation")$layout$annotations
   
   txt <- sapply(ann, "[[", "text")
   xref <- sapply(ann, "[[", "xref")
@@ -267,7 +268,7 @@ test_that("annotation xref/yref bumping", {
   expect_equal(yref, rep(c("y", "y2"), each = 32))
   
   s2 <- subplot(p1, p2, shareY = TRUE)
-  ann2 <- plotly_build(s2)$x$layout$annotations
+  ann2 <- expect_doppelganger_built(s2, "subplot-bump-axis-annotation-shared")$layout$annotations
   
   xref2 <- sapply(ann2, "[[", "xref")
   yref2 <- sapply(ann2, "[[", "yref")
@@ -285,7 +286,7 @@ test_that("annotation xref/yref bumping", {
     add_markers(x = 2, y = 2) %>%
     add_annotations(text = "bar", x = 1.5, y = 1.5)
   s <- subplot(p1, p2)
-  ann <- plotly_build(s)$x$layout$annotations
+  ann <- expect_doppelganger_built(s, "subplot-bump-axis-annotation-traces")$layout$annotations
   
   txt <- sapply(ann, "[[", "text")
   xref <- sapply(ann, "[[", "xref")
@@ -297,7 +298,7 @@ test_that("annotation xref/yref bumping", {
   expect_equal(yref, c("y", "y2"))
   
   s2 <- subplot(p1, p2, shareY = TRUE)
-  ann2 <- plotly_build(s2)$x$layout$annotations
+  ann2 <- expect_doppelganger_built(s2, "subplot-bump-axis-annotation-traces-shared")$layout$annotations
   
   xref2 <- sapply(ann2, "[[", "xref")
   yref2 <- sapply(ann2, "[[", "yref")
@@ -331,7 +332,7 @@ test_that("shape xref/yref bumping", {
     )
   
   s <- subplot(p1, p2)
-  shapes <- plotly_build(s)$x$layout$shapes
+  shapes <- expect_doppelganger_built(s, "subplot-bump-axis-shape")$layout$shapes
   expect_length(shapes, 2)
   
   types <- sapply(shapes, "[[", "type")
@@ -343,7 +344,7 @@ test_that("shape xref/yref bumping", {
   expect_equal(yref, c("y", "y2"))
   
   s2 <- subplot(p1, p2, shareY = TRUE)
-  shapes2 <- plotly_build(s2)$x$layout$shapes
+  shapes2 <- expect_doppelganger_built(s2, "subplot-bump-axis-shape-shared")$layout$shapes
   
   xref2 <- sapply(shapes2, "[[", "xref")
   yref2 <- sapply(shapes2, "[[", "yref")
@@ -374,7 +375,7 @@ test_that("image xref/yref bumping", {
     )
   
   s <- subplot(p, p, nrows = 1, margin = 0.02)
-  imgs <- plotly_build(s)$x$layout$images
+  imgs <- expect_doppelganger_built(s, "subplot-bump-axis-image")$layout$images
   
   expect_length(imgs, 2)
   
