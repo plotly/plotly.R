@@ -206,7 +206,10 @@ highlight_defaults <- function() {
 
 selectizeLib <- function(bootstrap = TRUE) {
   htmltools::htmlDependency(
-    "selectize", "0.12.0", depPath("selectize"),
+    name = "selectize", 
+    version = "0.12.0", 
+    package = "plotly",
+    src = dependency_dir("selectize"),
     stylesheet = if (bootstrap) "selectize.bootstrap3.css",
     script = "selectize.min.js"
   )
@@ -214,12 +217,15 @@ selectizeLib <- function(bootstrap = TRUE) {
 
 colourPickerLib <- function() {
   htmltools::htmlDependency(
-    "colourpicker", "1.1", depPath("colourpicker"),
+    name = "colourpicker", 
+    version = "1.1", 
+    package = "plotly",
+    src = dependency_dir("colourpicker"),
     stylesheet = "colourpicker.min.css",
     script = "colourpicker.min.js"
   )
 }
 
-depPath <- function(...) {
-  system.file('htmlwidgets', 'lib', ..., package = 'plotly')
+dependency_dir <- function(...) {
+  file.path('htmlwidgets', 'lib', ...)
 }

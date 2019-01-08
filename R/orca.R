@@ -73,7 +73,11 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   
   # find the relevant plotly.js bundle
   plotlyjs <- plotlyjsBundle(b)
-  plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
+  plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
+  # package field means src file path should be relative to pkg dir
+  if (!is.null(plotlyjs$package)) {
+    plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
+  }
   
   tmp <- tempfile(fileext = ".json")
   cat(to_JSON(b$x[c("data", "layout")]), file = tmp)
@@ -82,7 +86,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
     "graph", tmp, 
     "-o", file,
     "--format", format,
-    "--plotlyjs", plotlyjs_file,
+    "--plotlyjs", plotlyjs_path,
     if (debug) "--debug",
     if (verbose) "--verbose",
     if (safe) "--safe-mode",
@@ -143,12 +147,16 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   
   # use main bundle since any plot can be thrown at the server
   plotlyjs <- plotlyMainBundle()
-  plotlyjs_file <- file.path(plotlyjs$src$file, plotlyjs$script)
+  plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
+  # package field means src file path should be relative to pkg dir
+  if (!is.null(plotlyjs$package)) {
+    plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
+  }
   
   args <- c(
     "serve",
     "-p", port,
-    "--plotly", plotlyjs_file,
+    "--plotly", plotlyjs_path,
     if (safe) "--safe-mode",
     if (orca_version() >= "1.1.1") "--graph-only",
     if (keep_alive) "--keep-alive",
@@ -196,9 +204,14 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   )
 }
 
+correct_orca <- function() {
+  orca_help <- processx::run("orca", "-h")
+  grepl("plotly", orca_help[["stdout"]], ignore.case = TRUE)
+}
+
 
 orca_available <- function() {
-  if (Sys.which("orca") == "") {
+  if (Sys.which("orca") == "" || !correct_orca()) {
     stop(
       "The orca command-line utility is required for this functionality.\n\n",
       "Please follow the installation instructions here -- https://github.com/plotly/orca#installation",

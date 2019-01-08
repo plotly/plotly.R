@@ -56,6 +56,7 @@ RUN R -e "update.packages(ask = F)"
 RUN R -e "install.packages('devtools')" 
 RUN R -e "install.packages('roxygen2')"
 RUN R -e "install.packages('testthat')"
+RUN R -e "install.packages('vdiffr')"
 
 # sf system dependencies
 RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
@@ -86,16 +87,11 @@ RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640
 RUN chmod 777 /usr/bin/orca
 
 # install visual testing packages
-RUN R -e "devtools::install_github('lionel-/vdiffr')"
 RUN R -e "devtools::install_github('brodieG/diffobj@development')"
 
 # switch on visual testing
 ENV VDIFFR=true
 EXPOSE 3838
-
-# installing rgeos from CRAN is currently broken
-# http://r-sig-geo.2731867.n2.nabble.com/Re-Unexpected-configure-error-following-recent-rgeos-release-td7592423.html
-RUN R -e "install.packages('rgeos', repos='http://R-Forge.R-project.org', type='source')"
 
 RUN R -e "update.packages(ask=FALSE)"
 

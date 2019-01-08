@@ -348,6 +348,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
+  # throw warning if webgl is being used in shinytest
+  # currently, shinytest won't rely this warning, but it should
+  # https://github.com/rstudio/shinytest/issues/146
+  if (isTRUE(getOption("shiny.testmode"))) {
+    if (is.webgl(p)) warning("shinytest can't currently render WebGL-based graphics.")
+  }
   # crosstalk dynamically adds traces, meaning that a legend could be dynamically
   # added, which is confusing. So here we populate a sensible default.
   p <- verify_showlegend(p)
@@ -771,7 +777,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     colScale <- scales::col_numeric(pal, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
     vals <- if (diff(rng) > 0) {
-      as.numeric(stats::quantile(allColor, probs = seq(0, 1, length.out = 25), na.rm = TRUE))
+      seq(rng[1], rng[2], length.out = 25)
     } else {
       c(0, 1)
     }
@@ -1001,4 +1007,13 @@ supplyUserPalette <- function(default, user) {
 
 # helper functions
 array_ok <- function(attr) isTRUE(tryNULL(attr$arrayOk))
-has_fill <- function(trace) isTRUE(trace$fill %in% c('tozeroy', 'tozerox', 'tonexty', 'tonextx', 'toself', 'tonext'))
+has_fill <- function(trace) {
+  trace_type <- trace[["type"]] %||% "scatter"
+  # if trace type has fillcolor, but no fill attribute, then fill is always relevant
+  has_fillcolor <- has_attr(trace_type, "fillcolor")
+  has_fill <- has_attr(trace_type, "fill")
+  if (has_fillcolor && !has_fill) return(TRUE)
+  fill <- trace[["fill"]] %||% "none"
+  if (has_fillcolor && isTRUE(fill != "none")) return(TRUE)
+  FALSE
+}

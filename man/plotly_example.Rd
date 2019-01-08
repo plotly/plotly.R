@@ -4,12 +4,15 @@
 \alias{plotly_example}
 \title{Run a plotly example(s)}
 \usage{
-plotly_example(type = c("demo", "shiny", "rmd"), name, ...)
+plotly_example(type = c("demo", "shiny", "rmd"), name, edit = TRUE,
+  ...)
 }
 \arguments{
 \item{type}{the type of example}
 
 \item{name}{the name of the example (valid names depend on \code{type}).}
+
+\item{edit}{whether to open the relevant source files using \link{file.edit}. Only relevant if \code{type} is \code{"shiny"} or \code{"rmd"}.}
 
 \item{...}{arguments passed onto the suitable method.}
 }
