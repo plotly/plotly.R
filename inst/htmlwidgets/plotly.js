@@ -148,13 +148,6 @@ HTMLWidgets.widget({
       }
     }
     
-    // remove "sendDataToCloud", unless user has specified they want it
-    x.config = x.config || {};
-    if (!x.config.cloud) {
-      x.config.modeBarButtonsToRemove = x.config.modeBarButtonsToRemove || [];
-      x.config.modeBarButtonsToRemove.push("sendDataToCloud");
-    }
-    
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
       

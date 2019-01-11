@@ -89,7 +89,6 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @param ... these arguments are documented at 
 #' \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}
 #' @param collaborate include the collaborate mode bar button (unique to the R pkg)?
-#' @param cloud include the send data to cloud button?
 #' @param locale locale to use. See [here](https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization) for more info.
 #' @param mathjax add [MathJax rendering support](https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax).
 #' If `"cdn"`, mathjax is loaded externally (meaning an internet connection is needed for 
@@ -168,8 +167,6 @@ config <- function(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL, mat
   if (!collaborate) {
     p$x$config[["modeBarButtonsToAdd"]][nms %in% sharingButton()[["name"]]] <- NULL
   }
-
-  p$x$config$cloud <- cloud
 
   p
 }

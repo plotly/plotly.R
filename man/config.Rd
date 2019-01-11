@@ -15,8 +15,6 @@ config(p, ..., collaborate = TRUE, cloud = FALSE, locale = NULL,
 
 \item{collaborate}{include the collaborate mode bar button (unique to the R pkg)?}
 
-\item{cloud}{include the send data to cloud button?}
-
 \item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
 
 \item{mathjax}{add \href{https://github.com/plotly/plotly.js/tree/master/dist#to-support-mathjax}{MathJax rendering support}.
