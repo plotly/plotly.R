@@ -226,7 +226,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
         obj[[ref]] <- obj[[ref]] %||% ref_default
         if (identical(obj[[ref]], "paper")) return(obj)
         refIdx <- match(obj[[ref]], axisMap)
-        if (!is.na(refIdx)) obj[[ref]] <- names(axisMap)[refIdx]
+        if (!is.na(refIdx)) obj[[ref]] <- names(axisMap)[refIdx][1]
         obj
       }
       annotations[[i]] <- lapply(annotations[[i]], bump_axis_ref)
