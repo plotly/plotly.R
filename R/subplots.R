@@ -207,30 +207,31 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
     }
-    # map trace xaxis/yaxis/geo attributes
+    
     for (key in c("geo", "subplot", "xaxis", "yaxis")) {
+      # bump trace axis references
       oldAnchors <- unlist(lapply(traces[[i]], "[[", key))
       if (!length(oldAnchors)) next
       axisMap <- if (key == "yaxis") yMap else xMap
       axisMap <- setNames(sub("axis", "", axisMap), sub("axis", "", names(axisMap)))
       newAnchors <- names(axisMap)[match(oldAnchors, axisMap)]
       traces[[i]] <- Map(function(tr, a) { tr[[key]] <- a; tr }, traces[[i]], newAnchors)
-      # also map annotation and image xaxis/yaxis references
-      # TODO: do this for shapes as well?
+      
+      # bump annotation, image, shape xref/yref
+      # (none of these layout components have geo/subplot support)
       ref <- list(xaxis = "xref", yaxis = "yref")[[key]]
       if (is.null(ref)) next
-      if (length(annotations[[i]])) {
-        annotations[[i]] <- Map(function(x, y) { 
-          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
-          x
-        }, annotations[[i]], newAnchors)
+      bump_axis_ref <- function(obj, ref_default = sub("ref", "", ref)) {
+        # TODO: throw error/warning if ref_default doesn't match axisMap?
+        obj[[ref]] <- obj[[ref]] %||% ref_default
+        if (identical(obj[[ref]], "paper")) return(obj)
+        refIdx <- match(obj[[ref]], axisMap)
+        if (!is.na(refIdx)) obj[[ref]] <- names(axisMap)[refIdx][1]
+        obj
       }
-      if (length(images[[i]])) {
-        images[[i]] <- Map(function(x, y) { 
-          if (!identical(x[[ref]], "paper")) x[[ref]] <- y 
-          x
-        }, images[[i]], newAnchors)
-      }
+      annotations[[i]] <- lapply(annotations[[i]], bump_axis_ref)
+      shapes[[i]] <- lapply(shapes[[i]], bump_axis_ref)
+      images[[i]] <- lapply(images[[i]], bump_axis_ref, "paper")
     }
     
     
