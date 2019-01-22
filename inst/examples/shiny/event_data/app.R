@@ -17,12 +17,10 @@ server <- function(input, output, session) {
   nms <- row.names(mtcars)
   
   output$plot <- renderPlotly({
-    if (identical(input$plotType, "ggplotly")) {
-      p <- ggplot(mtcars, aes(x = mpg, y = wt, customdata = nms)) + geom_point()
-      ggplotly(p) %>% layout(dragmode = "select")
+    p <- if (identical(input$plotType, "ggplotly")) {
+      ggplotly(ggplot(mtcars, aes(x = mpg, y = wt, customdata = nms)) + geom_point())
     } else {
-      plot_ly(mtcars, x = ~mpg, y = ~wt, customdata = nms) %>%
-        layout(dragmode = "select")
+      plot_ly(mtcars, x = ~mpg, y = ~wt, customdata = nms)
     }
     p %>% 
       layout(dragmode = "select") %>%
