@@ -229,6 +229,10 @@ HTMLWidgets.widget({
           obj.z = pt.z;
         }
         
+        if (pt.hasOwnProperty("customdata")) {
+          obj.customdata = pt.customdata;
+        }
+        
         /* 
           TL;DR: (I think) we have to select the graph div (again) to attach keys...
           
