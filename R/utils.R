@@ -476,8 +476,9 @@ verify_attr <- function(proposed, schema) {
       proposed[[attr]] <- retain(proposed[[attr]], uniq)
     }
     
-    # plotly.js should really handle this logic
-    if (isTRUE(grepl("fill", proposed[["hoveron"]]))) {
+    # If we deliberately only want hover on fills, send a string to 
+    # plotly.js so it does something sensible 
+    if (identical(proposed[["hoveron"]], "fills")) {
       proposed[["text"]] <- paste(uniq(proposed[["text"]]), collapse = "\n")
     }
     

@@ -28,7 +28,7 @@ file.copy(
 )
 # update the plot schema
 Schema <- jsonlite::fromJSON(Sys.glob("*plotly.js*/dist/plot-schema.json"))
-devtools::use_data(Schema, overwrite = T, internal = T)
+usethis::use_data(Schema, overwrite = T, internal = T)
 
 # clean-up and bump HTML dependency version
 unlink("*plotly.js*", recursive = T)
