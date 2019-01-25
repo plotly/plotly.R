@@ -4,7 +4,7 @@
 \alias{event_unregister}
 \title{Un-register a shiny input value}
 \usage{
-event_unregister(p, event = NULL, priority = c("input", "event"))
+event_unregister(p, event = NULL)
 }
 \arguments{
 \item{event}{The type of plotly event. All supported events are listed in the

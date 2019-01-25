@@ -314,8 +314,7 @@ HTMLWidgets.widget({
         graphDiv.on(evt, function() {
           var inputsToClear = eventClearMap[evt];
           inputsToClear.map(function(input) {
-            // TODO: need to clear both input/event
-            Shiny.setInputValue(input + "-" + x.source, null);
+            Shiny.setInputValue(input + "-" + x.source, null, {priority: "event"});
           });
         });
       });
@@ -350,9 +349,9 @@ HTMLWidgets.widget({
         // register the event
         graphDiv.on(plotlyJSevent, function(d) {
           Shiny.setInputValue(
-            event + "-" + x.source + "-" + priority,
+            event + "-" + x.source,
             JSON.stringify(eventDataPreProcessor(d)),
-            priority == "event" ? {priority: "event"} : undefined
+            {priority: "event"}
           );
         });
       }

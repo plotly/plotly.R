@@ -4,7 +4,7 @@
 \alias{event_register}
 \title{Register a shiny input value}
 \usage{
-event_register(p, event = NULL, priority = c("input", "event"))
+event_register(p, event = NULL)
 }
 \arguments{
 \item{event}{The type of plotly event. All supported events are listed in the
