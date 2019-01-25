@@ -342,7 +342,7 @@ HTMLWidgets.widget({
         plotly_clickannotation: function(d) { return d.fullAnnotation }
       };
       
-      var registerShinyValue = function(event, priority) {
+      var registerShinyValue = function(event) {
         var eventDataPreProcessor = eventDataFunctionMap[event] || function(d) { return d ? d : el.id };
         // some events are unique to the R package
         var plotlyJSevent = (event == "plotly_brushed") ? "plotly_selected" : (event == "plotly_brushing") ? "plotly_selecting" : event;
@@ -356,14 +356,8 @@ HTMLWidgets.widget({
         });
       }
     
-      var shinyInputs = x.shinyInputs || [];
-      shinyInputs.map(function(input) { 
-        return registerShinyValue(input, "input");
-      });
       var shinyEvents = x.shinyEvents || [];
-      shinyEvents.map(function(event) { 
-        return registerShinyValue(event, "event"); 
-      });
+      shinyEvents.map(registerShinyValue);
     }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,

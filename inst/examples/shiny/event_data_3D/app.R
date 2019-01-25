@@ -20,7 +20,7 @@ server <- function(input, output, session) {
   
   output$click <- renderPrint({
     d <- event_data("plotly_click")
-    if (is.null(d)) "Click events appear here (double-click to clear)" else d
+    if (is.null(d)) "Click events appear here" else d
   })
   
 }
