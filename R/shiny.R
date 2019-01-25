@@ -84,6 +84,10 @@ register_plot_events <- function(p) {
 #' with the `source` argument in [plot_ly()] (or [ggplotly()]) to respond to  
 #' events emitted from that specific plot.
 #' @param session a shiny session object (the default should almost always be used).
+#' @param priority the priority of the corresponding shiny input value. 
+#' If equal to `"event"`, then [event_data()] always triggers re-execution, 
+#' instead of re-executing only when the relevant shiny input value changes 
+#' (the default).
 #' @export
 #' @seealso [event_register], [event_unregister]
 #' @references 
@@ -100,10 +104,10 @@ event_data <- function(
     "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
     "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
-  ), 
+  ),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
-  priority = c("event", "input")
+  priority = c("input", "event")
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
@@ -113,7 +117,7 @@ event_data <- function(
   event <- match.arg(event)
   # check to see if this event-source-priority combo is registered
   eventID <- paste(event, source, sep = "-")
-  eventIDRegistered <- eventID %in% session$userData[["plotlyShinyEventIDs"]]
+  eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
   if (!eventIDRegistered) {
     stop(
       "The '", event, "' event has not been registered for a source ID ",

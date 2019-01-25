@@ -5,6 +5,11 @@
 * The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
 * The `orca()` function gains new arguments `more_args` and `...` for finer control over the underlying system commands.
 
+
+* Improved `event_data()` interface:
+  * The `event` argument of the `event_data()` function now supports the following events: `plotly_selecting`, `plotly_brushed`, `plotly_brushing`, `plotly_restyle`, `plotly_legendclick`, `plotly_legenddoubleclick`, `plotly_clickannotation`, `plotly_afterplot`, `plotly_doubleclick`, `plotly_deselect`, `plotly_unhover`. 
+  * A new `priority` argument. By setting `priority='event'`, the `event` is treated like a true event: any reactive expression using the `event` becomes invalidated (regardless of whether the input values has changed). For an example, see `plotly_example`
+
 ## IMPROVEMENTS
 
 * Upgraded to plotly.js v1.42.5.

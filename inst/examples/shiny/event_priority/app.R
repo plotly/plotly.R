@@ -9,9 +9,8 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   output$p <- renderPlotly({
-    plot_ly(x = 1:2, y = 1:2, size = I(c(100, 150)))  %>%
-      add_markers() %>%
-      event_register("plotly_click", "event")
+    plot_ly(x = 1, y = 1, marker = list(size = 100))  %>%
+      add_trace(text = "Click me", mode = "markers+text")
   })
   
   output$time1 <- renderText({
