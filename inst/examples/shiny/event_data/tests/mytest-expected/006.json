@@ -1,0 +1,296 @@
+{
+  "input": {
+    ".clientValue-default-plotlyCrosstalkOpts": {
+      "on": "plotly_click",
+      "persistent": false,
+      "dynamic": false,
+      "selectize": false,
+      "opacityDim": 0.2,
+      "selected": {
+        "opacity": 1
+      },
+      "debounce": 0,
+      "color": [
+
+      ]
+    },
+    "plotly_afterplot-A": "\"plot\"",
+    "plotly_brushed-A": null,
+    "plotly_brushing-A": null,
+    "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
+    "plotly_deselect-A": "\"plot\"",
+    "plotly_hover-A": null,
+    "plotly_selected-A": null,
+    "plotly_selecting-A": null,
+    "plotType": "plotly"
+  },
+  "output": {
+    "brushing": "[1] \"Extents of the selection brush will appear here.\"",
+    "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
+    "hover": "[1] \"Hover events appear here (unhover to clear)\"",
+    "plot": {
+      "x": {
+        "layout": {
+          "margin": {
+            "b": 40,
+            "l": 60,
+            "t": 25,
+            "r": 10
+          },
+          "dragmode": "select",
+          "xaxis": {
+            "domain": [
+              0,
+              1
+            ],
+            "automargin": true,
+            "title": "mpg"
+          },
+          "yaxis": {
+            "domain": [
+              0,
+              1
+            ],
+            "automargin": true,
+            "title": "wt"
+          },
+          "hovermode": "closest",
+          "showlegend": false
+        },
+        "source": "A",
+        "config": {
+          "cloud": false
+        },
+        "shinyEvents": [
+          "plotly_hover",
+          "plotly_click",
+          "plotly_selected",
+          "plotly_relayout",
+          "plotly_brushed",
+          "plotly_brushing",
+          "plotly_clickannotation",
+          "plotly_doubleclick",
+          "plotly_deselect",
+          "plotly_afterplot",
+          "plotly_selecting"
+        ],
+        "data": [
+          {
+            "x": [
+              21,
+              21,
+              22.8,
+              21.4,
+              18.7,
+              18.1,
+              14.3,
+              24.4,
+              22.8,
+              19.2,
+              17.8,
+              16.4,
+              17.3,
+              15.2,
+              10.4,
+              10.4,
+              14.7,
+              32.4,
+              30.4,
+              33.9,
+              21.5,
+              15.5,
+              15.2,
+              13.3,
+              19.2,
+              27.3,
+              26,
+              30.4,
+              15.8,
+              19.7,
+              15,
+              21.4
+            ],
+            "y": [
+              2.62,
+              2.875,
+              2.32,
+              3.215,
+              3.44,
+              3.46,
+              3.57,
+              3.19,
+              3.15,
+              3.44,
+              3.44,
+              4.07,
+              3.73,
+              3.78,
+              5.25,
+              5.424,
+              5.345,
+              2.2,
+              1.615,
+              1.835,
+              2.465,
+              3.52,
+              3.435,
+              3.84,
+              3.845,
+              1.935,
+              2.14,
+              1.513,
+              3.17,
+              2.77,
+              3.57,
+              2.78
+            ],
+            "customdata": [
+              "Mazda RX4",
+              "Mazda RX4 Wag",
+              "Datsun 710",
+              "Hornet 4 Drive",
+              "Hornet Sportabout",
+              "Valiant",
+              "Duster 360",
+              "Merc 240D",
+              "Merc 230",
+              "Merc 280",
+              "Merc 280C",
+              "Merc 450SE",
+              "Merc 450SL",
+              "Merc 450SLC",
+              "Cadillac Fleetwood",
+              "Lincoln Continental",
+              "Chrysler Imperial",
+              "Fiat 128",
+              "Honda Civic",
+              "Toyota Corolla",
+              "Toyota Corona",
+              "Dodge Challenger",
+              "AMC Javelin",
+              "Camaro Z28",
+              "Pontiac Firebird",
+              "Fiat X1-9",
+              "Porsche 914-2",
+              "Lotus Europa",
+              "Ford Pantera L",
+              "Ferrari Dino",
+              "Maserati Bora",
+              "Volvo 142E"
+            ],
+            "type": "scatter",
+            "mode": "markers",
+            "marker": {
+              "color": "rgba(31,119,180,1)",
+              "line": {
+                "color": "rgba(31,119,180,1)"
+              }
+            },
+            "error_y": {
+              "color": "rgba(31,119,180,1)"
+            },
+            "error_x": {
+              "color": "rgba(31,119,180,1)"
+            },
+            "line": {
+              "color": "rgba(31,119,180,1)"
+            },
+            "xaxis": "x",
+            "yaxis": "y",
+            "frame": null
+          }
+        ],
+        "highlight": {
+          "on": "plotly_click",
+          "persistent": false,
+          "dynamic": false,
+          "selectize": false,
+          "opacityDim": 0.2,
+          "selected": {
+            "opacity": 1
+          },
+          "debounce": 0
+        },
+        "base_url": "https://plot.ly"
+      },
+      "evals": [
+
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "typedarray",
+          "version": "0.1",
+          "src": {
+            "href": "typedarray-0.1"
+          },
+          "meta": null,
+          "script": "typedarray.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "jquery",
+          "version": "1.11.3",
+          "src": {
+            "href": "jquery-1.11.3"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.0.1",
+          "src": {
+            "href": "crosstalk-1.0.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "plotly-htmlwidgets-css",
+          "version": "1.42.5",
+          "src": {
+            "href": "plotly-htmlwidgets-css-1.42.5"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "plotly-htmlwidgets.css",
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "plotly-main",
+          "version": "1.42.5",
+          "src": {
+            "href": "plotly-main-1.42.5"
+          },
+          "meta": null,
+          "script": "plotly-latest.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        }
+      ]
+    },
+    "selected": "[1] \"Click and drag events (i.e., select/lasso) appear here (double-click to clear)\"",
+    "selecting": "[1] \"Click and drag events (i.e., select/lasso) appear here (double-click to clear)\""
+  },
+  "export": {
+
+  }
+}

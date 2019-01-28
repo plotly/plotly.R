@@ -54,6 +54,7 @@ Suggests:
     knitr,
     devtools,
     shiny (>= 1.1.0),
+    shinytest (> 1.3.0),
     curl,
     rmarkdown,
     vdiffr,
