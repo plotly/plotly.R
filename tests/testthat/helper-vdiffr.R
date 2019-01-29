@@ -70,3 +70,11 @@ expect_doppelganger_built <- function(p, name, ...) {
   expect_doppelganger(p, name, ...)
   plotly_build(p)$x[c("data", "layout")]
 }
+
+expect_pass <- function(...) {
+  if (enable_vdiffr) {
+    testthat::skip("shiny testing not performed during visual testing")
+  } else {
+    shinytest::expect_pass(...)
+  }
+}
