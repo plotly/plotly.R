@@ -115,13 +115,20 @@ event_data <- function(
   }
   
   event <- match.arg(event)
-  # check to see if this event-source-priority combo is registered
   eventID <- paste(event, source, sep = "-")
   eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
   if (!eventIDRegistered) {
-    stop(
-      "The '", event, "' event has not been registered for a source ID ",
-      "of '", source, "'. Please add `event_register(p, '", event, "')` to your plot `p`."
+    # If event_data() is requested before any (relevant) plotly
+    # graphs have rendered, we won't know if the relevant
+    # event-source combo is legitimate. As a result, we throw a 
+    # warning here to try to be useful in cases where you really
+    # are requesting an input value that is never registered, but
+    # without preventing valid code from running.
+    warning(
+      "The '", event, "' event tied a source ID of '", source, "' ",
+      "has not yet been registered. ", 
+      "If you encounter issues acquiring data from this event-source combo",
+      "Try adding `event_register(p, '", event, "')` to plot `p`"
     )
   }
   
