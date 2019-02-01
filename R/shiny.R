@@ -116,21 +116,26 @@ event_data <- function(
   
   event <- match.arg(event)
   eventID <- paste(event, source, sep = "-")
-  eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
-  if (!eventIDRegistered) {
-    # If event_data() is requested before any (relevant) plotly
-    # graphs have rendered, we won't know if the relevant
-    # event-source combo is legitimate. As a result, we throw a 
-    # warning here to try to be useful in cases where you really
-    # are requesting an input value that is never registered, but
-    # without preventing valid code from running.
-    warning(
-      "The '", event, "' event tied a source ID of '", source, "' ",
-      "has not yet been registered. ", 
-      "If you encounter issues acquiring data from this event-source combo",
-      "Try adding `event_register(p, '", event, "')` to plot `p`"
-    )
-  }
+  
+  # It's possible for event_data() to execute before any 
+  # relevant input values have been registered (i.e, before 
+  # relevant plotly graphs have been executed). Therefore, 
+  # we delay checking that a relevant input value has been 
+  # registered until shiny flushes
+  session$onFlushed(
+    function() {
+      eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
+      if (!eventIDRegistered) {
+        stop(
+          "The '", event, "' event tied a source ID of '", source, "' ",
+          "is not registered. In order to obtain this event data, ", 
+          "please add `event_register(p, '", event, "')` to the plot (`p`) ",
+          "that you wish to obtain event data from.",
+          call. = FALSE
+        )
+      }
+    }
+  )
   
   # legend clicking returns trace(s), which shouldn't be simplified...
   parseJSON <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) {
