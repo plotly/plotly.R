@@ -165,22 +165,12 @@ HTMLWidgets.widget({
       instance.height = x.layout.height;
       
     } else {
-      
       // new x data could contain a new height/width...
       // attach to instance so that resize logic knows about the new size
       instance.width = x.layout.width || instance.width;
       instance.height = x.layout.height || instance.height;
       
-      // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
-      // a new webgl context
-      // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
-
-      // TODO: restore crosstalk selections?
-      Plotly.purge(graphDiv);
-      // TODO: why is this necessary to get crosstalk working?
-      graphDiv.data = undefined;
-      graphDiv.layout = undefined;
-      var plot = Plotly.plot(graphDiv, x);
+      var plot = Plotly.react(graphDiv, x);
       
     }
     
