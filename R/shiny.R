@@ -126,7 +126,7 @@ event_data <- function(
     function() {
       eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
       if (!eventIDRegistered) {
-        stop(
+        warning(
           "The '", event, "' event tied a source ID of '", source, "' ",
           "is not registered. In order to obtain this event data, ", 
           "please add `event_register(p, '", event, "')` to the plot (`p`) ",
