@@ -174,7 +174,6 @@ HTMLWidgets.widget({
       graphDiv.data = undefined;
       graphDiv.layout = undefined;
       var plot = Plotly.plot(graphDiv, x);
-      
     }
     
     // Trigger plotly.js calls defined via `plotlyProxy()`
@@ -184,6 +183,13 @@ HTMLWidgets.widget({
           var gd = document.getElementById(msg.id);
           if (!gd) {
             throw new Error("Couldn't find plotly graph with id: " + msg.id);
+          }
+          // This isn't an official plotly.js method, but it's the only current way to 
+          // change just the configuration of a plot 
+          // https://community.plot.ly/t/update-config-function/9057
+          if (msg.method == "reconfig") {
+            Plotly.react(gd, gd.data, gd.layout, msg.args);
+            return;
           }
           if (!Plotly[msg.method]) {
             throw new Error("Unknown method " + msg.method);
@@ -267,53 +273,85 @@ HTMLWidgets.widget({
       });
     }
     
+    
+    var legendEventData = function(d) {
+      // if legendgroup is not relevant just return the trace
+      var trace = d.data[d.curveNumber];
+      if (!trace.legendgroup) return trace;
+      
+      // if legendgroup was specified, return all traces that match the group
+      var legendgrps = d.data.map(function(trace){ return trace.legendgroup; });
+      var traces = [];
+      for (i = 0; i < legendgrps.length; i++) {
+        if (legendgrps[i] == trace.legendgroup) {
+          traces.push(d.data[i]);
+        }
+      }
+      
+      return traces;
+    };
+
+    
     // send user input event data to shiny
     if (HTMLWidgets.shinyMode) {
-      // https://plot.ly/javascript/zoom-events/
-      graphDiv.on('plotly_relayout', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_relayout-" + x.source, 
-          JSON.stringify(d)
-        );
+      
+      // Some events clear other input values
+      // TODO: always register these?
+      var eventClearMap = {
+        plotly_deselect: ["plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", "plotly_click"],
+        plotly_unhover: ["plotly_hover"],
+        plotly_doubleclick: ["plotly_click"]
+      };
+    
+      Object.keys(eventClearMap).map(function(evt) {
+        graphDiv.on(evt, function() {
+          var inputsToClear = eventClearMap[evt];
+          inputsToClear.map(function(input) {
+            Shiny.setInputValue(input + "-" + x.source, null, {priority: "event"});
+          });
+        });
       });
-      graphDiv.on('plotly_hover', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_hover-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
-        );
-      });
-      graphDiv.on('plotly_click', function(d) {
-        Shiny.onInputChange(
-          ".clientValue-plotly_click-" + x.source, 
-          JSON.stringify(eventDataWithKey(d))
-        );
-      });
-      graphDiv.on('plotly_selected', function(d) {
+      
+      var eventDataFunctionMap = {
+        plotly_click: eventDataWithKey,
+        plotly_hover: eventDataWithKey,
+        plotly_unhover: eventDataWithKey,
         // If 'plotly_selected' has already been fired, and you click
         // on the plot afterwards, this event fires `undefined`?!?
         // That might be considered a plotly.js bug, but it doesn't make 
         // sense for this input change to occur if `d` is falsy because,
         // even in the empty selection case, `d` is truthy (an object),
         // and the 'plotly_deselect' event will reset this input
-        if (d) {
-          Shiny.onInputChange(
-            ".clientValue-plotly_selected-" + x.source, 
-            JSON.stringify(eventDataWithKey(d))
+        plotly_selected: function(d) { if (d) { return eventDataWithKey(d); } },
+        plotly_selecting: function(d) { if (d) { return eventDataWithKey(d); } },
+        plotly_brushed: function(d) {
+          if (d) { return d.range ? d.range : d.lassoPoints; }
+        },
+        plotly_brushing: function(d) {
+          if (d) { return d.range ? d.range : d.lassoPoints; }
+        },
+        plotly_legendclick: legendEventData,
+        plotly_legenddoubleclick: legendEventData,
+        plotly_clickannotation: function(d) { return d.fullAnnotation }
+      };
+      
+      var registerShinyValue = function(event) {
+        var eventDataPreProcessor = eventDataFunctionMap[event] || function(d) { return d ? d : el.id };
+        // some events are unique to the R package
+        var plotlyJSevent = (event == "plotly_brushed") ? "plotly_selected" : (event == "plotly_brushing") ? "plotly_selecting" : event;
+        // register the event
+        graphDiv.on(plotlyJSevent, function(d) {
+          Shiny.setInputValue(
+            event + "-" + x.source,
+            JSON.stringify(eventDataPreProcessor(d)),
+            {priority: "event"}
           );
-        }
-      });
-      graphDiv.on('plotly_unhover', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_hover-" + x.source, null);
-      });
-      graphDiv.on('plotly_doubleclick', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
-      });
-      // 'plotly_deselect' is code for doubleclick when in select mode
-      graphDiv.on('plotly_deselect', function(eventData) {
-        Shiny.onInputChange(".clientValue-plotly_selected-" + x.source, null);
-        Shiny.onInputChange(".clientValue-plotly_click-" + x.source, null);
-      });
-    } 
+        });
+      }
+    
+      var shinyEvents = x.shinyEvents || [];
+      shinyEvents.map(registerShinyValue);
+    }
     
     // Given an array of {curveNumber: x, pointNumber: y} objects,
     // return a hash of {

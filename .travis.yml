@@ -33,3 +33,6 @@ before_script:
 
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
+
+# temporary: needed for plotly input testing in shiny 
+r_github_packages: rstudio/shinytest
