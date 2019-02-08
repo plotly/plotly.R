@@ -4,19 +4,29 @@
 \alias{event_data}
 \title{Access plotly user input event data in shiny}
 \usage{
-event_data(event = c("plotly_hover", "plotly_click", "plotly_selected",
-  "plotly_relayout"), source = "A",
-  session = shiny::getDefaultReactiveDomain())
+event_data(event = c("plotly_hover", "plotly_unhover", "plotly_click",
+  "plotly_doubleclick", "plotly_selected", "plotly_selecting",
+  "plotly_brushed", "plotly_brushing", "plotly_deselect",
+  "plotly_relayout", "plotly_restyle", "plotly_legendclick",
+  "plotly_legenddoubleclick", "plotly_clickannotation",
+  "plotly_afterplot"), source = "A",
+  session = shiny::getDefaultReactiveDomain(), priority = c("input",
+  "event"))
 }
 \arguments{
-\item{event}{The type of plotly event. Currently 'plotly_hover',
-'plotly_click', 'plotly_selected', and 'plotly_relayout' are supported.}
+\item{event}{The type of plotly event. All supported events are listed in the
+function signature above (i.e., the usage section).}
 
 \item{source}{a character string of length 1. Match the value of this string
-with the source argument in \code{\link[=plot_ly]{plot_ly()}} to retrieve the
-event data corresponding to a specific plot (shiny apps can have multiple plots).}
+with the \code{source} argument in \code{\link[=plot_ly]{plot_ly()}} (or \code{\link[=ggplotly]{ggplotly()}}) to respond to
+events emitted from that specific plot.}
 
 \item{session}{a shiny session object (the default should almost always be used).}
+
+\item{priority}{the priority of the corresponding shiny input value.
+If equal to \code{"event"}, then \code{\link[=event_data]{event_data()}} always triggers re-execution,
+instead of re-executing only when the relevant shiny input value changes
+(the default).}
 }
 \description{
 This function must be called within a reactive shiny context.
@@ -25,6 +35,15 @@ This function must be called within a reactive shiny context.
 \dontrun{
 plotly_example("shiny", "event_data")
 }
+}
+\references{
+\itemize{
+\item \url{https://plotly-book.cpsievert.me/shiny-plotly-inputs.html}
+\item \url{https://plot.ly/javascript/plotlyjs-function-reference/}
+}
+}
+\seealso{
+\link{event_register}, \link{event_unregister}
 }
 \author{
 Carson Sievert

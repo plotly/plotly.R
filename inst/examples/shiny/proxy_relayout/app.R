@@ -17,6 +17,8 @@ server <- function(input, output, session) {
   
   observeEvent(event_data("plotly_relayout"), {
     d <- event_data("plotly_relayout")
+    # unfortunately, the data structure emitted is different depending on 
+    # whether the relayout is triggered from the rangeslider or the plot
     xmin <- if (length(d[["xaxis.range[0]"]])) d[["xaxis.range[0]"]] else d[["xaxis.range"]][1]
     xmax <- if (length(d[["xaxis.range[1]"]])) d[["xaxis.range[1]"]] else d[["xaxis.range"]][2]
     if (is.null(xmin) || is.null(xmax)) return(NULL)
