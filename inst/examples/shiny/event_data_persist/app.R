@@ -2,33 +2,44 @@ library(shiny)
 library(plotly)
 
 ui <- fluidPage(
-  plotlyOutput("plot"),
-  verbatimTextOutput("data")
+  plotlyOutput("p"),
+  tableOutput("table")
 )
-
-mtcars$id <- row.names(mtcars)
 
 server <- function(input, output, session) {
   
-  output$plot <- renderPlotly({
-    plot_ly(mtcars, x = ~disp, y = ~mpg) %>%
-      add_markers(key = ~id) %>%
-      layout(dragmode = "select") %>%
-      highlight("plotly_selected")
+  # keep track of which cars have been hovered on
+  cars <- reactiveVal()
+  
+  # On hover, the key field of the event data contains the car name
+  # Add that name to the set of all "selected" cars
+  observeEvent(event_data("plotly_hover"), {
+    car <- event_data("plotly_hover")$key
+    cars_old_new <- c(cars(), car)
+    cars(unique(cars_old_new))
   })
   
-  selected <- reactiveVal(rep(FALSE, nrow(mtcars)))
-  
-  selected_data <- reactive({
-    ed <- event_data("plotly_selected")
-    if (is.null(ed)) return(NULL)
-    new <- mtcars[["id"]] %in% ed[["key"]]
-    selected(selected() | new)
-    mtcars[selected(), ]
+  # clear the set of cars when a double-click occurs
+  observeEvent(event_data("plotly_doubleclick"), {
+    cars(NULL)
   })
   
-  output$data <- renderPrint({
-    selected_data()
+  output$p <- renderPlotly({
+    
+    # if the car is selected, paint it red
+    cols <- ifelse(row.names(mtcars) %in% cars(), "red", "black")
+    
+    mtcars %>%
+      plot_ly(
+        x = ~wt, y = ~mpg, 
+        key = row.names(mtcars), 
+        color = I(cols)
+      ) %>%
+      add_markers()
+  })
+  
+  output$table <- renderTable({
+    filter(mtcars, row.names(mtcars) %in% cars())
   })
   
 }
