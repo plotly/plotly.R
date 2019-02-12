@@ -4,19 +4,31 @@
 
 * The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
 * The `orca()` function gains new arguments `more_args` and `...` for finer control over the underlying system commands.
+* Improvements related to accessing plotly.js events in shiny:
+  * The `event` argument of the `event_data()` function now supports the following events: `plotly_selecting`, `plotly_brushed`, `plotly_brushing`, `plotly_restyle`, `plotly_legendclick`, `plotly_legenddoubleclick`, `plotly_clickannotation`, `plotly_afterplot`, `plotly_doubleclick`, `plotly_deselect`, `plotly_unhover`. For examples, see `plotly_example("shiny", "event_data")`, `plotly_example("shiny", "event_data_legends")`, and  `plotly_example("shiny", "event_data_annotation")`, 
+    * New `event_register()` and `event_unregister()` functions for declaring which events to transmit over the wire (i.e., from the browser to the shiny server). Events that are likely to have large overhead are not registered by default, so you'll need to register these: `plotly_selecting`, `plotly_unhover`, `plotly_restyle`, `plotly_legendclick`, and `plotly_legenddoubleclick`.
+  * A new `priority` argument. By setting `priority='event'`, the `event` is treated like a true event: any reactive expression using the `event` becomes invalidated (regardless of whether the input values has changed). For an example, see `plotly_example("shiny", "event_priority")`.
+* The `method` argument of `plotlyProxyInvoke()` gains support for a `"reconfig"` method. This makes it possible to change just the configuration of a plot. For an example use, see `plotly_example("shiny", "event_data_annotation")`.
 
 ## IMPROVEMENTS
 
-* Upgraded to plotly.js v1.41.3.
+* Upgraded to plotly.js v1.42.5.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
 * The `plotly_example()` will now attempt to open the source file(s) used to run the example. Set `edit = FALSE` to prevent the source file(s) from opening.
+* The `event_data()` function now relays the (official plotly.js) `customdata` attribute in similar fashion to (unofficial) `key` attribute (#1423).
+
+
+## CHANGES
+
+* The 'collaborate' button no longer appears in the modebar, and as a result, the `config()` function no longer has a `collaborate` argument.
 
 ## BUG FIXES
 
-* `subplot()` now bumps annotation `xref`/`yref` anchors correctly (#1181).
-* `subplot()` now accumulates images, repositions paper coordinates, and reanchors axis references (#1332).
+* `subplot()` now works much better with annotations, images, and shapes:
+  - When `xref`/`yref` references an x/y axis these references are bumped accordingly (#1181).
+  - When `xref`/`yref` references paper coordinates, these coordinates are updated accordingly (#1332).
 * `event_data("plotly_selected")` is no longer too eager to clear. That is, it is no longer set to `NULL` when clicking on a plot *after* triggering the "plotly_selected" event (#1121) (#1122).
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
 * When using **shinytest** to test a **shiny** that contains **plotly** graph, false positive differences are no longer reported (rstudio/shinytest#174). 
@@ -25,7 +37,9 @@
 * Fixed issue where **dplyr** groups caused a problem in the ordering of data arrays passed to `marker` objects (#1351).
 * In some cases, a `ggplotly()` colorbar would cause issues with hover behavior, which is now fixed (#1381).
 * An articial marker no longer appears when clearing a crosstalk selection of a plot with a colorbar (#1406).
+* Clearing a highlight event via crosstalk no longer deletes all the traces added since initial draw (#1436).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
+* The `text` attribute is no longer collapsed to a string when `hoveron='fills+points'` (#1448). 
 
 # 4.8.0
 

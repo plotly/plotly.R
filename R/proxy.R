@@ -101,7 +101,8 @@ plotlyjs_methods <- function() {
   c(
     "restyle", "relayout", "update", "addTraces", "deleteTraces", "moveTraces",
     "extendTraces", "prependTraces", "purge", "toImage", "downloadImage", "animate",
-    "newPlot", "react", "validate", "makeTemplate", "validateTemplate", "addFrames"
+    "newPlot", "react", "validate", "makeTemplate", "validateTemplate", "addFrames",
+    "reconfig"
   )
 }
 

@@ -190,6 +190,8 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     tr <- trace[names(trace) %in% allAttrs]
     # TODO: does it make sense to "train" matrices/2D-tables (e.g. z)?
     tr <- tr[vapply(tr, function(x) is.null(dim(x)) && is.atomic(x), logical(1))]
+    # white-list customdata as this can be a non-atomic vector
+    tr$customdata <- trace$customdata
     builtData <- tibble::as_tibble(tr)
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
     for (i in seq_along(tr)) {
@@ -266,7 +268,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
-    d <- data.frame(x[names(x) %in% x$.plotlyVariableMapping], stringsAsFactors = FALSE)
+    d <- tibble::as_tibble(x[names(x) %in% x$.plotlyVariableMapping])
     d <- group2NA(
       d, if (has_group(x)) ".plotlyGroupIndex",
       ordered = if (inherits(x, "plotly_line")) "x",
@@ -365,6 +367,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   if (registerFrames) {
     p <- registerFrames(p, frameMapping = frameMapping)
   }
+  
+  # set the default plotly.js events to register in shiny
+  p <- shiny_defaults_set(p)
   
   p <- verify_guides(p)
   

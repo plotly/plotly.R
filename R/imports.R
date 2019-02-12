@@ -5,7 +5,7 @@
 #' @importFrom stats setNames complete.cases quantile is.leaf
 #' @importFrom tidyr unnest
 #' @importFrom viridisLite viridis
-#' @importFrom jsonlite toJSON fromJSON
+#' @importFrom jsonlite toJSON parse_json read_json
 #' @importFrom httr GET POST PATCH content config add_headers stop_for_status warn_for_status
 #' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender prependContent
 #' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
