@@ -154,6 +154,11 @@ event_data <- function(
   }
   
   priority <- match.arg(priority)
+  # events that don't emit any data should _always_ be treated with event priority
+  if (event %in% c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")) {
+    priority <- "event"
+  }
+  
   if (priority == "event") {
     # Shiny.setInputValue() is always called with event priority
     # so simply return the parse input value
