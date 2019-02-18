@@ -3,6 +3,7 @@
     "plotType": "ggplotly"
   },
   "output": {
+    "brushed": "[1] \"Extents of the selection brush will appear here.\"",
     "brushing": "[1] \"Extents of the selection brush will appear here.\"",
     "click": "[1] \"Click events appear here (double-click to clear)\"",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
