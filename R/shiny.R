@@ -181,6 +181,7 @@ event_data <- function(
 #' Register a shiny input value 
 #' 
 #' @inheritParams event_data
+#' @param p a plotly object.
 #' @seealso [event_data]
 #' @export
 #' @author Carson Sievert
@@ -192,6 +193,7 @@ event_register <- function(p, event = NULL) {
 #' Un-register a shiny input value
 #' 
 #' @inheritParams event_data
+#' @param p a plotly object.
 #' @seealso [event_data]
 #' @export
 #' @author Carson Sievert
