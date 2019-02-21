@@ -1,3 +1,4 @@
+# see https://community.rstudio.com/t/sliding-a-point-on-a-plot-rather-than-sliderinput-to-update-plot-in-shiny/16405/7
 library(shiny)
 library(plotly)
 
