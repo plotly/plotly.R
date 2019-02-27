@@ -153,7 +153,13 @@ event_data <- function(
     parseJSONVal(session$rootScope()$input[[eventID]])
   }
   
-  priority <- match.arg(priority)
+  # events that don't emit any data should _always_ be treated with event priority
+  priority <- if (event %in% c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")) {
+    "event"
+  } else {
+    match.arg(priority)
+  }
+  
   if (priority == "event") {
     # Shiny.setInputValue() is always called with event priority
     # so simply return the parse input value
