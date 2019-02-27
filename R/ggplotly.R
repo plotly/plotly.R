@@ -562,9 +562,20 @@ gg2list <- function(p, width = NULL, height = NULL,
   )
   doms <- get_domains(nPanels, nRows, margins)
   
+  # check if secondary axis
+  y_attr = attributes(scale_y()$secondary.axis)
+  if('AxisSecondary' %in% y_attr$class){
+    layout_axes = c('x','y','y2')
+  }else{
+    layout_axes = c('x','y') 
+  }
+  
   for (i in seq_len(nPanels)) {
     lay <- layout$layout[i, ]
-    for (xy in c("x", "y")) {
+    for (la in layout_axes) {
+      # find axis specific theme elements that inherit from their parent
+      xy = substr(la,0,1)
+      is_secondary = nchar(la)==2
       # find axis specific theme elements that inherit from their parent
       theme_el <- function(el) {
         theme[[paste0(el, ".", xy)]] %||% theme[[el]]
@@ -575,8 +586,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       axisLine <- theme_el("axis.line")
       panelGrid <- theme_el("panel.grid.major") %||% theme_el("panel.grid") 
       stripText <- theme_el("strip.text")
-      
-      axisName <- lay[, paste0(xy, "axis")]
+      axisName <- if(is_secondary){
+        paste0(lay[, paste0(xy, "axis")],'2')
+      }else{
+        lay[, paste0(xy, "axis")]
+      }
+      # axisName = lay[, paste0(xy, "axis")]
       anchor <- lay[, paste0(xy, "anchor")]
       rng <- layout$panel_params[[i]]
       
@@ -641,7 +656,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       # type of unit conversion
       type <- if (xy == "x") "height" else "width"
       # get axis title
-      axisTitleText <- sc$name %||% plot$labels[[xy]] %||% ""
+      axisTitleText <- if(is_secondary){
+         sc$secondary.axis$name %||% plot$labels[[la]] %||% "" 
+      }else{
+        sc$name %||% plot$labels[[xy]] %||% "" 
+      }
       if (is_blank(axisTitle)) axisTitleText <- ""
       
       # is this axis dynamic?
@@ -658,17 +677,19 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDateType <- isDynamic && isDate
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
+      y_side_options = c('left','right')
+      rng_sec_key = if(is_secondary){'.sec'}else{''}
       
       axisObj <- list(
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
-        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
+        range = rng[[paste0(xy,rng_sec_key,".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
-        ticktext = rng[[paste0(xy, ".labels")]],
-        tickvals = rng[[paste0(xy, ".major")]],
+        ticktext = rng[[paste0(xy,rng_sec_key,".labels")]],
+        tickvals = rng[[paste0(xy,rng_sec_key, ".major")]],
         categoryorder = "array",
-        categoryarray = rng[[paste0(xy, ".labels")]],
+        categoryarray = rng[[paste0(xy,rng_sec_key, ".labels")]],
         nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
@@ -688,9 +709,16 @@ gg2list <- function(p, width = NULL, height = NULL,
         zeroline = FALSE,
         anchor = anchor,
         title = faced(axisTitleText, axisTitle$face),
-        titlefont = text2font(axisTitle)
+        titlefont = text2font(axisTitle),
+        side = if(is_secondary){
+          y_side_options[y_side_options!=sc$position]
+        }else{
+          sc$position
+        }
       )
-      
+      if(is_secondary){
+        axisObj$overlaying = 'y'
+      }
       # set scaleanchor/scaleratio if these are fixed coordinates
       # the logic here is similar to what p$coordinates$aspect() does,
       # but the ratio is scaled to the data range by plotly.js 
@@ -982,7 +1010,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   }
   
   # try to merge marker/line traces that have the same values for these props
-  props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name")
+  props <- c("x", "y", "text", "type", "xaxis", "yaxis", "name",'yaxis2')
   hashes <- vapply(traces, function(x) digest::digest(x[names(x) %in% props]), character(1))
   modes <- vapply(traces, function(x) x$mode %||% "", character(1))
   nhashes <- length(unique(hashes))
