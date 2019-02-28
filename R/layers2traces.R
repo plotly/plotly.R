@@ -98,6 +98,12 @@ layers2traces <- function(data, prestats_data, layout, p) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
+    secondary_flag = ''
+    if('axis' %in% names(d)){
+      if(d$axis[1]==2){
+        secondary_flag ='2'  
+      }
+    }
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
@@ -141,7 +147,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
       trs[[j]]$xaxis <-  sub("axis", "", layout$layout[panel, "xaxis"])
-      trs[[j]]$yaxis <-  sub("axis", "", layout$layout[panel, "yaxis"])
+      trs[[j]]$yaxis <-  paste0(sub("axis", "", layout$layout[panel, "yaxis"]),secondary_flag)
     }
     trace.list <- c(trace.list, trs)
   }
