@@ -2,43 +2,43 @@
 layers2traces <- function(data, prestats_data, layout, p) {
   # Attach a "geom class" to each layer of data for method dispatch
   data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
-  
+
   # Extract parameters (and "hovertext aesthetics") in each layer
   params <- Map(function(x, y) {
     param <- c(
-      y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
+      y[["geom_params"]], y[["stat_params"]], y[["aes_params"]],
       position = ggtype(y, "position")
     )
-    
+
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]
     map <- c(y$mapping, calc_aes)
-    
+
     # add on plot-level mappings, if they're inherited
     if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
-    
-    # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
+
+    # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels
     map <- ggfun("make_labels")(map)
 
-    # filter tooltip aesthetics down to those specified in `tooltip` arg 
+    # filter tooltip aesthetics down to those specified in `tooltip` arg
     if (!identical(p$tooltip, "all")) {
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
-    
+
     # throw out positional coordinates if we're hovering on fill
     if (identical("fills", hover_on(x))) {
       map <- map[!names(map) %in% c("x", "xmin", "xmax", "y", "ymin", "ymax")]
     }
-    
+
     # disregard geometry mapping in hovertext for GeomSf
     if ("GeomSf" %in% class(y$geom)) {
       map <- map[!names(map) %in% "geometry"]
     }
-    
+
     param[["hoverTextAes"]] <- map
     param
   }, data, p$layers)
-  
+
   hoverTextAes <- lapply(params, "[[", "hoverTextAes")
   # attach a new column (hovertext) to each layer of data
   # (mapped to the text trace property)
@@ -68,7 +68,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     x$hovertext <- x$hovertext %||% ""
     x
   }, data, hoverTextAes)
-  
+
   # draw legends only for discrete scales
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
@@ -98,12 +98,9 @@ layers2traces <- function(data, prestats_data, layout, p) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    secondary_flag = ''
-    if('axis' %in% names(d)){
-      if(d$axis[1]==2){
-        secondary_flag ='2'  
-      }
-    }
+    secondary_flag = if('axis' %in% names(d) && 
+                        (d$axis[1]=='sec' | d$axis[1]==2) ){'2'}else{''}
+  
     # variables that produce multiple traces and deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
     # add variable that produce multiple traces, but do _not_ deserve entries
@@ -142,7 +139,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     } else {
       trs <- lapply(trs, function(x) { x$showlegend <- FALSE; x })
     }
-    
+
     # each trace is with respect to which axis?
     for (j in seq_along(trs)) {
       panel <- unique(dl[[j]]$PANEL)
@@ -277,7 +274,7 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
-  
+
   data[["geometry"]] <- sf::st_sfc(data[["geometry"]])
   data <- sf::st_as_sf(data, sf_column_name = "geometry")
   geom_type <- sf::st_geometry_type(data)
@@ -287,7 +284,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
     geom_type <- sf::st_geometry_type(data)
   }
   data <- remove_class(data, "sf")
-  
+
   basic_type <- dplyr::recode(
     as.character(geom_type),
     TRIANGLE = "GeomPolygon",
@@ -307,7 +304,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
     LINESTRING = "GeomPath",
     POINT = "GeomPoint"
   )
-  
+
   # return a list of data frames...one for every geometry (a la, GeomSmooth)
   d <- split(data, basic_type)
   for (i in seq_along(d)) {
@@ -334,10 +331,10 @@ to_basic.GeomMap <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomAnnotationMap <- function(data, prestats_data, layout, params, p, ...) {
-  # TODO: we could/should? reduce this data down to the panel limits, but 
+  # TODO: we could/should? reduce this data down to the panel limits, but
   # probably more effort than it's worth
   d <- params$map
-  
+
   # add hovertext
   hasRegion <- isTRUE(p$tooltip %in% c("all", "region"))
   hasSubRegion <- isTRUE(p$tooltip %in% c("all", "subregion"))
@@ -469,22 +466,22 @@ to_basic.GeomErrorbarh <- function(data, prestats_data, layout, params, p, ...) 
 
 #' @export
 to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) {
-  
+
   if (!is.null(data[["y"]])) {
     data$width <- 0
     return(prefix_class(data, "GeomErrorbar"))
   }
-  
+
   # reshape data so that x/y reflect path data
   data$group <- seq_len(nrow(data))
   data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
   data <- data[order(data$group), ]
   # fix the hovertext (by removing the "irrelevant" aesthetic)
   recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
-  data$hovertext <- Map(function(x, y) { 
+  data$hovertext <- Map(function(x, y) {
     paste(x[!grepl(y, x)], collapse = br())
   }, strsplit(data$hovertext, br()), paste0("^", recodeMap, ":"))
-  
+
   prefix_class(data, "GeomPath")
 }
 
@@ -543,7 +540,7 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
   layout$tickval_y <- 0.03 * abs(layout$y_max - layout$y_min)
   layout$tickval_x <- 0.03 * abs(layout$x_max - layout$x_min)
   data <- merge(data, layout[c("PANEL", "x_min", "x_max", "y_min", "y_max", "tickval_y", "tickval_x")])
-  
+
   # see GeomRug$draw_panel()
   rugs <- list()
   sides <- params$sides
@@ -552,9 +549,9 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("b", sides)) {
       rugs$b <- with(
         data, data.frame(
-          x = x, 
+          x = x,
           xend = x,
-          y = y_min, 
+          y = y_min,
           yend = y_min + tickval_y,
           others
         )
@@ -563,9 +560,9 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("t", sides)) {
       rugs$t <- with(
         data, data.frame(
-          x = x, 
+          x = x,
           xend = x,
-          y = y_max - tickval_y, 
+          y = y_max - tickval_y,
           yend = y_max,
           others
         )
@@ -576,9 +573,9 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("l", sides)) {
       rugs$l <- with(
         data, data.frame(
-          x = x_min, 
+          x = x_min,
           xend = x_min + tickval_x,
-          y = y, 
+          y = y,
           yend = y,
           others
         )
@@ -587,16 +584,16 @@ to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
     if (grepl("r", sides)) {
       rugs$r <- with(
         data, data.frame(
-          x = x_max - tickval_x, 
+          x = x_max - tickval_x,
           xend = x_max,
-          y = y, 
+          y = y,
           yend = y,
           others
         )
       )
     }
   }
-  
+
   lapply(rugs, function(d) {
     prefix_class(to_basic.GeomSegment(d), "GeomRug")
   })
@@ -705,7 +702,7 @@ geom2trace.GeomBar <- function(data, params, p) {
   # TODO: does position play a role here?
   #pos <- params$position %||% "stack"
   flip <- inherits(p$coordinates, "CoordFlip")
-  
+
   if (!flip) {
     width <- with(data, xmax - xmin)
     # TODO: does this cause rounding issues when inverse transforming for dynamicTicks?
@@ -750,7 +747,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 geom2trace.GeomPolygon <- function(data, params, p) {
 
   data <- group2NA(data)
-  
+
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
@@ -919,7 +916,7 @@ split_on <- function(dat) {
     idx <- domainName %in% names(dat)
     lookup[[i]][idx] <- domainName[idx]
   }
-  # search all the classes for relevant splits (moving from specific->generic) 
+  # search all the classes for relevant splits (moving from specific->generic)
   splits <- NULL
   for (i in class(dat)) {
     splits <- splits %||% lookup[[i]]
@@ -999,8 +996,8 @@ ribbon_dat <- function(dat) {
 
 aes2plotly <- function(data, params, aes = "size") {
   geom <- class(data)[1]
-  
-  # Hack to support this geom_sf hack 
+
+  # Hack to support this geom_sf hack
   # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
   defaults <- if (inherits(data, "GeomSf")) {
     type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
@@ -1008,14 +1005,14 @@ aes2plotly <- function(data, params, aes = "size") {
   } else {
     ggfun(geom)$default_aes
   }
-  
+
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
   converter <- switch(
-    aes, 
-    size = mm2pixels, 
-    stroke = mm2pixels, 
-    colour = toRGB, 
-    fill = toRGB, 
+    aes,
+    size = mm2pixels,
+    stroke = mm2pixels,
+    colour = toRGB,
+    fill = toRGB,
     linetype = lty2dash,
     shape = pch2symbol,
     alpha = function(x) { x[is.na(x)] <- 1; x },
