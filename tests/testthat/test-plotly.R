@@ -192,11 +192,12 @@ test_that("Complex example works", {
   l <- expect_traces(p, 3, "time-series-summary")
 })
 
-
 test_that("span/size controls errorbar thickness/width", {
   
   p <- plot_ly(x = 1:10, y = 1:10, error_x = list(value = 3), error_y = list(value = 2), span = I(5), size = I(10), stroke = I("black"), color = I("red")) %>%
     plotly_build()
+  
+  expect_doppelganger_built(p, "errorbar.width")
   
   d <- p$x$data
   expect_length(d, 1)
