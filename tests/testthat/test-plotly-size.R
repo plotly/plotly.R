@@ -22,5 +22,6 @@ test_that("sizemode is always respected", {
 test_that("size maps correctly to marker.size", {
   p <- plot_ly(x = 1:10, y = 1:10, size = I(30))
   d <- expect_doppelganger_built(p, "marker.size")$data
+  expect_length(d[[1]]$marker$size, 10)
   expect_true(all(d[[1]]$marker$size == 30))
 })

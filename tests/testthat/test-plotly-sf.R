@@ -240,6 +240,7 @@ test_that("sizing constants", {
   p <- plot_mapbox(mn_pts, size = I(30)) %>% plotly_build()
   d <- p$x$data
   expect_length(d, 1)
+  expect_length(d[[1]]$marker$size, nrow(mn_pts))
   expect_true(all(d[[1]]$marker$size == 30))
   expect_true(d[[1]]$marker$sizemode == "area")
   
@@ -247,6 +248,7 @@ test_that("sizing constants", {
   p <- plot_ly(mn_pts, size = I(30), span = I(10), stroke = I("black")) %>% plotly_build()
   d <- p$x$data
   expect_length(d, 1)
+  expect_length(d[[1]]$marker$size, nrow(mn_pts))
   expect_true(all(d[[1]]$marker$size == 30))
   expect_true(d[[1]]$marker$sizemode == "area")
   expect_true(d[[1]]$marker$line$width == 10)
@@ -256,6 +258,7 @@ test_that("sizing constants", {
   p <- plot_ly(mn_pts, size = I(20), error_x = list(value = 5)) %>% plotly_build()
   d <- p$x$data
   expect_length(d, 1)
+  expect_length(d[[1]]$marker$size, nrow(mn_pts))
   expect_true(all(d[[1]]$marker$size == 20))
   expect_true(d[[1]]$marker$sizemode == "area")
   expect_true(d[[1]]$error_x$value == 5)
