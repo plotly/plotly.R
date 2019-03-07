@@ -510,7 +510,7 @@ verify_attr <- function(proposed, schema) {
         # markers -- in that case, if marker.size is an array 
         # of length 1 will result in just one marker
         # https://codepen.io/cpsievert/pen/aMmOza
-        n <- length(proposed[["x"]] %||% proposed[["y"]])
+        n <- length(proposed[["x"]] %||% proposed[["y"]] %||% proposed[["lat"]] %||% proposed[["lon"]])
         proposed$marker[["size"]] <- default(i(rep(s, n)))
       }
     }
