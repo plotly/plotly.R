@@ -497,12 +497,22 @@ verify_attr <- function(proposed, schema) {
       proposed$name <- uniq(proposed$name)
     }
     
-    # if marker.sizemode='area', make sure marker.size is boxed up 
-    # (otherwise, when marker.size is a constant, it always sets the diameter!)
+    # if marker.size was populated via `size` arg (i.e., internal map_size()), 
+    # then it should _always_ be an array
+    # of appropriate length...
+    # (when marker.size is a constant, it always sets the diameter!)
     # https://codepen.io/cpsievert/pen/zazXgw
     # https://github.com/plotly/plotly.js/issues/2735
-    if ("area" %in% proposed$marker$sizemode) {
-      proposed$marker[["size"]] <- i(proposed$marker[["size"]])
+    if (is.default(proposed$marker$size)) {
+      s <- proposed$marker[["size"]]
+      if (length(s) == 1) {
+        # marker.size could be of length 1, but we may have multiple 
+        # markers -- in that case, if marker.size is an array 
+        # of length 1 will result in just one marker
+        # https://codepen.io/cpsievert/pen/aMmOza
+        n <- length(proposed[["x"]] %||% proposed[["y"]] %||% proposed[["lat"]] %||% proposed[["lon"]])
+        proposed$marker[["size"]] <- default(i(rep(s, n)))
+      }
     }
     
     # do the same for "sub-attributes"
