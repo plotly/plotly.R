@@ -280,3 +280,18 @@ test_that("Can map data to legendgroup", {
     expect_true(bars[[i]]$legendgroup == letters[[i]])
   }
 })
+
+
+test_that("Axis domains aren't supplied if layout.grid exists", {
+  p <- plot_ly(type = 'scatter',mode = 'lines', y = c(5,1,3), xaxis = 'x', yaxis = 'y') %>%
+    add_trace(y = c(2,1,5), xaxis = 'x2', yaxis = 'y2') %>%
+    add_trace(y = c(2,1,5), xaxis = 'x3', yaxis = 'y3')%>%
+    add_trace(y = c(2,1,5), xaxis = 'x4', yaxis = 'y4')%>%
+    add_trace(y = c(2,1,5), xaxis = 'x5', yaxis = 'y5')%>%
+    add_trace(y = c(2,1,5), xaxis = 'x6', yaxis = 'y6')%>%
+    layout(grid = list(rows = 2, columns = 3, pattern ='independent'))
+  
+  l <- expect_doppelganger_built(p, "layout-grid")
+  expect_null(l$layout$xaxis$domain)
+  expect_null(l$layout$yaxis$domain)
+})
