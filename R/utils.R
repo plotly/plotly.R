@@ -348,7 +348,7 @@ supply_defaults <- function(p) {
     p$x$layout[[p$x$layout$mapType]] <- modify_list(
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
-  } else {
+  } else if (!length(p$x$layout[["grid"]])) {
     types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
     axes <- unlist(lapply(types, function(x) {
       grep("^[a-z]axis$", names(Schema$traces[[x]]$attributes), value = TRUE) %||% NULL
