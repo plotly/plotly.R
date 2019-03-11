@@ -40,6 +40,7 @@
 * Clearing a highlight event via crosstalk no longer deletes all the traces added since initial draw (#1436).
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 * The `text` attribute is no longer collapsed to a string when `hoveron='fills+points'` (#1448). 
+* `layout.[x-y]axis.domain` is no longer supplied a default when `layout.grid` is specified (#1427).
 
 # 4.8.0
 
