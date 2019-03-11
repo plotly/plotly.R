@@ -999,8 +999,13 @@ aes2plotly <- function(data, params, aes = "size") {
   defaults <- if (inherits(data, "GeomSf")) {
     type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
     ggfun("default_aesthetics")(type)
-  } else if ("default_aes" %in% names(ggfun(geom))) {
-    ggfun(geom)$default_aes
+  } else {
+    geom_obj <- ggfun(geom)
+    # If the first class of `data` is a data.frame,
+    # ggfun() returns a function because ggplot2 now
+    # defines data.frame in it's namespace
+    # https://github.com/ropensci/plotly/pull/1481
+    if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
   }
   
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
