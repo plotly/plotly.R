@@ -130,15 +130,6 @@ colorway <- function(p = NULL) {
 # TODO: make this more unique?
 crosstalk_key <- function() ".crossTalkKey"
 
-# modifyList turns elements that are data.frames into lists
-# which changes the behavior of toJSON
-as_df <- function(x) {
-  if (is.null(x) || is.matrix(x)) return(x)
-  if (is.list(x) && !is.data.frame(x)) {
-    setNames(as.data.frame(x), NULL)
-  }
-}
-
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
@@ -656,6 +647,33 @@ verify_mode <- function(p) {
     }
   }
   p
+}
+
+
+verify_colorscale <- function(p) {
+  p$x$data <- lapply(p$x$data, function(trace) {
+    trace$colorscale <- colorscale_json(trace$colorscale)
+    trace$marker$colorscale <- colorscale_json(trace$marker$colorscale)
+    trace
+  }) 
+  p
+}
+
+# Coerce `x` into a data structure that can map to a colorscale attribute.
+# Note that colorscales can either be the name of a scale (e.g., 'Rainbow') or 
+# a 2D array (e.g., [[0, 'rgb(0,0,255)', [1, 'rgb(255,0,0)']])
+colorscale_json <- function(x) {
+  if (!length(x)) return(x)
+  if (is.character(x)) return(x)
+  if (is.matrix(x)) {
+    if (ncol(x) != 2) stop("A colorscale matrix requires two columns")
+    x <- as.data.frame(x)
+    x[, 1] <- as.numeric(x[, 1])
+  }
+  if (is.list(x) && length(x) == 2) {
+    x <- setNames(as.data.frame(x), NULL)
+  }
+  x
 }
 
 # if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified
