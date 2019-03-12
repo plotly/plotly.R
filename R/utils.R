@@ -670,24 +670,28 @@ colorscale_json <- function(x) {
     x <- as.data.frame(x)
     x[, 1] <- as.numeric(x[, 1])
   }
+  # ensure a list like this: list(list(0, 0.5, 1), list("red", "white", "blue"))
+  # converts to the correct dimensions: [[0, 'red'], [0.5, 'white'], [1, 'blue']]
   if (is.list(x) && length(x) == 2) {
-    # ensure a list like this: list(list(0, 0.5, 1), list("red", "white", "blue"))
-    # converts to the correct dimensions
-    if (!is.data.frame(x) && can_be_numeric(x[[1]])) {
+    n1 <- length(x[[1]])
+    n2 <- length(x[[2]])
+    if (n1 != n2 || n1+n2 == 0) {
+      warning("A colorscale list must of elements of the same (non-zero) length")
+    } else if (!is.data.frame(x) && can_be_numeric(x[[1]])) {
       x <- data.frame(
         val = as.numeric(x[[1]]),
         col = as.character(x[[2]]),
         stringsAsFactors = FALSE
       )
+      x <- setNames(x, NULL)
     }
-    x <- setNames(x, NULL)
   }
   x
 }
 
 can_be_numeric <- function(x) {
-  x <- suppressWarnings(as.numeric(x))
-  sum(is.na(x)) == 0
+  xnum <- suppressWarnings(as.numeric(x))
+  sum(is.na(x)) == sum(is.na(xnum))
 }
 
 # if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified
