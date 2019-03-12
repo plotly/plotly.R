@@ -661,7 +661,7 @@ verify_colorscale <- function(p) {
 
 # Coerce `x` into a data structure that can map to a colorscale attribute.
 # Note that colorscales can either be the name of a scale (e.g., 'Rainbow') or 
-# a 2D array (e.g., [[0, 'rgb(0,0,255)', [1, 'rgb(255,0,0)']])
+# a 2D array (e.g., [[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']])
 colorscale_json <- function(x) {
   if (!length(x)) return(x)
   if (is.character(x)) return(x)
@@ -671,9 +671,23 @@ colorscale_json <- function(x) {
     x[, 1] <- as.numeric(x[, 1])
   }
   if (is.list(x) && length(x) == 2) {
-    x <- setNames(as.data.frame(x), NULL)
+    # ensure a list like this: list(list(0, 0.5, 1), list("red", "white", "blue"))
+    # converts to the correct dimensions
+    if (!is.data.frame(x) && can_be_numeric(x[[1]])) {
+      x <- data.frame(
+        val = as.numeric(x[[1]]),
+        col = as.character(x[[2]]),
+        stringsAsFactors = FALSE
+      )
+    }
+    x <- setNames(x, NULL)
   }
   x
+}
+
+can_be_numeric <- function(x) {
+  x <- suppressWarnings(as.numeric(x))
+  sum(is.na(x)) == 0
 }
 
 # if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified

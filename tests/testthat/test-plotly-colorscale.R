@@ -39,7 +39,7 @@ test_that("Can specify contour colorscale", {
       y = 1:10, 
       marker = list(
         color = 1:10, 
-        colorscale = colorScale, 
+        colorscale = colorscale, 
         showscale = TRUE
       )
     )
@@ -53,22 +53,15 @@ test_that("Can specify contour colorscale", {
   test_df     <- plot_colorscale(as.data.frame(colorScale))
   test_matrix <- plot_colorscale(as.matrix(as.data.frame(colorScale)))
   
-})
-
-
-
-test_that("marker.colorscale overrides color", {
-  plot_ly(
-    x = c(-9, -6, -5, -3, -1), 
-    y = c(0, 1, 4, 5, 7), 
-    color = 1:5,
-    marker = list(
-      #color = 6:10, 
-      colorscale='Rainbow', 
-      showscale = TRUE
-    )
-  ) 
-  l <- expect_doppelganger_built(p, "marker.colorscale")
+  expect_doppelganger_built(test_list, "test_list")
+  expect_doppelganger_built(test_df, "test_df")
+  expect_doppelganger_built(test_matrix, "test_matrix")
+  
+  test_list_2 <- plot_colorscale(list(list(0, "rgb(0,0,255)"), list(1, "rgb(0,255,0)")))
+  test_list_3 <- plot_colorscale(list(list(0, 1), list("rgb(0,0,255)", "rgb(0,255,0)")))
+  
+  expect_doppelganger_built(test_list_2, "test_list_2")
+  expect_doppelganger_built(test_list_3, "test_list_3")
 })
 
 
