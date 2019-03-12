@@ -45,6 +45,7 @@ test_that("Can specify contour colorscale", {
     )
   }
   
+  pal <- scales::colour_ramp(c("red", "green"))
   colorScale <- list(
     val = seq(0, 1, by = 0.1), 
     col = pal(seq(0, 1, by = 0.1))
