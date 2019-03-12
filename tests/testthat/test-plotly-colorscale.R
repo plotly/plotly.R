@@ -27,7 +27,7 @@ test_that("Can specify contour colorscale", {
 })
 
 test_that("Can provide a color interpolation function", {
-  p <- plot_ly(dat, x = 1:10, y = 1:10, color = 1:10, colors = scales::colour_ramp(c("red", "green")))
+  p <- plot_ly(x = 1:10, y = 1:10, color = 1:10, colors = scales::colour_ramp(c("red", "green")))
   l <- expect_doppelganger_built(p, "colorRamp")
 })
 
