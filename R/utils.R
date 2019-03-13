@@ -675,7 +675,7 @@ colorscale_json <- function(x) {
   if (is.list(x) && length(x) == 2) {
     n1 <- length(x[[1]])
     n2 <- length(x[[2]])
-    if (n1 != n2 || n1+n2 == 0) {
+    if (n1 != n2 || n1 == 0 || n2 == 0) {
       warning("A colorscale list must of elements of the same (non-zero) length")
     } else if (!is.data.frame(x) && can_be_numeric(x[[1]])) {
       x <- data.frame(
