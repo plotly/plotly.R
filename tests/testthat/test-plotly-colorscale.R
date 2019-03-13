@@ -38,7 +38,7 @@ test_that("Can specify contour colorscale", {
       x = 1:10, 
       y = 1:10, 
       marker = list(
-        color = 1:10, 
+        color = c(1:9, NA), 
         colorscale = colorscale, 
         showscale = TRUE
       )
