@@ -65,7 +65,7 @@ prepareWidget <- function(x) {
 }
 
 register_plot_events <- function(p) {
-  session <- getDefaultReactiveDomain()
+  session <- shiny::getDefaultReactiveDomain()
   eventIDs <- paste(p$x$shinyEvents, p$x$source, sep = "-")
   session$userData$plotlyShinyEventIDs <- unique(c(
     session$userData$plotlyShinyEventIDs,
