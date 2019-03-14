@@ -118,6 +118,10 @@
 #     expect_length(strsplit(x, ":")[[1]], 3)
 #   }
 #   
+#   expect_not_srcified <- function(x) {
+#     expect_true(is.null(x))
+#   }
+# 
 #   # src-ifies data arrays, but not arrayOk of length 1
 #   p <- plot_ly(x = 1:10, y = 1:10, marker = list(color = "red")) 
 #   res <- api_create(p)
@@ -138,9 +142,9 @@
 #     api_create()
 #   trace <- res$figure$frames[[1]]$data[[1]]
 #   expect_srcified(trace$marker$colorsrc)
-#   
-#   # can src-ify layout.xaxis.tickvals
+# 
+#   # doesn't src-ify layout arrays (layout.xaxis.tickvals)
 #   res <- api_create(ggplot() + geom_bar(aes(1:10)))
-#   expect_srcified(res$figure$layout$xaxis$tickvalssrc)
-#   
+#   expect_not_srcified(res$figure$layout$xaxis$tickvalssrc)
+# 
 # })
