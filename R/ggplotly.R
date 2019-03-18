@@ -459,27 +459,35 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  layout$layout$xaxis <- layout$layout$COL
-  layout$layout$yaxis <- layout$layout$ROW
-  layout$layout$xanchor <- nRows
-  layout$layout$yanchor <- 1
+  layout$layout <- dplyr::mutate(layout$layout,
+    xaxis = COL,
+    yaxis = ROW,
+    xanchor = nRows,
+    yanchor = 1L)
   if (inherits(plot$facet, "FacetWrap")) {
-    if (plot$facet$params$free$x) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$ROW
-    }
-    if (plot$facet$params$free$y) {
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$COL
-      layout$layout$xanchor <- nPanels
-    }
     if (plot$facet$params$free$x && plot$facet$params$free$y) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$PANEL
+      layout$layout <- dplyr::mutate(layout$layout,
+        xaxis = PANEL,
+        yaxis = PANEL,
+        xanchor = PANEL,
+        yanchor = PANEL)
+    } else if (plot$facet$params$free$x) {
+      layout$layout <- dplyr::mutate(layout$layout,
+        xaxis = PANEL,
+        xanchor = ROW)
+    } else if (plot$facet$params$free$y) {
+      layout$layout <- dplyr::mutate(layout$layout,
+        yaxis = PANEL,
+        yanchor = COL)
     }
+    # anchor X axis to the lowest plot in its column
+    layout$layout <- dplyr::group_by(layout$layout, xaxis) %>%
+      dplyr::mutate(xanchor = max(as.integer(yaxis))) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(xanchor = if (is.factor(yaxis)) levels(yaxis)[xanchor] else xanchor)
   }
+  layout$layout <- as.data.frame(layout$layout)
+
   # format the axis/anchor to a format plotly.js respects
   layout$layout$xaxis <- paste0("xaxis", sub("^1$", "", layout$layout$xaxis))
   layout$layout$yaxis <- paste0("yaxis", sub("^1$", "", layout$layout$yaxis))

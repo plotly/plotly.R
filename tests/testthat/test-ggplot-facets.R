@@ -140,5 +140,5 @@ test_that("when y scales are free, x-axes are still anchored on exterior", {
   info <- expect_doppelganger_built(p, "facet_wrap-free_y-2")
   xaxes <- info$layout[grep("^xaxis", names(info$layout))]
   yaxes <- info$layout[grep("^yaxis", names(info$layout))]
-  expect_equivalent(unique(sapply(xaxes, "[[", "anchor")), "y5")
+  expect_equivalent(unique(sapply(xaxes, "[[", "anchor")), c("y5", "y4"))
 })
