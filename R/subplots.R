@@ -416,7 +416,7 @@ reposition <- function(obj, domains) {
     o <- obj[[i]]
     xs <- if (identical(o$xref, "paper")) {
       if (is.numeric(o$sizex)) obj[[i]]$sizex <- o$sizex * abs(diff(xdom))
-      c("x", "x0", "x1")
+      if (identical(o$xsizemode, "pixel")) "xanchor" else c("x", "x0", "x1")
     }
     for (j in xs) {
       if (is.numeric(o[[j]])) {
@@ -425,7 +425,7 @@ reposition <- function(obj, domains) {
     }
     ys <- if (identical(o$yref, "paper")) {
       if (is.numeric(o$sizey)) obj[[i]]$sizey <- o$sizey * abs(diff(ydom))
-      c("y", "y0", "y1")
+      if (identical(o$ysizemode, "pixel")) "yanchor" else c("y", "y0", "y1")
     }
     for (j in ys) {
       if (is.numeric(o[[j]])) {
