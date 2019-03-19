@@ -12,7 +12,7 @@
 
 ## IMPROVEMENTS
 
-* Upgraded to plotly.js v1.44.3.
+* Upgraded to plotly.js v1.45.3.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
