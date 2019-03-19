@@ -73,10 +73,14 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
     stop("Can only add a rangeslider to a plot with one x-axis", call. = FALSE)
   }
   
-  p$x$layout$xaxis$range <- c(
-    to_milliseconds(start),
-    to_milliseconds(end)
-  )
+  if (!is.null(start) && !is.null(end)) {
+    p$x$layout$xaxis$range <- c(
+      to_milliseconds(start),
+      to_milliseconds(end)
+    )
+  } else if (!is.null(start) || !is.null(end)) {
+    stop("Both start and end must be specified")
+  }
   
   p$x$layout$xaxis$rangeslider <- list(visible = TRUE, ...)
   p
