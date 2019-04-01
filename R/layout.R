@@ -129,7 +129,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., cloud = FALSE, locale = NULL, mathjax = NULL) {
+config <- function(p, ..., locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$dependencies <- c(
@@ -157,7 +157,6 @@ config <- function(p, ..., cloud = FALSE, locale = NULL, mathjax = NULL) {
   args <- list(...)
   if ("collaborate" %in% names(args)) warning("The collaborate button is no longer supported")
   p$x$config <- modify_list(p$x$config, args)
-  p$x$config$cloud <- cloud
 
   p
 }
