@@ -516,6 +516,10 @@ verify_attr <- function(proposed, schema) {
 
 attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if ("titlefont" %in% illegalAttrs) {
+    warning("The titlefont attribute is now deprecated. Use title = list(font = ...) instead.", call. = FALSE)
+    illegalAttrs <- setdiff(illegalAttrs, "titlefont")
+  }
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
             paste(illegalAttrs, collapse = "', '"), "'\n", 

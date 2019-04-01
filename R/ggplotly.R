@@ -429,9 +429,11 @@ gg2list <- function(p, width = NULL, height = NULL,
   )
   # main plot title
   if (nchar(plot$labels$title %||% "") > 0) {
-    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
-    gglayout$titlefont <- text2font(theme$plot.title)
-    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
+    gglayout$title <- list(
+      text = faced(plot$labels$title, theme$plot.title$face),
+      font = text2font(theme$plot.title)
+    )
+    gglayout$margin$t <- gglayout$margin$t + gglayout$title$font$size
   }
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
