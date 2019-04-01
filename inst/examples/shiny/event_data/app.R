@@ -47,7 +47,7 @@ server <- function(input, output, session) {
     if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else d
   })
   
-  output$brush <- renderPrint({
+  output$brushed <- renderPrint({
     d <- event_data("plotly_brushed")
     if (is.null(d)) "Extents of the selection brush will appear here." else d
   })

@@ -9,12 +9,13 @@ MAINTAINER Carson Sievert "carson@rstudio.com"
 
 # Don't print "debconf: unable to initialize frontend: Dialog" messages
 ARG DEBIAN_FRONTED=noninteractive
+ARG CACHEBUST=1
 
 # Need this to add R repo
 RUN apt-get update && apt-get install -y software-properties-common
 
 # Add R apt repository
-RUN add-apt-repository "deb http://cran.r-project.org/bin/linux/ubuntu $(lsb_release -cs)/"
+RUN add-apt-repository "deb http://cran.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x51716619e084dab9
 
 # Install basic stuff and R
