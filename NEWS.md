@@ -18,14 +18,11 @@
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
 * The `plotly_example()` will now attempt to open the source file(s) used to run the example. Set `edit = FALSE` to prevent the source file(s) from opening.
 * The `event_data()` function now relays the (official plotly.js) `customdata` attribute in similar fashion to (unofficial) `key` attribute (#1423).
-
+* An informative warning is now thrown if invalid argument names are supplied to `config()`.
 
 ## CHANGES
 
 * The 'collaborate' button no longer appears in the modebar, and as a result, the `config()` function no longer has a `collaborate` argument.
-
-## CHANGES
-
 * Since plotly.js now defaults to *not* showing the "Edit in Chart Studio" button, the `cloud` argument in `config()` was removed. If you want to show this button, use the new plotly.js `showSendToCloud` config attribute instead (e.g. `config(plot_ly(), showSendToCloud = TRUE)`)
 
 ## BUG FIXES

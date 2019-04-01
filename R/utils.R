@@ -425,6 +425,11 @@ verify_attr_names <- function(p) {
     c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
     "layout"
   )
+  attrs_name_check(
+    names(p$x$config),
+    names(Schema$config),
+    "config"
+  )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
