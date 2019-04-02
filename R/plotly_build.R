@@ -377,6 +377,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   p <- verify_guides(p)
   
+  # verify colorscale attributes are in a sensible data structure
+  p <- verify_colorscale(p)
+  
   # verify plot attributes are legal according to the plotly.js spec
   p <- verify_attr_names(p)
   # box up 'data_array' attributes where appropriate
@@ -808,11 +811,6 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         colorObj[c("cmin", "cmax")] <- NULL
         colorObj[["showscale"]] <- default(TRUE)
         traces[[i]] <- modify_list(colorObj, traces[[i]])
-        traces[[i]]$colorscale <- as_df(traces[[i]]$colorscale)
-        # sigh, contour colorscale doesn't support alpha
-        if (grepl("contour", traces[[i]][["type"]])) {
-          traces[[i]]$colorscale[, 2] <- strip_alpha(traces[[i]]$colorscale[, 2])
-        }
         traces[[i]] <- structure(traces[[i]], class = c("plotly_colorbar", "zcolor"))
         next
       }
@@ -856,8 +854,6 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
           traces[[i]] <- modify_list(list(fillcolor = col), traces[[i]])
         }
         
-        # make sure the colorscale is going to convert to JSON nicely
-        traces[[i]]$marker$colorscale <- as_df(traces[[i]]$marker$colorscale)
       }
     }
   

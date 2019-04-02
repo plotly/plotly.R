@@ -65,7 +65,7 @@ prepareWidget <- function(x) {
 }
 
 register_plot_events <- function(p) {
-  session <- getDefaultReactiveDomain()
+  session <- shiny::getDefaultReactiveDomain()
   eventIDs <- paste(p$x$shinyEvents, p$x$source, sep = "-")
   session$userData$plotlyShinyEventIDs <- unique(c(
     session$userData$plotlyShinyEventIDs,
@@ -153,7 +153,13 @@ event_data <- function(
     parseJSONVal(session$rootScope()$input[[eventID]])
   }
   
-  priority <- match.arg(priority)
+  # events that don't emit any data should _always_ be treated with event priority
+  priority <- if (event %in% c("plotly_doubleclick", "plotly_deselect", "plotly_afterplot")) {
+    "event"
+  } else {
+    match.arg(priority)
+  }
+  
   if (priority == "event") {
     # Shiny.setInputValue() is always called with event priority
     # so simply return the parse input value
@@ -181,6 +187,7 @@ event_data <- function(
 #' Register a shiny input value 
 #' 
 #' @inheritParams event_data
+#' @param p a plotly object.
 #' @seealso [event_data]
 #' @export
 #' @author Carson Sievert
@@ -192,6 +199,7 @@ event_register <- function(p, event = NULL) {
 #' Un-register a shiny input value
 #' 
 #' @inheritParams event_data
+#' @param p a plotly object.
 #' @seealso [event_data]
 #' @export
 #' @author Carson Sievert

@@ -20,6 +20,7 @@
     "plotType": "ggplotly"
   },
   "output": {
+    "brushed": "[1] \"Extents of the selection brush will appear here.\"",
     "brushing": "[1] \"Extents of the selection brush will appear here.\"",
     "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
