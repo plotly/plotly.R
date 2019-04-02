@@ -20,8 +20,8 @@
     "plotType": "ggplotly"
   },
   "output": {
-    "brushed": "[1] \"Extents of the selection brush will appear here.\"",
-    "brushing": "[1] \"Extents of the selection brush will appear here.\"",
+    "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
+    "brushing": "[1] \"Brush extents appear here (double-click to clear)\"",
     "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
     "plot": {
@@ -466,8 +466,8 @@
         }
       ]
     },
-    "selected": "[1] \"Click and drag events (i.e., select/lasso) appear here (double-click to clear)\"",
-    "selecting": "[1] \"Click and drag events (i.e., select/lasso) appear here (double-click to clear)\""
+    "selected": "[1] \"Brushed points appear here (double-click to clear)\"",
+    "selecting": "[1] \"Brush points appear here (double-click to clear)\""
   },
   "export": {
 
