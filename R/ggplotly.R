@@ -697,8 +697,11 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = faced(axisTitleText, axisTitle$face),
-        titlefont = text2font(axisTitle)
+        # layout.axisid.title don't yet support alignment :(
+        title = list(
+          text = faced(axisTitleText, axisTitle$face),
+          font = text2font(axisTitle)
+        )
       )
       
       # set scaleanchor/scaleratio if these are fixed coordinates
