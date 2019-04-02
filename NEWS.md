@@ -1,5 +1,12 @@
 # 4.8.0.9000
 
+## Changes to plotly.js
+
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.42.3 to v1.46.0. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes, but here is summary most pertainent ones for the R package:
+  * New trace types: `sunburst`, `waterfall`, `isosurface`.
+  * New `hovertemplate` attribute allows for finer-tuned control over tooltip text. See [here](https://plotly-r.com/controlling-tooltips.html#fig:tooltip-format-heatmap) for an example.
+  * Providing a string to `title` is now deprecated (but still works). Instead, use `title = list(text = "title")`. This change was made to support a new title placement API (e.g., `title = list(text = "title", xanchor = "left")`). Note that these changes are relevant for `layout.title` as well as `layout.xaxis.title`/`layout.yaxis.title`/etc.
+
 ## NEW FEATURES
 
 * The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
@@ -12,7 +19,6 @@
 
 ## IMPROVEMENTS
 
-* Upgraded to plotly.js v1.45.3.
 * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
