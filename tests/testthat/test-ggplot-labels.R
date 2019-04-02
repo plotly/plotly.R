@@ -5,7 +5,7 @@ test_that("ggtitle is translated correctly", {
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ggtitle("My amazing plot!")
   info <- expect_doppelganger_built(ggiris, "labels-ggtitle")
-  expect_identical(info$layout$title, "My amazing plot!")
+  expect_identical(info$layout$title$text, "My amazing plot!")
 })
 
 test_that("ylab is translated correctly", {
