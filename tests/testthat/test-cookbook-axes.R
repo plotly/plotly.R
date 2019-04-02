@@ -106,7 +106,7 @@ no.x.title <- bp +
 
 test_that("coord_fixed(ratio)", {
   info <- expect_traces(no.x.title, 1, "no-x-title")
-  expect_identical(info$layout$xaxis$title, "")
+  expect_identical(info$layout$xaxis$title$text, "")
 })
 
 # Also possible to set the axis label with the scale
@@ -133,8 +133,8 @@ bp.fonts <- bp +
 test_that("element_text face, colour, size, angle, vjust, size", {
   info <- expect_traces(bp.fonts, 1, "fonts")
   expect_equivalent(info$layout$xaxis$tickangle, -90)
-  expect_match(info$layout$xaxis$title, "<b>", fixed = TRUE)
-  expect_match(info$layout$xaxis$title, "</b>", fixed = TRUE)
+  expect_match(info$layout$xaxis$title$text, "<b>", fixed = TRUE)
+  expect_match(info$layout$xaxis$title$text, "</b>", fixed = TRUE)
 })
 
 # Label formatters

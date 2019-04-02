@@ -13,7 +13,7 @@ test_that("ylab is translated correctly", {
     geom_point(aes(Petal.Width, Sepal.Width)) +
     ylab("sepal width")
   info <- expect_doppelganger_built(ggiris, "labels-ylab")
-  labs <- c(info$layout$xaxis$title, info$layout$yaxis$title)
+  labs <- c(info$layout$xaxis$title$text, info$layout$yaxis$title$text)
   expect_identical(labs, c("Petal.Width", "sepal width"))
 })
 
