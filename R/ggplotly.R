@@ -439,7 +439,11 @@ gg2list <- function(p, width = NULL, height = NULL,
   if (nchar(plot$labels$title %||% "") > 0) {
     gglayout$title <- list(
       text = faced(plot$labels$title, theme$plot.title$face),
-      font = text2font(theme$plot.title)
+      font = text2font(theme$plot.title),
+      # don't translate vjust to y since they since have very different meaning...
+      # y is allowed to span the paper coordinate whereas vjust it local to it's grob
+      x = theme$plot.title$hjust,
+      xref = "paper"
     )
     gglayout$margin$t <- gglayout$margin$t + gglayout$title$font$size
   }
