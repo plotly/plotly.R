@@ -102,10 +102,11 @@ getLevels <- function(x) {
 tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
 
 # Don't attempt to do "tidy" data training on these trace types
+# Note that non-tidy traces expect/anticipate data_array's of varying lengths
 is_tidy <- function(trace) {
   type <- trace[["type"]] %||% "scatter"
   !type %in% c(
-    "mesh3d", "heatmap", "histogram2d", 
+    "mesh3d", "heatmap", "histogram2d", "isosurface",
     "histogram2dcontour", "contour", "surface"
   )
 }
