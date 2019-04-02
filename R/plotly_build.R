@@ -136,6 +136,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     trace <- verify_type(trace)
     # verify orientation of boxes/bars
     trace <- verify_orientation(trace)
+    # supply sensible defaults based on trace type
+    trace <- coerce_attr_defaults(trace)
+    
+    
     
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]] %||% TRUE)) {
@@ -1021,4 +1025,13 @@ has_fill <- function(trace) {
   fill <- trace[["fill"]] %||% "none"
   if (has_fillcolor && isTRUE(fill != "none")) return(TRUE)
   FALSE
+}
+
+# ensure we've set a sensible trace defaults
+# based on the trace type
+coerce_attr_defaults <- function(trace) {
+  if (identical(trace[["type"]], "sunburst")) {
+    trace$stroke <- trace[["stroke"]] %||% I("white")
+  }
+  trace
 }
