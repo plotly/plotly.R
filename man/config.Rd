@@ -4,7 +4,7 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ..., cloud = FALSE, locale = NULL, mathjax = NULL)
+config(p, ..., locale = NULL, mathjax = NULL)
 }
 \arguments{
 \item{p}{a plotly object}
