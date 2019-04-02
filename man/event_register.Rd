@@ -7,6 +7,8 @@
 event_register(p, event = NULL)
 }
 \arguments{
+\item{p}{a plotly object.}
+
 \item{event}{The type of plotly event. All supported events are listed in the
 function signature above (i.e., the usage section).}
 }

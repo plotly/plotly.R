@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   # On hover, the key field of the event data contains the car name
   # Add that name to the set of all "selected" cars
   observeEvent(event_data("plotly_hover"), {
-    car <- event_data("plotly_hover")$key
+    car <- event_data("plotly_hover")$customdata
     cars_old_new <- c(cars(), car)
     cars(unique(cars_old_new))
   })
@@ -32,8 +32,8 @@ server <- function(input, output, session) {
     mtcars %>%
       plot_ly(
         x = ~wt, y = ~mpg, 
-        key = row.names(mtcars), 
-        color = I(cols)
+        customdata = row.names(mtcars), 
+        marker = list(color = cols)
       ) %>%
       add_markers()
   })

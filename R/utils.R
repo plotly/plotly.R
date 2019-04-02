@@ -130,15 +130,6 @@ colorway <- function(p = NULL) {
 # TODO: make this more unique?
 crosstalk_key <- function() ".crossTalkKey"
 
-# modifyList turns elements that are data.frames into lists
-# which changes the behavior of toJSON
-as_df <- function(x) {
-  if (is.null(x) || is.matrix(x)) return(x)
-  if (is.list(x) && !is.data.frame(x)) {
-    setNames(as.data.frame(x), NULL)
-  }
-}
-
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
@@ -348,7 +339,7 @@ supply_defaults <- function(p) {
     p$x$layout[[p$x$layout$mapType]] <- modify_list(
       list(domain = geoDomain), p$x$layout[[p$x$layout$mapType]]
     )
-  } else {
+  } else if (!length(p$x$layout[["grid"]])) {
     types <- vapply(p$x$data, function(tr) tr[["type"]] %||% "scatter", character(1))
     axes <- unlist(lapply(types, function(x) {
       grep("^[a-z]axis$", names(Schema$traces[[x]]$attributes), value = TRUE) %||% NULL
@@ -502,12 +493,22 @@ verify_attr <- function(proposed, schema) {
       proposed$name <- uniq(proposed$name)
     }
     
-    # if marker.sizemode='area', make sure marker.size is boxed up 
-    # (otherwise, when marker.size is a constant, it always sets the diameter!)
+    # if marker.size was populated via `size` arg (i.e., internal map_size()), 
+    # then it should _always_ be an array
+    # of appropriate length...
+    # (when marker.size is a constant, it always sets the diameter!)
     # https://codepen.io/cpsievert/pen/zazXgw
     # https://github.com/plotly/plotly.js/issues/2735
-    if ("area" %in% proposed$marker$sizemode) {
-      proposed$marker[["size"]] <- i(proposed$marker[["size"]])
+    if (is.default(proposed$marker$size)) {
+      s <- proposed$marker[["size"]]
+      if (length(s) == 1) {
+        # marker.size could be of length 1, but we may have multiple 
+        # markers -- in that case, if marker.size is an array 
+        # of length 1 will result in just one marker
+        # https://codepen.io/cpsievert/pen/aMmOza
+        n <- length(proposed[["x"]] %||% proposed[["y"]] %||% proposed[["lat"]] %||% proposed[["lon"]])
+        proposed$marker[["size"]] <- default(i(rep(s, n)))
+      }
     }
     
     # do the same for "sub-attributes"
@@ -655,6 +656,51 @@ verify_mode <- function(p) {
     }
   }
   p
+}
+
+
+verify_colorscale <- function(p) {
+  p$x$data <- lapply(p$x$data, function(trace) {
+    trace$colorscale <- colorscale_json(trace$colorscale)
+    trace$marker$colorscale <- colorscale_json(trace$marker$colorscale)
+    trace
+  }) 
+  p
+}
+
+# Coerce `x` into a data structure that can map to a colorscale attribute.
+# Note that colorscales can either be the name of a scale (e.g., 'Rainbow') or 
+# a 2D array (e.g., [[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']])
+colorscale_json <- function(x) {
+  if (!length(x)) return(x)
+  if (is.character(x)) return(x)
+  if (is.matrix(x)) {
+    if (ncol(x) != 2) stop("A colorscale matrix requires two columns")
+    x <- as.data.frame(x)
+    x[, 1] <- as.numeric(x[, 1])
+  }
+  # ensure a list like this: list(list(0, 0.5, 1), list("red", "white", "blue"))
+  # converts to the correct dimensions: [[0, 'red'], [0.5, 'white'], [1, 'blue']]
+  if (is.list(x) && length(x) == 2) {
+    n1 <- length(x[[1]])
+    n2 <- length(x[[2]])
+    if (n1 != n2 || n1 == 0 || n2 == 0) {
+      warning("A colorscale list must of elements of the same (non-zero) length")
+    } else if (!is.data.frame(x) && can_be_numeric(x[[1]])) {
+      x <- data.frame(
+        val = as.numeric(x[[1]]),
+        col = as.character(x[[2]]),
+        stringsAsFactors = FALSE
+      )
+      x <- setNames(x, NULL)
+    }
+  }
+  x
+}
+
+can_be_numeric <- function(x) {
+  xnum <- suppressWarnings(as.numeric(x))
+  sum(is.na(x)) == sum(is.na(xnum))
 }
 
 # if an object (e.g. trace.marker) contains a non-default attribute, it has been user-specified

@@ -1,7 +1,7 @@
 #' @import ggplot2
 #' @importFrom grDevices col2rgb extendrange dev.list dev.off rgb as.raster
 #' @importFrom graphics layout
-#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL str
+#' @importFrom utils getFromNamespace modifyList data packageVersion browseURL str file.edit
 #' @importFrom stats setNames complete.cases quantile is.leaf
 #' @importFrom tidyr unnest
 #' @importFrom viridisLite viridis

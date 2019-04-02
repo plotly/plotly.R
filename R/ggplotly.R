@@ -236,10 +236,18 @@ gg2list <- function(p, width = NULL, height = NULL,
     out
   }
   
+  # ggplot2 3.1.0.9000 introduced a Layer method named setup_layer() 
+  # currently, LayerSf is the only core-ggplot2 Layer that makes use
+  # of it https://github.com/tidyverse/ggplot2/pull/2875
+  data <- layer_data
+  if (packageVersion("ggplot2") > "3.1.0") {
+    data <- by_layer(function(l, d) l$setup_layer(d, plot))
+  }
+  
   # Initialise panels, add extra data for margins & missing facetting
   # variables, and add on a PANEL variable to data
   layout <- ggfun("create_layout")(plot$facet, plot$coordinates)
-  data <- layout$setup(layer_data, plot$data, plot$plot_env)
+  data <- layout$setup(data, plot$data, plot$plot_env)
   
   # save the domain of the group for display in tooltips
   groupDomains <- Map(function(x, y) {
