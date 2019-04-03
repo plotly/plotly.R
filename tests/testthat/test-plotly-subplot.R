@@ -210,9 +210,9 @@ test_that("shape paper repositioning", {
   expect_equal(yref, rep("paper", 2))
   
   # now with a fixed height/width
-  p1 <- plot_ly(mtcars) %>%
+  p1 <- plot_ly() %>%
     layout(
-      shapes = ~list(
+      shapes = list(
         type = "rect",
         x0 = 0.25,
         x1 = 0.75,
@@ -225,9 +225,9 @@ test_that("shape paper repositioning", {
         fillcolor = "red"
       )
     )
-  p2 <- plot_ly(mtcars) %>%
+  p2 <- plot_ly() %>%
     layout(
-      shapes = ~list(
+      shapes = list(
         type = "rect",
         y0 = 0.25,
         y1 = 0.75,
