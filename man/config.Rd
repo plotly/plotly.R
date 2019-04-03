@@ -4,13 +4,18 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ..., locale = NULL, mathjax = NULL)
+config(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL,
+  mathjax = NULL)
 }
 \arguments{
 \item{p}{a plotly object}
 
 \item{...}{these arguments are documented at
 \url{https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js}}
+
+\item{cloud}{deprecated. Use \code{showSendToCloud} instead.}
+
+\item{showSendToCloud}{include the send data to cloud button?}
 
 \item{locale}{locale to use. See \href{https://github.com/plotly/plotly.js/tree/master/dist#to-include-localization}{here} for more info.}
 

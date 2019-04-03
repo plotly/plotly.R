@@ -30,8 +30,8 @@
 
 ## CHANGES
 
-* The 'collaborate' button no longer appears in the modebar, and as a result, the `config()` function no longer has a `collaborate` argument.
-* Since plotly.js now defaults to *not* showing the "Edit in Chart Studio" button, the `cloud` argument in `config()` was removed. If you want to show this button, use the new plotly.js `showSendToCloud` config attribute instead (e.g. `config(plot_ly(), showSendToCloud = TRUE)`)
+* The 'collaborate' button no longer appears in the modebar, and is longer supported, so the `config()` function no longer has a `collaborate` argument.
+* The `cloud` argument is now deprecated and will be removed in a future version. Use `showSendToCloud` instead.
 * `ggplotly()` now translates title information to `layout.title.text` (instead of `layout.title`) and `layout.title.font` (instead of `layout.titlefont`)
 
 ## BUG FIXES
