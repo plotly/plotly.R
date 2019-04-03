@@ -488,6 +488,8 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
     }
     
     # tag 'src-able' attributes (needed for api_create())
+    # note that layout has 'src-able' attributes that shouldn't
+    # be turned into grids https://github.com/ropensci/plotly/pull/1489
     isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
     if ((isDataArray || isSrcAble) && !isTRUE(layoutAttr)) {
       proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
