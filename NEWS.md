@@ -39,6 +39,7 @@
 * `subplot()` now works much better with annotations, images, and shapes:
   - When `xref`/`yref` references an x/y axis these references are bumped accordingly (#1181).
   - When `xref`/`yref` references paper coordinates, these coordinates are updated accordingly (#1332).
+* `subplot()` now repositions shapes with fixed height/width (i.e., `xsizemode`/`ysizemode` of `"pixel"`) correctly (#1494).
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
 * When using **shinytest** to test a **shiny** that contains **plotly** graph, false positive differences are no longer reported (rstudio/shinytest#174). 
 * When the `size` argument maps to `marker.size`, it now converts to an array of appropriate length (#1479).
@@ -51,6 +52,7 @@
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 * The `text` attribute is no longer collapsed to a string when `hoveron='fills+points'` (#1448). 
 * `layout.[x-y]axis.domain` is no longer supplied a default when `layout.grid` is specified (#1427).
+* When uploading charts to a plot.ly account via `api_create()`, layout attributes are no longer incorrectly src-ified, which was causing inconsistencies in local/remote rendering of `ggplotly()` charts (#1197).
 
 # 4.8.0
 
