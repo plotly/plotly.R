@@ -42,6 +42,7 @@
 * Recursive attribute validation is now only performed on recursive objects (#1315).
 * The `text` attribute is no longer collapsed to a string when `hoveron='fills+points'` (#1448). 
 * `layout.[x-y]axis.domain` is no longer supplied a default when `layout.grid` is specified (#1427).
+* When uploading charts to a plot.ly account via `api_create()`, layout attributes are no longer incorrectly src-ified, which was causing inconsistencies in local/remote rendering of `ggplotly()` charts (#1197).
 
 # 4.8.0
 
