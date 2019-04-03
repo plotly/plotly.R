@@ -159,7 +159,7 @@ config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL
   args <- list(...)
   if ("collaborate" %in% names(args)) warning("The collaborate button is no longer supported")
   p$x$config <- modify_list(p$x$config, args)
-  if (cloud) message("The `cloud` argument is deprecated. Use `showSendToCloud` instead.")
+  if (cloud) warning("The `cloud` argument is deprecated. Use `showSendToCloud` instead.")
   p$x$config$showSendToCloud <- showSendToCloud
 
   p
