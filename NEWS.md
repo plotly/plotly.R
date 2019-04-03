@@ -20,7 +20,8 @@
     * The `orca()` function now supports conversion of much larger figures (#1322) and works without a mapbox api token (#1314).
     * The `orca_serve()` function was added for efficient exporting of many plotly graphs. For examples, see `help(orca_serve)`.
     * The `orca()` function gains new arguments `more_args` and `...` for finer control over the underlying system commands.
-    
+
+* `ggplotly()` now respects horizontal alignment of **ggplot2** titles (e.g., `ggplotly(qplot(1:10) + ggtitle("A title") + theme(plot.title = element_text(hjust = 1)))`).
 * **plotly** objects can now be serialized and unserialized in different environments (i.e., you can now use `saveRDS()` to save an object as an rds file and restore it on another machine with `readRDS()`). Note this object is *dynamically* linked to JavaScript libraries, so one should take care to use consistent versions of **plotly** when serializing and unserializing (#1376).
 * The `style()` function now supports "partial updates" (i.e. modification of a particular property of an object, rather than the entire object). For example, notice how the first plot retains the original marker shape (a square): `p <- plot_ly(x = 1:10, y = 1:10, symbol = I(15)); subplot(style(p, marker.color = "red"), style(p, marker = list(color = "red")))` (#1342).
 * The `method` argument of `plotlyProxyInvoke()` gains support for a `"reconfig"` method. This makes it possible to modify just the configuration of a plot in a **shiny** app. For an example use, see `plotly_example("shiny", "event_data_annotation")`.
