@@ -369,7 +369,8 @@
           "dragmode": "select"
         },
         "config": {
-          "doubleClick": "reset"
+          "doubleClick": "reset",
+          "showSendToCloud": false
         },
         "source": "A",
         "shinyEvents": [
