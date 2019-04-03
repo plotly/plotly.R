@@ -1030,7 +1030,7 @@ coerce_attr_defaults <- function(trace, layout) {
     # As of v1.46.1, paper_bgcolor defaults to '#fff' which
     # col2rgb() can't parse, but expands to '#ffffff'
     # https://stackoverflow.com/a/2899224/1583084
-    bgcolor <- p$x$layout$paper_bgcolor %||% "#ffffff"
+    bgcolor <- layout$paper_bgcolor %||% "#ffffff"
     trace$stroke <- trace[["stroke"]] %||% default(I(bgcolor))
   }
   trace
