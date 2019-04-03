@@ -137,7 +137,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     # verify orientation of boxes/bars
     trace <- verify_orientation(trace)
     # supply sensible defaults based on trace type
-    trace <- coerce_attr_defaults(trace)
+    trace <- coerce_attr_defaults(trace, p$x$layout)
     
     
     
@@ -1025,9 +1025,13 @@ has_fill <- function(trace) {
 
 # ensure we've set a sensible trace defaults
 # based on the trace type
-coerce_attr_defaults <- function(trace) {
-  if (identical(trace[["type"]], "sunburst")) {
-    trace$stroke <- trace[["stroke"]] %||% I("white")
+coerce_attr_defaults <- function(trace, layout) {
+  if (trace[["type"]] %in% c("sunburst", "pie")) {
+    # As of v1.46.1, paper_bgcolor defaults to '#fff' which
+    # col2rgb() can't parse, but expands to '#ffffff'
+    # https://stackoverflow.com/a/2899224/1583084
+    bgcolor <- p$x$layout$paper_bgcolor %||% "#ffffff"
+    trace$stroke <- trace[["stroke"]] %||% default(I(bgcolor))
   }
   trace
 }
