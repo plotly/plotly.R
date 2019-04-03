@@ -1,12 +1,14 @@
 context("isosurface")
 
-# get the values/x/y/z from the plotly.js mock this test is based on
-mock <- jsonlite::fromJSON(
-  "https://raw.githubusercontent.com/plotly/plotly.js/master/test/image/mocks/gl3d_isosurface_log-axis_slices_surface-fill.json", 
-  simplifyVector = FALSE
-)
-
 test_that("isosurface works with colorscale", {
+  skip_on_cran()
+  
+  # get the values/x/y/z from the plotly.js mock this test is based on
+  mock <- jsonlite::fromJSON(
+    "https://raw.githubusercontent.com/plotly/plotly.js/32738b549dff09eb4e9a095cebc750a3a8ae1ffd/test/image/mocks/gl3d_isosurface_log-axis_slices_surface-fill.json", 
+    simplifyVector = FALSE
+  )
+  
   p <- plot_ly(
     type = "isosurface",
     colorscale = "Rainbow",
