@@ -459,29 +459,37 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  layout$layout <- dplyr::mutate(layout$layout,
+  layout$layout <- dplyr::mutate(
+    layout$layout,
     xaxis = COL,
     yaxis = ROW,
     xanchor = nRows,
-    yanchor = 1L)
+    yanchor = 1L
+  )
   if (inherits(plot$facet, "FacetWrap")) {
     if (plot$facet$params$free$x && plot$facet$params$free$y) {
-      layout$layout <- dplyr::mutate(layout$layout,
+      layout$layout <- dplyr::mutate(
+        layout$layout,
         xaxis = PANEL,
         yaxis = PANEL,
         xanchor = PANEL,
-        yanchor = PANEL)
+        yanchor = PANEL
+      )
     } else if (plot$facet$params$free$x) {
-      layout$layout <- dplyr::mutate(layout$layout,
+      layout$layout <- dplyr::mutate(
+        layout$layout,
         xaxis = PANEL,
-        xanchor = ROW)
+        xanchor = ROW
+      )
     } else if (plot$facet$params$free$y) {
-      layout$layout <- dplyr::mutate(layout$layout,
+      layout$layout <- dplyr::mutate(
+        layout$layout,
         yaxis = PANEL,
-        yanchor = COL)
+        yanchor = COL
+      )
     }
     # anchor X axis to the lowest plot in its column
-    layout$layout <- dplyr::group_by(layout$layout, xaxis) %>%
+    layout$layout <- dplyr::group_by_(layout$layout, "xaxis") %>%
       dplyr::mutate(xanchor = max(as.integer(yaxis))) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(xanchor = if (is.factor(yaxis)) levels(yaxis)[xanchor] else xanchor)
