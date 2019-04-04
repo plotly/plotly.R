@@ -16,11 +16,13 @@ addons:
       - libproj-dev
       - libgeos-dev
       - libgdal-dev
+      
     
 env:
   global:
     # don't treat missing suggested packages as error
     - _R_CHECK_FORCE_SUGGESTS_=false
+    - VDIFFR=true
     # plotly_api_key (for posting to plot.ly)
     - secure: "WsvmMHN4YVhnk0bLRE04APcLbs5s4vWKSHjEdU0bPXd0xdMTzZeP5D7pxyF1983C+P5LpSnGHv4dgwLMBkNzxJwBR7/Ta7lfO1akYILWwxib+1DVbCqUH5Z4Ba1FSCQptIrLNGR3P7+0Lem4hEhqKdPKltFnxhnXO0Y+MeG71IQ="
     # MAPBOX_TOKEN (for testing `plot_mapbox()`)
@@ -31,13 +33,5 @@ env:
 before_install:
   - echo "Sys.setenv('plotly_username' = 'cpsievert')" > ~/.Rprofile
 
-before_script:
-  - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e GITHUB_PAT=$GITHUB_PAT -e MAPBOX_TOKEN=$MAPBOX_TOKEN -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
-
 # work around temporary travis + R 3.5 bug
 r_packages: devtools  
-
-# temporary: needed for plotly input testing in shiny 
-r_github_packages: 
-  - rstudio/shinytest
-  - r-lib/remotes
