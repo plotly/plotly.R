@@ -295,3 +295,18 @@ test_that("Axis domains aren't supplied if layout.grid exists", {
   expect_null(l$layout$xaxis$domain)
   expect_null(l$layout$yaxis$domain)
 })
+
+
+test_that("Informative deprecation message for titlefont", {
+  expect_warning(config(plot_ly(), cloud = TRUE), "cloud")
+})
+
+test_that("Informative warning for invalid config attr", {
+  p <- config(plot_ly(), foobar = TRUE)
+  expect_warning(plotly_build(p), "foobar")
+})
+
+test_that("Informative deprecation message for titlefont", {
+  p <- layout(plot_ly(), title = "A title", titlefont = list(size = 30))
+  expect_warning(plotly_build(p), "titlefont")
+})

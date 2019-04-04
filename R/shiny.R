@@ -6,7 +6,9 @@
 #' @param outputId output variable to read from
 #' @param width,height Must be a valid CSS unit (like \code{"100\%"},
 #'   `"400px"`, `"auto"`) or a number, which will be coerced to a
-#'   string and have `"px"` appended.
+#'   string and have `"px"` appended. Note that, for height, using "auto" 
+#'   or "100%" generally will not work as expected, because of how 
+#'   height is computed with HTML/CSS.
 #' @param inline use an inline (`span()`) or block container 
 #' (`div()`) for the output
 #' @param expr An expression that generates a plotly

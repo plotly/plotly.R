@@ -102,10 +102,11 @@ getLevels <- function(x) {
 tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
 
 # Don't attempt to do "tidy" data training on these trace types
+# Note that non-tidy traces expect/anticipate data_array's of varying lengths
 is_tidy <- function(trace) {
   type <- trace[["type"]] %||% "scatter"
   !type %in% c(
-    "mesh3d", "heatmap", "histogram2d", 
+    "mesh3d", "heatmap", "histogram2d", "isosurface",
     "histogram2dcontour", "contour", "surface"
   )
 }
@@ -416,6 +417,11 @@ verify_attr_names <- function(p) {
     c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
     "layout"
   )
+  attrs_name_check(
+    names(p$x$config),
+    names(Schema$config),
+    "config"
+  )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
@@ -435,7 +441,7 @@ verify_attr_names <- function(p) {
 verify_attr_spec <- function(p) {
   if (!is.null(p$x$layout)) {
     p$x$layout <- verify_attr(
-      p$x$layout, Schema$layout$layoutAttributes
+      p$x$layout, Schema$layout$layoutAttributes, layoutAttr = TRUE
     )
   }
   for (tr in seq_along(p$x$data)) {
@@ -450,7 +456,7 @@ verify_attr_spec <- function(p) {
   p
 }
 
-verify_attr <- function(proposed, schema) {
+verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
   for (attr in names(proposed)) {
     attrSchema <- schema[[attr]] %||% schema[[sub("[0-9]+$", "", attr)]]
     # if schema is missing (i.e., this is an un-official attr), move along
@@ -479,8 +485,10 @@ verify_attr <- function(proposed, schema) {
     }
     
     # tag 'src-able' attributes (needed for api_create())
+    # note that layout has 'src-able' attributes that shouldn't
+    # be turned into grids https://github.com/ropensci/plotly/pull/1489
     isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
-    if (isDataArray || isSrcAble) {
+    if ((isDataArray || isSrcAble) && !isTRUE(layoutAttr)) {
       proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
@@ -508,7 +516,7 @@ verify_attr <- function(proposed, schema) {
     
     # do the same for "sub-attributes"
     if (identical(role, "object") && is.recursive(proposed[[attr]])) {
-      proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]])
+      proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]], layoutAttr = layoutAttr)
     }
   }
   
@@ -517,6 +525,10 @@ verify_attr <- function(proposed, schema) {
 
 attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if ("titlefont" %in% illegalAttrs) {
+    warning("The titlefont attribute is deprecated. Use title = list(font = ...) instead.", call. = FALSE)
+    illegalAttrs <- setdiff(illegalAttrs, "titlefont")
+  }
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
             paste(illegalAttrs, collapse = "', '"), "'\n", 

@@ -110,6 +110,7 @@ verify_partial_bundle <- function(p) {
   # verify that this partial bundle actually supports this viz
   # (at this point, bundleType should never be 'auto' or 'main')
   missingTypes <- setdiff(types, bundleTraceMap[[bundleType]])
+  
   if (length(missingTypes)) {
     msg <- sprintf(
       "The '%s' bundle supports the following trace types: '%s'.\n\n This plotly visualization contains the following trace types: '%s'",
@@ -188,7 +189,8 @@ bundleTraceMap <- list(
     "scatter3d",
     "surface",
     "mesh3d",
-    "cone"
+    "cone",
+    "isosurface"
   ),
   gl2d = c(
     "scatter",
@@ -209,6 +211,7 @@ bundleTraceMap <- list(
     "pie",
     "histogram",
     "ohlc",
-    "candlestick"
+    "candlestick",
+    "waterfall"
   )
 )
