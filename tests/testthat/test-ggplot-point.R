@@ -67,6 +67,6 @@ test_that("can flip axes", {
     coord_flip()
   
   info <- expect_doppelganger_built(p, "point-flip")
-  expect_equivalent(info$layout$xaxis$title, "price")
-  expect_equivalent(info$layout$yaxis$title, "carat")
+  expect_equivalent(info$layout$xaxis$title$text, "price")
+  expect_equivalent(info$layout$yaxis$title$text, "carat")
 })

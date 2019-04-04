@@ -102,10 +102,11 @@ getLevels <- function(x) {
 tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
 
 # Don't attempt to do "tidy" data training on these trace types
+# Note that non-tidy traces expect/anticipate data_array's of varying lengths
 is_tidy <- function(trace) {
   type <- trace[["type"]] %||% "scatter"
   !type %in% c(
-    "mesh3d", "heatmap", "histogram2d", 
+    "mesh3d", "heatmap", "histogram2d", "isosurface",
     "histogram2dcontour", "contour", "surface"
   )
 }
@@ -416,6 +417,11 @@ verify_attr_names <- function(p) {
     c(names(Schema$layout$layoutAttributes), c("barmode", "bargap", "mapType")),
     "layout"
   )
+  attrs_name_check(
+    names(p$x$config),
+    names(Schema$config),
+    "config"
+  )
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
@@ -519,6 +525,10 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
 
 attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   illegalAttrs <- setdiff(proposedAttrs, validAttrs)
+  if ("titlefont" %in% illegalAttrs) {
+    warning("The titlefont attribute is deprecated. Use title = list(font = ...) instead.", call. = FALSE)
+    illegalAttrs <- setdiff(illegalAttrs, "titlefont")
+  }
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
             paste(illegalAttrs, collapse = "', '"), "'\n", 
