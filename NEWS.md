@@ -30,6 +30,7 @@
 
 ## CHANGES
 
+* If `stroke` is specified, `span` now defaults to `I(1)`. This results in a slightly narrower default span for some trace types (e.g., `box`, `contour`), but it also ensures the `stroke` is always visible when it's relevant (e.g. `plot_ly(x = 1:10, y = 1:10, stroke = I("black"))`), making for a more consistent overall default (#1507).
 * The 'collaborate' button no longer appears in the modebar, and is longer supported, so the `config()` function no longer has a `collaborate` argument.
 * The `cloud` argument is now deprecated and will be removed in a future version. Use `showSendToCloud` instead.
 * `ggplotly()` now translates title information to `layout.title.text` (instead of `layout.title`) and `layout.title.font` (instead of `layout.titlefont`)
