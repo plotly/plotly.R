@@ -441,12 +441,10 @@ typedArrayPolyfill <- function() {
   )
 }
 
-# TODO: suggest a plotlyBundles package that has trace-level bundles 
-# and bundle size at print time.
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     name = "plotly-main", 
-    version = "1.42.5",
+    version = "1.46.1",
     package = "plotly",
     src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",

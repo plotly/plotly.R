@@ -208,6 +208,56 @@ test_that("shape paper repositioning", {
   expect_equal(y1, rep(0.75, 2))
   expect_equal(xref, rep("paper", 2))
   expect_equal(yref, rep("paper", 2))
+  
+  # now with a fixed height/width
+  p1 <- plot_ly() %>%
+    layout(
+      shapes = list(
+        type = "rect",
+        x0 = 0.25,
+        x1 = 0.75,
+        xref = "paper",
+        y0 = 0,
+        y1 = 30,
+        yanchor = 0.5,
+        ysizemode = "pixel",
+        yref = "paper",
+        fillcolor = "red"
+      )
+    )
+  p2 <- plot_ly() %>%
+    layout(
+      shapes = list(
+        type = "rect",
+        y0 = 0.25,
+        y1 = 0.75,
+        yref = "paper",
+        x0 = 0,
+        x1 = 30,
+        xanchor = 0.5,
+        xsizemode = "pixel",
+        xref = "paper",
+        line = list(color = "blue")
+      )
+    )
+  
+  s <- subplot(p1, p2)
+  shapes <- expect_doppelganger_built(s, "subplot-reposition-shape-fixed")$layout$shapes
+  expect_length(shapes, 2)
+  
+  xanchor <- lapply(shapes, "[[", "xanchor")[[2]]
+  yanchor <- lapply(shapes, "[[", "yanchor")[[1]]
+  x0 <- sapply(shapes, "[[", "x0")
+  x1 <- sapply(shapes, "[[", "x1")
+  y0 <- sapply(shapes, "[[", "y0")
+  y1 <- sapply(shapes, "[[", "y1")
+  
+  expect_equal(xanchor, 0.76)
+  expect_equal(yanchor, 0.5)
+  expect_equal(x0, c(0.12, 0))
+  expect_equal(x1, c(0.36, 30))
+  expect_equal(y0, c(0, 0.25))
+  expect_equal(y1, c(30, 0.75))
 })
 
 

@@ -52,9 +52,8 @@ control over the interactive behavior. The `ggplotly()` function itself
 has some convenient “high-level” arguments, such as `dynamicTicks`,
 which tells plotly.js to dynamically recompute axes, when appropriate.
 The `style()` function also comes in handy for *modifying* the
-underlying [traces
-attributes](https://plot.ly/r/reference/#scatter-hoveron) used to
-generate the plot:
+underlying trace
+attributes (e.g. [hoveron](https://plot.ly/r/reference/#scatter-hoveron)) used to generate the plot:
 
 ``` r
 gg <- ggplotly(g, dynamicTicks = "y")
@@ -66,20 +65,20 @@ style(gg, hoveron = "points", hoverinfo = "x+y+text", hoverlabel = list(bgcolor 
 Moreover, since `ggplotly()` returns a plotly object, you can apply
 essentially any function from the R package on that object. Some useful
 ones include `layout()` (for [customizing the
-layout](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#customizing-the-layout)),
+layout](https://plotly-r.com/improving-ggplotly.html#modifying-layout)),
 `add_traces()` (and its higher-level `add_*()` siblings, for example
 `add_polygons()`, for [adding new
-traces/data](https://cpsievert.github.io/plotly_book/extending-ggplotly.html#leveraging-statistical-output)),
+traces/data](https://plotly-r.com/improving-ggplotly.html#leveraging-statistical-output)),
 `subplot()` (for [combining multiple plotly
-objects](https://cpsievert.github.io/plotly_book/merging-plotly-objects.html)),
+objects](https://plotly-r.com/arranging-views.html#arranging-plotly-objects)),
 and `plotly_json()` (for inspecting the underlying JSON sent to
 plotly.js).
 
 The `ggplotly()` function will also respect some “unofficial”
 **ggplot2** aesthetics, namely `text` (for [customizing the
-tooltip](https://cpsievert.github.io/plotly_book/a-case-study-of-housing-sales-in-texas.html#fig:ggsubplot)),
+tooltip](https://plotly-r.com/controlling-tooltips.html#tooltip-text-ggplotly)),
 `frame` (for [creating
-animations](https://cpsievert.github.io/plotly_book/key-frame-animations.html)),
+animations](https://plotly-r.com/animating-views.html)),
 and `ids` (for ensuring sensible smooth transitions).
 
 ### Using plotly without ggplot2
@@ -90,12 +89,7 @@ coordinates](https://plot.ly/r/parallel-coordinates-plot/) or
 [maps](https://plot.ly/r/maps/)) or even some visualization that the
 ggplot2 API won’t ever support (e.g., surface,
 [mesh](https://plot.ly/r/3d-mesh/),
-[trisurf](https://plot.ly/r/trisurf/), or sankey diagrams). The
-[cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf)
-is a nice quick reference for this interface, but the [plotly
-cookbook](https://cpsievert.github.io/plotly_book/the-plotly-cookbook.html)
-has more complete overview of the philosophy behind this “non-ggplot2”
-approach.
+[trisurf](https://plot.ly/r/trisurf/), etc).
 
 ``` r
 plot_ly(z = ~volcano, type = "surface")
@@ -103,74 +97,9 @@ plot_ly(z = ~volcano, type = "surface")
 
 ![<https://plot.ly/~brnvg/1134>](https://plot.ly/~brnvg/1134.png)
 
-## Crosstalk support
+## Learn more
 
-The R package has special support for linking/highlighting/filtering
-views that is not (yet) available outside of the R package. This
-functionality is built upon the [**crosstalk**
-package](https://rstudio.github.io/crosstalk/), which distinguishes
-between two event classes: *select* and *filter*. The **plotly** package
-interprets these classes in the following way:
-
-1.  **Select**: add new “selection” trace(s) (i.e., graphical marks) and
-    *dim* the other traces. Some people refer to this as “brushing” or
-    “highlighting”.
-2.  **Filter**: retain “selection” trace(s), but *remove* other traces,
-    and update the layout accordingly. Some people refer to this as
-    “crossfilter” or “drill-down”.
-
-The following gif helps to demonstrate the difference – see
-[here](http://rpubs.com/cpsievert/275511) for the code used to generate
-it.
-
-![<http://rpubs.com/cpsievert/275511>](http://i.imgur.com/cYsuNQn.gif)
-
-Like other [crosstalk enabled
-widgets](https://rstudio.github.io/crosstalk/widgets.html), **plotly**
-responds to filter events, but you can’t (yet) emit a filter event via
-direct manipulation of a plotly graph. Unlike (some) other crosstalk
-enabled widgets, **plotly** has advanced support for select (a much more
-broad class than filter) events, like [persistent/dynamic
-brushing](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#transient-versus-persistent-selection),
-[brushing via indirect
-manipulation](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html#selection-via-indirect-manipulation),
-and even ways to [completely control the appearance new selection
-traces](https://cpsievert.github.io/plotcon17/workshop/day2/#21). In
-other words, these “special” brushing features work when linking
-multiple **plotly** graphs, but may not when linking to other crosstalk
-enabled widgets.
-
-To date, [this slide
-deck](https://cpsievert.github.io/plotcon17/workshop/day2) is the most
-comprehensive, yet somewhat thorough, walk-through of this framework,
-but the [linking views without
-shiny](https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html)
-chapter of the [plotly book](https://cpsievert.github.io/plotly_book/)
-provides even more background. There are also numerous demos shipped
-with the package which provide nice examples (list all the demos via
-`demo(package = "plotly")`).
-
-**plotly**’s **crosstalk** functionality aims to provide tools for
-interactively exploring subsets of your data with a fixed definition
-from data to plot. If you need more flexibility, you can always embed
-**crosstalk** plots within a larger **shiny** app, or even [access and
-respond to any plotly event within
-shiny](https://cpsievert.github.io/plotly_book/linking-views-with-shiny.html),
-but adding **shiny** into the equation comes with a cost – the result is
-no longer standalone HTML (harder to share/host) and linking views
-requires fairly sophicated knowledge/use of shiny’s reactive programming
-framework.
-
-## Examples and documentation
-
-We have numerous online examples on <https://plot.ly/r/> and
-<https://plot.ly/ggplot2/>, but a more comprehensive write-up is also
-available at <https://plotly-book.cpsievert.me/>. The package itself
-ships with a number of demos (list them by running `demo(package =
-"plotly")`) and shiny/rmarkdown examples (list them by running
-`plotly_example("shiny")` or `plotly_example("rmd")`).
-[Carson](https://cpsievert.me) also keeps numerous [slide
-decks](https://talks.cpsievert.me) with useful examples and concepts.
+To learn more about special features that the plotly R package provides (e.g., [client-side linking](https://plotly-r.com/client-side-linking.html), [**shiny** integration](https://plotly-r.com/linking-views-with-shiny.html), [editing and generating static images](https://plotly-r.com/publish.html), [custom events in JavaScript](https://plotly-r.com/javascript.html), and more), see <https://plotly-r.com>. You may already be familiar with existing plotly documentation (e.g., <https://plot.ly/r/>), which is essentially a language-agnostic how-to guide for learning plotly.js, whereas <https://plotly-r.com> is meant to be more wholistic tutorial written by and for the R user. The package itself ships with a number of demos (list them by running `demo(package = "plotly")`) and shiny/rmarkdown examples (list them by running `plotly_example("shiny")` or `plotly_example("rmd")`). [Carson](https://cpsievert.me) also keeps numerous [slide decks](https://talks.cpsievert.me) with useful examples and concepts.
 
 ## Contributing
 
