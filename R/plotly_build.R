@@ -1026,6 +1026,11 @@ has_fill <- function(trace) {
 # ensure we've set a sensible trace defaults
 # based on the trace type
 coerce_attr_defaults <- function(trace, layout) {
+  # if user has specified stroke, make sure the span 
+  # defaults to something greater than 0 (so they can see the stroke!)
+  if (length(trace[["stroke"]]) && !is.default(trace[["stroke"]])) {
+    trace$span <- trace[["span"]] %||% default(I(1))
+  }
   if (trace[["type"]] %in% c("sunburst", "pie")) {
     # As of v1.46.1, paper_bgcolor defaults to '#fff' which
     # col2rgb() can't parse, but expands to '#ffffff'
