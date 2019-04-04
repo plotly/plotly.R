@@ -437,9 +437,15 @@ gg2list <- function(p, width = NULL, height = NULL,
   )
   # main plot title
   if (nchar(plot$labels$title %||% "") > 0) {
-    gglayout$title <- faced(plot$labels$title, theme$plot.title$face)
-    gglayout$titlefont <- text2font(theme$plot.title)
-    gglayout$margin$t <- gglayout$margin$t + gglayout$titlefont$size
+    gglayout$title <- list(
+      text = faced(plot$labels$title, theme$plot.title$face),
+      font = text2font(theme$plot.title),
+      # don't translate vjust to y since they since have very different meaning...
+      # y is allowed to span the paper coordinate whereas vjust it local to it's grob
+      x = theme$plot.title$hjust,
+      xref = "paper"
+    )
+    gglayout$margin$t <- gglayout$margin$t + gglayout$title$font$size
   }
   # ensure there's enough space for the modebar (this is based on a height of 1em)
   # https://github.com/plotly/plotly.js/blob/dd1547/src/components/modebar/index.js#L171
@@ -695,8 +701,11 @@ gg2list <- function(p, width = NULL, height = NULL,
         gridwidth = unitConvert(panelGrid, "pixels", type),
         zeroline = FALSE,
         anchor = anchor,
-        title = faced(axisTitleText, axisTitle$face),
-        titlefont = text2font(axisTitle)
+        # layout.axisid.title don't yet support alignment :(
+        title = list(
+          text = faced(axisTitleText, axisTitle$face),
+          font = text2font(axisTitle)
+        )
       )
       
       # set scaleanchor/scaleratio if these are fixed coordinates

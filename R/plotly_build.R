@@ -136,6 +136,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     trace <- verify_type(trace)
     # verify orientation of boxes/bars
     trace <- verify_orientation(trace)
+    # supply sensible defaults based on trace type
+    trace <- coerce_attr_defaults(trace, p$x$layout)
+    
+    
     
     # attach crosstalk info, if necessary
     if (crosstalk_key() %in% names(dat) && isTRUE(trace[["inherit"]] %||% TRUE)) {
@@ -1017,4 +1021,17 @@ has_fill <- function(trace) {
   fill <- trace[["fill"]] %||% "none"
   if (has_fillcolor && isTRUE(fill != "none")) return(TRUE)
   FALSE
+}
+
+# ensure we've set a sensible trace defaults
+# based on the trace type
+coerce_attr_defaults <- function(trace, layout) {
+  if (trace[["type"]] %in% c("sunburst", "pie")) {
+    # As of v1.46.1, paper_bgcolor defaults to '#fff' which
+    # col2rgb() can't parse, but expands to '#ffffff'
+    # https://stackoverflow.com/a/2899224/1583084
+    bgcolor <- layout$paper_bgcolor %||% "#ffffff"
+    trace$stroke <- trace[["stroke"]] %||% default(I(bgcolor))
+  }
+  trace
 }

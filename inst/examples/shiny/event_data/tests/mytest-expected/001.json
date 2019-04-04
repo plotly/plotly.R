@@ -240,11 +240,13 @@
             "gridwidth": 0.66417600664176,
             "zeroline": false,
             "anchor": "y",
-            "title": "mpg",
-            "titlefont": {
-              "color": "rgba(0,0,0,1)",
-              "family": "",
-              "size": 14.6118721461187
+            "title": {
+              "text": "mpg",
+              "font": {
+                "color": "rgba(0,0,0,1)",
+                "family": "",
+                "size": 14.6118721461187
+              }
             },
             "hoverformat": ".2f"
           },
@@ -300,11 +302,13 @@
             "gridwidth": 0.66417600664176,
             "zeroline": false,
             "anchor": "x",
-            "title": "wt",
-            "titlefont": {
-              "color": "rgba(0,0,0,1)",
-              "family": "",
-              "size": 14.6118721461187
+            "title": {
+              "text": "wt",
+              "font": {
+                "color": "rgba(0,0,0,1)",
+                "family": "",
+                "size": 14.6118721461187
+              }
             },
             "hoverformat": ".2f"
           },
@@ -344,7 +348,7 @@
         },
         "config": {
           "doubleClick": "reset",
-          "cloud": false
+          "showSendToCloud": false
         },
         "source": "A",
         "shinyEvents": [
@@ -423,9 +427,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.42.5",
+          "version": "1.46.1",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.42.5"
+            "href": "plotly-htmlwidgets-css-1.46.1"
           },
           "meta": null,
           "script": null,
@@ -436,9 +440,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.42.5",
+          "version": "1.46.1",
           "src": {
-            "href": "plotly-main-1.42.5"
+            "href": "plotly-main-1.46.1"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
