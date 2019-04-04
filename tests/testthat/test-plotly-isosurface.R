@@ -2,6 +2,7 @@ context("isosurface")
 
 test_that("isosurface works with colorscale", {
   skip_on_cran()
+  skip_on_travis()
   
   # get the values/x/y/z from the plotly.js mock this test is based on
   mock <- jsonlite::fromJSON(
