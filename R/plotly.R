@@ -77,7 +77,7 @@
 #' with the source argument in [event_data()] to retrieve the 
 #' event data corresponding to a specific plot (shiny apps can have multiple plots).
 #' @author Carson Sievert
-#' @references <https://plotly-book.cpsievert.me/the-plotly-cookbook.html>
+#' @references <https://plotly-r.com/overview.html>
 #' @seealso \itemize{
 #'  \item For initializing a plotly-geo object: [plot_geo()]
 #'  \item For initializing a plotly-mapbox object: [plot_mapbox()]

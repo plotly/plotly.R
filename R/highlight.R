@@ -50,7 +50,7 @@
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
-#' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+#' @references \url{https://plotly-r.com/client-side-linking.html}
 #' @seealso [attrs_selected()]
 #' @examples
 #' 

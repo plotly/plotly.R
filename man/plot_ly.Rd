@@ -152,7 +152,7 @@ add_paths(p, linetype = ~Species)
 
 }
 \references{
-\url{https://plotly-book.cpsievert.me/the-plotly-cookbook.html}
+\url{https://plotly-r.com/overview.html}
 }
 \seealso{
 \itemize{

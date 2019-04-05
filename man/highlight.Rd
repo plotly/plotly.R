@@ -99,7 +99,7 @@ highlight(layout(gg, showlegend = TRUE), selected = s)
 
 }
 \references{
-\url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+\url{https://plotly-r.com/client-side-linking.html}
 }
 \seealso{
 \code{\link[=attrs_selected]{attrs_selected()}}
