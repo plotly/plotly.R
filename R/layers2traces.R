@@ -786,6 +786,8 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "box",
+    notched = params[["notch"]],
+    notchwidth = params[["notchwidth"]],
     fillcolor = toRGB(
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
