@@ -495,10 +495,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
     }
     # anchor X axis to the lowest plot in its column
-    layout$layout <- dplyr::group_by_(layout$layout, "xaxis") %>%
-      dplyr::mutate(xanchor = max(as.integer(yaxis))) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(xanchor = if (is.factor(yaxis)) levels(yaxis)[xanchor] else xanchor)
+    layout$layout <- dplyr::group_by_(layout$layout, "xaxis")
+    layout$layout <-  dplyr::mutate(layout$layout, xanchor = max(as.integer(yaxis)))
   }
   layout$layout <- as.data.frame(layout$layout)
 
