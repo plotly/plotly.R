@@ -777,7 +777,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
-  compact(list(
+  trace <- compact(list(
     x = data[["x"]],
     y = data[["y"]],
     hoverinfo = "y",
@@ -790,22 +790,38 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
     ),
-    # marker styling must inherit from GeomPoint$default_aes
-    # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L77
-    marker = list(
-      opacity = GeomPoint$default_aes$alpha,
-      outliercolor = toRGB(GeomPoint$default_aes$colour),
-      line = list(
-        width = mm2pixels(GeomPoint$default_aes$stroke),
-        color = toRGB(GeomPoint$default_aes$colour)
-      ),
-      size = mm2pixels(GeomPoint$default_aes$size)
-    ),
     line = list(
       color = aes2plotly(data, params, "colour"),
       width = aes2plotly(data, params, "size")
     )
   ))
+  
+  # handle special `outlier.shape=NA` case
+  if (is.na(params$outlier.shape)) {
+    params$outlier.alpha <- 0
+  }
+  
+  # redefine aes meaning using outlier params
+  data$alpha  <- params$outlier.alpha %||% data$alpha
+  data$fill   <- params$outlier.fill %||% data$fill
+  data$shape  <- params$outlier.shape %||% data$shape
+  data$stroke <- params$outlier.stroke %||% data$stroke
+  data$colour <- params$outlier.colour %||% data$colour
+  data$size   <- params$outlier.size %||% data$size
+  
+  trace$marker <- list(
+    opacity = aes2plotly(data, params, "alpha"),
+    # I don't think this is relevant if line.color is defined?
+    color = aes2plotly(data, params, "fill"),
+    symbol = aes2plotly(data, params, "shape"),
+    line = list(
+      width = aes2plotly(data, params, "stroke"),
+      color = aes2plotly(data, params, "colour")
+    ),
+    size = aes2plotly(data, params, "size")
+  )
+  
+  trace
 }
 
 
@@ -1007,7 +1023,6 @@ aes2plotly <- function(data, params, aes = "size") {
     # https://github.com/ropensci/plotly/pull/1481
     if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
   }
-  
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
   converter <- switch(
     aes, 
