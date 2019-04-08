@@ -50,14 +50,13 @@
 #' @param ... currently not supported.
 #' @export
 #' @author Carson Sievert
-#' @references \url{https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html}
+#' @references \url{https://plotly-r.com/client-side-linking.html}
 #' @seealso [attrs_selected()]
 #' @examples
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 
 #' 
-#' library(crosstalk)
 #' d <- highlight_key(txhousing, ~city)
 #' p <- ggplot(d, aes(date, median, group = city)) + geom_line()
 #' gg <- ggplotly(p, tooltip = "city") 

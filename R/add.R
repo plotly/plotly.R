@@ -33,7 +33,7 @@ add_data <- function(p, data = NULL) {
 #' @param xend "final" x position (in this context, x represents "start")
 #' @param yend "final" y position (in this context, y represents "start")
 #' @seealso [plot_ly()]
-#' @references \url{http://plotly-book.cpsievert.me/the-plotly-cookbook.html}
+#' @references \url{https://plotly-r.com/overview.html}
 #' 
 #' \url{https://plot.ly/r}
 #' 
