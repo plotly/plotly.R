@@ -190,14 +190,113 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
-  aez <- names(GeomBoxplot$default_aes)
-  for (i in aez) {
-    prestats_data[[i]] <- NULL
+  # Code adapted from GeomBoxplot$draw_group()
+  data$fill <- scales::alpha(data$fill, data$alpha)
+  data$hovertext <- NULL
+  whiskers <- dplyr::bind_rows(
+    dplyr::mutate(data, xend = x, y = upper, yend = ymax),
+    dplyr::mutate(data, xend = x, y = lower, yend = ymin)
+  )
+  box <- dplyr::mutate(
+    data,
+    ymin = lower, 
+    y = middle, 
+    ymax = upper, 
+    ynotchlower = ifelse(params$notch, notchlower, NA), 
+    ynotchupper = ifelse(params$notch, notchupper, NA), 
+    notchwidth = params$notchwidth
+  )
+  
+  outliers <- if (length(data$outliers) && !is.na(params$outlier.shape)) {
+    tidyr::unnest(data) %>%
+      dplyr::mutate(
+        y = outliers,
+        # TODO: respect tooltip
+        hovertext = paste("x:", x, "y:", y),
+        colour = params$outlier.colour %||% colour, 
+        fill = params$outlier.fill %||% fill, 
+        shape = params$outlier.shape %||% shape, 
+        size = params$outlier.size %||% size, 
+        stroke = params$outlier.stroke %||% stroke,
+        alpha = params$outlier.alpha %||% alpha
+      )
   }
-  vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
-  prefix_class(
-    merge(prestats_data, data[names(data) %in% vars], by = c("PANEL", "group"), sort = FALSE),
-    "GeomBoxplot"
+  
+  # If boxplot has notches, it needs to drawn as a polygon (instead of a crossbar/rect)
+  # This code is adapted from GeomCrossbar$draw_panel()
+  if (params$notch) {
+    # TODO: where does fatten come from?
+    fatten <- 2.5
+    middle <- transform(
+      box, x = xmin, xend = xmax, yend = y, 
+      size = size * fatten, alpha = NA
+    )
+    if (box$ynotchlower < box$ymin || box$ynotchupper > box$ymax) 
+      message("notch went outside hinges. Try setting notch=FALSE.")
+    notchindent <- (1 - box$notchwidth) * (box$xmax - box$xmin)/2
+    middle$x <- middle$x + notchindent
+    middle$xend <- middle$xend - notchindent
+    box <- data.frame(
+      x = c(
+        box$xmin, 
+        box$xmin, 
+        box$xmin + notchindent, 
+        box$xmin, 
+        box$xmin, 
+        box$xmax, 
+        box$xmax, 
+        box$xmax - notchindent, 
+        box$xmax, 
+        box$xmax, 
+        box$xmin
+      ), y = c(
+        box$ymax, 
+        box$ynotchupper, 
+        box$y, 
+        box$ynotchlower, 
+        box$ymin, 
+        box$ymin, 
+        box$ynotchlower, 
+        box$y, 
+        box$ynotchupper, 
+        box$ymax, 
+        box$ymax
+      ), 
+      alpha = box$alpha, 
+      colour = box$colour, 
+      size = box$size, 
+      linetype = box$linetype, 
+      fill = box$fill, 
+      group = seq_len(nrow(box)), 
+      stringsAsFactors = FALSE
+  )
+  }
+  
+  # place an invisible marker at the boxplot middle 
+  # for some sensible hovertext
+  hover_pts <- data %>% 
+    dplyr::mutate(
+      # TODO: 
+      # (1) respect tooltip argument
+      # (2) include varwidth and/or notch information?
+      hovertext = paste(
+        paste("Max:", ymax),
+        paste("Upper:", upper),
+        paste("Middle:", middle),
+        paste("Lower:", lower),
+        paste("Min:", ymin),
+        sep = br()
+      ),
+      alpha = 0
+    ) %>%
+    dplyr::select(x, y = middle, hovertext, alpha, colour)
+  
+  # to_basic.GeomCrossbar() returns list of 2 data frames
+  c(
+    if (params$notch) list(prefix_class(box, "GeomPolygon")) else to_basic.GeomCrossbar(box, params = params), 
+    list(to_basic.GeomSegment(whiskers)), 
+    list(prefix_class(hover_pts, "GeomPoint")), 
+    if (length(outliers)) list(prefix_class(outliers, "GeomPoint"))
   )
 }
 
