@@ -206,7 +206,6 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
     ynotchupper = ifelse(params$notch, notchupper, NA), 
     notchwidth = params$notchwidth
   )
-  
   outliers <- if (length(data$outliers) && !is.na(params$outlier.shape)) {
     tidyr::unnest(data) %>%
       dplyr::mutate(
@@ -221,57 +220,6 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
         alpha = params$outlier.alpha %||% alpha
       )
   }
-  
-  # If boxplot has notches, it needs to drawn as a polygon (instead of a crossbar/rect)
-  # This code is adapted from GeomCrossbar$draw_panel()
-  if (params$notch) {
-    # TODO: where does fatten come from?
-    fatten <- 2.5
-    middle <- transform(
-      box, x = xmin, xend = xmax, yend = y, 
-      size = size * fatten, alpha = NA
-    )
-    if (box$ynotchlower < box$ymin || box$ynotchupper > box$ymax) 
-      message("notch went outside hinges. Try setting notch=FALSE.")
-    notchindent <- (1 - box$notchwidth) * (box$xmax - box$xmin)/2
-    middle$x <- middle$x + notchindent
-    middle$xend <- middle$xend - notchindent
-    box <- data.frame(
-      x = c(
-        box$xmin, 
-        box$xmin, 
-        box$xmin + notchindent, 
-        box$xmin, 
-        box$xmin, 
-        box$xmax, 
-        box$xmax, 
-        box$xmax - notchindent, 
-        box$xmax, 
-        box$xmax, 
-        box$xmin
-      ), y = c(
-        box$ymax, 
-        box$ynotchupper, 
-        box$y, 
-        box$ynotchlower, 
-        box$ymin, 
-        box$ymin, 
-        box$ynotchlower, 
-        box$y, 
-        box$ynotchupper, 
-        box$ymax, 
-        box$ymax
-      ), 
-      alpha = box$alpha, 
-      colour = box$colour, 
-      size = box$size, 
-      linetype = box$linetype, 
-      fill = box$fill, 
-      group = seq_len(nrow(box)), 
-      stringsAsFactors = FALSE
-  )
-  }
-  
   # place an invisible marker at the boxplot middle 
   # for some sensible hovertext
   hover_pts <- data %>% 
@@ -291,9 +239,48 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
     ) %>%
     dplyr::select(x, y = middle, hovertext, alpha, colour)
   
-  # to_basic.GeomCrossbar() returns list of 2 data frames
+  # If boxplot has notches, it needs to drawn as a polygon (instead of a crossbar/rect)
+  # This code is adapted from GeomCrossbar$draw_panel()
+  box_dat <- if (!params$notch) {
+    to_basic.GeomCrossbar(box, params = params)
+  } else {
+    # fatten is a parameter to GeomCrossbar$draw_panel() and is always 2 when called from GeomBoxplot$draw_panel()
+    fatten <- 2
+    middle <- transform(
+      box, x = xmin, xend = xmax, yend = y, 
+      size = size * fatten, alpha = NA
+    )
+    if (box$ynotchlower < box$ymin || box$ynotchupper > box$ymax) 
+      message("notch went outside hinges. Try setting notch=FALSE.")
+    notchindent <- (1 - box$notchwidth) * (box$xmax - box$xmin)/2
+    middle$x <- middle$x + notchindent
+    middle$xend <- middle$xend - notchindent
+    
+    box$notchindent <- notchindent
+    boxes <- split(box, seq_len(nrow(box)))
+    box <- dplyr::bind_rows(lapply(boxes, function(b) {
+      dplyr::bind_rows(
+        dplyr::mutate(b, x = xmin,               y = ymax),
+        dplyr::mutate(b, x = xmin,               y = notchupper),
+        dplyr::mutate(b, x = xmin + notchindent, y = middle),
+        dplyr::mutate(b, x = xmin,               y = notchlower),
+        dplyr::mutate(b, x = xmin,               y = ymin),
+        dplyr::mutate(b, x = xmax,               y = ymin),
+        dplyr::mutate(b, x = xmax,               y = notchlower),
+        dplyr::mutate(b, x = xmax - notchindent, y = middle),
+        dplyr::mutate(b, x = xmax,               y = notchupper),
+        dplyr::mutate(b, x = xmax,               y = ymax)
+      )
+    }))
+    
+    list(
+      prefix_class(box, "GeomPolygon"),
+      to_basic.GeomSegment(middle)
+    )
+  }
+  # box_dat is list of 2 data frames
   c(
-    if (params$notch) list(prefix_class(box, "GeomPolygon")) else to_basic.GeomCrossbar(box, params = params), 
+    box_dat, 
     list(to_basic.GeomSegment(whiskers)), 
     list(prefix_class(hover_pts, "GeomPoint")), 
     if (length(outliers)) list(prefix_class(outliers, "GeomPoint"))
