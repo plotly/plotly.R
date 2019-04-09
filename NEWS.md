@@ -41,6 +41,7 @@
   - When `xref`/`yref` references an x/y axis these references are bumped accordingly (#1181).
   - When `xref`/`yref` references paper coordinates, these coordinates are updated accordingly (#1332).
 * `subplot()` now repositions shapes with fixed height/width (i.e., `xsizemode`/`ysizemode` of `"pixel"`) correctly (#1494).
+* The `colorscale` attribute now correctly handles a wider range of input values (#1432, #1485)
 * The colorscale generated via the `color` argument in `plot_ly()` now uses an evenly spaced grid of values instead of quantiles (#1308).
 * When using **shinytest** to test a **shiny** that contains **plotly** graph, false positive differences are no longer reported (rstudio/shinytest#174). 
 * When the `size` argument maps to `marker.size`, it now converts to an array of appropriate length (#1479).
