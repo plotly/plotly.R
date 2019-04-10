@@ -35,4 +35,6 @@ before_script:
 r_packages: devtools  
 
 # temporary: needed for plotly input testing in shiny 
-r_github_packages: rstudio/shinytest
+r_github_packages: 
+  - rstudio/shinytest
+  - r-lib/remotes
