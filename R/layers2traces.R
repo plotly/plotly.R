@@ -226,18 +226,18 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
     dplyr::mutate(
       # TODO: 
       # (1) respect tooltip argument
-      # (2) include varwidth and/or notch information?
+      # (2) include varwidth and/or notch information, if relevant
       hovertext = paste(
-        paste("Max:", ymax),
-        paste("Upper:", upper),
-        paste("Middle:", middle),
-        paste("Lower:", lower),
-        paste("Min:", ymin),
+        paste("Max:", format(ymax)),
+        paste("Upper:", format(upper)),
+        paste("Middle:", format(middle)),
+        paste("Lower:", format(lower)),
+        paste("Min:", format(ymin)),
         sep = br()
       ),
       alpha = 0
     ) %>%
-    dplyr::select(x, y = middle, hovertext, alpha, colour)
+    dplyr::select(PANEL, x, y = middle, hovertext, alpha, fill)
   
   # If boxplot has notches, it needs to drawn as a polygon (instead of a crossbar/rect)
   # This code is adapted from GeomCrossbar$draw_panel()
