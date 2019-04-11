@@ -310,11 +310,13 @@ plot_geo <- function(data = data.frame(), ..., offline = FALSE) {
 #' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
 #' @examples
 #' 
+#' \dontrun{
 #' hc <- hclust(dist(USArrests), "ave")
 #' dend1 <- as.dendrogram(hc)
 #' plot_dendro(dend1, height = 600) %>% 
 #'   hide_legend() %>% 
 #'   highlight(persistent = TRUE, dynamic = TRUE)
+#' }
 #' 
 
 plot_dendro <- function(d, set = "A", xmin = -50, height = 500, width = 500, ...) {
