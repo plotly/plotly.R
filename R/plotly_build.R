@@ -226,7 +226,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       # 3. The grouping from (2) and any groups detected via dplyr::groups()
       #    are combined into a single grouping variable, .plotlyGroupIndex
       builtData <- arrange_safe(builtData, ".plotlyTraceIndex")
-      isComplete <- complete.cases(builtData[names(builtData) %in% c("x", "y", "z")])
+      # Missing values have special meaning for waterfall
+      vars <- if (trace$type != "waterfall") c("x", "y", "z")
+      isComplete <- complete.cases(builtData[names(builtData) %in% vars])
       # warn about missing values if groups aren't relevant for this trace type
       if (any(!isComplete) && !has_group(trace)) {
         warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
