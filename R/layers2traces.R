@@ -1,7 +1,12 @@
 # layer -> trace conversion
 layers2traces <- function(data, prestats_data, layout, p) {
   # Attach a "geom class" to each layer of data for method dispatch
-  data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
+  data <- Map(function(x, y) {
+    cl <- class(y$geom)[1]
+    # is this layer coming from plotly::geom_boxplot2()?
+    cl <- if (isTRUE(y$plotlyGeomBoxplot2)) "GeomBoxplot2" else cl
+    prefix_class(x, cl)
+  }, data, p$layers)
   
   # Extract parameters (and "hovertext aesthetics") in each layer
   params <- Map(function(x, y) {
@@ -284,6 +289,19 @@ to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
     list(to_basic.GeomSegment(whiskers)), 
     list(prefix_class(hover_pts, "GeomPoint")), 
     if (length(outliers)) list(prefix_class(outliers, "GeomPoint"))
+  )
+}
+
+#' @export
+to_basic.GeomBoxplot2 <- function(data, prestats_data, layout, params, p, ...) {
+  aez <- names(GeomBoxplot$default_aes)
+  for (i in aez) {
+    prestats_data[[i]] <- NULL
+  }
+  vars <- c("PANEL", "group", "key", aez, grep("_plotlyDomain$", names(data), value = T))
+  prefix_class(
+    merge(prestats_data, data[names(data) %in% vars], by = c("PANEL", "group"), sort = FALSE),
+    "GeomBoxplot"
   )
 }
 
@@ -859,6 +877,39 @@ geom2trace.GeomPolygon <- function(data, params, p) {
   if (inherits(data, "GeomSmooth")) L$hoverinfo <- "x+y"
   if (inherits(data, "GeomCrossbar")) L$hoverinfo <- "none"
   compact(L)
+}
+
+#' @export
+geom2trace.GeomBoxplot2 <- function(data, params, p) {
+  compact(list(
+    x = data[["x"]],
+    y = data[["y"]],
+    hoverinfo = "y",
+    key = data[["key"]],
+    customdata = data[["customdata"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
+    type = "box",
+    fillcolor = toRGB(
+      aes2plotly(data, params, "fill"),
+      aes2plotly(data, params, "alpha")
+    ),
+    # marker styling must inherit from GeomPoint$default_aes
+    # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L77
+    marker = list(
+      opacity = GeomPoint$default_aes$alpha,
+      outliercolor = toRGB(GeomPoint$default_aes$colour),
+      line = list(
+        width = mm2pixels(GeomPoint$default_aes$stroke),
+        color = toRGB(GeomPoint$default_aes$colour)
+      ),
+      size = mm2pixels(GeomPoint$default_aes$size)
+    ),
+    line = list(
+      color = aes2plotly(data, params, "colour"),
+      width = aes2plotly(data, params, "size")
+    )
+  ))
 }
 
 #' @export
