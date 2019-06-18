@@ -91,6 +91,7 @@ ENV VDIFFR=true
 EXPOSE 3838
 
 RUN R -e "install.packages('assertthat')"
+RUN R -e "install.packages('testthat')"
 RUN R -e "update.packages(ask=FALSE)"
 
 # install any new dependencies, then either manage cases (the default) or run tests
