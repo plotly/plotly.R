@@ -51,8 +51,13 @@ lm_app <- function(dat, x, y, key = row.names(dat)) {
       req(input$degree)
       is_outlier <- key %in% keys()
       modelDat <- dat[!is_outlier, ]
-      formula <- as.formula(
-        sprintf("%s ~ poly(%s, degree = %s)", as.character(y)[2], as.character(x)[2], input$degree)
+      formula <- substitute(
+        y ~ poly(x, degree = degree), 
+        list(
+          y = y[[2]],
+          x = x[[2]],
+          degree = input$degree
+        )
       )
       m <- lm(formula, modelDat)
       modelDat$yhat <- as.numeric(fitted(m))
