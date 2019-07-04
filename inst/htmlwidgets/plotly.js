@@ -113,7 +113,7 @@ HTMLWidgets.widget({
           flex.appendChild(container);
         }
       }
-
+      
       // finally, insert the flexbox inside the htmlwidget container,
       // but before the plotly graph div
       graphDiv.parentElement.insertBefore(flex, graphDiv);
@@ -179,7 +179,13 @@ HTMLWidgets.widget({
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
       // a new webgl context
       // https://github.com/plotly/plotly.js/blob/2b24f9def901831e61282076cf3f835598d56f0e/src/plot_api/plot_api.js#L531-L532
-      var plot = Plotly.react(graphDiv, x);
+
+      // TODO: restore crosstalk selections?
+      Plotly.purge(graphDiv);
+      // TODO: why is this necessary to get crosstalk working?
+      graphDiv.data = undefined;
+      graphDiv.layout = undefined;
+      var plot = Plotly.plot(graphDiv, x);
     }
     
     // Trigger plotly.js calls defined via `plotlyProxy()`
