@@ -430,28 +430,26 @@
           "stylesheet": null,
           "head": null,
           "attachment": null,
-          "package": null,
           "all_files": true
         },
         {
           "name": "crosstalk",
-          "version": "1.0.0",
+          "version": "1.0.1",
           "src": {
-            "href": "crosstalk-1.0.0"
+            "href": "crosstalk-1.0.1"
           },
           "meta": null,
           "script": "js/crosstalk.min.js",
           "stylesheet": "css/crosstalk.css",
           "head": null,
           "attachment": null,
-          "package": null,
           "all_files": true
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.46.1",
+          "version": "1.48.3",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.46.1"
+            "href": "plotly-htmlwidgets-css-1.48.3"
           },
           "meta": null,
           "script": null,
@@ -462,9 +460,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.46.1",
+          "version": "1.48.3",
           "src": {
-            "href": "plotly-main-1.46.1"
+            "href": "plotly-main-1.48.3"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
