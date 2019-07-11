@@ -506,10 +506,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
+  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z[["x"]]$dimension %()% z$x.range %||% z$x_range))
+  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z[["x"]]$dimension %()% z$x.range %||% z$x_range))
+  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z[["y"]]$dimension %()% z$y.range %||% z$y_range))
+  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z[["y"]]$dimension %()% z$y.range %||% z$y_range))
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -566,7 +566,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       # allocate enough space for the _longest_ text label
       axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(layout$panel_params, "[[", "x.labels"))
+      labz <- unlist(lapply(layout$panel_params, function(pp) pp[["x"]]$get_labels %()% pp$x.labels))
       lab <- labz[which.max(nchar(labz))]
       panelMarginY <- panelMarginY + axisTicksX +
         bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))[["height"]]
@@ -578,7 +578,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       # allocate enough space for the _longest_ text label
       axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(layout$panel_params, "[[", "y.labels"))
+      labz <- unlist(lapply(layout$panel_params, function(pp) pp[["y"]]$get_labels %()% pp$y.labels))
       lab <- labz[which.max(nchar(labz))]
       panelMarginX <- panelMarginX + axisTicksY +
         bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))[["width"]]
@@ -615,7 +615,10 @@ gg2list <- function(p, width = NULL, height = NULL,
         idx <- rng$graticule$type == direction & !is.na(rng$graticule$degree_label)
         tickData <- rng$graticule[idx, ]
         # TODO: how to convert a language object to unicode character string?
-        rng[[paste0(xy, ".labels")]] <- as.character(tickData[["degree_label"]])
+        rng[[paste0(xy, ".labels")]] <- sub(
+          "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
+          sub("\"", "", tickData[["degree_label"]])
+        )
         rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
         
         # If it doesn't already exist (for this panel), 
@@ -650,14 +653,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         tickExists <- with(rng$graticule, sapply(degree_label, is.language))
         if (sum(tickExists) == 0) {
           theme$axis.ticks.length <- 0
-        } else{
-          # convert the special *degree expression in plotmath to HTML entity
-          # TODO: can this be done more generally for all ?
-          rng[[paste0(xy, ".labels")]] <- sub(
-            "\\*\\s+degree[ ]?[\\*]?", "&#176;", rng[[paste0(xy, ".labels")]]
-          )
         }
-        
       }
       
       # stuff like layout$panel_params is already flipped, but scales aren't
@@ -687,16 +683,19 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
       
+      ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
+      tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
+      
       axisObj <- list(
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
         range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
-        ticktext = rng[[paste0(xy, ".labels")]],
-        tickvals = rng[[paste0(xy, ".major")]],
+        ticktext = ticktext,
+        tickvals = tickvals,
         categoryorder = "array",
-        categoryarray = rng[[paste0(xy, ".labels")]],
+        categoryarray = ticktext,
         nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),

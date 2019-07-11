@@ -36,6 +36,11 @@ is.discrete <- function(x) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
 
+"%()%" <- function(x, y) {
+  if (is.function(x)) return(x())
+  y
+}
+
 # kind of like %||%, but only respects user-defined defaults
 # (instead of defaults provided in the build step)
 "%|D|%" <- function(x, y) {
