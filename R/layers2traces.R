@@ -417,8 +417,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
-  data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
+  x <- if (inherits(p$coordinates, "CoordFlip")) "y" else "x"
+  lay <- tidyr::gather_(layout$layout, "variable", x, paste0(x, c("_min", "_max")))
+  data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
+  data[["x"]] <- data[[x]]
   data[["y"]] <- data$yintercept
   prefix_class(data, c("GeomHline", "GeomPath"))
 }
@@ -429,8 +431,10 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
-  data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
+  y <- if (inherits(p$coordinates, "CoordFlip")) "x" else "y"
+  lay <- tidyr::gather_(layout$layout, "variable", y, paste0(y, c("_min", "_max")))
+  data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
+  data[["y"]] <- data[[y]]
   data[["x"]] <- data$xintercept
   prefix_class(data, c("GeomVline", "GeomPath"))
 }

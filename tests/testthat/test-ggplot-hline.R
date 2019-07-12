@@ -75,3 +75,16 @@ test_that("hline/vline/abline split on linetype/colour/size", {
     unique(vapply(l$data, function(x) x$line$width, numeric(1))), 4
   )
 })
+
+
+test_that("hline works with coord_flip", {
+  
+  gg <- ggplot() + 
+    geom_point(aes(6, 5)) + 
+    geom_hline(yintercept = 5) + 
+    coord_flip()
+  
+  l <- plotly_build(gg)$x
+  expect_equivalent(l$data[[2]]$x, c(5, 5))
+  expect_equivalent(l$data[[2]]$y, c(5.95, 6.05))
+})
