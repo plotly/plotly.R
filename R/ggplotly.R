@@ -506,10 +506,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z[["x"]]$dimension %()% z$x.range %||% z$x_range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z[["x"]]$dimension %()% z$x.range %||% z$x_range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z[["y"]]$dimension %()% z$y.range %||% z$y_range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z[["y"]]$dimension %()% z$y.range %||% z$y_range))
+  layout$layout$x_min <- sapply(layout$panel_params, function(z) { min(z[["x"]]$dimension %()% z$x.range %||% z$x_range) })
+  layout$layout$x_max <- sapply(layout$panel_params, function(z) { max(z[["x"]]$dimension %()% z$x.range %||% z$x_range) })
+  layout$layout$y_min <- sapply(layout$panel_params, function(z) { min(z[["y"]]$dimension %()% z$y.range %||% z$y_range) })
+  layout$layout$y_max <- sapply(layout$panel_params, function(z) { max(z[["y"]]$dimension %()% z$y.range %||% z$y_range) })
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
