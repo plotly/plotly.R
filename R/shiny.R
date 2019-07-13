@@ -58,9 +58,9 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
   p <- if (promises::is.promising(x)) {
-    promises::then(x, plotly_build)
+    promises::then(x, ggplotly)
   } else {
-    plotly_build(x)
+    ggplotly(x)
   }
   register_plot_events(p)
   p
