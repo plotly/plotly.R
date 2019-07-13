@@ -617,7 +617,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         # TODO: how to convert a language object to unicode character string?
         rng[[paste0(xy, ".labels")]] <- sub(
           "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
-          sub("\"", "", tickData[["degree_label"]])
+          gsub("\"", "", tickData[["degree_label"]])
         )
         rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
         
