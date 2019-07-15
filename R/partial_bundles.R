@@ -189,8 +189,7 @@ bundleTraceMap <- list(
     "scatter3d",
     "surface",
     "mesh3d",
-    "cone",
-    "isosurface"
+    "cone"
   ),
   gl2d = c(
     "scatter",

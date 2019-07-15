@@ -1,5 +1,3 @@
-# ------------------------------------------------------------------------------
-# Remove VMODE to run vdiffr::manage_cases()
 # $ docker build -t cpsievert/plotly-vtest .
 # $ docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-vtest
 # ------------------------------------------------------------------------------
@@ -92,6 +90,9 @@ RUN chmod 777 /usr/bin/orca
 ENV VDIFFR=true
 EXPOSE 3838
 
+RUN R -e "install.packages('assertthat')"
+RUN R -e "install.packages('testthat')"
+ARG CRANCACHE=1
 RUN R -e "update.packages(ask=FALSE)"
 
 # install any new dependencies, then either manage cases (the default) or run tests
