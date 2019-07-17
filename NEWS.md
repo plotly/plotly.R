@@ -7,7 +7,7 @@
 ## BUG FIXES
 
 * `ggplotly()` now positions the x-axis in the last column of a `facet_wrap()` properly (#1501).
-
+* `ggplotly()` now handles `geom_hline()`/`geom_vline()` correctly in conjunction with `coord_flip()` (#1519).
 
 # 4.9.0
 
