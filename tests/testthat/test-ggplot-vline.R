@@ -33,3 +33,17 @@ test_that("vector xintercept results in multiple vertical lines", {
   expect_true(l$mode == "lines")
   expect_true(l$line$color == "rgba(0,0,255,1)")
 })
+
+
+
+test_that("vline works with coord_flip", {
+  
+  gg <- ggplot() + 
+    geom_point(aes(5, 6)) + 
+    geom_vline(xintercept = 5) + 
+    coord_flip()
+  
+  l <- plotly_build(gg)$x
+  expect_equivalent(l$data[[2]]$x, c(5.95, 6.05))
+  expect_equivalent(l$data[[2]]$y, c(5, 5))
+})
