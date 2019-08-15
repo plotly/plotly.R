@@ -49,3 +49,7 @@ test_that("can access ggplot data in layout()", {
   expect_equivalent(plotly_build(l)$x$layout$title, range(txhousing$date))
   expect_identical_plotly(l, (p + gginteractive()) %>% layout(title = ~range(date)))
 })
+
+test_that("can suppress conversion of ggplot to plotly", {
+  expect_s3_class(p + gginteractive(interactive = FALSE), class(p))
+})

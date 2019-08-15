@@ -1,18 +1,26 @@
 #' @include ggplotly.R
 #' @rdname ggplotly
 #' @importFrom purrr partial
+#' 
+#' @param interactive
+#'  If `TRUE` (default), then ggplot object is converted to plotly object.
+#' 
 #' @export
 gginteractive <- function(
-  width = NULL, height = NULL, tooltip = "all", dynamicTicks = FALSE,
-  layerData = 1, originalData = TRUE, source = "A", ...
+  interactive = TRUE, width = NULL, height = NULL, tooltip = "all",
+  dynamicTicks = FALSE, layerData = 1, originalData = TRUE, source = "A", ...
 ) {
   structure(
-    partial(
-      ggplotly,
-      width = width, height = height, tooltip = tooltip,
-      dynamicTicks = dynamicTicks, layerData = layerData,
-      originalData = originalData, source = source, ...
-    ),
+    if (interactive) {
+      partial(
+        ggplotly,
+        width = width, height = height, tooltip = tooltip,
+        dynamicTicks = dynamicTicks, layerData = layerData,
+        originalData = originalData, source = source, ...
+      )
+    } else {
+      identity
+    },
     class = c("gginteractive", "function")
   )
 }

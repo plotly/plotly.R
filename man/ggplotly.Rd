@@ -9,9 +9,9 @@ ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
   tooltip = "all", dynamicTicks = FALSE, layerData = 1,
   originalData = TRUE, source = "A", ...)
 
-gginteractive(width = NULL, height = NULL, tooltip = "all",
-  dynamicTicks = FALSE, layerData = 1, originalData = TRUE,
-  source = "A", ...)
+gginteractive(interactive = TRUE, width = NULL, height = NULL,
+  tooltip = "all", dynamicTicks = FALSE, layerData = 1,
+  originalData = TRUE, source = "A", ...)
 }
 \arguments{
 \item{p}{a ggplot object.}
@@ -41,6 +41,8 @@ with the source argument in \code{\link[=event_data]{event_data()}} to retrieve 
 event data corresponding to a specific plot (shiny apps can have multiple plots).}
 
 \item{...}{arguments passed onto methods.}
+
+\item{interactive}{If \code{TRUE} (default), then ggplot object is converted to plotly object.}
 }
 \description{
 These functions convert a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object to a plotly object.
