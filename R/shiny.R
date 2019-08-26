@@ -37,17 +37,21 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
 #' @rdname plotly-shiny
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
-  # Wrap the (user-supplied) expression with a call to evalq()
+  if (!quoted) { 
+    quoted <- TRUE
+    expr <- substitute(expr) 
+  }
+  # Install the (user-supplied) expression as a function
   # This way, if the user-supplied expression contains a return()
   # statement, we can capture that return value and pass it along
   # to prepareWidget()
-  expr <- call("evalq", expr, env)
   # prepareWidget() makes it possible to pass different non-plotly
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
-  expr <- as.call(list(call(":::", quote("plotly"), quote("prepareWidget")), expr))
-  renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+  shiny::installExprFunction(expr, "func", env, quoted)
+  renderFunc <- shinyRenderWidget(
+    plotly:::prepareWidget(func()), plotlyOutput, env, quoted
+  )
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
   # in shiny 1.0.3.9002, but we require >= 1.1)
