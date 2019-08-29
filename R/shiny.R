@@ -67,13 +67,14 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
-  p <- if (promises::is.promising(x)) {
-    promises::then(x, plotly_build)
+  if (promises::is.promising(x)) {
+    promises::then(
+      promises::then(x, plotly_build),
+      register_plot_events
+    )
   } else {
-    plotly_build(x)
+    register_plot_events(plotly_build(x))
   }
-  register_plot_events(p)
-  p
 }
 
 register_plot_events <- function(p) {
@@ -83,6 +84,7 @@ register_plot_events <- function(p) {
     session$userData$plotlyShinyEventIDs,
     eventIDs
   ))
+  p
 }
 
 
