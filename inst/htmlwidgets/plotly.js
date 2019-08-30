@@ -17,11 +17,13 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
-    // Make a deep copy of user data that we need for the resize method 
-    // (Plotly.relayout() mutates the plot input object -- https://codepen.io/cpsievert/pen/WNeOrjj) 
-    instance.width = JSON.parse(JSON.stringify(x.layout.width || null));
-    instance.height = JSON.parse(JSON.stringify(x.layout.height || null));
-    instance.autosize = JSON.parse(JSON.stringify(x.layout.autosize || true));
+    // Plotly.relayout() mutates the plot input object, so make sure to 
+    // keep a reference to the user-supplied width/height *before*
+    // we call Plotly.plot();
+    var lay = x.layout || {};
+    instance.width = lay.width;
+    instance.height = lay.height;
+    instance.autosize = lay.autosize || true;
     
     /* 
     / 'inform the world' about highlighting options this is so other
