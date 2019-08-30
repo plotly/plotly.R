@@ -37,21 +37,11 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
 #' @rdname plotly-shiny
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { 
-    quoted <- TRUE
-    expr <- substitute(expr) 
-  }
-  # Install the (user-supplied) expression as a function
-  # This way, if the user-supplied expression contains a return()
-  # statement, we can capture that return value and pass it along
-  # to prepareWidget()
-  # prepareWidget() makes it possible to pass different non-plotly
-  # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
-  # to inform event_data about what events have been registered
-  shiny::installExprFunction(expr, "func", env, quoted)
-  renderFunc <- shinyRenderWidget(
-    plotly:::prepareWidget(func()), plotlyOutput, env, quoted
-  )
+  if (!quoted) { expr <- substitute(expr) } # force quoted
+  # this makes it possible to pass a ggplot2 object to renderPlotly()
+  # https://github.com/ramnathv/htmlwidgets/issues/166#issuecomment-153000306
+  expr <- as.call(list(call(":::", quote("plotly"), quote("prepareWidget")), expr))
+  renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
   # in shiny 1.0.3.9002, but we require >= 1.1)
@@ -67,14 +57,13 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
-  if (promises::is.promising(x)) {
-    promises::then(
-      promises::then(x, plotly_build),
-      register_plot_events
-    )
+  p <- if (promises::is.promising(x)) {
+    promises::then(x, plotly_build)
   } else {
-    register_plot_events(plotly_build(x))
+    plotly_build(x)
   }
+  register_plot_events(p)
+  p
 }
 
 register_plot_events <- function(p) {
@@ -84,7 +73,6 @@ register_plot_events <- function(p) {
     session$userData$plotlyShinyEventIDs,
     eventIDs
   ))
-  p
 }
 
 
