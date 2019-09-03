@@ -263,11 +263,12 @@ HTMLWidgets.widget({
         for (var i = 0; i < attrsToAttach.length; i++) {
           var attr = trace[attrsToAttach[i]];
           if (Array.isArray(attr)) {
-            var ptNums = pt.pointNumber || pt.pointNumbers;
-            if (typeof ptNums === "number") {
-              obj[attrsToAttach[i]] = ptNums;
-            } else if (Array.isArray(ptNums)) {
-              obj[attrsToAttach[i]] = ptNums.map(function(i) { return attr[i]; });
+            if (typeof pt.pointNumber === "number") {
+              obj[attrsToAttach[i]] = attr[pt.pointNumber];
+            } else if (Array.isArray(pt.pointNumber)) {
+              obj[attrsToAttach[i]] = attr[pt.pointNumber[0]][pt.pointNumber[1]];
+            } else if (Array.isArray(pt.pointNumbers)) {
+              obj[attrsToAttach[i]] = pt.pointNumbers.map(function(i) { return attr[i]; });
             }
           }
         }
