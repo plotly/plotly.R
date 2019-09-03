@@ -263,10 +263,13 @@ HTMLWidgets.widget({
         for (var i = 0; i < attrsToAttach.length; i++) {
           var attr = trace[attrsToAttach[i]];
           if (Array.isArray(attr)) {
-              // pointNumber can be an array (e.g., heatmaps)
-              // TODO: can pointNumber be 3D?
-              obj[attrsToAttach[i]] = typeof pt.pointNumber === "number" ? 
-                attr[pt.pointNumber] : attr[pt.pointNumber[0]][pt.pointNumber[1]];
+            var ptNums = pt.pointNumber || pt.pointNumbers;
+            if (typeof ptNums === "number") {
+              ptNums = [ptNums];
+            }
+            if (Array.isArray(ptNums)) {
+              obj[attrsToAttach[i]] = ptNums.map(function(i) { return attr[i]; });
+            }
           }
         }
         return obj;
