@@ -265,9 +265,8 @@ HTMLWidgets.widget({
           if (Array.isArray(attr)) {
             var ptNums = pt.pointNumber || pt.pointNumbers;
             if (typeof ptNums === "number") {
-              ptNums = [ptNums];
-            }
-            if (Array.isArray(ptNums)) {
+              obj[attrsToAttach[i]] = ptNums;
+            } else if (Array.isArray(ptNums)) {
               obj[attrsToAttach[i]] = ptNums.map(function(i) { return attr[i]; });
             }
           }
