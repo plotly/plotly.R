@@ -93,7 +93,7 @@ deparse2 <- function(x) {
 }
 
 new_id <- function() {
-  basename(tempfile(""))
+  paste(sample(c(0:9, letters), 12, replace = TRUE), collapse = "")
 }
 
 names2 <- function(x) {
