@@ -296,7 +296,7 @@ HTMLWidgets.widget({
 
     
     // send user input event data to shiny
-    if (HTMLWidgets.shinyMode) {
+    if (HTMLWidgets.shinyMode && Shiny.setInputValue) {
       
       // Some events clear other input values
       // TODO: always register these?
