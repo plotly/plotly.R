@@ -313,7 +313,7 @@ test_that("Informative deprecation message for titlefont", {
 
 test_that("toWebGL() shouldn't complain if it's already webgl", {
   p <- plot_ly(x = 1, y = 1) %>%
-    add_markers() %>%
+    add_trace(type = "scattergl", mode = "markers") %>%
     toWebGL()
   expect_silent(plotly_build(p))
 })
