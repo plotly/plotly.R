@@ -68,11 +68,11 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 prepareWidget <- function(x) {
   if (promises::is.promising(x)) {
     promises::then(
-      promises::then(x, ggplotly),
+      promises::then(x, plotly_build),
       register_plot_events
     )
   } else {
-    register_plot_events(ggplotly(x))
+    register_plot_events(plotly_build(x))
   }
 }
 
