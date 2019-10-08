@@ -6,6 +6,8 @@
 
 ## BUG FIXES
 
+* Fixed an issue with correctly capturing the return value of user-expressions to `renderPlotly()` (#1528).
+* Fixed a resizing issue where graphs could be incorrectly resized to their initial size in some cases (#1553). 
 * `ggplotly()` now positions the x-axis in the last column of a `facet_wrap()` properly (#1501).
 * `ggplotly()` now handles `geom_hline()`/`geom_vline()` correctly in conjunction with `coord_flip()` (#1519).
 * `event_data()` now correctly relays the `key` attribute for statistical traces (#1610).
