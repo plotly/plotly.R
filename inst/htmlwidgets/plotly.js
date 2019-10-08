@@ -17,6 +17,14 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
+    // Plotly.relayout() mutates the plot input object, so make sure to 
+    // keep a reference to the user-supplied width/height *before*
+    // we call Plotly.plot();
+    var lay = x.layout || {};
+    instance.width = lay.width;
+    instance.height = lay.height;
+    instance.autosize = lay.autosize || true;
+    
     /* 
     / 'inform the world' about highlighting options this is so other
     / crosstalk libraries have a chance to respond to special settings 
@@ -153,16 +161,8 @@ HTMLWidgets.widget({
       
       var plot = Plotly.plot(graphDiv, x);
       instance.plotly = true;
-      instance.autosize = x.layout.autosize || true;
-      instance.width = x.layout.width;
-      instance.height = x.layout.height;
       
     } else {
-      
-      // new x data could contain a new height/width...
-      // attach to instance so that resize logic knows about the new size
-      instance.width = x.layout.width || instance.width;
-      instance.height = x.layout.height || instance.height;
       
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
       // a new webgl context
