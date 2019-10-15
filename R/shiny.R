@@ -41,15 +41,15 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
     quoted <- TRUE
     expr <- substitute(expr) 
   }
-  # Install the (user-supplied) expression as a function
+  # Wrap the (user-supplied) expression in local()
   # This way, if the user-supplied expression contains a return()
   # statement, we can capture that return value and pass it along
   # to prepareWidget()
+  expr <- call("local", expr, env)
   # prepareWidget() makes it possible to pass different non-plotly
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
-  shiny::installExprFunction(expr, "func", env, quoted, assign.env = env)
-  expr <- quote(plotly:::prepareWidget(func()))
+  expr <- as.call(list(call(":::", quote("plotly"), quote("prepareWidget")), expr))
   renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted)
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
