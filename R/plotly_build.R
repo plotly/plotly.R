@@ -280,10 +280,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     )
     for (i in x$.plotlyVariableMapping) {
       # try to reduce the amount of data we have to send for non-positional scales
-      x[[i]] <- structure(
-        if (i %in% npscales()) uniq(d[[i]]) else d[[i]],
-        class = oldClass(x[[i]])
-      )
+      entry <- if (i %in% npscales()) uniq(d[[i]]) else d[[i]]
+      if (is.null(entry)) {
+        x[[i]] <- NULL  
+      } else {
+        x[[i]] <- structure(entry, class = oldClass(x[[i]]))  
+      }
     }
     x
   })
