@@ -48,9 +48,10 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   # prepareWidget() makes it possible to pass different non-plotly
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
-  shiny::installExprFunction(expr, "func", env, quoted, assign.env = env)
+  shiny::installExprFunction(expr, "func", env, quoted)
   expr <- quote(plotly:::prepareWidget(func()))
-  renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted)
+  local_env <- environment()
+  renderFunc <- shinyRenderWidget(expr, plotlyOutput, local_env, quoted)
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
   # in shiny 1.0.3.9002, but we require >= 1.1)
