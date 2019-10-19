@@ -120,3 +120,10 @@ test_that("geom_linerange() without a y aesthetic translates to a path", {
   )
   
 })
+
+test_that("NA values do not cause a lot of warnings when ploting (#1299)", {
+  df <- data.frame(x=1:2, y=NA)
+  p <- plot_ly(df, x=~x, y=~y)
+  expect_warning(plotly_build(p), "Ignoring")
+  expect_failure(expect_warning(plotly_build(p), "structure"))
+})
