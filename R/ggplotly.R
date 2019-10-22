@@ -1136,23 +1136,29 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(u) {
-  u <- verifyUnit(u)
-  if (attr(u, "unit") != "mm") {
-    stop("Unit must be in millimeters")
-  }
-  (as.numeric(u) * 96) / 25.4
-}
-
-verifyUnit <- function(u) {
-  # the default unit in ggplot2 is millimeters (unless it's element_text())
-  if (is.null(attr(u, "unit"))) {
-    u <- if (inherits(u, "element")) {
-      grid::unit(u$size %||% 0, "points")
+    u <- verifyUnit(u)
+    if (getRversion() >= "4.0.0") {
+        if (grid::unitType(u) != "mm") {
+            stop("Unit must be in millimeters")
+        }
     } else {
-      grid::unit(u %||% 0, "mm")
+        if (attr(u, "unit") != "mm") {
+            stop("Unit must be in millimeters")
+        }
     }
-  }
-  u
+    (as.numeric(u) * 96) / 25.4
+}
+  
+verifyUnit <- function(u) {
+    ## the default unit in ggplot2 is millimeters (unless it's element_text())
+    if (!grid::is.unit(u)) {
+        u <- if (inherits(u, "element")) {
+                 grid::unit(u$size %||% 0, "points")
+             } else {
+                 grid::unit(u %||% 0, "mm")
+             }
+    }
+    u
 }
 
 # detect a blank theme element
