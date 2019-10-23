@@ -1138,7 +1138,8 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 mm2pixels <- function(u) {
     u <- verifyUnit(u)
     if (getRversion() >= "4.0.0") {
-        if (grid::unitType(u) != "mm") {
+        unitType <- get("unitType", envir=asNamespace("grid"))
+        if (unitType(u) != "mm") {
             stop("Unit must be in millimeters")
         }
     } else {
