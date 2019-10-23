@@ -1136,30 +1136,32 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 # we need to know PPI/DPI of the display. I'm not sure of a decent way to do that
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(u) {
-    u <- verifyUnit(u)
-    if (getRversion() >= "4.0.0") {
-        unitType <- get("unitType", envir=asNamespace("grid"))
-        if (unitType(u) != "mm") {
-            stop("Unit must be in millimeters")
-        }
-    } else {
-        if (attr(u, "unit") != "mm") {
-            stop("Unit must be in millimeters")
-        }
-    }
-    (as.numeric(u) * 96) / 25.4
+  u <- verifyUnit(u)
+  if (getUnitType(u) != "mm") {
+    stop("Unit must be in millimeters")
+  }
+  (as.numeric(u) * 96) / 25.4
 }
   
 verifyUnit <- function(u) {
-    ## the default unit in ggplot2 is millimeters (unless it's element_text())
-    if (!grid::is.unit(u)) {
-        u <- if (inherits(u, "element")) {
-                 grid::unit(u$size %||% 0, "points")
-             } else {
-                 grid::unit(u %||% 0, "mm")
-             }
-    }
-    u
+  if (grid::is.unit(u)) return(u)
+  
+  ## the default unit in ggplot2 is millimeters (unless it's element_text())
+  if (inherits(u, "element")) {
+    grid::unit(u$size %||% 0, "points")
+  } else {
+    grid::unit(u %||% 0, "mm")
+  }
+}
+
+# Use public API for getting the unit's type, if available
+# https://github.com/ropensci/plotly/pull/1646#issue-331268260
+getUnitType <- function(u) {
+  if (getRversion() >= "4.0.0") {
+    get("unitType", envir = asNamespace("grid"))(u)
+  } else {
+    attr(u, "unit")
+  }
 }
 
 # detect a blank theme element
