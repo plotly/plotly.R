@@ -37,6 +37,7 @@ See the examples section for an example.
 # plotly graph. In this case, we get a 3x file reduction.
 # ----------------------------------------------------------------------
 
+\dontrun{
 library(plotly)
 p <- plot_ly(x = 1:10, y = 1:10) \%>\% add_markers()
 save_widget <- function(p, f) {
@@ -58,7 +59,6 @@ save_widget(partial_bundle(p), f2)
 # heatmap (part of the cartesian bundle) doesn't...
 # ----------------------------------------------------------------------
 
-\dontrun{
 library(htmltools)
 p1 <- plot_ly(z = ~volcano) \%>\% 
   add_heatmap() \%>\%
