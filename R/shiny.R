@@ -49,7 +49,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
   shiny::installExprFunction(expr, "func", env, quoted)
-  expr <- quote(plotly:::prepareWidget(func()))
+  expr <- quote(getFromNamespace("prepareWidget", "plotly")(func()))
   local_env <- environment()
   renderFunc <- shinyRenderWidget(expr, plotlyOutput, local_env, quoted)
   # remove 'internal' plotly attributes that are known to cause false
