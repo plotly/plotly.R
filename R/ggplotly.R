@@ -1157,11 +1157,8 @@ verifyUnit <- function(u) {
 # Use public API for getting the unit's type, if available
 # https://github.com/ropensci/plotly/pull/1646#issue-331268260
 getUnitType <- function(u) {
-  if (getRversion() >= "4.0.0") {
-    get("unitType", envir = asNamespace("grid"))(u)
-  } else {
+  tryNULL(get("unitType", envir = asNamespace("grid"))) %||%
     attr(u, "unit")
-  }
 }
 
 # detect a blank theme element
