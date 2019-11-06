@@ -117,7 +117,8 @@ event_data <- function(
     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
     "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
-    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
+    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot",
+    "plotly_sunburstclick"
   ),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
@@ -252,7 +253,8 @@ shiny_event_defaults <- function() {
     "plotly_clickannotation",
     "plotly_doubleclick", 
     "plotly_deselect", 
-    "plotly_afterplot"
+    "plotly_afterplot",
+    "plotly_sunburstclick"
   )
 }
 
