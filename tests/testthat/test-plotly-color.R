@@ -29,7 +29,8 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
-  expect_identical(sort(colsToCompare[c(1, 5, 9)]), sort(colz))
+  idx <- if (packageVersion("scales") > '1.0.0') c(1, 2, 3) else c(1, 5, 9)
+  expect_identical(sort(colsToCompare[idx]), sort(colz))
   # providing vector of RGB codes should also work
   p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, 
                colors = cols[1:3])
