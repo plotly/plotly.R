@@ -112,7 +112,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
       if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
         stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
       }
-      if (is_mapbox(p)) tr[["type"]] <- "scattermapbox"
+      if (is_mapbox(p)) tr[["type"]] <- tr[["type"]] %||% "scattermapbox"
       if (is_geo(p)) {
         tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
       }
