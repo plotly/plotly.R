@@ -384,6 +384,7 @@
           "plotly_doubleclick",
           "plotly_deselect",
           "plotly_afterplot",
+          "plotly_sunburstclick",
           "plotly_selecting"
         ],
         "highlight": {
