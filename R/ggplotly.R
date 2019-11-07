@@ -1137,8 +1137,8 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(u) {
   u <- verifyUnit(u)
-  if (getUnitType(u) != "mm") {
-    stop("Unit must be in millimeters")
+  if (any(getUnitType(u) != "mm")) {
+    stop("All units must be in millimeters")
   }
   (as.numeric(u) * 96) / 25.4
 }
