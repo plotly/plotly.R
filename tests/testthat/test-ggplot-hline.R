@@ -54,28 +54,31 @@ test_that("hline/vline/abline split on linetype/colour/size", {
     y = x * 0.95
   )
   gg <- ggplot(d, aes(x, y)) +
+    geom_point() +
     geom_vline(xintercept = c(2.5, 3, 3.5), linetype = 1:3) +
     geom_hline(yintercept = c(2.5, 3, 3.5), size = 1:3) +
     geom_abline(slope = -1, intercept = c(2.5, 3, 3.5), colour = 1:3)
   
-  l <- plotly_build(gg)$x
-  expect_length(l$data, 9)
+  l <- expect_doppelganger_built(gg, "split-hline-vline-abline")
+  expect_length(l$data, 10)
   
   expect_equivalent(
-    vapply(l$data, function(x) x$line$dash, character(1)), 
+    unlist(lapply(l$data, function(x) x$line$dash)), 
     lty2dash(c(1:3, rep(1, 6)))
   )
   
   expect_equivalent(
-    unique(vapply(l$data, function(x) x$line$color, character(1))),
+    unique(unlist(lapply(l$data, function(x) x$line$color))),
     # Default palette colors are changing in R4.0...
     # https://github.com/wch/r-source/commit/58eafa7#diff-038aeefcb87409db883f064615187949R2495
     toRGB(if (getRversion() >= "4.0.0") c("black", "#DF536B", "#61D04F") else c("black", "red", "green3"))
   )
   
   expect_length(
-    unique(vapply(l$data, function(x) x$line$width, numeric(1))), 4
+    unique(unlist(lapply(l$data, function(x) x$line$width))), 4
   )
+  
+  
 })
 
 
