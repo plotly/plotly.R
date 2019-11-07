@@ -68,7 +68,9 @@ test_that("hline/vline/abline split on linetype/colour/size", {
   
   expect_equivalent(
     unique(vapply(l$data, function(x) x$line$color, character(1))),
-    c("rgba(0,0,0,1)", "rgba(255,0,0,1)", "rgba(0,205,0,1)")
+    # Default palette colors are changing in R4.0...
+    # https://github.com/wch/r-source/commit/58eafa7#diff-038aeefcb87409db883f064615187949R2495
+    toRGB(if (getRversion() >= "4.0.0") c("black", "#DF536B", "#61D04F") else c("black", "red", "green3"))
   )
   
   expect_length(
