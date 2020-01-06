@@ -686,6 +686,9 @@ gg2list <- function(p, width = NULL, height = NULL,
       ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
       tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
       
+      ticktext <- ticktext[!is.na(ticktext)]
+      tickvals <- tickvals[!is.na(tickvals)]
+      
       axisObj <- list(
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
