@@ -10,12 +10,14 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     
+    # add on plot-level mappings, if they're inherited
+    map <- c(y$mapping, if (isTRUE(y$inherit.aes)) p$mapping)
+    
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]
-    map <- c(y$mapping, calc_aes)
+    calc_aes <- calc_aes[!names(calc_aes) %in% names(map)]
     
-    # add on plot-level mappings, if they're inherited
-    if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
+    map <- c(calc_aes, map)
     
     # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
     map <- ggfun("make_labels")(map)
