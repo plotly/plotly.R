@@ -100,7 +100,7 @@ For anything else, use \code{api()}.
 # and/or data frames to your plotly account
 # ------------------------------------------------------------
 
-# A data frame creates a plotly "grid". Printing one will take you
+# A data frame creates a plotly "grid". Printing one will take you 
 # to the it's web address so you can start creating!
 (m <- api_create(mtcars))
 
@@ -117,7 +117,7 @@ layout(
 )
 
 ------------------------------------------------------------
-# The api() function provides a low-level interface for performing
+# The api() function provides a low-level interface for performing 
 # any action at any endpoint! It always returns a list.
 # ------------------------------------------------------------
 
@@ -143,7 +143,7 @@ api("files/cpsievert:14681")
 
 # change the filename https://api.plot.ly/v2/files#update
 # (note: this won't work unless you have proper credentials to the relevant account)
-api("files/cpsievert:14681", "PATCH", list(filename = "toy file"))
+api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
 
 # Copy a file https://api.plot.ly/v2/files#lookup
 api("files/cpsievert:14681/copy", "POST")

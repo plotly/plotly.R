@@ -1,6 +1,6 @@
 #' Create a static image
 #'
-#' The images endpoint turns a plot (which may be given in multiple forms)
+#' The images endpoint turns a plot (which may be given in multiple forms) 
 #' into an image of the desired format.
 #'
 #' @param x either a plotly object or a list.
@@ -19,12 +19,12 @@
 #' Svg <- plotly_IMAGE(p, format = "svg",  out_file = "plotly-test-image.svg")
 #' Pdf <- plotly_IMAGE(p, format = "pdf",  out_file = "plotly-test-image.pdf")
 #' }
-#'
+#' 
 
-plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png",
+plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
                          scale = 1, out_file, ...) {
   x <- plotly_build(x)[["x"]]
-
+  
   bod <- list(
     figure = x[c("data", "layout")],
     width = width,

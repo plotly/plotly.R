@@ -15,14 +15,14 @@ unzip(tmp)
 
 # update the default bundle
 file.copy(
-  Sys.glob("*plotly.js*/dist/plotly.min.js"),
-  "inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js",
+  Sys.glob("*plotly.js*/dist/plotly.min.js"), 
+  "inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js", 
   overwrite = TRUE
 )
 # update the plotly.js LICENSE
 file.copy(
-  Sys.glob("*plotly.js*/LICENSE"),
-  "inst/htmlwidgets/lib/plotlyjs/LICENSE",
+  Sys.glob("*plotly.js*/LICENSE"), 
+  "inst/htmlwidgets/lib/plotlyjs/LICENSE", 
   overwrite = TRUE
 )
 # update the locale files
@@ -49,8 +49,8 @@ message("Manually update plotly.R with this version")
 
 
 
-# download latest build from master
+# download latest build from master 
 #download.file(
-#  "https://raw.githubusercontent.com/plotly/plotly.js/master/dist/plotly.min.js",
+#  "https://raw.githubusercontent.com/plotly/plotly.js/master/dist/plotly.min.js", 
 #  destfile = "inst/htmlwidgets/lib/plotlyjs/plotly-latest.min.js"
 #)

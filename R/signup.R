@@ -30,9 +30,9 @@
 #' Sys.setenv("plotly_domain" = "http://mydomain.com")
 #'
 #' # If you want to automatically load these environment variables when you
-#' # start R, you can put them inside your ~/.Rprofile
+#' # start R, you can put them inside your ~/.Rprofile 
 #' # (see help(.Rprofile) for more details)
-#'
+#' 
 #' }
 signup <- function(username, email, save = TRUE) {
   if (missing(username)) username <- verify("username")

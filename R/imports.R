@@ -18,7 +18,7 @@
 NULL
 
 
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate 
 #' @name mutate
 #' @rdname reexports
 #' @export
@@ -66,7 +66,7 @@ dplyr::rename
 #' @export
 dplyr::rename_
 
-#' @importFrom dplyr group_by
+#' @importFrom dplyr group_by 
 #' @name group_by
 #' @rdname reexports
 #' @export
@@ -169,7 +169,7 @@ dplyr::filter_
 # #' @rdname reexports
 # #' @export
 # tidyr::gather
-#
+# 
 # #' @importFrom tidyr gather_
 # #' @name gather_
 # #' @rdname reexports
