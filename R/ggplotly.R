@@ -1,7 +1,6 @@
 #' Convert ggplot2 to plotly
 #'
-#' This function converts a [ggplot2::ggplot()] object to a 
-#' plotly object. 
+#' These functions convert a [ggplot2::ggplot()] object to a plotly object. 
 #' 
 #' @details Conversion of relative sizes depends on the size of the current 
 #' graphics device (if no device is open, width/height of a new (off-screen) 
@@ -38,6 +37,7 @@
 #' # simple example
 #' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
 #' ggplotly(ggiris)
+#' ggiris + gginteractive()
 #'
 #' data(canada.cities, package = "maps")
 #' viz <- ggplot(canada.cities, aes(long, lat)) +
