@@ -30,9 +30,9 @@
 #' Sys.setenv("plotly_domain" = "http://mydomain.com")
 #'
 #' # If you want to automatically load these environment variables when you
-#' # start R, you can put them inside your ~/.Rprofile 
+#' # start R, you can put them inside your ~/.Rprofile
 #' # (see help(.Rprofile) for more details)
-#' 
+#'
 #' }
 signup <- function(username, email, save = TRUE) {
   if (missing(username)) username <- verify("username")
@@ -45,7 +45,14 @@ signup <- function(username, email, save = TRUE) {
     version = as.character(packageVersion("plotly"))
   )
   base_url <- file.path(get_domain(), "apimkacct")
-  resp <- httr::POST(base_url, body = bod)
+  resp <- httr::RETRY(
+    verb = "POST"
+    , base_url
+    , body = bod
+    , times = 5
+    , terminate_on = c(400, 401, 403, 404)
+    , terminate_on_success = TRUE
+  )
   con <- process(append_class(resp, "signup"))
   if (save) {
     # store API key as an environment variable in .Rprofile

@@ -67,7 +67,7 @@ viewing that page will be able to view the graph.
 You do not need to be logged in to view this plot.}
 
 \item{...}{For \code{api()}, these arguments are passed onto
-\code{\link[httr:VERB]{httr::VERB()}}. For \code{api_create()}, these arguments are
+\code{\link[httr:RETRY]{httr::RETRY()}}. For \code{api_create()}, these arguments are
 included in the body of the HTTP request.}
 
 \item{id}{a filename id.}
@@ -78,9 +78,9 @@ included in the body of the HTTP request.}
 To see a list of all available endpoints, call \code{api()}.
 Any relevant query parameters should be included here (see examples).}
 
-\item{verb}{name of the HTTP verb to use (as in, \code{\link[httr:VERB]{httr::VERB()}}).}
+\item{verb}{name of the HTTP verb to use (as in, \code{\link[httr:RETRY]{httr::RETRY()}}).}
 
-\item{body}{body of the HTTP request(as in, \code{\link[httr:VERB]{httr::VERB()}}).
+\item{body}{body of the HTTP request(as in, \code{\link[httr:RETRY]{httr::RETRY()}}).
 If this value is not already converted to JSON
 (via \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}), it uses the internal \code{to_JSON()}
 to ensure values are "automatically unboxed" (i.e., vec.}
@@ -100,7 +100,7 @@ For anything else, use \code{api()}.
 # and/or data frames to your plotly account
 # ------------------------------------------------------------
 
-# A data frame creates a plotly "grid". Printing one will take you 
+# A data frame creates a plotly "grid". Printing one will take you
 # to the it's web address so you can start creating!
 (m <- api_create(mtcars))
 
@@ -117,7 +117,7 @@ layout(
 )
 
 ------------------------------------------------------------
-# The api() function provides a low-level interface for performing 
+# The api() function provides a low-level interface for performing
 # any action at any endpoint! It always returns a list.
 # ------------------------------------------------------------
 
@@ -143,7 +143,7 @@ api("files/cpsievert:14681")
 
 # change the filename https://api.plot.ly/v2/files#update
 # (note: this won't work unless you have proper credentials to the relevant account)
-api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
+api("files/cpsievert:14681", "PATCH", list(filename = "toy file"))
 
 # Copy a file https://api.plot.ly/v2/files#lookup
 api("files/cpsievert:14681/copy", "POST")
