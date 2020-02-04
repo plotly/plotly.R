@@ -273,16 +273,14 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
-  
-  data[["geometry"]] <- sf::st_sfc(data[["geometry"]])
-  data <- sf::st_as_sf(data, sf_column_name = "geometry")
+
+  data <- sf::st_as_sf(data)
   geom_type <- sf::st_geometry_type(data)
   # st_cast should "expand" a collection into multiple rows (one per feature)
   if ("GEOMETRYCOLLECTION" %in% geom_type) {
     data <- sf::st_cast(data)
     geom_type <- sf::st_geometry_type(data)
   }
-  data <- remove_class(data, "sf")
   
   basic_type <- dplyr::recode(
     as.character(geom_type),
@@ -310,6 +308,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
     d[[i]] <- prefix_class(
       fortify_sf(d[[i]]), c(names(d)[[i]], "GeomSf")
     )
+    d[[i]] <- remove_class(d[[i]], "sf")
   }
   if (length(d) == 1) d[[1]] else d
 }

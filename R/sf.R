@@ -11,7 +11,7 @@ fortify_sf <- function(model, ...) {
   # the coordinate belongs; for POINT this is absent (each coordinate is a feature), 
   # for LINESTRING L1 refers to the feature, for MULTIPOLYGON L1 refers to the main 
   # ring or holes, L2 to the ring id in the MULTIPOLYGON, and L3 to the simple feature.
-  coords <- sf::st_coordinates(model$geometry)
+  coords <- sf::st_coordinates(sf::st_geometry(model))
   colnames(coords) <- tolower(colnames(coords))
   lcols <- grep("^l", colnames(coords))
   
