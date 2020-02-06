@@ -1,5 +1,9 @@
 # 4.9.1.9000
 
+## Changes to plotly.js
+
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.49.4 to v1.52.2. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+
 ## BUG FIXES
 
 * `add_sf()`/`geom_sf()` now correctly handle geometry columns that are named something other than `"geometry"` (#1659).

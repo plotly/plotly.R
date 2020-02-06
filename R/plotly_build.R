@@ -1033,7 +1033,7 @@ coerce_attr_defaults <- function(trace, layout) {
   if (length(trace[["stroke"]]) && !is.default(trace[["stroke"]])) {
     trace$span <- trace[["span"]] %||% default(I(1))
   }
-  if (trace[["type"]] %in% c("sunburst", "pie")) {
+  if (trace[["type"]] %in% c("sunburst", "pie", "treemap")) {
     # As of v1.46.1, paper_bgcolor defaults to '#fff' which
     # col2rgb() can't parse, but expands to '#ffffff'
     # https://stackoverflow.com/a/2899224/1583084
