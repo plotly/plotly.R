@@ -10,7 +10,7 @@ embed_notebook(x, width = NULL, height = NULL, file = NULL)
 \item{x}{a plotly object}
 
 \item{width}{attribute of the iframe. If \code{NULL}, the width in
-\code{plot_ly} is used. If that is also \code{NULL}, '100\\%' is the default.}
+\code{plot_ly} is used. If that is also \code{NULL}, '100\%' is the default.}
 
 \item{height}{attribute of the iframe. If \code{NULL}, the height in
 \code{plot_ly} is used. If that is also \code{NULL}, '400px' is the default.}
