@@ -7,8 +7,14 @@
 \alias{animation_button}
 \title{Animation configuration options}
 \usage{
-animation_opts(p, frame = 500, transition = frame, easing = "linear",
-  redraw = TRUE, mode = "immediate")
+animation_opts(
+  p,
+  frame = 500,
+  transition = frame,
+  easing = "linear",
+  redraw = TRUE,
+  mode = "immediate"
+)
 
 animation_slider(p, hide = FALSE, ...)
 

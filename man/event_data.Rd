@@ -4,14 +4,16 @@
 \alias{event_data}
 \title{Access plotly user input event data in shiny}
 \usage{
-event_data(event = c("plotly_hover", "plotly_unhover", "plotly_click",
-  "plotly_doubleclick", "plotly_selected", "plotly_selecting",
-  "plotly_brushed", "plotly_brushing", "plotly_deselect",
-  "plotly_relayout", "plotly_restyle", "plotly_legendclick",
-  "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot",
-  "plotly_sunburstclick"), source = "A",
-  session = shiny::getDefaultReactiveDomain(), priority = c("input",
-  "event"))
+event_data(
+  event = c("plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
+    "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing",
+    "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick",
+    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot",
+    "plotly_sunburstclick"),
+  source = "A",
+  session = shiny::getDefaultReactiveDomain(),
+  priority = c("input", "event")
+)
 }
 \arguments{
 \item{event}{The type of plotly event. All supported events are listed in the

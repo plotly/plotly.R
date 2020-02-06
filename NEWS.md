@@ -2,7 +2,11 @@
 
 ## Changes to plotly.js
 
-* This version of the R package upgrades the version of the underlying plotly.js library from v1.49.4 to v1.52.2. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.49.4 to v1.52.2. This includes many bug fixes, improvements, as well as 2 new trace types: `treemap` and `image`. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+
+## IMPROVEMENTS
+
+* The `add_image()` function was added to make it easier to create image traces via `raster` objects.
 
 ## BUG FIXES
 

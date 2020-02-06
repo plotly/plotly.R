@@ -27,3 +27,12 @@ test_that("image trace renders", {
     layout(grid = list(rows = 1, columns = 2, pattern = "independent")) %>%
     expect_doppelganger("colormodel")
 })
+
+
+test_that("add_image() works", {
+  plot_ly() %>%
+    add_image(
+      z = as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
+    ) %>%
+    expect_doppelganger("raster-basic")
+})
