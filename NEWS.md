@@ -1,3 +1,9 @@
+# 4.9.1.9000
+
+## BUG FIXES
+
+* `add_sf()`/`geom_sf()` now correctly handle geometry columns that are named something other than `"geometry"` (#1659).
+
 # 4.9.1
 
 ## Changes to plotly.js
