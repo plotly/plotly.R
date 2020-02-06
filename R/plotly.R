@@ -424,11 +424,31 @@ as_widget <- function(x, ...) {
     ),
     preRenderHook = plotly_build,
     dependencies = c(
+      # phantomjs doesn't support Object.setPrototypeOf() and a
+      # plotly.js dependency (buffer) uses it to detect TypedArray support.
+      # Thus, we add a polyfill if this is running in shinytest, but otherwise
+      # we shouldn't need it because Object.setPrototypeOf() is pretty widely supported
+      # https://github.com/plotly/plotly.js/issues/4556#issuecomment-583061419
+      # https://caniuse.com/#search=setPrototypeOf
+      if (isTRUE(getOption("shiny.testmode"))) {
+        list(setPrototypeOfPolyfill())
+      },
       list(typedArrayPolyfill()),
       crosstalk::crosstalkLibs(),
       list(plotlyHtmlwidgetsCSS()),
       list(plotlyMainBundle())
     )
+  )
+}
+
+setPrototypeOfPolyfill <- function() {
+  htmltools::htmlDependency(
+    name = "setprototypeof", 
+    version = "0.1",
+    package = "plotly",
+    src = dependency_dir("setprototypeof"),
+    script = "setprototypeof.js",
+    all_files = FALSE
   )
 }
 
