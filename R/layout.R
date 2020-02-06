@@ -134,11 +134,15 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
-    p$dependencies <- c(
-      p$dependencies,
-      list(locale_dependency(locale))
-    )
     p$x$config$locale <- locale
+    # Plotly.js defaults to US English (en-US) and includes 
+    # British English (en) in the standard bundle.
+    if (!locale %in% c("en", "en-US")) {
+      p$dependencies <- c(
+        p$dependencies,
+        list(locale_dependency(locale))
+      )
+    }
   }
   
   if (!is.null(mathjax)) {
