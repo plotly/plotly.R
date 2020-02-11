@@ -15,7 +15,9 @@ Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "marianne.corvellec@igdore.org", comment = c(ORCID = "0000-0002-1994-3581")),
     person("Pedro", "Despouy", role = "aut",
     email = "pedro@plot.ly"),
-    person("Plotly Technologies Inc.", role = "cph"))
+    person("Plotly Technologies Inc.", role = "cph"),
+    person("Salim", "Brüggemann", role = "ctb",
+    email = "salim-b@pm.me", comment = c(ORCID = "0000-0002-5329-5987")))
 License: MIT + file LICENSE
 Description: Create interactive web graphics from 'ggplot2' graphs and/or a custom interface to the (MIT-licensed) JavaScript library 'plotly.js' inspired by the grammar of graphics.
 URL: https://plotly-r.com, https://github.com/ropensci/plotly#readme, https://plot.ly/r
