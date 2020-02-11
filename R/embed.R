@@ -1,7 +1,7 @@
 #' Embed a plot as an iframe into a Jupyter Notebook
 #' @param x a plotly object
 #' @param width attribute of the iframe. If `NULL`, the width in
-#' `plot_ly` is used. If that is also `NULL`, '100\%' is the default.
+#' `plot_ly` is used. If that is also `NULL`, '100%' is the default.
 #' @param height attribute of the iframe. If `NULL`, the height in
 #' `plot_ly` is used. If that is also `NULL`, '400px' is the default.
 #' @param file deprecated.

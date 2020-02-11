@@ -5,8 +5,11 @@
 \alias{plotlyProxyInvoke}
 \title{Modify a plotly object inside a shiny app}
 \usage{
-plotlyProxy(outputId, session = shiny::getDefaultReactiveDomain(),
-  deferUntilFlush = TRUE)
+plotlyProxy(
+  outputId,
+  session = shiny::getDefaultReactiveDomain(),
+  deferUntilFlush = TRUE
+)
 
 plotlyProxyInvoke(p, method, ...)
 }

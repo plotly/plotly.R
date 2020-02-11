@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{raster2uri}
 \alias{raster2uri}
-\title{Convert a raster object to a data URI}
+\title{Encode a raster object as a data URI}
 \usage{
 raster2uri(r, ...)
 }
@@ -12,8 +12,10 @@ raster2uri(r, ...)
 \item{...}{arguments passed onto \code{\link[=as.raster]{as.raster()}}.}
 }
 \description{
-Convenient embedding images via \code{\link[=layout]{layout()}}
-\href{images}{https://plot.ly/r/reference/#layout-images}.
+Encode a raster object as a data URI, which is suitable for
+use with \code{layout()} \href{https://plot.ly/r/reference/#layout-images}{images}.
+This is especially convenient for embedding raster images on a plot in
+a self-contained fashion (i.e., so they don't depend on external URL links).
 }
 \examples{
 
@@ -33,6 +35,9 @@ plot_ly(x = 1, y = 1) \%>\%
      xanchor = "left", yanchor = "bottom"
   ))
  ) 
+}
+\references{
+\url{https://plotly-r.com/embedding-images.html}
 }
 \author{
 Carson Sievert

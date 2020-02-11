@@ -6,9 +6,9 @@
 [![Build
 Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
 [![CRAN
-Status](http://www.r-pkg.org/badges/version/plotly)](http://cran.r-project.org/package=plotly)
+Status](https://www.r-pkg.org/badges/version/plotly)](https://cran.r-project.org/package=plotly)
 [![CRAN
-Downloads](http://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://www.rpackages.io/package/plotly)
+Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://www.rpackages.io/package/plotly)
 [![monthly](https://cranlogs.r-pkg.org/badges/plotly)](https://www.rpackages.io/package/plotly)
 
 An R package for creating interactive web graphics via the open source

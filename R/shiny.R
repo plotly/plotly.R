@@ -49,7 +49,7 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
   shiny::installExprFunction(expr, "func", env, quoted)
-  expr <- quote(plotly:::prepareWidget(func()))
+  expr <- quote(getFromNamespace("prepareWidget", "plotly")(func()))
   local_env <- environment()
   renderFunc <- shinyRenderWidget(expr, plotlyOutput, local_env, quoted)
   # remove 'internal' plotly attributes that are known to cause false
@@ -117,7 +117,8 @@ event_data <- function(
     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
     "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
-    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
+    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot",
+    "plotly_sunburstclick"
   ),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
@@ -252,7 +253,8 @@ shiny_event_defaults <- function() {
     "plotly_clickannotation",
     "plotly_doubleclick", 
     "plotly_deselect", 
-    "plotly_afterplot"
+    "plotly_afterplot",
+    "plotly_sunburstclick"
   )
 }
 

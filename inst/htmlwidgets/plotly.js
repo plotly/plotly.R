@@ -317,6 +317,7 @@ HTMLWidgets.widget({
       
       var eventDataFunctionMap = {
         plotly_click: eventDataWithKey,
+        plotly_sunburstclick: eventDataWithKey,
         plotly_hover: eventDataWithKey,
         plotly_unhover: eventDataWithKey,
         // If 'plotly_selected' has already been fired, and you click

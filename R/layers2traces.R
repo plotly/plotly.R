@@ -10,12 +10,14 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     
+    # add on plot-level mappings, if they're inherited
+    map <- c(y$mapping, if (isTRUE(y$inherit.aes)) p$mapping)
+    
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]
-    map <- c(y$mapping, calc_aes)
+    calc_aes <- calc_aes[!names(calc_aes) %in% names(map)]
     
-    # add on plot-level mappings, if they're inherited
-    if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
+    map <- c(calc_aes, map)
     
     # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
     map <- ggfun("make_labels")(map)
@@ -271,16 +273,14 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
-  
-  data[["geometry"]] <- sf::st_sfc(data[["geometry"]])
-  data <- sf::st_as_sf(data, sf_column_name = "geometry")
+
+  data <- sf::st_as_sf(data)
   geom_type <- sf::st_geometry_type(data)
   # st_cast should "expand" a collection into multiple rows (one per feature)
   if ("GEOMETRYCOLLECTION" %in% geom_type) {
     data <- sf::st_cast(data)
     geom_type <- sf::st_geometry_type(data)
   }
-  data <- remove_class(data, "sf")
   
   basic_type <- dplyr::recode(
     as.character(geom_type),
@@ -308,6 +308,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
     d[[i]] <- prefix_class(
       fortify_sf(d[[i]]), c(names(d)[[i]], "GeomSf")
     )
+    d[[i]] <- remove_class(d[[i]], "sf")
   }
   if (length(d) == 1) d[[1]] else d
 }
@@ -532,7 +533,7 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
   )
 }
-utils::globalVariables(c("xmin", "xmax", "y", "size"))
+utils::globalVariables(c("xmin", "xmax", "y", "size", "COL", "PANEL", "ROW", "yaxis"))
 
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {

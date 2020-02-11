@@ -185,15 +185,18 @@ plotly_empty <- function(...) {
 }
 
 
-#' Convert a raster object to a data URI
+#' Encode a raster object as a data URI
 #' 
-#' Convenient embedding images via [layout()]
-#' \href{images}{https://plot.ly/r/reference/#layout-images}.
+#' Encode a raster object as a data URI, which is suitable for 
+#' use with `layout()` \href{https://plot.ly/r/reference/#layout-images}{images}.
+#' This is especially convenient for embedding raster images on a plot in 
+#' a self-contained fashion (i.e., so they don't depend on external URL links).
 #' 
 #' @param r an object coercable to a raster object via [as.raster()]
 #' @param ... arguments passed onto [as.raster()].
 #' @author Carson Sievert
 #' @export
+#' @references <https://plotly-r.com/embedding-images.html>
 #' @examples
 #' 
 #' # a red gradient (from ?as.raster)

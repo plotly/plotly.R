@@ -24,7 +24,7 @@ add_data <- function(p, data = NULL) {
 #' @inheritParams plot_ly
 #' @param p a plotly object
 #' @param inherit inherit attributes from [plot_ly()]?
-#' @param z a numeric matrix
+#' @param z a numeric matrix (unless [add_image()], which wants a raster object, see [as.raster()]).
 #' @param x the x variable.
 #' @param y the y variable.
 #' @param text textual labels.
@@ -390,6 +390,43 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
     p, class = c("plotly_ribbon", "plotly_polygon"), 
     x = x, ymin = ymin, ymax = ymax, type = "scatter", mode = "lines",
     hoveron = "points", fill = "toself",  ..., data = data, inherit = inherit
+  )
+}
+
+#' @inheritParams add_trace
+#' @rdname add_trace
+#' @param colormodel Sets the colormodel for image traces if `z` is not a raster object. 
+#' If `z` is a raster object (see [as.raster()]), the `'rgba'` colormodel is always used.
+#' @export
+add_image <- function(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE) {
+  
+  if (inherit) {
+    z <- z %||% p$x$attrs[[1]][["z"]]
+    colormodel <- colormodel %||% p$x$attrs[[1]][["colormodel"]]
+  }
+  
+  if (inherits(z, "raster")) {
+    cols <- col2rgb(z, alpha = TRUE)
+    dims <- c(dim(z), 4)
+    z <- array(numeric(prod(dims)), dims)
+    matrix_ <- function(x) {
+      matrix(x, byrow = TRUE, nrow = dims[1], ncol = dims[2])
+    }
+    z[,,1] <- matrix_(cols["red",])
+    z[,,2] <- matrix_(cols["green",])
+    z[,,3] <- matrix_(cols["blue",])
+    z[,,4] <- matrix_(cols["alpha",])
+    
+    # Throw if we detect another colormodel
+    if (!identical(colormodel %||% "rgba", "rgba")) {
+      warning("Passing a raster object to z requires rgba colormodel")
+    }
+    colormodel <- "rgba"
+  }
+  
+  add_trace(
+    p, z = z, colormodel = colormodel, ..., 
+    data = data, type = "image"
   )
 }
 

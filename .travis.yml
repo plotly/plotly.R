@@ -34,10 +34,3 @@ before_install:
 before_script:
   - if [[ "$TRAVIS_R_VERSION_STRING" == "release" ]]; then docker run -e GITHUB_PAT=$GITHUB_PAT -e MAPBOX_TOKEN=$MAPBOX_TOKEN -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-orca; fi
 
-# work around temporary travis + R 3.5 bug
-r_packages: devtools  
-
-# temporary: needed for plotly input testing in shiny 
-r_github_packages: 
-  - rstudio/shinytest
-  - r-lib/remotes

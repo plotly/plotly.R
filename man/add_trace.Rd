@@ -11,6 +11,7 @@
 \alias{add_sf}
 \alias{add_table}
 \alias{add_ribbons}
+\alias{add_image}
 \alias{add_area}
 \alias{add_pie}
 \alias{add_bars}
@@ -28,59 +29,89 @@
 \usage{
 add_trace(p, ..., data = NULL, inherit = TRUE)
 
-add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_text(p, x = NULL, y = NULL, z = NULL, text = NULL, ...,
-  data = NULL, inherit = TRUE)
+add_text(
+  p,
+  x = NULL,
+  y = NULL,
+  z = NULL,
+  text = NULL,
+  ...,
+  data = NULL,
+  inherit = TRUE
+)
 
-add_paths(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_paths(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_lines(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_lines(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_segments(p, x = NULL, y = NULL, xend = NULL, yend = NULL, ...,
-  data = NULL, inherit = TRUE)
+add_segments(
+  p,
+  x = NULL,
+  y = NULL,
+  xend = NULL,
+  yend = NULL,
+  ...,
+  data = NULL,
+  inherit = TRUE
+)
 
-add_polygons(p, x = NULL, y = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
 add_table(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
 
-add_ribbons(p, x = NULL, ymin = NULL, ymax = NULL, ...,
-  data = NULL, inherit = TRUE)
+add_ribbons(
+  p,
+  x = NULL,
+  ymin = NULL,
+  ymax = NULL,
+  ...,
+  data = NULL,
+  inherit = TRUE
+)
+
+add_image(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
 
 add_area(p, r = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
 
-add_pie(p, values = NULL, labels = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_pie(p, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
 
 add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram(p, x = NULL, y = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_histogram(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram2d(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_histogram2d(
+  p,
+  x = NULL,
+  y = NULL,
+  z = NULL,
+  ...,
+  data = NULL,
+  inherit = TRUE
+)
 
-add_histogram2dcontour(p, x = NULL, y = NULL, z = NULL, ...,
-  data = NULL, inherit = TRUE)
+add_histogram2dcontour(
+  p,
+  x = NULL,
+  y = NULL,
+  z = NULL,
+  ...,
+  data = NULL,
+  inherit = TRUE
+)
 
-add_heatmap(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_heatmap(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_contour(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_boxplot(p, x = NULL, y = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_surface(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL,
-  inherit = TRUE)
+add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_scattergeo(p, ...)
 
@@ -103,7 +134,7 @@ provided at this level may override other arguments
 
 \item{y}{the y variable.}
 
-\item{z}{a numeric matrix}
+\item{z}{a numeric matrix (unless \code{\link[=add_image]{add_image()}}, which wants a raster object, see \code{\link[=as.raster]{as.raster()}}).}
 
 \item{text}{textual labels.}
 
@@ -116,6 +147,9 @@ provided at this level may override other arguments
 \item{ymin}{a variable used to define the lower boundary of a polygon.}
 
 \item{ymax}{a variable used to define the upper boundary of a polygon.}
+
+\item{colormodel}{Sets the colormodel for image traces if \code{z} is not a raster object.
+If \code{z} is a raster object (see \code{\link[=as.raster]{as.raster()}}), the \code{'rgba'} colormodel is always used.}
 
 \item{r}{For polar chart only. Sets the radial coordinates.}
 

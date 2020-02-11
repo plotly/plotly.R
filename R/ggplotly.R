@@ -686,6 +686,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
       tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
       
+      # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
+      ticktext <- ticktext[!is.na(ticktext)]
+      tickvals <- tickvals[!is.na(tickvals)]
+      
       axisObj <- list(
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
@@ -1137,22 +1141,28 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(u) {
   u <- verifyUnit(u)
-  if (attr(u, "unit") != "mm") {
-    stop("Unit must be in millimeters")
+  if (any(getUnitType(u) != "mm")) {
+    stop("All units must be in millimeters")
   }
   (as.numeric(u) * 96) / 25.4
 }
-
+  
 verifyUnit <- function(u) {
-  # the default unit in ggplot2 is millimeters (unless it's element_text())
-  if (is.null(attr(u, "unit"))) {
-    u <- if (inherits(u, "element")) {
-      grid::unit(u$size %||% 0, "points")
-    } else {
-      grid::unit(u %||% 0, "mm")
-    }
+  if (grid::is.unit(u)) return(u)
+  
+  ## the default unit in ggplot2 is millimeters (unless it's element_text())
+  if (inherits(u, "element")) {
+    grid::unit(u$size %||% 0, "points")
+  } else {
+    grid::unit(u %||% 0, "mm")
   }
-  u
+}
+
+# Use public API for getting the unit's type, if available
+# https://github.com/ropensci/plotly/pull/1646#issue-331268260
+getUnitType <- function(u) {
+  tryNULL(get("unitType", envir = asNamespace("grid"))(u)) %||%
+    attr(u, "unit")
 }
 
 # detect a blank theme element

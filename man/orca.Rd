@@ -5,14 +5,34 @@
 \alias{orca_serve}
 \title{Static image exporting}
 \usage{
-orca(p, file = "plot.png", format = tools::file_ext(file),
-  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
-  parallel_limit = NULL, verbose = FALSE, debug = FALSE,
-  safe = FALSE, more_args = NULL, ...)
+orca(
+  p,
+  file = "plot.png",
+  format = tools::file_ext(file),
+  scale = NULL,
+  width = NULL,
+  height = NULL,
+  mathjax = FALSE,
+  parallel_limit = NULL,
+  verbose = FALSE,
+  debug = FALSE,
+  safe = FALSE,
+  more_args = NULL,
+  ...
+)
 
-orca_serve(port = 5151, mathjax = FALSE, safe = FALSE,
-  request_limit = NULL, keep_alive = TRUE, window_max_number = NULL,
-  quiet = FALSE, debug = FALSE, more_args = NULL, ...)
+orca_serve(
+  port = 5151,
+  mathjax = FALSE,
+  safe = FALSE,
+  request_limit = NULL,
+  keep_alive = TRUE,
+  window_max_number = NULL,
+  quiet = FALSE,
+  debug = FALSE,
+  more_args = NULL,
+  ...
+)
 }
 \arguments{
 \item{p}{a plotly object.}
