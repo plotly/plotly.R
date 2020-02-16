@@ -1,4 +1,4 @@
-# 4.9.1.9000
+# 4.9.2
 
 ## Changes to plotly.js
 
@@ -11,6 +11,7 @@
 ## BUG FIXES
 
 * `add_sf()`/`geom_sf()` now correctly handle geometry columns that are named something other than `"geometry"` (#1659).
+* Specifying an english locale no longer results in error (#1686).
 
 # 4.9.1
 
