@@ -109,10 +109,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   if (is_mapbox(p) || is_geo(p)) {
     p <- geo2cartesian(p)
     attrsToEval <- lapply(attrsToEval, function(tr) {
-      if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
-        stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
+      type <- tr[["type"]] %||% "scatter"
+      if (!grepl("scatter|choropleth", type)) {
+        warning("Can't add a '", type, "' trace to a map object", call. = FALSE)
       }
-      if (is_mapbox(p)) tr[["type"]] <- tr[["type"]] %||% "scattermapbox"
+      if (is_mapbox(p)) {
+        tr[["type"]] <- if (!is.null(tr[["z"]])) "choroplethmapbox" else "scattermapbox"
+      }
       if (is_geo(p)) {
         tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
       }
