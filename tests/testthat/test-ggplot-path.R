@@ -39,8 +39,8 @@ test_that("paths with different colors become different traces", {
 })
 
 four.paths <- rbind(
-  data.frame(two.paths, g = "positive"),
-  data.frame(-two.paths, g = "negative")
+  data.frame(two.paths, g = "positive", stringsAsFactors = TRUE),
+  data.frame(-two.paths, g = "negative", stringsAsFactors = TRUE)
 )
 
 test_that("paths with the same color but different groups stay together", {
