@@ -1,3 +1,13 @@
+# 4.9.2.1
+
+This is minor patch release with a few minor bug fixes and updates test expectations in anticipation of new R 4.0 defaults.
+
+## BUG FIXES
+
+* `plot_mapbox()` now correctly defaults to a scattermapbox trace (unless z is present, then it defaults to choroplethmapbox) (#1702).
+* `ggplotly()` now correctly resolves overlapping axis tick text in `coord_sf()` (#1673).
+* A false-positive warning is no longer thrown when attempting to cast `toWebGL()` (#1569).
+
 # 4.9.2
 
 ## Changes to plotly.js
