@@ -115,7 +115,7 @@ test_that("resolves overlapping axis ticks", {
   world <- rnaturalearth::ne_countries(returnclass = "sf")
   
   # filter the world sf object down to canada
-  canada <- rnaturalearth::filter(world, name == "Canada")
+  canada <- dplyr::filter(world, name == "Canada")
   # coerce cities lat/long data to an official sf object
   cities <- sf::st_as_sf(
     maps::canada.cities,
@@ -134,5 +134,5 @@ test_that("resolves overlapping axis ticks", {
   p <- ggplot() +
     geom_sf(data = canada) +
     geom_sf(data = cities, aes(size = pop), color = "red", alpha = 0.3)
-  ggplotly(p)
+  expect_doppelganger_built(ggplotly(p), "sf-axis-ticks")
 })
