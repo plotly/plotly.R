@@ -106,3 +106,33 @@ test_that("works with a blank theme", {
   expect_length(l$data, 2)
   expect_equivalent(l$data[[1]]$line$color, "transparent")
 })
+
+test_that("resolves overlapping axis ticks", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  skip_if_not_installed("maps")
+  
+  world <- rnaturalearth::ne_countries(returnclass = "sf")
+  
+  # filter the world sf object down to canada
+  canada <- rnaturalearth::filter(world, name == "Canada")
+  # coerce cities lat/long data to an official sf object
+  cities <- sf::st_as_sf(
+    maps::canada.cities,
+    coords = c("long", "lat"),
+    crs = 4326
+  )
+  # A PROJ4 projection designed for Canada
+  # http://spatialreference.org/ref/sr-org/7/
+  # http://spatialreference.org/ref/sr-org/7/proj4/
+  moll_proj <- "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84
++units=m +no_defs"
+  # perform the projections
+  canada <- sf::st_transform(canada, moll_proj)
+  cities <- sf::st_transform(cities, moll_proj)
+  # plot with geom_sf()
+  p <- ggplot() +
+    geom_sf(data = canada) +
+    geom_sf(data = cities, aes(size = pop), color = "red", alpha = 0.3)
+  ggplotly(p)
+})
