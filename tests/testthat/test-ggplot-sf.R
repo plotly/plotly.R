@@ -109,13 +109,12 @@ test_that("works with a blank theme", {
 
 test_that("resolves overlapping axis ticks", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("rnaturalearth")
   skip_if_not_installed("maps")
   
-  world <- rnaturalearth::ne_countries(returnclass = "sf")
+  world <- sf::st_as_sf(maps::map('world', plot = FALSE, fill = TRUE))
   
   # filter the world sf object down to canada
-  canada <- dplyr::filter(world, name == "Canada")
+  canada <- dplyr::filter(world, ID == "Canada")
   # coerce cities lat/long data to an official sf object
   cities <- sf::st_as_sf(
     maps::canada.cities,
