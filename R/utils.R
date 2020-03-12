@@ -36,6 +36,11 @@ is.discrete <- function(x) {
   if (length(x) > 0 || is_blank(x)) x else y
 }
 
+"%()%" <- function(x, y) {
+  if (is.function(x)) return(x())
+  y
+}
+
 # kind of like %||%, but only respects user-defined defaults
 # (instead of defaults provided in the build step)
 "%|D|%" <- function(x, y) {
@@ -818,14 +823,15 @@ verify_webgl <- function(p) {
     return(p)
   }
   types <- sapply(p$x$data, function(x) x[["type"]][1] %||% "scatter")
-  idx <- paste0(types, "gl") %in% names(Schema$traces)
-  if (any(!idx)) {
+  can_gl <- paste0(types, "gl") %in% names(Schema$traces)
+  already_gl <- grepl("gl$", types)
+  if (any(!can_gl & !already_gl)) {
     warning(
       "The following traces don't have a WebGL equivalent: ",
-      paste(which(!idx), collapse = ", ")
+      paste(which(!can_gl & !already_gl), collapse = ", ")
     )
   }
-  for (i in which(idx)) {
+  for (i in which(can_gl)) {
     p$x$data[[i]]$type <- paste0(p$x$data[[i]]$type, "gl")
   }
   p

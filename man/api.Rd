@@ -10,17 +10,31 @@
 \alias{api}
 \title{Tools for working with plotly's REST API (v2)}
 \usage{
-api_create(x = last_plot(), filename = NULL, fileopt = c("overwrite",
-  "new"), sharing = c("public", "private", "secret"), ...)
+api_create(
+  x = last_plot(),
+  filename = NULL,
+  fileopt = c("overwrite", "new"),
+  sharing = c("public", "private", "secret"),
+  ...
+)
 
-\method{api_create}{plotly}(x = last_plot(), filename = NULL,
-  fileopt = "overwrite", sharing = "public", ...)
+\method{api_create}{plotly}(
+  x = last_plot(),
+  filename = NULL,
+  fileopt = "overwrite",
+  sharing = "public",
+  ...
+)
 
-\method{api_create}{ggplot}(x = last_plot(), filename = NULL,
-  fileopt = "overwrite", sharing = "public", ...)
+\method{api_create}{ggplot}(
+  x = last_plot(),
+  filename = NULL,
+  fileopt = "overwrite",
+  sharing = "public",
+  ...
+)
 
-\method{api_create}{data.frame}(x, filename = NULL,
-  fileopt = "overwrite", sharing = "public", ...)
+\method{api_create}{data.frame}(x, filename = NULL, fileopt = "overwrite", sharing = "public", ...)
 
 api_download_plot(id, username)
 

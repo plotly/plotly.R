@@ -4,9 +4,17 @@
 \alias{gg2list}
 \title{Convert a ggplot to a list.}
 \usage{
-gg2list(p, width = NULL, height = NULL, tooltip = "all",
-  dynamicTicks = FALSE, layerData = 1, originalData = TRUE,
-  source = "A", ...)
+gg2list(
+  p,
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A",
+  ...
+)
 }
 \arguments{
 \item{p}{ggplot2 plot.}

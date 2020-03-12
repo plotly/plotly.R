@@ -92,7 +92,10 @@ EXPOSE 3838
 
 RUN R -e "install.packages('assertthat')"
 RUN R -e "install.packages('testthat')"
+ARG CRANCACHE=1
 RUN R -e "update.packages(ask=FALSE)"
+RUN R -e "remotes::install_github('r-lib/vdiffr')"
+RUN R -e "install.packages('rnaturalearth')"
 
 # install any new dependencies, then either manage cases (the default) or run tests
 # note the workaround to get docker to run a proper exit status when there are testthat errors

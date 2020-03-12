@@ -4,8 +4,15 @@
 \alias{plotly_IMAGE}
 \title{Create a static image}
 \usage{
-plotly_IMAGE(x, width = 1000, height = 500, format = "png",
-  scale = 1, out_file, ...)
+plotly_IMAGE(
+  x,
+  width = 1000,
+  height = 500,
+  format = "png",
+  scale = 1,
+  out_file,
+  ...
+)
 }
 \arguments{
 \item{x}{either a plotly object or a list.}

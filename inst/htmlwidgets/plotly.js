@@ -17,6 +17,14 @@ HTMLWidgets.widget({
   
   renderValue: function(el, x, instance) {
     
+    // Plotly.relayout() mutates the plot input object, so make sure to 
+    // keep a reference to the user-supplied width/height *before*
+    // we call Plotly.plot();
+    var lay = x.layout || {};
+    instance.width = lay.width;
+    instance.height = lay.height;
+    instance.autosize = lay.autosize || true;
+    
     /* 
     / 'inform the world' about highlighting options this is so other
     / crosstalk libraries have a chance to respond to special settings 
@@ -165,16 +173,8 @@ HTMLWidgets.widget({
       
       var plot = Plotly.plot(graphDiv, x);
       instance.plotly = true;
-      instance.autosize = x.layout.autosize || true;
-      instance.width = x.layout.width;
-      instance.height = x.layout.height;
       
     } else {
-      
-      // new x data could contain a new height/width...
-      // attach to instance so that resize logic knows about the new size
-      instance.width = x.layout.width || instance.width;
-      instance.height = x.layout.height || instance.height;
       
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
       // a new webgl context
@@ -275,10 +275,13 @@ HTMLWidgets.widget({
         for (var i = 0; i < attrsToAttach.length; i++) {
           var attr = trace[attrsToAttach[i]];
           if (Array.isArray(attr)) {
-              // pointNumber can be an array (e.g., heatmaps)
-              // TODO: can pointNumber be 3D?
-              obj[attrsToAttach[i]] = typeof pt.pointNumber === "number" ? 
-                attr[pt.pointNumber] : attr[pt.pointNumber[0]][pt.pointNumber[1]];
+            if (typeof pt.pointNumber === "number") {
+              obj[attrsToAttach[i]] = attr[pt.pointNumber];
+            } else if (Array.isArray(pt.pointNumber)) {
+              obj[attrsToAttach[i]] = attr[pt.pointNumber[0]][pt.pointNumber[1]];
+            } else if (Array.isArray(pt.pointNumbers)) {
+              obj[attrsToAttach[i]] = pt.pointNumbers.map(function(idx) { return attr[idx]; });
+            }
           }
         }
         return obj;
@@ -305,7 +308,7 @@ HTMLWidgets.widget({
 
     
     // send user input event data to shiny
-    if (HTMLWidgets.shinyMode) {
+    if (HTMLWidgets.shinyMode && Shiny.setInputValue) {
       
       // Some events clear other input values
       // TODO: always register these?
@@ -326,6 +329,7 @@ HTMLWidgets.widget({
       
       var eventDataFunctionMap = {
         plotly_click: eventDataWithKey,
+        plotly_sunburstclick: eventDataWithKey,
         plotly_hover: eventDataWithKey,
         plotly_unhover: eventDataWithKey,
         // If 'plotly_selected' has already been fired, and you click

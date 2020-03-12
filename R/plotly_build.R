@@ -109,10 +109,13 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   if (is_mapbox(p) || is_geo(p)) {
     p <- geo2cartesian(p)
     attrsToEval <- lapply(attrsToEval, function(tr) {
-      if (!grepl("scatter|choropleth", tr[["type"]] %||% "scatter")) {
-        stop("Cant add a '", tr[["type"]], "' trace to a map object", call. = FALSE)
+      type <- tr[["type"]] %||% "scatter"
+      if (!grepl("scatter|choropleth", type)) {
+        warning("Can't add a '", type, "' trace to a map object", call. = FALSE)
       }
-      if (is_mapbox(p)) tr[["type"]] <- "scattermapbox"
+      if (is_mapbox(p)) {
+        tr[["type"]] <- if (!is.null(tr[["z"]])) "choroplethmapbox" else "scattermapbox"
+      }
       if (is_geo(p)) {
         tr[["type"]] <- if (!is.null(tr[["z"]])) "choropleth" else "scattergeo"
       }
@@ -280,10 +283,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     )
     for (i in x$.plotlyVariableMapping) {
       # try to reduce the amount of data we have to send for non-positional scales
-      x[[i]] <- structure(
-        if (i %in% npscales()) uniq(d[[i]]) else d[[i]],
-        class = oldClass(x[[i]])
-      )
+      entry <- if (i %in% npscales()) uniq(d[[i]]) else d[[i]]
+      if (is.null(entry)) {
+        x[[i]] <- NULL  
+      } else {
+        x[[i]] <- structure(entry, class = oldClass(x[[i]]))  
+      }
     }
     x
   })
@@ -1031,7 +1036,7 @@ coerce_attr_defaults <- function(trace, layout) {
   if (length(trace[["stroke"]]) && !is.default(trace[["stroke"]])) {
     trace$span <- trace[["span"]] %||% default(I(1))
   }
-  if (trace[["type"]] %in% c("sunburst", "pie")) {
+  if (trace[["type"]] %in% c("sunburst", "pie", "treemap")) {
     # As of v1.46.1, paper_bgcolor defaults to '#fff' which
     # col2rgb() can't parse, but expands to '#ffffff'
     # https://stackoverflow.com/a/2899224/1583084

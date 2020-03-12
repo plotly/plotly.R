@@ -4,11 +4,20 @@
 \alias{highlight}
 \title{Query graphical elements in multiple linked views}
 \usage{
-highlight(p, on = "plotly_click", off,
-  persistent = getOption("persistent", FALSE), dynamic = FALSE,
-  color = NULL, selectize = FALSE, defaultValues = NULL,
+highlight(
+  p,
+  on = "plotly_click",
+  off,
+  persistent = getOption("persistent", FALSE),
+  dynamic = FALSE,
+  color = NULL,
+  selectize = FALSE,
+  defaultValues = NULL,
   opacityDim = getOption("opacityDim", 0.2),
-  selected = attrs_selected(), debounce = 0, ...)
+  selected = attrs_selected(),
+  debounce = 0,
+  ...
+)
 }
 \arguments{
 \item{p}{a plotly visualization.}

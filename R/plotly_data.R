@@ -92,7 +92,7 @@ print.plotly_data <- function(x, ...) {
 #' 
 #' This function simply creates an object of class [crosstalk::SharedData].
 #' The reason it exists is to make it easier to teach others how to leverage
-#' it's functionality in plotly. It also makes it more discoverable if one
+#' its functionality in plotly. It also makes it more discoverable if one
 #' is already aware of [highlight].
 #' 
 #' @param ... arguments passed to `crosstalk::SharedData$new()`

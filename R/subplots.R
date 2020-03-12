@@ -266,7 +266,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   }
   
   p <- list(
-    data = Reduce(c, traces),
+    data = unlist(traces, recursive = FALSE),
     layout = Reduce(modify_list, c(xAxes, rev(yAxes)))
   )
   
@@ -275,9 +275,10 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   annotations <- Map(reposition, annotations, split(domainInfo, seq_along(plots)))
   shapes <- Map(reposition, shapes, split(domainInfo, seq_along(plots)))
   images <- Map(reposition, images, split(domainInfo, seq_along(plots)))
-  p$layout$annotations <- Reduce(c, annotations)
-  p$layout$shapes <- Reduce(c, shapes)
-  p$layout$images <- Reduce(c, images)
+  p$layout$annotations <- unlist(annotations, recursive = FALSE)
+  p$layout$shapes <- unlist(shapes, recursive = FALSE)
+  p$layout$images <- unlist(images, recursive = FALSE)
+
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) {
     x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes|images", names(x))] %||% list()
@@ -290,8 +291,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     }
     layouts <- layouts[which_layout]
   }
-  p$attrs <- Reduce(c, lapply(plots, "[[", "attrs"))
-  p$layout <- modify_list(p$layout, Reduce(modify_list, layouts))
+  p$attrs <- unlist(lapply(plots, "[[", "attrs"), recursive = FALSE)
+  p$layout <- Reduce(modify_list, layouts, p$layout)
   p$source <- ensure_one(plots, "source")
   p$config <- ensure_one(plots, "config")
   p$highlight <- ensure_one(plots, "highlight")
@@ -338,14 +339,18 @@ dots2plots <- function(...) {
 # helper function that warns if more than one plot-level attribute 
 # has been specified in a list of plots (and returning that attribute)
 ensure_one <- function(plots, attr) {
-  attrs <- lapply(plots, "[", attr)
+  attrs <- Filter(Negate(is.null), lapply(plots, "[[", attr))
+  if (length(attrs) == 0) {
+    warning("No ", attr, " found", call. = FALSE)
+    return (NULL)
+  }
   for (i in seq_along(attrs)) {
     if (!identical(attrs[[1]], attrs[[i]])) {
       warning("Can only have one: ", attr, call. = FALSE)
       break
     }
   }
-  attrs[[length(attrs)]][[1]]
+  attrs[[length(attrs)]]
 }
 
 
@@ -399,7 +404,7 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
 
 list2df <- function(x, nms) {
   #stopifnot(length(unique(sapply(x, length))) == 1)
-  m <- if (length(x) == 1) t(x[[1]]) else Reduce(rbind, x)
+  m <- if (length(x) == 1) t(x[[1]]) else do.call(rbind, x)
   row.names(m) <- NULL
   df <- data.frame(m)
   if (!missing(nms)) setNames(df, nms) else df

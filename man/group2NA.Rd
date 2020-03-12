@@ -4,8 +4,13 @@
 \alias{group2NA}
 \title{Separate groups with missing values}
 \usage{
-group2NA(data, groupNames = "group", nested = NULL, ordered = NULL,
-  retrace.first = inherits(data, "GeomPolygon"))
+group2NA(
+  data,
+  groupNames = "group",
+  nested = NULL,
+  ordered = NULL,
+  retrace.first = inherits(data, "GeomPolygon")
+)
 }
 \arguments{
 \item{data}{a data frame.}

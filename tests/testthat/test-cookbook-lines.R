@@ -119,7 +119,7 @@ test_that("4 error bars", {
   info <- expect_traces(bp.err4, 4, "bar-dodge-color-err4")
 })
 
-df <- read.table(header = T, text = "
+df <- read.table(header = TRUE, text = "
       cond xval yval
    control 11.5 10.8
    control  9.3 12.9
@@ -189,7 +189,7 @@ test_that("geom_hline -> 2 more traces", {
   expect_equivalent(sum(has.name), 2)
 })
 
-df.vlines <- data.frame(cond = levels(df$cond), xval = c(10,11.5))
+df.vlines <- data.frame(cond = unique(df$cond), xval = c(10,11.5))
 #      cond xval
 #   control 10.0
 # treatment 11.5

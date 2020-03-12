@@ -4,8 +4,14 @@
 \alias{config}
 \title{Set the default configuration for plotly}
 \usage{
-config(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL,
-  mathjax = NULL)
+config(
+  p,
+  ...,
+  cloud = FALSE,
+  showSendToCloud = cloud,
+  locale = NULL,
+  mathjax = NULL
+)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -25,7 +31,7 @@ TeX rendering). If \code{"local"}, the PLOTLY_MATHJAX_PATH environment variable 
 set to the location (a local file path) of MathJax. IMPORTANT: \strong{plotly} uses SVG-based
 mathjax rendering which doesn't play nicely with HTML-based rendering
 (e.g., \strong{rmarkdown} documents and \strong{shiny} apps). To leverage both types of rendering,
-you must \code{<iframe>} your plotly graph(s) into the larger document
+you must \verb{<iframe>} your plotly graph(s) into the larger document
 (see \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here}
 for an \strong{rmarkdown} example and
 \href{https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd}{here} for a \strong{shiny} example).}

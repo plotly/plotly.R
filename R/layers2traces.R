@@ -10,12 +10,14 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     
+    # add on plot-level mappings, if they're inherited
+    map <- c(y$mapping, if (isTRUE(y$inherit.aes)) p$mapping)
+    
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]
-    map <- c(y$mapping, calc_aes)
+    calc_aes <- calc_aes[!names(calc_aes) %in% names(map)]
     
-    # add on plot-level mappings, if they're inherited
-    if (isTRUE(y$inherit.aes)) map <- c(map, p$mapping)
+    map <- c(calc_aes, map)
     
     # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
     map <- ggfun("make_labels")(map)
@@ -271,16 +273,14 @@ to_basic.GeomRect <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
-  
-  data[["geometry"]] <- sf::st_sfc(data[["geometry"]])
-  data <- sf::st_as_sf(data, sf_column_name = "geometry")
+
+  data <- sf::st_as_sf(data)
   geom_type <- sf::st_geometry_type(data)
   # st_cast should "expand" a collection into multiple rows (one per feature)
   if ("GEOMETRYCOLLECTION" %in% geom_type) {
     data <- sf::st_cast(data)
     geom_type <- sf::st_geometry_type(data)
   }
-  data <- remove_class(data, "sf")
   
   basic_type <- dplyr::recode(
     as.character(geom_type),
@@ -308,6 +308,7 @@ to_basic.GeomSf <- function(data, prestats_data, layout, params, p, ...) {
     d[[i]] <- prefix_class(
       fortify_sf(d[[i]]), c(names(d)[[i]], "GeomSf")
     )
+    d[[i]] <- remove_class(d[[i]], "sf")
   }
   if (length(d) == 1) d[[1]] else d
 }
@@ -417,8 +418,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
-  data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
+  x <- if (inherits(p$coordinates, "CoordFlip")) "y" else "x"
+  lay <- tidyr::gather_(layout$layout, "variable", x, paste0(x, c("_min", "_max")))
+  data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
+  data[["x"]] <- data[[x]]
   data[["y"]] <- data$yintercept
   prefix_class(data, c("GeomHline", "GeomPath"))
 }
@@ -429,8 +432,10 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- do.call(paste,
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "y", c("y_min", "y_max"))
-  data <- merge(lay[c("PANEL", "y")], data, by = "PANEL")
+  y <- if (inherits(p$coordinates, "CoordFlip")) "x" else "y"
+  lay <- tidyr::gather_(layout$layout, "variable", y, paste0(y, c("_min", "_max")))
+  data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
+  data[["y"]] <- data[[y]]
   data[["x"]] <- data$xintercept
   prefix_class(data, c("GeomVline", "GeomPath"))
 }
@@ -528,7 +533,7 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
   )
 }
-utils::globalVariables(c("xmin", "xmax", "y", "size"))
+utils::globalVariables(c("xmin", "xmax", "y", "size", "COL", "PANEL", "ROW", "yaxis"))
 
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {

@@ -465,37 +465,51 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # panel -> plotly.js axis/anchor info
   # (assume a grid layout by default)
-  layout$layout$xaxis <- layout$layout$COL
-  layout$layout$yaxis <- layout$layout$ROW
-  layout$layout$xanchor <- nRows
-  layout$layout$yanchor <- 1
+  layout$layout <- dplyr::mutate(
+    layout$layout,
+    xaxis = COL,
+    yaxis = ROW,
+    xanchor = nRows,
+    yanchor = 1L
+  )
   if (inherits(plot$facet, "FacetWrap")) {
-    if (plot$facet$params$free$x) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$ROW
-    }
-    if (plot$facet$params$free$y) {
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$COL
-      layout$layout$xanchor <- nPanels
-    }
     if (plot$facet$params$free$x && plot$facet$params$free$y) {
-      layout$layout$xaxis <- layout$layout$PANEL
-      layout$layout$yaxis <- layout$layout$PANEL
-      layout$layout$xanchor <- layout$layout$PANEL
-      layout$layout$yanchor <- layout$layout$PANEL
+      layout$layout <- dplyr::mutate(
+        layout$layout,
+        xaxis = PANEL,
+        yaxis = PANEL,
+        xanchor = PANEL,
+        yanchor = PANEL
+      )
+    } else if (plot$facet$params$free$x) {
+      layout$layout <- dplyr::mutate(
+        layout$layout,
+        xaxis = PANEL,
+        xanchor = ROW
+      )
+    } else if (plot$facet$params$free$y) {
+      layout$layout <- dplyr::mutate(
+        layout$layout,
+        yaxis = PANEL,
+        yanchor = COL
+      )
     }
+    # anchor X axis to the lowest plot in its column
+    layout$layout <- dplyr::group_by_(layout$layout, "xaxis")
+    layout$layout <-  dplyr::mutate(layout$layout, xanchor = max(as.integer(yaxis)))
   }
+  layout$layout <- as.data.frame(layout$layout)
+
   # format the axis/anchor to a format plotly.js respects
   layout$layout$xaxis <- paste0("xaxis", sub("^1$", "", layout$layout$xaxis))
   layout$layout$yaxis <- paste0("yaxis", sub("^1$", "", layout$layout$yaxis))
   layout$layout$xanchor <- paste0("y", sub("^1$", "", layout$layout$xanchor))
   layout$layout$yanchor <- paste0("x", sub("^1$", "", layout$layout$yanchor))
   # for some layers2traces computations, we need the range of each panel
-  layout$layout$x_min <- sapply(layout$panel_params, function(z) min(z$x.range %||% z$x_range))
-  layout$layout$x_max <- sapply(layout$panel_params, function(z) max(z$x.range %||% z$x_range))
-  layout$layout$y_min <- sapply(layout$panel_params, function(z) min(z$y.range %||% z$y_range))
-  layout$layout$y_max <- sapply(layout$panel_params, function(z) max(z$y.range %||% z$y_range))
+  layout$layout$x_min <- sapply(layout$panel_params, function(z) { min(z[["x"]]$dimension %()% z$x.range %||% z$x_range) })
+  layout$layout$x_max <- sapply(layout$panel_params, function(z) { max(z[["x"]]$dimension %()% z$x.range %||% z$x_range) })
+  layout$layout$y_min <- sapply(layout$panel_params, function(z) { min(z[["y"]]$dimension %()% z$y.range %||% z$y_range) })
+  layout$layout$y_max <- sapply(layout$panel_params, function(z) { max(z[["y"]]$dimension %()% z$y.range %||% z$y_range) })
   
   # layers -> plotly.js traces
   plot$tooltip <- tooltip
@@ -552,7 +566,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       # allocate enough space for the _longest_ text label
       axisTextX <- theme[["axis.text.x"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(layout$panel_params, "[[", "x.labels"))
+      labz <- unlist(lapply(layout$panel_params, function(pp) { pp[["x"]]$get_labels %()% pp$x.labels }))
       lab <- labz[which.max(nchar(labz))]
       panelMarginY <- panelMarginY + axisTicksX +
         bbox(lab, axisTextX$angle, unitConvert(axisTextX, "npc", "height"))[["height"]]
@@ -564,7 +578,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
       # allocate enough space for the _longest_ text label
       axisTextY <- theme[["axis.text.y"]] %||% theme[["axis.text"]]
-      labz <- unlist(lapply(layout$panel_params, "[[", "y.labels"))
+      labz <- unlist(lapply(layout$panel_params, function(pp) { pp[["y"]]$get_labels %()% pp$y.labels }))
       lab <- labz[which.max(nchar(labz))]
       panelMarginX <- panelMarginX + axisTicksY +
         bbox(lab, axisTextY$angle, unitConvert(axisTextY, "npc", "width"))[["width"]]
@@ -598,10 +612,19 @@ gg2list <- function(p, width = NULL, height = NULL,
       if ("CoordSf" %in% class(p$coordinates)) {
         # see CoordSf$render_axis_v
         direction <- if (xy == "x") "E" else "N"
-        idx <- rng$graticule$type == direction & !is.na(rng$graticule$degree_label)
+        idx <- rng$graticule$type == direction & 
+          !is.na(rng$graticule$degree_label) &
+          # Respect the logical 'plot12' column which sf constructs for 
+          # determining which tick labels should be drawn
+          # https://github.com/r-spatial/sf/blob/b49d37/R/graticule.R#L199
+          # https://github.com/r-spatial/sf/blob/52a8351/R/plot.R#L580
+          (rng$graticule$plot12 %||% TRUE)
         tickData <- rng$graticule[idx, ]
         # TODO: how to convert a language object to unicode character string?
-        rng[[paste0(xy, ".labels")]] <- as.character(tickData[["degree_label"]])
+        rng[[paste0(xy, ".labels")]] <- sub(
+          "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
+          gsub("\"", "", tickData[["degree_label"]])
+        )
         rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
         
         # If it doesn't already exist (for this panel), 
@@ -636,14 +659,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         tickExists <- with(rng$graticule, sapply(degree_label, is.language))
         if (sum(tickExists) == 0) {
           theme$axis.ticks.length <- 0
-        } else{
-          # convert the special *degree expression in plotmath to HTML entity
-          # TODO: can this be done more generally for all ?
-          rng[[paste0(xy, ".labels")]] <- sub(
-            "\\*\\s+degree[ ]?[\\*]?", "&#176;", rng[[paste0(xy, ".labels")]]
-          )
         }
-        
       }
       
       # stuff like layout$panel_params is already flipped, but scales aren't
@@ -673,16 +689,23 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
       
+      ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
+      tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
+      
+      # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
+      ticktext <- ticktext[!is.na(ticktext)]
+      tickvals <- tickvals[!is.na(tickvals)]
+      
       axisObj <- list(
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
         range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
-        ticktext = rng[[paste0(xy, ".labels")]],
-        tickvals = rng[[paste0(xy, ".major")]],
+        ticktext = ticktext,
+        tickvals = tickvals,
         categoryorder = "array",
-        categoryarray = rng[[paste0(xy, ".labels")]],
+        categoryarray = ticktext,
         nticks = nrow(rng),
         ticks = if (is_blank(axisTicks)) "" else "outside",
         tickcolor = toRGB(axisTicks$colour),
@@ -1124,22 +1147,28 @@ unitConvert <- function(u, to = c("npc", "pixels"), type = c("x", "y", "height",
 # from R, but it seems 96 is a reasonable assumption.
 mm2pixels <- function(u) {
   u <- verifyUnit(u)
-  if (attr(u, "unit") != "mm") {
-    stop("Unit must be in millimeters")
+  if (any(getUnitType(u) != "mm")) {
+    stop("All units must be in millimeters")
   }
   (as.numeric(u) * 96) / 25.4
 }
-
+  
 verifyUnit <- function(u) {
-  # the default unit in ggplot2 is millimeters (unless it's element_text())
-  if (is.null(attr(u, "unit"))) {
-    u <- if (inherits(u, "element")) {
-      grid::unit(u$size %||% 0, "points")
-    } else {
-      grid::unit(u %||% 0, "mm")
-    }
+  if (grid::is.unit(u)) return(u)
+  
+  ## the default unit in ggplot2 is millimeters (unless it's element_text())
+  if (inherits(u, "element")) {
+    grid::unit(u$size %||% 0, "points")
+  } else {
+    grid::unit(u %||% 0, "mm")
   }
-  u
+}
+
+# Use public API for getting the unit's type, if available
+# https://github.com/ropensci/plotly/pull/1646#issue-331268260
+getUnitType <- function(u) {
+  tryNULL(get("unitType", envir = asNamespace("grid"))(u)) %||%
+    attr(u, "unit")
 }
 
 # detect a blank theme element

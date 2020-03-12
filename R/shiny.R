@@ -37,11 +37,21 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
 #' @rdname plotly-shiny
 #' @export
 renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
-  # this makes it possible to pass a ggplot2 object to renderPlotly()
-  # https://github.com/ramnathv/htmlwidgets/issues/166#issuecomment-153000306
-  expr <- as.call(list(call(":::", quote("plotly"), quote("prepareWidget")), expr))
-  renderFunc <- shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+  if (!quoted) { 
+    quoted <- TRUE
+    expr <- substitute(expr) 
+  }
+  # Install the (user-supplied) expression as a function
+  # This way, if the user-supplied expression contains a return()
+  # statement, we can capture that return value and pass it along
+  # to prepareWidget()
+  # prepareWidget() makes it possible to pass different non-plotly
+  # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
+  # to inform event_data about what events have been registered
+  shiny::installExprFunction(expr, "func", env, quoted)
+  expr <- quote(getFromNamespace("prepareWidget", "plotly")(func()))
+  local_env <- environment()
+  renderFunc <- shinyRenderWidget(expr, plotlyOutput, local_env, quoted)
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
   # in shiny 1.0.3.9002, but we require >= 1.1)
@@ -57,13 +67,14 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 # Converts a plot, OR a promise of a plot, to plotly
 prepareWidget <- function(x) {
-  p <- if (promises::is.promising(x)) {
-    promises::then(x, plotly_build)
+  if (promises::is.promising(x)) {
+    promises::then(
+      promises::then(x, plotly_build),
+      register_plot_events
+    )
   } else {
-    plotly_build(x)
+    register_plot_events(plotly_build(x))
   }
-  register_plot_events(p)
-  p
 }
 
 register_plot_events <- function(p) {
@@ -73,6 +84,7 @@ register_plot_events <- function(p) {
     session$userData$plotlyShinyEventIDs,
     eventIDs
   ))
+  p
 }
 
 
@@ -105,7 +117,8 @@ event_data <- function(
     "plotly_hover", "plotly_unhover", "plotly_click", "plotly_doubleclick",
     "plotly_selected", "plotly_selecting", "plotly_brushed", "plotly_brushing", 
     "plotly_deselect", "plotly_relayout", "plotly_restyle", "plotly_legendclick", 
-    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot"
+    "plotly_legenddoubleclick", "plotly_clickannotation", "plotly_afterplot",
+    "plotly_sunburstclick"
   ),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
@@ -240,7 +253,8 @@ shiny_event_defaults <- function() {
     "plotly_clickannotation",
     "plotly_doubleclick", 
     "plotly_deselect", 
-    "plotly_afterplot"
+    "plotly_afterplot",
+    "plotly_sunburstclick"
   )
 }
 

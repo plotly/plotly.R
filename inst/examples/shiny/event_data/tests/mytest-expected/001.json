@@ -362,6 +362,7 @@
           "plotly_doubleclick",
           "plotly_deselect",
           "plotly_afterplot",
+          "plotly_sunburstclick",
           "plotly_selecting"
         ],
         "highlight": {
@@ -384,6 +385,19 @@
 
       ],
       "deps": [
+        {
+          "name": "setprototypeof",
+          "version": "0.1",
+          "src": {
+            "href": "setprototypeof-0.1"
+          },
+          "meta": null,
+          "script": "setprototypeof.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
         {
           "name": "typedarray",
           "version": "0.1",
@@ -427,9 +441,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.46.1",
+          "version": "1.52.2",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.46.1"
+            "href": "plotly-htmlwidgets-css-1.52.2"
           },
           "meta": null,
           "script": null,
@@ -440,9 +454,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.46.1",
+          "version": "1.52.2",
           "src": {
-            "href": "plotly-main-1.46.1"
+            "href": "plotly-main-1.52.2"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
