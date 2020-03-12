@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 4.10.0.9000
 
 ## Changes to plotly.js
