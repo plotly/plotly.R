@@ -1,3 +1,9 @@
+# 4.9.2.9000
+
+## IMPROVEMENTS
+
+* `orca()` accepts a `dir` argument so images can be stored in a different location than the current working directory (#1310).
+
 # 4.9.2.1
 
 This is minor patch release with a few minor bug fixes and updates test expectations in anticipation of new R 4.0 defaults.

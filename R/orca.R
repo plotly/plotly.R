@@ -11,6 +11,7 @@
 #' 
 #' @param p a plotly object.
 #' @param file output filename.
+#' @param dir sets the output directory. Defaults to current working directory.
 #' @param format the output format (png, jpeg, webp, svg, pdf, eps).
 #' @param scale Sets the image scale. Applies to all output images.
 #' @param width Sets the image width. If not set, defaults to `layout.width` value. 
@@ -62,7 +63,8 @@
 #' }
 #' 
 
-orca <- function(p, file = "plot.png", format = tools::file_ext(file), 
+orca <- function(p, file = "plot.png", dir = getwd(), 
+                 format = tools::file_ext(file), 
                  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
                  safe = FALSE, more_args = NULL, ...) {
@@ -84,6 +86,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   
   args <- c(
     "graph", tmp, 
+    "-d", dir,
     "-o", file,
     "--format", format,
     "--plotlyjs", plotlyjs_path,
