@@ -693,8 +693,9 @@ gg2list <- function(p, width = NULL, height = NULL,
       tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
-      ticktext <- ticktext[!is.na(ticktext)]
-      tickvals <- tickvals[!is.na(tickvals)]
+      hasTickText <- !(is.na(ticktext) | is.na(tickvals))
+      ticktext <- ticktext[hasTickText]
+      tickvals <- tickvals[hasTickText]
       
       axisObj <- list(
         # TODO: log type?
