@@ -814,7 +814,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
           bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
         
-        if (nchar(axisTitleText) > 0) {
+        if (!is.null(axisTitleText) && nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
           offset <-
@@ -836,7 +836,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
-          if (nchar(axisTitleText) > 0) {
+          if (!is.null(axisTitleText) && nchar(axisTitleText) > 0) {
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
             # multiplying the offset by 2 seems to work, but this is a terrible hack
