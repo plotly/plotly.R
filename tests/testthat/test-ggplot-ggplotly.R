@@ -29,3 +29,8 @@ test_that("can access ggplot data in layout()", {
   l <- ggplotly(p) %>% layout(title = ~range(date))
   expect_equivalent(plotly_build(l)$x$layout$title, range(txhousing$date))
 })
+
+test_that("there is no error if axisTitleText is NULL", {
+  l <- ggplotly(p) %>% xlab(element_blank()) %>% ylab(element_blank()) %>% ggtitle(element_blank())  
+  expect_true(inherits(l), "plotly")
+})
