@@ -430,7 +430,7 @@ as_widget <- function(x, ...) {
       # we shouldn't need it because Object.setPrototypeOf() is pretty widely supported
       # https://github.com/plotly/plotly.js/issues/4556#issuecomment-583061419
       # https://caniuse.com/#search=setPrototypeOf
-      if (isTRUE(getOption("shiny.testmode"))) {
+      if (needsPrototypePolyfill()) {
         list(setPrototypeOfPolyfill())
       },
       list(typedArrayPolyfill()),
@@ -439,6 +439,18 @@ as_widget <- function(x, ...) {
       list(plotlyMainBundle())
     )
   )
+}
+
+needsPrototypePolyfill <- function() {
+  if (isTRUE(getOption("shiny.testmode"))) {
+    return(TRUE)
+  }
+  
+  if (isTRUE(getOption("knitr.in.progress"))) {
+    return(!knitr::is_html_output())
+  }
+  
+  return(FALSE)
 }
 
 setPrototypeOfPolyfill <- function() {
