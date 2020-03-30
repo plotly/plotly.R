@@ -436,7 +436,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     font = text2font(theme$text)
   )
   # main plot title
-  if (nchar(plot$labels$title %||% "") > 0) {
+  if (!is.null(plot$labels$title) && nchar(plot$labels$title %||% "") > 0) {
     gglayout$title <- list(
       text = faced(plot$labels$title, theme$plot.title$face),
       font = text2font(theme$plot.title),

@@ -31,6 +31,7 @@ test_that("can access ggplot data in layout()", {
 })
 
 test_that("there is no error if axisTitleText is NULL", {
-  l <- ggplotly(p) %>% xlab(element_blank()) %>% ylab(element_blank()) %>% ggtitle(element_blank())  
+  l1 <- p + xlab(element_blank()) + ylab(element_blank()) + ggtitle(element_blank())
+  l2 <- ggplotly(l1)
   expect_true(inherits(l), "plotly")
 })
