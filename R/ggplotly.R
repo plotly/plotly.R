@@ -436,7 +436,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     font = text2font(theme$text)
   )
   # main plot title
-  if (!rlang::is_empty(plot$labels$title) && nzchar(plot$labels$title %||% "")) {
+  if (length(plot$labels$title) != 0 && nzchar(plot$labels$title %||% "")) {
     gglayout$title <- list(
       text = faced(plot$labels$title, theme$plot.title$face),
       font = text2font(theme$plot.title),
@@ -814,7 +814,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           bbox(axisTickText, axisObj$tickangle, axisObj$tickfont$size)[[type]] +
           bbox(axisTitleText, axisTitle$angle, unitConvert(axisTitle, "pixels", type))[[type]]
         
-        if (!rlang::is_empty(axisTitleText) && nzchar(axisTitleText %||% "")) {
+        if (length(axisTitleText) != 0 && nzchar(axisTitleText %||% "")) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
           offset <-
@@ -836,7 +836,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
-          if (!rlang::is_empty(axisTitleText) && nzchar(axisTitleText %||% "")) {
+          if (length(axisTitleText) != 0 && nzchar(axisTitleText %||% "")) {
             # npc is on a 0-1 scale of the _entire_ device,
             # but these units _should_ be wrt to the plotting region
             # multiplying the offset by 2 seems to work, but this is a terrible hack
