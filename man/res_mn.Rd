@@ -4,7 +4,9 @@
 \name{res_mn}
 \alias{res_mn}
 \title{Minnesotan Indian Reservation Lands}
-\format{An sf data frame with 13 features and 5 fields}
+\format{
+An sf data frame with 13 features and 5 fields
+}
 \usage{
 res_mn
 }
