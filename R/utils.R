@@ -1137,6 +1137,15 @@ try_library <- function(pkg, fun = NULL) {
        "Please install and try again.", call. = FALSE)
 }
 
+# a la shiny:::is_available
+is_available <- function(package, version = NULL) {
+  installed <- nzchar(system.file(package = package))
+  if (is.null(version)) {
+    return(installed)
+  }
+  installed && isTRUE(utils::packageVersion(package) >= version)
+}
+
 # similar logic to rstudioapi::isAvailable()
 is_rstudio <- function() {
   identical(.Platform$GUI, "RStudio")
