@@ -4,8 +4,10 @@
 \name{wind}
 \alias{wind}
 \title{Wind data}
-\format{A data frame with three variables: \code{r}, \code{t},
-\code{nms}.}
+\format{
+A data frame with three variables: \code{r}, \code{t},
+\code{nms}.
+}
 \usage{
 wind
 }

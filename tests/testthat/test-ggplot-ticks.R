@@ -190,4 +190,13 @@ test_that("R line breaks are translated to HTML line breaks", {
   )
 })
 
-
+test_that("Missing axis ticks are treated correctly", {
+  # https://github.com/ropensci/plotly/issues/1721
+  p <- ggplot(data = mtcars, aes(x = qsec, y = disp)) + 
+    geom_point() + 
+    scale_x_continuous(
+      breaks = pretty(range(mtcars$qsec), n = 10),
+      labels = pretty(range(mtcars$qsec), n = 10)
+    )
+  expect_doppelganger_built(p, "continuous-x-missing")
+})

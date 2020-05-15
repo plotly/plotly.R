@@ -1,4 +1,22 @@
-# 4.9.1.9000
+# 4.9.2.9000
+
+## IMPROVEMENTS
+
+## BUG FIXES
+
+# 4.9.2.1
+
+This is minor patch release with a few minor bug fixes and updates test expectations in anticipation of new R 4.0 defaults.
+
+## BUG FIXES
+
+* Fixes rendering issues non-HTML **rmarkdown** output formats, which was introduced in the 4.9.2 release (#1702).
+* Fixes a `ggplotly()` bug in axis tick translation (#1725, #1721).
+* `plot_mapbox()` now correctly defaults to a scattermapbox trace (unless z is present, then it defaults to choroplethmapbox) (#1707).
+* `ggplotly()` now correctly resolves overlapping axis tick text in `coord_sf()` (#1673).
+* A false-positive warning is no longer thrown when attempting to cast `toWebGL()` (#1569).
+
+# 4.9.2
 
 ## Changes to plotly.js
 
@@ -11,6 +29,7 @@
 ## BUG FIXES
 
 * `add_sf()`/`geom_sf()` now correctly handle geometry columns that are named something other than `"geometry"` (#1659).
+* Specifying an english locale no longer results in error (#1686).
 
 # 4.9.1
 

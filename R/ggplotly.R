@@ -612,7 +612,13 @@ gg2list <- function(p, width = NULL, height = NULL,
       if ("CoordSf" %in% class(p$coordinates)) {
         # see CoordSf$render_axis_v
         direction <- if (xy == "x") "E" else "N"
-        idx <- rng$graticule$type == direction & !is.na(rng$graticule$degree_label)
+        idx <- rng$graticule$type == direction & 
+          !is.na(rng$graticule$degree_label) &
+          # Respect the logical 'plot12' column which sf constructs for 
+          # determining which tick labels should be drawn
+          # https://github.com/r-spatial/sf/blob/b49d37/R/graticule.R#L199
+          # https://github.com/r-spatial/sf/blob/52a8351/R/plot.R#L580
+          (rng$graticule$plot12 %||% TRUE)
         tickData <- rng$graticule[idx, ]
         # TODO: how to convert a language object to unicode character string?
         rng[[paste0(xy, ".labels")]] <- sub(
@@ -687,8 +693,9 @@ gg2list <- function(p, width = NULL, height = NULL,
       tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
-      ticktext <- ticktext[!is.na(ticktext)]
-      tickvals <- tickvals[!is.na(tickvals)]
+      hasTickText <- !(is.na(ticktext) | is.na(tickvals))
+      ticktext <- ticktext[hasTickText]
+      tickvals <- tickvals[hasTickText]
       
       axisObj <- list(
         # TODO: log type?
