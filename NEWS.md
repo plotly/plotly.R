@@ -1,5 +1,9 @@
 # 4.9.2.9000
 
+## Changes to plotly.js
+
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.52.2 to v1.54.1. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+
 ## IMPROVEMENTS
 
 ## BUG FIXES
