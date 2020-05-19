@@ -195,7 +195,7 @@ api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
     body = body,
     times = 5,
     terminate_on = c(400, 401, 403, 404),
-    terminate_on_success = TRUE
+    terminate_on_success = TRUE,
     ...
   )
   
