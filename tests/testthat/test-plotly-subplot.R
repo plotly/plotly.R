@@ -80,17 +80,18 @@ empty <- ggplot() + geom_blank()
 scatter <- ggplot(d) + geom_point(aes(x = x, y = y))
 hist_right <- ggplot(d) + geom_histogram(aes(x = y)) + coord_flip()
 s <- subplot(
-  hist_top, empty, scatter, hist_right, 
-  nrows = 2, widths = c(0.8, 0.2), heights = c(0.2, 0.8),
+  hist_top, empty, empty, scatter, empty, hist_right, 
+  nrows = 2, widths = c(0.5, 0.3, 0.2), heights = c(0.4, 0.6),
   margin = 0.005, shareX = TRUE, shareY = TRUE
 )
 
 test_that("Row/column height/width", {
   l <- expect_traces(s, 3, "width-height")
-  expect_equivalent(diff(l$layout$xaxis$domain), 0.8 - 0.005)
-  expect_equivalent(diff(l$layout$xaxis2$domain), 0.2 - 0.005)
-  expect_equivalent(diff(l$layout$yaxis$domain), 0.2 - 0.005)
-  expect_equivalent(diff(l$layout$yaxis2$domain), 0.8 - 0.005)
+  expect_equivalent(diff(l$layout$xaxis$domain), 0.5 - 0.005)
+  expect_equivalent(diff(l$layout$xaxis2$domain), 0.3 - 0.005)
+  expect_equivalent(diff(l$layout$xaxis3$domain), 0.2 - 0.005)
+  expect_equivalent(diff(l$layout$yaxis$domain), 0.4 - 0.005)
+  expect_equivalent(diff(l$layout$yaxis2$domain), 0.6 - 0.005)
 })
 
 test_that("recursive subplots work", {
@@ -471,56 +472,5 @@ test_that("geo+cartesian behaves", {
   geoDom <- l$layout[[grep("^geo", names(l$layout))]]$domain
   expect_equivalent(geoDom$x, c(0, 1))
   expect_equivalent(geoDom$y, c(0, 0.68))
-})
-
-
-
-test_that("May specify legendgroup with through a vector of values", {
-  
-  # example adapted from https://github.com/ropensci/plotly/issues/817
-  df <- dplyr::bind_rows(
-    data.frame(x = rnorm(100,2), Name = "x1"),
-    data.frame(x = rnorm(100,6), Name = "x2"),
-    data.frame(x = rnorm(100,4), Name = "x3")
-  )
-  df$y <- rnorm(300)
-  
-  # marker definition...
-  m <- list(
-    size = 10, 
-    line = list(
-      width = 1, 
-      color = "black"
-    )
-  )
-  
-  base <- plot_ly(
-    df, 
-    marker = m, 
-    color = ~factor(Name), 
-    legendgroup = ~factor(Name)
-  ) 
-  
-  s <- subplot(
-    add_histogram(base, x = ~x, showlegend = FALSE),
-    plotly_empty(), 
-    add_markers(base, x = ~x, y = ~y),
-    add_histogram(base, y = ~y, showlegend = FALSE),
-    nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), 
-    shareX = TRUE, shareY = TRUE, titleX = FALSE, titleY = FALSE
-  ) %>% layout(barmode = "stack")
-  
-  # one trace for the empty plot
-  l <- expect_traces(s, 10, "subplot-legendgroup")
-  
-  # really this means show three legend items (one is blank)
-  expect_equivalent(
-    sum(sapply(l$data, function(tr) tr$showlegend %||% TRUE)), 4
-  )
-  
-  expect_length(
-    unlist(lapply(l$data, "[[", "legendgroup")), 9
-  )
-  
 })
 

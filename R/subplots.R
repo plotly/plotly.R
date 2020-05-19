@@ -369,37 +369,36 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
     stop("The length of the heights argument is ", length(heights),
          ", but the number of rows is ", nrows, call. = FALSE)
   }
-  if (any(widths < 0) | any(heights < 0)) {
+  if (sum(margins[1:2]) < 0 || sum(margins[3:4]) < 0) {
+    stop("Subplot margins cannot be negative")
+  }
+  if (any(widths < 0) || any(heights < 0)) {
     stop("The widths and heights arguments must contain positive values")
   }
-  if (sum(widths) > 1 | sum(heights) > 1) {
-    stop("The sum of the widths and heights arguments must be less than 1")
+  total_margins_width <- sum(margins[1:2])*(ncols-1)
+  if (total_margins_width >= 1.0) stop("The total width of margins should be less than 1.0, reduce margin[1:2]")
+  total_margins_height <- sum(margins[3:4])*(nrows-1)
+  if (total_margins_height >= 1.0) stop("The total height of margins should be less than 1.0, reduce margin[3:4]")
+  # if needed, rescale subplot widths and heights to fit in 0..1 range
+  total_width <- sum(widths) + total_margins_width
+  if (total_width > 1.0) {
+    widths <- widths/sum(widths)*(1.0 - total_margins_width)
+    total_width <- 1.0
   }
-  
-  widths <- cumsum(c(0, widths))
-  heights <- cumsum(c(0, heights))
-  # 'center' these values if there is still room left 
-  widths <- widths + (1 - max(widths)) / 2
-  heights <- heights + (1 - max(heights)) / 2
-  
-  xs <- vector("list", ncols)
-  for (i in seq_len(ncols)) {
-    xs[[i]] <- c(
-      xstart = widths[i] + if (i == 1) 0 else margins[1],
-      xend = widths[i + 1] - if (i == ncols) 0 else margins[2]
-    )
+  total_height <- sum(heights) + total_margins_height
+  if (total_height > 1.0) {
+    heights <- heights/sum(heights)*(1.0 - total_margins_height)
+    total_height <- 1.0
   }
-  xz <- rep_len(xs, nplots)
-  
-  ys <- vector("list", nrows)
-  for (i in seq_len(nplots)) {
-    j <- ceiling(i / ncols)
-    ys[[i]] <- c(
-      ystart = 1 - (heights[j]) - if (j == 1) 0 else margins[3],
-      yend = 1 - (heights[j + 1]) + if (j == nrows) 0 else margins[4]
-    )
-  }
-  list2df(Map(c, xz, ys))
+
+  # panel offsets (centered in the whole plot) 
+  xstarts <- c(0, cumsum(widths[-length(widths)]+sum(margins[1:2]))) + (1-total_width)/2
+  ystarts <- c(0, cumsum(heights[-length(heights)]+sum(margins[3:4]))) + (1-total_height)/2
+
+  data.frame(xstart = rep_len(xstarts, nplots),
+             xend = pmin(1.0, rep_len(xstarts+widths, nplots)),
+             ystart = rep(1-ystarts, each=ncols, length.out=nplots),
+             yend = pmax(0.0, rep(1-ystarts-heights, each=ncols, length.out=nplots)))
 }
 
 list2df <- function(x, nms) {
