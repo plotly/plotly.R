@@ -127,7 +127,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                titleY = TRUE, titleX = TRUE) %>% 
     hide_legend() %>%
     layout(dragmode = "select")
-  if (robust_nchar(p$title %||% "") > 0) {
+  if (robust_nchar(p$title) > 0) {
     s <- layout(s, title = p$title)
   }
   for (i in seq_along(p$xAxisLabels)) {
@@ -436,7 +436,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     font = text2font(theme$text)
   )
   # main plot title
-  if (robust_nchar(plot$labels$title %||% "") > 0) {
+  if (robust_nchar(plot$labels$title) > 0) {
     gglayout$title <- list(
       text = faced(plot$labels$title, theme$plot.title$face),
       font = text2font(theme$plot.title),

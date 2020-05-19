@@ -45,12 +45,12 @@ test_that("factor labels work", {
   p <- ggplot(diamonds, aes(cut)) + 
     geom_bar() + 
     scale_x_discrete("Cut", labels=factor(letters[1:5]))
-  plotly_build(p)
+  b <- expect_doppelganger_built(p, "factor-labels")
 })
 
 test_that("empty labels work", {
   p <- ggplot(iris, aes(Petal.Length, Sepal.Width, color = Species)) + 
     geom_point() + 
-    xlab(element_blank()) 
-  plotly_build(p)
+    labs(x = element_blank(), y = element_blank())
+  b <- expect_doppelganger_built(p, "labs-element-blank")
 })
