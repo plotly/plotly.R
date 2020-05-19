@@ -6,6 +6,8 @@
 
 ## IMPROVEMENTS
 
+* All HTTP requests are now retried upon failure (#1656)
+
 ## BUG FIXES
 
 * `ggplotly()` now handles `element_blank()` and `factor()` labels in positional scales correctly (#1731 and #1772).
