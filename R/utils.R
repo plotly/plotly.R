@@ -1139,3 +1139,18 @@ try_library <- function(pkg, fun = NULL) {
 is_rstudio <- function() {
   identical(.Platform$GUI, "RStudio")
 }
+
+# nchar() needs a non-empty character vector; sometimes x will be a
+# factor, or an empty vector.
+robust_nchar <- function(x, ...) {
+  if (length(x)) nchar(as.character(x), ...)
+  else 0
+}
+
+# Extract longest element, or blank if none
+longest_element <- function(x) {
+  if (length(x))
+    x[which.max(robust_nchar(x))]
+  else
+    ""
+}
