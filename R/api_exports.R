@@ -170,7 +170,6 @@ api_download_file <- function(id, username, endpoint = "files", ...) {
 
 
 #' @rdname api
-#' @importFrom httr RETRY
 #' @export
 api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
   api_check_endpoint(endpoint)
@@ -189,15 +188,15 @@ api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
   }
   
   resp <- httr::RETRY(
-    verb = verb
-    , url = url
-    , api_headers()
-    , api_auth()
-    , body = body
-    , times = 5
-    , terminate_on = c(400, 401, 403, 404)
-    , terminate_on_success = TRUE
-    , ...
+    verb = verb,
+    url = url,
+    api_headers(),
+    api_auth(),
+    body = body,
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE
+    ...
   )
   
   structure(process(resp), class = "api")
