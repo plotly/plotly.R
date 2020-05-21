@@ -326,7 +326,6 @@ test_that("Line breaks are properly translated (R -> HTML)", {
   
   target_labels <- iris$Species %>%
     unique() %>%
-    as.character() %>%
     paste0(suffix) %>%
     gsub(pattern = "\n",
          replacement = br(),
