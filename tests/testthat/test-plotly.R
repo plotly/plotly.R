@@ -319,8 +319,6 @@ test_that("toWebGL() shouldn't complain if it's already webgl", {
 })
 
 test_that("Line breaks are properly translated (R -> HTML)", {
-  skip_if_not_installed(pkg = "forcats")
-  
   # create target labels
   suffix <- "\n\n(third line)\n(fourth line)"
   
@@ -333,9 +331,8 @@ test_that("Line breaks are properly translated (R -> HTML)", {
          fixed = TRUE)
   
   # test factor column
-  d <- iris %>% dplyr::mutate(Species = forcats::fct_relabel(Species,
-                                                             paste0,
-                                                             suffix))
+  d <- iris
+  levels(d$Species) <- paste0(levels(d$Species), suffix)
   p1 <- d %>% plot_ly(x = ~Sepal.Length,
                       y = ~Species)
   
