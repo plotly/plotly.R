@@ -63,7 +63,7 @@
 #' }
 #' 
 
-orca <- function(p, file = "plot.png", dir = getwd(), 
+orca <- function(p, file = "plot.png", dir = ".", 
                  format = tools::file_ext(file), 
                  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
@@ -86,7 +86,7 @@ orca <- function(p, file = "plot.png", dir = getwd(),
   
   args <- c(
     "graph", tmp, 
-    "-d", dir,
+    "-d", normalizePath(dir, mustWork = TRUE),
     "-o", file,
     "--format", format,
     "--plotlyjs", plotlyjs_path,
