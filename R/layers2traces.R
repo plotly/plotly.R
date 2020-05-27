@@ -951,6 +951,10 @@ hover_on <- function(data) {
 
 # make trace with errorbars
 make_error <- function(data, params, xy = "x") {
+  # if xy is NULL: set xy to mean of xy_min and xy_max
+  if (is.null(data[[xy]])) {
+    data[[xy]] <- (data[[paste0(xy, "min")]] + data[[paste0(xy, "max")]]) / 2  
+  }
   color <- aes2plotly(data, params, "colour")
   e <- list(
     x = data[["x"]],
