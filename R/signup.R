@@ -45,7 +45,14 @@ signup <- function(username, email, save = TRUE) {
     version = as.character(packageVersion("plotly"))
   )
   base_url <- file.path(get_domain(), "apimkacct")
-  resp <- httr::POST(base_url, body = bod)
+  resp <- httr::RETRY(
+    verb = "POST",
+    base_url,
+    body = bod,
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE
+  )
   con <- process(append_class(resp, "signup"))
   if (save) {
     # store API key as an environment variable in .Rprofile

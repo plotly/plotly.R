@@ -31,14 +31,14 @@
 #' @param endpoint the endpoint (i.e., location) for the request. 
 #' To see a list of all available endpoints, call `api()`.
 #' Any relevant query parameters should be included here (see examples).
-#' @param verb name of the HTTP verb to use (as in, [httr::VERB()]).
-#' @param body body of the HTTP request(as in, [httr::VERB()]).
+#' @param verb name of the HTTP verb to use (as in, [httr::RETRY()]).
+#' @param body body of the HTTP request(as in, [httr::RETRY()]).
 #' If this value is not already converted to JSON 
 #' (via [jsonlite::toJSON()]), it uses the internal `to_JSON()`
 #' to ensure values are "automatically unboxed" (i.e., vec.
 #'
 #' @param ... For `api()`, these arguments are passed onto 
-#' [httr::VERB()]. For `api_create()`, these arguments are
+#' [httr::RETRY()]. For `api_create()`, these arguments are
 #' included in the body of the HTTP request.
 #' 
 #' @export
@@ -187,9 +187,16 @@ api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
     body <- to_JSON(body)
   }
   
-  resp <- httr::VERB(
-    verb = verb, url = url, api_headers(), api_auth(), 
-    body = body, ...
+  resp <- httr::RETRY(
+    verb = verb,
+    url = url,
+    api_headers(),
+    api_auth(),
+    body = body,
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE,
+    ...
   )
   
   structure(process(resp), class = "api")
