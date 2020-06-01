@@ -4,8 +4,10 @@
 \name{hobbs}
 \alias{hobbs}
 \title{Hobbs data}
-\format{A data frame with three variables: \code{r}, \code{t},
-\code{nms}.}
+\format{
+A data frame with three variables: \code{r}, \code{t},
+\code{nms}.
+}
 \usage{
 hobbs
 }

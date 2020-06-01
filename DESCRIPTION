@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.9.2.1
+Version: 4.9.2.9000
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com", comment = c(ORCID = "0000-0002-4958-2844")),
     person("Chris", "Parmer", role = "aut",
@@ -26,7 +26,7 @@ Depends:
 Imports:
     tools,
     scales,
-    httr,
+    httr (>= 1.3.0),
     jsonlite (>= 1.6),
     magrittr,
     digest,
@@ -72,6 +72,10 @@ Suggests:
     plotlyGeoAssets,
     forcats
 LazyData: true
+<<<<<<< HEAD
 RoxygenNote: 7.0.2
+=======
+RoxygenNote: 7.1.0
+>>>>>>> c19594b1fb54b28952895344fec3ad0060a1c646
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
