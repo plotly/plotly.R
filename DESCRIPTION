@@ -72,10 +72,6 @@ Suggests:
     plotlyGeoAssets,
     forcats
 LazyData: true
-<<<<<<< HEAD
-RoxygenNote: 7.0.2
-=======
 RoxygenNote: 7.1.0
->>>>>>> c19594b1fb54b28952895344fec3ad0060a1c646
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
