@@ -880,7 +880,10 @@ geom2trace.GeomErrorbar <- function(data, params, p) {
   # Support of bi-directional GeomErrorbar introduced with ggplot2 3.3.0
   # g <- ggplot() + geom_errorbar(aes(y = "A", xmin = 1, xmax = 2))
   # ggplotly(g)
-  if (params[["flipped_aes"]]) {
+# Support of bi-directional GeomErrorbar introduced with ggplot2 3.3.0:
+# g <- ggplot() + geom_errorbar(aes(y = "A", xmin = 1, xmax = 2))
+# ggplotly(g)
+if (params[["flipped_aes"]]) { 
     make_error(data, params, "x")
   } else {
     make_error(data, params, "y")
