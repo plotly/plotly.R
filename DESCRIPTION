@@ -28,7 +28,7 @@ Depends:
 Imports:
     tools,
     scales,
-    httr,
+    httr (>= 1.3.0),
     jsonlite (>= 1.6),
     magrittr,
     digest,

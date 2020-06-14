@@ -9,7 +9,7 @@
 #' @param format The desired image format 'png', 'jpeg', 'svg', 'pdf', 'eps', or 'webp'
 #' @param scale Both png and jpeg formats will be scaled beyond the specified width and height by this number.
 #' @param out_file A filename for writing the image to a file.
-#' @param ... arguments passed onto `httr::POST`
+#' @param ... arguments passed onto `httr::RETRY`
 #' @export
 #' @examples \dontrun{
 #' p <- plot_ly(x = 1:10)
@@ -34,9 +34,16 @@ plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png",
     filename = Sys.time()
   )
   base_url <- file.path(get_domain("api"), "v2", "images")
-  resp <- httr::POST(
-    base_url, body = to_JSON(bod), api_headers(), api_auth(),
-    if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE), 
+  resp <- httr::RETRY(
+    verb = "POST",
+    url = base_url,
+    body = to_JSON(bod),
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE,
+    api_headers(),
+    api_auth(),
+    if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE),
     ...
   )
   con <- process(append_class(resp, "api_image"))
