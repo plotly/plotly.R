@@ -10,6 +10,8 @@
 
 ## BUG FIXES
 
+* `ggplotly()` now handles discrete axes of a `facet_wrap` and `facet_grid` correctly when there is only one category in panels > 1 (#1577 and #1720).
+
 * `ggplotly()` now handles `element_blank()` and `factor()` labels in positional scales correctly (#1731 and #1772).
 
 # 4.9.2.1
