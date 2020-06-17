@@ -807,7 +807,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       # do some stuff that should be done once for the entire plot
       if (i == 1) {
         # Split ticktext elements by "\n"  to account for linebreaks
-        axisTickText <- sapply(as.character(axisObj$ticktext), strsplit, split = "\n", USE.NAMES = FALSE)
+        axisTickText <- strsplit(as.character(axisObj$ticktext), split = "\n")
         # Get longest element for each tick
         axisTickText <- lapply(axisTickText, longest_element)
         # Longest element of all ticks
