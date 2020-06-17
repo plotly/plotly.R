@@ -521,7 +521,7 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
     
     # do the same for "sub-attributes"
     if (identical(role, "object") && is.recursive(proposed[[attr]])) {
-      proposed[[attr]] <- verify_attr(proposed[[attr]], schema[[attr]], layoutAttr = layoutAttr)
+      proposed[[attr]] <- verify_attr(proposed[[attr]], attrSchema, layoutAttr = layoutAttr)
     }
   }
   
