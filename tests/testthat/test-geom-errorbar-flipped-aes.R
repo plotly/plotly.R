@@ -10,6 +10,8 @@ test_that("geom_errobar is rendered with flipped aes", {
   L <- plotly_build(gp)
   
   # Tests
+  # errobar is rendered
+  expect_doppelganger(L, "errobar-flipped-aes")
   # xmin and xmax equal to ggplot 
   expect_equivalent(L[["x"]][["data"]][[1]][["x"]] + L[["x"]][["data"]][[1]][["error_x"]][["array"]],
                     ggplot_build(gp)$data[[1]]$xmax)
