@@ -46,7 +46,11 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 * All HTTP requests are now retried upon failure (#1656)
 
+* R linebreaks (`\n`) in _factor labels_ are now translated to HTML linebreaks (`<br />`), too. Before, this conversion was only done for colums of type character. ([#1700](https://github.com/ropensci/plotly/pull/1700), @salim-b)
+
 ## BUG FIXES
+
+* `ggplotly()` now handles discrete axes of a `facet_wrap` and `facet_grid` correctly when there is only one category in panels > 1 (#1577 and #1720).
 
 * `ggplotly()` now handles `element_blank()` and `factor()` labels in positional scales correctly (#1731 and #1772).
 

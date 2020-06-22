@@ -317,3 +317,34 @@ test_that("toWebGL() shouldn't complain if it's already webgl", {
     toWebGL()
   expect_silent(plotly_build(p))
 })
+
+test_that("Line breaks are properly translated (R -> HTML)", {
+  # create target labels
+  suffix <- "\n\n(third line)\n(fourth line)"
+  
+  target_labels <- iris$Species %>%
+    unique() %>%
+    paste0(suffix) %>%
+    gsub(pattern = "\n",
+         replacement = br(),
+         x = .,
+         fixed = TRUE)
+  
+  # test factor column
+  d <- iris
+  levels(d$Species) <- paste0(levels(d$Species), suffix)
+  p1 <- d %>% plot_ly(x = ~Sepal.Length,
+                      y = ~Species)
+  
+  expect_equivalent(plotly_build(p1)[["x"]][["layout"]][["yaxis"]][["categoryarray"]],
+                    target_labels)
+  
+  # test character column
+  p2 <- d %>%
+    dplyr::mutate(Species = as.character(Species)) %>%
+    plot_ly(x = ~Sepal.Length,
+            y = ~Species)
+  
+  expect_equivalent(plotly_build(p2)[["x"]][["layout"]][["yaxis"]][["categoryarray"]],
+                    target_labels)
+})
