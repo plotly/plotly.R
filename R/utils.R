@@ -609,12 +609,14 @@ translate_linebreaks <- function(p) {
     typ <- typeof(a)
     if (typ == "list") {
       # retain the class of list elements 
-      # which important for many things, such as colorbars
+      # which is important for many things, such as colorbars
       a[] <- lapply(a, recurse)
     } else if (typ == "character" && !inherits(a, "JS_EVAL")) {
       attrs <- attributes(a)
       a <- gsub("\n", br(), a, fixed = TRUE)
       attributes(a) <- attrs
+    } else if (is.factor(a)) {
+      levels(a) <- gsub("\n", br(), levels(a), fixed = TRUE)
     }
     a
   }
