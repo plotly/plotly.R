@@ -125,7 +125,7 @@ group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d2 <- dplyr::group_by(d, !!!additional_args, .add = add)
   # add crosstalk key as a group (to enable examples like demos/highlight-pipeline.R)
   if (crosstalk_key() %in% names(d)) {
-    d2 <- dplyr::group_by(d2, !!crosstalk_key(), add = TRUE)
+    d2 <- dplyr::group_by(d2, !!crosstalk_key(), .add = TRUE)
   }
   add_data(.data, d2)
 }
