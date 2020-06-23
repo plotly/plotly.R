@@ -1156,9 +1156,19 @@ longest_element <- function(x) {
 }
 
 # Apply rlang::as_quosure across a list or vector, but explicitly pass env
-# and expr to as_quosure, due to a bug in as_quosures when dealing with 
-# lazy objects
-as_quosures_explicit <- function(vec) {
-  lapply(vec, 
-         FUN = function(x) rlang::as_quosure(x$expr, x$env))
+# and expr to as_quosure
+dots_as_quosures <- function(x) {
+  if (!inherits(x, "lazy_dots")) {
+    stop("Expected lazy dots")
+  }
+  lapply(x, function(x) rlang::as_quosure(x$expr, x$env))
+}
+
+# A dplyr::group_by wrapper for the add argument
+group_by_add <- function(..., add = TRUE) {
+  if (packageVersion('dplyr') >= '1.0') {
+    dplyr::group_by(...,  .add = add)
+  } else {
+    dplyr::group_by(...,  add = add)
+  } 
 }
