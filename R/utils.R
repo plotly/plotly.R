@@ -1172,7 +1172,7 @@ dots_as_quosures <- function(x) {
   if (!inherits(x, "lazy_dots")) {
     stop("Expected lazy dots")
   }
-  lapply(x, function(x) rlang::as_quosure(x$expr, x$env))
+  lapply(x, function(x) rlang::new_quosure(x$expr, x$env))
 }
 
 # A dplyr::group_by wrapper for the add argument
