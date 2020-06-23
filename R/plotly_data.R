@@ -121,10 +121,11 @@ ungroup.plotly <- function(x, ...) {
 #' @export
 group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
   d <- plotly_data(.data)
-  d2 <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d2 <- dplyr::group_by(d, !!!additional_args, .add = add)
   # add crosstalk key as a group (to enable examples like demos/highlight-pipeline.R)
   if (crosstalk_key() %in% names(d)) {
-    d2 <- dplyr::group_by_(d2, crosstalk_key(), add = TRUE)
+    d2 <- dplyr::group_by(d2, !!crosstalk_key(), add = TRUE)
   }
   add_data(.data, d2)
 }
@@ -133,7 +134,8 @@ group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
 #' @export
 summarise_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::summarise_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::summarise(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -145,7 +147,7 @@ mutate_.plotly <- function(.data, ..., .dots) {
   # '.' in a pipeline should really reference the data!!
   lapply(dotz, function(x) { assign(".", d, x$env) })
   set <- attr(d, "set")
-  d <- dplyr::mutate_(d, .dots = dotz)
+  d <- dplyr::mutate(d, !!!as_quosures_explicit(dotz))
   add_data(.data, structure(d, set = set))
 }
 
@@ -157,7 +159,7 @@ do_.plotly <- function(.data, ..., .dots) {
   # '.' in a pipeline should really reference the data!!
   lapply(dotz, function(x) { assign(".", d, x$env) })
   set <- attr(d, "set")
-  d <- dplyr::do_(d, .dots = dotz)
+  d <- dplyr::do(d, !!!as_quosures_explicit(dotz))
   add_data(.data, structure(d, set = set))
 }
 
@@ -165,7 +167,8 @@ do_.plotly <- function(.data, ..., .dots) {
 #' @export
 arrange_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::arrange_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::arrange(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -173,7 +176,8 @@ arrange_.plotly <- function(.data, ..., .dots) {
 #' @export
 select_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::select_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::select(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -181,7 +185,8 @@ select_.plotly <- function(.data, ..., .dots) {
 #' @export
 filter_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::filter_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::filter(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -189,7 +194,8 @@ filter_.plotly <- function(.data, ..., .dots) {
 #' @export
 distinct_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::distinct_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::distinct(d, .dots = !!!additional_args)
   add_data(.data, d)
 }
 
@@ -197,7 +203,8 @@ distinct_.plotly <- function(.data, ..., .dots) {
 #' @export
 slice_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::slice_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::slice(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -205,7 +212,8 @@ slice_.plotly <- function(.data, ..., .dots) {
 #' @export
 rename_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::rename_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::rename(d, !!!additional_args)
   add_data(.data, d)
 }
 
@@ -213,7 +221,8 @@ rename_.plotly <- function(.data, ..., .dots) {
 #' @export
 transmute_.plotly <- function(.data, ..., .dots) {
   d <- plotly_data(.data)
-  d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))
+  additional_args <- as_quosures_explicit(lazyeval::all_dots(.dots, ...))
+  d <- dplyr::transmute(d, !!!additional_arg)
   add_data(.data, d)
 }
 
