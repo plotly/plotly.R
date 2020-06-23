@@ -561,7 +561,7 @@ train_data <- function(data, trace) {
     idx2 <- seq.int(2, NROW(dat), by = 2)
     dat[idx2, "x"] <- data[["xend"]]
     dat[idx2, "y"] <- data[["yend"]]
-    data <- dplyr::group_by(dat, !!rlang::sym(".plotlyGroupIndex"), .add = TRUE)
+    data <- group_by_add(dat, !!rlang::sym(".plotlyGroupIndex"), add = TRUE)
   }
   
   # TODO: a lot more geoms!!!
