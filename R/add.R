@@ -334,7 +334,7 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
       y = y,
       `_bbox` = bbox,
       set = set,
-      data = if ("group" %in% names(d[[i]])) group_by_add(d[[i]], !!rlang::sym("group"), add = TRUE) else d[[i]], 
+      data = if ("group" %in% names(d[[i]])) group_by_add(d[[i]], !!rlang::sym("group")) else d[[i]], 
       inherit = inherit
     )
     args <- modify_list(args, attrs)
