@@ -139,7 +139,7 @@ crosstalk_key <- function() ".crossTalkKey"
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
-  if (length(vars)) dplyr::arrange(data, !!!lapply(vars, rlang::sym)) else data
+  if (length(vars)) dplyr::arrange(data, !!!rlang::syms(vars)) else data
 }
 
 is_mapbox <- function(p) {
