@@ -24,11 +24,23 @@ NULL
 #' @export
 dplyr::mutate
 
+#' @importFrom dplyr mutate_
+#' @name mutate_
+#' @rdname reexports
+#' @export
+dplyr::mutate_
+
 #' @importFrom dplyr transmute
 #' @name transmute
 #' @rdname reexports
 #' @export
 dplyr::transmute
+
+#' @importFrom dplyr transmute_
+#' @name transmute_
+#' @rdname reexports
+#' @export
+dplyr::transmute_
 
 #' @importFrom dplyr select
 #' @name select
@@ -36,17 +48,35 @@ dplyr::transmute
 #' @export
 dplyr::select
 
+#' @importFrom dplyr select_
+#' @name select_
+#' @rdname reexports
+#' @export
+dplyr::select_
+
 #' @importFrom dplyr rename
 #' @name rename
 #' @rdname reexports
 #' @export
 dplyr::rename
 
+#' @importFrom dplyr rename_
+#' @name rename_
+#' @rdname reexports
+#' @export
+dplyr::rename_
+
 #' @importFrom dplyr group_by 
 #' @name group_by
 #' @rdname reexports
 #' @export
 dplyr::group_by
+
+#' @importFrom dplyr group_by_
+#' @name group_by_
+#' @rdname reexports
+#' @export
+dplyr::group_by_
 
 #' @importFrom dplyr groups
 #' @name groups
@@ -66,22 +96,47 @@ dplyr::ungroup
 #' @export
 dplyr::summarise
 
+#' @importFrom dplyr summarise_
+#' @name summarise_
+#' @rdname reexports
+#' @export
+dplyr::summarise_
+
 #' @importFrom dplyr do
 #' @name do
 #' @rdname reexports
 #' @export
 dplyr::do
 
+#' @importFrom dplyr do_
+#' @name do_
+#' @rdname reexports
+#' @export
+dplyr::do_
+
 #' @importFrom dplyr arrange
 #' @name arrange
 #' @rdname reexports
 #' @export
 dplyr::arrange
+
+#' @importFrom dplyr arrange_
+#' @name arrange_
+#' @rdname reexports
+#' @export
+dplyr::arrange_
+
 #' @importFrom dplyr distinct
 #' @name distinct
 #' @rdname reexports
 #' @export
 dplyr::distinct
+
+#' @importFrom dplyr distinct_
+#' @name distinct_
+#' @rdname reexports
+#' @export
+dplyr::distinct_
 
 #' @importFrom dplyr slice
 #' @name slice
@@ -89,11 +144,23 @@ dplyr::distinct
 #' @export
 dplyr::slice
 
+#' @importFrom dplyr slice_
+#' @name slice_
+#' @rdname reexports
+#' @export
+dplyr::slice_
+
 #' @importFrom dplyr filter
 #' @name filter
 #' @rdname reexports
 #' @export
 dplyr::filter
+
+#' @importFrom dplyr filter_
+#' @name filter_
+#' @rdname reexports
+#' @export
+dplyr::filter_
 
 # waiting on https://github.com/tidyverse/tidyr/pull/229
 #
