@@ -808,10 +808,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       if (i == 1) {
         # Split ticktext elements by "\n"  to account for linebreaks
         axisTickText <- strsplit(as.character(axisObj$ticktext), split = "\n", fixed = TRUE)
-        # Get longest element for each tick
-        axisTickText <- lapply(axisTickText, longest_element)
-        # Longest element of all ticks
-        axisTickText <- longest_element(axisTickText)
+        axisTickText <- longest_element(unlist(axisTickText))
         side <- if (xy == "x") "b" else "l"
         # account for axis ticks, ticks text, and titles in plot margins
         # (apparently ggplot2 doesn't support axis.title/axis.text margins)
