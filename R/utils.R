@@ -139,7 +139,7 @@ crosstalk_key <- function() ".crossTalkKey"
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
-  if (length(vars)) dplyr::arrange_(data, .dots = vars) else data
+  if (length(vars)) dplyr::arrange(data, !!!lapply(vars, rlang::sym)) else data
 }
 
 is_mapbox <- function(p) {
@@ -1164,4 +1164,12 @@ longest_element <- function(x) {
     x[which.max(robust_nchar(x))]
   else
     ""
+}
+
+# Apply rlang::as_quosure across a list or vector, but explicitly pass env
+# and expr to as_quosure, due to a bug in as_quosures when dealing with 
+# lazy objects
+as_quosures_explicit <- function(vec) {
+  lapply(vec, 
+         FUN = function(x) rlang::as_quosure(x$expr, x$env))
 }
