@@ -419,8 +419,13 @@ gg2list <- function(p, width = NULL, height = NULL,
       suppressMessages(dplyr::left_join(x, y))
     }, data, nestedKeys, layers)
     
-    # return all the objects in this environmet 
-    mget(ls(environment()), inherits = FALSE)
+    structure(
+      list(
+        data = data, layout = layout, plot = plot, 
+        env = environment()
+      ), 
+      class = "ggplot_built"
+    )
   }
   
   # Allow thematic to add new defaults to the plot object based on it's theme
@@ -431,14 +436,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     ggplotly_build(p)
   }
   
-  # ggplotly_build() returns list of objects...make them known to gg2list() env
-  
-  env <- environment()
-  for (var in names(built)) {
-    assign(var, built[[var]], envir = env)
+  # Assign all the objects available to ggplotly_build() to this functions environment
+  built_env <- built$env
+  envir <- environment()
+  for (var in ls(built_env)) {
+    assign(var, built_env[[var]], envir = envir)
   }
-  
-  
   
   # initiate plotly.js layout with some plot-wide theming stuff
   theme <- ggfun("plot_theme")(plot)
