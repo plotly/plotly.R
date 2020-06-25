@@ -4,6 +4,10 @@
 
 * This version of the R package upgrades the version of the underlying plotly.js library from v1.52.2 to v1.54.1. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
 
+## NEW FEATURES
+
+* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic** (#1801).
+
 ## IMPROVEMENTS
 
 * All HTTP requests are now retried upon failure (#1656, @jameslamb).
