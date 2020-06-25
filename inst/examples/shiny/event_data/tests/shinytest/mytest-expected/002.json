@@ -15,19 +15,14 @@
       ]
     },
     "plotly_afterplot-A": "\"plot\"",
-    "plotly_brushed-A": null,
-    "plotly_brushing-A": null,
-    "plotly_click-A": null,
-    "plotly_deselect-A": "\"plot\"",
+    "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_hover-A": null,
-    "plotly_selected-A": null,
-    "plotly_selecting-A": null,
     "plotType": "ggplotly"
   },
   "output": {
     "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
     "brushing": "[1] \"Brush extents appear here (double-click to clear)\"",
-    "click": "[1] \"Click events appear here (double-click to clear)\"",
+    "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
     "plot": {
       "x": {
@@ -435,9 +430,9 @@
         },
         {
           "name": "jquery",
-          "version": "1.11.3",
+          "version": "3.5.1",
           "src": {
-            "href": "jquery-1.11.3"
+            "href": "jquery-3.5.1"
           },
           "meta": null,
           "script": "jquery.min.js",
@@ -448,9 +443,9 @@
         },
         {
           "name": "crosstalk",
-          "version": "1.1.0.1",
+          "version": "1.1.0.9000",
           "src": {
-            "href": "crosstalk-1.1.0.1"
+            "href": "crosstalk-1.1.0.9000"
           },
           "meta": null,
           "script": "js/crosstalk.min.js",
