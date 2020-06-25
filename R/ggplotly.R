@@ -424,8 +424,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   }
   
   # Allow thematic to add new defaults to the plot object based on it's theme
-  ggthematic_build <- getFromNamespace("ggthematic_build", "thematic")
-  built <- if (is.function(ggthematic_build)) {
+  built <- if (isNamespaceLoaded("thematic")) {
+    ggthematic_build <- getFromNamespace("ggthematic_build", "thematic")
     ggthematic_build(p, ggplotly_build, thematic::thematic_get_theme(resolve = TRUE))
   } else {
     ggplotly_build(p)
