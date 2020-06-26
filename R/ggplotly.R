@@ -1258,10 +1258,29 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
 text2font <- function(x = ggplot2::element_text(), type = "height") {
   list(
     color = toRGB(x$colour),
-    family = x$family,
+    family = font_family(x$family),
     # TODO: what about the size of vertical text?
     size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", type)
   )
+}
+
+# Replace a default font family, "", with thematic's font option (if set)
+font_family <- function(family = "") {
+  if (!identical(family, "")) {
+    return(family)
+  }
+  if (!isNamespaceLoaded("thematic")) {
+    return("")
+  }
+  font <- thematic::thematic_get_option("font")
+  if (!length(font)) {
+    return("")
+  }
+  # font$families is a vector of families, but font.family wants to be a 
+  # string (like CSS font-family), so make sure the names are unquoted, 
+  # then quote them
+  families <- sub("'$", "", sub("^'", "", font$families))
+  sprintf("'%s'", paste(families, collapse = "', '"))
 }
 
 # wrap text in bold/italics according to the text "face"
