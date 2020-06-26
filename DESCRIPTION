@@ -72,8 +72,10 @@ Suggests:
     IRdisplay,
     processx,
     plotlyGeoAssets,
-    forcats
+    forcats,
+    thematic
 LazyData: true
 RoxygenNote: 7.1.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+Remotes: rstudio/thematic
