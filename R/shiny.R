@@ -11,6 +11,8 @@
 #'   height is computed with HTML/CSS.
 #' @param inline use an inline (`span()`) or block container 
 #' (`div()`) for the output
+#' @param reportTheme whether or not to report CSS styles (if a sufficient
+#' version of shiny and htmlwidgets is available).
 #' @param expr An expression that generates a plotly
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This 
@@ -22,8 +24,8 @@
 #'
 #' @export
 plotlyOutput <- function(outputId, width = "100%", height = "400px", 
-                         inline = FALSE) {
-  htmlwidgets::shinyWidgetOutput(
+                         inline = FALSE, reportTheme = TRUE) {
+  args <- list(
     outputId = outputId, 
     name = "plotly", 
     width = width, 
@@ -32,6 +34,10 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
     package = "plotly",
     reportSize = TRUE
   )
+  if (is_available("shiny", "1.4.0.9003") && is_available("htmlwidgets", "1.5.1.9001")) {
+    args$reportTheme <- reportTheme
+  }
+  do.call(htmlwidgets::shinyWidgetOutput, args)
 }
 
 #' @rdname plotly-shiny

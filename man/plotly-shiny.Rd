@@ -6,7 +6,13 @@
 \alias{renderPlotly}
 \title{Shiny bindings for plotly}
 \usage{
-plotlyOutput(outputId, width = "100\%", height = "400px", inline = FALSE)
+plotlyOutput(
+  outputId,
+  width = "100\%",
+  height = "400px",
+  inline = FALSE,
+  reportTheme = TRUE
+)
 
 renderPlotly(expr, env = parent.frame(), quoted = FALSE)
 }
@@ -21,6 +27,9 @@ height is computed with HTML/CSS.}
 
 \item{inline}{use an inline (\code{span()}) or block container
 (\code{div()}) for the output}
+
+\item{reportTheme}{whether or not to report CSS styles (if a sufficient
+version of shiny and htmlwidgets is available).}
 
 \item{expr}{An expression that generates a plotly}
 

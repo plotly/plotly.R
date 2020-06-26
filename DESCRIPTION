@@ -78,4 +78,6 @@ LazyData: true
 RoxygenNote: 7.1.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Remotes: rstudio/thematic
+Remotes: 
+  rstudio/thematic,
+  ramnathv/htmlwidgets
