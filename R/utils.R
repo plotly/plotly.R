@@ -1166,15 +1166,6 @@ longest_element <- function(x) {
     ""
 }
 
-# Apply rlang::as_quosure across a list or vector, but explicitly pass env
-# and expr to as_quosure
-dots_as_quosures <- function(x) {
-  if (!inherits(x, "lazy_dots")) {
-    stop("Expected lazy dots")
-  }
-  lapply(x, function(x) rlang::new_quosure(x$expr, x$env))
-}
-
 # A dplyr::group_by wrapper for the add argument
 group_by_add <- function(..., add = TRUE) {
   if (packageVersion('dplyr') >= '1.0') {

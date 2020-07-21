@@ -4,10 +4,21 @@
 \alias{plotly_data}
 \alias{groups.plotly}
 \alias{ungroup.plotly}
+\alias{group_by.plotly}
+\alias{mutate.plotly}
+\alias{do.plotly}
+\alias{summarise.plotly}
+\alias{arrange.plotly}
+\alias{select.plotly}
+\alias{filter.plotly}
+\alias{distinct.plotly}
+\alias{slice.plotly}
+\alias{rename.plotly}
+\alias{transmute.plotly}
 \alias{group_by_.plotly}
-\alias{summarise_.plotly}
 \alias{mutate_.plotly}
 \alias{do_.plotly}
+\alias{summarise_.plotly}
 \alias{arrange_.plotly}
 \alias{select_.plotly}
 \alias{filter_.plotly}
@@ -23,27 +34,49 @@ plotly_data(p, id = p$x$cur_data)
 
 \method{ungroup}{plotly}(x, ...)
 
-\method{group_by_}{plotly}(.data, ..., .dots, add = FALSE)
+\method{group_by}{plotly}(.data, ...)
 
-\method{summarise_}{plotly}(.data, ..., .dots)
+\method{mutate}{plotly}(.data, ...)
 
-\method{mutate_}{plotly}(.data, ..., .dots)
+\method{do}{plotly}(.data, ...)
 
-\method{do_}{plotly}(.data, ..., .dots)
+\method{summarise}{plotly}(.data, ...)
 
-\method{arrange_}{plotly}(.data, ..., .dots)
+\method{arrange}{plotly}(.data, ...)
 
-\method{select_}{plotly}(.data, ..., .dots)
+\method{select}{plotly}(.data, ...)
 
-\method{filter_}{plotly}(.data, ..., .dots)
+\method{filter}{plotly}(.data, ...)
 
-\method{distinct_}{plotly}(.data, ..., .dots)
+\method{distinct}{plotly}(.data, ...)
 
-\method{slice_}{plotly}(.data, ..., .dots)
+\method{slice}{plotly}(.data, ...)
 
-\method{rename_}{plotly}(.data, ..., .dots)
+\method{rename}{plotly}(.data, ...)
 
-\method{transmute_}{plotly}(.data, ..., .dots)
+\method{transmute}{plotly}(.data, ...)
+
+\method{group_by_}{plotly}(.data, ...)
+
+\method{mutate_}{plotly}(.data, ...)
+
+\method{do_}{plotly}(.data, ...)
+
+\method{summarise_}{plotly}(.data, ...)
+
+\method{arrange_}{plotly}(.data, ...)
+
+\method{select_}{plotly}(.data, ...)
+
+\method{filter_}{plotly}(.data, ...)
+
+\method{distinct_}{plotly}(.data, ...)
+
+\method{slice_}{plotly}(.data, ...)
+
+\method{rename_}{plotly}(.data, ...)
+
+\method{transmute_}{plotly}(.data, ...)
 }
 \arguments{
 \item{p}{a plotly visualization}
@@ -56,10 +89,10 @@ plotly_data(p, id = p$x$cur_data)
 
 \item{.data}{a plotly visualization}
 
-\item{.dots}{Used to work around non-standard evaluation. See vignette("nse") for details}
-
 \item{add}{By default, when add = FALSE, group_by will override existing groups.
 To instead add to the existing groups, use add = TRUE}
+
+\item{.dots}{Used to work around non-standard evaluation. See vignette("nse") for details}
 }
 \description{
 \code{plotly_data()} returns data associated with

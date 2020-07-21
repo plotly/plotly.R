@@ -104,125 +104,161 @@ highlight_key <- function(...) {
   crosstalk::SharedData$new(...)
 }
 
+# ---------------------------------------------------------------------------
+# dplyr methods
+# ---------------------------------------------------------------------------
+
 #' @rdname plotly_data
-#' @export
 groups.plotly <- function(x) {
-  dplyr::groups(plotly_data(x))
+  groups(plotly_data(x))
 }
 
 #' @rdname plotly_data
-#' @export
 ungroup.plotly <- function(x, ...) {
-  d <- dplyr::ungroup(plotly_data(x))
+  d <- ungroup(plotly_data(x), ...)
   add_data(x, d)
 }
 
 #' @rdname plotly_data
-#' @export
-group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d2 <- group_by_add(d, !!!additional_args, add = add)
+group_by.plotly <- function(.data, ...) {
+  d <- group_by(plotly_data(.data), ...)
+  if (crosstalk_key() %in% names(d)) {
+    d <- group_by_add(d, !!rlang::sym(crosstalk_key()), add = TRUE)
+  }
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+mutate.plotly <- function(.data, ...) {
+  d <- mutate(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+do.plotly <- function(.data, ...) {
+  d <- do(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+summarise.plotly <- function(.data, ...) {
+  d <- summarise(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+arrange.plotly <- function(.data, ...) {
+  d <- arrange(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+select.plotly <- function(.data, ...) {
+  d <- select(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+filter.plotly <- function(.data, ...) {
+  d <- filter(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+distinct.plotly <- function(.data, ...) {
+  d <- distinct(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+slice.plotly <- function(.data, ...) {
+  d <- slice(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+rename.plotly <- function(.data, ...) {
+  d <- rename(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+transmute.plotly <- function(.data, ...) {
+  d <- transmute(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+# ------------------------------------------------------------
+# Deprecated dplyr non-nse generics
+# ------------------------------------------------------------
+
+#' @rdname plotly_data
+group_by_.plotly <- function(.data, ...) {
+  d <- group_by_(plotly_data(.data), ...)
   # add crosstalk key as a group (to enable examples like demos/highlight-pipeline.R)
   if (crosstalk_key() %in% names(d)) {
-    d2 <- group_by_add(d2, !!rlang::sym(crosstalk_key()), add = TRUE)
+    d <- group_by_add(d, !!rlang::sym(crosstalk_key()), add = TRUE)
   }
-  add_data(.data, d2)
-}
-
-#' @rdname plotly_data
-#' @export
-summarise_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::summarise(d, !!!additional_args)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-mutate_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  dotz <- lazyeval::all_dots(.dots, ...)
-  # '.' in a pipeline should really reference the data!!
-  lapply(dotz, function(x) { assign(".", d, x$env) })
-  set <- attr(d, "set")
-  d <- dplyr::mutate(d, !!!dots_as_quosures(dotz))
-  add_data(.data, structure(d, set = set))
-}
-
-#' @rdname plotly_data
-#' @export
-do_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  dotz <- lazyeval::all_dots(.dots, ...)
-  # '.' in a pipeline should really reference the data!!
-  lapply(dotz, function(x) { assign(".", d, x$env) })
-  set <- attr(d, "set")
-  d <- dplyr::do(d, !!!dots_as_quosures(dotz))
-  add_data(.data, structure(d, set = set))
-}
-
-#' @rdname plotly_data
-#' @export
-arrange_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::arrange(d, !!!additional_args)
+mutate_.plotly <- function(.data, ...) {
+  d <- mutate_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-select_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::select(d, !!!additional_args)
+do_.plotly <- function(.data, ...) {
+  d <- do_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-filter_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::filter(d, !!!additional_args)
+summarise_.plotly <- function(.data, ...) {
+  d <- summarise_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-distinct_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::distinct(d, .dots = !!!additional_args)
+arrange_.plotly <- function(.data, ...) {
+  d <- arrange_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-slice_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::slice(d, !!!additional_args)
+select_.plotly <- function(.data, ...) {
+  d <- select_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-rename_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::rename(d, !!!additional_args)
+filter_.plotly <- function(.data, ...) {
+  d <- filter_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-transmute_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  additional_args <- dots_as_quosures(lazyeval::all_dots(.dots, ...))
-  d <- dplyr::transmute(d, !!!additional_arg)
+distinct_.plotly <- function(.data, ...) {
+  d <- distinct_(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+slice_.plotly <- function(.data, ...) {
+  d <- slice_(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+rename_.plotly <- function(.data, ...) {
+  d <- rename_(plotly_data(.data), ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+transmute_.plotly <- function(.data, ...) {
+  d <- transmute_(plotly_data(.data), ...)
   add_data(.data, d)
 }
 
