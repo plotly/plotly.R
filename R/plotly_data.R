@@ -4,15 +4,12 @@
 #' a plotly visualization (if there are multiple data frames, by default, 
 #' it returns the most recent one). 
 #' 
-#' @param p a plotly visualization
+#' @param p a plotly visualization.
 #' @param id a character string or number referencing an "attribute layer".
 #' 
-#' @param .data a plotly visualization
-#' @param x a plotly visualization
-#' @param ... stuff passed onto the relevant method
-#' @param add By default, when add = FALSE, group_by will override existing groups. 
-#' To instead add to the existing groups, use add = TRUE
-#' @param .dots Used to work around non-standard evaluation. See vignette("nse") for details
+#' @param .data a plotly visualization.
+#' @param x a plotly visualization.
+#' @param ... arguments passed onto the relevant method.
 #' 
 #' @name plotly_data
 #' @export
@@ -95,6 +92,7 @@ print.plotly_data <- function(x, ...) {
 #' its functionality in plotly. It also makes it more discoverable if one
 #' is already aware of [highlight].
 #' 
+#' @param x a plotly visualization or a `data.frame`.
 #' @param ... arguments passed to `crosstalk::SharedData$new()`
 #' @export
 #' @author Carson Sievert

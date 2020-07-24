@@ -79,20 +79,15 @@ plotly_data(p, id = p$x$cur_data)
 \method{transmute_}{plotly}(.data, ...)
 }
 \arguments{
-\item{p}{a plotly visualization}
+\item{p}{a plotly visualization.}
 
 \item{id}{a character string or number referencing an "attribute layer".}
 
-\item{x}{a plotly visualization}
+\item{x}{a plotly visualization.}
 
-\item{...}{stuff passed onto the relevant method}
+\item{...}{arguments passed onto the relevant method.}
 
-\item{.data}{a plotly visualization}
-
-\item{add}{By default, when add = FALSE, group_by will override existing groups.
-To instead add to the existing groups, use add = TRUE}
-
-\item{.dots}{Used to work around non-standard evaluation. See vignette("nse") for details}
+\item{.data}{a plotly visualization.}
 }
 \description{
 \code{plotly_data()} returns data associated with

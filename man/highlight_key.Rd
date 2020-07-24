@@ -7,6 +7,8 @@
 highlight_key(x, ...)
 }
 \arguments{
+\item{x}{a plotly visualization or a \code{data.frame}.}
+
 \item{...}{arguments passed to \code{crosstalk::SharedData$new()}}
 }
 \value{
