@@ -40,6 +40,7 @@ Imports:
     hexbin,
     RColorBrewer,
     dplyr,
+    vctrs,
     tibble,
     lazyeval (>= 0.2.0),
     rlang,

@@ -14,7 +14,7 @@
 #' @importFrom purrr transpose
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom data.table as.data.table setorderv
-#' @importFrom rlang eval_tidy
+#' @importFrom rlang eval_tidy !! !!!
 NULL
 
 
