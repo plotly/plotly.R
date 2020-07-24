@@ -100,9 +100,21 @@ print.plotly_data <- function(x, ...) {
 #' @author Carson Sievert
 #' @return An object of class [crosstalk::SharedData]
 #' @seealso [highlight]
-highlight_key <- function(...) {
-  crosstalk::SharedData$new(...)
+highlight_key <- function(x, ...) {
+  UseMethod("highlight_key")
 }
+
+#' @export
+highlight_key.plotly <- function(x, ...) {
+  d <- plotly_data(x)
+  add_data(x, crosstalk::SharedData$new(d, ...))
+}
+
+#' @export
+highlight_key.default <- function(x, ...) {
+  crosstalk::SharedData$new(x, ...)
+}
+
 
 # ---------------------------------------------------------------------------
 # dplyr methods
