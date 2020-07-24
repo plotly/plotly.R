@@ -517,7 +517,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
     }
     # anchor X axis to the lowest plot in its column
-    layout$layout <- dplyr::group_by_(layout$layout, "xaxis")
+    layout$layout <- dplyr::group_by(layout$layout, !!rlang::sym("xaxis"))
     layout$layout <-  dplyr::mutate(layout$layout, xanchor = max(as.integer(yaxis)))
   }
   layout$layout <- as.data.frame(layout$layout)
@@ -1112,7 +1112,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # translate group aesthetics to data attributes
   return_dat <- Map(function(x, y) {
     if (is.null(y[["group"]])) return(x)
-    dplyr::group_by_(x, y[["group"]])
+    dplyr::group_by(x, !!rlang::as_quosure(y[["group"]]))
   }, return_dat, mappingFormulas)
   
   # don't need to add group as an attribute anymore

@@ -3,7 +3,7 @@ context("Errorbar")
 test_that("geom_errorbar gives errorbars", {
 
   d <- dplyr::summarise(
-    dplyr::group_by_(mtcars, "cyl"), 
+    dplyr::group_by(mtcars, cyl), 
     q1 = quantile(mpg, 0.25),
     m = mean(mpg),
     q3 = quantile(mpg, 0.75)

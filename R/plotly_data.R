@@ -4,15 +4,12 @@
 #' a plotly visualization (if there are multiple data frames, by default, 
 #' it returns the most recent one). 
 #' 
-#' @param p a plotly visualization
+#' @param p a plotly visualization.
 #' @param id a character string or number referencing an "attribute layer".
 #' 
-#' @param .data a plotly visualization
-#' @param x a plotly visualization
-#' @param ... stuff passed onto the relevant method
-#' @param add By default, when add = FALSE, group_by will override existing groups. 
-#' To instead add to the existing groups, use add = TRUE
-#' @param .dots Used to work around non-standard evaluation. See vignette("nse") for details
+#' @param .data a plotly visualization.
+#' @param x a plotly visualization.
+#' @param ... arguments passed onto the relevant method.
 #' 
 #' @name plotly_data
 #' @export
@@ -95,125 +92,188 @@ print.plotly_data <- function(x, ...) {
 #' its functionality in plotly. It also makes it more discoverable if one
 #' is already aware of [highlight].
 #' 
+#' @param x a plotly visualization or a `data.frame`.
 #' @param ... arguments passed to `crosstalk::SharedData$new()`
 #' @export
 #' @author Carson Sievert
 #' @return An object of class [crosstalk::SharedData]
 #' @seealso [highlight]
-highlight_key <- function(...) {
-  crosstalk::SharedData$new(...)
+highlight_key <- function(x, ...) {
+  UseMethod("highlight_key")
 }
 
-#' @rdname plotly_data
 #' @export
+highlight_key.plotly <- function(x, ...) {
+  d <- plotly_data(x)
+  add_data(x, crosstalk::SharedData$new(d, ...))
+}
+
+#' @export
+highlight_key.default <- function(x, ...) {
+  crosstalk::SharedData$new(x, ...)
+}
+
+
+# ---------------------------------------------------------------------------
+# dplyr methods
+# ---------------------------------------------------------------------------
+
+#' @rdname plotly_data
 groups.plotly <- function(x) {
-  dplyr::groups(plotly_data(x))
+  groups(plotly_data(x))
 }
 
 #' @rdname plotly_data
-#' @export
 ungroup.plotly <- function(x, ...) {
-  d <- dplyr::ungroup(plotly_data(x))
+  d <- ungroup(plotly_data(x), ...)
   add_data(x, d)
 }
 
 #' @rdname plotly_data
-#' @export
-group_by_.plotly <- function(.data, ..., .dots, add = FALSE) {
-  d <- plotly_data(.data)
-  d2 <- dplyr::group_by_(d, .dots = lazyeval::all_dots(.dots, ...), add = add)
+group_by.plotly <- function(.data, ...) {
+  d <- group_by(plotly_data(.data), ...)
+  if (crosstalk_key() %in% names(d)) {
+    d <- group_by_add(d, !!rlang::sym(crosstalk_key()), add = TRUE)
+  }
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+mutate.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), mutate, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+do.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), do, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+summarise.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), summarise, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+arrange.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), arrange, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+select.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), select, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+filter.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), filter, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+distinct.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), distinct, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+slice.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), slice, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+rename.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), rename, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+transmute.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), transmute, ...)
+  add_data(.data, d)
+}
+
+# Apply a dplyr generic to a dataset while preserving the crosstalk 'set' attribute
+preserve_set <- function(.data, func, ...) {
+  structure(func(.data, ...), set = attr(.data, "set"))
+}
+
+# ------------------------------------------------------------
+# Deprecated dplyr non-nse generics
+# ------------------------------------------------------------
+
+#' @rdname plotly_data
+group_by_.plotly <- function(.data, ...) {
+  d <- group_by_(plotly_data(.data), ...)
   # add crosstalk key as a group (to enable examples like demos/highlight-pipeline.R)
   if (crosstalk_key() %in% names(d)) {
-    d2 <- dplyr::group_by_(d2, crosstalk_key(), add = TRUE)
+    d <- group_by_add(d, !!rlang::sym(crosstalk_key()), add = TRUE)
   }
-  add_data(.data, d2)
-}
-
-#' @rdname plotly_data
-#' @export
-summarise_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::summarise_(d, .dots = lazyeval::all_dots(.dots, ...))
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-mutate_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  dotz <- lazyeval::all_dots(.dots, ...)
-  # '.' in a pipeline should really reference the data!!
-  lapply(dotz, function(x) { assign(".", d, x$env) })
-  set <- attr(d, "set")
-  d <- dplyr::mutate_(d, .dots = dotz)
-  add_data(.data, structure(d, set = set))
-}
-
-#' @rdname plotly_data
-#' @export
-do_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  dotz <- lazyeval::all_dots(.dots, ...)
-  # '.' in a pipeline should really reference the data!!
-  lapply(dotz, function(x) { assign(".", d, x$env) })
-  set <- attr(d, "set")
-  d <- dplyr::do_(d, .dots = dotz)
-  add_data(.data, structure(d, set = set))
-}
-
-#' @rdname plotly_data
-#' @export
-arrange_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::arrange_(d, .dots = lazyeval::all_dots(.dots, ...))
+mutate_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), mutate_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-select_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::select_(d, .dots = lazyeval::all_dots(.dots, ...))
+do_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), do_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-filter_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::filter_(d, .dots = lazyeval::all_dots(.dots, ...))
+summarise_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), summarise_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-distinct_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::distinct_(d, .dots = lazyeval::all_dots(.dots, ...))
+arrange_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), arrange_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-slice_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::slice_(d, .dots = lazyeval::all_dots(.dots, ...))
+select_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), select_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-rename_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::rename_(d, .dots = lazyeval::all_dots(.dots, ...))
+filter_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), filter_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
-#' @export
-transmute_.plotly <- function(.data, ..., .dots) {
-  d <- plotly_data(.data)
-  d <- dplyr::transmute_(d, .dots = lazyeval::all_dots(.dots, ...))
+distinct_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), distinct_, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+slice_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), slice_, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+rename_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), rename_, ...)
+  add_data(.data, d)
+}
+
+#' @rdname plotly_data
+transmute_.plotly <- function(.data, ...) {
+  d <- preserve_set(plotly_data(.data), transmute_, ...)
   add_data(.data, d)
 }
 
