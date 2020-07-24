@@ -130,62 +130,67 @@ group_by.plotly <- function(.data, ...) {
 
 #' @rdname plotly_data
 mutate.plotly <- function(.data, ...) {
-  d <- mutate(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), mutate, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 do.plotly <- function(.data, ...) {
-  d <- do(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), do, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 summarise.plotly <- function(.data, ...) {
-  d <- summarise(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), summarise, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 arrange.plotly <- function(.data, ...) {
-  d <- arrange(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), arrange, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 select.plotly <- function(.data, ...) {
-  d <- select(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), select, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 filter.plotly <- function(.data, ...) {
-  d <- filter(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), filter, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 distinct.plotly <- function(.data, ...) {
-  d <- distinct(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), distinct, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 slice.plotly <- function(.data, ...) {
-  d <- slice(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), slice, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 rename.plotly <- function(.data, ...) {
-  d <- rename(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), rename, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 transmute.plotly <- function(.data, ...) {
-  d <- transmute(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), transmute, ...)
   add_data(.data, d)
+}
+
+# Apply a dplyr generic to a dataset while preserving the crosstalk 'set' attribute
+preserve_set <- function(.data, func, ...) {
+  structure(func(.data, ...), set = attr(.data, "set"))
 }
 
 # ------------------------------------------------------------
@@ -204,61 +209,61 @@ group_by_.plotly <- function(.data, ...) {
 
 #' @rdname plotly_data
 mutate_.plotly <- function(.data, ...) {
-  d <- mutate_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), mutate_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 do_.plotly <- function(.data, ...) {
-  d <- do_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), do_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 summarise_.plotly <- function(.data, ...) {
-  d <- summarise_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), summarise_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 arrange_.plotly <- function(.data, ...) {
-  d <- arrange_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), arrange_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 select_.plotly <- function(.data, ...) {
-  d <- select_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), select_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 filter_.plotly <- function(.data, ...) {
-  d <- filter_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), filter_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 distinct_.plotly <- function(.data, ...) {
-  d <- distinct_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), distinct_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 slice_.plotly <- function(.data, ...) {
-  d <- slice_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), slice_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 rename_.plotly <- function(.data, ...) {
-  d <- rename_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), rename_, ...)
   add_data(.data, d)
 }
 
 #' @rdname plotly_data
 transmute_.plotly <- function(.data, ...) {
-  d <- transmute_(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), transmute_, ...)
   add_data(.data, d)
 }
 
