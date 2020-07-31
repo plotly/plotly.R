@@ -27,7 +27,7 @@ plotly_IMAGE(
 
 \item{out_file}{A filename for writing the image to a file.}
 
-\item{...}{arguments passed onto \code{httr::POST}}
+\item{...}{arguments passed onto \code{httr::RETRY}}
 }
 \description{
 The images endpoint turns a plot (which may be given in multiple forms)

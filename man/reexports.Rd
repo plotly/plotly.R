@@ -35,8 +35,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{arrange_}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr]{distinct_}}, \code{\link[dplyr]{do}}, \code{\link[dplyr]{do_}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{filter_}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{group_by_}}, \code{\link[dplyr]{groups}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{mutate_}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{rename_}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{select_}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{slice_}}, \code{\link[dplyr]{summarise}}, \code{\link[dplyr]{summarise_}}, \code{\link[dplyr]{transmute}}, \code{\link[dplyr]{transmute_}}, \code{\link[dplyr]{ungroup}}}
+  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr:se-deprecated]{arrange_}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr:se-deprecated]{distinct_}}, \code{\link[dplyr]{do}}, \code{\link[dplyr:se-deprecated]{do_}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr:se-deprecated]{filter_}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr:se-deprecated]{group_by_}}, \code{\link[dplyr:group_data]{groups}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr:se-deprecated]{mutate_}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr:se-deprecated]{rename_}}, \code{\link[dplyr]{select}}, \code{\link[dplyr:se-deprecated]{select_}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr:se-deprecated]{slice_}}, \code{\link[dplyr]{summarise}}, \code{\link[dplyr:se-deprecated]{summarise_}}, \code{\link[dplyr:mutate]{transmute}}, \code{\link[dplyr:se-deprecated]{transmute_}}, \code{\link[dplyr:group_by]{ungroup}}}
 
-  \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
+  \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
 }}
 

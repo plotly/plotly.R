@@ -348,3 +348,7 @@ test_that("Line breaks are properly translated (R -> HTML)", {
   expect_equivalent(plotly_build(p2)[["x"]][["layout"]][["yaxis"]][["categoryarray"]],
                     target_labels)
 })
+
+test_that("group_by() on a plotly object doesn't produce warning", {
+   expect_warning(group_by(plot_ly(txhousing), city), NA)
+})

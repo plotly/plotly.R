@@ -517,7 +517,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       )
     }
     # anchor X axis to the lowest plot in its column
-    layout$layout <- dplyr::group_by_(layout$layout, "xaxis")
+    layout$layout <- dplyr::group_by(layout$layout, !!rlang::sym("xaxis"))
     layout$layout <-  dplyr::mutate(layout$layout, xanchor = max(as.integer(yaxis)))
   }
   layout$layout <- as.data.frame(layout$layout)
@@ -1112,7 +1112,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # translate group aesthetics to data attributes
   return_dat <- Map(function(x, y) {
     if (is.null(y[["group"]])) return(x)
-    dplyr::group_by_(x, y[["group"]])
+    dplyr::group_by(x, !!rlang::as_quosure(y[["group"]]))
   }, return_dat, mappingFormulas)
   
   # don't need to add group as an attribute anymore
@@ -1258,10 +1258,29 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
 text2font <- function(x = ggplot2::element_text(), type = "height") {
   list(
     color = toRGB(x$colour),
-    family = x$family,
+    family = font_family(x$family),
     # TODO: what about the size of vertical text?
     size = unitConvert(grid::unit(x$size %||% 0, "points"), "pixels", type)
   )
+}
+
+# Replace a default font family, "", with thematic's font option (if set)
+font_family <- function(family = "") {
+  if (!identical(family, "")) {
+    return(family)
+  }
+  if (!isNamespaceLoaded("thematic")) {
+    return("")
+  }
+  font <- thematic::thematic_get_option("font")
+  if (!length(font)) {
+    return("")
+  }
+  # font$families is a vector of families, but font.family wants to be a 
+  # string (like CSS font-family), so make sure the names are unquoted, 
+  # then quote them
+  families <- sub("'$", "", sub("^'", "", font$families))
+  sprintf("'%s'", paste(families, collapse = "', '"))
 }
 
 # wrap text in bold/italics according to the text "face"
