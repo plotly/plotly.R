@@ -60,8 +60,9 @@ shiny app, see \code{plotly_example("shiny", "ggplotly_sizing")}.
 \examples{
 \dontrun{
 # simple example
-ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
-ggplotly(ggiris)
+ggpenguins <- qplot(bill_length_mm , body_mass_g, 
+data = palmerpenguins::penguins, color = species)
+ggplotly(ggpenguins)
 
 data(canada.cities, package = "maps")
 viz <- ggplot(canada.cities, aes(long, lat)) +
@@ -82,7 +83,8 @@ qplot(data = d, x = mpg, y = wt) \%>\%
 demo("crosstalk-highlight-ggplotly", package = "plotly")
 
 # client-side linked brushing in a scatterplot matrix
-highlight_key(iris) \%>\%
+highlight_key(palmerpenguins::penguins) \%>\%
+highlight_key(palmerpenguins::penguins) \%>\%
   GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
   ggplotly(tooltip = c("x", "y", "colour")) \%>\%
   highlight("plotly_selected")

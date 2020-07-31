@@ -82,7 +82,7 @@ Any relevant query parameters should be included here (see examples).}
 
 \item{body}{body of the HTTP request(as in, \code{\link[httr:RETRY]{httr::RETRY()}}).
 If this value is not already converted to JSON
-(via \code{\link[jsonlite:fromJSON]{jsonlite::toJSON()}}), it uses the internal \code{to_JSON()}
+(via \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}), it uses the internal \code{to_JSON()}
 to ensure values are "automatically unboxed" (i.e., vec.}
 }
 \description{
