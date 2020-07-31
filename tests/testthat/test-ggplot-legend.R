@@ -72,8 +72,9 @@ test_that("very long legend items", {
   info <- expect_traces(p_long_items, 3, "very-long-legend-items")
 })
 
-iris$All <- "All species"
-p <- qplot(data = iris, x = Sepal.Length, y = Sepal.Width, color = All)
+penguins <- palmerpenguins::penguins
+penguins$All <- "All species"
+p <- qplot(data = penguins, x = bill_length_mm, y = bill_depth_mm, color = All)
 
 test_that("legend is created with discrete mapping regardless of unique values", {
   info <- expect_traces(p, 1, "one-entry")

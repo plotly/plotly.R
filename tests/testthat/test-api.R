@@ -93,7 +93,7 @@ test_that("Can overwrite a grid", {
 
   id <- new_id()
   m <- api_create(mtcars, id)
-  m2 <- api_create(iris, id)
+  m2 <- api_create(palmerpenguins::penguins, id)
   expect_true(identical(m$embed_url, m2$embed_url))
   expect_false(identical(m$cols, m2$cols))
 })
