@@ -84,7 +84,6 @@ demo("crosstalk-highlight-ggplotly", package = "plotly")
 
 # client-side linked brushing in a scatterplot matrix
 highlight_key(palmerpenguins::penguins) \%>\%
-highlight_key(palmerpenguins::penguins) \%>\%
   GGally::ggpairs(aes(colour = Species), columns = 1:4) \%>\%
   ggplotly(tooltip = c("x", "y", "colour")) \%>\%
   highlight("plotly_selected")
