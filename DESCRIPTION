@@ -40,6 +40,7 @@ Imports:
     hexbin,
     RColorBrewer,
     dplyr,
+    vctrs,
     tibble,
     lazyeval (>= 0.2.0),
     rlang,
@@ -75,7 +76,9 @@ Suggests:
     forcats,
     thematic
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Remotes: rstudio/thematic
+Remotes: 
+  rstudio/thematic,
+  Displayr/htmlwidgets
