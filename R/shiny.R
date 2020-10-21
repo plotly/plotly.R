@@ -34,7 +34,7 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
     package = "plotly",
     reportSize = TRUE
   )
-  if (is_available("shiny", "1.4.0.9003") && is_available("htmlwidgets", "1.5.1.9001")) {
+  if (is_available("shiny", "1.4.0.9003") && is_available("htmlwidgets", "1.5.2.9000")) {
     args$reportTheme <- reportTheme
   }
   do.call(htmlwidgets::shinyWidgetOutput, args)
