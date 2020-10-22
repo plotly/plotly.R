@@ -6,7 +6,7 @@
 
 ## NEW FEATURES
 
-* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.1.9001 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
+* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
 
 ## IMPROVEMENTS
 
