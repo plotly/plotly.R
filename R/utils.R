@@ -1021,7 +1021,8 @@ try_file <- function(f, what) {
 # preferred defaults for toJSON mapping
 to_JSON <- function(x, ...) {
   jsonlite::toJSON(x, digits = 50, auto_unbox = TRUE, force = TRUE,
-                   null = "null", na = "null", ...)
+                   null = "null", na = "null", 
+                   time_format = "%Y-%m-%dT%H:%M:%OS3%z",  ...)
 }
 
 # preferred defaults for toJSON mapping

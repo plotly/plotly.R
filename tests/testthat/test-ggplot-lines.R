@@ -41,7 +41,18 @@ test_that("different colored lines become different colored traces", {
   expect_identical(info$data[[2]]$x[1:n], x)
 })
 
-
+test_that("Milliseconds are preserved with dynamic ticks", {
+  d <- data.frame(
+    t = as.POSIXct("1970-01-01 00:00") + (0:999) / 10,
+    y = sin((0:999) * 4 * pi / 1000)
+  )
+  gg <- ggplot(d, aes(t, y)) + geom_line()
+  p <- ggplotly(gg, dynamicTicks = TRUE)
+  j <- plotly_json(p, jsonedit = FALSE)
+  t2 <- jsonlite::fromJSON(j)$data$x[[1]] %>% 
+    as.POSIXct(format = "%Y-%m-%dT%H:%M:%OS%z")
+  expect_equal(as.numeric(mean(diff(t2))), 0.1)
+})
 
 test_that("Translates both dates and datetimes (with dynamic ticks) correctly", {
   
