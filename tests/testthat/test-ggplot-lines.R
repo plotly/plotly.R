@@ -52,6 +52,7 @@ test_that("Milliseconds are preserved with dynamic ticks", {
   t2 <- jsonlite::fromJSON(j)$data$x[[1]] %>% 
     as.POSIXct(format = "%Y-%m-%dT%H:%M:%OS%z")
   expect_equal(as.numeric(mean(diff(t2))), 0.1)
+  expect_doppelganger_built(p, "line-milliseconds")
 })
 
 test_that("Translates both dates and datetimes (with dynamic ticks) correctly", {
