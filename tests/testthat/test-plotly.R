@@ -55,21 +55,22 @@ test_that("Variable mappings return same result regardless of where they appear"
 
 
 test_that("plot_ly() handles a simple scatterplot", {
-  p <- plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length, mode = "markers")
+  p <- plot_ly(data = palmerpenguins::penguins, 
+               x = ~bill_length_mm, y = ~bill_depth_mm, mode = "markers")
   l <- expect_traces(p, 1, "scatterplot")
   expect_equivalent(l$data[[1]]$mode, "markers")
-  expect_equivalent(l$data[[1]]$x, iris$Sepal.Length)
-  expect_equivalent(l$data[[1]]$y, iris$Petal.Length)
-  expect_true(l$layout$xaxis$title == "Sepal.Length")
-  expect_true(l$layout$yaxis$title == "Petal.Length")
+  expect_equivalent(l$data[[1]]$x, na.omit(palmerpenguins::penguins$bill_length_mm))
+  expect_equivalent(l$data[[1]]$y, na.omit(palmerpenguins::penguins$bill_depth_mm))
+  expect_true(l$layout$xaxis$title == "bill_length_mm")
+  expect_true(l$layout$yaxis$title == "bill_depth_mm")
   expect_true(l$layout$xaxis$automargin)
   expect_true(l$layout$yaxis$automargin)
 })
 
 test_that("type inference + add_data + layering works as expected", {
-p <- plot_ly(iris, x = ~Species) %>% 
+p <- plot_ly(palmerpenguins::penguins, x = ~species) %>% 
   add_trace(opacity = 0.3) %>%
-  add_data(iris[sample(nrow(iris), 10), ]) %>% 
+  add_data(palmerpenguins::penguins[sample(nrow(palmerpenguins::penguins), 10), ]) %>% 
   add_trace() %>%
   layout(barmode = "overlay")
   l <- expect_traces(p, 2, "bar-inference")
@@ -322,8 +323,9 @@ test_that("Line breaks are properly translated (R -> HTML)", {
   # create target labels
   suffix <- "\n\n(third line)\n(fourth line)"
   
-  target_labels <- iris$Species %>%
+  target_labels <- palmerpenguins::penguins$species %>%
     unique() %>%
+    sort() %>%
     paste0(suffix) %>%
     gsub(pattern = "\n",
          replacement = br(),
@@ -331,19 +333,19 @@ test_that("Line breaks are properly translated (R -> HTML)", {
          fixed = TRUE)
   
   # test factor column
-  d <- iris
-  levels(d$Species) <- paste0(levels(d$Species), suffix)
-  p1 <- d %>% plot_ly(x = ~Sepal.Length,
-                      y = ~Species)
+  d <- palmerpenguins::penguins
+  levels(d$species) <- paste0(levels(d$species), suffix)
+  p1 <- d %>% plot_ly(x = ~bill_length_mm,
+                      y = ~species)
   
   expect_equivalent(plotly_build(p1)[["x"]][["layout"]][["yaxis"]][["categoryarray"]],
                     target_labels)
   
   # test character column
   p2 <- d %>%
-    dplyr::mutate(Species = as.character(Species)) %>%
-    plot_ly(x = ~Sepal.Length,
-            y = ~Species)
+    dplyr::mutate(species = as.character(species)) %>%
+    plot_ly(x = ~bill_length_mm,
+            y = ~species)
   
   expect_equivalent(plotly_build(p2)[["x"]][["layout"]][["yaxis"]][["categoryarray"]],
                     target_labels)

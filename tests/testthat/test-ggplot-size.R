@@ -1,9 +1,9 @@
 context("size")
 
 test_that("size is a vector if it is specified", {
-  iplot <- ggplot(iris) +
-    geom_point(aes(Petal.Width, Sepal.Width, size=Petal.Length))
-  L <- expect_doppelganger_built(iplot, "size-is-a-vector")
+  pplot <- ggplot(palmerpenguins::penguins) +
+    geom_point(aes(bill_length_mm, bill_depth_mm, size=flipper_length_mm))
+  L <- expect_doppelganger_built(pplot, "size-is-a-vector")
   m <- L$data[[1]]$marker
   expect_that(m, is_a("list"))
   expect_true(length(m$size) > 1)
