@@ -37,7 +37,6 @@ Imports:
     htmltools (>= 0.3.6),
     htmlwidgets (>= 1.5.2.9001),
     tidyr,
-    hexbin,
     RColorBrewer,
     dplyr,
     vctrs,
@@ -51,6 +50,7 @@ Imports:
 Suggests:
     MASS,
     maps,
+    hexbin,
     ggthemes,
     GGally,
     testthat,
