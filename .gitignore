@@ -17,3 +17,4 @@ rsconnect/
 revdep/
 travis_debug.R
 .httr-oauth
+tests/testthat/Rplots.pdf

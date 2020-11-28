@@ -88,14 +88,14 @@ RUN mkdir -p /opt/orca \
 ENV VDIFFR=true
 EXPOSE 3838
 
-
+ARG CRANCACHE=1
 RUN R -e "update.packages(ask=FALSE)"
 RUN R -e "remotes::install_github('r-lib/vdiffr')"
 
 # install any new dependencies, then either manage cases (the default) or run tests
 # note the workaround to get docker to run a proper exit status when there are testthat errors
 # https://github.com/r-lib/testthat/issues/515#issuecomment-304169376
-CMD R -e "remotes::install_deps(dep = TRUE)"
+CMD R -e "remotes::install_deps(dependencies = TRUE)"
 
 CMD cd /home/plotly; R -e "if (!identical(Sys.getenv('VMODE'), 'ci')) vdiffr::manage_cases(); \
   res <- devtools::test(reporter='summary'); \
