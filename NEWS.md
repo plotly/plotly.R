@@ -18,6 +18,8 @@
 
 ## BUG FIXES
 
+* When R's `POSIXt` class is serialized to JSON, the time of day is now correctly preserved (in plotly.js expected `'yyyy-mm-dd HH:MM:SS.ssssss'` format). This should fix a whole host of issues where date-times were being rounded. (#1871, @FlukeAndFeather).
+
 * `ggplotly()` now handles discrete axes of a `facet_wrap` and `facet_grid` correctly when there is only one category in panels > 1 (#1577 and #1720).
 
 * `ggplotly()` now correctly accounts for linebreaks in tick label text when computing plot margins (#1791, @trekonom).
