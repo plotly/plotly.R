@@ -24,6 +24,8 @@
 
 * `ggplotly()` now handles `element_blank()` and `factor()` labels in positional scales correctly (#1731 and #1772).
 
+* `ggplotly()` now handles missing `y` aesthetic in `geom_errorbar()` (#1779, @trekonom).
+
 # 4.9.2.1
 
 This is minor patch release with a few minor bug fixes and updates test expectations in anticipation of new R 4.0 defaults.
