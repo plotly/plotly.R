@@ -1,7 +1,7 @@
 context("ggplot themes")
 
 penguin.base <- ggplot(palmerpenguins::penguins) +
-  geom_point(aes(bill_length_mm, bill_length_mm)) +
+  geom_point(aes(bill_length_mm, flipper_length_mm)) +
   theme_grey()
 
 test_that("background translated correctly",{

@@ -18,3 +18,4 @@ revdep/
 travis_debug.R
 .httr-oauth
 tests/testthat/Rplots.pdf
+inst/examples/shiny/event_data/tests/shinytest/mytest-current/

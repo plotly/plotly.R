@@ -136,9 +136,7 @@ test_that("subplot accepts a list of plots", {
 
 test_that("ggplotly understands ggmatrix", {
   skip_if_not_installed("GGally")
-  penguins <- palmerpenguins::penguins %>% tidyr::drop_na() %>% 
-    select(species, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
-  L <- expect_doppelganger_built(GGally::ggpairs(penguins), 
+  L <- expect_doppelganger_built(GGally::ggpairs(iris), 
                                  "plotly-subplot-ggmatrix")
 })
 
