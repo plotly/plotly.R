@@ -456,9 +456,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.54.1"
+            "href": "plotly-htmlwidgets-css-1.57.1"
           },
           "meta": null,
           "script": null,
@@ -469,9 +469,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-main-1.54.1"
+            "href": "plotly-main-1.57.1"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
