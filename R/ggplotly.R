@@ -176,12 +176,12 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which requires a known output (device) size.
-  dev_fun <- if (system.file(package = "Cairo") != "") {
-    Cairo::Cairo
-  } else if (capabilities("png")) {
+  dev_fun <- if (capabilities("aqua") || capabilities("png")) {
     grDevices::png
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
+  } else if (system.file(package = "Cairo") != "") {
+    Cairo::Cairo
   } else {
     stop(
       "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
