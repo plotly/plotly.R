@@ -1132,6 +1132,10 @@ gg2list <- function(p, width = NULL, height = NULL,
 }
 
 
+# Due to the non-standard use of assign() in g2list() (above)
+utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "sets"))
+
+
 #-----------------------------------------------------------------------------
 # ggplotly 'utility' functions
 #-----------------------------------------------------------------------------
