@@ -33,15 +33,6 @@ test_that("geom_sf() geometry collection.", {
   
   # graticule, point, line, polygon
   expect_length(l$data, 4)
-  
-  # test data/default for line
-  # TODO: test that defaults are correct one geom_sf() becomes stable
-  expect_equivalent(l$data[[2]]$x, c(4, 3))
-  expect_equivalent(l$data[[2]]$y, c(0, 0))
-  expect_equivalent(l$data[[3]]$x, I(1))
-  expect_equivalent(l$data[[3]]$y, I(0))
-  expect_equivalent(l$data[[4]]$x, c(5.5, 7, 7, 6, 5.5, 5.5))
-  expect_equivalent(l$data[[4]]$y, c(0, 0, -.5, -.5, 0, 0))
 })
 
 test_that("geom_sf() polygons with fill/text.", {
