@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.9.2.9000
+Version: 4.9.3
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com", comment = c(ORCID = "0000-0002-4958-2844")),
     person("Chris", "Parmer", role = "aut",
@@ -74,12 +74,8 @@ Suggests:
     processx,
     plotlyGeoAssets,
     forcats,
-    thematic,
     palmerpenguins
 LazyData: true
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Remotes: 
-  rstudio/thematic,
-  ramnathv/htmlwidgets

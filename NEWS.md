@@ -1,4 +1,4 @@
-# 4.9.2.9000
+# 4.9.3
 
 ## Changes to plotly.js
 
