@@ -41,7 +41,7 @@ If a group of scatter traces share the same non-positional characteristics
 (i.e., color, fill, etc), it is more efficient to draw them as a single trace
 with missing values that separate the groups (instead of multiple traces),
 In this case, one should also take care to make sure
-\href{https://plot.ly/r/reference/#scatter-connectgaps}{connectgaps}
+\href{https://plotly.com/r/reference/#scatter-connectgaps}{connectgaps}
 is set to \code{FALSE}.
 }
 \examples{

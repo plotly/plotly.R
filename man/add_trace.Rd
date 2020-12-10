@@ -268,9 +268,9 @@ plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) \%>\%
 \references{
 \url{https://plotly-r.com/overview.html}
 
-\url{https://plot.ly/r}
+\url{https://plotly.com/r}
 
-\url{https://plot.ly/r/reference/}
+\url{https://plotly.com/r/reference/}
 }
 \seealso{
 \code{\link[=plot_ly]{plot_ly()}}

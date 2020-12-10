@@ -10,7 +10,7 @@ layout(p, ..., data = NULL)
 \item{p}{A plotly object.}
 
 \item{...}{Arguments to the layout object. For documentation,
-see \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}}
+see \url{https://plotly.com/r/reference/#Layout_and_layout_style_objects}}
 
 \item{data}{A data frame to associate with this layout (optional). If not
 provided, arguments are evaluated using the data frame in \code{\link[=plot_ly]{plot_ly()}}.}

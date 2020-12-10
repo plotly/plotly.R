@@ -27,9 +27,9 @@
 #' only have one name, this argument acts very much like `split` in that it 
 #' creates one trace for every unique value.
 #' @param color Values mapped to relevant 'fill-color' attribute(s) 
-#' (e.g. [fillcolor](https://plot.ly/r/reference#scatter-fillcolor), 
-#' [marker.color](https://plot.ly/r/reference#scatter-marker-color), 
-#' [textfont.color](https://plot.ly/r/reference/#scatter-textfont-color), etc.).
+#' (e.g. [fillcolor](https://plotly.com/r/reference#scatter-fillcolor), 
+#' [marker.color](https://plotly.com/r/reference#scatter-marker-color), 
+#' [textfont.color](https://plotly.com/r/reference/#scatter-textfont-color), etc.).
 #' The mapping from data values to color codes may be controlled using
 #' `colors` and `alpha`, or avoided altogether via [I()] (e.g., `color = I("red")`). 
 #' Any color understood by [grDevices::col2rgb()] may be used in this way. 
@@ -37,35 +37,35 @@
 #' or a vector of colors to interpolate in hexadecimal "#RRGGBB" format, 
 #' or a color interpolation function like `colorRamp()`.
 #' @param stroke Similar to `color`, but values are mapped to relevant 'stroke-color' attribute(s)
-#' (e.g., [marker.line.color](https://plot.ly/r/reference#scatter-marker-line-color)
-#'  and [line.color](https://plot.ly/r/reference#scatter-line-color)
+#' (e.g., [marker.line.color](https://plotly.com/r/reference#scatter-marker-line-color)
+#'  and [line.color](https://plotly.com/r/reference#scatter-line-color)
 #' for filled polygons). If not specified, `stroke` inherits from `color`.
 #' @param strokes Similar to `colors`, but controls the `stroke` mapping.
 #' @param alpha A number between 0 and 1 specifying the alpha channel applied to `color`.
-#' Defaults to 0.5 when mapping to [fillcolor](https://plot.ly/r/reference#scatter-fillcolor) and 1 otherwise.
+#' Defaults to 0.5 when mapping to [fillcolor](https://plotly.com/r/reference#scatter-fillcolor) and 1 otherwise.
 #' @param alpha_stroke Similar to `alpha`, but applied to `stroke`.
-#' @param symbol (Discrete) values mapped to [marker.symbol](https://plot.ly/r/reference#scatter-marker-symbol).
+#' @param symbol (Discrete) values mapped to [marker.symbol](https://plotly.com/r/reference#scatter-marker-symbol).
 #' The mapping from data values to symbols may be controlled using
 #' `symbols`, or avoided altogether via [I()] (e.g., `symbol = I("pentagon")`). 
-#' Any [pch] value or [symbol name](https://plot.ly/r/reference#scatter-marker-symbol) may be used in this way.
-#' @param symbols A character vector of [pch] values or [symbol names](https://plot.ly/r/reference#scatter-marker-symbol).
-#' @param linetype (Discrete) values mapped to [line.dash](https://plot.ly/r/reference#scatter-line-dash).
+#' Any [pch] value or [symbol name](https://plotly.com/r/reference#scatter-marker-symbol) may be used in this way.
+#' @param symbols A character vector of [pch] values or [symbol names](https://plotly.com/r/reference#scatter-marker-symbol).
+#' @param linetype (Discrete) values mapped to [line.dash](https://plotly.com/r/reference#scatter-line-dash).
 #' The mapping from data values to symbols may be controlled using
 #' `linetypes`, or avoided altogether via [I()] (e.g., `linetype = I("dash")`). 
-#' Any `lty` (see [par]) value or [dash name](https://plot.ly/r/reference#scatter-line-dash) may be used in this way.
-#' @param linetypes A character vector of `lty` values or [dash names](https://plot.ly/r/reference#scatter-line-dash)
+#' Any `lty` (see [par]) value or [dash name](https://plotly.com/r/reference#scatter-line-dash) may be used in this way.
+#' @param linetypes A character vector of `lty` values or [dash names](https://plotly.com/r/reference#scatter-line-dash)
 #' @param size (Numeric) values mapped to relevant 'fill-size' attribute(s) 
-#' (e.g., [marker.size](https://plot.ly/r/reference#scatter-marker-size), 
-#' [textfont.size](https://plot.ly/r/reference#scatter-textfont-size),
-#' and [error_x.width](https://plot.ly/r/reference#scatter-error_x-width)).
+#' (e.g., [marker.size](https://plotly.com/r/reference#scatter-marker-size), 
+#' [textfont.size](https://plotly.com/r/reference#scatter-textfont-size),
+#' and [error_x.width](https://plotly.com/r/reference#scatter-error_x-width)).
 #' The mapping from data values to symbols may be controlled using
 #' `sizes`, or avoided altogether via [I()] (e.g., `size = I(30)`). 
 #' @param sizes A numeric vector of length 2 used to scale `size` to pixels.
 #' @param span (Numeric) values mapped to relevant 'stroke-size' attribute(s) 
 #' (e.g., 
-#' [marker.line.width](https://plot.ly/r/reference#scatter-marker-line-width),
-#' [line.width](https://plot.ly/r/reference#scatter-line-width) for filled polygons,
-#' and [error_x.thickness](https://plot.ly/r/reference#scatter-error_x-thickness))
+#' [marker.line.width](https://plotly.com/r/reference#scatter-marker-line-width),
+#' [line.width](https://plotly.com/r/reference#scatter-line-width) for filled polygons,
+#' and [error_x.thickness](https://plotly.com/r/reference#scatter-error_x-thickness))
 #' The mapping from data values to symbols may be controlled using
 #' `spans`, or avoided altogether via [I()] (e.g., `span = I(30)`). 
 #' @param spans A numeric vector of length 2 used to scale `span` to pixels.
@@ -114,7 +114,7 @@
 #'  add_lines(y = ~uempmed) %>%
 #'  add_lines(y = ~psavert, color = I("red"))
 #' 
-#' # Attributes are documented in the figure reference -> https://plot.ly/r/reference
+#' # Attributes are documented in the figure reference -> https://plotly.com/r/reference
 #' # You might notice plot_ly() has named arguments that aren't in this figure
 #' # reference. These arguments make it easier to map abstract data values to
 #' # visual attributes.
@@ -218,7 +218,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
 #' 
 #' @param data A data frame (optional).
 #' @param ... arguments passed along to [plot_ly()]. They should be
-#' valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
+#' valid scattermapbox attributes - \url{https://plotly.com/r/reference/#scattermapbox}.
 #' Note that x/y can also be used in place of lat/lon.
 #' @export
 #' @author Carson Sievert
@@ -243,7 +243,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
 plot_mapbox <- function(data = data.frame(), ...) {
   p <- config(plot_ly(data, ...), mapboxAccessToken = mapbox_token())
   # not only do we use this for is_mapbox(), but also setting the layout attr
-  # https://plot.ly/r/reference/#layout-mapbox
+  # https://plotly.com/r/reference/#layout-mapbox
   p$x$layout$mapType <- "mapbox"
   geo2cartesian(p)
 }
@@ -287,7 +287,7 @@ plot_geo <- function(data = data.frame(), ..., offline = FALSE) {
     )
   }
   # not only do we use this for is_geo(), but also setting the layout attr
-  # https://plot.ly/r/reference/#layout-geo
+  # https://plotly.com/r/reference/#layout-geo
   p$x$layout$mapType <- "geo"
   geo2cartesian(p)
 }

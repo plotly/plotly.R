@@ -166,7 +166,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 * The `name` attribute is now a "special `plot_ly()` argument" and behaves similar to `split` (it ensures a different trace for every unique value supplied). Although this leads to a breaking change (`name` was previously appended to an automatically generated trace name), it leads to a more flexible and transparent API. Those that wish to have the old behavior back should provide relevant mappings to the `name` attributes (e.g. `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~factor(vs), name = "a")` should become `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~factor(vs), name = ~paste(vs, "\na"))`)
 * The `color` argument now maps to `fillcolor`, making it much easier to use polygon fills to encode data values (e.g., choropleth maps). For backwards-compatibilty reasons, when `color` maps to `fillcolor`, `alpha` defaults to 0.5 (instead of 1). For an example, `plot_mapbox(mn_res, color = ~INDRESNAME)` or `plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, showlegend = FALSE, stroke = I("black"))`.
 * The `color` argument no longer automatically add `"markers"` to the `mode` attribute for scatter/scattergl trace types. Those who wish to have the old behavior back, should add `"markers"` to the `mode` explicity (e.g., change `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines")` to `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines+markers")`).
-* The `size` argument now informs a default [error_[x/y].width](https://plot.ly/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plot.ly/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`).
+* The `size` argument now informs a default [error_[x/y].width](https://plotly.com/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plotly.com/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`).
 * `layout.showlegend` now defaults to `TRUE` for a *single* pie trace. This is a more sensible default and matches pure plotly.js behavior.
 
 ### Other changes relevant for all **plotly** objects
@@ -253,7 +253,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
 * Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
 * Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
-* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
+* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plotly.com/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
@@ -359,7 +359,7 @@ limits.
 ## CHANGES
 
 * The `add_scattergeo()` and `add_choropleth()` functions have been deprecated in favor of `plot_geo()`. 
-* The `add_area(...)` function changed it's meaning from `add_lines(..., fill = 'tozeroy')` to a wrapper around the area trace <https://plot.ly/r/reference/#area>. This is more consistent with the naming conventions already in place for other `add_()` functions.
+* The `add_area(...)` function changed it's meaning from `add_lines(..., fill = 'tozeroy')` to a wrapper around the area trace <https://plotly.com/r/reference/#area>. This is more consistent with the naming conventions already in place for other `add_()` functions.
 * `add_ribbons()` now shows points (instead of fill) on hover.
 
 # 4.4.5 -- 19 September 2016

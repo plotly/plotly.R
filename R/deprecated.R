@@ -48,7 +48,7 @@ get_figure <- function(username, id) {
 #' 
 #' @description This function is now deprecated. It used to provide a way to store plotly 
 #' account credentials, but that can now be done with environment variables. 
-#' For more details and examples, see \url{https://plot.ly/r/getting-started/}.
+#' For more details and examples, see \url{https://plotly.com/r/getting-started/}.
 #' 
 #' If you're here looking for an intro/overview of the package, see the 
 #' \href{https://github.com/ropensci/plotly/#getting-started}{readme}

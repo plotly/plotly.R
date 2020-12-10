@@ -13,7 +13,7 @@
 #'  \item api_key key to use with the api
 #'  \item tmp_pw temporary password to access your plotly account
 #' }
-#' @references https://plot.ly/rest/
+#' @references https://plotly.com/rest/
 #' @export
 #' @examples \dontrun{
 #' # You need a plotly username and API key to communicate with the plotly API.

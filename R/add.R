@@ -35,9 +35,9 @@ add_data <- function(p, data = NULL) {
 #' @seealso [plot_ly()]
 #' @references \url{https://plotly-r.com/overview.html}
 #' 
-#' \url{https://plot.ly/r}
+#' \url{https://plotly.com/r}
 #' 
-#' \url{https://plot.ly/r/reference/} 
+#' \url{https://plotly.com/r/reference/} 
 #' @author Carson Sievert
 #' @export
 #' @rdname add_trace
