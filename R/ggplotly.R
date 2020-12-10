@@ -32,7 +32,7 @@
 #' @param ... arguments passed onto methods.
 #' @export
 #' @author Carson Sievert
-#' @references \url{https://plot.ly/ggplot2}
+#' @references \url{https://plotly.com/ggplot2/}
 #' @seealso [plot_ly()]
 #' @examples \dontrun{
 #' # simple example

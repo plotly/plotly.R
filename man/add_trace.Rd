@@ -268,7 +268,7 @@ plot_ly(x = c(0, 0, 1), y = c(0, 1, 0), z = c(0, 0, 0)) \%>\%
 \references{
 \url{https://plotly-r.com/overview.html}
 
-\url{https://plotly.com/r}
+\url{https://plotly.com/r/}
 
 \url{https://plotly.com/r/reference/}
 }

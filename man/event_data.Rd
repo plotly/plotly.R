@@ -41,7 +41,7 @@ plotly_example("shiny", "event_data")
 \references{
 \itemize{
 \item \url{https://plotly-r.com/linking-views-with-shiny.html#shiny-plotly-inputs}
-\item \url{https://plot.ly/javascript/plotlyjs-function-reference/}
+\item \url{https://plotly.com/javascript/plotlyjs-function-reference/}
 }
 }
 \seealso{

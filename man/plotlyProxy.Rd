@@ -28,7 +28,7 @@ until after the next time all of the outputs are updated.}
 \item{p}{a plotly proxy object (created with \code{plotlyProxy})}
 
 \item{method}{a plotlyjs method to invoke. For a list of options,
-visit the \href{https://plot.ly/javascript/plotlyjs-function-reference}{plotlyjs function reference}}
+visit \url{https://plotly.com/javascript/plotlyjs-function-reference/}}
 
 \item{...}{unnamed arguments passed onto the plotly.js method}
 }

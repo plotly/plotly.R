@@ -8,7 +8,7 @@
 
 * `renderPlotly()` now works well with `shiny::bindCache()`, meaning that plotly graphs can now be persistently cached in Shiny apps with `renderPlotly(expr) %>% shiny::bindCache()` (#1879).
 
-* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
+* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic/). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
 
 ## IMPROVEMENTS
 
@@ -258,7 +258,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://plotly-r.com/client-side-linking.html#fig:dendro>
-* The `export()` function gains a `selenium` argument for rendering/exporting WebGL plots and exporting to 'svg'/'webp' file formats (via the plotly.js function [Plotly.downloadImage()](https://plot.ly/javascript/plotlyjs-function-reference/#plotlydownloadimage)).
+* The `export()` function gains a `selenium` argument for rendering/exporting WebGL plots and exporting to 'svg'/'webp' file formats (via the plotly.js function [Plotly.downloadImage()](https://plotly.com/javascript/plotlyjs-function-reference/#plotlydownloadimage)).
 * Better type checking of trace attributes will now automatically reduce a single-valued vector to a constant (when appropriate). This is particularly useful for anchoring multiple traces to a single legend entry via `legendgroup` (see #675, #817, #826).
 * The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
 

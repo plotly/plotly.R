@@ -47,8 +47,8 @@ only have one name, this argument acts very much like \code{split} in that it
 creates one trace for every unique value.}
 
 \item{color}{Values mapped to relevant 'fill-color' attribute(s)
-(e.g. \href{https://plotly.com/r/reference#scatter-fillcolor}{fillcolor},
-\href{https://plotly.com/r/reference#scatter-marker-color}{marker.color},
+(e.g. \href{https://plotly.com/r/reference/#scatter-fillcolor}{fillcolor},
+\href{https://plotly.com/r/reference/#scatter-marker-color}{marker.color},
 \href{https://plotly.com/r/reference/#scatter-textfont-color}{textfont.color}, etc.).
 The mapping from data values to color codes may be controlled using
 \code{colors} and \code{alpha}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{color = I("red")}).
@@ -59,11 +59,11 @@ or a vector of colors to interpolate in hexadecimal "#RRGGBB" format,
 or a color interpolation function like \code{colorRamp()}.}
 
 \item{alpha}{A number between 0 and 1 specifying the alpha channel applied to \code{color}.
-Defaults to 0.5 when mapping to \href{https://plotly.com/r/reference#scatter-fillcolor}{fillcolor} and 1 otherwise.}
+Defaults to 0.5 when mapping to \href{https://plotly.com/r/reference/#scatter-fillcolor}{fillcolor} and 1 otherwise.}
 
 \item{stroke}{Similar to \code{color}, but values are mapped to relevant 'stroke-color' attribute(s)
-(e.g., \href{https://plotly.com/r/reference#scatter-marker-line-color}{marker.line.color}
-and \href{https://plotly.com/r/reference#scatter-line-color}{line.color}
+(e.g., \href{https://plotly.com/r/reference/#scatter-marker-line-color}{marker.line.color}
+and \href{https://plotly.com/r/reference/#scatter-line-color}{line.color}
 for filled polygons). If not specified, \code{stroke} inherits from \code{color}.}
 
 \item{strokes}{Similar to \code{colors}, but controls the \code{stroke} mapping.}
@@ -71,9 +71,9 @@ for filled polygons). If not specified, \code{stroke} inherits from \code{color}
 \item{alpha_stroke}{Similar to \code{alpha}, but applied to \code{stroke}.}
 
 \item{size}{(Numeric) values mapped to relevant 'fill-size' attribute(s)
-(e.g., \href{https://plotly.com/r/reference#scatter-marker-size}{marker.size},
-\href{https://plotly.com/r/reference#scatter-textfont-size}{textfont.size},
-and \href{https://plotly.com/r/reference#scatter-error_x-width}{error_x.width}).
+(e.g., \href{https://plotly.com/r/reference/#scatter-marker-size}{marker.size},
+\href{https://plotly.com/r/reference/#scatter-textfont-size}{textfont.size},
+and \href{https://plotly.com/r/reference/#scatter-error_x-width}{error_x.width}).
 The mapping from data values to symbols may be controlled using
 \code{sizes}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{size = I(30)}).}
 
@@ -81,27 +81,27 @@ The mapping from data values to symbols may be controlled using
 
 \item{span}{(Numeric) values mapped to relevant 'stroke-size' attribute(s)
 (e.g.,
-\href{https://plotly.com/r/reference#scatter-marker-line-width}{marker.line.width},
-\href{https://plotly.com/r/reference#scatter-line-width}{line.width} for filled polygons,
-and \href{https://plotly.com/r/reference#scatter-error_x-thickness}{error_x.thickness})
+\href{https://plotly.com/r/reference/#scatter-marker-line-width}{marker.line.width},
+\href{https://plotly.com/r/reference/#scatter-line-width}{line.width} for filled polygons,
+and \href{https://plotly.com/r/reference/#scatter-error_x-thickness}{error_x.thickness})
 The mapping from data values to symbols may be controlled using
 \code{spans}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{span = I(30)}).}
 
 \item{spans}{A numeric vector of length 2 used to scale \code{span} to pixels.}
 
-\item{symbol}{(Discrete) values mapped to \href{https://plotly.com/r/reference#scatter-marker-symbol}{marker.symbol}.
+\item{symbol}{(Discrete) values mapped to \href{https://plotly.com/r/reference/#scatter-marker-symbol}{marker.symbol}.
 The mapping from data values to symbols may be controlled using
 \code{symbols}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{symbol = I("pentagon")}).
-Any \link{pch} value or \href{https://plotly.com/r/reference#scatter-marker-symbol}{symbol name} may be used in this way.}
+Any \link{pch} value or \href{https://plotly.com/r/reference/#scatter-marker-symbol}{symbol name} may be used in this way.}
 
-\item{symbols}{A character vector of \link{pch} values or \href{https://plotly.com/r/reference#scatter-marker-symbol}{symbol names}.}
+\item{symbols}{A character vector of \link{pch} values or \href{https://plotly.com/r/reference/#scatter-marker-symbol}{symbol names}.}
 
-\item{linetype}{(Discrete) values mapped to \href{https://plotly.com/r/reference#scatter-line-dash}{line.dash}.
+\item{linetype}{(Discrete) values mapped to \href{https://plotly.com/r/reference/#scatter-line-dash}{line.dash}.
 The mapping from data values to symbols may be controlled using
 \code{linetypes}, or avoided altogether via \code{\link[=I]{I()}} (e.g., \code{linetype = I("dash")}).
-Any \code{lty} (see \link{par}) value or \href{https://plotly.com/r/reference#scatter-line-dash}{dash name} may be used in this way.}
+Any \code{lty} (see \link{par}) value or \href{https://plotly.com/r/reference/#scatter-line-dash}{dash name} may be used in this way.}
 
-\item{linetypes}{A character vector of \code{lty} values or \href{https://plotly.com/r/reference#scatter-line-dash}{dash names}}
+\item{linetypes}{A character vector of \code{lty} values or \href{https://plotly.com/r/reference/#scatter-line-dash}{dash names}}
 
 \item{split}{(Discrete) values used to create multiple traces (one trace per value).}
 
@@ -116,7 +116,7 @@ with the source argument in \code{\link[=event_data]{event_data()}} to retrieve 
 event data corresponding to a specific plot (shiny apps can have multiple plots).}
 }
 \description{
-This function maps R objects to \href{https://plot.ly/javascript/}{plotly.js},
+This function maps R objects to \href{https://plotly.com/javascript/}{plotly.js},
 an (MIT licensed) web-based interactive charting library. It provides
 abstractions for doing common things (e.g. mapping data values to
 fill colors (via \code{color}) or creating \link{animation}s (via \code{frame})) and sets

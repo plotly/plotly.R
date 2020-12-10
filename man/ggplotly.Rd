@@ -91,7 +91,7 @@ highlight_key(palmerpenguins::penguins) \%>\%
 
 }
 \references{
-\url{https://plot.ly/ggplot2}
+\url{https://plotly.com/ggplot2/}
 }
 \seealso{
 \code{\link[=plot_ly]{plot_ly()}}
