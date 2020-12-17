@@ -88,7 +88,7 @@ economics_long \%>\%
   do(p = plot_ly(., x = ~date, y = ~value)) \%>\%
   subplot(nrows = NROW(.), shareX = TRUE)
   
-# learn more at https://cpsievert.github.io/plotly_book/subplot.html
+# learn more at https://plotly.com/r/subplot.html
 
 }
 \author{

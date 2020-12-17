@@ -84,7 +84,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* Several new features and improvements related to accessing plotly.js events in shiny (learn more about them in this RStudio [webinar](https://resources.rstudio.com/webinars/accessing-and-responding-to-plotly-events-in-shiny-carson-sievert)):
+* Several new features and improvements related to accessing plotly.js events in shiny (learn more about them in this RStudio [webinar](https://rstudio.com/resources/webinars/accessing-and-responding-to-plotly-events-in-shiny/)):
     * The `event` argument of the `event_data()` function now supports the following events: `plotly_selecting`, `plotly_brushed`, `plotly_brushing`, `plotly_restyle`, `plotly_legendclick`, `plotly_legenddoubleclick`, `plotly_clickannotation`, `plotly_afterplot`, `plotly_doubleclick`, `plotly_deselect`, `plotly_unhover`. For examples, see `plotly_example("shiny", "event_data")`, `plotly_example("shiny", "event_data_legends")`, and  `plotly_example("shiny", "event_data_annotation")`, 
     * New `event_register()` and `event_unregister()` functions for declaring which events to transmit over the wire (i.e., from the browser to the shiny server). Events that are likely to have large overhead are not registered by default, so you'll need to register these: `plotly_selecting`, `plotly_unhover`, `plotly_restyle`, `plotly_legendclick`, and `plotly_legenddoubleclick`.
     * A new `priority` argument. By setting `priority='event'`, the `event` is treated like a true event: any reactive expression using the `event` becomes invalidated (regardless of whether the input values has changed). For an example, see `plotly_example("shiny", "event_priority")`.
@@ -247,9 +247,9 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html>. For some more complex examples, see <https://cpsievert.github.io/pedestrians/>
+* Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://plotly-r.com/client-side-linking.html>. For some more complex examples, see <https://pedestrians.cpsievert.me/>
 * Added the `highlight()` function for configuring selection modes/sequences/options.
-* Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
+* Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://plotly-r.com/animating-views.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
 * Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
 * Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
@@ -352,7 +352,7 @@ limits.
 
 ## NEW FEATURES
 
-* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://cpsievert.github.io/plotly_book/maps.html> 
+* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://plotly-r.com/maps.html> 
 * `subplot()` now accepts, and correctly scales mapbox objects.
 * Added the `add_mesh3d()` and `add_pie()` functions as wrappers around the "mesh3d", and "pie" trace types.
 
@@ -442,7 +442,7 @@ limits.
 
 ## CHANGES
 
-* vignettes were removed and that documentation will now be hosted at <https://cpsievert.github.io/plotly_book/>
+* vignettes were removed and that documentation will now be hosted at <https://plotly.com/r/>
 
 ## BUG FIXES
 
