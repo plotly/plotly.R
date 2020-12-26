@@ -30,9 +30,9 @@ test_that("nrows argument works", {
 })
 
 test_that("group + [x/y]axis works", {
-  iris$id <- as.integer(iris$Species)
-  p <- plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, color = ~Species,
-               xaxis = ~paste0("x", id), mode = "markers")
+  penguins <- palmerpenguins::penguins %>% tidyr::drop_na() %>% arrange(species)
+  p <- plot_ly(penguins, x = ~bill_length_mm, y = ~bill_depth_mm, color = ~species,
+               xaxis = ~paste0("x", as.integer(species)), mode = "markers")
   s <- expect_traces(subplot(p, margin = 0.05), 3, "group")
   ax <- s$layout[grepl("^[x-y]axis", names(s$layout))]
   doms <- lapply(ax, "[[", "domain")
@@ -136,7 +136,8 @@ test_that("subplot accepts a list of plots", {
 
 test_that("ggplotly understands ggmatrix", {
   skip_if_not_installed("GGally")
-  L <- expect_doppelganger_built(GGally::ggpairs(iris), "plotly-subplot-ggmatrix")
+  L <- expect_doppelganger_built(GGally::ggpairs(iris), 
+                                 "plotly-subplot-ggmatrix")
 })
 
 test_that("annotation paper repositioning", {

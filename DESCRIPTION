@@ -35,9 +35,8 @@ Imports:
     viridisLite,
     base64enc,
     htmltools (>= 0.3.6),
-    htmlwidgets (>= 1.3),
+    htmlwidgets (>= 1.5.2.9001),
     tidyr,
-    hexbin,
     RColorBrewer,
     dplyr,
     vctrs,
@@ -51,6 +50,7 @@ Imports:
 Suggests:
     MASS,
     maps,
+    hexbin,
     ggthemes,
     GGally,
     testthat,
@@ -74,7 +74,8 @@ Suggests:
     processx,
     plotlyGeoAssets,
     forcats,
-    thematic
+    thematic,
+    palmerpenguins
 LazyData: true
 RoxygenNote: 7.1.1
 Encoding: UTF-8

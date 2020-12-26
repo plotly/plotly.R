@@ -8,11 +8,11 @@ expect_traces <- function(p, n.traces, name){
 }
 
 test_that("plot_ly() handles a simple scatterplot", {
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Petal.Width)
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~bill_depth_mm)
 })
 
 test_that("Mapping a factor variable to color works", {
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species)
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~species)
   l <- expect_traces(p, 3, "scatterplot-color-factor")
   markers <- lapply(l$data, "[[", "marker")
   cols <- unlist(lapply(markers, "[[", "color"))
@@ -24,7 +24,7 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   # convert hex to rgba spec for comparison's sake
   colsToCompare <- toRGB(cols)
   # specifying a pallette set should "span the gamut" 
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, 
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~species, 
                colors = "Set1")
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
@@ -32,7 +32,7 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   idx <- if (packageVersion("scales") > '1.0.0') c(1, 2, 3) else c(1, 5, 9)
   expect_identical(sort(colsToCompare[idx]), sort(colz))
   # providing vector of RGB codes should also work
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, 
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~species, 
                colors = cols[1:3])
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom2")
   markers <- lapply(l$data, "[[", "marker")
@@ -51,16 +51,16 @@ test_that("Passing hex codes to colors argument works", {
 })
 
 test_that("Mapping a numeric variable to color works", {
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Petal.Width)
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~bill_depth_mm)
   # one trace is for the colorbar
   l <- expect_traces(p, 2, "scatterplot-color-numeric")
   idx <- vapply(l$data, is.colorbar, logical(1))
   markerScale <- l$data[[which(idx)]]$marker
   markerDat <- l$data[[which(!idx)]]$marker
-  expect_true(all(markerDat$color == iris$Petal.Width))
-  expect_true(markerScale$colorbar$title == "Petal.Width")
-  expect_true(min(iris$Petal.Width) == markerScale$cmin)
-  expect_true(max(iris$Petal.Width) == markerScale$cmax)
+  expect_true(all(markerDat$color == na.omit(palmerpenguins::penguins$bill_depth_mm)))
+  expect_true(markerScale$colorbar$title == "bill_depth_mm")
+  expect_true(min(na.omit(palmerpenguins::penguins$bill_depth_mm)) == markerScale$cmin)
+  expect_true(max(na.omit(palmerpenguins::penguins$bill_depth_mm)) == markerScale$cmax)
   expect_true(all(0 <= markerScale$colorscale[,1] & markerScale$colorscale[,1] <= 1))
 })
 
@@ -76,20 +76,20 @@ test_that("color/stroke mapping with box translates correctly", {
 })
 
 test_that("Custom RColorBrewer pallette works for numeric variable", {
-  p <- plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Length, 
-               color = ~Petal.Width, colors = "Greens")
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~flipper_length_mm, 
+               color = ~bill_depth_mm, colors = "Greens")
   # one trace is for the colorbar
   l <- expect_traces(p, 2, "scatterplot-color-numeric-custom")
 })
 
 test_that("axis titles get attached to scene object for 3D plots", {
-  p <- plot_ly(iris, x = ~Petal.Length, y = ~Petal.Width, z = ~Sepal.Width)
+  p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~bill_depth_mm, z = ~flipper_length_mm)
   l <- expect_traces(p, 1, "scatterplot-scatter3d-axes")
   expect_identical(l$data[[1]]$type, "scatter3d")
   scene <- l$layout$scene
-  expect_true(scene$xaxis$title == "Petal.Length")
-  expect_true(scene$yaxis$title == "Petal.Width")
-  expect_true(scene$zaxis$title == "Sepal.Width")
+  expect_true(scene$xaxis$title == "bill_length_mm")
+  expect_true(scene$yaxis$title == "bill_depth_mm")
+  expect_true(scene$zaxis$title == "flipper_length_mm")
 })
 
 test_that("Can specify a scale manually", {

@@ -36,8 +36,9 @@
 #' @seealso [plot_ly()]
 #' @examples \dontrun{
 #' # simple example
-#' ggiris <- qplot(Petal.Width, Sepal.Length, data = iris, color = Species)
-#' ggplotly(ggiris)
+#' ggpenguins <- qplot(bill_length_mm , body_mass_g, 
+#' data = palmerpenguins::penguins, color = species)
+#' ggplotly(ggpenguins)
 #'
 #' data(canada.cities, package = "maps")
 #' viz <- ggplot(canada.cities, aes(long, lat)) +
@@ -58,7 +59,7 @@
 #' demo("crosstalk-highlight-ggplotly", package = "plotly")
 #' 
 #' # client-side linked brushing in a scatterplot matrix
-#' highlight_key(iris) %>%
+#' highlight_key(palmerpenguins::penguins) %>%
 #'   GGally::ggpairs(aes(colour = Species), columns = 1:4) %>%
 #'   ggplotly(tooltip = c("x", "y", "colour")) %>%
 #'   highlight("plotly_selected")
@@ -175,12 +176,12 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # To convert relative sizes correctly, we use grid::convertHeight(),
   # which requires a known output (device) size.
-  dev_fun <- if (system.file(package = "Cairo") != "") {
-    Cairo::Cairo
-  } else if (capabilities("png")) {
+  dev_fun <- if (capabilities("aqua") || capabilities("png")) {
     grDevices::png
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
+  } else if (system.file(package = "Cairo") != "") {
+    Cairo::Cairo
   } else {
     stop(
       "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
@@ -1129,6 +1130,10 @@ gg2list <- function(p, width = NULL, height = NULL,
 
   l
 }
+
+
+# Due to the non-standard use of assign() in g2list() (above)
+utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "sets"))
 
 
 #-----------------------------------------------------------------------------

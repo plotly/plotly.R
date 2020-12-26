@@ -118,12 +118,12 @@
 #' # You might notice plot_ly() has named arguments that aren't in this figure
 #' # reference. These arguments make it easier to map abstract data values to
 #' # visual attributes.
-#' p <- plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length) 
-#' add_markers(p, color = ~Petal.Length, size = ~Petal.Length)
-#' add_markers(p, color = ~Species)
-#' add_markers(p, color = ~Species, colors = "Set1")
-#' add_markers(p, symbol = ~Species)
-#' add_paths(p, linetype = ~Species)
+#' p <- plot_ly(palmerpenguins::penguins, x = ~bill_length_mm, y = ~body_mass_g)
+#' add_markers(p, color = ~bill_depth_mm, size = ~bill_depth_mm)
+#' add_markers(p, color = ~species)
+#' add_markers(p, color = ~species, colors = "Set1")
+#' add_markers(p, symbol = ~species)
+#' add_paths(p, linetype = ~species)
 #' 
 #' }
 #' 
@@ -479,7 +479,7 @@ typedArrayPolyfill <- function() {
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     name = "plotly-main", 
-    version = "1.58.0",
+    version = "1.57.1",
     package = "plotly",
     src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",

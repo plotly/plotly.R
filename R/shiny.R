@@ -34,7 +34,7 @@ plotlyOutput <- function(outputId, width = "100%", height = "400px",
     package = "plotly",
     reportSize = TRUE
   )
-  if (is_available("shiny", "1.4.0.9003") && is_available("htmlwidgets", "1.5.1.9001")) {
+  if (is_available("shiny", "1.4.0.9003") && is_available("htmlwidgets", "1.5.2.9000")) {
     args$reportTheme <- reportTheme
   }
   do.call(htmlwidgets::shinyWidgetOutput, args)
@@ -55,9 +55,10 @@ renderPlotly <- function(expr, env = parent.frame(), quoted = FALSE) {
   # objects to renderPlotly() (e.g., ggplot2, promises). It also is used 
   # to inform event_data about what events have been registered
   shiny::installExprFunction(expr, "func", env, quoted)
-  expr <- quote(getFromNamespace("prepareWidget", "plotly")(func()))
-  local_env <- environment()
-  renderFunc <- shinyRenderWidget(expr, plotlyOutput, local_env, quoted)
+  expr2 <- quote(getFromNamespace("prepareWidget", "plotly")(func()))
+  renderFunc <- shinyRenderWidget(expr2, plotlyOutput, environment(), quoted,
+    cacheHint = list(label = "renderPlotly", userExpr = expr)
+  )
   # remove 'internal' plotly attributes that are known to cause false
   # positive test results in shinytest (snapshotPreprocessOutput was added 
   # in shiny 1.0.3.9002, but we require >= 1.1)

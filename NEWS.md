@@ -40,11 +40,13 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## Changes to plotly.js
 
-* This version of the R package upgrades the version of the underlying plotly.js library from v1.52.2 to v1.54.1. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.52.2 to v1.57.1. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
 
 ## NEW FEATURES
 
-* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.1.9001 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
+* `renderPlotly()` now works well with `shiny::bindCache()`, meaning that plotly graphs can now be persistently cached in Shiny apps with `renderPlotly(expr) %>% shiny::bindCache()` (#1879).
+
+* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
 
 ## IMPROVEMENTS
 
@@ -56,11 +58,15 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## BUG FIXES
 
+* When R's `POSIXt` class is serialized to JSON, the time of day is now correctly preserved (in plotly.js expected `'yyyy-mm-dd HH:MM:SS.ssssss'` format). This should fix a whole host of issues where date-times were being rounded. (#1871, @FlukeAndFeather).
+
 * `ggplotly()` now handles discrete axes of a `facet_wrap` and `facet_grid` correctly when there is only one category in panels > 1 (#1577 and #1720).
 
 * `ggplotly()` now correctly accounts for linebreaks in tick label text when computing plot margins (#1791, @trekonom).
 
 * `ggplotly()` now handles `element_blank()` and `factor()` labels in positional scales correctly (#1731 and #1772).
+
+* `ggplotly()` now handles missing `y` aesthetic in `geom_errorbar()` (#1779, @trekonom).
 
 # 4.9.2.1
 
