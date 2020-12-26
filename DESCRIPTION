@@ -15,6 +15,8 @@ Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "marianne.corvellec@igdore.org", comment = c(ORCID = "0000-0002-1994-3581")),
     person("Pedro", "Despouy", role = "aut",
     email = "pedro@plot.ly"),
+    person("Salim", "Brüggemann", role = "ctb",
+    email = "salim-b@pm.me", comment = c(ORCID = "0000-0002-5329-5987")),
     person("Plotly Technologies Inc.", role = "cph"))
 License: MIT + file LICENSE
 Description: Create interactive web graphics from 'ggplot2' graphs and/or a custom interface to the (MIT-licensed) JavaScript library 'plotly.js' inspired by the grammar of graphics.
@@ -33,11 +35,11 @@ Imports:
     viridisLite,
     base64enc,
     htmltools (>= 0.3.6),
-    htmlwidgets (>= 1.3),
+    htmlwidgets (>= 1.5.2.9001),
     tidyr,
-    hexbin,
     RColorBrewer,
     dplyr,
+    vctrs,
     tibble,
     lazyeval (>= 0.2.0),
     rlang,
@@ -48,6 +50,7 @@ Imports:
 Suggests:
     MASS,
     maps,
+    hexbin,
     ggthemes,
     GGally,
     testthat,
@@ -70,12 +73,13 @@ Suggests:
     IRdisplay,
     processx,
     plotlyGeoAssets,
-    forcats
+    forcats,
+    thematic,
+    palmerpenguins
 LazyData: true
-<<<<<<< HEAD
-RoxygenNote: 7.0.2
-=======
-RoxygenNote: 7.1.0
->>>>>>> c19594b1fb54b28952895344fec3ad0060a1c646
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+Remotes: 
+  rstudio/thematic,
+  Displayr/htmlwidgets

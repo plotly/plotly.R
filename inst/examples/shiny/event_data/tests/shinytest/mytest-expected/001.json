@@ -1,27 +1,5 @@
 {
   "input": {
-    ".clientValue-default-plotlyCrosstalkOpts": {
-      "on": "plotly_click",
-      "persistent": false,
-      "dynamic": false,
-      "selectize": false,
-      "opacityDim": 0.2,
-      "selected": {
-        "opacity": 1
-      },
-      "debounce": 0,
-      "color": [
-
-      ]
-    },
-    "plotly_afterplot-A": "\"plot\"",
-    "plotly_brushed-A": null,
-    "plotly_brushing-A": null,
-    "plotly_click-A": null,
-    "plotly_deselect-A": "\"plot\"",
-    "plotly_hover-A": null,
-    "plotly_selected-A": null,
-    "plotly_selecting-A": null,
     "plotType": "ggplotly"
   },
   "output": {
@@ -461,9 +439,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.54.1"
+            "href": "plotly-htmlwidgets-css-1.57.1"
           },
           "meta": null,
           "script": null,
@@ -474,9 +452,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-main-1.54.1"
+            "href": "plotly-main-1.57.1"
           },
           "meta": null,
           "script": "plotly-latest.min.js",

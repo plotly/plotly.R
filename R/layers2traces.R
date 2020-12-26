@@ -451,7 +451,11 @@ to_basic.GeomErrorbar <- function(data, prestats_data, layout, params, p, ...) {
   # width for ggplot2 means size of the entire bar, on the data scale
   # (plotly.js wants half, in pixels)
   data <- merge(data, layout$layout, by = "PANEL", sort = FALSE)
-  data$width <- (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
+  data$width <- if (params[["flipped_aes"]]) {
+    (data[["ymax"]] - data[["y"]]) /(data[["y_max"]] - data[["y_min"]])  
+  } else {
+    (data[["xmax"]] - data[["x"]]) /(data[["x_max"]] - data[["x_min"]])
+  }
   data$fill <- NULL
   prefix_class(data, "GeomErrorbar")
 }
@@ -873,7 +877,17 @@ geom2trace.GeomTile <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomErrorbar <- function(data, params, p) {
-  make_error(data, params, "y")
+  # Support of bi-directional GeomErrorbar introduced with ggplot2 3.3.0
+  # g <- ggplot() + geom_errorbar(aes(y = "A", xmin = 1, xmax = 2))
+  # ggplotly(g)
+# Support of bi-directional GeomErrorbar introduced with ggplot2 3.3.0:
+# g <- ggplot() + geom_errorbar(aes(y = "A", xmin = 1, xmax = 2))
+# ggplotly(g)
+if (params[["flipped_aes"]]) { 
+    make_error(data, params, "x")
+  } else {
+    make_error(data, params, "y")
+  }
 }
 
 #' @export
@@ -951,6 +965,8 @@ hover_on <- function(data) {
 
 # make trace with errorbars
 make_error <- function(data, params, xy = "x") {
+  # if xy is NULL: set xy to mean of xy_min and xy_max
+  data[[xy]] <- data[[xy]] %||% ((data[[paste0(xy, "min")]] + data[[paste0(xy, "max")]]) / 2)  
   color <- aes2plotly(data, params, "colour")
   e <- list(
     x = data[["x"]],

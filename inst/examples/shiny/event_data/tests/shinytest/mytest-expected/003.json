@@ -1,11 +1,32 @@
 {
   "input": {
+    ".clientValue-default-plotlyCrosstalkOpts": {
+      "on": "plotly_click",
+      "persistent": false,
+      "dynamic": false,
+      "selectize": false,
+      "opacityDim": 0.2,
+      "selected": {
+        "opacity": 1
+      },
+      "debounce": 0,
+      "color": [
+
+      ]
+    },
+    "plotly_afterplot-A": "\"plot\"",
+    "plotly_brushed-A": "{\"x\":[23.95978500551268,25.98332414553473],\"y\":[3.0020072289156627,3.5073743975903615]}",
+    "plotly_brushing-A": "{\"x\":[23.95978500551268,25.98332414553473],\"y\":[3.0020072289156627,3.5073743975903615]}",
+    "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
+    "plotly_hover-A": null,
+    "plotly_selected-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
+    "plotly_selecting-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotType": "ggplotly"
   },
   "output": {
-    "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
-    "brushing": "[1] \"Brush extents appear here (double-click to clear)\"",
-    "click": "[1] \"Click events appear here (double-click to clear)\"",
+    "brushed": "$x\n[1] 23.95979 25.98332\n\n$y\n[1] 3.002007 3.507374",
+    "brushing": "$x\n[1] 23.95979 25.98332\n\n$y\n[1] 3.002007 3.507374",
+    "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
     "plot": {
       "x": {
@@ -439,9 +460,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-htmlwidgets-css-1.54.1"
+            "href": "plotly-htmlwidgets-css-1.57.1"
           },
           "meta": null,
           "script": null,
@@ -452,9 +473,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "1.54.1",
+          "version": "1.57.1",
           "src": {
-            "href": "plotly-main-1.54.1"
+            "href": "plotly-main-1.57.1"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
@@ -465,8 +486,8 @@
         }
       ]
     },
-    "selected": "[1] \"Brushed points appear here (double-click to clear)\"",
-    "selecting": "[1] \"Brush points appear here (double-click to clear)\""
+    "selected": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
+    "selecting": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D"
   },
   "export": {
 
