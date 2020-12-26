@@ -1,4 +1,3 @@
-
 HTMLWidgets.widget({
   name: "plotly",
   type: "output",
@@ -156,18 +155,6 @@ HTMLWidgets.widget({
       }
     }
     
-    // remove "sendDataToCloud", unless user has specified they want it
-    x.config = x.config || {};
-    if (!x.config.cloud) {
-      x.config.modeBarButtonsToRemove = x.config.modeBarButtonsToRemove || [];
-      x.config.modeBarButtonsToRemove.push("sendDataToCloud");
-    }
-    
-    // if the object was passed in from another window, plotly will falsely think it isn't a "plain object"
-    // to get around this, we have to create a deep copy of the object
-    if (inIframe() && !isPlainObject(x))
-       x = JSON.parse(JSON.stringify(x))
-
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
       
@@ -882,10 +869,6 @@ function isPlainObject(obj) {
     Object.prototype.toString.call(obj) === '[object Object]' &&
     Object.getPrototypeOf(obj) === Object.prototype
   );
-}
-
-function inIframe() {
-  return window && window.self !== window.top;
 }
 
 function subsetArrayAttrs(obj, indices) {
