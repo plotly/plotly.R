@@ -13,7 +13,7 @@ raster2uri(r, ...)
 }
 \description{
 Encode a raster object as a data URI, which is suitable for
-use with \code{layout()} \href{https://plot.ly/r/reference/#layout-images}{images}.
+use with \code{layout()} \href{https://plotly.com/r/reference/#layout-images}{images}.
 This is especially convenient for embedding raster images on a plot in
 a self-contained fashion (i.e., so they don't depend on external URL links).
 }

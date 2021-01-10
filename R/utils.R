@@ -585,7 +585,7 @@ verify_type <- function(trace) {
     message(
       "No ", trace$type, " mode specifed:\n",
       "  Setting the mode to markers\n",
-      "  Read more about this attribute -> https://plot.ly/r/reference/#scatter-mode"
+      "  Read more about this attribute -> https://plotly.com/r/reference/#scatter-mode"
     )
     trace$mode <- "markers"
   }
@@ -596,7 +596,7 @@ relay_type <- function(type) {
   message(
     "No trace type specified:\n", 
     "  Based on info supplied, a '", type, "' trace seems appropriate.\n",
-    "  Read more about this trace type -> https://plot.ly/r/reference/#", type
+    "  Read more about this trace type -> https://plotly.com/r/reference/#", type
   )
   type
 }

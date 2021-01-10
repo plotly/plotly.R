@@ -78,7 +78,7 @@ mtcars %>%
   ")
 
 # inspect different plotly.js events via browser console
-# see also https://plot.ly/javascript/plotlyjs-events/
+# see also plotly.com/javascript/plotlyjs-events/
 onRender(p, "
   function(el, x) {
     el.on('plotly_hover', function(d) {

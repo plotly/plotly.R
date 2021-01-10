@@ -32,7 +32,7 @@
 #' @param ... arguments passed onto methods.
 #' @export
 #' @author Carson Sievert
-#' @references \url{https://plot.ly/ggplot2}
+#' @references \url{https://plotly.com/ggplot2/}
 #' @seealso [plot_ly()]
 #' @examples \dontrun{
 #' # simple example
@@ -431,8 +431,8 @@ gg2list <- function(p, width = NULL, height = NULL,
   
   # Allow thematic to add new defaults to the plot object based on it's theme
   built <- if (isNamespaceLoaded("thematic")) {
-    ggthematic_build <- getFromNamespace("ggthematic_build", "thematic")
-    ggthematic_build(p, ggplotly_build, thematic::thematic_get_theme(resolve = TRUE))
+    tns <- asNamespace("thematic")
+    tns$ggthematic_build(p, ggplotly_build, tns$thematic_get_theme(resolve = TRUE))
   } else {
     ggplotly_build(p)
   }
@@ -1277,7 +1277,7 @@ font_family <- function(family = "") {
   if (!isNamespaceLoaded("thematic")) {
     return("")
   }
-  font <- thematic::thematic_get_option("font")
+  font <- asNamespace("thematic")$thematic_get_option("font", resolve = TRUE)
   if (!length(font)) {
     return("")
   }

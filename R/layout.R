@@ -2,7 +2,7 @@
 #' 
 #' @param p A plotly object.
 #' @param ... Arguments to the layout object. For documentation,
-#' see \url{https://plot.ly/r/reference/#Layout_and_layout_style_objects}
+#' see \url{https://plotly.com/r/reference/#Layout_and_layout_style_objects}
 #' @param data A data frame to associate with this layout (optional). If not 
 #' provided, arguments are evaluated using the data frame in [plot_ly()].
 #' @author Carson Sievert
@@ -49,7 +49,7 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' @param start a start date/value.
 #' @param end an end date/value.
 #' @param ... these arguments are documented here 
-#' \url{https://plot.ly/r/reference/#layout-xaxis-rangeslider}
+#' \url{https://plotly.com/r/reference/#layout-xaxis-rangeslider}
 #' @export
 #' @author Carson Sievert
 #' @examples 
@@ -109,7 +109,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
 #' 
 #' # enable mathjax
-#' # see more examples at https://plot.ly/r/LaTeX/
+#' # see more examples at https://plotly.com/r/LaTeX/
 #' plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) %>%
 #'   layout(title = TeX("\\text{Some mathjax: }\\alpha+\\beta x")) %>%
 #'   config(mathjax = "cdn")
