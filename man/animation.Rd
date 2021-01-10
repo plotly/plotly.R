@@ -93,7 +93,7 @@ if (interactive()) {
 }
 
   
-#' # for more, see https://cpsievert.github.io/plotly_book/key-frame-animations.html
+#' # for more, see https://plotly.com/r/animating-views.html
 
 }
 \author{
