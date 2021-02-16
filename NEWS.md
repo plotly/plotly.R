@@ -1,5 +1,9 @@
 # 4.9.3.9000
 
+## BUG FIXES
+
+* `group_by.plotly()` now properly retains crosstalk information across `{dplyr}` versions (#1920).
+
 # 4.9.3
 
 ## Changes to plotly.js
