@@ -70,6 +70,18 @@ test_that("Simple scatterplot brushing with plot_ly() and subplot()", {
 })
 
 
+test_that("group_by.plotly() retains crosstalk set", {
+  b <- mtcars %>%
+    crosstalk::SharedData$new(group = "foo") %>%
+    plot_ly(x = ~mpg, y = ~hp) %>%
+    group_by(am) %>%
+    add_markers() %>%
+    plotly_build()
+  expect_equal(b$x$data[[1]]$set, "foo")
+  expect_true(all(b$x$data[[1]]$key == row.names(mtcars)))
+})
+
+
 
 # Ignore for now https://github.com/ggobi/ggally/issues/264
 #test_that("SharedData produces key/set in ggpairs", {
