@@ -70,7 +70,7 @@ test_that("Trace ordering matches factor levels", {
 
 test_that("Trace ordering is alphabetical", {
   #keep only 6 categories (to avoid warning)
-  mpg2 <- mpg %>% filter(class %in% c( "compact", "midsize", "suv", "2seater", "pickup", "subcompact"))
+  mpg2 <- mpg %>% dplyr::filter(class %in% c("compact", "midsize", "suv", "2seater", "pickup", "subcompact"))
   
   lvls <- sort(unique(mpg2$class))
   p <- plot_ly(mpg2, x = ~cty, y = ~hwy, symbol = ~class)

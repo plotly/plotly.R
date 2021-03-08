@@ -57,7 +57,7 @@ test_that('boxes with coord_flip()+facet_grid(scales="free")', {
 test_that("limits can hide data", {
   boxes.limits <- boxes + scale_x_discrete(limits = c("trt1", "ctrl"))
   info <- expect_warning(expect_traces(boxes.limits, 1, "limits-hide"), 
-                         regexp = "rows containing missing values")
+                         regexp = "missing values")
   expect_equivalent(info$layout$xaxis$ticktext, c("trt1", "ctrl"))
 })
 
@@ -201,4 +201,3 @@ test_that("Missing axis ticks are treated correctly", {
     )
   expect_doppelganger_built(p, "continuous-x-missing")
 })
-
