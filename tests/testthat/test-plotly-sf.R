@@ -34,7 +34,8 @@ test_that("plot_geo() lat/lon range is set", {
   skip_if_not_installed("sf")
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-  p <- plotly_build(plot_geo(nc))
+  expect_warning(p <- plotly_build(plot_geo(nc)), 
+                 regexp = "Attempting transformation to the target coordinate system")
   expect_equal(
     p$x$layout$geo$lataxis$range, 
     c(33.85492, 36.61673), 
@@ -86,7 +87,8 @@ test_that("Can plot sfc with a missing crs", {
   skip_if_not_installed("sf")
   
   storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet = TRUE)
-  p <- plotly_build(plot_geo(storms, name = "Storms"))
+  expect_warning(p <- plotly_build(plot_geo(storms, name = "Storms")), 
+                 regexp = "Missing coordinate reference system")
   expect_true(p$x$data[[1]]$type == "scattergeo")
   expect_true(p$x$data[[1]]$mode == "lines")
 })

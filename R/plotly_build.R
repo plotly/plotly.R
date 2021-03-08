@@ -425,7 +425,10 @@ registerFrames <- function(p, frameMapping = NULL) {
   # remove frames from the trace names
   for (i in seq_along(p$x$data)) {
     tr <- p$x$data[[i]]
-    if (length(tr[["name"]]) != 1) next
+    if (length(tr[["name"]]) != 1) {
+      p$x$data[[i]]$frameOrder <- NULL
+      next
+    } 
     nms <- strsplit(as.character(tr[["name"]]), br())[[1]]
     idx <- setdiff(seq_along(nms), tr$frameOrder %||% 0)
     p$x$data[[i]]$name <- if (length(idx)) paste(nms[idx], collapse = br()) else NULL

@@ -141,9 +141,9 @@ test_that("ggplotly understands ggmatrix", {
 })
 
 test_that("annotation paper repositioning", {
-  p1 <- plot_ly() %>%
+  p1 <- plot_ly(type = "scatter") %>%
     add_annotations(text = "foo", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
-  p2 <- plot_ly(mtcars) %>%
+  p2 <- plot_ly(mtcars, type = "scatter") %>%
     add_annotations(text = "bar", x = 0.5, y = 0.5, xref = "paper", yref = "paper")
   
   s <- subplot(p1, p2, margin = 0)
@@ -164,7 +164,7 @@ test_that("annotation paper repositioning", {
 
 test_that("shape paper repositioning", {
   
-  p1 <- plot_ly(mtcars) %>%
+  p1 <- plot_ly(mtcars, type = "scatter") %>%
     layout(
       shapes = ~list(
         type = "rect",
@@ -177,7 +177,7 @@ test_that("shape paper repositioning", {
         fillcolor = "red"
       )
     )
-  p2 <- plot_ly(mtcars) %>%
+  p2 <- plot_ly(mtcars, type = "scatter") %>%
     layout(
       shapes = ~list(
         type = "line",
@@ -211,7 +211,7 @@ test_that("shape paper repositioning", {
   expect_equal(yref, rep("paper", 2))
   
   # now with a fixed height/width
-  p1 <- plot_ly() %>%
+  p1 <- plot_ly(type = "scatter") %>%
     layout(
       shapes = list(
         type = "rect",
@@ -226,7 +226,7 @@ test_that("shape paper repositioning", {
         fillcolor = "red"
       )
     )
-  p2 <- plot_ly() %>%
+  p2 <- plot_ly(type = "scatter") %>%
     layout(
       shapes = list(
         type = "rect",
@@ -302,9 +302,9 @@ test_that("image paper repositioning", {
 
 test_that("annotation xref/yref bumping", {
   
-  p1 <- plot_ly(mtcars) %>%
+  p1 <- plot_ly(mtcars, type = "scatter") %>%
     add_annotations(text = ~cyl, x = ~wt, y = ~mpg)
-  p2 <- plot_ly(mtcars) %>%
+  p2 <- plot_ly(mtcars, type = "scatter") %>%
     add_annotations(text = ~am, x = ~wt, y = ~mpg)
   s <- subplot(p1, p2)
   ann <- expect_doppelganger_built(s, "subplot-bump-axis-annotation")$layout$annotations
@@ -328,11 +328,11 @@ test_that("annotation xref/yref bumping", {
   
   # now, with more traces than annotations
   # https://github.com/ropensci/plotly/issues/1444
-  p1 <- plot_ly() %>%
+  p1 <- plot_ly(type = "scatter") %>%
     add_markers(x = 1, y = 1) %>%
     add_markers(x = 2, y = 2) %>%
     add_annotations(text = "foo", x = 1.5, y = 1.5)
-  p2 <- plot_ly() %>%
+  p2 <- plot_ly(type = "scatter") %>%
     add_markers(x = 1, y = 1) %>%
     add_markers(x = 2, y = 2) %>%
     add_annotations(text = "bar", x = 1.5, y = 1.5)
@@ -359,7 +359,7 @@ test_that("annotation xref/yref bumping", {
 
 test_that("shape xref/yref bumping", {
   
-  p1 <- plot_ly(mtcars) %>%
+  p1 <- plot_ly(mtcars, type = "scatter") %>%
     layout(
       shapes = ~list(
         type = "rect",
@@ -370,7 +370,7 @@ test_that("shape xref/yref bumping", {
         fillcolor = "red"
       )
     )
-  p2 <- plot_ly(mtcars) %>%
+  p2 <- plot_ly(mtcars, type = "scatter") %>%
     layout(
       shapes = ~list(
         type = "line",
@@ -496,20 +496,24 @@ test_that("May specify legendgroup with through a vector of values", {
   )
   
   base <- plot_ly(
-    df, 
+    df,
     marker = m, 
     color = ~factor(Name), 
     legendgroup = ~factor(Name)
   ) 
   
-  s <- subplot(
-    add_histogram(base, x = ~x, showlegend = FALSE),
-    plotly_empty(), 
-    add_markers(base, x = ~x, y = ~y),
-    add_histogram(base, y = ~y, showlegend = FALSE),
-    nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), 
-    shareX = TRUE, shareY = TRUE, titleX = FALSE, titleY = FALSE
-  ) %>% layout(barmode = "stack")
+  expect_warning(
+    s <- subplot(
+      add_histogram(base, x = ~x, showlegend = FALSE),
+      plotly_empty(), 
+      add_markers(base, x = ~x, y = ~y),
+      add_histogram(base, y = ~y, showlegend = FALSE),
+      nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), 
+      shareX = TRUE, shareY = TRUE, titleX = FALSE, titleY = FALSE) %>% 
+        layout(barmode = "stack"), 
+    regexp = "No trace type|No scatter mode"
+  )
+  
   
   # one trace for the empty plot
   l <- expect_traces(s, 10, "subplot-legendgroup")

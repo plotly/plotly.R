@@ -55,7 +55,9 @@ test_that("Variable mappings return same result regardless of where they appear"
 
 
 test_that("plot_ly() handles a simple scatterplot", {
-  p <- plot_ly(data = palmerpenguins::penguins, 
+  d <- palmerpenguins::penguins %>% 
+    filter(!is.na(bill_length_mm))
+  p <- plot_ly(data = d, 
                x = ~bill_length_mm, y = ~bill_depth_mm, mode = "markers")
   l <- expect_traces(p, 1, "scatterplot")
   expect_equivalent(l$data[[1]]$mode, "markers")
@@ -141,7 +143,8 @@ test_that("Character strings correctly mapped to a positional axis", {
   letters <- LETTERS[as.numeric(sort(as.character(1:26)))]
   p <- plot_ly(x = letters, y = seq_along(letters)) %>% 
     add_bars(color = rep(c("a1", "a2"), length.out = 26))
-  l <- expect_traces(p, 2, "character-axis")
+  l <- expect_warning(expect_traces(p, 2, "character-axis"), 
+                      regexp = "minimal value for n is 3")
   expect_equivalent(l$layout$xaxis$type, "category")
   expect_equivalent(l$layout$xaxis$categoryorder, "array")
   expect_equivalent(l$layout$xaxis$categoryarray, LETTERS)
@@ -323,7 +326,10 @@ test_that("Line breaks are properly translated (R -> HTML)", {
   # create target labels
   suffix <- "\n\n(third line)\n(fourth line)"
   
-  target_labels <- palmerpenguins::penguins$species %>%
+  d <- palmerpenguins::penguins %>% 
+    filter(!is.na(bill_length_mm))
+  
+  target_labels <- d$species %>%
     unique() %>%
     sort() %>%
     paste0(suffix) %>%
@@ -333,7 +339,6 @@ test_that("Line breaks are properly translated (R -> HTML)", {
          fixed = TRUE)
   
   # test factor column
-  d <- palmerpenguins::penguins
   levels(d$species) <- paste0(levels(d$species), suffix)
   p1 <- d %>% plot_ly(x = ~bill_length_mm,
                       y = ~species)

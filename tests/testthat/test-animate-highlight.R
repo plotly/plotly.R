@@ -359,8 +359,8 @@ test_that("simple animation targeting works", {
 
 test_that("animation frames are boxed up correctly", {
   dallas <- subset(txhousing, city == "Dallas" & month == 1)
-  p <- ggplot(dallas) +
-    geom_point(aes(x = volume, y = sales, frame = year))
+  p <- ggplot(dallas, aes(x = volume, y = sales, frame = year)) +
+    geom_point()
   l <- plotly_build(p)$x
   
   for (i in seq_along(l$frames)) {
