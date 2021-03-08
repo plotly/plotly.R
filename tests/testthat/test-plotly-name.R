@@ -52,8 +52,6 @@ test_that("doesn't break old behavior", {
 
 test_that("adding trace name with frame does not throw frameOrder warning", {
   
-  warning_length <- length(warnings())
-  
   dt <- data.frame(source = rep(c(rep("TEL", 2) , rep("WEB", 2), rep("OTH",2)),2), 
                    period = rep(c("AM", "PM"), 6), 
                    y_val = runif(12), 
@@ -74,9 +72,8 @@ test_that("adding trace name with frame does not throw frameOrder warning", {
                     name = yr)
   }
   
-  l <- plotly_build(p1) 
+  expect_warning(l <- plotly_build(p1), NA) 
   
-  expect_equal(length(warnings()) - warning_length, 0)
   expect_equal(l$x$data[[1]]$name, 2020)
   expect_equal(l$x$data[[2]]$name, 2021)
   
