@@ -33,12 +33,14 @@ test_that("factor levels determine tick order", {
 ## range are dropped, resulting in a misleading box plot.
 bp.ylim.hide <- bp + ylim(5, 7.5)
 test_that("ylim hides points", {
-  info <- expect_traces(bp.ylim.hide, 1, "ylim.hide")
+  info <- expect_warning(expect_traces(bp.ylim.hide, 1, "ylim.hide"), 
+                         regexp = "containing non-finite values")
 })
 
 bp.scale.hide <- bp + scale_y_continuous(limits = c(5, 7.5))
 test_that("scale_y(limits) hides points", {
-  info <- expect_traces(bp.scale.hide, 1, "scale.hide")
+  info <- expect_warning(expect_traces(bp.scale.hide, 1, "scale.hide"), 
+                         regexp = "containing non-finite values")
   expect_equivalent(range(info$layout$yaxis$tickvals), c(5, 7.5))
   y <- unlist(lapply(info$data, "[[", "y"))
   expect_true(all(5 <= y & y <= 7.5, na.rm = TRUE))
