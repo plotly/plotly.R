@@ -484,12 +484,14 @@ registerFrames <- function(p, frameMapping = NULL) {
     d <- lapply(d, function(tr) { tr$visible <- tr$visible %||% TRUE; tr })
     
     # if this frame is missing a trace name, supply an invisible one
-    traceNamesMissing <- setdiff(frameTraceNames, sapply(d, "[[", "name"))
+    traceNamesMissing <- setdiff(frameTraceNames, unlist(lapply(d, "[[", "name")))
     for (j in traceNamesMissing) {
       idx <- vapply(p$x$data, function(tr) isTRUE(tr[["name"]] == j), logical(1))
-      idx <- which(idx)[[1]]
-      invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
-      d <- c(d, list(invisible))
+      if (any(idx)){
+        idx <- which(idx)[[1]]
+        invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
+        d <- c(d, list(invisible))
+      }
     }
     p$x$frames[[i]] <- list(
       name = as.character(format(nm)),
