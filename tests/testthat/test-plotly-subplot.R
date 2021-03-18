@@ -302,9 +302,9 @@ test_that("image paper repositioning", {
 
 test_that("annotation xref/yref bumping", {
   
-  p1 <- plot_ly(mtcars, type = "scatter") %>%
+  p1 <- plot_ly(mtcars) %>%
     add_annotations(text = ~cyl, x = ~wt, y = ~mpg)
-  p2 <- plot_ly(mtcars, type = "scatter") %>%
+  p2 <- plot_ly(mtcars) %>%
     add_annotations(text = ~am, x = ~wt, y = ~mpg)
   s <- subplot(p1, p2)
   ann <- expect_doppelganger_built(s, "subplot-bump-axis-annotation")$layout$annotations
@@ -328,11 +328,11 @@ test_that("annotation xref/yref bumping", {
   
   # now, with more traces than annotations
   # https://github.com/ropensci/plotly/issues/1444
-  p1 <- plot_ly(type = "scatter") %>%
+  p1 <- plot_ly() %>%
     add_markers(x = 1, y = 1) %>%
     add_markers(x = 2, y = 2) %>%
     add_annotations(text = "foo", x = 1.5, y = 1.5)
-  p2 <- plot_ly(type = "scatter") %>%
+  p2 <- plot_ly() %>%
     add_markers(x = 1, y = 1) %>%
     add_markers(x = 2, y = 2) %>%
     add_annotations(text = "bar", x = 1.5, y = 1.5)
