@@ -379,7 +379,7 @@ supply_highlight_attrs <- function(p) {
 
     # include one selectize dropdown per "valid" SharedData layer
     if (isTRUE(p$x$highlight$selectize)) {
-      p$x$selectize[[new_id()]] <- list(
+      p$x$selectize[[i]] <- list(
         items = data.frame(value = k, label = k), group = i
       )
     }
