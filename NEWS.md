@@ -2,6 +2,7 @@
 
 ## BUG FIXES
 
+* Duplicate `highlight(selectize=T)` dropdowns are no longer rendered in Shiny (#1936).
 * `group_by.plotly()` now properly retains crosstalk information across `{dplyr}` versions (#1920).
 * Fixes some issues with `name` and `frames` when both attributes are specified. (#1903 and #1618).
 
