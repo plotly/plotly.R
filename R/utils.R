@@ -379,7 +379,9 @@ supply_highlight_attrs <- function(p) {
 
     # include one selectize dropdown per "valid" SharedData layer
     if (isTRUE(p$x$highlight$selectize)) {
-      p$x$selectize[[i]] <- list(
+      # Hash i (the crosstalk group id) so that it can be used
+      # as an HTML id client-side (i.e., key shouldn't contain spaces)
+      p$x$selectize[[rlang::hash(i)]] <- list(
         items = data.frame(value = k, label = k), group = i
       )
     }

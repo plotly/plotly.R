@@ -42,7 +42,7 @@ Imports:
     vctrs,
     tibble,
     lazyeval (>= 0.2.0),
-    rlang,
+    rlang (>= 0.4.10),
     crosstalk,
     purrr,
     data.table,
