@@ -579,7 +579,7 @@ verify_type <- function(trace) {
   }
   if (!trace$type %in% names(Schema$traces)) {
     stop("Trace type must be one of the following: \n",
-         "'", paste(names(Schema$traces), collapse = "', '"), "'",
+         "'", paste(sort(names(Schema$traces)), collapse = "', '"), "'",
          call. = FALSE)
   }
   # if scatter/scatter3d/scattergl, default to a scatterplot
