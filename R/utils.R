@@ -538,9 +538,10 @@ attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   }
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            paste(sort(illegalAttrs), collapse = "', '"), "'\n", 
             "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
+            paste(sort(validAttrs), collapse = "', '"), "'\n", 
+            paste(sort(validAttrs), collapse = "', '"), "'\n", 
             call. = FALSE)
   }
   invisible(proposedAttrs)
