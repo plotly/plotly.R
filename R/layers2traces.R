@@ -12,8 +12,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       position = ggtype(y, "position")
     )
     
-    # add on plot-level mappings, if they're inherited
-    map <- c(y$mapping, if (isTRUE(y$inherit.aes)) p$mapping)
+    map <- getAesMap(p, y)
     
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]

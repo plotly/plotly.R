@@ -1099,7 +1099,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   # start build a plotly object with meta information about the ggplot
   # first, translate layer mappings -> plotly attrs
   mappingFormulas <- lapply(layers, function(x) {
-    mappings <- c(x$mapping, if (isTRUE(x$inherit.aes)) plot$mapping)
+    mappings <- getAesMap(plot, x)
     if (originalData) {
       lapply(mappings, lazyeval::f_new)
     } else {
@@ -1425,5 +1425,14 @@ gdef2trace <- function(gdef, theme, gglayout) {
     # if plotly.js gets better support for multiple legends,
     # that conversion should go here
     NULL
+  }
+}
+
+
+getAesMap <- function(plot, layer) {
+  if (isTRUE(layer$inherit.aes)) {
+    modify_list(plot$mapping, layer$mapping)
+  } else {
+    layer$mapping
   }
 }
