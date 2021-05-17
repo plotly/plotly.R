@@ -3,7 +3,7 @@ layers2layout <- function(gglayout, layers, layout) {
   geoms <- sapply(layers, function(x) class(x[["geom"]])[1])
   RasterGeom <- which(geoms %in% "GeomRasterAnn")
   for (i in RasterGeom) {
-    params <- layers[[i]]$geom_params
+    params <- layers[[i]]$computed_geom_params %||% layers[[i]]$geom_params
     for (j in seq_len(nrow(layout))) {
       lay <- layout[j, ]
       

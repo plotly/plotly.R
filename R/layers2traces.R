@@ -6,7 +6,9 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # Extract parameters (and "hovertext aesthetics") in each layer
   params <- Map(function(x, y) {
     param <- c(
-      y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
+      y[["computed_geom_params"]] %||% y[["geom_params"]], 
+      y[["computed_stat_params"]] %||% y[["stat_params"]], 
+      y[["aes_params"]], 
       position = ggtype(y, "position")
     )
     
