@@ -413,9 +413,9 @@
         },
         {
           "name": "jquery",
-          "version": "1.11.3",
+          "version": "3.5.1",
           "src": {
-            "href": "jquery-1.11.3"
+            "href": "jquery-3.5.1"
           },
           "meta": null,
           "script": "jquery.min.js",
@@ -426,9 +426,9 @@
         },
         {
           "name": "crosstalk",
-          "version": "1.1.0.1",
+          "version": "1.1.1",
           "src": {
-            "href": "crosstalk-1.1.0.1"
+            "href": "crosstalk-1.1.1"
           },
           "meta": null,
           "script": "js/crosstalk.min.js",

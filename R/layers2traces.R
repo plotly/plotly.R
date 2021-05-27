@@ -6,12 +6,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # Extract parameters (and "hovertext aesthetics") in each layer
   params <- Map(function(x, y) {
     param <- c(
-      y[["geom_params"]], y[["stat_params"]], y[["aes_params"]], 
+      y[["computed_geom_params"]] %||% y[["geom_params"]], 
+      y[["computed_stat_params"]] %||% y[["stat_params"]], 
+      y[["aes_params"]], 
       position = ggtype(y, "position")
     )
     
-    # add on plot-level mappings, if they're inherited
-    map <- c(y$mapping, if (isTRUE(y$inherit.aes)) p$mapping)
+    map <- getAesMap(p, y)
     
     # consider "calculated" aesthetics (e.g., density, count, etc)
     calc_aes <- y$stat$default_aes[ggfun("is_calculated_aes")(y$stat$default_aes)]

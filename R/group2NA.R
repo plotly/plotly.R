@@ -7,7 +7,7 @@
 #' (i.e., color, fill, etc), it is more efficient to draw them as a single trace 
 #' with missing values that separate the groups (instead of multiple traces), 
 #' In this case, one should also take care to make sure 
-#' \href{https://plot.ly/r/reference/#scatter-connectgaps}{connectgaps} 
+#' \href{https://plotly.com/r/reference/#scatter-connectgaps}{connectgaps} 
 #' is set to `FALSE`.
 #' 
 #' @param data a data frame.
@@ -72,7 +72,7 @@ group2NA <- function(data, groupNames = "group", nested = NULL, ordered = NULL,
   data.table::setorderv(dt, cols = c(nested, groupNames, ordered))
   
   # when connectgaps=FALSE, inserting NAs ensures each "group" 
-  # will be visually distinct https://plot.ly/r/reference/#scatter-connectgaps
+  # will be visually distinct https://plotly.com/r/reference/#scatter-connectgaps
   # also, retracing is useful for creating polygon(s) via scatter trace(s)
   keyVars <- c(nested, groupNames)
   keyNum <- length(keyVars) + 1

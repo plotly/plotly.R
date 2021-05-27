@@ -131,9 +131,9 @@ ungroup.plotly <- function(x, ...) {
 
 #' @rdname plotly_data
 group_by.plotly <- function(.data, ...) {
-  d <- group_by(plotly_data(.data), ...)
+  d <- preserve_set(plotly_data(.data), group_by, ...)
   if (crosstalk_key() %in% names(d)) {
-    d <- group_by_add(d, !!rlang::sym(crosstalk_key()), add = TRUE)
+    d <- preserve_set(d, group_by_add, !!rlang::sym(crosstalk_key()))
   }
   add_data(.data, d)
 }

@@ -379,7 +379,9 @@ supply_highlight_attrs <- function(p) {
 
     # include one selectize dropdown per "valid" SharedData layer
     if (isTRUE(p$x$highlight$selectize)) {
-      p$x$selectize[[new_id()]] <- list(
+      # Hash i (the crosstalk group id) so that it can be used
+      # as an HTML id client-side (i.e., key shouldn't contain spaces)
+      p$x$selectize[[rlang::hash(i)]] <- list(
         items = data.frame(value = k, label = k), group = i
       )
     }
@@ -585,7 +587,7 @@ verify_type <- function(trace) {
     message(
       "No ", trace$type, " mode specifed:\n",
       "  Setting the mode to markers\n",
-      "  Read more about this attribute -> https://plot.ly/r/reference/#scatter-mode"
+      "  Read more about this attribute -> https://plotly.com/r/reference/#scatter-mode"
     )
     trace$mode <- "markers"
   }
@@ -596,7 +598,7 @@ relay_type <- function(type) {
   message(
     "No trace type specified:\n", 
     "  Based on info supplied, a '", type, "' trace seems appropriate.\n",
-    "  Read more about this trace type -> https://plot.ly/r/reference/#", type
+    "  Read more about this trace type -> https://plotly.com/r/reference/#", type
   )
   type
 }

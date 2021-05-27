@@ -10,7 +10,7 @@ colorbar(p, ..., limits = NULL, which = 1)
 \item{p}{a plotly object}
 
 \item{...}{arguments are documented here
-\url{https://plot.ly/r/reference/#scatter-marker-colorbar}.}
+\url{https://plotly.com/r/reference/#scatter-marker-colorbar}.}
 
 \item{limits}{numeric vector of length 2. Set the extent of the colorbar scale.}
 
@@ -25,7 +25,7 @@ Modify the colorbar
 p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~cyl)
 
 # pass any colorbar attribute -- 
-# https://plot.ly/r/reference/#scatter-marker-colorbar
+# https://plotly.com/r/reference/#scatter-marker-colorbar
 colorbar(p, len = 0.5)
 
 # Expand the limits of the colorbar

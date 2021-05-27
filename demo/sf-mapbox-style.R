@@ -4,7 +4,7 @@ storms <- sf::st_read(system.file("shape/storms_xyz.shp", package = "sf"), quiet
 
 # obtain all the "pre-packaged" mapbox styles and use them to 
 # create a collection of buttons that will control the mapbox.style 
-# attribute via a dropdown -- https://plot.ly/r/dropdowns/
+# attribute via a dropdown -- https://plotly.com/r/dropdowns/
 styles <- schema(FALSE)$layout$layoutAttributes$mapbox$style$values
 style_buttons <- lapply(styles, function(s) {
   list(label = s, method = "relayout", args = list("mapbox.style", s))

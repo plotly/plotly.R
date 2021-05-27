@@ -2,7 +2,7 @@
 #' 
 #' @param p a plotly object
 #' @param ... arguments are documented here 
-#' \url{https://plot.ly/r/reference/#scatter-marker-colorbar}.
+#' \url{https://plotly.com/r/reference/#scatter-marker-colorbar}.
 #' @param limits numeric vector of length 2. Set the extent of the colorbar scale.
 #' @param which colorbar to modify? Should only be relevant for subplots with 
 #' multiple colorbars.
@@ -13,7 +13,7 @@
 #' p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~cyl)
 #' 
 #' # pass any colorbar attribute -- 
-#' # https://plot.ly/r/reference/#scatter-marker-colorbar
+#' # https://plotly.com/r/reference/#scatter-marker-colorbar
 #' colorbar(p, len = 0.5)
 #' 
 #' # Expand the limits of the colorbar
@@ -188,7 +188,7 @@ plotly_empty <- function(...) {
 #' Encode a raster object as a data URI
 #' 
 #' Encode a raster object as a data URI, which is suitable for 
-#' use with `layout()` \href{https://plot.ly/r/reference/#layout-images}{images}.
+#' use with `layout()` \href{https://plotly.com/r/reference/#layout-images}{images}.
 #' This is especially convenient for embedding raster images on a plot in 
 #' a self-contained fashion (i.e., so they don't depend on external URL links).
 #' 

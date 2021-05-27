@@ -2,11 +2,11 @@
 # devtools::install_github("ropensci/plotly@carson-dsl")
 
 ################################################################################
-# Basic Charts (https://plot.ly/r/#basic-charts)
+# Basic Charts (https://plotly.com/r/#basic-charts)
 ################################################################################
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/3d-line-plots/
+# https://plotly.com/r/3d-line-plots/
 # ----------------------------------------------------------------------
 
 # initiate a 100 x 3 matrix filled with zeros
@@ -24,7 +24,7 @@ library(plotly)
 plot_ly(df, x = x, y = y, z = z, color = time, type = "scatter3d")
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/3d-scatter-plots/
+# https://plotly.com/r/3d-scatter-plots/
 # ----------------------------------------------------------------------
 
 # variance-covariance matrix for a multivariate normal distribution
@@ -40,7 +40,7 @@ library(plotly)
 plot_ly(df, x = x, y = y, z = z, type = "scatter3d", mode = "markers")
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/3d-surface-plots/
+# https://plotly.com/r/3d-surface-plots/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -53,7 +53,7 @@ with(kd, plot_ly(x = x, y = y, z = z, type = "surface"))
 
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/filled-area-plots/
+# https://plotly.com/r/filled-area-plots/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -62,7 +62,7 @@ add_trace(p, x = c(1, 2, 3, 4), y = c(3, 5, 1, 7), fill = "tonexty")
 
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/bar-charts/
+# https://plotly.com/r/bar-charts/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -95,7 +95,7 @@ ggplot2::diamonds %>% count(cut, clarity) %>%
   plot_ly(x = cut, y = n, type = "bar", color = clarity)
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/box-plots/
+# https://plotly.com/r/box-plots/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -113,10 +113,10 @@ plot_ly(ggplot2::diamonds, x = cut, y = price, color = clarity, type = "box") %>
   layout(boxmode = "group")
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/bubble-charts/ 
+# https://plotly.com/r/bubble-charts/ 
 # ----------------------------------------------------------------------
 
-# IMO, this page should be a part of this page -> https://plot.ly/r/line-and-scatter/
+# IMO, this page should be a part of this page -> https://plotly.com/r/line-and-scatter/
 library(plotly)
 d <- diamonds[sample(nrow(diamonds), 1000), ]
 # note how size is automatically scaled and added as hover text
@@ -126,7 +126,7 @@ plot_ly(d, x = carat, y = price, text = paste("Clarity: ", clarity),
         mode = "markers", color = carat, size = carat, opacity = carat)
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/contour-plots/
+# https://plotly.com/r/contour-plots/
 # ----------------------------------------------------------------------
 
 #' Basic contour
@@ -149,7 +149,7 @@ subplot(
 ) 
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/error-bars/
+# https://plotly.com/r/error-bars/
 # ----------------------------------------------------------------------
 
 library(dplyr)
@@ -170,7 +170,7 @@ add_trace(p, y = mn, error_y = list(value = sd),
           name = "City", data = df2)
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/heatmaps/
+# https://plotly.com/r/heatmaps/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -201,7 +201,7 @@ library(viridis)
 plot_ly(z = volcano, colors = viridis(256), type = "heatmap")
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/2D-Histogram/
+# https://plotly.com/r/2D-Histogram/
 # ----------------------------------------------------------------------
 
 library(plotly)
@@ -210,7 +210,7 @@ obs <- mvtnorm::rmvnorm(500, sigma = s)
 plot_ly(x = obs[,1], y = obs[,2], type = "histogram2d")
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/histograms/
+# https://plotly.com/r/histograms/
 # ----------------------------------------------------------------------
 
 #' Basic histogram
@@ -224,7 +224,7 @@ plot_ly(x = rnorm(500), opacity = 0.6, type = "histogram") %>%
   add_trace(x = rnorm(500)) 
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/line-and-scatter/
+# https://plotly.com/r/line-and-scatter/
 # ----------------------------------------------------------------------
 
 #' Simple scatterplot
@@ -273,7 +273,7 @@ plot_ly(x = x, y = y, name = "linear", line = list(shape = "linear")) %>%
   add_trace(y = y + 25, name = "hv", line = list(shape = "hv"))
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/log-plot/
+# https://plotly.com/r/log-plot/
 # ----------------------------------------------------------------------
 
 d <- diamonds[sample(nrow(diamonds), 1000), ]
@@ -286,7 +286,7 @@ layout(p, xaxis = list(type = "log", autorange = T),
        yaxis = list(type = "log", autorange = T))
 
 # ---------------------------------------------------------------------
-# https://plot.ly/r/graphing-multiple-chart-types/
+# https://plotly.com/r/graphing-multiple-chart-types/
 # ----------------------------------------------------------------------
 
 #' Scatterplot with loess smoother
@@ -315,7 +315,7 @@ p %>%
             fill = "tonexty", line = l)
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/polar-chart/
+# https://plotly.com/r/polar-chart/
 # ----------------------------------------------------------------------
 
 p <- plot_ly(plotly::mic, r = r, t = t, color = nms, mode = "lines")
@@ -328,7 +328,7 @@ p <- plot_ly(plotly::wind, r = r, t = t, color = nms, type = "area")
 layout(p, radialaxis = list(ticksuffix = "%"), orientation = 270)
 
 # ----------------------------------------------------------------------
-# https://plot.ly/r/time-series/
+# https://plotly.com/r/time-series/
 # ----------------------------------------------------------------------
 
 #' POSIXlt date/time class
@@ -353,7 +353,7 @@ y <- rnorm(length(x))
 plot_ly(x = x, y = y, text = paste(tm, "days from today"))
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/r/choropleth-maps/  (new)
+#  https://plotly.com/r/choropleth-maps/  (new)
 # ----------------------------------------------------------------------------
 
 #' World Choropleth Map
@@ -449,7 +449,7 @@ plot_ly(df, type = 'scattergeo', mode = 'markers', locations = Country,
          geo = g1, geo2 = g2)
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/r/lines-on-maps/ (new)
+#  https://plotly.com/r/lines-on-maps/ (new)
 # ----------------------------------------------------------------------------
 
 #' US Flight Paths Map
@@ -559,7 +559,7 @@ layout(p, showlegend = FALSE, geo = geo,
        title = 'Contour lines over globe<br>(Click and drag to rotate)')
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/r/scatter-plots-on-maps/ (new)
+#  https://plotly.com/r/scatter-plots-on-maps/ (new)
 # ----------------------------------------------------------------------------
 
 #' US Airports Map
@@ -635,7 +635,7 @@ plot_ly(df, lat = Lat, lon = Lon, text = hover, color = Globvalue,
   layout(title = 'US Precipitation 06-30-2015<br>Source: NOAA', geo = g)
 
 # ----------------------------------------------------------------------------
-#  https://plot.ly/r/bubble-maps/ (new)
+#  https://plotly.com/r/bubble-maps/ (new)
 # ----------------------------------------------------------------------------
 
 #' United States Bubble Map
@@ -668,7 +668,7 @@ plot_ly(df, lon = lon, lat = lat, text = hover,
 # see 'Choropleth Inset Map' example
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/map-subplots-and-small-multiples/ (new)
+# https://plotly.com/r/map-subplots-and-small-multiples/ (new)
 # ----------------------------------------------------------------------------
 
 #' US map small multiples
@@ -710,12 +710,12 @@ p <- plot_ly(df, type = 'scattergeo', lon = LON, lat = LAT, group = YEAR,
 subplot(p, nrows = 9)
 
 ################################################################################
-# Multiple Axes, Subplots, and Insets (https://plot.ly/r/#multiple-axes-subplots-and-insets)
+# Multiple Axes, Subplots, and Insets (https://plotly.com/r/#multiple-axes-subplots-and-insets)
 ################################################################################
 
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/subplots/
+# https://plotly.com/r/subplots/
 # ----------------------------------------------------------------------------
 
 #' Basic subplot
@@ -737,7 +737,7 @@ subplot(
 ) %>% layout(showlegend = FALSE)
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/multiple-axes/
+# https://plotly.com/r/multiple-axes/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -752,7 +752,7 @@ plot_ly(x = 1:3, y = 10*(1:3), name = "slope of 10") %>%
 
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/insets/
+# https://plotly.com/r/insets/
 # ----------------------------------------------------------------------------
 
 p1 <- plot_ly(x = c(1, 2, 3), y = c(4, 3, 2))
@@ -767,7 +767,7 @@ subplot(p1, p2)
 ################################################################################
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/setting-graph-size/
+# https://plotly.com/r/setting-graph-size/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -782,7 +782,7 @@ plot_ly(x = seq(0, 8), y = seq(0, 8)) %>%
   layout(autosize = F, width = 500, height = 500, margin = m)
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/legend/
+# https://plotly.com/r/legend/
 # ----------------------------------------------------------------------------
 
 #' Legend Names
@@ -816,7 +816,7 @@ plot_ly(x = seq(0, 8), y = rnorm(8), showlegend = FALSE) %>%
   add_trace(y = rnorm(8), name = "Orange Trace", showlegend = TRUE)
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/LaTeX/
+# https://plotly.com/r/LaTeX/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -828,7 +828,7 @@ plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16),
          yaxis = list(title = "$d, r \\text{ (solar radius)}$"))
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/figure-labels/
+# https://plotly.com/r/figure-labels/
 # ----------------------------------------------------------------------------
 
 # NOTE: title and link of this page could be improvded
@@ -851,7 +851,7 @@ plot_ly(x = rnorm(10), y = rnorm(10), mode = "markers") %>%
   layout(xaxis = x, yaxis = y)
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/font/
+# https://plotly.com/r/font/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -864,7 +864,7 @@ plot_ly(x = 0:8, y = 0:8) %>%
   layout(title = "Global Font", font = f)
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/axes/
+# https://plotly.com/r/axes/
 # ----------------------------------------------------------------------------
 
 #' Style Axes Ticks and Placement
@@ -978,7 +978,7 @@ plot_ly(x = s, y = s) %>%
   )
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/text-and-annotations/
+# https://plotly.com/r/text-and-annotations/
 # ----------------------------------------------------------------------------
 
 #' Text mode
@@ -1076,7 +1076,7 @@ plot_ly() %>% layout(annotations = a)
 ################################################################################
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/privacy/
+# https://plotly.com/r/privacy/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -1094,7 +1094,7 @@ p$world_readable <- FALSE
 p
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/file-options/
+# https://plotly.com/r/file-options/
 # ----------------------------------------------------------------------------
 
 library(plotly)
@@ -1115,18 +1115,18 @@ plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot", fileopt = "overwrite")
 # NOTE: filenames that contain "/" be treated as a Plotly directory and will be saved to your Plotly account in a folder tree. For example, to save your graphs to the folder my-graphs: 
 
 ################################################################################
-# Get Requests, Static Image Export, and Interactive Embedding  (https://plot.ly/r/#get-requests-static-image-export)
+# Get Requests, Static Image Export, and Interactive Embedding  (https://plotly.com/r/#get-requests-static-image-export)
 ################################################################################
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/embedding-plotly-graphs-in-HTML/
+# https://plotly.com/r/embedding-plotly-graphs-in-HTML/
 # ----------------------------------------------------------------------------
 
 # Maybe copy/paste relevant bits from this vignette? ->
 # https://github.com/ropensci/plotly/blob/carson-dsl/vignettes/intro.Rmd
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/shiny-tutorial/
+# https://plotly.com/r/shiny-tutorial/
 # ----------------------------------------------------------------------------
 
 # Maybe link to an updated version of this blog post?
@@ -1136,7 +1136,7 @@ plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot", fileopt = "overwrite")
 # https://github.com/ropensci/plotly/tree/carson-dsl/inst/examples
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/get-requests/
+# https://plotly.com/r/get-requests/
 # ----------------------------------------------------------------------------
 
 fig <- get_figure("cpsievert", "559")
@@ -1147,7 +1147,7 @@ layout(fig, title = paste("Modified on ", Sys.time()))
 ################################################################################
 
 # ----------------------------------------------------------------------------
-# https://plot.ly/r/static-image-export/ (currently no R page)
+# https://plotly.com/r/static-image-export/ (currently no R page)
 # ----------------------------------------------------------------------------
 
 # Use the curl package to download a static image of any publicly viewable figure

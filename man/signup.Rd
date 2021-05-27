@@ -45,5 +45,5 @@ Sys.setenv("plotly_domain" = "http://mydomain.com")
 }
 }
 \references{
-https://plot.ly/rest/
+https://plotly.com/rest/
 }
