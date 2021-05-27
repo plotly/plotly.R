@@ -449,7 +449,7 @@ verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
   attrs_name_check(
     sub("[0-9]+$", "", names(p$x$layout)),
-    c(names(Schema$layout$layoutAttributes), c("boxmode", "barmode", "bargap", "mapType")),
+    c(names(Schema$layout$layoutAttributes), c("boxmode", "barmode", "bargap", "bargroupgap", "mapType")),
     "layout"
   )
   attrs_name_check(
