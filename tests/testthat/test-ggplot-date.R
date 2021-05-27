@@ -33,5 +33,7 @@ test_that("scale_x_date and irregular time series work", {
   )
   df <- df[order(df$date), ]
   dt <- qplot(date, price, data = df, geom = "line") + theme(aspect.ratio = 1/4)
-  info <- expect_doppelganger_built(dt, "date-irregular-time-series")
+  
+  info <- expect_warning(expect_doppelganger_built(dt, "date-irregular-time-series"), 
+                         regexp = "Aspect ratios aren't yet implemented")
 })

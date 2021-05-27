@@ -36,7 +36,16 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 ## BUG FIXES
 
 =======
-# 4.9.2.9000
+# 4.9.3.9000
+
+## BUG FIXES
+
+* Duplicate `highlight(selectize=T)` dropdowns are no longer rendered in Shiny (#1936).
+* `group_by.plotly()` now properly retains crosstalk information across `{dplyr}` versions (#1920).
+* Adds fixes in `ggplotly()` for the upcoming `{ggplot2}` >3.3.3 release (#1952).
+* Fixes some issues with `name` and `frames` when both attributes are specified. (#1903 and #1618).
+
+# 4.9.3
 
 ## Changes to plotly.js
 
@@ -46,7 +55,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 * `renderPlotly()` now works well with `shiny::bindCache()`, meaning that plotly graphs can now be persistently cached in Shiny apps with `renderPlotly(expr) %>% shiny::bindCache()` (#1879).
 
-* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
+* `ggplotly()` now works well with the [**thematic** package](https://rstudio.github.io/thematic/). That is, it can now correctly translate **ggplot2** styling that derives from **thematic**. Note that, in order to use **thematic**'s auto theming in Shiny with `ggplotly()`, you need **shiny** v1.5.0 (or higher) and **htmlwidgets** v1.5.2.9000 (or higher). Relatedly, if these versions are available, one may now also call `getCurrentOutputInfo()` inside `renderPlotly()` to get CSS styles of the output container (#1801 and #1802).
 
 ## IMPROVEMENTS
 
@@ -124,7 +133,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* Several new features and improvements related to accessing plotly.js events in shiny (learn more about them in this RStudio [webinar](https://resources.rstudio.com/webinars/accessing-and-responding-to-plotly-events-in-shiny-carson-sievert)):
+* Several new features and improvements related to accessing plotly.js events in shiny (learn more about them in this RStudio [webinar](https://rstudio.com/resources/webinars/accessing-and-responding-to-plotly-events-in-shiny/)):
     * The `event` argument of the `event_data()` function now supports the following events: `plotly_selecting`, `plotly_brushed`, `plotly_brushing`, `plotly_restyle`, `plotly_legendclick`, `plotly_legenddoubleclick`, `plotly_clickannotation`, `plotly_afterplot`, `plotly_doubleclick`, `plotly_deselect`, `plotly_unhover`. For examples, see `plotly_example("shiny", "event_data")`, `plotly_example("shiny", "event_data_legends")`, and  `plotly_example("shiny", "event_data_annotation")`, 
     * New `event_register()` and `event_unregister()` functions for declaring which events to transmit over the wire (i.e., from the browser to the shiny server). Events that are likely to have large overhead are not registered by default, so you'll need to register these: `plotly_selecting`, `plotly_unhover`, `plotly_restyle`, `plotly_legendclick`, and `plotly_legenddoubleclick`.
     * A new `priority` argument. By setting `priority='event'`, the `event` is treated like a true event: any reactive expression using the `event` becomes invalidated (regardless of whether the input values has changed). For an example, see `plotly_example("shiny", "event_priority")`.
@@ -206,7 +215,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 * The `name` attribute is now a "special `plot_ly()` argument" and behaves similar to `split` (it ensures a different trace for every unique value supplied). Although this leads to a breaking change (`name` was previously appended to an automatically generated trace name), it leads to a more flexible and transparent API. Those that wish to have the old behavior back should provide relevant mappings to the `name` attributes (e.g. `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~factor(vs), name = "a")` should become `plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~factor(vs), name = ~paste(vs, "\na"))`)
 * The `color` argument now maps to `fillcolor`, making it much easier to use polygon fills to encode data values (e.g., choropleth maps). For backwards-compatibilty reasons, when `color` maps to `fillcolor`, `alpha` defaults to 0.5 (instead of 1). For an example, `plot_mapbox(mn_res, color = ~INDRESNAME)` or `plot_mapbox(mn_res, split = ~INDRESNAME, color = ~AREA, showlegend = FALSE, stroke = I("black"))`.
 * The `color` argument no longer automatically add `"markers"` to the `mode` attribute for scatter/scattergl trace types. Those who wish to have the old behavior back, should add `"markers"` to the `mode` explicity (e.g., change `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines")` to `plot_ly(economics, x = ~pce, y = ~pop, color = ~as.numeric(date), mode = "lines+markers")`).
-* The `size` argument now informs a default [error_[x/y].width](https://plot.ly/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plot.ly/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`).
+* The `size` argument now informs a default [error_[x/y].width](https://plotly.com/r/reference/#scatter-error_x-width) (and `span` informs [error_[x/y].thickness](https://plotly.com/r/reference/#scatter-error_x-thickness)). Note you can override the default by specifying directly (e.g. `plot_ly(x = 1:10, y = 1:10, size = I(10), error_x = list(value = 5, width = 0))`).
 * `layout.showlegend` now defaults to `TRUE` for a *single* pie trace. This is a more sensible default and matches pure plotly.js behavior.
 
 ### Other changes relevant for all **plotly** objects
@@ -287,18 +296,18 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 
 ## NEW FEATURES & IMPROVEMENTS
 
-* Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://cpsievert.github.io/plotly_book/linking-views-without-shiny.html>. For some more complex examples, see <https://cpsievert.github.io/pedestrians/>
+* Added a significant amount of support for "multiple linked views". For some relatively basic examples, see the demos (the ones prefixed with "highlight" are most relevant) -- `demo(package = "plotly")`. For a more comprehensive overview, see <https://plotly-r.com/client-side-linking.html>. For some more complex examples, see <https://pedestrians.cpsievert.me/>
 * Added the `highlight()` function for configuring selection modes/sequences/options.
-* Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://cpsievert.github.io/plotly_book/key-frame-animations.html>
+* Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://plotly-r.com/animating-views.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
 * Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
 * Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
-* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plot.ly/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
+* Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plotly.com/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
 * Sensible sizing and positioning defaults are now provided for subplots multiple colorbars.
 * R linebreaks are translated to HTML linebreaks (i.e., '\n' translates to '<br />') (fixes #851).
 * Added a `plot_dendro()` function for a quick and dirty interactive dendrogram with support for hierarchial selection. For more, see -- <https://plotly-r.com/client-side-linking.html#fig:dendro>
-* The `export()` function gains a `selenium` argument for rendering/exporting WebGL plots and exporting to 'svg'/'webp' file formats (via the plotly.js function [Plotly.downloadImage()](https://plot.ly/javascript/plotlyjs-function-reference/#plotlydownloadimage)).
+* The `export()` function gains a `selenium` argument for rendering/exporting WebGL plots and exporting to 'svg'/'webp' file formats (via the plotly.js function [Plotly.downloadImage()](https://plotly.com/javascript/plotlyjs-function-reference/#plotlydownloadimage)).
 * Better type checking of trace attributes will now automatically reduce a single-valued vector to a constant (when appropriate). This is particularly useful for anchoring multiple traces to a single legend entry via `legendgroup` (see #675, #817, #826).
 * The `plotlyOutput()` function gains a `inline` argument which makes it easier to place multiple plots in the same row (in a shiny application).
 
@@ -392,14 +401,14 @@ limits.
 
 ## NEW FEATURES
 
-* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://cpsievert.github.io/plotly_book/maps.html> 
+* Added the `plot_mapbox()` and `plot_geo()` functions, which make it easier to work with the "scattermapbox", "scattergeo", and "choropleth" trace types. See the maps chapter of the plotly book for some examples -- <https://plotly-r.com/maps.html> 
 * `subplot()` now accepts, and correctly scales mapbox objects.
 * Added the `add_mesh3d()` and `add_pie()` functions as wrappers around the "mesh3d", and "pie" trace types.
 
 ## CHANGES
 
 * The `add_scattergeo()` and `add_choropleth()` functions have been deprecated in favor of `plot_geo()`. 
-* The `add_area(...)` function changed it's meaning from `add_lines(..., fill = 'tozeroy')` to a wrapper around the area trace <https://plot.ly/r/reference/#area>. This is more consistent with the naming conventions already in place for other `add_()` functions.
+* The `add_area(...)` function changed it's meaning from `add_lines(..., fill = 'tozeroy')` to a wrapper around the area trace <https://plotly.com/r/reference/#area>. This is more consistent with the naming conventions already in place for other `add_()` functions.
 * `add_ribbons()` now shows points (instead of fill) on hover.
 
 # 4.4.5 -- 19 September 2016
@@ -482,7 +491,7 @@ limits.
 
 ## CHANGES
 
-* vignettes were removed and that documentation will now be hosted at <https://cpsievert.github.io/plotly_book/>
+* vignettes were removed and that documentation will now be hosted at <https://plotly.com/r/>
 
 ## BUG FIXES
 

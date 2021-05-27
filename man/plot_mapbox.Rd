@@ -10,7 +10,7 @@ plot_mapbox(data = data.frame(), ...)
 \item{data}{A data frame (optional).}
 
 \item{...}{arguments passed along to \code{\link[=plot_ly]{plot_ly()}}. They should be
-valid scattermapbox attributes - \url{https://plot.ly/r/reference/#scattermapbox}.
+valid scattermapbox attributes - \url{https://plotly.com/r/reference/#scattermapbox}.
 Note that x/y can also be used in place of lat/lon.}
 }
 \description{

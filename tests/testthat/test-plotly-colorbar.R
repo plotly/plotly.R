@@ -121,12 +121,12 @@ test_that("positioning with multiple colorbars and legends", {
   
   s <- subplot(
     plot_ly(z = ~volcano),
-    plot_ly(x = 1:10, y = 1:10, color = factor(1:10))
+    plot_ly(x = 1:8, y = 1:8, color = factor(1:8))
   )
   
   b <- plotly_build(s)
   d <- b$x$data
-  expect_length(d, 11)
+  expect_length(d, 9)
   
   expect_true(d[[1]]$colorbar$len == 0.5)
   expect_true(d[[1]]$colorbar$lenmode == "fraction")

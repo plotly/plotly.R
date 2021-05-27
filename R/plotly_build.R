@@ -425,7 +425,10 @@ registerFrames <- function(p, frameMapping = NULL) {
   # remove frames from the trace names
   for (i in seq_along(p$x$data)) {
     tr <- p$x$data[[i]]
-    if (length(tr[["name"]]) != 1) next
+    if (length(tr[["name"]]) != 1) {
+      p$x$data[[i]]$frameOrder <- NULL
+      next
+    } 
     nms <- strsplit(as.character(tr[["name"]]), br())[[1]]
     idx <- setdiff(seq_along(nms), tr$frameOrder %||% 0)
     p$x$data[[i]]$name <- if (length(idx)) paste(nms[idx], collapse = br()) else NULL
@@ -481,12 +484,14 @@ registerFrames <- function(p, frameMapping = NULL) {
     d <- lapply(d, function(tr) { tr$visible <- tr$visible %||% TRUE; tr })
     
     # if this frame is missing a trace name, supply an invisible one
-    traceNamesMissing <- setdiff(frameTraceNames, sapply(d, "[[", "name"))
+    traceNamesMissing <- setdiff(frameTraceNames, unlist(lapply(d, "[[", "name")))
     for (j in traceNamesMissing) {
       idx <- vapply(p$x$data, function(tr) isTRUE(tr[["name"]] == j), logical(1))
-      idx <- which(idx)[[1]]
-      invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
-      d <- c(d, list(invisible))
+      if (any(idx)){
+        idx <- which(idx)[[1]]
+        invisible <- modify_list(p$x$data[[idx]], list(visible = FALSE))
+        d <- c(d, list(invisible))
+      }
     }
     p$x$frames[[i]] <- list(
       name = as.character(format(nm)),

@@ -57,7 +57,7 @@
 #'   do(p = plot_ly(., x = ~date, y = ~value)) %>%
 #'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
-#' # learn more at https://cpsievert.github.io/plotly_book/subplot.html
+#' # learn more at https://plotly.com/r/subplot.html
 #' 
 
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
@@ -86,7 +86,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   # Are any traces referencing "axislike" layout attributes that are missing?
   # If so, move those traces to a "new plot", and inherit layout attributes,
   # which makes this sort of thing possible:
-  # https://plot.ly/r/map-subplots-and-small-multiples/
+  # https://plotly.com/r/map-subplots-and-small-multiples/
   plots <- list()
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]

@@ -113,7 +113,7 @@ register_plot_events <- function(p) {
 #' @seealso [event_register], [event_unregister]
 #' @references 
 #'   * <https://plotly-r.com/linking-views-with-shiny.html#shiny-plotly-inputs> 
-#'   * <https://plot.ly/javascript/plotlyjs-function-reference/>
+#'   * <https://plotly.com/javascript/plotlyjs-function-reference/>
 #' @author Carson Sievert
 #' @examples \dontrun{
 #' plotly_example("shiny", "event_data")
