@@ -1,4 +1,4 @@
-context("device")
+
 
 test_that("ggplotly doesn't leave a new device open", {
   devList1 <- dev.list()

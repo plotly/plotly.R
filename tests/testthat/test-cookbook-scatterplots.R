@@ -1,4 +1,4 @@
-context("cookbook-scatter")
+
 
 # Make some noisily increasing data
 dat <- data.frame(

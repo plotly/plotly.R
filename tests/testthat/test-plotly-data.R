@@ -1,4 +1,4 @@
-context("plotly data")
+
 
 test_that("uniq works as expected", {
   expect_equivalent(uniq(c("red", "red", NA)), "red")

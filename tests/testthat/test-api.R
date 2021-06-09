@@ -1,4 +1,3 @@
-context("api")
 
 test_that("api() returns endpoints", {
   skip_on_cran()

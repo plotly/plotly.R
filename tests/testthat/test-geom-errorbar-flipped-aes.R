@@ -1,4 +1,4 @@
-context("Errorbar")
+
 
 test_that("geom_errobar is rendered with flipped aes", {
   

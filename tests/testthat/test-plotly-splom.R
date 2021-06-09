@@ -1,4 +1,4 @@
-context("splom")
+
 
 
 test_that("No cartesian axes are supplied to a splom chart", {

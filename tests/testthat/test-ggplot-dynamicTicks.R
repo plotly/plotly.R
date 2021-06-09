@@ -1,5 +1,3 @@
-context("dynamicTicks")
-
 # note: test-ggplot-lines.R has some tests for date dynamicTicks
 
 test_that("Discrete axis maps to categorical type", {

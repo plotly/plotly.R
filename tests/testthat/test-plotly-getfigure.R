@@ -1,4 +1,4 @@
-context("get_figure")
+
 
 test_that("requests made by a user who doesn't exist error a 404", {
   skip_on_cran()

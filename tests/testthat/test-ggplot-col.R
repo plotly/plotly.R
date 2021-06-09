@@ -1,4 +1,4 @@
-context("geom_col")
+
 
 # https://gist.github.com/jsonbecker/0cc702804512fdf29c7f9067adfc17d0#gistcomment-1935427
 df <- data.frame(

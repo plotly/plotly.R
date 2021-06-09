@@ -1,4 +1,4 @@
-context("add_sf")
+
 
 has_mapbox <- function() {
   !is.null(tryNULL(mapbox_token()))

@@ -1,4 +1,4 @@
-context("image-trace")
+
 
 test_that("image trace renders", {
   plot_ly() %>%

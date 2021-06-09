@@ -1,4 +1,4 @@
-context("customdata")
+
 
 # TODO: use shinytest to make sure we can access the right value in shiny
 test_that("ggplotly relays customdata", {

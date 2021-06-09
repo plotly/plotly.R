@@ -1,4 +1,3 @@
-context("axes")
 
 # Compute margin
 comp_margin <- function(gg, axisTickText) {

@@ -1,4 +1,4 @@
-context("Filename")
+
 
 test_that("filename supports names with paths included ", {
   skip_on_cran()

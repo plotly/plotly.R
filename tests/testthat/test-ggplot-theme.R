@@ -1,4 +1,4 @@
-context("ggplot themes")
+
 
 penguin.base <- ggplot(palmerpenguins::penguins) +
   geom_point(aes(bill_length_mm, flipper_length_mm)) +

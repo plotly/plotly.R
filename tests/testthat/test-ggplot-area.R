@@ -1,4 +1,4 @@
-context("Area")
+
 
 # Test that the order of traces is correct
 # Expect traces function

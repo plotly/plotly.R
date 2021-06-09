@@ -1,4 +1,3 @@
-context("blank")
 
 test_that("geom_blank", {
   l <- ggplotly(qplot())$x

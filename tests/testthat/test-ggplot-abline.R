@@ -1,4 +1,4 @@
-context("Abline")
+
 
 # 'Abline' refers to the line coefficients, as in y = a  b * x
 

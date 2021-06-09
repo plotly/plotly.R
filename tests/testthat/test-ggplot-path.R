@@ -1,4 +1,4 @@
-context("path")
+
 
 test_that("lines are different from paths", {
   df <- data.frame(
