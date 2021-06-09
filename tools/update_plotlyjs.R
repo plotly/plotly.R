@@ -41,9 +41,10 @@ withr::with_dir(tmpdir, {
         )
       }
       
-      # build
-      system("yarn install")
-      system("yarn build")
+      # build just the main bundle
+      # (also builds schema and locales)
+      system("npm install")
+      system("npm run bundle")
       
       # copy assets to R package source
       file.copy(
