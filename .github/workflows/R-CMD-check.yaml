@@ -30,8 +30,8 @@ jobs:
           - {os: windows-latest, r: 'release'}
           - {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
           - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.1.0 (ubuntu-18.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          # visual tests are only run on linux r-release since the svg generator (orca) isn't cross-platform
-          - {os: ubuntu-18.04,   r: 'release', vdiffr: true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          # vdiffr & shinytest only runs on linux r-release since the results aren't cross-platform
+          - {os: ubuntu-18.04,   r: 'release', vdiffr: true, shinytest: true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.6',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.5',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
@@ -40,6 +40,7 @@ jobs:
     env:
       RSPM: ${{ matrix.config.rspm }}
       VDIFFR: ${{ matrix.config.vdiffr }}
+      SHINYTEST: ${{ matrix.config.shinytest }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:

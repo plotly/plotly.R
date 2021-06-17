@@ -15,3 +15,11 @@ skip_cloud_tests <- function() {
     skip("Cloud testing is only run on Windows with the current release of R")
   }
 }
+
+skip_shinytest_tests <- function() {
+  skip_on_cran()
+  skip_if_not_installed("shinytest")
+  if (!as.logical(Sys.getenv("SHINYTEST", FALSE))) {
+    skip("shinytest testing requires the SHINYTEST environment variable to be true")
+  }
+}

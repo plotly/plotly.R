@@ -46,9 +46,6 @@ if (enable_vdiffr) {
     writeLines(svg_txt, file)
   }
   
-  # force the vdiffr shiny app to open in a real browser 
-  # (some svg files seem to not render properly in RStudio)
-  options(shiny.launch.browser = interactive())
 } 
 
 expect_doppelganger <- function(p, name, ...) {
