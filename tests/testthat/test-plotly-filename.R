@@ -11,7 +11,7 @@ test_that("filename supports names with paths included ", {
     endpt <- sprintf("files/%s/trash", file$fid)
     res <- api(endpt, "POST")
   }
-  f <- plotly_POST(p, filename = filename)
+  f <- api_create(p, filename = filename)
   expect_match(f$filename, "awesome")
   expect_true(f$parented)
 })
