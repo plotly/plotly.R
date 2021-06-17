@@ -1,13 +1,17 @@
-# Some tests make plot.ly HTTP requests and require a valid user account
-# (see test-plotly-filename.R). For security reasons, these tests should be 
-# skipped on pull requests (the .travis.yml file uses encrypted credentials
-# & encrypted environment vars cannot be accessed on pull request builds)
-skip_if_not_master <- function() {
+r_version <- paste(R.version$major, R.version$minor, sep = ".")
+r_release <- rversions::r_release()$version
+is_release <- isTRUE(r_release == r_version)
+is_win <- .Platform$OS.type == "windows"
+
+skip_cloud_tests <- function() {
+  skip_on_cran()
   if (is.na(Sys.getenv("plotly_username", NA))) {
-    return(skip("Testing plot.ly API calls requires a plotly account"))
+    skip("Cloud testing requires a plotly account (plotly_username)")
   }
-  is_pr <- grepl("^[0-9]+$", Sys.getenv("TRAVIS_PULL_REQUEST"))
-  is_r_release <- Sys.getenv("TRAVIS_R_VERSION_STRING", "release") == "release"
-  if (!is_pr && is_r_release) return(invisible(TRUE))
-  skip("plot.ly API calls are only tested on the master build on r-release")
+  if (is.na(Sys.getenv("plotly_api_key", NA))) {
+    skip("Cloud testing requires a plotly account (plotly_api_key)")
+  }
+  if (!is_release || !is_win) {
+    skip("Cloud testing is only run on Windows with the current release of R")
+  }
 }
