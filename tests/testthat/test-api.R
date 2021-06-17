@@ -1,7 +1,24 @@
+r_version <- paste(R.version$major, R.version$minor, sep = ".")
+r_release <- rversions::r_release()$version
+is_release <- isTRUE(r_release == r_version)
+is_win <- .Platform$OS.type == "windows"
+
+skip_cloud_tests <- function() {
+  skip_on_cran()
+  if (is.na(Sys.getenv("plotly_username", NA))) {
+    skip("Cloud testing requires a plotly account (plotly_username)")
+  }
+  if (is.na(Sys.getenv("plotly_api_key", NA))) {
+    skip("Cloud testing requires a plotly account (plotly_api_key)")
+  }
+  if (!is_release || !is_win) {
+    skip("Cloud testing is only run on Windows with the current release of R")
+  }
+}
+
 
 test_that("api() returns endpoints", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   res <- api()
   expect_true(length(res) > 1)
@@ -9,8 +26,7 @@ test_that("api() returns endpoints", {
 })
 
 test_that("Can search with white-space", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   res <- api("search?q=overdose drugs")
   expect_true(length(res) > 1)
@@ -27,8 +43,7 @@ test_that("Changing a filename works", {
 
 
 test_that("Downloading plots works", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   # https://plot.ly/~cpsievert/200
   p <- api_download_plot(200, "cpsievert")
@@ -46,8 +61,7 @@ test_that("Downloading plots works", {
 
 
 test_that("Downloading grids works", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   g <- api_download_grid(14681, "cpsievert")
   expect_is(g, "api_file")
@@ -63,8 +77,7 @@ test_that("Downloading grids works", {
 
 
 test_that("Creating produces a new file by default", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   expect_new <- function(obj) {
     old <- api("folders/home?user=cpsievert")
@@ -87,8 +100,7 @@ test_that("Creating produces a new file by default", {
 
 
 test_that("Can overwrite a grid", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   id <- new_id()
   m <- api_create(mtcars, id)
@@ -98,8 +110,7 @@ test_that("Can overwrite a grid", {
 })
 
 test_that("Can overwrite a plot", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   id <- new_id()
   p <- plot_ly()
@@ -110,8 +121,7 @@ test_that("Can overwrite a plot", {
 })
 
 test_that("Can create plots with non-trivial src attributes", {
-  skip_on_cran()
-  skip_if_not_master()
+  skip_cloud_tests()
 
   expect_srcified <- function(x) {
     expect_length(strsplit(x, ":")[[1]], 3)
@@ -146,4 +156,21 @@ test_that("Can create plots with non-trivial src attributes", {
   res <- api_create(ggplot() + geom_bar(aes(1:10)))
   expect_not_srcified(res$figure$layout$xaxis$tickvalssrc)
 
+})
+
+
+test_that("filename supports names with paths included ", {
+  skip_cloud_tests()
+  
+  p <- plot_ly(mtcars, x = ~wt, y = ~vs)
+  filename <- "directory/awesome"
+  # trash the file if it already exists
+  file <- api_lookup_file(filename)
+  if (is.file(file)) {
+    endpt <- sprintf("files/%s/trash", file$fid)
+    res <- api(endpt, "POST")
+  }
+  f <- api_create(p, filename = filename)
+  expect_match(f$filename, "awesome")
+  expect_true(f$parented)
 })
