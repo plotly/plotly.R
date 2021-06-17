@@ -36,7 +36,7 @@ Imports:
     base64enc,
     htmltools (>= 0.3.6),
     htmlwidgets (>= 1.5.2.9001),
-    tidyr,
+    tidyr (>= 1.0.0),
     RColorBrewer,
     dplyr,
     vctrs,
