@@ -19,7 +19,7 @@ skip_cloud_tests <- function() {
 skip_shinytest_tests <- function() {
   skip_on_cran()
   skip_if_not_installed("shinytest")
-  if (!as.logical(Sys.getenv("SHINYTEST", FALSE))) {
+  if (grepl("true", Sys.getenv("SHINYTEST"), fixed = TRUE)) {
     skip("shinytest testing requires the SHINYTEST environment variable to be true")
   }
 }

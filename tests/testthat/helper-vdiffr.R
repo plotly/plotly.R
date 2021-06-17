@@ -1,5 +1,5 @@
 # If VDIFFR is TRUE, enable visual testing
-enable_vdiffr <- as.logical(Sys.getenv("VDIFFR", FALSE))
+enable_vdiffr <- grepl("true", Sys.getenv("VDIFFR"), fixed = TRUE)
 
 message("Visual testing is ", if (!enable_vdiffr) "not ", "enabled.")
 
