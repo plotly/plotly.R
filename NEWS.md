@@ -1,10 +1,16 @@
+# 4.9.4.9000
+
+## BUG FIXES
+
+* Fixes a bug in `ggplotly()` with `{crosstalk}` and `{ggplot2}` v3.3.4  (#1952).
+
 # 4.9.4
 
 ## BUG FIXES
 
 * Duplicate `highlight(selectize=T)` dropdowns are no longer rendered in Shiny (#1936).
 * `group_by.plotly()` now properly retains crosstalk information across `{dplyr}` versions (#1920).
-* Adds fixes in `ggplotly()` for the upcoming `{ggplot2}` >3.3.3 release (#1952).
+* Adds fixes in `ggplotly()` for the upcoming `{ggplot2}` v3.3.4 release (#1952).
 * Fixes some issues with `name` and `frames` when both attributes are specified. (#1903 and #1618).
 
 # 4.9.3

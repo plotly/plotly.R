@@ -264,7 +264,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     layers <- Map(function(x, y) {
       if (crosstalk_key() %in% names(y) && !"key" %in% names(x[["mapping"]]) && 
           inherits(x[["stat"]], "StatIdentity")) {
-        x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
+        # ggplot2 v3.3.4 started using the computed_mapping (instead of mapping)
+        # field to inform the compute_aesthetics() method, so in order to add
+        # the crosstalk key, we need to add to that field (when present)
+        # https://github.com/tidyverse/ggplot2/pull/4475
+        nm <- if ("computed_mapping" %in% names(x)) "computed_mapping" else "mapping"
+        x[[nm]] <- c(x[[nm]], key = as.name(crosstalk_key()))
       }
       x
     }, layers, layer_data)
