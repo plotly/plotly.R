@@ -942,83 +942,69 @@ gg2list <- function(p, width = NULL, height = NULL,
   # will there be a legend?
   gglayout$showlegend <- sum(unlist(lapply(traces, "[[", "showlegend"))) >= 1
   
-  # legend styling
-  gglayout$legend <- list(
-    bgcolor = toRGB(theme$legend.background$fill),
-    bordercolor = toRGB(theme$legend.background$colour),
-    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
-    font = text2font(theme$legend.text)
-  )
-  
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
   } else {
-    # by default, guide boxes are vertically aligned
-    theme$legend.box <- theme$legend.box %||% "vertical"
     
-    # size of key (also used for bar in colorbar guide)
+    # ------------------------------------------------------------------
+    # Copied from body of ggplot2:::guides_build().
     theme$legend.key.width <- theme$legend.key.width %||% theme$legend.key.size
     theme$legend.key.height <- theme$legend.key.height %||% theme$legend.key.size
-    
-    # legend direction must be vertical
-    theme$legend.direction <- theme$legend.direction %||% "vertical"
-    if (!identical(theme$legend.direction, "vertical")) {
-      warning(
-        "plotly.js does not (yet) support horizontal legend items \n",
-        "You can track progress here: \n",
-        "https://github.com/plotly/plotly.js/issues/53 \n",
-        call. = FALSE
-      )
-      theme$legend.direction <- "vertical"
+    # Layout of legends depends on their overall location
+    position <- ggfun("legend_position")(theme$legend.position %||% "right")
+    if (position == "inside") {
+      theme$legend.box <- theme$legend.box %||% "vertical"
+      theme$legend.direction <- theme$legend.direction %||% "vertical"
+      theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
+    } else if (position == "vertical") {
+      theme$legend.box <- theme$legend.box %||% "vertical"
+      theme$legend.direction <- theme$legend.direction %||% "vertical"
+      theme$legend.box.just <- theme$legend.box.just %||% c("left", "top")
+    } else if (position == "horizontal") {
+      theme$legend.box <- theme$legend.box %||% "horizontal"
+      theme$legend.direction <- theme$legend.direction %||% "horizontal"
+      theme$legend.box.just <- theme$legend.box.just %||% c("center", "top")
     }
     
-    # justification of legend boxes
-    theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
-    # scales -> data for guides
     gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
     if (length(gdefs) > 0) {
       gdefs <- ggfun("guides_merge")(gdefs)
       gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
     }
+    # ------------------------------------------------------------------
     
-    # colourbar -> plotly.js colorbar
-    colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
-    nguides <- length(colorbar) + gglayout$showlegend
-    # If we have 2 or more guides, set x/y positions accordingly
-    if (nguides >= 2) {
-      # place legend at the bottom
-      gglayout$legend$y <- 1 / nguides
-      gglayout$legend$yanchor <- "top"
-      # adjust colorbar position(s)
-      for (i in seq_along(colorbar)) {
-        colorbar[[i]]$marker$colorbar$yanchor <- "top"
-        colorbar[[i]]$marker$colorbar$len <- 1 / nguides
-        colorbar[[i]]$marker$colorbar$y <- 1 - (i - 1) * (1 / nguides)
-      }
-    }
-    traces <- c(traces, colorbar)
+    # Until plotly.js has multiple legend support, we're stuck with smashing
+    # all legends into one...
+    legendTitle <- paste(
+      compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL)), 
+      collapse = br()
+    )
     
-    # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    if (isTRUE(gglayout$showlegend)) {
-      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = br())
-      titleAnnotation <- make_label(
-        legendTitle,
-        x = gglayout$legend$x %||% 1.02,
-        y = gglayout$legend$y %||% 1,
-        theme$legend.title,
-        xanchor = "left",
-        yanchor = "bottom",
-        # just so the R client knows this is a title
-        legendTitle = TRUE
+    # Discard everything but the first legend and colourbar(s)
+    is_legend <- vapply(gdefs, is_guide_legend, logical(1))
+    is_colorbar <- vapply(gdefs, is_guide_colorbar, logical(1))
+    gdefs <- c(
+      gdefs[is_colorbar],
+      if (gglayout$showlegend) gdefs[which(is_legend)[1]]
+    )
+    
+    # Get plotly.js positioning and orientation of all the guides at once
+    positions <- plotly_guide_positions(gdefs, theme)
+    
+    # Convert the legend
+    is_legend <- vapply(gdefs, is_guide_legend, logical(1))
+    if (sum(is_legend) == 1) {
+      idx <- which(is_legend)
+      gglayout$legend <- plotly_guide_legend(
+        gdefs[[idx]], theme, 
+        positions[[idx]], legendTitle
       )
-      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-      # adjust the height of the legend to accomodate for the title
-      # this assumes the legend always appears below colorbars
-      gglayout$legend$y <- (gglayout$legend$y %||% 1) -
-        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
     }
+    
+    # Convert the colorbars
+    is_colorbar <- vapply(gdefs, is_guide_colorbar, logical(1))
+    traces <- c(traces, plotly_guide_colorbars(gdefs[is_colorbar], theme, positions[is_colorbar], gglayout))
   }
   
   # flip x/y in traces for flipped coordinates
@@ -1384,14 +1370,109 @@ ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
 }
 
-# colourbar -> plotly.js colorbar
-gdef2trace <- function(gdef, theme, gglayout) {
-  if (inherits(gdef, "colorbar")) {
-    # sometimes the key has missing values, which we can ignore
+
+plotly_guide_positions <- function(gdefs, theme) {
+  length <- 1 / length(gdefs)
+  isTop <- "top" %in% theme$legend.position
+  isLeft <- "left" %in% theme$legend.position
+  
+  lapply(seq_along(gdefs), function(i) {
+    position <- (i / length(gdefs)) - (0.5 * length)
+    orientation <- substr(gdefs[[i]]$direction, 1, 1)
+    if (theme$legend.position %in% c("top", "bottom")) {
+      list(
+        xanchor = "center",
+        x = position,
+        len = length,
+        orientation = orientation,
+        yanchor = if (isTop) "bottom" else "top",
+        # bottom needs some additional space to dodge x-axis 
+        # TODO: can we measure size of axis in npc?
+        y = if (isTop) 1 else -0.25
+      )
+    } else if (theme$legend.position %in% c("left", "right")) {
+      list(
+        yanchor = "middle",
+        y = position,
+        len = length,
+        orientation = orientation,
+        xanchor = if (isLeft) "right" else "left",
+        # left needs some additional space to dodge y-axis 
+        # TODO: can we measure size of axis in npc?
+        x = if (isLeft) -0.25 else 1
+      )
+    } else if (is.numeric(theme$legend.position)) {
+      list(
+        x = theme$legend.position[1],
+        xanchor = "center",
+        y = theme$legend.position[2],
+        yanchor = "middle",
+        orientation = orientation
+      )
+    } else {
+      stop("Unrecognized legend positioning", call. = FALSE)
+    }
+  }) 
+}
+
+
+plotly_guide_legend <- function(gdef, theme, position, title) {
+  if (!is_guide_legend(gdef)) stop("gdef must be a legend", call. = FALSE)
+  legend <- list(
+    title = list(
+      # TODO: is it worth mapping to side?
+      text = title,
+      font = text2font(gdef$title.theme %||% theme$legend.text)
+    ),
+    bgcolor = toRGB(theme$legend.background$fill),
+    bordercolor = toRGB(theme$legend.background$colour),
+    borderwidth = unitConvert(
+      theme$legend.background$size, "pixels", "width"
+    ),
+    font = text2font(gdef$label.theme %||% theme$legend.text)
+  )
+  modifyList(legend, position)
+}
+
+
+# Colourbar(s) are implemented as an additional (hidden) trace(s)
+# (Note these can't yet be displayed horizontally https://github.com/plotly/plotly.js/issues/1244)
+plotly_guide_colorbars <- function(gdefs, theme, positions, gglayout) {
+  Map(function(gdef, position) {
+    if (!is_guide_colorbar(gdef)) stop("gdef must be a colourbar", call. = FALSE)
+    
     gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
     rng <- range(gdef$bar$value)
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    
+    colorbar <- list(
+      bgcolor = toRGB(theme$legend.background$fill),
+      bordercolor = toRGB(theme$legend.background$colour),
+      borderwidth = unitConvert(
+        theme$legend.background$size, "pixels", "width"
+      ),
+      thickness = unitConvert(
+        theme$legend.key.width, "pixels", "width"
+      ),
+      title = gdef$title,
+      titlefont = text2font(gdef$title.theme %||% theme$legend.title),
+      tickmode = "array",
+      ticktext = gdef$key$.label,
+      tickvals = gdef$key$.value,
+      tickfont = text2font(gdef$label.theme %||% theme$legend.text),
+      ticklen = 2
+    )
+  
+    colorbar <- modifyList(position, colorbar)
+    if (identical(colorbar$orientation, "h")) {
+      warning(
+        "plotly.js colorbars cannot (yet) be displayed horizontally ",
+        "https://github.com/plotly/plotly.js/issues/1244",
+        call. = FALSE
+      )
+    }
+    
     list(
       x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
       y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
@@ -1406,31 +1487,18 @@ gdef2trace <- function(gdef, theme, gglayout) {
       marker = list(
         color = c(0, 1),
         colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
-        colorbar = list(
-          bgcolor = toRGB(theme$legend.background$fill),
-          bordercolor = toRGB(theme$legend.background$colour),
-          borderwidth = unitConvert(
-            theme$legend.background$size, "pixels", "width"
-          ),
-          thickness = unitConvert(
-            theme$legend.key.width, "pixels", "width"
-          ),
-          title = gdef$title,
-          titlefont = text2font(gdef$title.theme %||% theme$legend.title),
-          tickmode = "array",
-          ticktext = gdef$key$.label,
-          tickvals = gdef$key$.value,
-          tickfont = text2font(gdef$label.theme %||% theme$legend.text),
-          ticklen = 2,
-          len = 1/2
-        )
+        colorbar = colorbar
       )
     )
-  } else {
-    # if plotly.js gets better support for multiple legends,
-    # that conversion should go here
-    NULL
-  }
+  }, gdefs, positions)
+}
+
+is_guide_colorbar <- function(x) {
+  inherits(x, "guide") && inherits(x, "colorbar")
+}
+
+is_guide_legend <- function(x) {
+  inherits(x, "guide") && inherits(x, "legend")
 }
 
 
