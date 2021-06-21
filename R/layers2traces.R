@@ -736,6 +736,11 @@ geom2trace.GeomBar <- function(data, params, p) {
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "bar",
+    # plotly.js v2.0 changed default to textposition='auto', meaning
+    # text will display by default, which makes sense for plot_ly() maybe, 
+    # but not ggplotly()
+    # https://github.com/plotly/orca/issues/374
+    textposition = "none",
     marker = list(
       autocolorscale = FALSE,
       color = toRGB(
