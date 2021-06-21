@@ -75,27 +75,23 @@ jobs:
           pak::local_system_requirements(execute = TRUE)
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
-        
-      #- name: Install google chrome
-      #  if: matrix.config.vdiffr == true
-      #  shell: bash
-      #  run: |
-      #    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-      #    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-      #    apt-get update -y
-      #    apt-get install -y google-chrome-stable
       
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.config.node }}
       
-      # TODO: maybe this should install via conda or npm instead?
       - name: Install orca
         if: matrix.config.vdiffr == true
         shell: bash
         run: |
           npm install -g electron@6.1.4 orca
-          sudo orca graph '{ "data": [{"y": [1,2,1]}] }' -o fig.png
+          
+      - Install phantomjs
+        if: matrix.config.shinytest == true
+        run: |
+          pak::pak("shinytest")
+          shinytest::installDependencies()
+        shell: Rscript {0}
 
       - name: Install dependencies
         run: |
