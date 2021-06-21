@@ -21,7 +21,7 @@ m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
 # With plotly.js 2.0, orca() starts to fail on this plot, but works fine with 
 # a taller viewport (e.g., orca(m, height = 1000, width = 600))
 #L <- expect_doppelganger_built(m, "density2dfill")
-L <- plotly_build(p)$x[c("data", "layout")]
+L <- plotly_build(m)$x[c("data", "layout")]
 
 test_that("StatDensity2d with GeomPolygon translates to filled path(s)", {
   # only the marker traces should be shown in the legend
