@@ -93,6 +93,7 @@ jobs:
         run: |
           pak::pak("shinytest")
           shinytest::installDependencies()
+          pak::pak()
         shell: Rscript {0}
 
       - name: Install dependencies
@@ -111,8 +112,9 @@ jobs:
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
         run: |
-          if (!require(devtools)) install.packages("devtools")
-          devtools::install()
+          options(crayon.enabled = TRUE)
+          if (!require(devtools)) pak::pak("devtools")
+          if (!require(reshape2)) pak::pak("reshape2")
           res <- devtools::test()
           df <- as.data.frame(res)
           if (sum(df$failed) > 0 || any(df$error)) stop("GHA CI tests failed")
