@@ -42,6 +42,9 @@ jobs:
       VDIFFR: ${{ matrix.config.vdiffr }}
       SHINYTEST: ${{ matrix.config.shinytest }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+      plotly_username: ${{ secrets.PLOTLY_USERNAME }}
+      plotly_api_key: ${{ secrets.PLOTLY_API_KEY }}
 
     steps:
       - uses: actions/checkout@v2
