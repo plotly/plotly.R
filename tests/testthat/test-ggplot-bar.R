@@ -127,7 +127,7 @@ test_that('guides(colour="none") does not affect fill legend', {
 test_that("guides(fill=FALSE) does not affect colour legend", {
   gg <- ggplot(data = df, aes(x = time, y = total_bill, colour = time)) +
     geom_bar(fill = "grey", stat = "identity") +
-    guides(fill = FALSE)
+    guides(fill = "none")
   info <- expect_traces(gg, 2, "aes-colour-guides-fill-FALSE")
   for(tr in info$data){
     expect_equivalent(tr$marker$color, toRGB("grey"))

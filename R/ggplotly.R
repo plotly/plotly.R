@@ -346,7 +346,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       x <- reComputeGroup(x, z)
       tib <- tibble::as_tibble(x[c("PANEL", "group")])
       tib[["key"]] <- key
-      nested <- tidyr::nest(tib, key, .key = key)
+      nested <- tidyr::nest(tib, key = key)
       # reduce the dimensions of list column elements from 2 to 1
       nested$key <- lapply(nested$key, function(x) x[[1]])
       nested
