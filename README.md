@@ -3,13 +3,14 @@
 
 <img src="man/figures/plotly.png" width="200" />
 
-[![Build
-Status](https://travis-ci.org/ropensci/plotly.png?branch=master)](https://travis-ci.org/ropensci/plotly)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/ropensci/plotly/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/plotly/actions)
 [![CRAN
 Status](https://www.r-pkg.org/badges/version/plotly)](https://cran.r-project.org/package=plotly)
 [![CRAN
 Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://www.rpackages.io/package/plotly)
 [![monthly](https://cranlogs.r-pkg.org/badges/plotly)](https://www.rpackages.io/package/plotly)
+<!-- badges: end -->
 
 An R package for creating interactive web graphics via the open source
 JavaScript graphing library
@@ -23,10 +24,10 @@ Install from CRAN:
 install.packages("plotly")
 ```
 
-Or install the latest development version (on GitHub) via devtools:
+Or install the latest development version (on GitHub) via `{remotes}`:
 
 ``` r
-devtools::install_github("ropensci/plotly")
+remotes::install_github("ropensci/plotly")
 ```
 
 ## Getting started

@@ -1,5 +1,5 @@
 # If VDIFFR is TRUE, enable visual testing
-enable_vdiffr <- as.logical(Sys.getenv("VDIFFR", FALSE))
+enable_vdiffr <- grepl("true", Sys.getenv("VDIFFR"), fixed = TRUE)
 
 message("Visual testing is ", if (!enable_vdiffr) "not ", "enabled.")
 
@@ -46,9 +46,6 @@ if (enable_vdiffr) {
     writeLines(svg_txt, file)
   }
   
-  # force the vdiffr shiny app to open in a real browser 
-  # (some svg files seem to not render properly in RStudio)
-  options(shiny.launch.browser = interactive())
 } 
 
 expect_doppelganger <- function(p, name, ...) {
