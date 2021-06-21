@@ -31,7 +31,7 @@ jobs:
           - {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
           - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.1.0 (ubuntu-18.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
           # vdiffr & shinytest only runs on linux r-release since the results aren't cross-platform
-          - {os: ubuntu-18.04,   r: 'release', vdiffr: true, shinytest: true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'release', vdiffr: true, node: "14.x", shinytest: true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.6',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.5',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
@@ -84,6 +84,10 @@ jobs:
       #    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
       #    apt-get update -y
       #    apt-get install -y google-chrome-stable
+      
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.config.node }}
       
       # TODO: maybe this should install via conda or npm instead?
       - name: Install orca
