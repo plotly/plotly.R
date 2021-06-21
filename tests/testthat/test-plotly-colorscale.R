@@ -1,4 +1,4 @@
-context("colorscales")
+
 
 
 test_that("Can specify marker.colorscale", {

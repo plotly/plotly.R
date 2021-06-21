@@ -1,4 +1,3 @@
-context("coord_fixed")
 
 test_that("single-panel fixed coordinates", {
   

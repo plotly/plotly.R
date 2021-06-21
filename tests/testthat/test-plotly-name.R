@@ -1,4 +1,3 @@
-context("name-mapping")
 
 test_that("can create multiple traces from name argument", {
   l <- plot_ly() %>% 

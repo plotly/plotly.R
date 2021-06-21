@@ -1,6 +1,4 @@
-context("shiny")
-
-
+ 
 test_that("event_register() registers an event", {
   p <- plotly_build(plot_ly(x = 1))
   
@@ -11,7 +9,6 @@ test_that("event_register() registers an event", {
   expect_true("plotly_selecting" %in% p$x$shinyEvents)
 })
 
-
 test_that("event_unregister() de-registers an event", {
   p <- plotly_build(plot_ly(x = 1))
   
@@ -21,7 +18,6 @@ test_that("event_unregister() de-registers an event", {
   
   expect_false("plotly_selected" %in% p$x$shinyEvents)
 })
-
 
 test_that("event_data shiny app works", {
   skip_on_cran()

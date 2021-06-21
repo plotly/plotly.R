@@ -1,4 +1,3 @@
-context("ggplot ylim")
 
 # http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_%28ggplot2%29/
 

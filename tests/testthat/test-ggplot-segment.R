@@ -1,4 +1,4 @@
-context("segment")
+
 
 test_that("segments become one path", {
   seg.df <- data.frame(

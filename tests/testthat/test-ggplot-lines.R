@@ -1,4 +1,4 @@
-context("lines")
+
 
 test_that("6 different automatic lty converted to plotly's 6 types", {
   d <- expand.grid(x=1:6, y=1:6)

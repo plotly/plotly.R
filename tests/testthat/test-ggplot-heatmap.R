@@ -1,4 +1,4 @@
-context("Heatmap")
+
 
 wdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 dtimes <- c("Morning", "Afternoon", "Evening")

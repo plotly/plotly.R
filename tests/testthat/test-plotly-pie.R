@@ -1,4 +1,4 @@
-context("pie")
+
 
 ds <- data.frame(
   labels = c("A", "B", "C"),

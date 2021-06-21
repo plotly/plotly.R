@@ -1,4 +1,4 @@
-context("highlighting and animation")
+
 
 m <- crosstalk::SharedData$new(mtcars, ~vs)
 p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()

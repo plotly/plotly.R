@@ -1,4 +1,4 @@
-context("sunburst")
+
 
 test_that("Simple sunburst works", {
   d <- data.frame(

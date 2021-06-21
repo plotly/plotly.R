@@ -1,4 +1,4 @@
-context("group2NA")
+
 
 test_that("group2NA() returns the data untouched if vars don't exist", {
   

@@ -1,4 +1,4 @@
-context("geom_errorbarh")
+
 
 test_that("geom_errorbarh gives horizontal errorbars", {
 

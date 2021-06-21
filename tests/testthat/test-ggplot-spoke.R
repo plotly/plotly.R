@@ -1,4 +1,4 @@
-context("spoke")
+
 
 df <- expand.grid(x = 1:10, y = 1:10)
 df$angle <- runif(100, 0, 2*pi)

@@ -1,4 +1,4 @@
-context("Step")
+
 
 # Dataset for test
 oranges <- subset(Orange, Tree %in% c(1, 2))

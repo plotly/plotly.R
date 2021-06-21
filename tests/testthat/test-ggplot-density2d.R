@@ -1,4 +1,4 @@
-context("Density2d")
+
 
 # Draw a 2d density estimation using geom_density2d
 m <- ggplot(MASS::geyser, aes(x=duration, y=waiting)) + 

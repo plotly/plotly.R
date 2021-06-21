@@ -1,4 +1,3 @@
-context("plotly-symbol")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
