@@ -1,0 +1,22 @@
+diff --git a/src/lib/array.js b/src/lib/array.js
+index 19463675a..470d3d6bf 100644
+--- a/src/lib/array.js
++++ b/src/lib/array.js
+@@ -2,8 +2,15 @@
+ 
+ var isArray = Array.isArray;
+ 
+-var ab = ArrayBuffer;
+-var dv = DataView;
++// IE9 fallbacks
++
++var ab = (typeof ArrayBuffer === 'undefined' || !ArrayBuffer.isView) ?
++    {isView: function() { return false; }} :
++    ArrayBuffer;
++
++var dv = (typeof DataView === 'undefined') ?
++    function() {} :
++    DataView;
+ 
+ function isTypedArray(a) {
+     return ab.isView(a) && !(a instanceof dv);
