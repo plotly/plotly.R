@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release', vdiffr: true, node: "8.x", shinytest: true}
+          - {os: macOS-latest,   r: 'release', visual_tests: true, node: "14.x", shinytest: true}
           - {os: windows-latest, r: 'release'}
           - {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
           - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.1.0 (ubuntu-18.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
@@ -39,7 +39,7 @@ jobs:
 
     env:
       RSPM: ${{ matrix.config.rspm }}
-      VDIFFR: ${{ matrix.config.vdiffr }}
+      VISUAL_TESTS: ${{ matrix.config.visual_tests }}
       SHINYTEST: ${{ matrix.config.shinytest }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
           node-version: ${{ matrix.config.node }}
       
       - name: Install orca
-        if: matrix.config.vdiffr == true
+        if: matrix.config.visual_tests == true
         run: npm install -g electron@6.1.4 orca
         shell: bash
           

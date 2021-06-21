@@ -1,10 +1,9 @@
-# If VDIFFR is TRUE, enable visual testing
-enable_vdiffr <- grepl("true", Sys.getenv("VDIFFR"), fixed = TRUE)
+visual_testing <- grepl("true", Sys.getenv("VISUAL_TESTS"), fixed = TRUE)
 
-message("Visual testing is ", if (!enable_vdiffr) "not ", "enabled.")
+message("Visual testing is ", if (!visual_testing) "not ", "enabled.")
 
 # start up the orca image server
-if (enable_vdiffr) {
+if (visual_testing) {
   # try 20 random ports
   for (vdiff_port_tries in 1:20) {
     port <- floor(runif(1, 3001, 8000))
@@ -21,7 +20,7 @@ if (enable_vdiffr) {
 
 expect_doppelganger <- function(p, name, ...) {
   
-  if (!enable_vdiffr) {
+  if (!visual_testing) {
     return(invisible(NULL))
   }
   
