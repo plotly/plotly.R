@@ -16,7 +16,7 @@ p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs), shape = factor(cyl)
   geom_point()
 
 test_that("Discrete colour and shape get merged into one legend", {
-  info <- expect_doppelganger_built(p, "scatter_legend")
+  info <- expect_doppelganger_built(p + theme(), "scatter_legend")
   expect_equivalent(length(info$data), 5)
   expect_true(info$layout$showlegend)
   # 5 legend entries
