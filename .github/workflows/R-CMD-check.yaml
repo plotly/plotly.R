@@ -82,11 +82,10 @@ jobs:
       
       - name: Install orca
         if: matrix.config.vdiffr == true
+        run: npm install -g electron@6.1.4 orca
         shell: bash
-        run: |
-          npm install -g electron@6.1.4 orca
           
-      - Install phantomjs
+      - name: Install phantomjs
         if: matrix.config.shinytest == true
         run: |
           pak::pak("shinytest")
