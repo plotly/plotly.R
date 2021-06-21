@@ -127,7 +127,6 @@ jobs:
 
       # Upload the whole pkg since tests where run with devtools::test()
       - name: Upload check results
-        if: failure()
         uses: actions/upload-artifact@master
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
