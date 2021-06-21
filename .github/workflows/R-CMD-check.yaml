@@ -119,6 +119,14 @@ jobs:
           df <- as.data.frame(res)
           if (sum(df$failed) > 0 || any(df$error)) stop("GHA CI tests failed")
         shell: Rscript {0}
+        
+      # Upload the whole pkg since tests where run with devtools::test()
+      - name: Upload check results
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: ./
 
       # Run check with --no-tests since we ran them abve
       - name: Check
@@ -126,13 +134,6 @@ jobs:
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-tests", "--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-
-      # Upload the whole pkg since tests where run with devtools::test()
-      - name: Upload check results
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: ./
 
       #- name: Show testthat output
       #  if: always()
