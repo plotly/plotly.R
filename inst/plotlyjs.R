@@ -13,6 +13,9 @@ tmp <- tempfile(fileext = ".zip")
 download.file(zip, tmp)
 unzip(tmp)
 
+# TODO: patch source to add back in phantomjs support
+# https://github.com/plotly/plotly.js/pull/5380/files#diff-459a89970d7ac2d1323f78c770d768ecbbfb9f698b0d1e25e8010e0eb73f56edR12-R14
+
 # update the default bundle
 file.copy(
   Sys.glob("*plotly.js*/dist/plotly.min.js"), 
@@ -32,11 +35,14 @@ file.copy(
   file.path("inst/htmlwidgets/lib/plotlyjs/locales", sub("^plotly-locale-", "", basename(locales))),
   overwrite = TRUE
 )
-# update typed array polyfill
-download.file(
-  "https://raw.githubusercontent.com/plotly/plotly.js/master/dist/extras/typedarray.min.js",
-  "inst/htmlwidgets/lib/typedarray/typedarray.min.js"
-)
+# plotly.js used to bundle a typedarray polyfill to support older browsers,
+# but v2 drops support for them, so it no longer includes this polyfill
+# Hopefully, we can continue to get away with using the pre-v2 polyfill
+# to support shinytest/phantomjs
+#download.file(
+#  "https://raw.githubusercontent.com/plotly/plotly.js/master/dist/extras/typedarray.min.js",
+#  "inst/htmlwidgets/lib/typedarray/typedarray.min.js"
+#)
 
 # update the plot schema
 Schema <- jsonlite::fromJSON(Sys.glob("*plotly.js*/dist/plot-schema.json"))
