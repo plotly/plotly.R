@@ -1,4 +1,3 @@
-context("geom_jitter")
 
 # Expect trace function
 expect_traces <- function(gg, n_traces, name) {

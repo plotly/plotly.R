@@ -1,5 +1,3 @@
-context("Hline")
-# Horizontal line
 
 x <- seq(0, 3.5, by = 0.5)
 y <- x * 0.95

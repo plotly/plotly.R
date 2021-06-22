@@ -1,4 +1,4 @@
-context("bar")
+
 
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.numeric(n.traces))
@@ -134,7 +134,7 @@ test_that("guides(fill=FALSE) does not affect colour legend", {
     expect_true(is.character(tr$marker$line$color))
     expect_true(tr$showlegend)
   }
-  expect_match(info$layout$annotations[[1]]$text, "time")
+  expect_match(info$layout$legend$title$text, "time")
   expect_true(info$layout$showlegend)
 })
 

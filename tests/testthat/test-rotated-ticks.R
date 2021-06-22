@@ -1,4 +1,3 @@
-context("rotated ticks")
 
 ss <- data.frame(State=paste("some long text", c("CA", "NY", "TX")),
                  Prop.Inv=c(0, 1, 0.7),

@@ -845,9 +845,6 @@ verify_showlegend <- function(p) {
   # this attribute should be set in hide_legend()
   # it ensures that "legend titles" go away in addition to showlegend = FALSE
   if (isTRUE(p$x$.hideLegend)) {
-    ann <- p$x$layout$annotations
-    is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
-    p$x$layout$annotations <- ann[!is_title]
     p$x$layout$showlegend <- FALSE 
   }
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))

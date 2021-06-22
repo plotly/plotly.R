@@ -1,4 +1,3 @@
-context("waterfall")
 
 test_that("Simple waterfall works", {
   p <- plot_ly() %>%

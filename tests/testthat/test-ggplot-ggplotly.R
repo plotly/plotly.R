@@ -1,4 +1,3 @@
-context("ggplotly+plotly")
 
 p <- ggplot(txhousing, aes(x = date, y = median, group = city)) +
   geom_line(alpha = 0.3)

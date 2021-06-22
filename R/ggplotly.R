@@ -999,26 +999,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     traces <- c(traces, colorbar)
     
-    # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    if (isTRUE(gglayout$showlegend)) {
-      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = br())
-      titleAnnotation <- make_label(
-        legendTitle,
-        x = gglayout$legend$x %||% 1.02,
-        y = gglayout$legend$y %||% 1,
-        theme$legend.title,
-        xanchor = "left",
-        yanchor = "bottom",
-        # just so the R client knows this is a title
-        legendTitle = TRUE
-      )
-      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-      # adjust the height of the legend to accomodate for the title
-      # this assumes the legend always appears below colorbars
-      gglayout$legend$y <- (gglayout$legend$y %||% 1) -
-        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
-    }
+    legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
+    legendTitle <- paste(legendTitles, collapse = br())
+    gglayout$legend$title <- list(
+      text = legendTitle,
+      font = text2font(theme$legend.title)
+    )
   }
   
   # flip x/y in traces for flipped coordinates

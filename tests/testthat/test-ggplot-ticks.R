@@ -1,4 +1,3 @@
-context("ggplot ticks")
 
 PlantGrowth$type <-
   ifelse(PlantGrowth$group == "ctrl", "control", "treatment")

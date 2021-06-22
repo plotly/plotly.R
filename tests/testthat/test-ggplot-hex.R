@@ -1,5 +1,3 @@
-context("hex")
-
 d <- ggplot(diamonds, aes(carat, price))
 
 test_that("geom_hex", {

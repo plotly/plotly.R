@@ -1,4 +1,4 @@
-context("size")
+
 
 test_that("size is a vector if it is specified", {
   pplot <- ggplot(palmerpenguins::penguins) +

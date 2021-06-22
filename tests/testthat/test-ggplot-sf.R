@@ -1,4 +1,3 @@
-context("geom_sf")
 
 test_that("geom_sf() basic polygons.", {
   skip_if_not_installed("sf")

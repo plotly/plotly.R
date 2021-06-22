@@ -1,5 +1,3 @@
-context("cookbook lines")
-
 expect_traces <- function(gg, n.traces, name) {
   stopifnot(is.numeric(n.traces))
   L <- expect_doppelganger_built(gg, paste0("cookbook-axes-", name))

@@ -1,4 +1,3 @@
-context("partial-bundles")
 
 test_that("Can reduce saved file size with an basic (auto) partial bundle by half", {
   skip_on_cran()

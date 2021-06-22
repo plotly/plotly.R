@@ -1,5 +1,3 @@
-context("rug")
-
 
 base <- ggplot(mtcars, aes(wt, mpg)) +
   geom_point()

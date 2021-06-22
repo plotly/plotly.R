@@ -1,4 +1,4 @@
-context("geom_point")
+
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))

@@ -1,4 +1,4 @@
-context("maps")
+
 
 
 test_that("basic geom_map works",  {
