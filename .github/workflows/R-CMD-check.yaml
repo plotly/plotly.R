@@ -103,7 +103,8 @@ jobs:
         if: matrix.config.visual_tests == true
         run: |
           sudo chown -R $UID $CONDA
-          Rscript -e "reticulate::conda_install('r-reticulate', 'python-kaleido', channel = 'conda-forge')"
+          Rscript -e "reticulate::conda_install('r-reticulate', 'python-kaleido')"
+          Rscript -e "reticulate::use_condaenv('r-reticulate')"
           Rscript -e "reticulate::py_config()"
           Rscript -e "reticulate::conda_list()"
         shell: bash
