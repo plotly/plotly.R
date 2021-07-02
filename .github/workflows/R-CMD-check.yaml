@@ -62,10 +62,15 @@ jobs:
         with:
           python-version: 3.8
           
+      - name: Fix Conda permissions on macOS
+        if: runner.os == 'macOS'
+        run: sudo chown -R $UID $CONDA
+          
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
           pip install kaleido
+          conda install -c conda-forge python-kaleido
         shell: bash
 
       - name: Install pak and query dependencies
