@@ -97,15 +97,26 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      
-      # https://github.com/nextstrain/conda/issues/5
+          
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
-          sudo chown -R $UID $CONDA
+          Rscript -e "reticulate::py_config()"
+          Rscript -e "reticulate::conda_list()"
+        shell: bash
+      
+      - name: Install kaleido
+        if: matrix.config.visual_tests == true
+        run: |
+          echo $CONDA
+          sudo chown -R $UID $CONDA # https://github.com/nextstrain/conda/issues/5
           Rscript -e "reticulate::install_miniconda()"
           Rscript -e "reticulate::conda_install('r-reticulate', 'python-kaleido')"
           Rscript -e "reticulate::use_miniconda('r-reticulate')"
+          
+      - name: Install kaleido
+        if: matrix.config.visual_tests == true
+        run: |
           Rscript -e "reticulate::py_config()"
           Rscript -e "reticulate::conda_list()"
         shell: bash
