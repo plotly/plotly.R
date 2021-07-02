@@ -61,6 +61,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+      
+      - name: Hack
+        if: matrix.config.visual_tests == true
+        run: unset SUDO_UID SUDO_GID SUDO_USER >> ~/.bashrc
+        shell: bash
           
       - name: Install kaleido
         if: matrix.config.visual_tests == true
