@@ -114,6 +114,10 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
         
+      - name: Install package
+        run: R CMD install .
+        shell: bash
+        
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
         run: |
