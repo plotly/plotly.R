@@ -1,13 +1,6 @@
-#' Static image exporting 
+#' Static image exporting via orca
 #' 
-#' Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
-#' [orca command-line utility](https://github.com/plotly/orca#installation).
-#' 
-#' The `orca()` function is designed for exporting one plotly graph whereas `orca_serve()`
-#' is meant for exporting many graphs at once. The former starts and stops an external (nodejs)
-#' process everytime it is called whereas the latter starts up a process when called, then
-#' returns an `export()` method for exporting graphs as well as a `close()` method for stopping 
-#' the external (background) process.
+#' Superseded by [kaleido()].
 #' 
 #' @param p a plotly object.
 #' @param file output filename.
@@ -67,17 +60,14 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
                  safe = FALSE, more_args = NULL, ...) {
   
+  .Deprecated("kaleido")
+  
   orca_available()
   
   b <- plotly_build(p)
   
   # find the relevant plotly.js bundle
-  plotlyjs <- plotlyjsBundle(b)
-  plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
-  # package field means src file path should be relative to pkg dir
-  if (!is.null(plotlyjs$package)) {
-    plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
-  }
+  plotlyjs_path <- plotlyMainBundlePath()
   
   tmp <- tempfile(fileext = ".json")
   cat(to_JSON(b$x[c("data", "layout")]), file = tmp)
@@ -141,17 +131,14 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
                        keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
                        debug = FALSE, more_args = NULL, ...) {
   
+  .Deprecated("kaleido")
+  
   # make sure we have the required infrastructure
   orca_available()
   try_library("processx", "orca_serve")
   
   # use main bundle since any plot can be thrown at the server
-  plotlyjs <- plotlyMainBundle()
-  plotlyjs_path <- file.path(plotlyjs$src$file, plotlyjs$script)
-  # package field means src file path should be relative to pkg dir
-  if (!is.null(plotlyjs$package)) {
-    plotlyjs_path <- system.file(plotlyjs_path, package = plotlyjs$package)
-  }
+  plotlyjs_path <- plotlyMainBundlePath()
   
   args <- c(
     "serve",

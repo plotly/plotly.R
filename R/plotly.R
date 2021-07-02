@@ -487,6 +487,15 @@ plotlyMainBundle <- function() {
   )
 }
 
+plotlyMainBundlePath <- function() {
+  dep <- plotlyMainBundle()
+  path <- file.path(dep$src$file, dep$script)
+  if (!is.null(dep$package)) {
+    path <- system.file(path, package = dep$package)
+  }
+  path
+}
+
 plotlyHtmlwidgetsCSS <- function() {
   htmltools::htmlDependency(
     name = "plotly-htmlwidgets-css", 

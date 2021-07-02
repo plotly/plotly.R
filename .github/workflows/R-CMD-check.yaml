@@ -83,9 +83,9 @@ jobs:
         with:
           node-version: ${{ matrix.config.node }}
       
-      - name: Install orca
+      - name: Install kaleido
         if: matrix.config.visual_tests == true
-        run: npm install -g electron@6.1.4 orca
+        run: pip install kaleido
         shell: bash
           
       - name: Install phantomjs
