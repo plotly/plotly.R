@@ -117,7 +117,7 @@ jobs:
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
         run: |
-          options(crayon.enabled = TRUE)
+          options(crayon.enabled = TRUE, testthat.progress.max_fails=1000)
           if (!require(devtools)) pak::pak("devtools")
           if (!require(reshape2)) pak::pak("reshape2")
           res <- devtools::test()
