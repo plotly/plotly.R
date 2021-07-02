@@ -72,12 +72,19 @@ jobs:
           key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
           restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
-      - name: Install system dependencies
+      - name: Install Linux sysdeps
         if: runner.os == 'Linux'
         run: |
           pak::local_system_requirements(execute = TRUE)
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
+        
+      - name: Install Mac sysdeps
+        if: runner.os == 'macOS'
+        run: |
+          brew install pkg-config
+          brew install gdal
+        shell: bash
       
       - uses: actions/setup-node@v1
         with:
