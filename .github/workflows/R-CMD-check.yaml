@@ -89,9 +89,8 @@ jobs:
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
-          pip install kaleido
+          unset SUDO_UID SUDO_GID SUDO_USER >> ~/.bashrc
           conda install -c conda-forge python-kaleido
-          sudo chmod 777 -R /usr/local/miniconda
         shell: bash
           
       - name: Install phantomjs
