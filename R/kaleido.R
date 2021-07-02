@@ -104,10 +104,19 @@ kaleido <- function(...) {
   res
 }
 
+
+#' Print method for kaleido
+#' 
+#' S3 method for [kaleido()].
+#' 
+#' @param x a [kaleido()] object.
+#' @param ... currently unused.
 #' @export
+#' @importFrom utils capture.output
+#' @keywords internal
 print.kaleidoScope <- function(x, ...) {
   args <- formals(x$transform)
   cat("$transform: function(", paste(names(args), collapse = ", "), ")\n", sep = "")
   cat("$shutdown: function()\n")
-  cat("$scope: ", capture.output(x$scope))
+  cat("$scope: ", utils::capture.output(x$scope))
 }
