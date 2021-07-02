@@ -61,15 +61,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-          
-      - name: Fix Conda permissions on macOS
-        if: runner.os == 'macOS'
-        run: sudo chown -R $UID $CONDA
-          
+      
+      # https://github.com/nextstrain/conda/issues/5
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
-          pip install kaleido
+          sudo chown -R $UID $CONDA
           conda install -c conda-forge python-kaleido
         shell: bash
 
@@ -94,13 +91,6 @@ jobs:
           pak::local_system_requirements(execute = TRUE)
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
-        
-      - name: Install Mac sysdeps
-        if: runner.os == 'macOS'
-        run: |
-          brew install pkg-config
-          brew install gdal
-        shell: bash
           
       - name: Install phantomjs
         if: matrix.config.shinytest == true
@@ -111,7 +101,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          options(install.packages.check.source = "no")
+          if (.Platform[['OS.type']] == 'windows' || Sys.info()[['sysname']] == 'Darwin') options(pkgType = 'binary')
           pak::local_install_dev_deps(upgrade = TRUE)
           pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
