@@ -44,17 +44,14 @@ kaleido <- function(...) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop("`kaleido()` requires `reticulate::py_available()`  to be `TRUE`. Do you need to install python?")
   }
-  reticulate::py_run_string(
-    "from kaleido.scopes.plotly import PlotlyScope", 
-    convert = FALSE
-  )
+  
+  py <- reticulate::py
   scope_name <- paste0("scope_", new_id())
-  reticulate::py_run_string(
-    sprintf("%s = PlotlyScope(plotlyjs='%s')", scope_name, plotlyMainBundlePath()),
-    convert = FALSE
+  py[[scope_name]] <- reticulate::import("kaleido")$scopes$plotly$PlotlyScope(
+    plotlyjs = plotlyMainBundlePath()
   )
   
-  scope <- reticulate::py[[scope_name]]
+  scope <- py[[scope_name]]
   
   mapbox <- Sys.getenv("MAPBOX_TOKEN", NA)
   if (!is.na(mapbox)) {
