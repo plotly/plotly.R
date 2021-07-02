@@ -105,7 +105,7 @@ jobs:
           sudo chown -R $UID $CONDA
           Rscript -e "reticulate::install_miniconda()"
           Rscript -e "reticulate::conda_install('visual-testing', 'python-kaleido')"
-          Rscript -e "reticulate::use_condaenv('visual-testing')"
+          Rscript -e "reticulate::use_miniconda('visual-testing')"
           Rscript -e "reticulate::py_config()"
           Rscript -e "reticulate::conda_list()"
         shell: bash
