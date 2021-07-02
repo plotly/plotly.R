@@ -104,7 +104,7 @@ jobs:
         run: |
           sudo chown -R $UID $CONDA
           #conda install -c conda-forge python-kaleido
-          Rscript -e "reticulate::conda_install('r-reticulate', 'kaleido', channel = 'python-kaleido')"
+          Rscript -e "reticulate::conda_install('r-reticulate', 'python-kaleido', channel = 'conda-forge')"
         shell: bash
 
       - name: Session info
