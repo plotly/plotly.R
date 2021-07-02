@@ -64,7 +64,9 @@ jobs:
           
       - name: Install kaleido
         if: matrix.config.visual_tests == true
-        run: conda install -c conda-forge python-kaleido
+        run: |
+          unset SUDO_UID SUDO_GID SUDO_USER
+          conda install -c conda-forge python-kaleido
         shell: bash
 
       - name: Install pak and query dependencies
