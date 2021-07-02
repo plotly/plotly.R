@@ -56,6 +56,16 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
 
       - uses: r-lib/actions/setup-pandoc@v1
+      
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          
+      - name: Install kaleido
+        if: matrix.config.visual_tests == true
+        run: conda install -c conda-forge python-kaleido
+        shell: bash
 
       - name: Install pak and query dependencies
         run: |
@@ -84,13 +94,6 @@ jobs:
         run: |
           brew install pkg-config
           brew install gdal
-        shell: bash
-      
-      - name: Install kaleido
-        if: matrix.config.visual_tests == true
-        run: |
-          sudo chmod 777 -R /usr/local/miniconda
-          conda install -c conda-forge python-kaleido
         shell: bash
           
       - name: Install phantomjs
