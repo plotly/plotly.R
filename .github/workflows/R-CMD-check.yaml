@@ -84,11 +84,8 @@ jobs:
         run: |
           brew install pkg-config
           brew install gdal
+          Rscript -e 'install.packages("sf", configure.args = "--with-proj-lib=/usr/local/lib/")'
         shell: bash
-      
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.config.node }}
       
       - name: Install kaleido
         if: matrix.config.visual_tests == true
