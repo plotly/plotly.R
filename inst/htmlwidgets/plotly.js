@@ -430,7 +430,7 @@ HTMLWidgets.widget({
         traceManager.updateFilter(set, e.value);
       };
       filter.on("change", filterChange);
-      
+      if (filter.invokeChangeHandler) filter.invokeChangeHandler();
       
       var selectionChange = function(e) {
         
@@ -486,6 +486,7 @@ HTMLWidgets.widget({
         }
       }
       selection.on("change", selectionChange);
+      if (selection.invokeChangeHandler) selection.invokeChangeHandler();
       
       // Set a crosstalk variable selection value, triggering an update
       var turnOn = function(e) {
