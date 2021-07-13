@@ -833,11 +833,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       gglayout[[axisName]] <- axisObj
       
       # do some stuff that should be done once for the entire plot
+      is_x <- xy == "x"
       if (i == 1) {
         # Split ticktext elements by "\n"  to account for linebreaks
         axisTickText <- strsplit(as.character(axisObj$ticktext), split = "\n", fixed = TRUE)
         axisTickText <- longest_element(unlist(axisTickText))
-        side <- if (xy == "x") "b" else "l"
+        side <- if (is_x) "b" else "l"
         # account for axis ticks, ticks text, and titles in plot margins
         # (apparently ggplot2 doesn't support axis.title/axis.text margins)
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
@@ -847,40 +848,45 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (robust_nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
-          offset <-
-            (0 -
-               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
-               unitConvert(theme$axis.ticks.length, "npc", type))
         }
         
         # add space for exterior facet strips in `layout.margin`
         
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
-          if (xy == "x") {
+          if (is_x) {
             gglayout$margin$t <- gglayout$margin$t + stripSize
           }
-          if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
+          if (is_x && inherits(plot$facet, "FacetGrid")) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
           if (robust_nchar(axisTitleText) > 0) {
-            # npc is on a 0-1 scale of the _entire_ device,
-            # but these units _should_ be wrt to the plotting region
-            # multiplying the offset by 2 seems to work, but this is a terrible hack
-            x <- if (xy == "x") 0.5 else offset
-            y <- if (xy == "x") offset else 0.5
-            gglayout$annotations <- c(
-              gglayout$annotations,
-              make_label(
-                faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = if (xy == "x") "center" else "right", 
-                yanchor = if (xy == "x") "top" else "center", 
-                annotationType = "axis"
-              )
+            axisAnn <- make_label(
+              faced(axisTitleText, axisTitle$face), 
+              el = axisTitle,
+              x = if (is_x) 0.5 else 0,
+              y = if (is_x) 0 else 0.5,
+              xanchor = if (is_x) "center" else "right", 
+              yanchor = if (is_x) "top" else "center", 
+              annotationType = "axis"
             )
+            
+            textMargin <- sum(axisText$margin[c(1, 3)])
+            class(textMargin) <- setdiff(class(textMargin), "margin")
+            titleMargin <- axisTitle$margin[if (is_x) 1 else 2]
+            class(titleMargin) <- setdiff(class(titleMargin), "margin")
+            offset <- bbox(axisTickText, axisText$angle, axisTextSize)[[type]] +
+                 unitConvert(theme$axis.ticks.length, "npc", type) +
+                 unitConvert(textMargin, "npc", type) +
+                 unitConvert(titleMargin, "npc", type)
+            
+            offset <- unitConvert(grid::unit(offset, "npc"), "pixels", type)
+            
+            shift <- if (is_x) "yshift" else "xshift"
+            axisAnn[[1]][[shift]] <- -1 * offset
+            gglayout$annotations <- c(gglayout$annotations, axisAnn)
           }
         }
       }
