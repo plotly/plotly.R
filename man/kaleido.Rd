@@ -38,6 +38,17 @@ Static image exporting via \href{https://github.com/plotly/Kaleido/}{the kaleido
 kaleido into a \pkg{reticulate}d Python session and returns a \verb{$transform()}
 method for converting R plots into static images (see examples below).
 }
+\section{Installation}{
+
+
+\code{kaleido()} requires \href{https://github.com/plotly/Kaleido/}{the kaleido python package} to be usable via the \pkg{reticulate} package. Here is a recommended way to do the installation:\preformatted{install.packages('reticulate')
+reticulate::install_miniconda()
+reticulate::conda_install('r-reticulate', 'python-kaleido')
+reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
+reticulate::use_miniconda('r-reticulate')
+}
+}
+
 \examples{
 
 \dontrun{

@@ -5,6 +5,19 @@
 #' kaleido into a \pkg{reticulate}d Python session and returns a `$transform()`
 #' method for converting R plots into static images (see examples below).
 #' 
+#' @section Installation:
+#' 
+#' `kaleido()` requires [the kaleido python
+#' package](https://github.com/plotly/Kaleido/) to be usable via the \pkg{reticulate} package. Here is a recommended way to do the installation:
+#' 
+#' ```
+#' install.packages('reticulate')
+#' reticulate::install_miniconda()
+#' reticulate::conda_install('r-reticulate', 'python-kaleido')
+#' reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
+#' reticulate::use_miniconda('r-reticulate')
+#' ```
+#' 
 #' @param ... not currently used.
 #' @export
 #' @return an environment which contains:
