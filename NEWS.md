@@ -8,6 +8,10 @@
 
 * `ggplotly()` now uses the `layout.legend.title` (instead of `layout.annotations`) plotly.js API to convert guides for discrete scales. (#1961)
 
+## New Features
+
+* Added new `kaleido()` function for static image exporting via the [kaleido python package](https://github.com/plotly/Kaleido). See `help(kaleido, package = "plotly")` for installation info and example usage. (#1971)
+
 ## Improvements
 
 * `ggplotly()` now better positions axis titles for `facet_wrap()`/`facet_grid()`. (#1975)

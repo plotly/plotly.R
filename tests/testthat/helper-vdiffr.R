@@ -3,20 +3,12 @@ visual_testing <- grepl("true", Sys.getenv("VISUAL_TESTS"), fixed = TRUE)
 message("Visual testing is ", if (!visual_testing) "not ", "enabled.")
 
 # start up the orca image server
-if (visual_testing) {
-  # try 20 random ports
-  for (vdiff_port_tries in 1:20) {
-    port <- floor(runif(1, 3001, 8000))
-    success <- tryFALSE({
-      # init image server with webgl enabled
-      # maybe someday this won't be necessary 
-      # https://github.com/plotly/orca/issues/127
-      orcaServer <- orca_serve(port = port, more_args = "--enable-webgl")
-      orcaServer$process$is_alive() && is.null(orcaServer$process$get_exit_status())
-    })
-    if (success) break
-  }
-} 
+imageServer <- if (visual_testing) {
+  kaleido() 
+} else {
+  list(transform = function(...) stop("Visual testing is disabled!"))
+}
+
 
 expect_doppelganger <- function(p, name, ...) {
   
@@ -53,13 +45,9 @@ write_plotly_svg <- function(p, file) {
   p$x$data <- Map(function(tr, id) { tr$uid <- id; tr }, p$x$data, uid_data)
   
   # write svg to disk
-  # NOTE TO SELF: yes, it would be great to use `orca_serve()` here, but it gives 
-  # slightly different results from `orca()` (ordering of attributes are different)
-  # and `orca_serve()` doesn't seem to run reliably everywhere
   owd <- setwd(dirname(file))
   on.exit(setwd(owd))
-  # NOTE: the dimensions here should match the server args part of xvfb-run
-  orcaServer$export(p, file = basename(file), width = 640, height = 480)
+  imageServer$transform(p, file = basename(file), width = 640, height = 480)
   
   # strip out non-deterministic fullLayout.uid
   # TODO: if and when plotly provides an API to pre-specify, use it!

@@ -72,35 +72,33 @@ jobs:
           key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
           restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
-      - name: Install system dependencies
+      - name: Install Linux sysdeps
         if: runner.os == 'Linux'
         run: |
           pak::local_system_requirements(execute = TRUE)
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
-      
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.config.node }}
-      
-      - name: Install orca
-        if: matrix.config.visual_tests == true
-        run: npm install -g electron@6.1.4 orca
-        shell: bash
-          
-      - name: Install phantomjs
-        if: matrix.config.shinytest == true
-        run: |
-          pak::pak("shinytest")
-          shinytest::installDependencies()
-          pak::pak()
-        shell: Rscript {0}
-
+        
       - name: Install dependencies
         run: |
-          pak::local_install_dev_deps(upgrade = TRUE)
+          if (Sys.info()[['sysname']] == 'Darwin') options(pkgType = 'mac.binary')
+          pak::local_install_dev_deps(upgrade = FALSE)
           pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
+        
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - name: Install kaleido
+        if: matrix.config.visual_tests == true
+        run: |
+          sudo chown -R $UID $CONDA # https://github.com/nextstrain/conda/issues/5
+          Rscript -e "reticulate::install_miniconda()"
+          Rscript -e "reticulate::conda_install('r-reticulate', 'python-kaleido')"
+          Rscript -e "reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')"
+          Rscript -e "reticulate::use_miniconda('r-reticulate')"
 
       - name: Session info
         run: |
@@ -109,10 +107,17 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
         
+      - name: Install shinytest deps
+        if: matrix.config.shinytest == true
+        run: |
+          Rscript -e 'shinytest::installDependencies()'
+          R CMD install .
+        shell: bash
+        
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
         run: |
-          options(crayon.enabled = TRUE)
+          options(crayon.enabled = TRUE, testthat.progress.max_fails=1000)
           if (!require(devtools)) pak::pak("devtools")
           if (!require(reshape2)) pak::pak("reshape2")
           res <- devtools::test()
