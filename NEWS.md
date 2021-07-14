@@ -8,6 +8,10 @@
 
 * `ggplotly()` now uses the `layout.legend.title` (instead of `layout.annotations`) plotly.js API to convert guides for discrete scales. (#1961)
 
+## Improvements
+
+* `ggplotly()` now better positions axis titles for `facet_wrap()`/`facet_grid()`. (#1975)
+
 # 4.9.4.1
 
 ## BUG FIXES
