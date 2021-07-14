@@ -67,6 +67,7 @@ Suggests:
     dendextend,
     maptools,
     rgeos,
+    sf,
     png,
     IRdisplay,
     processx,
