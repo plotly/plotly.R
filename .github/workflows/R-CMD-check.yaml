@@ -89,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: |
           if (Sys.info()[['sysname']] == 'Darwin') options(pkgType = 'mac.binary')
-          pak::local_install_dev_deps(upgrade = TRUE)
+          pak::local_install_dev_deps(upgrade = FALSE)
           pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
         
