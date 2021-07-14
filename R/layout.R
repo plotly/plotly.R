@@ -162,6 +162,11 @@ config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL
   
   args <- list(...)
   if ("collaborate" %in% names(args)) warning("The collaborate button is no longer supported")
+  
+  args$modeBarButtonsToAdd <- unique(c(
+    args$modeBarButtonsToAdd, c("hoverclosest", "hovercompare")
+  ))
+  
   p$x$config <- modify_list(p$x$config, args)
   if (cloud) warning("The `cloud` argument is deprecated. Use `showSendToCloud` instead.")
   p$x$config$showSendToCloud <- showSendToCloud
