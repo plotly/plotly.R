@@ -873,7 +873,7 @@ gg2list <- function(p, width = NULL, height = NULL,
               annotationType = "axis"
             )
             
-            textMargin <- sum(axisText$margin[c(1, 3)])
+            textMargin <- sum(axisText$margin[if (is_x) c(1, 3) else c(2, 4)])
             class(textMargin) <- setdiff(class(textMargin), "margin")
             titleMargin <- axisTitle$margin[if (is_x) 1 else 2]
             class(titleMargin) <- setdiff(class(titleMargin), "margin")
