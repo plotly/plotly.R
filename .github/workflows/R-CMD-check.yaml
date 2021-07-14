@@ -85,12 +85,6 @@ jobs:
           pak::local_install_dev_deps(upgrade = FALSE)
           pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
-          
-      - name: Install phantomjs
-        if: matrix.config.shinytest == true
-        run: |
-          shinytest::installDependencies()
-        shell: Rscript {0}
         
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -113,9 +107,12 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
         
-      - name: Install package
-        run: pak::pak(upgrade = FALSE)
-        shell: Rscript {0}
+      - name: Install shinytest deps
+        if: matrix.config.shinytest == true
+        run: |
+          Rscript -e 'shinytest::installDependencies()'
+          R CMD install .
+        shell: bash
         
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
