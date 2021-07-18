@@ -19,7 +19,9 @@ webp, svg, or pdf).}
 
 \item{width, height}{The width/height of the exported image in layout
 pixels. If \code{scale} is 1, this will also be the width/height of the exported
-image in physical pixels. \code{scale}: The scale factor to use when exporting
+image in physical pixels.}
+
+\item{scale}{The scale factor to use when exporting
 the figure. A scale factor larger than 1.0 will increase the image
 resolution with respect to the figure's layout pixel dimensions. Whereas as
 scale factor of less than 1.0 will decrease the image resolution.}
