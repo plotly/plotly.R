@@ -10,7 +10,7 @@
 
 ## New Features
 
-* Added new `kaleido()` function for static image exporting via the [kaleido python package](https://github.com/plotly/Kaleido). See `help(kaleido, package = "plotly")` for installation info and example usage. (#1971)
+* Added new functions for static image exporting via the [kaleido python package](https://github.com/plotly/Kaleido), namely `save_image()` and `kaleido()`. See `help(save_image, package = "plotly")` for installation info and example usage. (#1971)
 
 ## Improvements
 
