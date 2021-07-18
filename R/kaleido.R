@@ -1,9 +1,9 @@
-#' Static image exporting via kaleido
+#' Save plot as a static image
 #' 
 #' Static image exporting via [the kaleido python
 #' package](https://github.com/plotly/Kaleido/). `kaleido()` imports
 #' kaleido into a \pkg{reticulate}d Python session and returns a `$transform()`
-#' method for converting R plots into static images (see examples below).
+#' method for converting R plots into static images. `save_image()` provides a convenience wrapper around `kaleido()$transform()`. 
 #' 
 #' @section Installation:
 #' 
@@ -19,20 +19,19 @@
 #' ```
 #' 
 #' @param ... not currently used.
+#' @param p a plot object.
+#' @param file a file path with a suitable file extension (png, jpg, jpeg,
+#'   webp, svg, or pdf).
+#' @param width,height The width/height of the exported image in layout
+#'   pixels. If `scale` is 1, this will also be the width/height of the exported
+#'   image in physical pixels.
+#' @param scale The scale factor to use when exporting
+#'   the figure. A scale factor larger than 1.0 will increase the image
+#'   resolution with respect to the figure's layout pixel dimensions. Whereas as
+#'   scale factor of less than 1.0 will decrease the image resolution.
 #' @export
-#' @return an environment which contains:
-#'   * `transform()`: a function to convert plots objects into static images, 
-#'     with the following arguments:
-#'       * `p`: a plot object.
-#'       * `file`: a file path with a suitable file extension (png, jpg, jpeg, 
-#'         webp, svg, or pdf).
-#'       * `width`, `height`: The width/height of the exported image in layout 
-#'         pixels. If `scale` is 1, this will also be the width/height of the 
-#'         exported image in physical pixels.
-#'       * `scale`: The scale factor to use when exporting the figure. A scale 
-#'         factor larger than 1.0 will increase the image resolution with 
-#'         respect to the figure's layout pixel dimensions. Whereas as
-#'         scale factor of less than 1.0 will decrease the image resolution.
+#' @return For `save_image()`, the generated `file`. For `kaleido()`, an environment that contains:
+#'   * `transform()`: a function to convert plots objects into static images. This function has the same signature (i.e., arguments) as `save_image()`
 #'   * `shutdown()`: a function for shutting down any currently running subprocesses 
 #'     that were launched via `transform()`
 #'   * `scope`: a reference to the underlying `kaleido.scopes.plotly.PlotlyScope`
@@ -41,15 +40,30 @@
 #' @examples 
 #' 
 #' \dontrun{
-#'   scope <- kaleido()
+#'   # Save a single image
+#'   p <- plot_ly(x = 1:10)
 #'   tmp <- tempfile(fileext = ".png")
-#'   scope$transform(plot_ly(x = 1:10), tmp)
+#'   save_image(p, tmp)
 #'   file.show(tmp)
+#' 
+#'   # Efficiently save multiple images
+#'   scope <- kaleido()
+#'   for (i in 1:5) {
+#'     scope$transform(p, tmp)
+#'   }
 #'   # Remove and garbage collect to remove 
 #'   # R/Python objects and shutdown subprocesses
 #'   rm(scope); gc()
 #' }
 #' 
+save_image <- function(p, file, ..., width = NULL, height = NULL, scale = NULL) {
+  kaleido()$transform(
+    p, file, ..., width = width, height = height, scale = scale
+  )
+}
+
+#' @rdname save_image
+#' @export
 kaleido <- function(...) {
   if (!rlang::is_installed("reticulate")) {
     stop("`kaleido()` requires the reticulate package.")
@@ -74,7 +88,7 @@ kaleido <- function(...) {
   res <- list2env(list(
     scope = scope,
     # https://github.com/plotly/Kaleido/blob/6a46ecae/repos/kaleido/py/kaleido/scopes/plotly.py#L78-L106
-    transform = function(p, file = "figure.png", width = NULL, height = NULL, scale = NULL) {
+    transform = function(p, file = "figure.png", ..., width = NULL, height = NULL, scale = NULL) {
       # Perform JSON conversion exactly how the R package would do it
       # (this is essentially plotly_json(), without the additional unneeded info)
       # and attach as an attribute on the python scope object
@@ -95,6 +109,8 @@ kaleido <- function(...) {
       reticulate::py_run_string(
         sprintf("open('%s', 'wb').write(%s)", file, transform_cmd)
       )
+      
+      invisible(file)
     },
     # Shutdown the kaleido subprocesses
     # https://github.com/plotly/Kaleido/blob/586be5c/repos/kaleido/py/kaleido/scopes/base.py#L71-L72
