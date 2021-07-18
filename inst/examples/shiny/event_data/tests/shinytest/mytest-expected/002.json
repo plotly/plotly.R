@@ -365,6 +365,10 @@
         },
         "config": {
           "doubleClick": "reset",
+          "modeBarButtonsToAdd": [
+            "hoverclosest",
+            "hovercompare"
+          ],
           "showSendToCloud": false
         },
         "source": "A",
@@ -456,9 +460,9 @@
         },
         {
           "name": "plotly-htmlwidgets-css",
-          "version": "2.0.0",
+          "version": "2.2.1",
           "src": {
-            "href": "plotly-htmlwidgets-css-2.0.0"
+            "href": "plotly-htmlwidgets-css-2.2.1"
           },
           "meta": null,
           "script": null,
@@ -469,9 +473,9 @@
         },
         {
           "name": "plotly-main",
-          "version": "2.0.0",
+          "version": "2.2.1",
           "src": {
-            "href": "plotly-main-2.0.0"
+            "href": "plotly-main-2.2.1"
           },
           "meta": null,
           "script": "plotly-latest.min.js",
