@@ -162,6 +162,10 @@ HTMLWidgets.widget({
       var plot = Plotly.newPlot(graphDiv, x);
       instance.plotly = true;
       
+    } else if (x.layout.transition) {
+      
+      var plot = Plotly.react(graphDiv, x);
+    
     } else {
       
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
