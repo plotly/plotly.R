@@ -7,7 +7,7 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
-    if (instance.autosize && el.isConnected) {
+    if (instance.autosize) {
       var width = instance.width || width;
       var height = instance.height || height;
       Plotly.relayout(el, {width: width, height: height});
