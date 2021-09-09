@@ -1,0 +1,7 @@
+dependencies:
+
+ - name: Maps
+   version: 1.0.0
+   src: htmlwidgets
+   script:
+     - plotly.js.map
