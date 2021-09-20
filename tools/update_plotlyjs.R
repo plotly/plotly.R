@@ -43,6 +43,7 @@ withr::with_dir(tmpdir, {
       
       # build just the main bundle
       # (also builds schema and locales)
+      system("npm update")
       system("npm install")
       system("npm run bundle")
       
