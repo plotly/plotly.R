@@ -1,12 +1,13 @@
 # 4.9.4.9000
 
-## Changes to plotly.js
+## Breaking changes in JavaScript API
 
 * This version of the R package upgrades the version of the underlying plotly.js library from v1.57.1 to v2.2.1. This includes many breaking changes, bug fixes, and improvements to the underlying JavaScript library. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
 
-## Breaking changes
+## Breaking changes in R API
 
 * `ggplotly()` now uses the `layout.legend.title` (instead of `layout.annotations`) plotly.js API to convert guides for discrete scales. (#1961)
+* `renderPlotly()` now uses `Plotly.react()` (instead of `Plotly.newPlot()`) to redraw when `layout(transition = )` is specified. This makes it possible/easier to implement a smooth transitions when `renderPlotly()` gets re-executed. (#2001)
 
 ## New Features
 
