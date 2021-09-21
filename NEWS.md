@@ -2,7 +2,7 @@
 
 ## Breaking changes in JavaScript API
 
-* This version of the R package upgrades the version of the underlying plotly.js library from v1.57.1 to v2.2.1. This includes many breaking changes, bug fixes, and improvements to the underlying JavaScript library. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+* This version of the R package upgrades the version of the underlying plotly.js library from v1.57.1 to v2.5.1. This includes many breaking changes, bug fixes, and improvements to the underlying JavaScript library. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
 
 ## Breaking changes in R API
 
