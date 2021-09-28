@@ -101,14 +101,23 @@ layers2traces <- function(data, prestats_data, layout, p) {
   trace.list <- list()
   for (i in seq_along(datz)) {
     d <- datz[[i]]
-    # variables that produce multiple traces and deserve their own legend entries
+    # variables that produce multiple traces *and* deserve their own legend entries
     split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    # special logic for ggjoy
+    if (any(c("GeomJoy", "GeomJoy2", "GeomRidgeline") %in% class(d))) {
+      split_legend <- c(split_legend, "y_plotlyDomain")
+    }
     # add variable that produce multiple traces, but do _not_ deserve entries
     split_by <- c(split_legend, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
     split_vars <- intersect(split_by, names(d))
     lvls <- unique(d[split_vars])
+    
+    # TODO: why does this do nothing? How to control the ordering of the traces?
+    if ("y_plotlyDomain" %in% names(lvls)) {
+      lvls$y_plotlyDomain <- factor(lvls$y_plotlyDomain, levels = rev(levels(lvls$y_plotlyDomain)))
+    }
     lvls <- lvls[do.call(order, lvls), , drop = FALSE]
     separator <- new_id()
     fac <- factor(
