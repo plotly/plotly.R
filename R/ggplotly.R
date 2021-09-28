@@ -1301,11 +1301,13 @@ bold <- function(x) paste("<b>", x, "</b>")
 italic <- function(x) paste("<i>", x, "</i>")
 
 # generic S3 method to allow for class specific implementations
+#' @export
 uniq <- function(x){
   UseMethod("uniq", x)
 }
 
 # if a vector that has one unique value (ignoring missings), return that value
+#' @export
 uniq.default <- function(x) {
   u <- unique(x)
   if (identical(u, NA) || length(u) == 0) return(u)
@@ -1313,13 +1315,14 @@ uniq.default <- function(x) {
   if (length(u) == 1) u else x
 }
 
+#' @export
 uniq.NULL <- function(x) {
   x
 }
 
 # if TeX object convert to character first
 uniq.TeX <- function(x){
-  print(uniq(as.character(x)))
+  uniq(as.character(x))
 }
 
 # theme(strip.background) -> plotly.js rect shape
