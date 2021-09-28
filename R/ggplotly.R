@@ -1308,7 +1308,8 @@ uniq <- function(x){
 
 # if a vector that has one unique value (ignoring missings), return that value
 #' @export
-uniq.default <- function(x) {
+uniq <- function(x) {
+  if("TeX" %in% class(x)) x <- as.character(x)
   u <- unique(x)
   if (identical(u, NA) || length(u) == 0) return(u)
   u <- u[!is.na(u)]
@@ -1316,14 +1317,14 @@ uniq.default <- function(x) {
 }
 
 #' @export
-uniq.NULL <- function(x) {
-  x
-}
+# uniq.NULL <- function(x) {
+#   x
+# }
 
-# if TeX object convert to character first
-uniq.TeX <- function(x){
-  uniq(as.character(x))
-}
+# # if TeX object convert to character first
+# uniq.TeX <- function(x){
+#   uniq(as.character(x))
+# }
 
 # theme(strip.background) -> plotly.js rect shape
 make_strip_rect <- function(xdom, ydom, theme, side = "top") {
