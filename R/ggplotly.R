@@ -1315,7 +1315,7 @@ uniq.default <- function(x) {
 
 # if TeX object convert to character first
 uniq.TeX <- function(x){
-  print(uniq.default(as.character(x)))
+  print(uniq(as.character(x)))
 }
 
 # theme(strip.background) -> plotly.js rect shape
