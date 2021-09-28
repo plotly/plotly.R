@@ -88,6 +88,9 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", dynamicTicks = FALSE, 
                               layerData = 1, originalData = TRUE, source = "A", ...) {
   dots <- list(...)
+  # rectify tooltips, ggplot automatically convert `color` => `colour`
+  tooltip <- rectify_tooltips(tooltip)
+
   # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
   if (!crosstalk_key() %in% names(p$data)) {
     p$data[[crosstalk_key()]] <- p$data[[".rownames"]] %||% seq_len(nrow(p$data))
@@ -145,6 +148,8 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
 ggplotly.ggplot <- function(p = ggplot2::last_plot(), width = NULL,
                             height = NULL, tooltip = "all", dynamicTicks = FALSE,  
                             layerData = 1, originalData = TRUE, source = "A", ...) {
+  # rectify tooltips, ggplot automatically convert `color` => `colour`
+  tooltip <- rectify_tooltips(tooltip)
   l <- gg2list(p, width = width, height = height, tooltip = tooltip, 
                dynamicTicks = dynamicTicks, layerData = layerData, 
                originalData = originalData, source = source, ...)
@@ -1432,4 +1437,9 @@ getAesMap <- function(plot, layer) {
   } else {
     layer$mapping
   }
+}
+
+rectify_tooltips <- function(tooltip){
+    tooltip[tooltip == "color"] <- "colour"
+    tooltip
 }
