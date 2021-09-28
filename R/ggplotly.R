@@ -1313,6 +1313,10 @@ uniq.default <- function(x) {
   if (length(u) == 1) u else x
 }
 
+uniq.NULL <- function(x) {
+  x
+}
+
 # if TeX object convert to character first
 uniq.TeX <- function(x){
   print(uniq(as.character(x)))
