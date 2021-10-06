@@ -58,6 +58,9 @@ const widgetDefinition = {
     }
 
     var graphDiv = document.getElementById(el.id);
+
+    // Used by Displayr to determine when widget is ready to be snapshot for testing
+    graphDiv.setAttribute("rhtmlwidget-status", "loading");
     
     // TODO: move the control panel injection strategy inside here...
     HTMLWidgets.addPostRenderHandler(function() {
@@ -551,6 +554,11 @@ const widgetDefinition = {
         });
       }
     } // end of selectionChange
+
+    graphDiv.on("plotly_afterplot", function() {
+      // Used by Displayr to determine when widget is ready to be snapshot for testing
+      graphDiv.setAttribute("rhtmlwidget-status", "ready");
+    });
   } // end of renderValue
 }
 
