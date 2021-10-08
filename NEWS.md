@@ -1,4 +1,4 @@
-# 4.9.4.9000
+# 4.10.0
 
 ## Breaking changes in JavaScript API
 
