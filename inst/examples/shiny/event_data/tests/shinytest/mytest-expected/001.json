@@ -1,20 +1,5 @@
 {
   "input": {
-    ".clientValue-default-plotlyCrosstalkOpts": {
-      "on": "plotly_click",
-      "persistent": false,
-      "dynamic": false,
-      "selectize": false,
-      "opacityDim": 0.2,
-      "selected": {
-        "opacity": 1
-      },
-      "debounce": 0,
-      "color": [
-
-      ]
-    },
-    "plotly_afterplot-A": "\"plot\"",
     "plotType": "ggplotly"
   },
   "output": {
