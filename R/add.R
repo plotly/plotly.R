@@ -130,9 +130,14 @@ add_data <- function(p, data = NULL) {
 #'   layout(title = "Basic Pie Chart using Plotly")
 #'   
 #' data(wind)
-#' plot_ly(wind, r = ~r, t = ~t) %>% 
+#' plot_ly(wind, r = ~r, theta = ~t) %>% 
 #'   add_area(color = ~nms) %>%
-#'   layout(radialaxis = list(ticksuffix = "%"), orientation = 270)
+#'   layout(
+#'     polar = list(
+#'       radialaxis = list(ticksuffix = "%"), 
+#'       angularaxis = list(rotation = 90)
+#'     )
+#'   )
 #' 
 #' # ------------------------------------------------------------
 #' # 3D chart types
