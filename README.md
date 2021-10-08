@@ -4,7 +4,7 @@
 <img src="man/figures/plotly.png" width="200" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ropensci/plotly/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/plotly/actions)
+[![R-CMD-check](https://github.com/ropensci/plotly/workflows/R-CMD-check/badge.svg)](https://github.com/plotly/plotly.R/actions)
 [![CRAN
 Status](https://www.r-pkg.org/badges/version/plotly)](https://cran.r-project.org/package=plotly)
 [![CRAN
@@ -105,7 +105,7 @@ To learn more about special features that the plotly R package provides (e.g., [
 ## Contributing
 
 Please read through our [contributing
-guidelines](https://github.com/ropensci/plotly/blob/master/CONTRIBUTING.md).
+guidelines](https://github.com/plotly/plotly.R/blob/master/CONTRIBUTING.md).
 Included are directions for opening issues, asking questions,
 contributing changes to plotly, and our code of
 conduct.
