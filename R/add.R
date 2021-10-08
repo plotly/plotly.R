@@ -447,7 +447,7 @@ add_area <- function(p, r = NULL, theta = NULL, t = NULL, ...,
   theta <- theta %||% t
   if (inherit) {
     attrs <- p$x$attrs[[1]]
-    r <- t %||% attrs[["r"]]
+    r <- r %||% attrs[["r"]]
     theta <- theta %||% (attrs[["theta"]] %||% attrs[["t"]])
   }
   if (is.null(r) || is.null(theta)) {
