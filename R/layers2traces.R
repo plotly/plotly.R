@@ -623,7 +623,7 @@ to_basic.GeomAlluvium <- function (data, ...) {
   prefix_class(transform_alluvium(data), "GeomPolygon") 
 }
 
-# tranform the alluvium data into the corresponding polygons
+# transform the alluvium data into the corresponding polygons
 transform_alluvium <- function(data) {
   data <- data[order(data$x), ]
   
