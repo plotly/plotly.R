@@ -633,7 +633,7 @@ transform_alluvium <- function(data) {
 
   row_number <- nrow(data)
 
-  data_rev <- data[nrow(data):1L, ]
+  data_rev <- data[rev(seq_len(row_number)), ]
 
   structure(rbind(
     cbind(x = data$x, y = data$ymin, data[unused_aes]),
