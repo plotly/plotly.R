@@ -1,12 +1,15 @@
 test_that("mimics the autoplot output", {
     # taken from https://fable.tidyverts.org/articles/fable.html
-    p <- tsibble::tourism %>%
+    data <- tsibble::tourism %>%
             filter(Region == "Melbourne") %>%
+            `[`(, c("Quarter", "Trips", "Region")) %>%
+            distinct(Quarter, .keep_all = TRUE) %>%
+            as_tsibble(key = Region) 
+    p <- data %>%
             model(
                 ets = ETS(Trips ~ trend("A")),
-                arima = ARIMA(Trips)
             ) %>%
             forecast(h = "5 years") %>%
-            autoplot(tourism_melb)
+            autoplot(data)
     expect_doppelganger(ggplotly(p), "autoplot-fable") 
 })
