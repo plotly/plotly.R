@@ -668,6 +668,7 @@ to_basic.GeomRocci <- function(data, prestats_data, layout, params, p, ...){
   data$alpha <- params$linealpha
   rects <- to_basic.GeomRect(data)
   rects$alpha <- params$alpha.box
+  rects$colour <- NULL
   compact(list(
     if(params$labels) prefix_class(
       transform_geomroc(data,
