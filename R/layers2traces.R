@@ -637,7 +637,7 @@ to_basic.GeomRoc <- function(data, prestats_data, layout, params, p, ...){
   data$alpha <- params$linealpha
 
   compact(list(
-    if(params$labels) prefix_class(
+    if(params$labels && params$n.cuts) prefix_class(
       transform_geomroc(data,
         n.cuts = params$n.cuts,
         size = params$labelsize, 
