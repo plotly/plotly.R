@@ -622,6 +622,52 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
   dat
 }
 
+transform_geomroc <- function(data, n.cuts, size, round, alpha, ...){
+  labels <- as.integer(seq(1, nrow(data), length.out = min(n.cuts, nrow(data), na.rm=T)))
+  text <- data[labels, ]
+  text$label <- as.character(round(text$label, round))
+  text$size <- size
+  text$alpha <- alpha
+  text
+}
+
+#' @export 
+to_basic.GeomRoc <- function(data, prestats_data, layout, params, p, ...){
+  
+  data$alpha <- params$linealpha
+
+  compact(list(
+    if(params$labels) prefix_class(
+      transform_geomroc(data,
+        n.cuts = params$n.cuts,
+        size = params$labelsize, 
+        alpha = params$labelalpha, 
+        round = params$labelround),
+      "GeomText"),
+    prefix_class(data, "GeomPath")
+  ))
+}
+
+#' @export 
+to_basic.GeomRocci <- function(data, prestats_data, layout, params, p, ...){
+  
+  data$alpha <- params$linealpha
+  rects <- to_basic.GeomRect(data)
+  rects$alpha <- params$alpha.box
+  compact(list(
+    if(params$labels) prefix_class(
+      transform_geomroc(data,
+        n.cuts = NA,
+        size = params$labelsize, 
+        alpha = params$labelalpha, 
+        round = params$labelround),
+      "GeomText"),
+    prefix_class(data, "GeomPoint"),
+    rects
+  ))
+}
+
+
 #' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
