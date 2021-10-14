@@ -173,6 +173,12 @@ to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
 }
 
+#' @export 
+to_basic.GeomFunction <- function (data, prestats_data, layout, params, p, ...) {
+   data$y <- params$fun(data$x)
+   prefix_class(data, "GeomPath")
+}
+
 #' @export
 to_basic.GeomCol <- function(data, prestats_data, layout, params, p, ...) {
   prefix_class(data, "GeomBar")
