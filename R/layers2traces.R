@@ -625,6 +625,7 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
 transform_geomroc <- function(data, n.cuts, size, round, alpha, ...){
   labels <- as.integer(seq(1, nrow(data), length.out = min(n.cuts, nrow(data), na.rm=T)))
   text <- data[labels, ]
+  
   text$label <- as.character(round(text$label, round))
   text$size <- size
   text$alpha <- alpha
@@ -635,15 +636,29 @@ transform_geomroc <- function(data, n.cuts, size, round, alpha, ...){
 to_basic.GeomRoc <- function(data, prestats_data, layout, params, p, ...){
   
   data$alpha <- params$linealpha
-
-  compact(list(
-    if(params$labels && params$n.cuts) prefix_class(
-      transform_geomroc(data,
+  if(params$n.cuts) {
+    points <- transform_geomroc(
+        data,
         n.cuts = params$n.cuts,
+        # multiply by 4 to have results similar 
         size = params$labelsize, 
-        alpha = params$labelalpha, 
-        round = params$labelround),
-      "GeomText"),
+        alpha = params$pointalpha, 
+        round = params$labelround
+      )
+    if(params$labels) {
+      text <- points
+      # repel the text from the points
+      text$x <- text$x - .015
+      text$y <- text$y + .015
+      #text[c("x", "y")] <- text[c("x", "y")] + c(-.025,.025)
+      text$size <- params$labelsize
+      text$alpha <- params$labelalpha
+    }
+  }
+  dput(params)
+  compact(list(
+    if(params$labels && params$n.cuts) prefix_class(text,"GeomText"),
+    if(params$n.cuts)  prefix_class(points ,"GeomPoint"),    
     prefix_class(data, "GeomPath")
   ))
 }
