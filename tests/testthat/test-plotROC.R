@@ -1,4 +1,5 @@
 if(require(plotROC)){
+    set.seed(555)
     D.ex <- rbinom(200, size = 1, prob = .5)
     M1 <- rnorm(200, mean = D.ex, sd = .65)
     M2 <- rnorm(200, mean = D.ex, sd = 1.5)

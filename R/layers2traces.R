@@ -655,7 +655,6 @@ to_basic.GeomRoc <- function(data, prestats_data, layout, params, p, ...){
       text$alpha <- params$labelalpha
     }
   }
-  dput(params)
   compact(list(
     if(params$labels && params$n.cuts) prefix_class(text,"GeomText"),
     if(params$n.cuts)  prefix_class(points ,"GeomPoint"),    
