@@ -1,5 +1,8 @@
 # 4.10.0.9000
 
+## Improvements
+
+* `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
 
 # 4.10.0
 
