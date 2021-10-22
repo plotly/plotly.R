@@ -9,6 +9,11 @@
 
 * `ggplotly` now correctly interprets `color` as an aesthetic mapping. (#2034)
 
+## Improvements
+
+* `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
+
+
 # 4.10.0
 
 ## Breaking changes in JavaScript API

@@ -182,7 +182,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
   } else if (system.file(package = "Cairo") != "") {
-    Cairo::Cairo
+    function(filename, ...) Cairo::Cairo(file = filename, ...)
   } else {
     stop(
       "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
@@ -198,7 +198,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     height <- height %||% default(grDevices::dev.size("px")[2])
   }
   # open the device and make sure it closes on exit
-  dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
+  dev_fun(filename = tempfile(), width = width %||% 640, height = height %||% 480)
   on.exit(grDevices::dev.off(), add = TRUE)
   
   # check the value of dynamicTicks
