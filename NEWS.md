@@ -1,5 +1,13 @@
 # 4.10.0.9000
 
+## New Features
+
+* `ggplotly` now can convert treemaps made using the `treemapify` package. (#2051)
+* `ggplotly` now supports `geom_function`/`stat_function` geoms. (#2042)
+
+## BUG fixes
+
+* `ggplotly` now correctly interprets `color` as an aesthetic mapping. (#2034)
 
 # 4.10.0
 
