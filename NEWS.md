@@ -4,6 +4,11 @@
 
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
 
+## BUG fixes
+
+* `stat_ecdf()` now gives the correct output. (#2052)
+  
+
 # 4.10.0
 
 ## Breaking changes in JavaScript API
