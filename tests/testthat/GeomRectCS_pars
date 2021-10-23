@@ -1,0 +1,4 @@
+list(na.rm = TRUE, na.rm = TRUE, fill_up = "darkblue", fill_down = "red", 
+    colour_up = "darkblue", colour_down = "red", position = "identity", 
+    hoverTextAes = list(x = "date", y = "close", open = "open", 
+        close = "close", high = "high", low = "low"))
