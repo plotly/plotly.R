@@ -1303,7 +1303,6 @@ italic <- function(x) paste("<i>", x, "</i>")
 
 # if a vector that has one unique value (ignoring missings), return that value
 uniq <- function(x) {
-  x <- remove_class(x, "TeX")
   u <- unique(x)
   if (identical(u, NA) || length(u) == 0) return(u)
   u <- u[!is.na(u)]

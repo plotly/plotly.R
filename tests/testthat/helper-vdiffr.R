@@ -51,12 +51,12 @@ write_plotly_svg <- function(p, file) {
   
   # strip out non-deterministic fullLayout.uid
   # TODO: if and when plotly provides an API to pre-specify, use it!
-  svg_txt <- readLines(basename(file), warn = FALSE)
+  svg_txt <- readLines(file, warn = FALSE)
   strextract <- function(str, pattern) regmatches(str, regexpr(pattern, str))
   def <- strextract(svg_txt, 'defs id=\\"defs-[[:alnum:]]+\\"')
   uid <- sub("defs-", "", strextract(def, "defs-[[:alnum:]]+"))
   svg_txt <- gsub(uid, "", svg_txt, fixed = TRUE)
-  writeLines(svg_txt, basename(file))
+  writeLines(svg_txt, file)
 }
 
 # copied from vdiffr
