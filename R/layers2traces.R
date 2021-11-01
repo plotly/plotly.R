@@ -367,7 +367,7 @@ to_basic.GeomRasterAnn <- function(data, prestats_data, layout, params, p, ...) 
 #' @export
 to_basic.GeomTile <- function(data, prestats_data, layout, params, p, ...) {
   # geom2trace.GeomTile is a heatmap, which requires continuous fill
-  if (is.discrete(prestats_data$fill)) {
+  if (is.discrete(prestats_data$fill %||% NA)) {
     data <- prefix_class(data, "GeomRect")
     to_basic(data, prestats_data, layout, params, p)
   } else {
