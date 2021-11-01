@@ -1390,10 +1390,13 @@ gdef2trace <- function(gdef, theme, gglayout) {
     rng <- range(gdef$bar$value)
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
+      if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+    })
     list(
-      x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
-      y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
-      # esentially to prevent this getting merged at a later point
+      x = vals[[1]][[1]],
+      y = vals[[2]][[1]],
+      # essentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",
       mode = "markers",
