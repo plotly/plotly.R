@@ -623,6 +623,16 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
 }
 
 #' @export
+to_basic.GeomRectCS <- function(data, ...){
+  to_basic.GeomRect(data, ...)
+}
+#' @export
+to_basic.GeomLinerangeBC <- function(data, ...){
+  data[, c("xend", "y", "yend")] <- data[, c("x", "ymin", "ymax")]
+  to_basic.GeomSegment(data, ...)
+}
+
+#' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
