@@ -1377,6 +1377,10 @@ ggtype <- function(x, y = "geom") {
   sub(y, "", tolower(class(x[[y]])[1]))
 }
 
+get_first <- function(x){
+  if(length(x)) x[[1]] else x
+}
+
 # colourbar -> plotly.js colorbar
 gdef2trace <- function(gdef, theme, gglayout) {
   if (inherits(gdef, "colorbar")) {
@@ -1386,8 +1390,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
     list(
-      x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
-      y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
+      x = get_first(with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)),
+      y = get_first(with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)),
       # esentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",

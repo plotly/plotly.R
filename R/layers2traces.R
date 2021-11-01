@@ -624,7 +624,118 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
 
 #' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
+  dput(data, class(data)[[1]])
+  dput(params, paste0(class(data)[[1]], "pars"))
   data
+}
+
+
+####
+## TODO : this function should be generalised to be used with ggalluvial and geom_rect
+####
+rectangular_coords <- function(data){
+  data <- data[order(data$xmin+data$xmax), ]
+
+  if(all(unique(data$colour) == 0)) data$colour <- NULL
+  
+  unused_aes <- ! names(data) %in% c("x", "y", "ymin", "ymax")
+
+  row_number <- nrow(data)
+
+  data_rev <- data[row_number:1L, ]
+  structure(rbind(
+    cbind(x = data$xmin, y = data$ymin, data[unused_aes]),
+    cbind(x = data$xmin[row_number], y = data$ymin[row_number], data[row_number, unused_aes]),
+    cbind(x = data_rev$xmax, y = data_rev$ymax, data_rev[unused_aes])
+  ), class = class(data))
+}
+
+
+#' @export
+to_basic.GeomTreemap <- function(data, prestats_data, layout, params, p, ...) {
+  to_basic.GeomRect(tree_transform(data, params))
+}
+
+tree_transform <- function(data, params){
+  pars <- params[c("fixed", "layout", "start")]
+  pars$data <- data
+  pars$area <- "area"
+
+  inter <- intersect(names(data), paste0("subgroup", c("", 2:3)))
+  if(length(inter)) pars[inter] <- inter
+  
+  do.call(treemapify:::treemapify, pars)
+}
+
+#' @export 
+to_basic.GeomTreemapText <- function(data, prestats_data, layout, params, p, ...){
+  data <- tree_transform(data, params)
+
+  if(any(grepl("subgroup", params))) 
+
+  data$size <- with(data, 2*(xmax - xmin)/strwidth(label, units = "figure"))
+  data[, c("x", "y", "textposition")] <- with(data, list(x = (xmin+xmax)/2, y=(ymin+ymax)/2 , textposition = params$place))
+  #data[, c("x", "y", "hjust", "vjust")] <- with(data, place_to_coords(xmin, xmax, ymin, ymax, params$place))
+  #data[, c("x", "y")] <- with(data, list(x = (xmax+xmin)/2, y = if(any(grepl("subgroup", params))) ymax - strheight(label, units="figure")*.5*size else (ymax+ymin)/2 ) )
+  data$colour <- params$colour
+  data$fontface <- params$fontface
+  
+  prefix_class(data, "GeomText")
+}
+#place_to_coords <- function(xmin, xmax, ymin, ymax, place){
+#  #width <- strwidth(label)
+#  #height <- strheight(label)
+#  switch(place, 
+#    "bottom" = list(y = (ymax+ymin)/2, x = (xmin+xmax)/2, hjust=0, vjust=0),
+#    "right" = list(y = xmax, y = (ymin+ymax)/2, hjust=0, vjust=.5),
+#    "middle" = list(y = (xmax+xmax)/2, y = (ymin+ymax)/2, hjust=.5, vjust=.5),
+#    "left" = list(y = xmin, y = (ymin+ymax)/2, hjust = .5, vjust=.5),
+#    "top" =  list(y = ymax, x = (xmin+xmax)/2, vjust=0, hjust=.5),
+#  )
+#}
+treesubgroup_transform <- function(data, params){
+
+  pars <- params[c("fixed", "layout", "start")]
+  pars$area <- "area"
+
+  levels <- paste0("subgroup", c("", 2:3))
+  
+  levels <- levels[1:which(levels == params$level)]
+
+
+  bys <- lapply(levels, function(x) data[[x]])
+  areasums <- aggregate(data$area, by = bys, FUN = sum)
+  names(areasums) <- c(levels, "area")
+  for (aesthetic in setdiff(names(data), names(areasums))) {
+    values <- data[[aesthetic]]
+    names(values) <- data[[params$level]]
+    areasums[aesthetic] <- values[as.character(areasums[[params$level]])]
+  }
+
+  
+  pars$data <- areasums
+  if(length(levels) > 1) pars[head(levels, -1)] <- head(levels, -1)
+
+  do.call(treemapify:::treemapify, pars)
+
+}
+
+#' @export 
+to_basic.GeomSubgroupBorder <- function(data, prestats_data, layout, params, p, ...){
+  prefix_class(to_basic.GeomRect(treesubgroup_transform(data, params)), "GeomPath")
+}
+#' @export 
+to_basic.GeomSubgroupText <- function(data, prestats_data, layout, params, p, ...){
+  data <- treesubgroup_transform(data, params)
+  names(data)[names(data) == params$level] <- "label"
+
+  data$size <- with(data, 3*(xmax - xmin)/strwidth(label, units = "figure"))
+  #data[, c("x", "y")] <- with(data, list( x = (xmin+xmax)/2, y = (ymin+ymax)/2 ))
+  data[, c("x", "y", "textposition")] <- with(data, list(x = (xmin+xmax)/2, y=(ymin+ymax)/2 , textposition = params$place))
+
+  data$colour <- params$colour
+  data$fontface <- params$fontface
+  prefix_class(data, "GeomText")
 }
 
 #' Convert a "basic" geoms to a plotly.js trace.
@@ -844,6 +955,7 @@ geom2trace.GeomText <- function(data, params, p) {
     customdata = data[["customdata"]],
     frame = data[["frame"]],
     ids = data[["ids"]],
+    textposition = if("textposition" %in% names(data)) data[[1, "textposition"]] else NULL,
     textfont = list(
       # TODO: how to translate fontface/family?
       size = aes2plotly(data, params, "size"),
