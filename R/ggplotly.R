@@ -88,6 +88,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", dynamicTicks = FALSE, 
                               layerData = 1, originalData = TRUE, source = "A", ...) {
   dots <- list(...)
+
   # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
   if (!crosstalk_key() %in% names(p$data)) {
     p$data[[crosstalk_key()]] <- p$data[[".rownames"]] %||% seq_len(nrow(p$data))
@@ -181,7 +182,7 @@ gg2list <- function(p, width = NULL, height = NULL,
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
   } else if (system.file(package = "Cairo") != "") {
-    Cairo::Cairo
+    function(filename, ...) Cairo::Cairo(file = filename, ...)
   } else {
     stop(
       "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
@@ -197,7 +198,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     height <- height %||% default(grDevices::dev.size("px")[2])
   }
   # open the device and make sure it closes on exit
-  dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
+  dev_fun(filename = tempfile(), width = width %||% 640, height = height %||% 480)
   on.exit(grDevices::dev.off(), add = TRUE)
   
   # check the value of dynamicTicks
@@ -1302,6 +1303,7 @@ italic <- function(x) paste("<i>", x, "</i>")
 
 # if a vector that has one unique value (ignoring missings), return that value
 uniq <- function(x) {
+  x <- remove_class(x, "TeX")
   u <- unique(x)
   if (identical(u, NA) || length(u) == 0) return(u)
   u <- u[!is.na(u)]

@@ -23,8 +23,11 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
     map <- ggfun("make_labels")(map)
 
+
     # filter tooltip aesthetics down to those specified in `tooltip` arg 
     if (!identical(p$tooltip, "all")) {
+      # rectify tooltips, ggplot automatically convert `color` => `colour`
+      p$tooltip[p$tooltip == "color"] <- "colour"
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
     
@@ -168,6 +171,12 @@ layers2traces <- function(data, prestats_data, layout, p) {
 #' @export
 to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
+}
+
+#' @export 
+to_basic.GeomFunction <- function (data, prestats_data, layout, params, p, ...) {
+   data$y <- params$fun(data$x)
+   prefix_class(data, "GeomPath")
 }
 
 #' @export
