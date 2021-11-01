@@ -4,6 +4,10 @@
 
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
 
+## Bug fixes
+
+* `ggplotly()` now correctly handles `geom_tile()` with no `fill` aesthetic. (#2063)
+
 # 4.10.0
 
 ## Breaking changes in JavaScript API
