@@ -423,6 +423,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       x <- reComputeGroup(x, z)
       # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
       attr(y$group, "n") <- NULL
+      # https://github.com/plotly/plotly.R/issues/2013
+      if (!identical(class(x$group), class(y$group))) {
+        x$group <- as.character(x$group)
+        y$group <- as.character(y$group)
+      }
       suppressMessages(dplyr::left_join(x, y))
     }, data, nestedKeys, layers)
     
