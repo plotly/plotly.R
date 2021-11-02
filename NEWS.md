@@ -2,7 +2,7 @@
 
 ## Improvements
 
-* `ggplotly()` now supports `geom_candlestick`. (#2053)
+* `ggplotly()` now supports `tidyquant::geom_candlestick()`. (#2053)
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)  
 
 # 4.10.0
