@@ -622,6 +622,41 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
   dat
 }
 
+to_basic.GeomHiloLinerange <- function(data, ...){
+  prefix_class(data, "GeomPath")
+}
+
+transform_hiloribbon <- function(data) {
+  data <- data[order(data$x), ]
+  data$hilo <- NULL
+  
+  data$x_plotlyDomain <- as.character(data$x_plotlyDomain)
+  
+  maximum_lev <- max(data$level) + 1
+  
+  data$alpha <- (maximum_lev * (maximum_lev - data$level) - 1 )/ maximum_lev**3
+  data$colour <- data$alpha 
+  
+  unused_aes <- ! names(data) %in% c("x", "y", "ymin", "ymax")
+
+  row_number <- nrow(data)
+
+  data_rev <- data[row_number:1L, ]
+  structure(rbind(
+    cbind(x = data$x, y = data$ymin, data[unused_aes]),
+    cbind(x = data$x[row_number], y = data$ymin[row_number], data[row_number, unused_aes]),
+    cbind(x = data_rev$x, y = data_rev$ymax, data_rev[unused_aes])
+  ), class = class(data))
+}
+
+to_basic.GeomHiloRibbon <- function(data, ...){
+  prefix_class(transform_hiloribbon(data), "GeomPolygon")
+}
+
+#' @export
+to_basic.data.frame <- function(data, prestats_data, layout, params, p, ...) {
+  prefix_class(data, "GeomPath")
+}
 #' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
