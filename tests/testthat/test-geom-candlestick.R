@@ -26,8 +26,7 @@ if(require(tidyquant)){
     765.150024, 749.869995), stringsAsFactors = F)
   
   test_that("candlestick gets rendered correctly", {
-    p <- AMZN %>%
-           ggplot(aes(x = date, y = close)) +
+    p <- ggplot(df, aes(x = date, y = close)) +
            geom_candlestick(aes(open = open, close = close, high = high, low = low)) + 
            labs(title = "AMZN: New Candlestick Geom!",
                 x = "", y = "Closing Price") +
