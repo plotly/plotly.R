@@ -2,11 +2,14 @@
 
 ## Improvements
 
+* `ggplotly()` now supports the `{ggalluvial}` package. (#2061, @moutikabdessabour)
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
 
 ## Bug fixes
 
+* `ggplotly()` now converts `stat_ecdf()` properly. (#2065)
 * `ggplotly()` now correctly handles `geom_tile()` with no `fill` aesthetic. (#2063)
+
 
 # 4.10.0
 
