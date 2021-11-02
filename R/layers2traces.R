@@ -102,12 +102,16 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }
   # now to the actual layer -> trace conversion
   trace.list <- list()
+  aes_no_guide <- names(vapply(p$guides, identical, logical(1), "none"))
   for (i in seq_along(datz)) {
     d <- datz[[i]]
     # variables that produce multiple traces and deserve their own legend entries
-    split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    split_legend <- paste0(
+      setdiff(names(discreteScales), aes_no_guide), 
+      "_plotlyDomain"
+    )
     # add variable that produce multiple traces, but do _not_ deserve entries
-    split_by <- c(split_legend, "PANEL", "frame", split_on(d))
+    split_by <- c(split_legend, aes_no_guide, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
     split_vars <- intersect(split_by, names(d))
