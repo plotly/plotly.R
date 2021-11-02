@@ -3,6 +3,7 @@
 ## New features
 
 * `ggplotly()` now supports the `{ggalluvial}` package. (#2061, thanks @moutikabdessabour)
+* `highlight()` now supports `on="plotly_selecting"`, enabling client-side linked brushing via mouse click+drag (no mouse-up event required, as with `on="plotly_selected"`). (#1280)
 
 ## Bug fixes
 
