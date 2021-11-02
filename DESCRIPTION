@@ -81,5 +81,3 @@ LazyData: true
 RoxygenNote: 7.1.2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Config/Needs/coverage:
-    latex2exp

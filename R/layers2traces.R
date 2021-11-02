@@ -631,18 +631,16 @@ to_basic.GeomStratum <- function(data, ...) {
 # ggalluvial::GeomAlluvium
 #' @export 
 to_basic.GeomAlluvium <- function(data, ...) {
-  data <- data[order(data$x), ]
-  
+  # geom_alluvium by default generates a data.frame with a colour column and sets it to 0, which leads to an error when trying to get the colour from the number and grid::col2rgb complains that colors must be positive integers.
   cols <- unique(data$colour)
   if (length(cols) == 1 && cols[1] == 0) {
     data$colour <- NULL
   }
   
-  unused_aes <- !names(data) %in% c("x", "y", "ymin", "ymax")
-  
+  data <- data[order(data$x), ]
   row_number <- nrow(data)
-  
   data_rev <- data[rev(seq_len(row_number)), ]
+  unused_aes <- setdiff(names(data), c("x", "y", "ymin", "ymax"))
   
   d <- structure(rbind(
     cbind(x = data$x, y = data$ymin, data[unused_aes]),
