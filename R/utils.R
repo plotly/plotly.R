@@ -401,7 +401,7 @@ supply_highlight_attrs <- function(p) {
   # add HTML dependencies, set a sensible dragmode default, & throw messages
   if (hasKeys) {
     p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
-      default(switch(p$x$highlight$on %||% "", plotly_selected = "select") %||% "zoom")
+      default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
     if (is.default(p$x$highlight$off)) {
       message(
         sprintf(
