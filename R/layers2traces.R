@@ -252,7 +252,7 @@ to_basic.GeomLine <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomStep <- function(data, prestats_data, layout, params, p, ...) {
-  prefix_class(if((params$direction %||% "vh")  %in% c("vh", "hv", "mid")) ggplot2:::stairstep(data, direction = params$direction) else data, c("GeomPath", "GeomStep"))
+  prefix_class(if((params$direction %||% "vh")  %in% c("vh", "hv", "mid")) ggfun("stairstep")(data, direction = params$direction) else data, c("GeomPath", "GeomStep"))
 }
 
 #' @export
@@ -623,8 +623,7 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
 }
 
 #' @export
-to_basic.default<- function(data, prestats_data, layout, params, p, ...) {
- 
+to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
 }
 
