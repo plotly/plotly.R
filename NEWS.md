@@ -9,7 +9,7 @@
 
 * `ggplotly()` now converts `stat_ecdf()` properly. (#2065)
 * `ggplotly()` now correctly handles `geom_tile()` with no `fill` aesthetic. (#2063)
-
+* Fixed an issue with translating `GGally::ggcorr()` via `ggplotly()`. (#2012)
 
 # 4.10.0
 
