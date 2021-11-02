@@ -252,6 +252,7 @@ to_basic.GeomLine <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomStep <- function(data, prestats_data, layout, params, p, ...) {
+  data <- data[order(data[["x"]]), ]
   prefix_class(data, "GeomPath")
 }
 
