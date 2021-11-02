@@ -39,6 +39,26 @@ test_that("legend vanishes when theme(legend.position = 'none'')", {
   expect_identical(info$layout$showlegend, FALSE)
 })
 
+test_that("aesthetics can be discarded from legend with guide(aes = 'none')", {
+  df1 <- data.frame(
+    Date = seq(as.Date("2021-01-01"), as.Date("2021-01-10"), "days"),
+    Series = c(rep("SeriesA", 10), rep("SeriesB", 10)),
+    Values = rnorm(n = 20),
+    Mean = 0, V1 = 2, V2 = -2
+  )
+  
+  p <- ggplot(df1, aes(x=Date, y=Values, color = Series, linetype = Series, shape = Series)) +
+    geom_line(aes(x = Date, y = Mean, color = "Mean", linetype = "Mean")) +
+    geom_line(aes(x = Date, y = V1, color = "QC", linetype = "QC")) +
+    geom_line(aes(x = Date, y = V2, color = "QC", linetype = "QC")) +
+    geom_line() + 
+    geom_point() + 
+    guides(shape = "none", linetype = "none")
+  
+  expect_doppelganger(p, "guide-aes-none")
+})
+
+
 p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) + 
   geom_point()
 

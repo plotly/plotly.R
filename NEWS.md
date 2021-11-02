@@ -1,15 +1,19 @@
 # 4.10.0.9000
 
-## Improvements
+## New features
 
-* `ggplotly()` now supports the `{ggalluvial}` package. (#2061, @moutikabdessabour)
-* `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, @bersbersbers)
+* `ggplotly()` now supports the `{ggalluvial}` package. (#2061, thanks @moutikabdessabour)
 
 ## Bug fixes
 
 * `ggplotly()` now converts `stat_ecdf()` properly. (#2065)
 * `ggplotly()` now correctly handles `geom_tile()` with no `fill` aesthetic. (#2063)
+* `ggplotly()` now respects `guide(aes = "none")` (e.g., `guide(fill = "none")`) when constructing legend entries. (#2067)
 * Fixed an issue with translating `GGally::ggcorr()` via `ggplotly()`. (#2012)
+
+## Improvements
+
+* `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, thanks @bersbersbers)
 
 # 4.10.0
 
