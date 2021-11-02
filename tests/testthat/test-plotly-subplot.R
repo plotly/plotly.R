@@ -134,10 +134,23 @@ test_that("subplot accepts a list of plots", {
   expect_true(l$layout[[sub("y", "yaxis", xaxes[[1]]$anchor)]]$domain[1] == 0)
 })
 
-test_that("ggplotly understands ggmatrix", {
+test_that("ggplotly understands GGally", {
   skip_if_not_installed("GGally")
-  L <- expect_doppelganger_built(GGally::ggpairs(iris), 
-                                 "plotly-subplot-ggmatrix")
+  expect_doppelganger(
+    GGally::ggpairs(iris), 
+    "plotly-subplot-ggmatrix"
+  )
+  d <- tibble::tibble(
+    v1 = 1:100 + rnorm(100, sd = 20), 
+    v2 = 1:100 + rnorm(100, sd = 27), 
+    v3 = rep(1, 100) + rnorm(100, sd = 1),
+    v4 = v1 ** 2,
+    v5 = v1 ** 2
+  )
+  expect_doppelganger(
+    ggcorr(data, method = c("everything", "pearson")),
+    "ggally-ggcorr"
+  )
 })
 
 test_that("annotation paper repositioning", {
