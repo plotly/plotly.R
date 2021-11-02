@@ -53,6 +53,7 @@ Suggests:
     hexbin,
     ggthemes,
     GGally,
+    ggalluvial,
     testthat,
     knitr,
     devtools,

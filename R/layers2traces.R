@@ -622,6 +622,35 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
   dat
 }
 
+# ggalluvial::GeomStratum
+#' @export
+to_basic.GeomStratum <- function(data, ...) {
+  to_basic.GeomRect(data, ...)
+}
+
+# ggalluvial::GeomAlluvium
+#' @export 
+to_basic.GeomAlluvium <- function(data, ...) {
+  # geom_alluvium by default generates a data.frame with a colour column and sets it to 0, which leads to an error when trying to get the colour from the number and grid::col2rgb complains that colors must be positive integers.
+  cols <- unique(data$colour)
+  if (length(cols) == 1 && cols[1] == 0) {
+    data$colour <- NULL
+  }
+  
+  data <- data[order(data$x), ]
+  row_number <- nrow(data)
+  data_rev <- data[rev(seq_len(row_number)), ]
+  unused_aes <- setdiff(names(data), c("x", "y", "ymin", "ymax"))
+  
+  d <- structure(rbind(
+    cbind(x = data$x, y = data$ymin, data[unused_aes]),
+    cbind(x = data$x[row_number], y = data$ymin[row_number], data[row_number, unused_aes]),
+    cbind(x = data_rev$x, y = data_rev$ymax, data_rev[unused_aes])
+  ), class = class(data))
+  
+  prefix_class(d, "GeomPolygon") 
+}
+
 #' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
