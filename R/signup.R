@@ -42,7 +42,7 @@ signup <- function(username, email, save = TRUE) {
     un = username,
     email = email,
     platform = "R",
-    version = as.character(packageVersion("plotly"))
+    version = as.character(get_package_version("plotly"))
   )
   base_url <- file.path(get_domain(), "apimkacct")
   resp <- httr::RETRY(

@@ -1,3 +1,6 @@
+# @staticimports pkg:staticimports
+#  is_installed get_package_version system_file
+
 is.plotly <- function(x) {
   inherits(x, "plotly")
 }
@@ -1089,7 +1092,7 @@ get_kwargs <- function() {
 
 # "common" POST header fields
 api_headers <- function() {
-  v <- as.character(packageVersion("plotly"))
+  v <- as.character(get_package_version("plotly"))
   httr::add_headers(
     plotly_version = v,
     `Plotly-Client-Platform` = paste("R", v),
@@ -1130,20 +1133,11 @@ cat_profile <- function(key, value, path = "~") {
 
 # check that suggested packages are installed
 try_library <- function(pkg, fun = NULL) {
-  if (system.file(package = pkg) != "") {
+  if (is_installed(pkg)) {
     return(invisible())
   }
   stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
        "Please install and try again.", call. = FALSE)
-}
-
-# a la shiny:::is_available
-is_available <- function(package, version = NULL) {
-  installed <- nzchar(system.file(package = package))
-  if (is.null(version)) {
-    return(installed)
-  }
-  installed && isTRUE(utils::packageVersion(package) >= version)
 }
 
 # similar logic to rstudioapi::isAvailable()
@@ -1168,7 +1162,7 @@ longest_element <- function(x) {
 
 # A dplyr::group_by wrapper for the add argument
 group_by_add <- function(..., add = TRUE) {
-  if (packageVersion('dplyr') >= '1.0') {
+  if (get_package_version('dplyr') >= '1.0') {
     dplyr::group_by(...,  .add = add)
   } else {
     dplyr::group_by(...,  add = add)
