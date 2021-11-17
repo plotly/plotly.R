@@ -181,7 +181,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     grDevices::png
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
-  } else if (system.file(package = "Cairo") != "") {
+  } else if (is_installed("Cairo")) {
     function(filename, ...) Cairo::Cairo(file = filename, ...)
   } else {
     stop(
@@ -243,7 +243,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     # currently, LayerSf is the only core-ggplot2 Layer that makes use
     # of it https://github.com/tidyverse/ggplot2/pull/2875#issuecomment-438708426
     data <- layer_data
-    if (packageVersion("ggplot2") > "3.1.0") {
+    if (get_package_version("ggplot2") > "3.1.0") {
       data <- by_layer(function(l, d) if (is.function(l$setup_layer)) l$setup_layer(d, plot) else d)
     }
     
