@@ -616,9 +616,9 @@ TraceManager.prototype.updateFilter = function(group, keys) {
         traces.push(trace);
       }
     }
+    this.gd.data = traces;
   }
   
-  this.gd.data = traces;
   Plotly.redraw(this.gd);
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,
