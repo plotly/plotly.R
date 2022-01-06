@@ -1,5 +1,9 @@
 # 4.10.0.9000
 
+## Changes to plotly.js
+
+* This version of the R package upgrades the version of the underlying plotly.js library from v2.5.1 to v2.8.3. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
+
 ## New features
 
 * `ggplotly()` now supports the `{ggalluvial}` package. (#2061, thanks @moutikabdessabour)
