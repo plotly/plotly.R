@@ -628,15 +628,15 @@ TraceManager.prototype.updateFilter = function(group, keys) {
 };
 
 TraceManager.prototype.updateSelection = function(group, keys) {
-  
-  if (keys !== null && !Array.isArray(keys)) {
+ 
+  if (keys !== null && keys !== undefined  && !Array.isArray(keys)) {
     throw new Error("Invalid keys argument; null or array expected");
   }
   
   // if selection has been cleared, or if this is transient
   // selection, delete the "selection traces"
   var nNewTraces = this.gd.data.length - this.origData.length;
-  if (keys === null || !this.highlight.persistent && nNewTraces > 0) {
+  if (keys === null || keys === undefined || !this.highlight.persistent && nNewTraces > 0) {
     var tracesToRemove = [];
     for (var i = 0; i < this.gd.data.length; i++) {
       if (this.gd.data[i]._isCrosstalkTrace) tracesToRemove.push(i);
@@ -655,7 +655,7 @@ TraceManager.prototype.updateSelection = function(group, keys) {
     }
   }
   
-  if (keys === null) {
+  if (keys === null || keys === undefined) {
     
     Plotly.restyle(this.gd, {"opacity": this.origOpacity});
     

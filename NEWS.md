@@ -16,6 +16,8 @@
 * `ggplotly()` now respects `guide(aes = "none")` (e.g., `guide(fill = "none")`) when constructing legend entries. (#2067)
 * Fixed an issue with translating `GGally::ggcorr()` via `ggplotly()`. (#2012)
 * Fixed an issue where clearing a crosstalk filter would raise an error in the JS console (#2087)
+* Fixed an issue with `{crosstalk}` where running `selectionHandle.clear()` from another visual causes plotly to throw an error. (#2098)
+
 
 ## Improvements
 
