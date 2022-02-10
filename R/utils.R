@@ -541,9 +541,10 @@ attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
   }
   if (length(illegalAttrs)) {
     warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
+            paste(sort(illegalAttrs), collapse = "', '"), "'\n", 
             "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
+            paste(sort(validAttrs), collapse = "', '"), "'\n", 
+            paste(sort(validAttrs), collapse = "', '"), "'\n", 
             call. = FALSE)
   }
   invisible(proposedAttrs)
@@ -582,7 +583,7 @@ verify_type <- function(trace) {
   }
   if (!trace$type %in% names(Schema$traces)) {
     stop("Trace type must be one of the following: \n",
-         "'", paste(names(Schema$traces), collapse = "', '"), "'",
+         "'", paste(sort(names(Schema$traces)), collapse = "', '"), "'",
          call. = FALSE)
   }
   # if scatter/scatter3d/scattergl, default to a scatterplot
