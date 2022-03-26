@@ -28,7 +28,7 @@ jobs:
         config:
           - {os: macOS-latest,   r: 'release', visual_tests: true, node: "14.x", shinytest: true}
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
+          #- {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
           - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.1.0 (ubuntu-18.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
           # vdiffr & shinytest only runs on linux r-release since the results aren't cross-platform
           - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
