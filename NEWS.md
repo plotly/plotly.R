@@ -15,6 +15,7 @@
 * `ggplotly()` now correctly handles `geom_tile()` with no `fill` aesthetic. (#2063)
 * `ggplotly()` now respects `guide(aes = "none")` (e.g., `guide(fill = "none")`) when constructing legend entries. (#2067)
 * Fixed an issue with translating `GGally::ggcorr()` via `ggplotly()`. (#2012)
+* Fixed an issue where clearing a crosstalk filter would raise an error in the JS console (#2087)
 
 ## Improvements
 
