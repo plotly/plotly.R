@@ -20,6 +20,7 @@
 ## Improvements
 
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, thanks @bersbersbers)
+* `ggplotly()` does not issue warnings related to use of deprecated `tidyr::gather_()` in internals. (#2125, thanks @simonpcouch)
 
 # 4.10.0
 
