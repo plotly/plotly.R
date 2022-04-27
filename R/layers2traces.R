@@ -421,7 +421,10 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = c("x_min", "x_max"), values_to = "x", names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
   prefix_class(data, c("GeomHline", "GeomPath"))
@@ -434,7 +437,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   x <- if (inherits(p$coordinates, "CoordFlip")) "y" else "x"
-  lay <- tidyr::gather_(layout$layout, "variable", x, paste0(x, c("_min", "_max")))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = paste0(x, c("_min", "_max")), values_to = x, names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
   data[["x"]] <- data[[x]]
   data[["y"]] <- data$yintercept
@@ -448,7 +454,10 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   y <- if (inherits(p$coordinates, "CoordFlip")) "x" else "y"
-  lay <- tidyr::gather_(layout$layout, "variable", y, paste0(y, c("_min", "_max")))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = paste0(y, c("_min", "_max")), values_to = y, names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
   data[["y"]] <- data[[y]]
   data[["x"]] <- data$xintercept
@@ -495,7 +504,10 @@ to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) 
   
   # reshape data so that x/y reflect path data
   data$group <- seq_len(nrow(data))
-  data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = c("ymin", "ymax"), values_to = "y", names_to = "recodeVariable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- data[order(data$group), ]
   # fix the hovertext (by removing the "irrelevant" aesthetic)
   recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
