@@ -673,6 +673,8 @@ map_size <- function(traces, stroke = FALSE) {
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
+#' @importFrom rlang is_na
+#
 map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "transparent") {
   color <- if (stroke) {
     lapply(traces, function(x) { x[["stroke"]] %||% x[["color"]] })
@@ -743,7 +745,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
         if (!has_attr(type, attr)) next
         if (is_colorway && "textfont" == attr) next
         col <- if (isSingular) rgba_ else if (array_ok(attrs[[attr]]$color)) rgba else NA
-        if (is.na(col)) {
+        if (is_na(col)) {
           warning("`", attr, ".color` does not currently support multiple values.", call. = FALSE)
         } else {
           trace[[attr]] <- modify_list(list(color = default_(col)), trace[[attr]])
@@ -759,7 +761,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
       } else if (has_attr(type, "line")) {
         # if fill does not exist, 'color' controls line.color
         col <- if (isSingular) rgba_ else if (array_ok(attrs$line$color)) rgba else NA
-        if (is.na(col)) {
+        if (is_na(col)) {
           warning("`line.color` does not currently support multiple values.", call. = FALSE)
         } else {
           trace[["line"]] <- modify_list(list(color = default_(col)), trace[["line"]])
