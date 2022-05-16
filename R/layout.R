@@ -46,15 +46,17 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' Add a range slider to the x-axis
 #'
 #' @param p plotly object.
-#' @param start a start date/value.
-#' @param end an end date/value.
+#' @param start a starting value for the rangeslider's range.
+#' @param end an ending value for the rangeslider's range.
+#' @param xaxes xaxis ids to generate rangesliders.
+#' The default adds a rangeslider to every xaxis in the plot object.
 #' @param ... these arguments are documented here 
 #' \url{https://plotly.com/r/reference/#layout-xaxis-rangeslider}
 #' @export
 #' @author Carson Sievert
 #' @examples 
 #' 
-#' plot_ly(x = time(USAccDeaths), y = USAccDeaths) %>% 
+#' p1 <- plot_ly(x = time(USAccDeaths), y = USAccDeaths) %>% 
 #'   add_lines() %>%
 #'   rangeslider()
 #'   
@@ -63,22 +65,45 @@ layout.plotly <- function(p, ..., data = NULL) {
 #'   y = rnorm(seq_along(time))
 #'  )
 #'  
-#' plot_ly(d, x = ~time, y = ~y) %>%
+#' p2 <- plot_ly(d, x = ~time, y = ~y) %>%
 #'   add_lines() %>%
 #'   rangeslider(d$time[5], d$time[50])
 #'   
-#' 
-rangeslider <- function(p, start = NULL, end = NULL, ...) {
-  if (sum(grepl("^xaxis", names(p$x$layout))) > 1) {
-    stop("Can only add a rangeslider to a plot with one x-axis", call. = FALSE)
+#' subplot(p1, p2, nrows = 2, margin = 0.1) 
+#'
+#' # calling rangeslider on a plot with multiple axes
+#' # generates multiple rangesliders
+#' subplot(qplot(1:10), qplot(1:10, 1:10)) %>%
+#'   rangeslider()
+#'  
+#' # add a rangeslider to just the 2nd xaxis
+#' subplot(qplot(1:10), qplot(1:10, 1:10)) %>%
+#'   rangeslider(xaxes = "xaxis2")
+#'   
+rangeslider <- function(p, start = NULL, end = NULL, xaxes = "all", ...) {
+  if (identical(xaxes, "all")) {
+    xaxes <- grep("^xaxis", names(p$x$layout), value = TRUE)
+    xaxes <- xaxes %||% "xaxis"
   }
   
-  p$x$layout$xaxis$range <- c(
-    to_milliseconds(start),
-    to_milliseconds(end)
-  )
+  if (any(!grepl("^xaxis", xaxes))) {
+    stop("The `xaxes` argument must contain xaxis ids (e.g. xaxis, xaxis2, etc)")
+  }
   
-  p$x$layout$xaxis$rangeslider <- list(visible = TRUE, ...)
+  for (x in xaxes) {
+    if (!is.null(start) && !is.null(end)) {
+      p$x$layout[[x]]$range <- c(
+        to_milliseconds(start),
+        to_milliseconds(end)
+      )
+    } else if (!is.null(start) || !is.null(end)) {
+      stop("Both start and end must be specified")
+    }
+    slider_old <- p$x$layout[[x]]$rangeslider
+    slider_new <- list(visible = TRUE, ...)
+    p$x$layout[[x]]$rangeslider <- modify_list(slider_old, slider_new)
+  }
+  
   p
 }
 

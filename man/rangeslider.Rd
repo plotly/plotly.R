@@ -4,14 +4,17 @@
 \alias{rangeslider}
 \title{Add a range slider to the x-axis}
 \usage{
-rangeslider(p, start = NULL, end = NULL, ...)
+rangeslider(p, start = NULL, end = NULL, xaxes = "all", ...)
 }
 \arguments{
 \item{p}{plotly object.}
 
-\item{start}{a start date/value.}
+\item{start}{a starting value for the rangeslider's range.}
 
-\item{end}{an end date/value.}
+\item{end}{an ending value for the rangeslider's range.}
+
+\item{xaxes}{xaxis ids to generate rangesliders.
+The default adds a rangeslider to every xaxis in the plot object.}
 
 \item{...}{these arguments are documented here
 \url{https://plotly.com/r/reference/#layout-xaxis-rangeslider}}
@@ -21,7 +24,7 @@ Add a range slider to the x-axis
 }
 \examples{
 
-plot_ly(x = time(USAccDeaths), y = USAccDeaths) \%>\% 
+p1 <- plot_ly(x = time(USAccDeaths), y = USAccDeaths) \%>\% 
   add_lines() \%>\%
   rangeslider()
   
@@ -30,11 +33,21 @@ d <- tibble::tibble(
   y = rnorm(seq_along(time))
  )
  
-plot_ly(d, x = ~time, y = ~y) \%>\%
+p2 <- plot_ly(d, x = ~time, y = ~y) \%>\%
   add_lines() \%>\%
   rangeslider(d$time[5], d$time[50])
   
+subplot(p1, p2, nrows = 2, margin = 0.1) 
 
+# calling rangeslider on a plot with multiple axes
+# generates multiple rangesliders
+subplot(qplot(1:10), qplot(1:10, 1:10)) \%>\%
+  rangeslider()
+ 
+# add a rangeslider to just the 2nd xaxis
+subplot(qplot(1:10), qplot(1:10, 1:10)) \%>\%
+  rangeslider(xaxes = "xaxis2")
+  
 }
 \author{
 Carson Sievert
