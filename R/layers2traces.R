@@ -962,7 +962,7 @@ geom2trace.default <- function(data, params, p) {
     "geom_", class(data)[1], "() has yet to be implemented in plotly.\n",
     "  If you'd like to see this geom implemented,\n",
     "  Please open an issue with your example code at\n",
-    "  https://github.com/ropensci/plotly/issues"
+    "  https://github.com/ropensci/plotly/issues "
   )
   list()
 }
