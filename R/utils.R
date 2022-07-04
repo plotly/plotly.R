@@ -1,3 +1,6 @@
+# @staticimports pkg:staticimports
+#  is_installed get_package_version system_file
+
 is.plotly <- function(x) {
   inherits(x, "plotly")
 }
@@ -401,7 +404,7 @@ supply_highlight_attrs <- function(p) {
   # add HTML dependencies, set a sensible dragmode default, & throw messages
   if (hasKeys) {
     p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
-      default(switch(p$x$highlight$on %||% "", plotly_selected = "select") %||% "zoom")
+      default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
     if (is.default(p$x$highlight$off)) {
       message(
         sprintf(
@@ -845,9 +848,6 @@ verify_showlegend <- function(p) {
   # this attribute should be set in hide_legend()
   # it ensures that "legend titles" go away in addition to showlegend = FALSE
   if (isTRUE(p$x$.hideLegend)) {
-    ann <- p$x$layout$annotations
-    is_title <- vapply(ann, function(x) isTRUE(x$legendTitle), logical(1))
-    p$x$layout$annotations <- ann[!is_title]
     p$x$layout$showlegend <- FALSE 
   }
   show <- vapply(p$x$data, function(x) x$showlegend %||% TRUE, logical(1))
@@ -1092,7 +1092,7 @@ get_kwargs <- function() {
 
 # "common" POST header fields
 api_headers <- function() {
-  v <- as.character(packageVersion("plotly"))
+  v <- as.character(get_package_version("plotly"))
   httr::add_headers(
     plotly_version = v,
     `Plotly-Client-Platform` = paste("R", v),
@@ -1133,20 +1133,11 @@ cat_profile <- function(key, value, path = "~") {
 
 # check that suggested packages are installed
 try_library <- function(pkg, fun = NULL) {
-  if (system.file(package = pkg) != "") {
+  if (is_installed(pkg)) {
     return(invisible())
   }
   stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
        "Please install and try again.", call. = FALSE)
-}
-
-# a la shiny:::is_available
-is_available <- function(package, version = NULL) {
-  installed <- nzchar(system.file(package = package))
-  if (is.null(version)) {
-    return(installed)
-  }
-  installed && isTRUE(utils::packageVersion(package) >= version)
 }
 
 # similar logic to rstudioapi::isAvailable()
@@ -1171,7 +1162,7 @@ longest_element <- function(x) {
 
 # A dplyr::group_by wrapper for the add argument
 group_by_add <- function(..., add = TRUE) {
-  if (packageVersion('dplyr') >= '1.0') {
+  if (get_package_version('dplyr') >= '1.0') {
     dplyr::group_by(...,  .add = add)
   } else {
     dplyr::group_by(...,  add = add)

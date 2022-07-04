@@ -130,9 +130,14 @@ add_data <- function(p, data = NULL) {
 #'   layout(title = "Basic Pie Chart using Plotly")
 #'   
 #' data(wind)
-#' plot_ly(wind, r = ~r, t = ~t) %>% 
+#' plot_ly(wind, r = ~r, theta = ~t) %>% 
 #'   add_area(color = ~nms) %>%
-#'   layout(radialaxis = list(ticksuffix = "%"), orientation = 270)
+#'   layout(
+#'     polar = list(
+#'       radialaxis = list(ticksuffix = "%"), 
+#'       angularaxis = list(rotation = 90)
+#'     )
+#'   )
 #' 
 #' # ------------------------------------------------------------
 #' # 3D chart types
@@ -432,20 +437,29 @@ add_image <- function(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit 
 
 #' @inheritParams add_trace
 #' @rdname add_trace
-#' @param r For polar chart only. Sets the radial coordinates.
-#' @param t For polar chart only. Sets the radial coordinates.
+#' @param r Sets the radial coordinates.
+#' @param theta Sets the angular coordinates.
+#' @param t Deprecated. Use `theta` instead.
 #' @export
-add_area <- function(p, r = NULL, t = NULL, ...,
+add_area <- function(p, r = NULL, theta = NULL, t = NULL, ...,
                      data = NULL, inherit = TRUE) {
-  if (inherit) {
-    r <- t %||% p$x$attrs[[1]][["r"]]
-    t <- t %||% p$x$attrs[[1]][["t"]]
+  if (!is.null(t)) {
+    message(
+      "Since `add_area()` now uses the barpolar instead of the area trace, ", 
+      "the `t` argument is now deprecated. Use the `theta` argument instead."
+    )
   }
-  if (is.null(r) || is.null(t)) {
-    stop("Must supply `r`/`t` attributes", call. = FALSE)
+  theta <- theta %||% t
+  if (inherit) {
+    attrs <- p$x$attrs[[1]]
+    r <- r %||% attrs[["r"]]
+    theta <- theta %||% (attrs[["theta"]] %||% attrs[["t"]])
+  }
+  if (is.null(r) || is.null(theta)) {
+    stop("Must supply `r`/`theta` attributes", call. = FALSE)
   }
   add_trace_classed(
-    p, class = "plotly_area", r = r, t = t, type = "area",
+    p, class = "plotly_area", r = r, theta = theta, type = "barpolar",
     ..., data = data, inherit = inherit
   )
 }

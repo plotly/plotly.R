@@ -1,4 +1,4 @@
-context("ribbon")
+
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))

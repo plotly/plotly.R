@@ -274,7 +274,7 @@ plot_geo <- function(data = data.frame(), ..., offline = FALSE) {
   p <- plot_ly(data, ...)
   
   if (isTRUE(offline)) {
-    if (system.file(package = "plotlyGeoAssets") == "") {
+    if (!is_installed("plotlyGeoAssets")) {
       stop(
         "The plotlyGeoAssets package is required to make 'offline' maps. ",
         "Please install and try again.",
@@ -479,12 +479,21 @@ typedArrayPolyfill <- function() {
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     name = "plotly-main", 
-    version = "1.58.0",
+    version = "2.11.1",
     package = "plotly",
     src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",
     all_files = FALSE
   )
+}
+
+plotlyMainBundlePath <- function() {
+  dep <- plotlyMainBundle()
+  path <- file.path(dep$src$file, dep$script)
+  if (!is.null(dep$package)) {
+    path <- system_file(path, package = dep$package)
+  }
+  path
 }
 
 plotlyHtmlwidgetsCSS <- function() {
@@ -504,7 +513,7 @@ locale_dependency <- function(locale) {
   }
   
   locale_dir <- dependency_dir("plotlyjs", "locales")
-  locales_all <- sub("\\.js$", "", list.files(system.file(locale_dir, package = "plotly")))
+  locales_all <- sub("\\.js$", "", list.files(system_file(locale_dir, package = "plotly")))
   if (!tolower(locale) %in% locales_all) {
     stop(
       "Invalid locale: '", locale, "'.\n\n",

@@ -75,7 +75,7 @@ add_ribbons(
 
 add_image(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
 
-add_area(p, r = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
+add_area(p, r = NULL, theta = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
 
 add_pie(p, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
 
@@ -151,9 +151,11 @@ provided at this level may override other arguments
 \item{colormodel}{Sets the colormodel for image traces if \code{z} is not a raster object.
 If \code{z} is a raster object (see \code{\link[=as.raster]{as.raster()}}), the \code{'rgba'} colormodel is always used.}
 
-\item{r}{For polar chart only. Sets the radial coordinates.}
+\item{r}{Sets the radial coordinates.}
 
-\item{t}{For polar chart only. Sets the radial coordinates.}
+\item{theta}{Sets the angular coordinates.}
+
+\item{t}{Deprecated. Use \code{theta} instead.}
 
 \item{values}{the value to associated with each slice of the pie.}
 
@@ -251,9 +253,14 @@ plot_ly(ds, labels = ~labels, values = ~values) \%>\%
   layout(title = "Basic Pie Chart using Plotly")
   
 data(wind)
-plot_ly(wind, r = ~r, t = ~t) \%>\% 
+plot_ly(wind, r = ~r, theta = ~t) \%>\% 
   add_area(color = ~nms) \%>\%
-  layout(radialaxis = list(ticksuffix = "\%"), orientation = 270)
+  layout(
+    polar = list(
+      radialaxis = list(ticksuffix = "\%"), 
+      angularaxis = list(rotation = 90)
+    )
+  )
 
 # ------------------------------------------------------------
 # 3D chart types

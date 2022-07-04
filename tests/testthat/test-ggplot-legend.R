@@ -1,4 +1,4 @@
-context("legends")
+
 
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
@@ -28,10 +28,9 @@ test_that("Discrete colour and shape get merged into one legend", {
   expect_identical(
     nms, paste0("(", d$vs, ",", d$cyl, ")")
   )
-  a <- info$layout$annotations
-  expect_match(a[[1]]$text, "^factor\\(vs\\)")
-  expect_match(a[[1]]$text, "factor\\(cyl\\)$")
-  expect_true(a[[1]]$y > info$layout$legend$y)
+  legend_title <- info$layout$legend$title$text
+  expect_match(legend_title, "^factor\\(vs\\)")
+  expect_match(legend_title, "factor\\(cyl\\)$")
 })
 
 
@@ -39,6 +38,26 @@ test_that("legend vanishes when theme(legend.position = 'none'')", {
   info <- expect_traces(p + theme(legend.position = "none"), 5, "hide")
   expect_identical(info$layout$showlegend, FALSE)
 })
+
+test_that("aesthetics can be discarded from legend with guide(aes = 'none')", {
+  df1 <- data.frame(
+    Date = seq(as.Date("2021-01-01"), as.Date("2021-01-10"), "days"),
+    Series = c(rep("SeriesA", 10), rep("SeriesB", 10)),
+    Values = rnorm(n = 20),
+    Mean = 0, V1 = 2, V2 = -2
+  )
+  
+  p <- ggplot(df1, aes(x=Date, y=Values, color = Series, linetype = Series, shape = Series)) +
+    geom_line(aes(x = Date, y = Mean, color = "Mean", linetype = "Mean")) +
+    geom_line(aes(x = Date, y = V1, color = "QC", linetype = "QC")) +
+    geom_line(aes(x = Date, y = V2, color = "QC", linetype = "QC")) +
+    geom_line() + 
+    geom_point() + 
+    guides(shape = "none", linetype = "none")
+  
+  expect_doppelganger(p, "guide-aes-none")
+})
+
 
 p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) + 
   geom_point()
@@ -80,7 +99,7 @@ test_that("legend is created with discrete mapping regardless of unique values",
   info <- expect_traces(p, 1, "one-entry")
   expect_true(info$data[[1]]$showlegend)
   expect_true(info$layout$showlegend)
-  expect_equivalent(length(info$layout$annotations), 1)
+  expect_true(nzchar(info$layout$legend$title$text))
 })
 
 test_that("can hide legend", {

@@ -1,4 +1,3 @@
-context("means and error bars")
 
 one.line.df <- data.frame(
   x = c(1, 2, 3, 4), 

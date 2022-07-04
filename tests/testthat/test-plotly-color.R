@@ -1,4 +1,3 @@
-context("plotly-color")
 
 expect_traces <- function(p, n.traces, name){
   stopifnot(is.numeric(n.traces))
@@ -33,7 +32,7 @@ test_that("Custom RColorBrewer pallette works for factor variable", {
   l <- expect_traces(p, 3, "scatterplot-color-factor-custom")
   markers <- lapply(l$data, "[[", "marker")
   colz <- unlist(lapply(markers, "[[", "color"))
-  idx <- if (packageVersion("scales") > '1.0.0') c(1, 2, 3) else c(1, 5, 9)
+  idx <- if (get_package_version("scales") > '1.0.0') c(1, 2, 3) else c(1, 5, 9)
   expect_identical(sort(colsToCompare[idx]), sort(colz))
   # providing vector of RGB codes should also work
   p <- plot_ly(d, x = ~bill_length_mm, y = ~flipper_length_mm, color = ~species, 

@@ -1,4 +1,4 @@
-context("quantile")
+
 
 
 
@@ -10,7 +10,8 @@ test_that("Basic geom_quantile() works", {
     geom_point() +
     geom_quantile()
   
-  l <- plotly_build(p)$x
+  # partial match of 'coef' to 'coefficients' 
+  l <- suppressWarnings(plotly_build(p)$x)
   
   expect_length(l$data, 4)
   
@@ -35,7 +36,8 @@ test_that("Can specify gpar() in geom_quantile()", {
     geom_point() +
     geom_quantile(colour = "red", alpha = 0.5)
   
-  l <- plotly_build(p)$x
+  # partial match of 'coef' to 'coefficients' 
+  l <- suppressWarnings(plotly_build(p)$x)
   
   expect_length(l$data, 4)
   

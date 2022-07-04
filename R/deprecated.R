@@ -51,7 +51,7 @@ get_figure <- function(username, id) {
 #' For more details and examples, see \url{https://plotly.com/r/getting-started/}.
 #' 
 #' If you're here looking for an intro/overview of the package, see the 
-#' \href{https://github.com/ropensci/plotly/#getting-started}{readme}
+#' \href{https://github.com/plotly/plotly.R/#getting-started}{readme}
 #' 
 #' @keywords internal
 #' @param username plotly username

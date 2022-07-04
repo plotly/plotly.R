@@ -3,7 +3,7 @@
 \name{orca}
 \alias{orca}
 \alias{orca_serve}
-\title{Static image exporting}
+\title{Static image exporting via orca}
 \usage{
 orca(
   p,
@@ -80,15 +80,7 @@ for specifying display and/or electron options, such as \code{--enable-webgl} or
 \item{quiet}{Suppress all logging info.}
 }
 \description{
-Export plotly objects to static images (e.g., pdf, png, jpeg, svg, etc) via the
-\href{https://github.com/plotly/orca#installation}{orca command-line utility}.
-}
-\details{
-The \code{orca()} function is designed for exporting one plotly graph whereas \code{orca_serve()}
-is meant for exporting many graphs at once. The former starts and stops an external (nodejs)
-process everytime it is called whereas the latter starts up a process when called, then
-returns an \code{export()} method for exporting graphs as well as a \code{close()} method for stopping
-the external (background) process.
+Superseded by \code{\link[=kaleido]{kaleido()}}.
 }
 \section{Methods}{
 

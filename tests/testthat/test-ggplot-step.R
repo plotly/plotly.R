@@ -1,4 +1,4 @@
-context("Step")
+
 
 # Dataset for test
 oranges <- subset(Orange, Tree %in% c(1, 2))
@@ -33,4 +33,18 @@ test_that("direction vhv is translated to shape=vhv", {
   L <- expect_doppelganger_built(gg.vhv, "step-gg.vhv")
   expect_equivalent(length(L$data), 2)
   expect_identical(L$data[[1]]$line$shape, "vhv")
+})
+
+
+test_that("`stat_ecdf` renders correctly", {
+  df <- data.frame(
+    x = c(rnorm(100, 0, 3), rnorm(100, 0, 10)),
+    g = gl(2, 100)
+  )
+  
+  p <- ggplot(df, aes(x)) + stat_ecdf(geom = "step")
+  expect_doppelganger(ggplotly(p), "step-ecdf")
+  
+  p <- ggplot(df, aes(x, colour = g)) + stat_ecdf()
+  expect_doppelganger(ggplotly(p), "step-ecdf-multiple")
 })

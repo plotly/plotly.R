@@ -1,4 +1,3 @@
-context("internals")
 
 # test some assumptions we make about internal functions
 

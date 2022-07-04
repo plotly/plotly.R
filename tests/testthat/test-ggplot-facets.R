@@ -1,4 +1,3 @@
-context("Facets")
 
 test_that("6 facets becomes 6 panels", {
   

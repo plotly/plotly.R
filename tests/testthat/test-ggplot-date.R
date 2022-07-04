@@ -1,4 +1,4 @@
-context("date")
+
 
 test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
   in.str <- c("17 Mar 1983 06:33:44 AM",

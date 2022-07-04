@@ -98,9 +98,9 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' mathjax rendering which doesn't play nicely with HTML-based rendering 
 #' (e.g., **rmarkdown** documents and **shiny** apps). To leverage both types of rendering, 
 #' you must `<iframe>` your plotly graph(s) into the larger document 
-#' (see [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) 
+#' (see [here](https://github.com/plotly/plotly.R/blob/master/inst/examples/rmd/MathJax/index.Rmd) 
 #' for an **rmarkdown** example and 
-#' [here](https://github.com/ropensci/plotly/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
+#' [here](https://github.com/plotly/plotly.R/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
 #' @author Carson Sievert
 #' @export
 #' @examples
@@ -162,6 +162,11 @@ config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL
   
   args <- list(...)
   if ("collaborate" %in% names(args)) warning("The collaborate button is no longer supported")
+  
+  args$modeBarButtonsToAdd <- unique(c(
+    args$modeBarButtonsToAdd, c("hoverclosest", "hovercompare")
+  ))
+  
   p$x$config <- modify_list(p$x$config, args)
   if (cloud) warning("The `cloud` argument is deprecated. Use `showSendToCloud` instead.")
   p$x$config$showSendToCloud <- showSendToCloud

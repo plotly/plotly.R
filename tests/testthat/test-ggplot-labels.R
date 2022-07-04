@@ -1,4 +1,3 @@
-context("labels")
 
 test_that("ggtitle is translated correctly", {
   ggpenguin <- ggplot(palmerpenguins::penguins) +

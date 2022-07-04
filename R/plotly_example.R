@@ -24,7 +24,7 @@ plotly_example <- function(type = c("demo", "shiny", "rmd"), name, edit = TRUE, 
   }
   
   # check to make sure the example exists
-  exampleDir <- system.file("examples", type, package = "plotly")
+  exampleDir <- system_file("examples", type, package = "plotly")
   nms <- basename(list.dirs(exampleDir, recursive = FALSE))
   if (missing(name) || !isTRUE(name %in% nms)) {
     message(
@@ -36,7 +36,7 @@ plotly_example <- function(type = c("demo", "shiny", "rmd"), name, edit = TRUE, 
     return(invisible())
   }
   
-  finalDir <- system.file("examples", type, name, package = "plotly")
+  finalDir <- system_file("examples", type, name, package = "plotly")
   if (edit) {
     files <- list.files(finalDir, full.names = TRUE)
     scripts <- files[tools::file_ext(files) %in% c("R", "Rmd")]

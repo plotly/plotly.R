@@ -1,4 +1,3 @@
-context("toRGB")
 
 test_that("toRGB(NULL) is NULL", {
   expect_identical(toRGB(NULL), NULL)

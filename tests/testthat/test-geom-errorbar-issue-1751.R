@@ -1,4 +1,3 @@
-context("Errorbar")
 
 test_that("geom_errobar is rendered when y aes is not set", {
 

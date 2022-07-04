@@ -1,4 +1,4 @@
-context("Heatmap")
+
 
 wdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 dtimes <- c("Morning", "Afternoon", "Evening")
@@ -61,5 +61,14 @@ test_that("geom_tile() with discrete x/y", {
   # one trace is for the colorbar
   expect_equivalent(length(L$data), 2)
   expect_equivalent(L$data[[1]]$type, "heatmap")
+})
+
+test_that("geom_tile() with no fill aesthetic", {
+  df <- data.frame(
+    x = rep(c(2, 5, 7, 9, 12), 2),
+    y = rep(c(1, 2), each = 5)
+  )
+  p <- ggplot(df, aes(x, y)) + geom_tile(colour = "grey50")
+  expect_doppelganger(ggplotly(p), "tile-no-fill")
 })
 

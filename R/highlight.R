@@ -130,6 +130,7 @@ highlight <- function(p, on = "plotly_click", off,
   if (missing(off)) {
     off_default <- switch(
       on %||% "", 
+      plotly_selecting = ,
       plotly_selected = "plotly_deselect",
       plotly_click = "plotly_doubleclick",
       plotly_hover = "plotly_doubleclick"
@@ -148,7 +149,7 @@ highlight <- function(p, on = "plotly_click", off,
   # main (non-plotly.js) spec passed along to HTMLwidgets.renderValue()
   p$x$highlight <- list(
     # NULL may be used to disable on/off events
-    on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected"))),
+    on = if (!is.null(on)) match.arg(on, paste0("plotly_", c("click", "hover", "selected", "selecting"))),
     off = if (is.default(off)) off else if (!is.null(off)) match.arg(off, off_options),
     persistent = persistent,
     dynamic = dynamic,

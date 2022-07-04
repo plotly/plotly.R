@@ -1,4 +1,4 @@
-context("tooltip")
+
 
 test <- data.frame(
   time = strptime("2016-03-12 16:32:56", format = "%Y-%m-%d %X") + 60 * 1:100, 

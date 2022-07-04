@@ -12,7 +12,7 @@ const widgetDefinition = {
       var height = instance.height || height;
       Plotly.relayout(el, {width: width, height: height});
     }
-  },
+  },  
   
   renderValue: function(el, x, instance) {
     
@@ -158,12 +158,28 @@ const widgetDefinition = {
       }
     }
     
+    // remove "sendDataToCloud", unless user has specified they want it
+    x.config = x.config || {};
+    if (!x.config.cloud) {
+      x.config.modeBarButtonsToRemove = x.config.modeBarButtonsToRemove || [];
+      x.config.modeBarButtonsToRemove.push("sendDataToCloud");
+    }
+    
+    // if the object was passed in from another window, plotly will falsely think it isn't a "plain object"
+    // to get around this, we have to create a deep copy of the object
+    if (inIframe() && !isPlainObject(x))
+       x = JSON.parse(JSON.stringify(x))
+
     // if no plot exists yet, create one with a particular configuration
     if (!instance.plotly) {
       
-      var plot = Plotly.plot(graphDiv, x);
+      var plot = Plotly.newPlot(graphDiv, x);
       instance.plotly = true;
       
+    } else if (x.layout.transition) {
+      
+      var plot = Plotly.react(graphDiv, x);
+    
     } else {
       
       // this is essentially equivalent to Plotly.newPlot(), but avoids creating 
@@ -175,7 +191,7 @@ const widgetDefinition = {
       // TODO: why is this necessary to get crosstalk working?
       graphDiv.data = undefined;
       graphDiv.layout = undefined;
-      var plot = Plotly.plot(graphDiv, x);
+      var plot = Plotly.newPlot(graphDiv, x);
     }
     
     // Trigger plotly.js calls defined via `plotlyProxy()`
@@ -565,7 +581,7 @@ const widgetDefinition = {
       graphDiv.setAttribute("rhtmlwidget-status", "ready");
     });
   } // end of renderValue
-}
+}; // end of widget definition
 
 /**
  * @param graphDiv The Plotly graph div
@@ -623,9 +639,9 @@ TraceManager.prototype.updateFilter = function(group, keys) {
         traces.push(trace);
       }
     }
+    this.gd.data = traces;
   }
   
-  this.gd.data = traces;
   Plotly.redraw(this.gd);
   
   // NOTE: we purposely do _not_ restore selection(s), since on filter,
@@ -883,6 +899,10 @@ function isPlainObject(obj) {
   );
 }
 
+function inIframe() {
+  return window && window.self !== window.top;
+}
+
 function subsetArrayAttrs(obj, indices) {
   var newObj = {};
   Object.keys(obj).forEach(function(k) {
@@ -931,18 +951,18 @@ function removeBrush(el) {
 // N milliseconds. If `immediate` is passed, trigger the function on the
 // leading edge, instead of the trailing.
 function debounce(func, wait, immediate) {
-	var timeout;
-	return function() {
-		var context = this, args = arguments;
-		var later = function() {
-			timeout = null;
-			if (!immediate) func.apply(context, args);
-		};
-		var callNow = immediate && !timeout;
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-		if (callNow) func.apply(context, args);
-	};
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
 };
 
 module.exports = widgetDefinition

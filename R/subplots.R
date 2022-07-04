@@ -372,7 +372,7 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
   if (any(widths < 0) | any(heights < 0)) {
     stop("The widths and heights arguments must contain positive values")
   }
-  if (sum(widths) > 1 | sum(heights) > 1) {
+  if (sum(widths) > (1 + sqrt(.Machine$double.eps)) | sum(heights) > (1 + sqrt(.Machine$double.eps))) {
     stop("The sum of the widths and heights arguments must be less than 1")
   }
   

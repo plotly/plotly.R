@@ -88,6 +88,7 @@ ggplotly.ggmatrix <- function(p = ggplot2::last_plot(), width = NULL,
                               height = NULL, tooltip = "all", dynamicTicks = FALSE, 
                               layerData = 1, originalData = TRUE, source = "A", ...) {
   dots <- list(...)
+
   # provide a sensible crosstalk if none is already provided (makes ggnostic() work at least)
   if (!crosstalk_key() %in% names(p$data)) {
     p$data[[crosstalk_key()]] <- p$data[[".rownames"]] %||% seq_len(nrow(p$data))
@@ -180,8 +181,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     grDevices::png
   } else if (capabilities("jpeg")) {
     grDevices::jpeg 
-  } else if (system.file(package = "Cairo") != "") {
-    Cairo::Cairo
+  } else if (is_installed("Cairo")) {
+    function(filename, ...) Cairo::Cairo(file = filename, ...)
   } else {
     stop(
       "No Cairo or bitmap device is available. Such a graphics device is required to convert sizes correctly in ggplotly().\n\n", 
@@ -197,7 +198,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     height <- height %||% default(grDevices::dev.size("px")[2])
   }
   # open the device and make sure it closes on exit
-  dev_fun(file = tempfile(), width = width %||% 640, height = height %||% 480)
+  dev_fun(filename = tempfile(), width = width %||% 640, height = height %||% 480)
   on.exit(grDevices::dev.off(), add = TRUE)
   
   # check the value of dynamicTicks
@@ -242,7 +243,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     # currently, LayerSf is the only core-ggplot2 Layer that makes use
     # of it https://github.com/tidyverse/ggplot2/pull/2875#issuecomment-438708426
     data <- layer_data
-    if (packageVersion("ggplot2") > "3.1.0") {
+    if (get_package_version("ggplot2") > "3.1.0") {
       data <- by_layer(function(l, d) if (is.function(l$setup_layer)) l$setup_layer(d, plot) else d)
     }
     
@@ -264,7 +265,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     layers <- Map(function(x, y) {
       if (crosstalk_key() %in% names(y) && !"key" %in% names(x[["mapping"]]) && 
           inherits(x[["stat"]], "StatIdentity")) {
-        x[["mapping"]] <- c(x[["mapping"]], key = as.name(crosstalk_key()))
+        # ggplot2 v3.3.4 started using the computed_mapping (instead of mapping)
+        # field to inform the compute_aesthetics() method, so in order to add
+        # the crosstalk key, we need to add to that field (when present)
+        # https://github.com/tidyverse/ggplot2/pull/4475
+        nm <- if ("computed_mapping" %in% names(x)) "computed_mapping" else "mapping"
+        x[[nm]] <- c(x[[nm]], key = as.name(crosstalk_key()))
       }
       x
     }, layers, layer_data)
@@ -341,7 +347,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       x <- reComputeGroup(x, z)
       tib <- tibble::as_tibble(x[c("PANEL", "group")])
       tib[["key"]] <- key
-      nested <- tidyr::nest(tib, key, .key = key)
+      nested <- tidyr::nest(tib, key = key)
       # reduce the dimensions of list column elements from 2 to 1
       nested$key <- lapply(nested$key, function(x) x[[1]])
       nested
@@ -417,6 +423,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       x <- reComputeGroup(x, z)
       # dplyr issue??? https://github.com/tidyverse/dplyr/issues/2701
       attr(y$group, "n") <- NULL
+      # https://github.com/plotly/plotly.R/issues/2013
+      if (!identical(class(x$group), class(y$group))) {
+        x$group <- as.character(x$group)
+        y$group <- as.character(y$group)
+      }
       suppressMessages(dplyr::left_join(x, y))
     }, data, nestedKeys, layers)
     
@@ -828,11 +839,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       gglayout[[axisName]] <- axisObj
       
       # do some stuff that should be done once for the entire plot
+      is_x <- xy == "x"
       if (i == 1) {
         # Split ticktext elements by "\n"  to account for linebreaks
         axisTickText <- strsplit(as.character(axisObj$ticktext), split = "\n", fixed = TRUE)
         axisTickText <- longest_element(unlist(axisTickText))
-        side <- if (xy == "x") "b" else "l"
+        side <- if (is_x) "b" else "l"
         # account for axis ticks, ticks text, and titles in plot margins
         # (apparently ggplot2 doesn't support axis.title/axis.text margins)
         gglayout$margin[[side]] <- gglayout$margin[[side]] + axisObj$ticklen +
@@ -842,40 +854,45 @@ gg2list <- function(p, width = NULL, height = NULL,
         if (robust_nchar(axisTitleText) > 0) {
           axisTextSize <- unitConvert(axisText, "npc", type)
           axisTitleSize <- unitConvert(axisTitle, "npc", type)
-          offset <-
-            (0 -
-               bbox(axisTickText, axisText$angle, axisTextSize)[[type]] -
-               bbox(axisTitleText, axisTitle$angle, axisTitleSize)[[type]] / 2 -
-               unitConvert(theme$axis.ticks.length, "npc", type))
         }
         
         # add space for exterior facet strips in `layout.margin`
         
         if (has_facet(plot)) {
           stripSize <- unitConvert(stripText, "pixels", type)
-          if (xy == "x") {
+          if (is_x) {
             gglayout$margin$t <- gglayout$margin$t + stripSize
           }
-          if (xy == "y" && inherits(plot$facet, "FacetGrid")) {
+          if (is_x && inherits(plot$facet, "FacetGrid")) {
             gglayout$margin$r <- gglayout$margin$r + stripSize
           }
           # facets have multiple axis objects, but only one title for the plot,
           # so we empty the titles and try to draw the title as an annotation
           if (robust_nchar(axisTitleText) > 0) {
-            # npc is on a 0-1 scale of the _entire_ device,
-            # but these units _should_ be wrt to the plotting region
-            # multiplying the offset by 2 seems to work, but this is a terrible hack
-            x <- if (xy == "x") 0.5 else offset
-            y <- if (xy == "x") offset else 0.5
-            gglayout$annotations <- c(
-              gglayout$annotations,
-              make_label(
-                faced(axisTitleText, axisTitle$face), x, y, el = axisTitle,
-                xanchor = if (xy == "x") "center" else "right", 
-                yanchor = if (xy == "x") "top" else "center", 
-                annotationType = "axis"
-              )
+            axisAnn <- make_label(
+              faced(axisTitleText, axisTitle$face), 
+              el = axisTitle,
+              x = if (is_x) 0.5 else 0,
+              y = if (is_x) 0 else 0.5,
+              xanchor = if (is_x) "center" else "right", 
+              yanchor = if (is_x) "top" else "center", 
+              annotationType = "axis"
             )
+            
+            textMargin <- sum(axisText$margin[if (is_x) c(1, 3) else c(2, 4)])
+            class(textMargin) <- setdiff(class(textMargin), "margin")
+            titleMargin <- axisTitle$margin[if (is_x) 1 else 2]
+            class(titleMargin) <- setdiff(class(titleMargin), "margin")
+            offset <- bbox(axisTickText, axisText$angle, axisTextSize)[[type]] +
+                 unitConvert(theme$axis.ticks.length, "npc", type) +
+                 unitConvert(textMargin, "npc", type) +
+                 unitConvert(titleMargin, "npc", type)
+            
+            offset <- unitConvert(grid::unit(offset, "npc"), "pixels", type)
+            
+            shift <- if (is_x) "yshift" else "xshift"
+            axisAnn[[1]][[shift]] <- -1 * offset
+            gglayout$annotations <- c(gglayout$annotations, axisAnn)
           }
         }
       }
@@ -994,26 +1011,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     }
     traces <- c(traces, colorbar)
     
-    # legend title annotation - https://github.com/plotly/plotly.js/issues/276
-    if (isTRUE(gglayout$showlegend)) {
-      legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
-      legendTitle <- paste(legendTitles, collapse = br())
-      titleAnnotation <- make_label(
-        legendTitle,
-        x = gglayout$legend$x %||% 1.02,
-        y = gglayout$legend$y %||% 1,
-        theme$legend.title,
-        xanchor = "left",
-        yanchor = "bottom",
-        # just so the R client knows this is a title
-        legendTitle = TRUE
-      )
-      gglayout$annotations <- c(gglayout$annotations, titleAnnotation)
-      # adjust the height of the legend to accomodate for the title
-      # this assumes the legend always appears below colorbars
-      gglayout$legend$y <- (gglayout$legend$y %||% 1) -
-        length(legendTitles) * unitConvert(theme$legend.title$size, "npc", "height")
-    }
+    legendTitles <- compact(lapply(gdefs, function(g) if (inherits(g, "legend")) g$title else NULL))
+    legendTitle <- paste(legendTitles, collapse = br())
+    gglayout$legend$title <- list(
+      text = legendTitle,
+      font = text2font(theme$legend.title)
+    )
   }
   
   # flip x/y in traces for flipped coordinates
@@ -1387,10 +1390,13 @@ gdef2trace <- function(gdef, theme, gglayout) {
     rng <- range(gdef$bar$value)
     gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
     gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
+      if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+    })
     list(
-      x = with(gglayout$xaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
-      y = with(gglayout$yaxis, if (identical(tickmode, "auto")) ticktext else tickvals)[[1]],
-      # esentially to prevent this getting merged at a later point
+      x = vals[[1]][[1]],
+      y = vals[[2]][[1]],
+      # essentially to prevent this getting merged at a later point
       name = gdef$hash,
       type = "scatter",
       mode = "markers",

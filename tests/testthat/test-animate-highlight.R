@@ -1,4 +1,4 @@
-context("highlighting and animation")
+
 
 m <- crosstalk::SharedData$new(mtcars, ~vs)
 p <- plot_ly(m, x = ~wt, y = ~mpg) %>% add_markers()
@@ -391,6 +391,7 @@ test_that("animation button can be customized", {
 
 test_that("sf works with crosstalk", {
   skip_if_not_installed("sf")
+  skip_if_not_installed("s2")
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   # shared data will make the polygons "query-able"

@@ -1,4 +1,4 @@
-context("plotly data")
+
 
 test_that("uniq works as expected", {
   expect_equivalent(uniq(c("red", "red", NA)), "red")
@@ -15,7 +15,7 @@ test_that("plotly_data returns data frame", {
 })
 
 test_that("plotly_data preserves groups in data", {
-  d <- plotly_data(group_by_(plot_ly(mtcars), c("vs", "am")))
+  d <- plotly_data(group_by(plot_ly(mtcars), vs, am))
   expect_true(dplyr::groups(d)[[1]] == "vs")
 })
 

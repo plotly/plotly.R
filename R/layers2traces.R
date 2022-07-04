@@ -23,8 +23,11 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # turn symbol (e.g., ..count..) & call (e.g. calc(count)) mappings into text labels 
     map <- ggfun("make_labels")(map)
 
+
     # filter tooltip aesthetics down to those specified in `tooltip` arg 
     if (!identical(p$tooltip, "all")) {
+      # rectify tooltips, ggplot automatically convert `color` => `colour`
+      p$tooltip[p$tooltip == "color"] <- "colour"
       map <- map[names(map) %in% p$tooltip | map %in% p$tooltip]
     }
     
@@ -99,12 +102,16 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }
   # now to the actual layer -> trace conversion
   trace.list <- list()
+  aes_no_guide <- names(vapply(p$guides, identical, logical(1), "none"))
   for (i in seq_along(datz)) {
     d <- datz[[i]]
     # variables that produce multiple traces and deserve their own legend entries
-    split_legend <- paste0(names(discreteScales), "_plotlyDomain")
+    split_legend <- paste0(
+      setdiff(names(discreteScales), aes_no_guide), 
+      "_plotlyDomain"
+    )
     # add variable that produce multiple traces, but do _not_ deserve entries
-    split_by <- c(split_legend, "PANEL", "frame", split_on(d))
+    split_by <- c(split_legend, aes_no_guide, "PANEL", "frame", split_on(d))
     # ensure the factor level orders (which determines traces order)
     # matches the order of the domain values
     split_vars <- intersect(split_by, names(d))
@@ -168,6 +175,12 @@ layers2traces <- function(data, prestats_data, layout, p) {
 #' @export
 to_basic <- function(data, prestats_data, layout, params, p, ...) {
   UseMethod("to_basic")
+}
+
+#' @export 
+to_basic.GeomFunction <- function (data, prestats_data, layout, params, p, ...) {
+   data$y <- params$fun(data$x)
+   prefix_class(data, "GeomPath")
 }
 
 #' @export
@@ -243,6 +256,7 @@ to_basic.GeomLine <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomStep <- function(data, prestats_data, layout, params, p, ...) {
+  data <- data[order(data[["x"]]), ]
   prefix_class(data, "GeomPath")
 }
 
@@ -358,7 +372,7 @@ to_basic.GeomRasterAnn <- function(data, prestats_data, layout, params, p, ...) 
 #' @export
 to_basic.GeomTile <- function(data, prestats_data, layout, params, p, ...) {
   # geom2trace.GeomTile is a heatmap, which requires continuous fill
-  if (is.discrete(prestats_data$fill)) {
+  if (is.discrete(data$fill_plotlyDomain %||% NA_character_)) {
     data <- prefix_class(data, "GeomRect")
     to_basic(data, prestats_data, layout, params, p)
   } else {
@@ -407,7 +421,10 @@ to_basic.GeomAbline <- function(data, prestats_data, layout, params, p, ...) {
   data$group <- interaction(
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
-  lay <- tidyr::gather_(layout$layout, "variable", "x", c("x_min", "x_max"))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = c("x_min", "x_max"), values_to = "x", names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", "x")], data, by = "PANEL")
   data[["y"]] <- with(data, intercept + slope * x)
   prefix_class(data, c("GeomHline", "GeomPath"))
@@ -420,7 +437,10 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   x <- if (inherits(p$coordinates, "CoordFlip")) "y" else "x"
-  lay <- tidyr::gather_(layout$layout, "variable", x, paste0(x, c("_min", "_max")))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = paste0(x, c("_min", "_max")), values_to = x, names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
   data[["x"]] <- data[[x]]
   data[["y"]] <- data$yintercept
@@ -434,7 +454,10 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
     data[!grepl("group", names(data)) & !vapply(data, anyNA, logical(1))]
   )
   y <- if (inherits(p$coordinates, "CoordFlip")) "x" else "y"
-  lay <- tidyr::gather_(layout$layout, "variable", y, paste0(y, c("_min", "_max")))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = paste0(y, c("_min", "_max")), values_to = y, names_to = "variable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
   data[["y"]] <- data[[y]]
   data[["x"]] <- data$xintercept
@@ -481,7 +504,10 @@ to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) 
   
   # reshape data so that x/y reflect path data
   data$group <- seq_len(nrow(data))
-  data <- tidyr::gather_(data, "recodeVariable", "y", c("ymin", "ymax"))
+  lay <- tidyr::pivot_longer(
+    data = layout$layout, cols = c("ymin", "ymax"), values_to = "y", names_to = "recodeVariable"
+  ) 
+  lay <- as.data.frame(lay)
   data <- data[order(data$group), ]
   # fix the hovertext (by removing the "irrelevant" aesthetic)
   recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
@@ -613,6 +639,35 @@ to_basic.GeomQuantile <- function(data, prestats_data, layout, params, p, ...){
   dat
 }
 
+# ggalluvial::GeomStratum
+#' @export
+to_basic.GeomStratum <- function(data, ...) {
+  to_basic.GeomRect(data, ...)
+}
+
+# ggalluvial::GeomAlluvium
+#' @export 
+to_basic.GeomAlluvium <- function(data, ...) {
+  # geom_alluvium by default generates a data.frame with a colour column and sets it to 0, which leads to an error when trying to get the colour from the number and grid::col2rgb complains that colors must be positive integers.
+  cols <- unique(data$colour)
+  if (length(cols) == 1 && cols[1] == 0) {
+    data$colour <- NULL
+  }
+  
+  data <- data[order(data$x), ]
+  row_number <- nrow(data)
+  data_rev <- data[rev(seq_len(row_number)), ]
+  unused_aes <- setdiff(names(data), c("x", "y", "ymin", "ymax"))
+  
+  d <- structure(rbind(
+    cbind(x = data$x, y = data$ymin, data[unused_aes]),
+    cbind(x = data$x[row_number], y = data$ymin[row_number], data[row_number, unused_aes]),
+    cbind(x = data_rev$x, y = data_rev$ymax, data_rev[unused_aes])
+  ), class = class(data))
+  
+  prefix_class(d, "GeomPolygon") 
+}
+
 #' @export
 to_basic.default <- function(data, prestats_data, layout, params, p, ...) {
   data
@@ -736,6 +791,11 @@ geom2trace.GeomBar <- function(data, params, p) {
     frame = data[["frame"]],
     ids = data[["ids"]],
     type = "bar",
+    # plotly.js v2.0 changed default to textposition='auto', meaning
+    # text will display by default, which makes sense for plot_ly() maybe, 
+    # but not ggplotly()
+    # https://github.com/plotly/orca/issues/374
+    textposition = "none",
     marker = list(
       autocolorscale = FALSE,
       color = toRGB(

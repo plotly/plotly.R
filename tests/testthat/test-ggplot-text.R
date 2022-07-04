@@ -1,4 +1,4 @@
-context("Text")
+
 
 gg <- ggplot(mtcars, aes(x = wt, y = mpg, label = rownames(mtcars))) +
   geom_text(size = 18)

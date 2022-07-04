@@ -28,7 +28,7 @@ is.TeX <- function(x) {
 mathjax_cdn <- function() {
   htmltools::htmlDependency(
     name = "mathjax",
-    version = "2.7.4",
+    version = "2.7.5",
     package = "plotly",
     src = dependency_dir("mathjax"),
     script = "cdn.js"

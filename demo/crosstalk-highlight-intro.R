@@ -27,15 +27,14 @@ layout(p, title = "Click on a marker to highlight that patient")
 # "plotly_selected", which corresponds to click and drag mouse events.
 p %>%
   layout(title = "Click and drag to select patient") %>%
-  highlight("plotly_selected")
-
+  highlight("plotly_selecting")
 
 # Plotly provides two types of drag modes that will trigger a "plotly_selected"
 # event: "lasso" and "select". You can change the dragmode interactively via 
 # the modebar and/or set the default dragmode via `layout()`.
 p %>%
   layout(title = "Click and drag to select patient", dragmode = "lasso") %>%
-  highlight("plotly_selected")
+  highlight("plotly_selecting")
 
 # The first argument of `highlight()`, `on`, sets the interaction type used 
 # trigger a "highlight selection". The second argument, `off`, sets the 

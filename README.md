@@ -1,3 +1,1 @@
 This is a fork of the ropensci/plotly HtmlWidget for use in Displayr. The repository has been modified to be an node package and use the rhtmlBuildUtils framework. This was done in order to run unit tests on the widget js code, which has been modified by Displayr. The integration with rhtmlBuildUtils is incomplete, and only the building and unit testing of widget js code is supported. Features from rhtmlBuildUtils such as visual regression testing, linting and the internal web server are absent.
-
-Changes to widget js code should be made in [theSrc/tasks](theSrc/tasks) and `gulp compileWidgetEntryPoint` needs to be called to compile the code and write it to [inst/htmlwidgets](inst/htmlwidgets).

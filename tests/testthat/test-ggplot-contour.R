@@ -1,6 +1,3 @@
-context("Contour")
-
-
 
 test_that("geom_contour is translated to a path", {
   skip_if_not_installed("reshape2")

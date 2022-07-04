@@ -1,4 +1,3 @@
-context("size")
 
 test_that("sizemode is always respected", {
   
