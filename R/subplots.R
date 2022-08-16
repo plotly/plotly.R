@@ -57,7 +57,7 @@
 #'   do(p = plot_ly(., x = ~date, y = ~value)) %>%
 #'   subplot(nrows = NROW(.), shareX = TRUE)
 #'   
-#' # learn more at https://plotly.com/r/subplot.html
+#' # learn more at https://plotly.com/r/subplots/
 #' 
 
 subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02, 
