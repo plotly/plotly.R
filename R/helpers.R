@@ -219,14 +219,19 @@ plotly_empty <- function(...) {
 raster2uri <- function(r, ...) {
   try_library("png", "raster2uri")
   # should be 4 x n matrix
-  r <- grDevices::as.raster(r, ...)
-  rgbs <- col2rgb(c(r), alpha = T) / 255
-  nr <- dim(r)[1]
-  nc <- dim(r)[2]
-  reds <- matrix(rgbs[1, ], nrow = nr, ncol = nc, byrow = TRUE)
-  greens <- matrix(rgbs[2, ], nrow = nr, ncol = nc, byrow = TRUE)
-  blues <- matrix(rgbs[3, ], nrow = nr, ncol = nc, byrow = TRUE)
-  alphas <- matrix(rgbs[4, ], nrow = nr, ncol = nc, byrow = TRUE)
-  png <- array(c(reds, greens, blues, alphas), dim = c(dim(r), 4))
+  if (inherits(r, "nativeRaster")) {
+    # png::writePNG directly supports nativeRaster objects
+    png <- nr
+  } else {
+    r <- grDevices::as.raster(r, ...)
+    rgbs <- col2rgb(c(r), alpha = T) / 255
+    nr <- dim(r)[1]
+    nc <- dim(r)[2]
+    reds <- matrix(rgbs[1, ], nrow = nr, ncol = nc, byrow = TRUE)
+    greens <- matrix(rgbs[2, ], nrow = nr, ncol = nc, byrow = TRUE)
+    blues <- matrix(rgbs[3, ], nrow = nr, ncol = nc, byrow = TRUE)
+    alphas <- matrix(rgbs[4, ], nrow = nr, ncol = nc, byrow = TRUE)
+    png <- array(c(reds, greens, blues, alphas), dim = c(dim(r), 4))
+  }
   base64enc::dataURI(png::writePNG(png), mime = "image/png")
 }
