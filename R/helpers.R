@@ -221,7 +221,7 @@ raster2uri <- function(r, ...) {
   # should be 4 x n matrix
   if (inherits(r, "nativeRaster")) {
     # png::writePNG directly supports nativeRaster objects
-    png <- nr
+    png <- r
   } else {
     r <- grDevices::as.raster(r, ...)
     rgbs <- col2rgb(c(r), alpha = T) / 255
