@@ -4,6 +4,8 @@ message("Visual testing is ", if (!visual_testing) "not ", "enabled.")
 
 # start up the orca image server
 imageServer <- if (visual_testing) {
+  # https://github.com/plotly/plotly.R/issues/2179
+  reticulate::py_run_string("import sys") 
   kaleido() 
 } else {
   list(transform = function(...) stop("Visual testing is disabled!"))
