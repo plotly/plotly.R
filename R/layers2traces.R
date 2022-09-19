@@ -504,10 +504,10 @@ to_basic.GeomLinerange <- function(data, prestats_data, layout, params, p, ...) 
   
   # reshape data so that x/y reflect path data
   data$group <- seq_len(nrow(data))
-  lay <- tidyr::pivot_longer(
-    data = layout$layout, cols = c("ymin", "ymax"), values_to = "y", names_to = "recodeVariable"
-  ) 
-  lay <- as.data.frame(lay)
+  data <- tidyr::pivot_longer(
+    data = data, cols = c("ymin", "ymax"), values_to = "y", names_to = "recodeVariable"
+  )
+  data <- as.data.frame(data)
   data <- data[order(data$group), ]
   # fix the hovertext (by removing the "irrelevant" aesthetic)
   recodeMap <- p$mapping[dplyr::recode(data[["recodeVariable"]], "ymax" = "ymin", "ymin" = "ymax")]
