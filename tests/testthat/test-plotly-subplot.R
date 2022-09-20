@@ -274,6 +274,21 @@ test_that("shape paper repositioning", {
   expect_equal(y1, c(30, 0.75))
 })
 
+test_that("raster2uri supports nativeRaster objects", {
+  skip_if_not_installed("png")
+
+  r <- as.raster(matrix(c("black", "red", "green", "blue"), ncol = 4L))
+  nr <- structure(
+    c(-16777216L, -16776961L, -16711936L, -65536L),
+    dim = c(1L, 4L),
+    class = "nativeRaster",
+    channels = 4L
+  )
+  uri_r <- raster2uri(r)
+  uri_nr <- raster2uri(nr)
+  expect_equal(uri_r, uri_nr)
+})
+
 
 test_that("image paper repositioning", {
   skip_if_not_installed("png")

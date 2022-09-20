@@ -8,6 +8,8 @@
 
 * `ggplotly()` now supports the `{ggalluvial}` package. (#2061, thanks @moutikabdessabour)
 * `highlight()` now supports `on="plotly_selecting"`, enabling client-side linked brushing via mouse click+drag (no mouse-up event required, as with `on="plotly_selected"`). (#1280)
+* `raster2uri()` supports nativeRaster objects. This enables nativeRaster support for
+  the `annotation_raster()` geom (#2174, @zeehio).
 
 ## Bug fixes
 
