@@ -3,13 +3,13 @@
 ## Changes to plotly.js
 
 * This version of the R package upgrades the version of the underlying plotly.js library from v2.5.1 to v2.11.1. This includes many bug fixes and improvements. The [plotly.js release page](https://github.com/plotly/plotly.js/releases) has the full list of changes.
-* raster2uri() supports nativeRaster objects. This enables nativeRaster support for
-  the annotation_raster() geom (#2174, @zeehio).
 
 ## New features
 
 * `ggplotly()` now supports the `{ggalluvial}` package. (#2061, thanks @moutikabdessabour)
 * `highlight()` now supports `on="plotly_selecting"`, enabling client-side linked brushing via mouse click+drag (no mouse-up event required, as with `on="plotly_selected"`). (#1280)
+* `raster2uri()` supports nativeRaster objects. This enables nativeRaster support for
+  the `annotation_raster()` geom (#2174, @zeehio).
 
 ## Bug fixes
 
