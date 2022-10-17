@@ -148,7 +148,7 @@ test_that("ggplotly understands GGally", {
     v5 = v1 ** 2
   )
   expect_doppelganger(
-    ggcorr(data, method = c("everything", "pearson")),
+    GGally::ggcorr(data, method = c("everything", "pearson")),
     "ggally-ggcorr"
   )
 })
