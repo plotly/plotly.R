@@ -8,8 +8,8 @@
 \usage{
 plotlyOutput(
   outputId,
-  width = "100\%",
-  height = "400px",
+  width = NULL,
+  height = NULL,
   inline = FALSE,
   reportTheme = TRUE
 )
