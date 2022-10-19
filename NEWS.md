@@ -22,6 +22,7 @@
 
 ## Improvements
 
+* `plotlyOutput()`'s `height` and `width` now defaults to `NULL`, allowing it have more flexible default sizing behavior, which will be useful in combination with `{bslib}`'s new `card()`. (#2192)  
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, thanks @bersbersbers)
 * `ggplotly()` does not issue warnings related to use of deprecated `tidyr::gather_()` in internals. (#2125, thanks @simonpcouch)
 
