@@ -10,6 +10,10 @@
 * `highlight()` now supports `on="plotly_selecting"`, enabling client-side linked brushing via mouse click+drag (no mouse-up event required, as with `on="plotly_selected"`). (#1280)
 * `raster2uri()` supports nativeRaster objects. This enables nativeRaster support for
   the `annotation_raster()` geom (#2174, @zeehio).
+* `plotlyOutput()`'s gains a `fill` argument which , allowing it have more flexible default sizing behavior, which will be useful in combination with `{bslib}`'s new `card()`. (#2192)  
+
+* `plotlyOutput()` gains a new `fill` parameter. When `TRUE` (the default), the widget's container element is allowed to grow/shrink to fit it's parent container so long as that parent is opinionated about its height and has been marked with `htmltools::bindFillRole(x, container = TRUE)`. (#2198)
+  * The primary motivation for this is to allow plots to grow/shrink by default [inside `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing)
 
 ## Bug fixes
 
@@ -22,7 +26,6 @@
 
 ## Improvements
 
-* `plotlyOutput()`'s `height` and `width` now defaults to `NULL`, allowing it have more flexible default sizing behavior, which will be useful in combination with `{bslib}`'s new `card()`. (#2192)  
 * `ggplotly()` does not issue warnings with `options(warnPartialMatchArgs = TRUE)` any longer. (#2046, thanks @bersbersbers)
 * `ggplotly()` does not issue warnings related to use of deprecated `tidyr::gather_()` in internals. (#2125, thanks @simonpcouch)
 
