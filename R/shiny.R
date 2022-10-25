@@ -23,7 +23,7 @@
 #' @name plotly-shiny
 #'
 #' @export
-plotlyOutput <- function(outputId, width = NULL, height = NULL, 
+plotlyOutput <- function(outputId, width = "100%", height = "400px", 
                          inline = FALSE, reportTheme = TRUE) {
   args <- list(
     outputId = outputId, 
