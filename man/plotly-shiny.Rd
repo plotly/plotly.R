@@ -8,8 +8,8 @@
 \usage{
 plotlyOutput(
   outputId,
-  width = NULL,
-  height = NULL,
+  width = "100\%",
+  height = "400px",
   inline = FALSE,
   reportTheme = TRUE
 )
@@ -37,6 +37,9 @@ version of shiny and htmlwidgets is available).}
 
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
+
+\item{fill}{see \code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyWidgetOutput()}} for explanation (requires
+a recent version of htmlwidgets).}
 }
 \description{
 Output and render functions for using plotly within Shiny
