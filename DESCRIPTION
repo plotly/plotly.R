@@ -77,6 +77,9 @@ Suggests:
     palmerpenguins,
     rversions,
     reticulate
+Enhances:
+    ggforce,
+    ggraph
 LazyData: true
 RoxygenNote: 7.2.1
 Encoding: UTF-8
