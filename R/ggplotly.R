@@ -684,7 +684,8 @@ gg2list <- function(p, width = NULL, height = NULL,
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
             colour = panelGrid$colour, 
-            size = panelGrid$linewidth %||% panelGrid$size,
+            linewidth = panelGrid$linewidth,
+            size = panelGrid$size,
             linetype = panelGrid$linetype
           )
           grill <- geom2trace.GeomPath(d, params)
