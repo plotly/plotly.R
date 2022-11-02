@@ -791,6 +791,9 @@ geom2trace.GeomBar <- function(data, params, p) {
     base <- data[["ymin"]]
     x <- with(data, ymax - ymin)
   }
+  
+  # ggplot2 >3.4.0 changed from size to linewidth for controlling line width
+  width_var <- if ("linewidth" %in% names(data)) "linewidth" else "size"
 
   compact(list(
     orientation = if (flip) "h" else "v",
@@ -816,7 +819,7 @@ geom2trace.GeomBar <- function(data, params, p) {
         aes2plotly(data, params, "alpha")
       ),
       line = list(
-        width = aes2plotly(data, params, "size"),
+        width = aes2plotly(data, params, width_var),
         color = aes2plotly(data, params, "colour")
       )
     )
