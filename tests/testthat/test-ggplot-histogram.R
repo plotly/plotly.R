@@ -21,8 +21,8 @@ test_that("geom_histogram() is a bar chart of counts with no bargap", {
   expect_equivalent(info$layout$barmode, "relative")
 })
 
-test_that("geom_histogram(aes(y = ..density..)) displays a density", { 
-  info <- expect_traces(base + geom_histogram(aes(y=..density..)), 1, "density")
+test_that("geom_histogram(aes(y = after_stat(density))) displays a density", { 
+  info <- expect_traces(base + geom_histogram(aes(y=after_stat(density))), 1, "density")
   tr <- info$data[[1]]
   expect_identical(tr$type, "bar")
   #default binwidth
@@ -33,8 +33,8 @@ test_that("geom_histogram(aes(y = ..density..)) displays a density", {
   expect_equal(area, 1, tolerance = 0.1)
 })
 
-test_that("geom_histogram(aes(fill = ..count..)) works", {
-  info <- expect_traces(base + geom_histogram(aes(fill = ..count..)), 6, "fill")
+test_that("geom_histogram(aes(fill = after_stat(count))) works", {
+  info <- expect_traces(base + geom_histogram(aes(fill = after_stat(count))), 6, "fill")
   # grab just the bar traces (there should also be a colorbar)
   bars <- info$data[sapply(info$data, "[[", "type") == "bar"]
   # each traces should have the same value of y
@@ -53,7 +53,7 @@ test_that("Histogram with fixed colour/fill works", {
 })
 
 test_that("Specify histogram binwidth", {
-  gg <- base + geom_histogram(aes(y=..density..), binwidth = 0.3)
+  gg <- base + geom_histogram(aes(y=after_stat(density)), binwidth = 0.3)
   info <- expect_traces(gg, 1, "density-binwidth")
   tr <- info$data[[1]]
   area <- sum(tr$y) * 0.3
@@ -95,8 +95,10 @@ test_that("geom_histogram() with facets", {
 })
 
 test_that("vline overlaid histogram", {
+  skip_if_not_installed("ggplot2", "3.4.0") # linewidth introduced in 3.4.0
+  
   gg <- base + geom_histogram() +
-    geom_vline(aes(xintercept=mean(wt)), color="red", linetype="dashed", size=1)
+    geom_vline(aes(xintercept=mean(wt)), color="red", linetype="dashed", linewidth=1)
   info <- expect_traces(gg, 2, "vline")
   trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))

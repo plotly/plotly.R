@@ -14,7 +14,7 @@ test_that("geom_density2d translates to path(s)", {
 
 faithful$col <- factor(sample(1:20, nrow(faithful), replace = T))
 m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
-  stat_density_2d(aes(fill = ..level..), geom = "polygon") +
+  stat_density_2d(aes(fill = after_stat(level)), geom = "polygon") +
   geom_point(aes(colour = col)) +
   xlim(0.5, 6) + ylim(40, 110)
 

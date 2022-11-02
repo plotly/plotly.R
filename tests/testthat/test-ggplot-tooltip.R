@@ -47,7 +47,7 @@ test_that("can hide x values in tooltip", {
 })
 
 cars <- ggplot(mtcars, aes(mpg, factor(cyl)))
-p <- cars + stat_bin2d(aes(fill = ..density..), binwidth = c(3,1))
+p <- cars + stat_bin2d(aes(fill = after_stat(density)), binwidth = c(3,1))
 
 test_that("geom_tile() displays correct info in tooltip with discrete y", {
   L <- expect_doppelganger_built(p, "heatmap-discrete-tooltip")

@@ -121,9 +121,14 @@ test_that("geom_polygon(aes(linetype), fill, color)", {
 })
 
 test_that("geom_polygon(aes(size), fill, colour)", {
-  gg <- ggplot(poly.df) +
-    geom_polygon(aes(x, y, size = lab), fill = "orange", colour = "black") +
-    scale_size_manual(values = c(left = 2, right = 3))
+  size_plot <- function() {
+    ggplot(poly.df) +
+      geom_polygon(aes(x, y, size = lab), fill = "orange", colour = "black") +
+      scale_size_manual(values = c(left = 2, right = 3))
+  }
+  # ggplot2 3.4.0 deprecated size, but there is no scale_linewidth_manual(), 
+  # so I don't think it's currently possible to replicate this exact plot
+  gg <- expect_warning(size_plot(), "size")
   info <- expect_traces(gg, 2, "color-fill-aes-size")
   traces.by.name <- list()
   for(tr in info$data){

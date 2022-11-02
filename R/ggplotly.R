@@ -304,6 +304,14 @@ gg2list <- function(p, width = NULL, height = NULL,
       d[["y_plotlyDomain"]] <- d[["y"]]
       d
     })
+    # And since we're essentially adding an "unknown" (to ggplot2) 
+    # aesthetic, add it to the dropped_aes field to avoid fals positive
+    # warnings (https://github.com/tidyverse/ggplot2/pull/4866)
+    layers <- lapply(layers, function(l) {
+      l$stat$dropped_aes <- c(l$stat$dropped_aes, "x_plotlyDomain")
+      l$stat$dropped_aes <- c(l$stat$dropped_aes, "y_plotlyDomain")
+      l
+    })
     
     # Transform all scales
     data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
