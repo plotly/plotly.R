@@ -573,7 +573,7 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
   )
 }
-utils::globalVariables(c("xmin", "xmax", "y", "size", "COL", "PANEL", "ROW", "yaxis"))
+utils::globalVariables(c("xmin", "xmax", "y", "size", "linewidth", "COL", "PANEL", "ROW", "yaxis"))
 
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
@@ -860,6 +860,9 @@ geom2trace.GeomPolygon <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBoxplot <- function(data, params, p) {
+  # ggplot2 >3.4.0 changed from size to linewidth for controlling line width
+  width_var <- if ("linewidth" %in% names(data)) "linewidth" else "size"
+  
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
@@ -886,7 +889,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
     ),
     line = list(
       color = aes2plotly(data, params, "colour"),
-      width = aes2plotly(data, params, "size")
+      width = aes2plotly(data, params, width_var)
     )
   ))
 }
