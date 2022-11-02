@@ -1199,7 +1199,7 @@ verifyUnit <- function(u) {
   
   ## the default unit in ggplot2 is millimeters (unless it's element_text())
   if (inherits(u, "element")) {
-    grid::unit(u$size %||% 0, "points")
+    grid::unit(u$linewidth %||% u$size %||% 0, "points")
   } else {
     grid::unit(u %||% 0, "mm")
   }
