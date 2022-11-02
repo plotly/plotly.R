@@ -684,7 +684,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
             colour = panelGrid$colour, 
-            size = panelGrid$size, 
+            size = panelGrid$linewidth %||% panelGrid$size,
             linetype = panelGrid$linetype
           )
           grill <- geom2trace.GeomPath(d, params)
@@ -966,7 +966,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   gglayout$legend <- list(
     bgcolor = toRGB(theme$legend.background$fill),
     bordercolor = toRGB(theme$legend.background$colour),
-    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
+    borderwidth = unitConvert(
+      theme$legend.background$linewidth %||% theme$legend.background$size, 
+      "pixels", "width"
+    ),
     font = text2font(theme$legend.text)
   )
   
