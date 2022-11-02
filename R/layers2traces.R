@@ -825,8 +825,10 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
-
   data <- group2NA(data)
+  
+  # ggplot2 >3.4.0 changed from size to linewidth for controlling line width
+  width_var <- if ("linewidth" %in% names(data)) "linewidth" else "size"
   
   L <- list(
     x = data[["x"]],
@@ -839,7 +841,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     type = "scatter",
     mode = "lines",
     line = list(
-      width = aes2plotly(data, params, "size"),
+      width = aes2plotly(data, params, width_var),
       color = toRGB(
         aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
