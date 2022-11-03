@@ -732,8 +732,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
       
-      ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
-      tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
+      ticktext <- rng[[paste0(xy, ".labels")]] %||% rng[[xy]]$get_labels()
+      tickvals <- rng[[paste0(xy, ".major")]] %||% rng[[xy]]$break_positions()
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
       hasTickText <- !(is.na(ticktext) | is.na(tickvals))
