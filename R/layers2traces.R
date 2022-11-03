@@ -986,7 +986,6 @@ split_on <- function(dat) {
     GeomPath = c("fill", "colour", "size", "linewidth"),
     GeomPolygon = c("fill", "colour", "size", "linewidth"),
     GeomBar = "fill",
-    # TODO: add linetype here?
     GeomBoxplot = c("colour", "fill", "size"),
     GeomErrorbar = "colour",
     GeomErrorbarh = "colour",
@@ -1084,7 +1083,7 @@ aes2plotly <- function(data, params, aes = "size") {
   # Hack to support this geom_sf hack 
   # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
   defaults <- if (inherits(data, "GeomSf")) {
-    type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
+    type <- if (any(grepl("[P-p]oint", class(data)))) "point" else if (any(grepl("[L-l]ine", class(data)))) "line" else ""
     ggfun("default_aesthetics")(type)
   } else {
     geom_obj <- ggfun(geom)
