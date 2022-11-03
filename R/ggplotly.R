@@ -1423,7 +1423,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
           bgcolor = toRGB(theme$legend.background$fill),
           bordercolor = toRGB(theme$legend.background$colour),
           borderwidth = unitConvert(
-            theme$legend.background$size, "pixels", "width"
+            theme$legend.background$linewidth %||% theme$legend.background$size, "pixels", "width"
           ),
           thickness = unitConvert(
             theme$legend.key.width, "pixels", "width"
