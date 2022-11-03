@@ -684,10 +684,10 @@ gg2list <- function(p, width = NULL, height = NULL,
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
             colour = panelGrid$colour, 
-            linewidth = panelGrid$linewidth,
-            size = panelGrid$size,
             linetype = panelGrid$linetype
           )
+          nm <- linewidth_or_size(panelGrid)
+          params[[nm]] <- panelGrid[[nm]]
           grill <- geom2trace.GeomPath(d, params)
           grill$hoverinfo <- "none"
           grill$showlegend <- FALSE
@@ -968,7 +968,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     bgcolor = toRGB(theme$legend.background$fill),
     bordercolor = toRGB(theme$legend.background$colour),
     borderwidth = unitConvert(
-      theme$legend.background$linewidth %||% theme$legend.background$size, 
+      theme$legend.background[[linewidth_or_size(theme$legend.background)]], 
       "pixels", "width"
     ),
     font = text2font(theme$legend.text)
@@ -1203,7 +1203,7 @@ verifyUnit <- function(u) {
   
   ## the default unit in ggplot2 is millimeters (unless it's element_text())
   if (inherits(u, "element")) {
-    grid::unit(u$linewidth %||% u$size %||% 0, "points")
+    grid::unit(u[[linewidth_or_size(u)]] %||% 0, "points")
   } else {
     grid::unit(u %||% 0, "mm")
   }
@@ -1423,7 +1423,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
           bgcolor = toRGB(theme$legend.background$fill),
           bordercolor = toRGB(theme$legend.background$colour),
           borderwidth = unitConvert(
-            theme$legend.background$linewidth %||% theme$legend.background$size, "pixels", "width"
+            theme$legend.background[[linewidth_or_size(theme$legend.background)]],
+            "pixels", "width"
           ),
           thickness = unitConvert(
             theme$legend.key.width, "pixels", "width"
