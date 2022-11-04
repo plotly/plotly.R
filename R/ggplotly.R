@@ -732,6 +732,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
       
+      # In 3.2.x .major disappeared in favor of break_positions()
+      # (tidyverse/ggplot2#3436), but with 3.4.x break_positions() no longer
+      # yields the actual final positions on a 0-1 scale, but .major does
+      # (tidyverse/ggplot2#5029)
       ticktext <- rng[[paste0(xy, ".labels")]] %||% rng[[xy]]$get_labels()
       tickvals <- rng[[paste0(xy, ".major")]] %||% rng[[xy]]$break_positions()
       
@@ -744,7 +748,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
-        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
+        range = rng[[xy]]$dimension %()% rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
         ticktext = ticktext,
         tickvals = tickvals,

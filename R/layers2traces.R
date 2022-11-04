@@ -701,7 +701,6 @@ geom2trace.GeomBlank <- function(data, params, p) {
 #' @export
 geom2trace.GeomPath <- function(data, params, p) {
   data <- group2NA(data)
-  
   L <- list(
     x = data[["x"]],
     y = data[["y"]],
@@ -817,6 +816,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
+  
   data <- group2NA(data)
   
   L <- list(
