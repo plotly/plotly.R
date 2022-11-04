@@ -304,6 +304,14 @@ gg2list <- function(p, width = NULL, height = NULL,
       d[["y_plotlyDomain"]] <- d[["y"]]
       d
     })
+    # And since we're essentially adding an "unknown" (to ggplot2) 
+    # aesthetic, add it to the dropped_aes field to avoid fals positive
+    # warnings (https://github.com/tidyverse/ggplot2/pull/4866)
+    layers <- lapply(layers, function(l) {
+      l$stat$dropped_aes <- c(l$stat$dropped_aes, "x_plotlyDomain")
+      l$stat$dropped_aes <- c(l$stat$dropped_aes, "y_plotlyDomain")
+      l
+    })
     
     # Transform all scales
     data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
@@ -676,9 +684,10 @@ gg2list <- function(p, width = NULL, height = NULL,
           d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
             colour = panelGrid$colour, 
-            size = panelGrid$size, 
             linetype = panelGrid$linetype
           )
+          nm <- linewidth_or_size(panelGrid)
+          params[[nm]] <- panelGrid[[nm]]
           grill <- geom2trace.GeomPath(d, params)
           grill$hoverinfo <- "none"
           grill$showlegend <- FALSE
@@ -723,8 +732,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       isDiscrete <- identical(sc$scale_name, "position_d")
       isDiscreteType <- isDynamic && isDiscrete
       
-      ticktext <- rng[[xy]]$get_labels %()% rng[[paste0(xy, ".labels")]]
-      tickvals <- rng[[xy]]$break_positions %()% rng[[paste0(xy, ".major")]]
+      # In 3.2.x .major disappeared in favor of break_positions()
+      # (tidyverse/ggplot2#3436), but with 3.4.x break_positions() no longer
+      # yields the actual final positions on a 0-1 scale, but .major does
+      # (tidyverse/ggplot2#5029)
+      ticktext <- rng[[paste0(xy, ".labels")]] %||% rng[[xy]]$get_labels()
+      tickvals <- rng[[paste0(xy, ".major")]] %||% rng[[xy]]$break_positions()
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
       hasTickText <- !(is.na(ticktext) | is.na(tickvals))
@@ -735,7 +748,7 @@ gg2list <- function(p, width = NULL, height = NULL,
         # TODO: log type?
         type = if (isDateType) "date" else if (isDiscreteType) "category" else "linear",
         autorange = isDynamic,
-        range = rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
+        range = rng[[xy]]$dimension %()% rng[[paste0(xy, ".range")]] %||% rng[[paste0(xy, "_range")]],
         tickmode = if (isDynamic) "auto" else "array",
         ticktext = ticktext,
         tickvals = tickvals,
@@ -958,7 +971,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   gglayout$legend <- list(
     bgcolor = toRGB(theme$legend.background$fill),
     bordercolor = toRGB(theme$legend.background$colour),
-    borderwidth = unitConvert(theme$legend.background$size, "pixels", "width"),
+    borderwidth = unitConvert(
+      theme$legend.background[[linewidth_or_size(theme$legend.background)]], 
+      "pixels", "width"
+    ),
     font = text2font(theme$legend.text)
   )
   
@@ -1191,7 +1207,7 @@ verifyUnit <- function(u) {
   
   ## the default unit in ggplot2 is millimeters (unless it's element_text())
   if (inherits(u, "element")) {
-    grid::unit(u$size %||% 0, "points")
+    grid::unit(u[[linewidth_or_size(u)]] %||% 0, "points")
   } else {
     grid::unit(u %||% 0, "mm")
   }
@@ -1411,7 +1427,8 @@ gdef2trace <- function(gdef, theme, gglayout) {
           bgcolor = toRGB(theme$legend.background$fill),
           bordercolor = toRGB(theme$legend.background$colour),
           borderwidth = unitConvert(
-            theme$legend.background$size, "pixels", "width"
+            theme$legend.background[[linewidth_or_size(theme$legend.background)]],
+            "pixels", "width"
           ),
           thickness = unitConvert(
             theme$legend.key.width, "pixels", "width"

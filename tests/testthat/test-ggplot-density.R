@@ -51,10 +51,10 @@ test_that("geom_density() respects colour aesthetic", {
 })
 
 g <- base + 
-  geom_histogram(aes(y = ..density..), binwidth = 0.5, fill = "pink") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.5, fill = "pink") +
   geom_density(fill = "lightblue", alpha = 0.1)
   
-test_that("geom_histogram(aes(y = ..density..)) + geom_density() works", {
+test_that("geom_histogram(aes(y = after_stat(density))) + geom_density() works", {
   info <- expect_traces(g, 2, "histogram")
   trs <- info$data
   type <- unique(sapply(trs, "[[", "type"))

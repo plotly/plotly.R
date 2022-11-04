@@ -1,6 +1,7 @@
 
 test_that("geom_blank", {
-  l <- ggplotly(qplot())$x
+  qp <- expect_warning(qplot(), "deprecated")
+  l <- ggplotly(qp)$x
   
   expect_length(l$data, 1)
   expect_false(l$data[[1]]$visible)

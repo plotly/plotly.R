@@ -387,9 +387,11 @@ to_basic.GeomHex <- function(data, prestats_data, layout, params, p, ...) {
   dy <- resolution(data[["y"]], FALSE)/sqrt(3)/2 * 1.15
   hexC <- hexbin::hexcoords(dx, dy, n = 1)
   n <- nrow(data)
-  data$size <- ifelse(data$size < 1, data$size ^ (1 / 6), data$size ^ 6)
-  x <- rep.int(hexC[["x"]], n) * rep(data$size, each = 6) + rep(data[["x"]], each = 6)
-  y <- rep.int(hexC[["y"]], n) * rep(data$size, each = 6) + rep(data[["y"]], each = 6)
+  nm <- linewidth_or_size(GeomHex)
+  size <- data[[nm]]
+  data[[nm]] <- ifelse(size < 1, size ^ (1 / 6), size ^ 6)
+  x <- rep.int(hexC[["x"]], n) * rep(data[[nm]], each = 6) + rep(data[["x"]], each = 6)
+  y <- rep.int(hexC[["y"]], n) * rep(data[[nm]], each = 6) + rep(data[["y"]], each = 6)
   data <- data[rep(seq_len(n), each = 6), ]
   data[["x"]] <- x
   data[["y"]] <- y
@@ -558,13 +560,15 @@ to_basic.GeomSpoke <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   # from GeomCrossbar$draw_panel()
-  middle <- base::transform(data, x = xmin, xend = xmax, yend = y, size = size * params$fatten, alpha = NA)
+  middle <- base::transform(data, x = xmin, xend = xmax, yend = y, alpha = NA)
+  nm <- linewidth_or_size(GeomCrossbar)
+  data[[nm]] <- data[[nm]] * params$fatten
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
   )
 }
-utils::globalVariables(c("xmin", "xmax", "y", "size", "COL", "PANEL", "ROW", "yaxis"))
+utils::globalVariables(c("xmin", "xmax", "y", "size", "linewidth", "COL", "PANEL", "ROW", "yaxis"))
 
 #' @export
 to_basic.GeomRug  <- function(data, prestats_data, layout, params, p, ...) {
@@ -710,7 +714,7 @@ geom2trace.GeomPath <- function(data, params, p) {
     name = if (inherits(data, "GeomSmooth")) "fitted values",
     line = list(
       # TODO: line width array? -- https://github.com/plotly/plotly.js/issues/147
-      width = aes2plotly(data, params, "size")[1],
+      width = aes2plotly(data, params, linewidth_or_size(GeomPath))[1],
       color = toRGB(
         aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
@@ -803,7 +807,7 @@ geom2trace.GeomBar <- function(data, params, p) {
         aes2plotly(data, params, "alpha")
       ),
       line = list(
-        width = aes2plotly(data, params, "size"),
+        width = aes2plotly(data, params, linewidth_or_size(GeomBar)),
         color = aes2plotly(data, params, "colour")
       )
     )
@@ -812,7 +816,7 @@ geom2trace.GeomBar <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomPolygon <- function(data, params, p) {
-
+  
   data <- group2NA(data)
   
   L <- list(
@@ -826,7 +830,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
     type = "scatter",
     mode = "lines",
     line = list(
-      width = aes2plotly(data, params, "size"),
+      width = aes2plotly(data, params, linewidth_or_size(GeomPolygon)),
       color = toRGB(
         aes2plotly(data, params, "colour"),
         aes2plotly(data, params, "alpha")
@@ -873,7 +877,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
     ),
     line = list(
       color = aes2plotly(data, params, "colour"),
-      width = aes2plotly(data, params, "size")
+      width = aes2plotly(data, params, linewidth_or_size(GeomBoxplot))
     )
   ))
 }
@@ -976,11 +980,11 @@ geom2trace.default <- function(data, params, p) {
 # since plotly.js can't draw two polygons with different fill in a single trace
 split_on <- function(dat) {
   lookup <- list(
-    GeomHline = c("linetype", "colour", "size"),
-    GeomVline = c("linetype", "colour", "size"),
-    GeomAbline = c("linetype", "colour", "size"),
-    GeomPath = c("fill", "colour", "size"),
-    GeomPolygon = c("fill", "colour", "size"),
+    GeomHline = c("linetype", "colour", "size", "linewidth"),
+    GeomVline = c("linetype", "colour", "size", "linewidth"),
+    GeomAbline = c("linetype", "colour", "size", "linewidth"),
+    GeomPath = c("fill", "colour", "size", "linewidth"),
+    GeomPolygon = c("fill", "colour", "size", "linewidth"),
     GeomBar = "fill",
     GeomBoxplot = c("colour", "fill", "size"),
     GeomErrorbar = "colour",
@@ -1079,7 +1083,7 @@ aes2plotly <- function(data, params, aes = "size") {
   # Hack to support this geom_sf hack 
   # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
   defaults <- if (inherits(data, "GeomSf")) {
-    type <- if (any(grepl("point", class(data)))) "point" else if (any(grepl("line", class(data)))) "line" else ""
+    type <- if (any(grepl("[P-p]oint", class(data)))) "point" else if (any(grepl("[L-l]ine", class(data)))) "line" else ""
     ggfun("default_aesthetics")(type)
   } else {
     geom_obj <- ggfun(geom)
@@ -1093,7 +1097,8 @@ aes2plotly <- function(data, params, aes = "size") {
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
   converter <- switch(
     aes, 
-    size = mm2pixels, 
+    size = mm2pixels,
+    linewidth = mm2pixels,
     stroke = mm2pixels, 
     colour = toRGB, 
     fill = toRGB, 
@@ -1111,6 +1116,26 @@ aes2plotly <- function(data, params, aes = "size") {
   }
   converter(vals)
 }
+
+
+# ggplot2 3.4.0 deprecated size in favor of linewidth in line-based geoms (e.g.,
+# GeomLine, GeomRect, etc) and elements (e.g., element_line(), element_rect(),
+# etc). Note that, some geoms (e.g., GeomBoxplot, GeomSf) can have both 
+# linewidth and size
+linewidth_or_size <- function(x) {
+  UseMethod("linewidth_or_size")
+}
+
+#' @export
+linewidth_or_size.Geom <- function(x) {
+  if ("linewidth" %in% x$aesthetics()) "linewidth" else "size"
+}
+
+#' @export
+linewidth_or_size.element <- function(x) {
+  if ("linewidth" %in% names(x)) "linewidth" else "size"
+}
+
 
 # Convert R pch point codes to plotly "symbol" codes.
 pch2symbol <- function(x) {

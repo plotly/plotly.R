@@ -56,7 +56,7 @@ test_that("Missing values are preserved for lines within a color variable", {
 m <- mtcars
 m$rowname <- rownames(mtcars)
 p <- m %>% 
-  dplyr::group_by_("rowname") %>%
+  dplyr::group_by(rowname) %>%
   plot_ly(x = ~wt, y = ~mpg) %>% 
   add_markers()
 

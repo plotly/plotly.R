@@ -19,7 +19,7 @@ huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
 # like getAnywhere(round_any.numeric)
 huron$decade <- floor(huron$year / 10) * 10 
 
-ar <- ggplot(huron) + geom_area(aes(x = year, y = level))
+ar <- ggplot(huron) + geom_area(aes(x = year, y = level), stat = "identity")
 
 test_that("sanity check for geom_area", {
   L <- expect_traces(ar, 1, "simple")
@@ -33,7 +33,7 @@ test_that("sanity check for geom_area", {
 })
 
 # Test alpha transparency in fill color
-gg <- ggplot(huron) + geom_area(aes(x = year, y = level), alpha = 0.4)
+gg <- ggplot(huron) + geom_area(aes(x = year, y = level), alpha = 0.4, stat = "identity")
 
 test_that("transparency alpha in geom_area is converted", {
   L <- expect_traces(gg, 1, "area-fillcolor")
@@ -54,7 +54,7 @@ df <- merge(x = df, y = temp, all.x = TRUE)
 df$freq <- df$n / df$sum.n
 # Generate ggplot object
 p <- ggplot(data = df, aes(x = carat, y = freq, fill = cut)) + 
-  geom_area() 
+  geom_area(stat = "identity")
 # Test 
 test_that("traces are ordered correctly in geom_area", {
   info <- expect_traces(p, 5, "traces_order")

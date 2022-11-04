@@ -5,7 +5,9 @@ df <- data.frame(x, y)
 gg <- ggplot(df) + geom_point(aes(x, y))
 
 test_that("second trace be the hline", {
-  p <- gg + geom_hline(yintercept = 1.1, colour = "green", size = 3)
+  skip_if_not_installed("ggplot2", "3.4.0") # linewidth introduced in 3.4.0
+  
+  p <- gg + geom_hline(yintercept = 1.1, colour = "green", linewidth = 3)
   
   L <- expect_doppelganger_built(p, "hline")
   expect_equivalent(length(L$data), 2)
@@ -18,7 +20,9 @@ test_that("second trace be the hline", {
 })
 
 test_that("vector yintercept results in multiple horizontal lines", {
-  p <- gg + geom_hline(yintercept = 1:3, colour = "red", size = 3)
+  skip_if_not_installed("ggplot2", "3.4.0") # linewidth introduced in 3.4.0
+  
+  p <- gg + geom_hline(yintercept = 1:3, colour = "red", linewidth = 3)
   
   L <- expect_doppelganger_built(p, "hline-multiple")
   expect_equivalent(length(L$data), 2)
@@ -47,6 +51,8 @@ test_that("hline can be drawn over range of factors", {
 
 
 test_that("hline/vline/abline split on linetype/colour/size", {
+  skip_if_not_installed("ggplot2", "3.4.0") # linewidth introduced in 3.4.0
+  
   d <- tibble::tibble(
     x = seq(0, 3.5, by = 0.5), 
     y = x * 0.95
@@ -54,7 +60,7 @@ test_that("hline/vline/abline split on linetype/colour/size", {
   gg <- ggplot(d, aes(x, y)) +
     geom_point() +
     geom_vline(xintercept = c(2.5, 3, 3.5), linetype = 1:3) +
-    geom_hline(yintercept = c(2.5, 3, 3.5), size = 1:3) +
+    geom_hline(yintercept = c(2.5, 3, 3.5), linewidth = 1:3) +
     geom_abline(slope = -1, intercept = c(2.5, 3, 3.5), colour = 1:3)
   
   l <- expect_doppelganger_built(gg, "split-hline-vline-abline")

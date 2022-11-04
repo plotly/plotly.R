@@ -15,12 +15,14 @@ expect_traces <- function(gg, n.traces, name) {
 }
 
 test_that("Second trace be the a-b line", {
+  skip_if_not_installed("ggplot2", "3.4.0") # linewidth introduced in 3.4.0
+  
   x <- seq(0, 3.5, by = 0.5)
   y <- x * 0.95
   df <- data.frame(x, y)
   
   gg <- ggplot(df) + geom_point(aes(x, y, size = x)) +
-    geom_abline(intercept = 1.1, slope = 0.9, colour = "red", size = 4)
+    geom_abline(intercept = 1.1, slope = 0.9, colour = "red", linewidth = 4)
   
   L <- expect_traces(gg, 2, "single-abline")
   
