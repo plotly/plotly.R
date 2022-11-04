@@ -10,7 +10,7 @@
 #'   until after the next time all of the outputs are updated.
 #' @rdname plotlyProxy
 #' @export 
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' 
 #' if (require("shiny") && interactive()) {

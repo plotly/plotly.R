@@ -19,6 +19,7 @@ The polyfill seems to be only relevant for those rendering plots
 via phantomjs and RStudio on some Windows platforms.
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 \dontrun{
 p1 <- plot_ly()
@@ -29,4 +30,5 @@ file.info(t1)$size
 htmlwidgets::saveWidget(p2, t1)
 file.info(t1)$size
 }
+\dontshow{\}) # examplesIf}
 }

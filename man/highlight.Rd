@@ -82,6 +82,7 @@ other htmlwidgets will respect these options, such as persistent selection
 in leaflet (see \code{demo("highlight-leaflet", package = "plotly")}).
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # These examples are designed to show you how to highlight/brush a *single*
 # view. For examples of multiple linked views, see `demo(package = "plotly")` 
@@ -104,7 +105,7 @@ s <- attrs_selected(
 )
 
 highlight(layout(gg, showlegend = TRUE), selected = s)
-
+\dontshow{\}) # examplesIf}
 }
 \references{
 \url{https://plotly-r.com/client-side-linking.html}

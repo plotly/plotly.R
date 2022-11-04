@@ -4,7 +4,7 @@
 #' @return hexadecimal colour value (if is.na(x), return "transparent" for compatibility with Plotly)
 #' @export
 #' @seealso [showRGB()]
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' toRGB("steelblue") 
 #' # [1] "rgba(70,130,180,1)"
@@ -66,7 +66,7 @@ toRGB <- function(x, alpha = 1) {
 #' @param ... arguments passed along to `scales::show_col`.
 #' @export
 #' @author Carson Sievert
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' showRGB(toRGB(colors()), labels = FALSE)
 showRGB <- function(x, ...) {

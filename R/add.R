@@ -3,7 +3,7 @@
 #' @param p a plotly visualization
 #' @param data a data frame.
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' plot_ly() %>% add_data(economics) %>% add_trace(x = ~date, y = ~pce)
 add_data <- function(p, data = NULL) {
@@ -41,7 +41,7 @@ add_data <- function(p, data = NULL) {
 #' @author Carson Sievert
 #' @export
 #' @rdname add_trace
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # the `plot_ly()` function initiates an object, and if no trace type
 #' # is specified, it sets a sensible default
@@ -704,7 +704,7 @@ special_attrs <- function(trace) {
 # #' 
 # #' 
 # #' @export
-# #' @examples
+# #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 # #' 
 # #' x <- rnorm(10)
 # #' plot_ly(x = ~x) %>%

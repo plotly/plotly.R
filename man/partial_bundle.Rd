@@ -31,6 +31,7 @@ bundles are used, the most recent bundle will override the other bundles.
 See the examples section for an example.
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # ----------------------------------------------------------------------
 # This function is always safe to use when rendering a single 
@@ -68,7 +69,7 @@ p2 <- plot_ly(z = ~volcano) \%>\%
   partial_bundle()
 browsable(tagList(p1, p2))
 }
-
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

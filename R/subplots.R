@@ -28,7 +28,7 @@
 #' @return A plotly object
 #' @export
 #' @author Carson Sievert
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # pass any number of plotly objects to subplot()
 #' p1 <- plot_ly(economics, x = ~date, y = ~uempmed)

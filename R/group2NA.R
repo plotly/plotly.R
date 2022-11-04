@@ -23,7 +23,7 @@
 #' then `groupNames`, then `ordered`. As long as `groupNames` 
 #' contains valid variable names, new rows will also be inserted to separate 
 #' the groups.
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # note the insertion of new rows with missing values 
 #' group2NA(mtcars, "vs", "cyl")

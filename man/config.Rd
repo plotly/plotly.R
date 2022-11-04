@@ -40,6 +40,7 @@ for an \strong{rmarkdown} example and
 Set the default configuration for plotly
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # remove the plotly logo and collaborate button from modebar
 config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
@@ -65,7 +66,7 @@ config(p, locale = "de")
 config(p, locale = "es")
 # chinese
 config(p, locale = "zh-CN")
-
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

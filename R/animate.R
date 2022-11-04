@@ -28,7 +28,7 @@
 #' @rdname animation
 #' @aliases animation
 #' @author Carson Sievert
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' df <- data.frame(
 #'   x = c(1, 2, 2, 1, 1, 2),

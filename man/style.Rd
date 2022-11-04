@@ -19,6 +19,7 @@ Modify trace(s) of an existing plotly visualization. Useful when used in
 conjunction with \code{\link[=get_figure]{get_figure()}}.
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # style() is especially useful in conjunction with ggplotly()
 # It allows you to leverage the underlying plotly.js library to change 
@@ -46,7 +47,7 @@ style(p, marker = list(line = list(color = "blue")))
 style(p, marker.line.color = "blue") 
 # this clobbers the previously supplied marker.line.color
 style(p, marker.line = list(width = 2.5), marker.size = 10)
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=api_download_plot]{api_download_plot()}}

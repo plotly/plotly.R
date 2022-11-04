@@ -9,7 +9,7 @@
 #' or a number specifying the number of spaces to indent. See [jsonlite::prettify].
 #' @param ... other options passed onto [listviewer::jsonedit]
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #'   
 #' plotly_json(plot_ly())
 #' plotly_json(plot_ly(), FALSE)
@@ -32,7 +32,7 @@ plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE
 #' @param jsonedit use `listviewer::jsonedit` to view the JSON?
 #' @param ... other options passed onto `listviewer::jsonedit`
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' s <- schema()
 #' 
 #' # retrieve acceptable `layout.mapbox.style` values

@@ -36,11 +36,12 @@ visit \url{https://plotly.com/javascript/plotlyjs-function-reference/}}
 Modify a plotly object inside a shiny app
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 
 if (require("shiny") && interactive()) {
   plotly_example("shiny", "proxy_relayout")
   plotly_example("shiny", "proxy_mapbox")
 }
-
+\dontshow{\}) # examplesIf}
 }

@@ -21,6 +21,7 @@ multiple colorbars.}
 Modify the colorbar
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~cyl)
 
@@ -38,6 +39,7 @@ corr <- cor(diamonds[vapply(diamonds, is.numeric, logical(1))])
 plot_ly(x = rownames(corr), y = colnames(corr), z = corr) \%>\%
  add_heatmap() \%>\%
  colorbar(limits = c(-1, 1))
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

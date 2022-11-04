@@ -46,7 +46,7 @@
 #' @author Carson Sievert
 #' @references \url{https://api.plot.ly/v2}
 #' @seealso [signup()]
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{
 #' 

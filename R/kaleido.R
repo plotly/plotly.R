@@ -37,7 +37,7 @@
 #'   * `scope`: a reference to the underlying `kaleido.scopes.plotly.PlotlyScope`
 #'     python object. Modify this object to customize the underlying Chromium
 #'     subprocess and/or configure other details such as URL to plotly.js, MathJax, etc. 
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{
 #'   # Save a single image

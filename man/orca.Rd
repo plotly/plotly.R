@@ -107,6 +107,7 @@ The \code{orca_serve()} function returns an object with two fields:
 }
 
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 \dontrun{
 # NOTE: in a headless environment, you may need to set `more_args="--enable-webgl"`
@@ -132,7 +133,7 @@ server$close()
 unlink("test1.pdf")
 unlink("test2.pdf")
 }
-
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

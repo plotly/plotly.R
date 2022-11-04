@@ -8,7 +8,7 @@
 #' @param p a ggplot object, or a plotly object, or a list.
 #' @param registerFrames should a frame trace attribute be interpreted as frames in an animation?
 #' @export
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #'
 #' p <- plot_ly(economics, x = ~date, y = ~pce)
 #' # the unevaluated plotly object
