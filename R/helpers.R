@@ -8,7 +8,7 @@
 #' multiple colorbars.
 #' @author Carson Sievert
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~mpg, color = ~cyl)
 #' 
@@ -112,7 +112,7 @@ hide_guides <- function(p) {
 #' @param p a plotly object.
 #' @export
 #' @seealso [hide_legend()]
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~cyl)
 #' hide_colorbar(p)
@@ -136,7 +136,7 @@ hide_colorbar <- function(p) {
 #' @param p a plotly object.
 #' @export
 #' @seealso [hide_colorbar()]
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
 #' hide_legend(p)
@@ -153,7 +153,7 @@ hide_legend <- function(p) {
 #' 
 #' @param p a plotly or ggplot object.
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # currently no bargl trace type
 #' toWebGL(ggplot() + geom_bar(aes(1:10)))
@@ -197,7 +197,7 @@ plotly_empty <- function(...) {
 #' @author Carson Sievert
 #' @export
 #' @references <https://plotly-r.com/embedding-images.html>
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # a red gradient (from ?as.raster)
 #' r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))

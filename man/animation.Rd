@@ -65,6 +65,7 @@ Both the play button and slider component transition between frames according
 rules specified by \code{\link[=animation_opts]{animation_opts()}}.
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 df <- data.frame(
   x = c(1, 2, 2, 1, 1, 2),
@@ -94,7 +95,7 @@ if (interactive()) {
 
   
 #' # for more, see https://plotly.com/r/animating-views.html
-
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

@@ -1136,6 +1136,11 @@ linewidth_or_size.element <- function(x) {
   if ("linewidth" %in% names(x)) "linewidth" else "size"
 }
 
+#' @export
+linewidth_or_size.default <- function(x) {
+  if (get_package_version("ggplot2") >= "3.4") "linewidth" else "size"
+}
+
 
 # Convert R pch point codes to plotly "symbol" codes.
 pch2symbol <- function(x) {

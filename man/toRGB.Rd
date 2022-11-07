@@ -18,6 +18,7 @@ hexadecimal colour value (if is.na(x), return "transparent" for compatibility wi
 Convert R colours to RGBA hexadecimal colour values
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 toRGB("steelblue") 
 # [1] "rgba(70,130,180,1)"
@@ -31,7 +32,7 @@ m <- list(
 )
 
 plot_ly(x = 1, y = 1, marker = m)
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=showRGB]{showRGB()}}

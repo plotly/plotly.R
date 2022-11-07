@@ -11,7 +11,7 @@
 #' @seealso [api_download_plot()]
 #' @author Carson Sievert
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # style() is especially useful in conjunction with ggplotly()
 #' # It allows you to leverage the underlying plotly.js library to change 

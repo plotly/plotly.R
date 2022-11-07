@@ -45,6 +45,7 @@ In this case, one should also take care to make sure
 is set to \code{FALSE}.
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # note the insertion of new rows with missing values 
 group2NA(mtcars, "vs", "cyl")
@@ -59,5 +60,5 @@ plot_ly(tx, x = ~date, y = ~median) \%>\% add_lines()
 # add_lines() will ensure paths are sorted by x, but this is equivalent
 tx <- group2NA(txhousing, "city", ordered = "date")
 plot_ly(tx, x = ~date, y = ~median) \%>\% add_paths()
-
+\dontshow{\}) # examplesIf}
 }

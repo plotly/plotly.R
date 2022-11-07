@@ -89,7 +89,7 @@
 #'  \item For quick, accurate, and searchable plotly.js reference: [schema()]
 #' }
 #' @export
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' \dontrun{
 #' 
 #' # plot_ly() tries to create a sensible plot based on the information you 
@@ -263,7 +263,7 @@ plot_mapbox <- function(data = data.frame(), ...) {
 #' @export
 #' @author Carson Sievert
 #' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' map_data("world", "canada") %>%
 #'   group_by(group) %>%
@@ -308,7 +308,7 @@ plot_geo <- function(data = data.frame(), ..., offline = FALSE) {
 #' @export
 #' @author Carson Sievert
 #' @seealso [plot_ly()], [plot_mapbox()], [ggplotly()] 
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{
 #' hc <- hclust(dist(USArrests), "ave")
@@ -400,7 +400,7 @@ get_xy <- function(node) {
 #' @param x a plotly object.
 #' @param ... other options passed onto `htmlwidgets::createWidget`
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' trace <- list(x = 1, y = 1)
 #' obj <- list(data = list(trace), layout = list(title = "my plot"))
@@ -553,7 +553,7 @@ locale_dependency <- function(locale) {
 #'
 #' @param p a plotly object
 #' @export
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{
 #' p1 <- plot_ly()

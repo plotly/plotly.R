@@ -19,7 +19,7 @@
 #' @param minified whether or not to use a minified js file (non-minified file can be useful for debugging plotly.js)
 #' @author Carson Sievert
 #' @export
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # ----------------------------------------------------------------------
 #' # This function is always safe to use when rendering a single 

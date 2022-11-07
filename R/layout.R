@@ -52,7 +52,7 @@ layout.plotly <- function(p, ..., data = NULL) {
 #' \url{https://plotly.com/r/reference/#layout-xaxis-rangeslider}
 #' @export
 #' @author Carson Sievert
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' plot_ly(x = time(USAccDeaths), y = USAccDeaths) %>% 
 #'   add_lines() %>%
@@ -103,7 +103,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' [here](https://github.com/plotly/plotly.R/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
 #' @author Carson Sievert
 #' @export
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # remove the plotly logo and collaborate button from modebar
 #' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)

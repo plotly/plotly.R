@@ -27,7 +27,7 @@
 #' @author Carson Sievert
 #' @md
 #' @rdname orca
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{
 #' # NOTE: in a headless environment, you may need to set `more_args="--enable-webgl"`

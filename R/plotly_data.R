@@ -13,7 +13,7 @@
 #' 
 #' @name plotly_data
 #' @export
-#' @examples
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' # use group_by() to define groups of visual markings
 #' p <- txhousing %>%

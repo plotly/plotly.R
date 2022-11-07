@@ -8,7 +8,7 @@
 #' @param x a character vector
 #' @export
 #' @seealso [config]
-#' @examples 
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) %>%
 #'   layout(title = TeX("\\text{Some mathjax: }\\alpha+\\beta x")) %>%

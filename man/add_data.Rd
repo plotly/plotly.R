@@ -15,6 +15,8 @@ add_data(p, data = NULL)
 Add data to a plotly visualization
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 plot_ly() \%>\% add_data(economics) \%>\% add_trace(x = ~date, y = ~pce)
+\dontshow{\}) # examplesIf}
 }

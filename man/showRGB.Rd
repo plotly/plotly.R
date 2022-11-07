@@ -16,8 +16,10 @@ Useful for viewing colors after they've been converted to plotly.js'
 color format -- "rgba(255, 255, 255, 1)"
 }
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 showRGB(toRGB(colors()), labels = FALSE)
+\dontshow{\}) # examplesIf}
 }
 \author{
 Carson Sievert

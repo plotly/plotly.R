@@ -56,6 +56,7 @@ reticulate::use_miniconda('r-reticulate')
 }
 
 \examples{
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 \dontrun{
   # Save a single image
@@ -73,5 +74,5 @@ reticulate::use_miniconda('r-reticulate')
   # R/Python objects and shutdown subprocesses
   rm(scope); gc()
 }
-
+\dontshow{\}) # examplesIf}
 }
