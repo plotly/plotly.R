@@ -1,5 +1,6 @@
 
 test_that("geom_blank", {
+  skip_if_not_installed("ggplot2", "3.4.0")
   qp <- expect_warning(qplot(), "deprecated")
   l <- ggplotly(qp)$x
   
