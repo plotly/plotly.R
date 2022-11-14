@@ -121,6 +121,7 @@ test_that("geom_polygon(aes(linetype), fill, color)", {
 })
 
 test_that("geom_polygon(aes(size), fill, colour)", {
+  skip_if_not_installed("ggplot2", "3.4.0")
   size_plot <- function() {
     ggplot(poly.df) +
       geom_polygon(aes(x, y, size = lab), fill = "orange", colour = "black") +
