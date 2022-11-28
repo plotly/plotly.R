@@ -1,6 +1,8 @@
 # 4.10.1.9000
 
+## Bug fixes
 
+* `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
 
 
 # 4.10.1
