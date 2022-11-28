@@ -68,3 +68,18 @@ test_that("traces are ordered correctly in geom_area", {
   }
 })
 
+
+test_that("Can handle an 'empty' geom_area()", {
+  p <- ggplot(data.frame(x = 1, y = 1), aes(x, y)) +
+    geom_area() +
+    geom_point()
+  
+  l <- ggplotly(p)$x
+  
+  expect_length(l$data, 2)
+  
+  expect_false(l$data[[1]]$visible)
+  expect_true(l$data[[2]]$x == 1)
+  expect_true(l$data[[2]]$y == 1)
+  expect_true(l$data[[2]]$mode == "markers")
+})

@@ -1061,6 +1061,7 @@ make_error <- function(data, params, xy = "x") {
 # (note this function is also used for geom_smooth)
 ribbon_dat <- function(dat) {
   n <- nrow(dat)
+  if (n == 0) return(dat)
   o <- order(dat[["x"]])
   o2 <- order(dat[["x"]], decreasing = TRUE)
   used <- c("x", "ymin", "ymax", "y")
