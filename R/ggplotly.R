@@ -1266,7 +1266,7 @@ bbox <- function(txt = "foo", angle = 0, size = 12) {
   n <- robust_nchar(txt)
   if (sum(n) == 0) return(list(height = 0, width = 0))
   w <- size * (robust_nchar(txt) / 2)
-  angle <- abs(angle %||% 0)
+  angle <- angle %||% 0
   # do the sensible thing in the majority of cases
   if (angle == 0) return(list(height = size, width = w))
   if (angle == 90) return(list(height = w, width = size))
