@@ -17,6 +17,7 @@
     "plotly_afterplot-A": "\"plot\"",
     "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_hover-A": null,
+    "plotly_relayout-A": "{\"width\":962,\"height\":400}",
     "plotType": "ggplotly"
   },
   "output": {
