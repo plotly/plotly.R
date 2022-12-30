@@ -1,8 +1,13 @@
 # 4.10.1.9000
 
+## New features
+
+* Closed #2216: Additional selectize.js options can now be passed along to `highlight()`'s `selectize` argument. (#2217)
+
 ## Bug fixes
 
-* `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
+* Closed #2218: `highlight(selectize = TRUE)` no longer yields an incorrect selectize.js result when there is a combination of crosstalk and non-crosstalk traces. (#2217) 
+* Closed #2208: `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
 
 
 # 4.10.1
