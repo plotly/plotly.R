@@ -368,6 +368,7 @@ supply_highlight_attrs <- function(p) {
   
   # defaults are now populated, allowing us to populate some other 
   # attributes such as the selectize widget definition
+  # TODO: this is wrong!!! What if set is missing and present?!
   sets <- unlist(lapply(p$x$data, "[[", "set"))
   keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
   p$x$highlight$ctGroups <- i(unique(sets))
@@ -381,12 +382,29 @@ supply_highlight_attrs <- function(p) {
     hasKeys <- TRUE
 
     # include one selectize dropdown per "valid" SharedData layer
-    if (isTRUE(p$x$highlight$selectize)) {
+    selectize <- p$x$highlight$selectize %||% FALSE
+    if (!identical(selectize, FALSE)) {
+      options <- list(items = data.frame(value = k, label = k), group = i)
+      if (!is.logical(selectize)) {
+        options <- modify_list(options, selectize)
+      }
       # Hash i (the crosstalk group id) so that it can be used
       # as an HTML id client-side (i.e., key shouldn't contain spaces)
-      p$x$selectize[[rlang::hash(i)]] <- list(
-        items = data.frame(value = k, label = k), group = i
-      )
+      groupId <- rlang::hash(i)
+      
+      # If the selectize payload has already been built, use that already built payload
+      # (since it may have been modified at this point), unless there are new keys to consider
+      oldSelectize <- p$x$selectize[[groupId]]
+      if (length(oldSelectize) > 0) {
+        missingKeys <- setdiff(k, oldSelectize$items$value)
+        if (length(missingKeys) > 0) {
+          warning("Overwriting the existing selectize payload for group '", i, "'. If you've previously modified this payload in some way, consider modifying it again.")
+        } else {
+          options <- oldSelectize
+        }
+      } 
+      
+      p$x$selectize[[groupId]] <- options
     }
     
     # set default values via crosstalk api

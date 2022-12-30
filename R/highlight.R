@@ -115,7 +115,7 @@ highlight <- function(p, on = "plotly_click", off,
   
   # attach HTML dependencies (these libraries are used in the HTMLwidgets.renderValue() method)
   # TODO: only attach these when keys are present!
-  if (selectize) {
+  if (!identical(selectize, FALSE)) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
   }
   if (dynamic) {
