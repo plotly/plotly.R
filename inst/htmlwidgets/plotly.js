@@ -521,15 +521,17 @@ HTMLWidgets.widget({
       // communication between the widget and direct manipulation events
       if (x.selectize) {
         var selectizeID = Object.keys(x.selectize)[i];
-        var items = x.selectize[selectizeID].items;
+        var options = x.selectize[selectizeID];
         var first = [{value: "", label: "(All)"}];
-        var opts = {
-          options: first.concat(items),
-          searchField: "label",
-          valueField: "value",
-          labelField: "label",
-          maxItems: 50
-        };
+        var opts = $.extend({
+            options: first.concat(options.items),
+            searchField: "label",
+            valueField: "value",
+            labelField: "label",
+            maxItems: 50
+          }, 
+          options
+        );
         var select = $("#" + selectizeID).find("select")[0];
         var selectize = $(select).selectize(opts)[0].selectize;
         // NOTE: this callback is triggered when *directly* altering 

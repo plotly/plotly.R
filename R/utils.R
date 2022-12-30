@@ -366,31 +366,32 @@ supply_highlight_attrs <- function(p) {
   # set "global" options via crosstalk variable
   p$x$highlight <- p$x$highlight %||% highlight_defaults()
   
-  # defaults are now populated, allowing us to populate some other 
-  # attributes such as the selectize widget definition
-  sets <- unlist(lapply(p$x$data, "[[", "set"))
-  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  p$x$highlight$ctGroups <- i(unique(sets))
+  # Grab the special "crosstalk set" (i.e., group) for each trace
+  sets <- lapply(p$x$data, "[[", "set")
+  noSet <- vapply(sets, is.null, logical(1))
   
-  # TODO: throw warning if we don't detect valid keys?
-  hasKeys <- FALSE
+  # If no sets are present, there's nothing more to do
+  if (all(noSet)) {
+    return(p)
+  }
+  
+  # Store the unique set of crosstalk sets (which gets looped over client-side) 
+  p$x$highlight$ctGroups <- i(unique(unlist(sets)))
+  
+  # Build a set -> key mapping for each relevant trace, which we'll use
+  # to set default values and/or build the selectize.js payload (if relevant)
+  setDat <- p$x$data[!noSet]
+  keys <- setNames(lapply(setDat, "[[", "key"), sets[!noSet])
+  
   for (i in p$x$highlight$ctGroups) {
+    
+    # Get all the keys for this crosstalk group
     k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
-    if (is.null(k)) next
     k <- k[!is.null(k)]
-    hasKeys <- TRUE
-
-    # include one selectize dropdown per "valid" SharedData layer
-    if (isTRUE(p$x$highlight$selectize)) {
-      # Hash i (the crosstalk group id) so that it can be used
-      # as an HTML id client-side (i.e., key shouldn't contain spaces)
-      p$x$selectize[[rlang::hash(i)]] <- list(
-        items = data.frame(value = k, label = k), group = i
-      )
-    }
+    if (length(k) == 0) next
     
     # set default values via crosstalk api
-    vals <- p$x$highlight$defaultValues[p$x$highlight$defaultValues %in% k]
+    vals <- intersect(p$x$highlight$defaultValues, k)
     if (length(vals)) {
       p <- htmlwidgets::onRender(
         p, sprintf(
@@ -399,20 +400,44 @@ supply_highlight_attrs <- function(p) {
         )
       )
     }
+
+    # include one selectize dropdown per "valid" SharedData layer
+    selectize <- p$x$highlight$selectize %||% FALSE
+    if (!identical(selectize, FALSE)) {
+      options <- list(items = data.frame(value = k, label = k), group = i)
+      if (!is.logical(selectize)) {
+        options <- modify_list(options, selectize)
+      }
+      # Hash i (the crosstalk group id) so that it can be used
+      # as an HTML id client-side (i.e., key shouldn't contain spaces)
+      groupId <- rlang::hash(i)
+      
+      # If the selectize payload has already been built, use that already built payload
+      # (since it may have been modified at this point), unless there are new keys to consider
+      oldSelectize <- p$x$selectize[[groupId]]
+      if (length(oldSelectize) > 0) {
+        missingKeys <- setdiff(k, oldSelectize$items$value)
+        if (length(missingKeys) > 0) {
+          warning("Overwriting the existing selectize payload for group '", i, "'. If you've previously modified this payload in some way, consider modifying it again.")
+        } else {
+          options <- oldSelectize
+        }
+      } 
+      
+      p$x$selectize[[groupId]] <- options
+    }
   }
 
-  # add HTML dependencies, set a sensible dragmode default, & throw messages
-  if (hasKeys) {
-    p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
-      default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
-    if (is.default(p$x$highlight$off)) {
-      message(
-        sprintf(
-          "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
-          p$x$highlight$off, p$x$highlight$on
-        )
+  # set a sensible dragmode default, & throw messages
+  p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
+    default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
+  if (is.default(p$x$highlight$off)) {
+    message(
+      sprintf(
+        "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
+        p$x$highlight$off, p$x$highlight$on
       )
-    }
+    )
   }
   
   p

@@ -36,8 +36,10 @@
 #' highlighting selections. See [toRGB()] for valid color
 #' specifications. If `NULL` (the default), the color of selected marks
 #' are not altered.
-#' @param selectize provide a selectize.js widget for selecting keys? Note that 
-#' the label used for this widget derives from the groupName of the SharedData object.
+#' @param selectize whether or not to render a selectize.js widget for selecting
+#'   [highlight_key()] values. A list of additional selectize.js options may
+#'   also be provided. The label used for this widget should be set via the
+#'   `groupName` argument of [highlight_key()].
 #' @param defaultValues a vector of values for setting a "default selection".
 #' These values should match the key attribute.
 #' @param opacityDim a number between 0 and 1 used to reduce the
@@ -115,7 +117,7 @@ highlight <- function(p, on = "plotly_click", off,
   
   # attach HTML dependencies (these libraries are used in the HTMLwidgets.renderValue() method)
   # TODO: only attach these when keys are present!
-  if (selectize) {
+  if (!identical(selectize, FALSE)) {
     p$dependencies <- c(p$dependencies, list(selectizeLib()))
   }
   if (dynamic) {

@@ -81,6 +81,50 @@ test_that("group_by.plotly() retains crosstalk set", {
   expect_true(all(b$x$data[[1]]$key == row.names(mtcars)))
 })
 
+test_that("highlight(selectize) produces a sensible payload", {
+  p <- plot_ly() %>%
+    add_lines(data = mtcars, x = ~wt, y = ~mpg) %>%
+    add_markers(
+      data = highlight_key(mtcars, ~cyl, "Choose cylinder"),
+      x = ~wt, y = ~mpg
+    )
+  
+  # Builds basic payload when selectize=TRUE
+  b <- p %>%
+    highlight(selectize = TRUE) %>%
+    plotly_build()
+  
+  selectize <- list(
+    items = data.frame(value = c(6, 4, 8), label = c(6, 4, 8)), 
+    group = "Choose cylinder"
+  )
+  
+  expect_length(b$x$selectize, 1)
+  expect_equal(b$x$selectize[[1]], selectize)
+  
+  # Copies over any list() options
+  b2 <- p %>%
+    highlight(selectize = list(plugins = list("remove_button"))) %>%
+    plotly_build()
+  
+  selectize$plugins <- list("remove_button")
+  
+  expect_length(b2$x$selectize, 1)
+  expect_equal(b2$x$selectize[[1]], selectize)
+  
+  # Can also tack on options after building, and plotly_build() won't overwrite
+  b2$x$selectize[[1]] <- modifyList(
+    b2$x$selectize[[1]], list(foo = "bar")
+  )
+  
+  b2 <- plotly_build(b2)
+  
+  selectize$foo <- "bar"
+  
+  expect_equal(b2$x$selectize[[1]], selectize)
+  
+})
+
 
 
 # Ignore for now https://github.com/ggobi/ggally/issues/264
