@@ -87,8 +87,7 @@ test_that("highlight(selectize) produces a sensible payload", {
     add_markers(
       data = highlight_key(mtcars, ~cyl, "Choose cylinder"),
       x = ~wt, y = ~mpg
-    ) %>%
-    add_markers()
+    )
   
   # Builds basic payload when selectize=TRUE
   b <- p %>%
