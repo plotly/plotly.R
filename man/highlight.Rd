@@ -55,8 +55,10 @@ highlighting selections. See \code{\link[=toRGB]{toRGB()}} for valid color
 specifications. If \code{NULL} (the default), the color of selected marks
 are not altered.}
 
-\item{selectize}{provide a selectize.js widget for selecting keys? Note that
-the label used for this widget derives from the groupName of the SharedData object.}
+\item{selectize}{whether or not to render a selectize.js widget for selecting
+\code{\link[=highlight_key]{highlight_key()}} values. A list of additional selectize.js options may
+also be provided. The label used for this widget should be set via the
+\code{groupName} argument of \code{\link[=highlight_key]{highlight_key()}}.}
 
 \item{defaultValues}{a vector of values for setting a "default selection".
 These values should match the key attribute.}
