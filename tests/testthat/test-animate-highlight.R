@@ -82,9 +82,12 @@ test_that("group_by.plotly() retains crosstalk set", {
 })
 
 test_that("highlight(selectize) produces a sensible payload", {
-  p <- mtcars %>%
-    highlight_key(~cyl, "Choose cylinder") %>%
-    plot_ly(x = ~wt, y = ~mpg) %>%
+  p <- plot_ly() %>%
+    add_lines(data = mtcars, x = ~wt, y = ~mpg) %>%
+    add_markers(
+      data = highlight_key(mtcars, ~cyl, "Choose cylinder"),
+      x = ~wt, y = ~mpg
+    ) %>%
     add_markers()
   
   # Builds basic payload when selectize=TRUE
@@ -120,7 +123,6 @@ test_that("highlight(selectize) produces a sensible payload", {
   selectize$foo <- "bar"
   
   expect_equal(b2$x$selectize[[1]], selectize)
-  
   
 })
 

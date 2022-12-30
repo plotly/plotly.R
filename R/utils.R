@@ -366,20 +366,40 @@ supply_highlight_attrs <- function(p) {
   # set "global" options via crosstalk variable
   p$x$highlight <- p$x$highlight %||% highlight_defaults()
   
-  # defaults are now populated, allowing us to populate some other 
-  # attributes such as the selectize widget definition
-  # TODO: this is wrong!!! What if set is missing and present?!
-  sets <- unlist(lapply(p$x$data, "[[", "set"))
-  keys <- setNames(lapply(p$x$data, "[[", "key"), sets)
-  p$x$highlight$ctGroups <- i(unique(sets))
+  # Grab the special "crosstalk set" (i.e., group) for each trace
+  sets <- lapply(p$x$data, "[[", "set")
+  noSet <- vapply(sets, is.null, logical(1))
   
-  # TODO: throw warning if we don't detect valid keys?
-  hasKeys <- FALSE
+  # If no sets are present, there's nothing more to do
+  if (all(noSet)) {
+    return(p)
+  }
+  
+  # Store the unique set of crosstalk sets (which gets looped over client-side) 
+  p$x$highlight$ctGroups <- i(unique(unlist(sets)))
+  
+  # Build a set -> key mapping for each relevant trace, which we'll use
+  # to set default values and/or build the selectize.js payload (if relevant)
+  setDat <- p$x$data[!noSet]
+  keys <- setNames(lapply(setDat, "[[", "key"), sets[!noSet])
+  
   for (i in p$x$highlight$ctGroups) {
+    
+    # Get all the keys for this crosstalk group
     k <- unique(unlist(keys[names(keys) %in% i], use.names = FALSE))
-    if (is.null(k)) next
     k <- k[!is.null(k)]
-    hasKeys <- TRUE
+    if (length(k) == 0) next
+    
+    # set default values via crosstalk api
+    vals <- intersect(p$x$highlight$defaultValues, k)
+    if (length(vals)) {
+      p <- htmlwidgets::onRender(
+        p, sprintf(
+          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
+          i, jsonlite::toJSON(as.character(vals), auto_unbox = FALSE)
+        )
+      )
+    }
 
     # include one selectize dropdown per "valid" SharedData layer
     selectize <- p$x$highlight$selectize %||% FALSE
@@ -406,31 +426,18 @@ supply_highlight_attrs <- function(p) {
       
       p$x$selectize[[groupId]] <- options
     }
-    
-    # set default values via crosstalk api
-    vals <- p$x$highlight$defaultValues[p$x$highlight$defaultValues %in% k]
-    if (length(vals)) {
-      p <- htmlwidgets::onRender(
-        p, sprintf(
-          "function(el, x) { crosstalk.group('%s').var('selection').set(%s) }", 
-          i, jsonlite::toJSON(as.character(vals), auto_unbox = FALSE)
-        )
-      )
-    }
   }
 
-  # add HTML dependencies, set a sensible dragmode default, & throw messages
-  if (hasKeys) {
-    p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
-      default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
-    if (is.default(p$x$highlight$off)) {
-      message(
-        sprintf(
-          "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
-          p$x$highlight$off, p$x$highlight$on
-        )
+  # set a sensible dragmode default, & throw messages
+  p$x$layout$dragmode <- p$x$layout$dragmode %|D|% 
+    default(switch(p$x$highlight$on %||% "", plotly_selected = "select", plotly_selecting = "select") %||% "zoom")
+  if (is.default(p$x$highlight$off)) {
+    message(
+      sprintf(
+        "Setting the `off` event (i.e., '%s') to match the `on` event (i.e., '%s'). You can change this default via the `highlight()` function.",
+        p$x$highlight$off, p$x$highlight$on
       )
-    }
+    )
   }
   
   p
