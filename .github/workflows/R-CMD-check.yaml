@@ -61,7 +61,7 @@ jobs:
         with:
           cache-version: 3
           needs: check
-          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
+          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing on Windows via pak
           # https://github.com/plotly/plotly.R/pull/2221
           build-args: '--no-multiarch'
 
