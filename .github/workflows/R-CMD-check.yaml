@@ -53,16 +53,16 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.config.r }}
-          # `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
-          # https://github.com/plotly/plotly.R/pull/2221
-          use-public-rspm: ${{ !startsWith(matrix.config.os, 'windows') }}
+          use-public-rspm: true
 
       - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          cache-version: 2
+          cache-version: 3
           needs: check
+          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
+          # https://github.com/plotly/plotly.R/pull/2221
           build-args: '--no-multiarch'
 
       - name: Set up Python 3.8
@@ -108,6 +108,8 @@ jobs:
         with:
           check-dir: '"check"'
           # Run check with --no-tests since we ran them abve
+          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
+          # https://github.com/plotly/plotly.R/pull/2221
           args: 'c("--no-tests", "--no-manual", "--as-cran", "--no-multiarch")'
           error-on: '"warning"'
       
