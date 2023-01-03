@@ -55,7 +55,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           # `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
           # https://github.com/plotly/plotly.R/pull/2221
-          use-public-rspm: ${{ startsWith(matrix.config.os, 'windows') }}
+          use-public-rspm: ${{ !startsWith(matrix.config.os, 'windows') }}
 
       - uses: r-lib/actions/setup-pandoc@v2
 
