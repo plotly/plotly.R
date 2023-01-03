@@ -63,6 +63,7 @@ jobs:
         with:
           cache-version: 2
           needs: check
+          build-args: '--no-multiarch'
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -107,7 +108,7 @@ jobs:
         with:
           check-dir: '"check"'
           # Run check with --no-tests since we ran them abve
-          args: 'c("--no-tests", "--no-manual", "--as-cran")'
+          args: 'c("--no-tests", "--no-manual", "--as-cran", "--no-multiarch")'
           error-on: '"warning"'
       
       #- name: Show testthat output
