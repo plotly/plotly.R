@@ -562,7 +562,7 @@ to_basic.GeomCrossbar <- function(data, prestats_data, layout, params, p, ...) {
   # from GeomCrossbar$draw_panel()
   middle <- base::transform(data, x = xmin, xend = xmax, yend = y, alpha = NA)
   nm <- linewidth_or_size(GeomCrossbar)
-  data[[nm]] <- data[[nm]] * params$fatten
+  data[[nm]] <- data[[nm]] * (params$fatten %||% formals(geom_crossbar)$fatten)
   list(
     prefix_class(to_basic.GeomRect(data), "GeomCrossbar"),
     prefix_class(to_basic.GeomSegment(middle), "GeomCrossbar")
