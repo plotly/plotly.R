@@ -61,9 +61,6 @@ jobs:
         with:
           cache-version: 3
           needs: check
-          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing on Windows via pak
-          # https://github.com/plotly/plotly.R/pull/2221
-          build-args: '--no-multiarch'
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -108,7 +105,7 @@ jobs:
         with:
           check-dir: '"check"'
           # Run check with --no-tests since we ran them abve
-          # 2023-01-03: `{purrr}` v1.0.0 had trouble installing from RSPM on Windows
+          # 2023-01-03: `{purrr}` v1.0.0 had trouble on Windows without the `--no-multiarch`
           # https://github.com/plotly/plotly.R/pull/2221
           args: 'c("--no-tests", "--no-manual", "--as-cran", "--no-multiarch")'
           error-on: '"warning"'
