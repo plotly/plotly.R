@@ -82,6 +82,4 @@ RoxygenNote: 7.2.3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/Needs/check:
-    rcmdcheck,
-    devtools,
     reshape2
