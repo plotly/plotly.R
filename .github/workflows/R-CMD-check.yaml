@@ -61,10 +61,7 @@ jobs:
         with:
           cache-version: 2
           needs: check
-          extra-packages: |
-            rcmdcheck
-            devtools
-            reshape2
+          extra-packages: rcmdcheck,devtools,reshape2
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
