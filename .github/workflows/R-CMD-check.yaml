@@ -28,16 +28,17 @@ jobs:
         config:
           - {os: macOS-latest,   r: 'release', visual_tests: true, node: "14.x", shinytest: true}
           - {os: windows-latest, r: 'release'}
-          #- {os: windows-latest, r: '3.6', rspm: "https://packagemanager.rstudio.com/cran/latest"}
-          - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.1.0 (ubuntu-18.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: windows-latest, r: '4.1'}
+          - {os: windows-latest, r: '3.6'}
+          - {os: ubuntu-18.04,   r: 'devel'}
           # vdiffr & shinytest only runs on linux r-release since the results aren't cross-platform
-          - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.6',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.5',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'release'}
+          - {os: ubuntu-18.04,   r: 'oldrel-1'}
+          - {os: ubuntu-18.04,   r: 'oldrel-2'}
+          - {os: ubuntu-18.04,   r: 'oldrel-3'}
+          - {os: ubuntu-18.04,   r: 'oldrel-4'}
 
     env:
-      RSPM: ${{ matrix.config.rspm }}
       VISUAL_TESTS: ${{ matrix.config.visual_tests }}
       SHINYTEST: ${{ matrix.config.shinytest }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -48,43 +49,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-r@v2
         id: install-r
         with:
           r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Install pak and query dependencies
-        run: |
-          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", dependencies = TRUE), ".github/r-depends.rds")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}/*
-            !${{ env.R_LIBS_USER }}/pak
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
+          cache-version: 2
+          needs: check
+          extra-packages: |
+            rcmdcheck
+            devtools
+            reshape2
 
-      - name: Install Linux sysdeps
-        if: runner.os == 'Linux'
-        run: |
-          pak::local_system_requirements(execute = TRUE)
-          pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
-        shell: Rscript {0}
-        
-      - name: Install dependencies
-        run: |
-          if (Sys.info()[['sysname']] == 'Darwin') options(pkgType = 'mac.binary')
-          pak::local_install_dev_deps(upgrade = FALSE)
-          pak::pkg_install("rcmdcheck")
-        shell: Rscript {0}
-        
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -110,8 +91,6 @@ jobs:
       - name: Run Tests
         run: |
           options(crayon.enabled = TRUE, testthat.progress.max_fails=1000)
-          if (!require(devtools)) pak::pak("devtools")
-          if (!require(reshape2)) pak::pak("reshape2")
           res <- devtools::test()
           df <- as.data.frame(res)
           if (sum(df$failed) > 0 || any(df$error)) stop("GHA CI tests failed")
@@ -125,19 +104,15 @@ jobs:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: ./
 
-      # Run check with --no-tests since we ran them abve
-      - name: Check
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-tests", "--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-
+      - name: Check package
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          check-dir: '"check"'
+          # Run check with --no-tests since we ran them abve
+          args: 'c("--no-tests", "--no-manual", "--as-cran")'
+          error-on: '"warning"'
+      
       #- name: Show testthat output
       #  if: always()
       #  run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
       #  shell: bash
-
-      - name: Don't use tar from old Rtools to store the cache
-        if: ${{ runner.os == 'Windows' && startsWith(steps.install-r.outputs.installed-r-version, '3.6' ) }}
-        shell: bash
-        run: echo "C:/Program Files/Git/usr/bin" >> $GITHUB_PATH
