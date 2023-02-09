@@ -103,8 +103,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # now to the actual layer -> trace conversion
   trace.list <- list()
   
-  is_guide_none <- vapply(p$guides, identical, logical(1), "none")
-  aes_no_guide <- names(is_guide_none)[isTRUE(is_guide_none)]
+  aes_no_guide <- names(p$guides)[vapply(p$guides, identical, logical(1), "none")]
   
   for (i in seq_along(datz)) {
     d <- datz[[i]]
