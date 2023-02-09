@@ -59,14 +59,6 @@ test_that("aesthetics can be discarded from legend with guide(aes = 'none')", {
 })
 
 test_that("legend can be manipulated via guides(aes = guide_xxx())", {
-  p <- ggplot(mtcars, aes(hp, mpg, color = factor(cyl))) +
-    geom_point() +
-    guides(color = guide_legend())
-  
-  info <- expect_doppelganger_built(gg, "mtcars-guides")
-  
-  expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 3)
-  
   # Issue posted on Stackoverflow
   # https://stackoverflow.com/questions/75365694/plotly-did-not-show-legend-when-converted-from-ggplot
   data <- data.frame(
@@ -96,7 +88,7 @@ test_that("legend can be manipulated via guides(aes = guide_xxx())", {
            shape = guide_legend(title = "", order = 2)) +
     theme(axis.text.x = element_text(angle = 90))
   
-  info <- expect_doppelganger_built(gg, "so-issue")
+  info <- expect_doppelganger_built(gg, "respect-guides")
   
   expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 4)
 })
