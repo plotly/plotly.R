@@ -9,7 +9,7 @@
 * Closed #2218: `highlight(selectize = TRUE)` no longer yields an incorrect selectize.js result when there is a combination of crosstalk and non-crosstalk traces. (#2217) 
 * Closed #2208: `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
 * Closed #2220: `ggplotly()` no longer errors on `stat_summary(geom = "crossbar")`. (#2222)
-
+* Closed #2212: `ggplotly()` no longer removes legends when setting guide properties via `guides(aes = guide_xxx(...))`.
 
 # 4.10.1
 
