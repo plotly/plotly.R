@@ -6,6 +6,7 @@
 
 ## Bug fixes
 
+* Closed #2212: `ggplotly()` no longer silently drops legends that are customized through `ggplot2::guide_legend()`.
 * Closed #2179: `save_image()` no longer needs `reticulate::py_run_string("import sys")` in order to run without error. (#2179)
 * Closed #2218: `highlight(selectize = TRUE)` no longer yields an incorrect selectize.js result when there is a combination of crosstalk and non-crosstalk traces. (#2217) 
 * Closed #2208: `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
