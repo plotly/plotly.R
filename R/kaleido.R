@@ -107,7 +107,7 @@ kaleido <- function(...) {
       # Write the base64 encoded string that transform() returns to disk
       # https://github.com/plotly/Kaleido/blame/master/README.md#L52
       reticulate::py_run_string(
-        sprintf("open('%s', 'wb').write(%s)", file, transform_cmd)
+        sprintf("import sys; open('%s', 'wb').write(%s)", file, transform_cmd)
       )
       
       invisible(file)
