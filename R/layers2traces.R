@@ -102,7 +102,9 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }
   # now to the actual layer -> trace conversion
   trace.list <- list()
-  aes_no_guide <- names(vapply(p$guides, identical, logical(1), "none"))
+  
+  aes_no_guide <- names(p$guides)[vapply(p$guides, identical, logical(1), "none")]
+  
   for (i in seq_along(datz)) {
     d <- datz[[i]]
     # variables that produce multiple traces and deserve their own legend entries

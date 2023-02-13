@@ -58,6 +58,40 @@ test_that("aesthetics can be discarded from legend with guide(aes = 'none')", {
   expect_doppelganger(p, "guide-aes-none")
 })
 
+test_that("legend can be manipulated via guides(aes = guide_xxx())", {
+  # Issue posted on Stackoverflow
+  # https://stackoverflow.com/questions/75365694/plotly-did-not-show-legend-when-converted-from-ggplot
+  data <- data.frame(
+    stringsAsFactors = FALSE,
+    Level = c("Fast","Fast","Fast","Fast",
+              "Fast","Fast","Slow","Slow","Slow",
+              "Slow","Slow","Slow"),
+    Period = c("1Year","3Month","1Year","3Month",
+               "1Year","3Month","1Year","3Month",
+               "1Year","3Month","1Year","3Month"),
+    X = c(0.002,0.002,0.1,0.1,0.9,0.9,
+          0.002,0.002,0.1,0.1,0.9,0.9),
+    Y = c(1.38,1.29,1.61,1.61,1.74,0.98,
+          1.14,0.97,1.09,1.1,0.94,0.58)
+  )
+  
+  gg <- ggplot(data = data,
+               aes(x = X,
+                   y = Y,
+                   shape = Period,
+                   color = Level)) +
+    geom_point(alpha = 0.6, size = 3) +
+    labs(x = " ",
+         y = "Value") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.1)) +
+    guides(color = guide_legend(title = "Period", order = 1),
+           shape = guide_legend(title = "", order = 2)) +
+    theme(axis.text.x = element_text(angle = 90))
+  
+  info <- expect_doppelganger_built(gg, "respect-guides")
+  
+  expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 4)
+})
 
 p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) + 
   geom_point()
@@ -114,4 +148,3 @@ test_that("many legend items", {
   p <- ggplot(midwest, aes(category, fill = category)) + geom_bar()
   info <- expect_traces(p, length(unique(midwest$category)), "many legend items")
 })
-
