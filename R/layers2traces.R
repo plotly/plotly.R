@@ -445,7 +445,7 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
     data = layout$layout, cols = paste0(x, c("_min", "_max")), values_to = x, names_to = "variable"
   ) 
   lay <- as.data.frame(lay)
-  if (nrow(data) != 0) {
+  if (nrow(data) > 0) {
     data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
   }
   data[["x"]] <- data[[x]]
@@ -465,7 +465,7 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
   ) 
   lay <- as.data.frame(lay)
   # fix for #1947; applied to Hline as well
-  if (nrow(data) != 0) {
+  if (nrow(data) > 0) {
     data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
   }
   data[["y"]] <- data[[y]]
