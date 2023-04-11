@@ -1,77 +1,64 @@
 
 test_that("geom_vline/geom_hline does not throw an error with ggplotly when no lines are found", {
-  # Prepare data
-  data <- data.table::data.table(gapminder::gapminder)
-  # Add year of interest for vertical lines
-  data[year == 2002, year_of_interest := "yoi"]
+  set.seed(123)
+  x <- seq(0, 10, by = 1)
+  # random walk
+  y <- cumsum(rnorm(length(x), mean = 0, sd = 1))
+  df <- data.frame(x, y)
+  df$point_of_interest <- "not_poi"
+  df[df$x == 2, ]$point_of_interest <- "poi" # point of interest
 
   # Case 1: Vertical line by feeding data to it; this allows for programmatically setting many lines at different years
-  p1 <- ggplot2::ggplot(data, ggplot2::aes(x = year, y = lifeExp, colour = country)) +
-    ggplot2::geom_line() +
+  p1 <- ggplot2::ggplot(df) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_vline(
-      ggplot2::aes(xintercept = year),
-      data = data[year_of_interest == "yoi", ],
-      colour = "yellow",
-      alpha = 0.75,
-      linewidth = 1.25,
-      linetype = "dashed"
-    ) +
-    ggplot2::theme(legend.position = "none")
+      ggplot2::aes(xintercept = x),
+      data = df[df$point_of_interest == "poi", ],
+      colour = "yellow"
+    )
 
   # Test that ggplotly does not throw an error for both cases
   expect_error(plotly::ggplotly(p1), NA) # lines are found no error is thrown
 
   # Case 2: No lines are found, ggplot2 accepts it and no error is thrown
-  p2 <- ggplot2::ggplot(data, ggplot2::aes(x = year, y = lifeExp, colour = country)) +
-    ggplot2::geom_line() +
+  p2 <- ggplot2::ggplot(df) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_vline(
-      ggplot2::aes(xintercept = year),
-      data = data[year_of_interest == "some_not_found", ],
-      colour = "yellow",
-      alpha = 0.75,
-      linewidth = 1.25,
-      linetype = "dashed"
-    ) +
-    ggplot2::theme(legend.position = "none")
+      ggplot2::aes(xintercept = x),
+      data = df[df$point_of_interest == "something_not_matched", ],
+      colour = "yellow"
+    )
 
-  # error:
+  # error given without fix:
   # "Error in fix.by(by.y, y) : 'by' must specify a uniquely valid column"
-  expect_error(plotly::ggplotly(p2), "Error in fix.by") # no lines are found no error is thrown
+  expect_error(plotly::ggplotly(p2), NA) # no lines are found no error is thrown
 
   ## --------------------------------
   # testing horizontal line
-  data[round(lifeExp, 0) == 50, val_of_interest := "voi"]
+  df$value_of_interest <- "not_voi"
+  df[round(df$x, 0) == 2, ]$value_of_interest <- "voi" # value of interest
 
   # horizontal line no error
-  p3 <- ggplot2::ggplot(data, ggplot2::aes(x = year, y = lifeExp, colour = country)) +
-    ggplot2::geom_line() +
+  p3 <- ggplot2::ggplot(df) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_hline(
-      ggplot2::aes(yintercept = lifeExp),
-      data = data[val_of_interest == "voi", ],
-      colour = "pink",
-      alpha = 0.75,
-      linewidth = 1.25,
-      linetype = "dashed"
-    ) +
-    ggplot2::theme(legend.position = "none")
+      ggplot2::aes(yintercept = x),
+      data = df[df$value_of_interest == "voi", ],
+      colour = "pink"
+    )
 
   expect_error(plotly::ggplotly(p3), NA) # lines are found no error is thrown
 
   # horizontal line not set; error
-  p4 <- ggplot2::ggplot(data, ggplot2::aes(x = year, y = lifeExp, colour = country)) +
-    ggplot2::geom_line() +
+  p4 <- ggplot2::ggplot(df) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_hline(
-      ggplot2::aes(yintercept = lifeExp),
-      data = data[val_of_interest == "some_val_not_found", ],
-      colour = "pink",
-      alpha = 0.75,
-      linewidth = 1.25,
-      linetype = "dashed"
-    ) +
-    ggplot2::theme(legend.position = "none")
+      ggplot2::aes(yintercept = x),
+      data = df[df$value_of_interest == "something_not_matched", ],
+      colour = "pink"
+    )
 
-  # ggplot2 allows this no error
-  # print(p4)
+  # error given without fix:
   # "Error in fix.by(by.y, y) : 'by' must specify a uniquely valid column"
-  expect_error(plotly::ggplotly(p4), "Error in fix.by") # no lines are found no error is thrown
+  expect_error(plotly::ggplotly(p4), NA) # no lines are found no error is thrown
 })
