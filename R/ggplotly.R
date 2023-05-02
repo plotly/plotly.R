@@ -314,7 +314,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     })
     
     # Transform all scales
-    data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
+    data <- lapply(data, scales_transform_df, scales = scales)
     
     # Map and train positions so that statistics have access to ranges
     # and all positions are numeric
@@ -368,7 +368,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     data <- by_layer(function(l, d) l$map_statistic(d, plot))
     
     # Make sure missing (but required) aesthetics are added
-    ggfun("scales_add_missing")(plot, c("x", "y"), plot$plot_env)
+    scales_add_missing(plot, c("x", "y"))
     
     # Reparameterise geoms from (e.g.) y and width to ymin and ymax
     data <- by_layer(function(l, d) l$compute_geom_1(d))
@@ -401,7 +401,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     # Train and map non-position scales
     npscales <- scales$non_position_scales()
     if (npscales$n() > 0) {
-      lapply(data, ggfun("scales_train_df"), scales = npscales)
+      lapply(data, scales_train_df, scales = npscales)
       # this for loop is unique to plotly -- it saves the "domain"
       # of each non-positional scale for display in tooltips
       for (sc in npscales$scales) {
@@ -413,7 +413,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           d
         })
       }
-      data <- lapply(data, ggfun("scales_map_df"), scales = npscales)
+      data <- lapply(data, scales_map_df, scales = npscales)
     }
     
     # Fill in defaults etc.
@@ -1457,5 +1457,38 @@ getAesMap <- function(plot, layer) {
     modify_list(plot$mapping, layer$mapping)
   } else {
     layer$mapping
+  }
+}
+
+# Handle compatibility for changes in ggplot2 >v3.4.2 (#5144)
+scales_transform_df <- function(scales, df) {
+  if (is.function(scales$transform_df)) {
+    scales$transform_df(df)
+  } else {
+    ggfun("scales_transform_df")(df, scales = scales)
+  }
+}
+
+scales_train_df <- function(scales, df) {
+  if (is.function(scales$train_df)) {
+    scales$train_df(df)
+  } else {
+    ggfun("scales_train_df")(df, scales = scales)
+  }
+}
+
+scales_map_df <- function(scales, df) {
+  if (is.function(scales$map_df)) {
+    scales$map_df(df)
+  } else {
+    ggfun("scales_map_df")(df, scales = scales)
+  }
+}
+
+scales_add_missing <- function(plot, aesthetics) {
+  if (length(plot$scales$add_missing)) {
+    plot$scales$add_missing(c("x", "y"), plot$plot_env)
+  } else {
+    ggfun("scales_add_missing")(plot, aesthetics, plot$plot_env)
   }
 }
