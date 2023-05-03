@@ -1460,7 +1460,10 @@ getAesMap <- function(plot, layer) {
   }
 }
 
-# Handle compatibility for changes in ggplot2 >v3.4.2 (#5144)
+# ------------------------------------------------------------------
+# Handle compatibility for changes in ggplot2 >v3.4.2 (#5144),
+# which removed these functions in favor of scale/plot methods
+# ------------------------------------------------------------------
 scales_transform_df <- function(scales, df) {
   if (is.function(scales$transform_df)) {
     scales$transform_df(df)
@@ -1486,7 +1489,7 @@ scales_map_df <- function(scales, df) {
 }
 
 scales_add_missing <- function(plot, aesthetics) {
-  if (length(plot$scales$add_missing)) {
+  if (is.function(plot$scales$add_missing)) {
     plot$scales$add_missing(c("x", "y"), plot$plot_env)
   } else {
     ggfun("scales_add_missing")(plot, aesthetics, plot$plot_env)
