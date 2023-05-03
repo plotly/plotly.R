@@ -26,17 +26,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          # vdiffr & shinytest only runs on mac r-release since the results aren't cross-platform
           - {os: macOS-latest,   r: 'release', visual_tests: true, node: "14.x", shinytest: true}
           - {os: windows-latest, r: 'release'}
           - {os: windows-latest, r: '4.1'}
           - {os: windows-latest, r: '3.6'}
-          - {os: ubuntu-18.04,   r: 'devel'}
-          # vdiffr & shinytest only runs on linux r-release since the results aren't cross-platform
-          - {os: ubuntu-18.04,   r: 'release'}
-          - {os: ubuntu-18.04,   r: 'oldrel-1'}
-          - {os: ubuntu-18.04,   r: 'oldrel-2'}
-          - {os: ubuntu-18.04,   r: 'oldrel-3'}
-          - {os: ubuntu-18.04,   r: 'oldrel-4'}
+          - {os: ubuntu-latest,   r: 'devel'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          - {os: ubuntu-latest,   r: 'oldrel-2'}
+          - {os: ubuntu-latest,   r: 'oldrel-3'}
+          - {os: ubuntu-latest,   r: 'oldrel-4'}
 
     env:
       VISUAL_TESTS: ${{ matrix.config.visual_tests }}
