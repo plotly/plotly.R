@@ -1004,12 +1004,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
-    gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
-    if (length(gdefs) > 0) {
-      gdefs <- ggfun("guides_merge")(gdefs)
-      gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
+    gdefs <- if (inherits(plot$guides, "ggproto")) {
+      get_gdefs_ggproto(npscales$scales, theme, plot, layers)
+    } else {
+      get_gdefs(scales, theme, plot, layers)
     }
-    
+
     # colourbar -> plotly.js colorbar
     colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
     nguides <- length(colorbar) + gglayout$showlegend
@@ -1461,8 +1461,9 @@ getAesMap <- function(plot, layer) {
 }
 
 # ------------------------------------------------------------------
-# Handle compatibility for changes in ggplot2 >v3.4.2 (#5144),
-# which removed these functions in favor of scale/plot methods
+# Handle compatibility for changes in ggplot2 >v3.4.2 (specifically #5144),
+# which moved away from scales_transform_df(), scales_train_df(), etc  
+# towards ggproto methods attached to `scales`
 # ------------------------------------------------------------------
 scales_transform_df <- function(scales, df) {
   if (is.function(scales$transform_df)) {
@@ -1494,4 +1495,36 @@ scales_add_missing <- function(plot, aesthetics) {
   } else {
     ggfun("scales_add_missing")(plot, aesthetics, plot$plot_env)
   }
+}
+
+# -------------------------------------------------------------------------
+# Handle compatibility for changes in ggplot2 >v3.4.2 (specifically #4879),
+# which away from guides_train(), guides_merge(), guides_geom() 
+# towards ggproto methods attached to `plot$guides`
+# -------------------------------------------------------------------------
+get_gdefs_ggproto <- function(scales, theme, plot, layers) {
+  guides <- plot$guides$setup(scales)
+  guides$train(scales, theme$legend.direction, plot$labels)
+  if (length(guides$guides) > 0) {
+    guides$merge()
+    guides$process_layers(layers)
+  }
+  # Add old legend/colorbar classes to guide params so that ggplotly() code
+  # can continue to work the same way it always has
+  for (i in which(vapply(guides$guides, inherits, logical(1), "GuideColourbar"))) {
+    guides$params[[i]] <- prefix_class(guides$params[[i]], "colorbar")
+  }
+  for (i in which(vapply(guides$guides, inherits, logical(1), "GuideLegend"))) {
+    guides$params[[i]] <- prefix_class(guides$params[[i]], "legend")
+  }
+  guides$params
+}
+
+get_gdefs <- function(scales, theme, plot, layers) {
+  gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
+  if (length(gdefs) > 0) {
+    gdefs <- ggfun("guides_merge")(gdefs)
+    gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
+  }
+  gdefs
 }
