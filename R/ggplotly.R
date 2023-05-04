@@ -1403,12 +1403,21 @@ gdef2trace <- function(gdef, theme, gglayout) {
   if (inherits(gdef, "colorbar")) {
     # sometimes the key has missing values, which we can ignore
     gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
-    rng <- range(gdef$bar$value)
-    gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
-    gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    
+    # Put values on a 0-1 scale
+    # N.B. ggplot2 >v3.4.2 (specifically #4879) renamed bar to decor and also 
+    # started returning normalized values for the key field
+    decor <- gdef$decor %||% gdef$bar
+    rng <- range(decor$value)
+    decor$value <- scales::rescale(decor$value, from = rng)
+    if (!"decor" %in% names(gdef)) {
+      gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    }
+    
     vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
       if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
     })
+    
     list(
       x = vals[[1]][[1]],
       y = vals[[2]][[1]],
@@ -1422,7 +1431,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
       # do everything on a 0-1 scale
       marker = list(
         color = c(0, 1),
-        colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
+        colorscale = setNames(decor[c("value", "colour")], NULL),
         colorbar = list(
           bgcolor = toRGB(theme$legend.background$fill),
           bordercolor = toRGB(theme$legend.background$colour),
