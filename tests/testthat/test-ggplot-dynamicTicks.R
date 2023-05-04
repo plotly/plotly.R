@@ -33,7 +33,7 @@ test_that("Categorical axis reflects custom scale mapping", {
     scale_x_discrete(limits = lims)
   
   expect_warning(p <- ggplotly(g, dynamicTicks = "x"), 
-                 regexp = "non-finite values")
+                 regexp = "non-finite")
   
   axisActual <- with(
     p$x$layout$xaxis, list(type, tickmode, categoryorder, categoryarray)
@@ -49,7 +49,7 @@ test_that("Categorical axis reflects custom scale mapping", {
     geom_bar() +
     scale_x_discrete(limits = lims, labels = labs)
   expect_warning(p <- ggplotly(g, dynamicTicks = "x"), 
-                 regexp = "non-finite values")
+                 regexp = "non-finite")
   
   axisActual <- with(
     p$x$layout$xaxis, list(type, tickmode, categoryorder, categoryarray)
