@@ -103,6 +103,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # now to the actual layer -> trace conversion
   trace.list <- list()
   
+  # ggplot2 >v3.4.2 (specifically #4879) moved the guides system to ggproto, 
+  # which moved the location of the name->value fields
   guides <- if (inherits(p$guides, "ggproto")) p$guides$guides else p$guides
   aes_no_guide <- names(guides)[vapply(guides, identical, logical(1), "none")]
   

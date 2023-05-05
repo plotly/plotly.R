@@ -4,6 +4,10 @@
 
 * Closed #2216: Additional selectize.js options can now be passed along to `highlight()`'s `selectize` argument. (#2217)
 
+## Improvements
+
+* Closed #2259: `ggplotly()` now provides better support for ggplot2 >v3.4.2. (#2262)
+
 ## Bug fixes
 
 * Closed #2212: `ggplotly()` no longer silently drops legends that are customized through `ggplot2::guide_legend()`.
