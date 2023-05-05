@@ -314,7 +314,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     })
     
     # Transform all scales
-    data <- lapply(data, ggfun("scales_transform_df"), scales = scales)
+    data <- lapply(data, scales_transform_df, scales = scales)
     
     # Map and train positions so that statistics have access to ranges
     # and all positions are numeric
@@ -368,7 +368,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     data <- by_layer(function(l, d) l$map_statistic(d, plot))
     
     # Make sure missing (but required) aesthetics are added
-    ggfun("scales_add_missing")(plot, c("x", "y"), plot$plot_env)
+    scales_add_missing(plot, c("x", "y"))
     
     # Reparameterise geoms from (e.g.) y and width to ymin and ymax
     data <- by_layer(function(l, d) l$compute_geom_1(d))
@@ -401,7 +401,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     # Train and map non-position scales
     npscales <- scales$non_position_scales()
     if (npscales$n() > 0) {
-      lapply(data, ggfun("scales_train_df"), scales = npscales)
+      lapply(data, scales_train_df, scales = npscales)
       # this for loop is unique to plotly -- it saves the "domain"
       # of each non-positional scale for display in tooltips
       for (sc in npscales$scales) {
@@ -413,7 +413,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           d
         })
       }
-      data <- lapply(data, ggfun("scales_map_df"), scales = npscales)
+      data <- lapply(data, scales_map_df, scales = npscales)
     }
     
     # Fill in defaults etc.
@@ -1004,12 +1004,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     # justification of legend boxes
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
-    gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
-    if (length(gdefs) > 0) {
-      gdefs <- ggfun("guides_merge")(gdefs)
-      gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
+    gdefs <- if (inherits(plot$guides, "ggproto")) {
+      get_gdefs_ggproto(npscales$scales, theme, plot, layers)
+    } else {
+      get_gdefs(scales, theme, plot, layers)
     }
-    
+
     # colourbar -> plotly.js colorbar
     colorbar <- compact(lapply(gdefs, gdef2trace, theme, gglayout))
     nguides <- length(colorbar) + gglayout$showlegend
@@ -1403,12 +1403,21 @@ gdef2trace <- function(gdef, theme, gglayout) {
   if (inherits(gdef, "colorbar")) {
     # sometimes the key has missing values, which we can ignore
     gdef$key <- gdef$key[!is.na(gdef$key$.value), ]
-    rng <- range(gdef$bar$value)
-    gdef$bar$value <- scales::rescale(gdef$bar$value, from = rng)
-    gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    
+    # Put values on a 0-1 scale
+    # N.B. ggplot2 >v3.4.2 (specifically #4879) renamed bar to decor and also 
+    # started returning normalized values for the key field
+    decor <- gdef$decor %||% gdef$bar
+    rng <- range(decor$value)
+    decor$value <- scales::rescale(decor$value, from = rng)
+    if (!"decor" %in% names(gdef)) {
+      gdef$key$.value <- scales::rescale(gdef$key$.value, from = rng)
+    }
+    
     vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
       if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
     })
+    
     list(
       x = vals[[1]][[1]],
       y = vals[[2]][[1]],
@@ -1422,7 +1431,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
       # do everything on a 0-1 scale
       marker = list(
         color = c(0, 1),
-        colorscale = setNames(gdef$bar[c("value", "colour")], NULL),
+        colorscale = setNames(decor[c("value", "colour")], NULL),
         colorbar = list(
           bgcolor = toRGB(theme$legend.background$fill),
           bordercolor = toRGB(theme$legend.background$colour),
@@ -1458,4 +1467,73 @@ getAesMap <- function(plot, layer) {
   } else {
     layer$mapping
   }
+}
+
+# ------------------------------------------------------------------
+# Handle compatibility for changes in ggplot2 >v3.4.2 (specifically #5144),
+# which moved away from scales_transform_df(), scales_train_df(), etc  
+# towards ggproto methods attached to `scales`
+# ------------------------------------------------------------------
+scales_transform_df <- function(scales, df) {
+  if (is.function(scales$transform_df)) {
+    scales$transform_df(df)
+  } else {
+    ggfun("scales_transform_df")(df, scales = scales)
+  }
+}
+
+scales_train_df <- function(scales, df) {
+  if (is.function(scales$train_df)) {
+    scales$train_df(df)
+  } else {
+    ggfun("scales_train_df")(df, scales = scales)
+  }
+}
+
+scales_map_df <- function(scales, df) {
+  if (is.function(scales$map_df)) {
+    scales$map_df(df)
+  } else {
+    ggfun("scales_map_df")(df, scales = scales)
+  }
+}
+
+scales_add_missing <- function(plot, aesthetics) {
+  if (is.function(plot$scales$add_missing)) {
+    plot$scales$add_missing(c("x", "y"), plot$plot_env)
+  } else {
+    ggfun("scales_add_missing")(plot, aesthetics, plot$plot_env)
+  }
+}
+
+# -------------------------------------------------------------------------
+# Handle compatibility for changes in ggplot2 >v3.4.2 (specifically #4879),
+# which away from guides_train(), guides_merge(), guides_geom() 
+# towards ggproto methods attached to `plot$guides`
+# -------------------------------------------------------------------------
+get_gdefs_ggproto <- function(scales, theme, plot, layers) {
+  guides <- plot$guides$setup(scales)
+  guides$train(scales, theme$legend.direction, plot$labels)
+  if (length(guides$guides) > 0) {
+    guides$merge()
+    guides$process_layers(layers)
+  }
+  # Add old legend/colorbar classes to guide params so that ggplotly() code
+  # can continue to work the same way it always has
+  for (i in which(vapply(guides$guides, inherits, logical(1), "GuideColourbar"))) {
+    guides$params[[i]] <- prefix_class(guides$params[[i]], "colorbar")
+  }
+  for (i in which(vapply(guides$guides, inherits, logical(1), "GuideLegend"))) {
+    guides$params[[i]] <- prefix_class(guides$params[[i]], "legend")
+  }
+  guides$params
+}
+
+get_gdefs <- function(scales, theme, plot, layers) {
+  gdefs <- ggfun("guides_train")(scales, theme, plot$guides, plot$labels)
+  if (length(gdefs) > 0) {
+    gdefs <- ggfun("guides_merge")(gdefs)
+    gdefs <- ggfun("guides_geom")(gdefs, layers, plot$mapping)
+  }
+  gdefs
 }
