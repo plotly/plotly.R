@@ -85,5 +85,3 @@ Config/Needs/check:
     rcmdcheck,
     devtools,
     reshape2
-Remotes:
-    tidyverse/ggplot2
