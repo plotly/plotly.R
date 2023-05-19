@@ -82,8 +82,7 @@ RoxygenNote: 7.2.3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/Needs/check:
+    tidyverse/ggplot2,
     rcmdcheck,
     devtools,
     reshape2
-Remotes:
-    tidyverse/ggplot2
