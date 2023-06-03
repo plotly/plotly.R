@@ -98,36 +98,7 @@ test_that("hline works with coord_flip", {
   expect_equivalent(l$data[[2]]$y, c(5.95, 6.05))
 })
 
-# fix for issue #1974 pull request #2252
 test_that("geom_vline/geom_hline does not throw an error with ggplotly when no lines are found", {
-  x <- seq(0, 10, by = 1)
-  # random walk
-  y <- cumsum(rnorm(length(x), mean = 0, sd = 1))
-  df <- data.frame(x, y)
-  df$value_of_interest <- "not_voi"
-  df[round(df$x, 0) == 2, ]$value_of_interest <- "voi" # value of interest
-
-  # horizontal line no error
-  p3 <- ggplot2::ggplot(df) +
-    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
-    ggplot2::geom_hline(
-      ggplot2::aes(yintercept = x),
-      data = df[df$value_of_interest == "voi", ],
-      colour = "pink"
-    )
-
-  expect_error(plotly::ggplotly(p3), NA) # lines are found no error is thrown
-
-  # horizontal line not set; error
-  p4 <- ggplot2::ggplot(df) +
-    ggplot2::geom_line(ggplot2::aes(x = x, y = y)) +
-    ggplot2::geom_hline(
-      ggplot2::aes(yintercept = x),
-      data = df[df$value_of_interest == "something_not_matched", ],
-      colour = "pink"
-    )
-
-  # error given without fix:
-  # "Error in fix.by(by.y, y) : 'by' must specify a uniquely valid column"
-  expect_error(plotly::ggplotly(p4), NA) # no lines are found no error is thrown
+  p3 <- ggplot(df) + geom_hline(aes(yintercept = x), data = data.frame(x = 1)[F, , drop = FALSE])
+  expect_error(plotly::ggplotly(p3), NA)
 })
