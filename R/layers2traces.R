@@ -448,7 +448,9 @@ to_basic.GeomHline <- function(data, prestats_data, layout, params, p, ...) {
     data = layout$layout, cols = paste0(x, c("_min", "_max")), values_to = x, names_to = "variable"
   ) 
   lay <- as.data.frame(lay)
-  data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
+  if (nrow(data) > 0) {
+    data <- merge(lay[c("PANEL", x)], data, by = "PANEL")
+  }
   data[["x"]] <- data[[x]]
   data[["y"]] <- data$yintercept
   prefix_class(data, c("GeomHline", "GeomPath"))
@@ -465,7 +467,9 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
     data = layout$layout, cols = paste0(y, c("_min", "_max")), values_to = y, names_to = "variable"
   ) 
   lay <- as.data.frame(lay)
-  data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
+  if (nrow(data) > 0) {
+    data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
+  }
   data[["y"]] <- data[[y]]
   data[["x"]] <- data$xintercept
   prefix_class(data, c("GeomVline", "GeomPath"))

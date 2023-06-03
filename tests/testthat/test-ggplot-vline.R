@@ -46,3 +46,8 @@ test_that("vline works with coord_flip", {
   expect_equivalent(l$data[[2]]$x, c(5.95, 6.05))
   expect_equivalent(l$data[[2]]$y, c(5, 5))
 })
+
+test_that("geom_vline/geom_hline does not throw an error with ggplotly when no lines are found", {
+  p <- ggplot(df) + geom_vline(aes(xintercept = x), data = data.frame(x = 1)[F, , drop = FALSE])
+  expect_error(plotly::ggplotly(p), NA)
+})
