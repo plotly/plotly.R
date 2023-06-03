@@ -100,7 +100,6 @@ test_that("hline works with coord_flip", {
 
 # fix for issue #1974 pull request #2252
 test_that("geom_vline/geom_hline does not throw an error with ggplotly when no lines are found", {
-  set.seed(123)
   x <- seq(0, 10, by = 1)
   # random walk
   y <- cumsum(rnorm(length(x), mean = 0, sd = 1))
