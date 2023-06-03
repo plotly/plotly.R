@@ -12,7 +12,7 @@
 * Closed #2208: `ggplotly()` no longer errors given a `geom_area()` with 1 or less data points (error introduced by new behavior in ggplot2 v3.4.0). (#2209)
 * Closed #2220: `ggplotly()` no longer errors on `stat_summary(geom = "crossbar")`. (#2222)
 * Closed #2212: `ggplotly()` no longer removes legends when setting guide properties via `guides(aes = guide_xxx(...))`.
-* Closed #1947: `ggplotly()` now correctly handles `geom_vline` with empty data. Previously, if `geom_vline` was passed an empty data frame, it would result in an error. The plot is drawn even if no lines are found; this is the same behaviour as `ggplot2`. (#1947)
+* Closed #1947: `ggplotly()` now correctly handles `geom_vline`/`geom_hline` with empty data. Previously, if `geom_vline`/`geom_hline` was passed an empty data frame, it would result in an error. The plot is drawn even if no lines are found; this is the same behaviour as `ggplot2`. (#1947)
 
 # 4.10.1
 
