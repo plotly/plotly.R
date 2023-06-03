@@ -464,7 +464,6 @@ to_basic.GeomVline <- function(data, prestats_data, layout, params, p, ...) {
     data = layout$layout, cols = paste0(y, c("_min", "_max")), values_to = y, names_to = "variable"
   ) 
   lay <- as.data.frame(lay)
-  # fix for #1947; applied to Hline as well
   if (nrow(data) > 0) {
     data <- merge(lay[c("PANEL", y)], data, by = "PANEL")
   }
