@@ -1,6 +1,5 @@
-citHeader("To cite plotly in publications use:")
-
-citEntry(entry = "book",
+bibentry(
+  bibtype = "book",
   author = "Carson Sievert",
   title = "Interactive Web-Based Data Visualization with R, plotly, and shiny",
   publisher = "Chapman and Hall/CRC",
