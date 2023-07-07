@@ -21,6 +21,56 @@ expect_same_data <- function(p1, p2) {
   expect_identical(d1, d2)
 }
 
+# Create a list of plotly objects for use in plotly_merge
+plotly_merge_list = list(
+  # Naming convention is based on xaxis.type and the number of traces: AxisType_TraceCount
+  category_1 = mtcars %>% 
+    group_by(cyl) %>% 
+    summarise(med_mpg = median(mpg)) %>% 
+    ungroup() %>% 
+    mutate(cyl = as.character(cyl)) %>% 
+    plot_ly(
+      type = 'bar',
+      x = ~cyl,
+      y = ~med_mpg
+    ),
+  linear_3 = iris %>% 
+    plot_ly(
+      type = 'scatter',
+      mode = 'markers',
+      x = ~Petal.Length,
+      y = ~Petal.Width,
+      color = ~Species
+    ),
+  multicat_1 = plot_ly(
+    type = 'heatmap',
+    y = 1:10,
+    x = rbind(rep(LETTERS[1:5], each = 2), 1:10),
+    z = array(seq(from = 1, to = 100, by = 1), dim = c(10, 10))
+  ),
+  log_2 = plot_ly(
+    type = 'scatter',
+    mode = 'lines',
+    x = rep(c(1, 10, 100), 2),
+    y = c(1:3, 3:1),
+    name = rep(c('Asc', 'Desc'), 3)
+  ) %>% 
+    layout(xaxis = list(type = 'log', range = c(log10(0), log10(3)))),
+  date_1 = plot_ly(
+    type = 'scatter',
+    mode = 'lines',
+    x = seq(as.Date('1970-1-1'), as.Date('1970-12-31'), by = 'days'),
+    y = 1:365
+  )
+)
+
+plotly_merge_p = plotly_merge(
+  plot_list = plotly_merge_list,
+  show_legend = NA,
+  active_plot = 1
+) %>% plotly_build()
+
+
 test_that("vector values with repeated values are returned verbatim", {
   p <- plot_ly(x = c(1, 2), y = c(1, 1))
   l <- plotly_build(p)$x
@@ -357,4 +407,23 @@ test_that("Line breaks are properly translated (R -> HTML)", {
 
 test_that("group_by() on a plotly object doesn't produce warning", {
    expect_warning(group_by(plot_ly(txhousing), city), NA)
+})
+
+test_that("The length of `updatemenus` and its elements are correct" {
+  # The length of updatemenus is 1, and the length of updatemenus[[1]]$buttons matches the length of the plot_list argument
+  length(plotly_merge_p$x$layout$updatemenus) == 1 &&
+    length(plotly_merge_p$x$layout$updatemenus[[1]]$buttons) == length(plotly_merge_list)
+})
+
+test_that("The names of the data and layout are correct for their assigned buttons", {
+  seq_along(plotly_merge_list) %>% vapply(function(p_test) {
+    all( 
+      # Data
+      unique(plotly_build(plotly_merge_list[[p_test]])$x$data %>% lapply(names) %>% unlist()) %in%
+        names(plotly_merge_p$x$layout$updatemenus[[1]]$buttons[[p_test]]$args[[1]]),
+      # Layout
+      unique(plotly_build(plotly_merge_list[[p_test]])$x$layout %>% names()) %in%
+        names(plotly_merge_p$x$layout$updatemenus[[1]]$buttons[[p_test]]$args[[2]])
+    )
+  }, logical(1)) %>% all()
 })
