@@ -173,3 +173,236 @@ config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL
 
   p
 }
+
+#' Construct a plot with a `layout.updatemenus` element programmatically
+#' 
+#' @param plot_list a named list of `plotly` objects
+#' @param ... Arguments to the layout.updatemenus object. For documentation,
+#' see \url{https://plotly.com/r/reference/layout/updatemenus/}
+#' @param show_legend Should the legend always be visible? Set to `TRUE` or `FALSE` to 
+#' always display or hide the legend, respectively. If `NA` (the default), legend visibility will mimic 
+#' plotly's default settings (for example, legends with only one trace will be hidden)
+#' @param active_plot the index of the plot from `plot_list` that is active by default. 
+#' By default, the first plot is considered active unless otherwise specified.
+#' @returns When given a named list of plotly objects, this function will return a single plotly object 
+#' with a `layout.updatemenus` element embedded within it. This plot element can be used to cycle between
+#' the plots provided by the user.
+#' @export
+#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
+#' 
+#' plotly_merge(
+#'   plot_list = list(
+#'     Petal = iris %>% 
+#'       plot_ly(
+#'         type = 'scatter',
+#'         mode = 'markers',
+#'         x = ~Petal.Length,
+#'         y = ~Petal.Width,
+#'         color = ~Species
+#'       ),
+#'     Sepal = iris %>% 
+#'       plot_ly(
+#'         type = 'scatter',
+#'         mode = 'markers',
+#'         x = ~Sepal.Length,
+#'         y = ~Sepal.Width,
+#'         color = ~Species
+#'       ) %>% layout(yaxis = list(range = c(0, 5))),
+#'     mtbars = mtcars %>% 
+#'       group_by(cyl) %>% 
+#'       summarise(med_mpg = median(mpg)) %>% 
+#'       ungroup() %>% 
+#'       mutate(cyl = as.character(cyl)) %>% 
+#'       plot_ly(
+#'         type = 'bar',
+#'         x = ~cyl,
+#'         y = ~med_mpg
+#'       )
+#'   )
+#' )
+
+plotly_merge = function(plot_list, ..., show_legend = NA, active_plot = 1) {
+  stopifnot(
+    'plot_list must be a list of plotly objects' = is.list(plot_list),
+    'all elements of plot_list must be plotly objects' = vapply(plot_list, function(x) {
+      all(c('plotly', 'htmlwidget') %in% class(x))
+    }, logical(1)) %>% all(),
+    'show_legend must be a logical scalar; if it is NA (the default), legends with a single trace will be hidden' = 
+      is.vector(show_legend) && is.logical(show_legend) && length(show_legend) == 1,
+    'active_plot must be an integer scalar greater than zero; numerics will be truncated to integers' = is.vector(active_plot) && 
+      length(active_plot) == 1 && 
+      is.numeric(active_plot) && 
+      active_plot >= 1 &&
+      is.finite(active_plot),
+    'active_plot must be less than or equal to the length of the list of plotly objects provided' = 
+      length(active_plot) <= length(plot_list)
+  )
+  
+  # If there is only one plot in the list, return just that plot
+  if(length(plot_list) == 1) {return(plot_list[[1]])}
+  
+  # Truncate active_plot
+  active_plot = trunc(active_plot)
+  
+  # Build out the plots for manipulation
+  plot_list = lapply(plot_list, plotly_build) %>% 
+    # Examine the first trace of each plot; if legend visibility is not specified,
+    # guess whether the user wants to show the legend or not, or use show_legend if a value has been provided
+    lapply(function(p) {
+      if(is.null(p$x$data[[1]]$showlegend) && length(p$x$data) == 1) {
+        p$x$data[[1]]$showlegend = ifelse(!is.na(show_legend), show_legend, FALSE)
+      }
+      
+      return(p)
+    })
+  
+  # Note how many traces each plot contains
+  trace_count = vapply(plot_list, function(p_traces) {
+    length(p_traces$x$data)
+  }, integer(1))
+  max_trace = max(trace_count)
+  max_traces = seq_len(max_trace)
+  
+  # If necessary, increase the trace count and set the starting visibility of each plot so that there are enough traces to switch between
+  for(p in seq_along(plot_list)) {
+    trace_deficit = max_trace - trace_count[p]
+    if(trace_deficit > 0) {
+      for(traces in max_traces[! max_traces %in% seq_along(plot_list[[p]]$x$data)]) {
+        plot_list[[p]]$x$data[[traces]] = plot_list[[p]]$x$data[[1]]
+        plot_list[[p]]$x$data[[traces]]$visible = FALSE
+      }
+    }
+  }
+  
+  # Note the visibility, data, and layout settings each button in the dropdown should have
+  p_viz = seq_along(trace_count) %>% 
+    setNames(rep('visible', length(.))) %>% 
+    lapply(function(p) {
+      max_traces <= trace_count[p]
+    })
+  
+  p_data = plot_list %>% 
+    p_button_data(n_traces = max(max_traces))
+  
+  p_layout = plot_list %>% 
+    p_button_layout() %>% 
+    setNames(names(plot_list)) %>% 
+    # If no axis type is specified, assume the axis is linear
+    lapply(function(p) {
+      p$xaxis$type = ifelse(is.null(p$xaxis$type), 'linear', p$xaxis$type)
+      p$yaxis$type = ifelse(is.null(p$yaxis$type), 'linear', p$yaxis$type)
+      
+      return(p)
+    })
+  
+  # Append the `visible` element to the plot
+  p_data = seq_along(p_data) %>% 
+    setNames(names(p_data)) %>% 
+    lapply(function(p) {
+      p_data[[p]]$visible = p_viz[[p]]
+      
+      return(p_data[[p]])
+    })
+  
+  # Create the dropdown to return the final plot
+  plot_list[[active_plot]] %>% 
+    layout(
+      updatemenus = list(
+        list(
+          active = active_plot - 1,
+          ...,
+          # For each plot provided, make a button in the dropdown to switch to that plot
+          buttons = seq_along(trace_count) %>% 
+            lapply(function(p_trace) {
+              list(
+                method = 'update',
+                args = list(
+                  p_data[[p_trace]],
+                  p_layout[[p_trace]]
+                ),
+                label = names(trace_count[p_trace])
+              )
+            })
+        )
+      )
+    )
+}
+
+p_button_data = function(p_list, n_traces) {
+  stopifnot(
+    'p_list must be a list of plotly objects' = is.list(p_list),
+    'all elements of p_list must be plotly objects' = vapply(p_list, function(x) {
+      c('plotly', 'htmlwidget') %in% class(x)
+    }, logical(2)) %>% all(),
+    'All elements of p_list must be named' = !is.null(names(p_list)) && !any(names(p_list) == '')
+  )
+  
+  p_list = p_list %>% lapply(plotly_build)
+  
+  # Gather the names of the trace elements to restructure
+  p_data_elements = p_list %>% 
+    lapply(function(p) {
+      p$x$data %>% lapply(names) %>% unlist() %>% unique()
+    }) %>% 
+    unlist() %>% 
+    unique() %>% 
+    setNames(nm = .)
+  
+  # For each trace element, return the data in a format suitable for plotly update buttons
+  p_list %>% 
+    lapply(function(p) {
+      p_data_elements %>% lapply(function(d) {
+        a = p$x$data %>% lapply(function(p_data) p_data[[d]])
+        
+        if(length(a) < n_traces) {
+          a[(length(a)+1):n_traces] = NA
+          # a[(length(a)+1):n_traces] = a[1]
+        }
+        
+        return(a)
+      })
+    })
+}
+p_button_layout = function(p_list) {
+  stopifnot(
+    'p_list must be a list of plotly objects' = is.list(p_list),
+    'all elements of p_list must be plotly objects' = vapply(p_list, function(x) {
+      c('plotly', 'htmlwidget') %in% class(x)
+    }, logical(2)) %>% all(),
+    'All elements of p_list must be named' = !is.null(names(p_list)) && !any(names(p_list) == '')
+  )
+  
+  p_list = p_list %>% lapply(plotly_build)
+  
+  # Gather the names of the trace elements to restructure
+  p_data_elements = p_list %>% 
+    lapply(function(p) {
+      # p$x$layout %>% lapply(names) %>% unlist() %>% unique()
+      p$x$layout %>% names()
+    }) %>% 
+    unlist() %>% 
+    unique() %>% 
+    setNames(nm = .)
+  
+  # For each trace element, return the data in a format suitable for plotly update buttons
+  p_data_elements %>% lapply(function(l) {
+    p_list %>% unname() %>% lapply(function(p) {
+      p$x$layout[[l]]
+    })
+  })
+  
+  # For each plot, extract the layout
+  p_list %>% 
+    lapply(function(p) {
+      p_data_elements %>% lapply(function(l) {
+        p$x$layout[[l]]
+      })
+    }) %>% 
+    # Try to manually add logic to determine the axis type
+    lapply(function(p) {
+      p$xaxis$type = ifelse(is.null(p$xaxis$type), '-', p$xaxis$type)
+      p$yaxis$type = ifelse(is.null(p$yaxis$type), '-', p$yaxis$type)
+      
+      return(p)
+    })
+}
