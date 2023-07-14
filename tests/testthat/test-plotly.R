@@ -358,3 +358,17 @@ test_that("Line breaks are properly translated (R -> HTML)", {
 test_that("group_by() on a plotly object doesn't produce warning", {
    expect_warning(group_by(plot_ly(txhousing), city), NA)
 })
+
+test_that("Check QTables dont cause errors", {
+    .createQTableArray <- function(n, class.name)
+        structure(
+            array(runif(n), dim = c(n, 1L)),
+            class = class.name
+        )
+    s <- data.frame(
+        x = .createQTableArray(10, "QTable"),
+        y = .createQTableArray(10, "qTable")
+    )
+    expect_error(p <- plot_ly(s, x = ~x, y = ~y), NA)
+    expect_error(print(p), NA)
+})

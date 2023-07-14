@@ -143,7 +143,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
   if (is.data.frame(data) && nrow(data) > 0L) {
     qtables <- vapply(data, inherits, logical(1L), c("qTable", "QTable"))
     if (any(qtables))
-      data[qtables] <- lapply(data[qtables], unclass)
+      data[qtables] <- lapply(data[qtables], as.vector)
   }
 
   # "native" plotly arguments
