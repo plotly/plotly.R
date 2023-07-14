@@ -1,0 +1,52 @@
+version: 2.1
+orbs:
+  r-packages: displayr/r-packages@dev:alpha
+parameters:
+  trigger-message:
+    type: string
+    default: ""
+  remote-deps:
+    type: string
+    default: ""
+  plugins-branch:
+    type: string
+    default: ""
+  triggered-packages:
+    type: string
+    default: ""
+  executor:
+    type: enum
+    enum: [nightly, rocker, machine,rocker-geo]
+    default: rocker
+
+workflows:
+  build-and-check-R-package:
+    jobs:
+      - r-packages/build-and-check-package:
+          executor: << pipeline.parameters.executor >>
+          name: BuildAndCheckPackage
+          context:
+            - r_packages
+          remote-deps: << pipeline.parameters.remote-deps >>
+          separate-test-job: false
+      - r-packages/deploy-package:
+          executor: << pipeline.parameters.executor >>
+          requires:
+            - BuildAndCheckPackage
+          context:
+            - r_packages
+          filters:
+            branches:
+              only:
+                - master
+      - r-packages/trigger-revdeps:
+          executor: << pipeline.parameters.executor >>
+          requires:
+            - BuildAndCheckPackage
+          context:
+            - r_packages
+          remote-deps: << pipeline.parameters.remote-deps >>
+          plugins-branch: << pipeline.parameters.plugins-branch >>
+          trigger-message: << pipeline.parameters.trigger-message >>
+          triggered-packages: << pipeline.parameters.triggered-packages >>
+
