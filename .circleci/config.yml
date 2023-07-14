@@ -32,7 +32,7 @@ workflows:
           context:
             - rviz_packages
           remote-deps: << pipeline.parameters.remote-deps >>
-          separate-test-job: true
+          separate-test-job: false
           save-snapshots: false
       - r-packages/test-package:
           executor: << pipeline.parameters.executor >>
