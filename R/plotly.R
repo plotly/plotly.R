@@ -140,6 +140,7 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
   if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
   }
+
   if (is.data.frame(data) && nrow(data) > 0L) {
     qtables <- vapply(data, inherits, logical(1L), c("qTable", "QTable"))
     if (any(qtables))
