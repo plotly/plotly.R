@@ -362,13 +362,18 @@ test_that("group_by() on a plotly object doesn't produce warning", {
 test_that("Check QTables dont cause errors", {
     .createQTableArray <- function(n, class.name)
         structure(
-            array(runif(n), dim = c(n, 1L)),
+            array(runif(n), dim = n),
             class = class.name
         )
     s <- data.frame(
         x = .createQTableArray(10, "QTable"),
-        y = .createQTableArray(10, "qTable")
+        x2 = .createQTableArray(10, "qTable"),
+        y = factor(letters[1:10])
     )
-    expect_error(p <- plot_ly(s, x = ~x, y = ~y), NA)
+    expect_error(p <- plot_ly(s) |>
+        add_segments(x = ~x, xend = ~x2, y = ~y, yend = ~y, showlegend = FALSE) |>
+        add_markers(x = ~x, xend = ~y, y = ~y, name = "foo", color = I("orange"), showlegend = FALSE) |>
+        add_markers(x = ~x2, xend = ~y, y = ~y, name = "bar", color = I("blue"), showlegend = FALSE),
+    NA)
     expect_error(print(p), NA)
 })
