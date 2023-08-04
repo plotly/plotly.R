@@ -365,8 +365,7 @@ test_that("Check QTables dont cause errors", {
         x2 = array(runif(n), dim = n),
         y = factor(letters[1:10])
     )
-    class(s[[1]]) <- "QTable"
-    class(s[[2]]) <- "qTable"
+    class(s[[1]]) <- class(s[[2]]) <- "QTable"
     expect_error(p <- plot_ly(s) |>
         add_segments(x = ~x, xend = ~x2, y = ~y, yend = ~y, showlegend = FALSE) |>
         add_markers(x = ~x, xend = ~y, y = ~y, name = "foo", color = I("orange"), showlegend = FALSE) |>
