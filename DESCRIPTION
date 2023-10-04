@@ -73,6 +73,7 @@ Suggests:
     processx,
     plotlyGeoAssets,
     forcats,
+    withr,
     palmerpenguins,
     rversions,
     reticulate,
