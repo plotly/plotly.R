@@ -65,8 +65,6 @@ Suggests:
     webshot,
     listviewer,
     dendextend,
-    maptools,
-    rgeos,
     sf,
     png,
     IRdisplay,
