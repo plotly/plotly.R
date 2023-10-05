@@ -96,8 +96,6 @@ test_that("Can plot sfc with a missing crs", {
 
 test_that("plot_ly() defaults to blank axes", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("maptools")
-  skip_if_not_installed("rgeos")
   
   m <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
   

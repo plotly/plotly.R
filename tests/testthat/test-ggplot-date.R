@@ -1,13 +1,14 @@
 
 
 test_that("datetimes are converted to e.g. 2013-01-02 05:00:00", {
+  withr::local_locale(c("LC_TIME" = "en_US"))
   in.str <- c("17 Mar 1983 06:33:44 AM",
-                "17 Mar 1984 01:59:55 PM")
+              "17 Mar 1984 01:59:55 PM")
   time.obj <- strptime(in.str, "%d %b %Y %I:%M:%S %p")
   out.str <- strftime(time.obj, "%Y-%m-%d %H:%M:%S")
   df <- rbind(data.frame(who = "me", time.obj, dollars = c(1.1, 5.6)),
               data.frame(who = "you", time.obj, dollars = c(10.2, 0)))
-  gg <- qplot(time.obj, dollars, data = df, color = who, geom = "line")
+  gg <- ggplot(aes(time.obj, dollars, color = who), data = df) + geom_line()
   info <- expect_doppelganger_built(gg, "date-strings")
   expect_equivalent(length(info$data), 2)
   for(trace in info$data[1:2]){

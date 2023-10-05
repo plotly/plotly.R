@@ -90,6 +90,7 @@ test_that("sf aspect ratio is correct", {
 test_that("works with a blank theme", {
   skip_if_not_installed("sf")
   skip_if_not_installed("s2")
+  skip_if_not_installed("ggthemes")
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) + geom_sf() + 
