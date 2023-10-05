@@ -767,7 +767,12 @@ geom2trace.GeomPoint <- function(data, params, p) {
   # fill is only relevant for pch %in% 21:25
   pch <- uniq(data$shape) %||% params$shape %||% GeomPoint$default_aes$shape
   if (any(idx <- pch %in% 21:25) || any(idx <- !is.null(data[["fill_plotlyDomain"]]))) {
-    L$marker$color[idx] <- aes2plotly(data, params, "fill")[idx]
+    fill_value <- aes2plotly(data, params, "fill")
+    if (length(idx) == 1) {
+      L$marker$color <- fill_value
+    } else {
+      L$marker$color[idx] <- fill_value[idx]
+    }
   }
   compact(L)
 }
