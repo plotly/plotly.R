@@ -48,6 +48,16 @@ test_that("marker color inherits from fill, when appropriate", {
 })
 
 
+test_that("when marker color inherits from fill, colours are assigned correctly #2298", {
+  df <- data.frame(x = c(1,2), y = c(0,0), color = rep("yellow", 2), fill = 1:2)
+  p <- ggplot(df) +
+    geom_point(aes(x = x, y = y, fill = fill, color = color), size = 5, shape = 21) +
+    scale_fill_gradient(low = "green", high = "red")
+  pb <- plotly_build(p)
+  expect_equivalent(pb$x$data[[1]]$marker$color, c("rgba(0,255,0,1)", "rgba(255,0,0,1)"))
+})
+
+
 test_that("can plot on sub-second time scale", {
   d <- data.frame(
     x = as.POSIXct("2018-09-28 15:13:06 CDT") + 1e-3 * c(1:9, 5000), 
