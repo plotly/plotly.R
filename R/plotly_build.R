@@ -395,11 +395,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # if a partial bundle was specified, make sure it supports the visualization
   p <- verify_partial_bundle(p)
-  
-  # scattergl currently doesn't render in RStudio on Windows
-  # https://github.com/ropensci/plotly/issues/1214
-  p <- verify_scattergl_platform(p)
-  
+
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
   p
