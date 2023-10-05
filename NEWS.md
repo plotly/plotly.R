@@ -6,6 +6,8 @@
 
 * Closed #1214: Do not warn in RStudio on Windows when scattergl is used. Recent RStudio versions can render scattergl correctly.
 
+* Closed #2298: Fix fill assignment in geom_point when a single shape value was used with multiple fill and colour values mapped (@zeehio)
+
 # 4.10.2
 
 ## New features
