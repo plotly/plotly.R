@@ -1512,7 +1512,15 @@ scales_add_missing <- function(plot, aesthetics) {
 # towards ggproto methods attached to `plot$guides`
 # -------------------------------------------------------------------------
 get_gdefs_ggproto <- function(scales, theme, plot, layers) {
-  guides <- plot$guides$setup(scales)
+  
+  # Proposed change to accomodate
+  # https://github.com/tidyverse/ggplot2/pull/5428
+  # Ensure a 1:1 mapping between aesthetics and scales
+  aesthetics <- lapply(scales, `[[`, "aesthetics")
+  scales     <- rep.int(scales, lengths(aesthetics))
+  aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
+  
+  guides <- plot$guides$setup(scales, aesthetics = aesthetics)
   guides$train(scales, theme$legend.direction, plot$labels)
   if (length(guides$guides) > 0) {
     guides$merge()
