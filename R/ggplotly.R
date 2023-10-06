@@ -725,11 +725,13 @@ gg2list <- function(p, width = NULL, height = NULL,
           call. = FALSE
         )
       }
-      # determine axis types (note: scale_name may go away someday)
+      # determine axis types (note: scale_name went away in ggplot2 v3.4.3)
       # https://github.com/hadley/ggplot2/issues/1312
-      isDate <- isTRUE(sc$scale_name %in% c("date", "datetime"))
+      isDate <- isTRUE(sc$scale_name %in% c("date", "datetime")) || 
+        inherits(sc, c("ScaleContinuousDatetime", "ScaleContinuousDate"))
       isDateType <- isDynamic && isDate
-      isDiscrete <- identical(sc$scale_name, "position_d")
+      isDiscrete <- identical(sc$scale_name, "position_d") ||
+        inherits(sc, "ScaleDiscretePosition")
       isDiscreteType <- isDynamic && isDiscrete
       
       # In 3.2.x .major disappeared in favor of break_positions()
