@@ -61,6 +61,11 @@ jobs:
         with:
           cache-version: 3
           needs: check
+          
+      - name: Install dev GGally
+        run: |
+          Rscript -e "if (!require('remotes')) install.packages('remotes')"
+          Rscript -e "remotes::install_github('ggobi/ggally')"
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
