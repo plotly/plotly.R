@@ -1513,9 +1513,8 @@ scales_add_missing <- function(plot, aesthetics) {
 # -------------------------------------------------------------------------
 get_gdefs_ggproto <- function(scales, theme, plot, layers) {
   
-  # Proposed change to accomodate
-  # https://github.com/tidyverse/ggplot2/pull/5428
-  # Ensure a 1:1 mapping between aesthetics and scales
+  # Unfortunate duplication of logic in tidyverse/ggplot2#5428
+  # which ensures a 1:1 mapping between aesthetics and scales
   aesthetics <- lapply(scales, `[[`, "aesthetics")
   scales     <- rep.int(scales, lengths(aesthetics))
   aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
