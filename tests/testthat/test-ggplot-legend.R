@@ -148,3 +148,17 @@ test_that("many legend items", {
   p <- ggplot(midwest, aes(category, fill = category)) + geom_bar()
   info <- expect_traces(p, length(unique(midwest$category)), "many legend items")
 })
+
+
+# Make sure we can support the bugfix made in tidyverse/ggplot2#5425
+test_that("can handle varying aesthetics/scales", {
+  df <- data.frame(x = (1:3)/3, z = c("red", "blue", "green"))
+  
+  p <- ggplot(df) +
+    aes(x, z, colour = z, fill = z, size = x) +
+    geom_point() +
+    scale_discrete_identity(aesthetics = c("colour", "fill")) +
+    scale_size_identity()
+  
+  expect_traces(p, 1, "varying-aes-guide")
+})
