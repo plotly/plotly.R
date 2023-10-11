@@ -725,11 +725,11 @@ gg2list <- function(p, width = NULL, height = NULL,
           call. = FALSE
         )
       }
-      # determine axis types (note: scale_name may go away someday)
-      # https://github.com/hadley/ggplot2/issues/1312
-      isDate <- isTRUE(sc$scale_name %in% c("date", "datetime"))
+      
+      # determine axis types
+      isDate <- inherits(sc, c("ScaleContinuousDatetime", "ScaleContinuousDate"))
       isDateType <- isDynamic && isDate
-      isDiscrete <- identical(sc$scale_name, "position_d")
+      isDiscrete <- inherits(sc, "ScaleDiscretePosition")
       isDiscreteType <- isDynamic && isDiscrete
       
       # In 3.2.x .major disappeared in favor of break_positions()
@@ -1512,7 +1512,14 @@ scales_add_missing <- function(plot, aesthetics) {
 # towards ggproto methods attached to `plot$guides`
 # -------------------------------------------------------------------------
 get_gdefs_ggproto <- function(scales, theme, plot, layers) {
-  guides <- plot$guides$setup(scales)
+  
+  # Unfortunate duplication of logic in tidyverse/ggplot2#5428
+  # which ensures a 1:1 mapping between aesthetics and scales
+  aesthetics <- lapply(scales, `[[`, "aesthetics")
+  scales     <- rep.int(scales, lengths(aesthetics))
+  aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
+  
+  guides <- plot$guides$setup(scales, aesthetics = aesthetics)
   guides$train(scales, theme$legend.direction, plot$labels)
   if (length(guides$guides) > 0) {
     guides$merge()

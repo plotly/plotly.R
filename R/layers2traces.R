@@ -79,7 +79,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
     if (sc$is_discrete()) {
-      discreteScales[[sc$aesthetics]] <- sc
+      nm <- paste(sc$aesthetics, collapse = "_")
+      discreteScales[[nm]] <- sc
     }
   }
   # Convert "high-level" geoms to their "low-level" counterpart
