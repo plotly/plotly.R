@@ -1,5 +1,9 @@
 # 4.10.2.9000
 
+## Improvements
+
+* `ggplotly()` now works better with the development version of ggplot2 (> v3.4.3). (#2301)
+
 ## Bug fixes
 
 * Closed #1947: `ggplotly()` now correctly handles `geom_vline`/`geom_hline` with empty data. Previously, if `geom_vline`/`geom_hline` was passed an empty data frame, it would result in an error. The plot is drawn even if no lines are found; this is the same behavior as `ggplot2`.
