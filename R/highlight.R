@@ -54,7 +54,7 @@
 #' @author Carson Sievert
 #' @references \url{https://plotly-r.com/client-side-linking.html}
 #' @seealso [attrs_selected()]
-#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
+#' @examplesIf interactive()
 #' 
 #' # These examples are designed to show you how to highlight/brush a *single*
 #' # view. For examples of multiple linked views, see `demo(package = "plotly")` 

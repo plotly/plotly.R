@@ -45,7 +45,7 @@ In this case, one should also take care to make sure
 is set to \code{FALSE}.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # note the insertion of new rows with missing values 
 group2NA(mtcars, "vs", "cyl")
