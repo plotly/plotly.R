@@ -1,5 +1,9 @@
 # plotly (development version)
 
+## Bug fixes
+
+* Closed #1582, #2296: Avoid `hoveron=` related warnings when converting a ggplot object toWebGL().
+
 # 4.10.3
 
 ## Improvements
