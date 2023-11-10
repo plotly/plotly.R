@@ -398,6 +398,9 @@ gg2list <- function(p, width = NULL, height = NULL,
     layout$setup_panel_params()
     data <- layout$map_position(data)
     
+    # Hand off position guides to layout
+    layout$setup_panel_guides(plot$guides, plot$layers)
+    
     # Train and map non-position scales
     npscales <- scales$non_position_scales()
     if (npscales$n() > 0) {
@@ -414,6 +417,15 @@ gg2list <- function(p, width = NULL, height = NULL,
         })
       }
       data <- lapply(data, scales_map_df, scales = npscales)
+    }
+    
+    if (npscales$n() > 0) {
+      plot$guides <- plot$guides$build(
+        npscales, plot$layers, plot$labels, data
+      )
+    } else {
+      # Assign empty guides if there are no non-position scales
+      plot$guides <- ggfun("guides_list")()
     }
     
     # Fill in defaults etc.
@@ -1005,7 +1017,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
     gdefs <- if (inherits(plot$guides, "ggproto")) {
-      get_gdefs_ggproto(npscales$scales, theme, plot, layers)
+      get_gdefs_ggproto(npscales$scales, theme, plot, layers, data)
     } else {
       get_gdefs(scales, theme, plot, layers)
     }
@@ -1511,7 +1523,7 @@ scales_add_missing <- function(plot, aesthetics) {
 # which away from guides_train(), guides_merge(), guides_geom() 
 # towards ggproto methods attached to `plot$guides`
 # -------------------------------------------------------------------------
-get_gdefs_ggproto <- function(scales, theme, plot, layers) {
+get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
   
   # Unfortunate duplication of logic in tidyverse/ggplot2#5428
   # which ensures a 1:1 mapping between aesthetics and scales
@@ -1520,10 +1532,19 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers) {
   aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
   
   guides <- plot$guides$setup(scales, aesthetics = aesthetics)
-  guides$train(scales, theme$legend.direction, plot$labels)
+  if (get_package_version("ggplot2") > "3.4.4") {
+    guides$train(scales, plot$labels) 
+  } else {
+    guides$train(scales, theme$legend.direction, plot$labels)
+  }
+  
   if (length(guides$guides) > 0) {
     guides$merge()
-    guides$process_layers(layers)
+    if (get_package_version("ggplot2") > "3.4.4") {
+      guides$process_layers(layers, layer_data)
+    } else {
+      guides$process_layers(layers)
+    }
   }
   # Add old legend/colorbar classes to guide params so that ggplotly() code
   # can continue to work the same way it always has
