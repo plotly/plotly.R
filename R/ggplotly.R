@@ -419,14 +419,7 @@ gg2list <- function(p, width = NULL, height = NULL,
       data <- lapply(data, scales_map_df, scales = npscales)
     }
     
-    if (npscales$n() > 0) {
-      plot$guides <- plot$guides$build(
-        npscales, plot$layers, plot$labels, data
-      )
-    } else {
-      # Assign empty guides if there are no non-position scales
-      plot$guides <- ggfun("guides_list")()
-    }
+    plot$guides <- guides_build(plot, npscales, data)
     
     # Fill in defaults etc.
     data <- by_layer(function(l, d) l$compute_geom_2(d))
@@ -1532,20 +1525,14 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
   aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
   
   guides <- plot$guides$setup(scales, aesthetics = aesthetics)
-  if (get_package_version("ggplot2") > "3.4.4") {
-    guides$train(scales, plot$labels) 
-  } else {
-    guides$train(scales, theme$legend.direction, plot$labels)
-  }
+  guides$train(scales, plot$labels)
   
   if (length(guides$guides) > 0) {
     guides$merge()
-    if (get_package_version("ggplot2") > "3.4.4") {
-      guides$process_layers(layers, layer_data)
-    } else {
-      guides$process_layers(layers)
-    }
+    # TODO: seems as though this should be dropping guides?
+    guides$process_layers(layers, layer_data)
   }
+  
   # Add old legend/colorbar classes to guide params so that ggplotly() code
   # can continue to work the same way it always has
   for (i in which(vapply(guides$guides, inherits, logical(1), "GuideColourbar"))) {
@@ -1555,6 +1542,17 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
     guides$params[[i]] <- prefix_class(guides$params[[i]], "legend")
   }
   guides$params
+}
+
+guides_build <- function(plot, npscales, data) {
+  if (!is.function(plot$guides$build)) {
+    return(plot$guides)
+  }
+  if (npscales$n() > 0) {
+    plot$guides$build(npscales, plot$layers, plot$labels, data)
+  } else {
+    ggfun("guides_list")()
+  }
 }
 
 get_gdefs <- function(scales, theme, plot, layers) {
