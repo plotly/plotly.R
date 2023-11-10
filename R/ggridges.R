@@ -6,25 +6,24 @@
 #' @return dataframe containing plotting data 
 #'
 get_ridge_data <- function(data, na.rm) {
-    if (isTRUE(na.rm)) {
-        data <- data[stats::complete.cases(data[c("x", "ymin", "ymax")]), ]
-    }
-    
-    #if dataframe is empty there's nothing to draw
-    if (nrow(data) == 0) return(list())
-    
-    # remove all points that fall below the minimum height
-    data$ymax[data$height < data$min_height] <- NA
-    
-    # order data
-    data <- data[order(data$ymin, data$x), ]
-    
-    # remove missing points
-    missing_pos <- !stats::complete.cases(data[c("x", "ymin", "ymax")])
-    ids <- cumsum(missing_pos) + 1
-    data$group <- paste0(data$group, "-", ids)
-    data[!missing_pos, ]
-    
+  if (isTRUE(na.rm)) {
+    data <- data[stats::complete.cases(data[c("x", "ymin", "ymax")]), ]
+  }
+  
+  #if dataframe is empty there's nothing to draw
+  if (nrow(data) == 0) return(list())
+  
+  # remove all points that fall below the minimum height
+  data$ymax[data$height < data$min_height] <- NA
+  
+  # order data
+  data <- data[order(data$ymin, data$x), ]
+  
+  # remove missing points
+  missing_pos <- !stats::complete.cases(data[c("x", "ymin", "ymax")])
+  ids <- cumsum(missing_pos) + 1
+  data$group <- paste0(data$group, "-", ids)
+  data[!missing_pos, ]
 }
 
 
@@ -49,7 +48,7 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
     decreasing = FALSE
   )
   groups <- groups[o]
-
+  
   # for each group create a density + vline + point as applicable
   res <- lapply(
     rev(groups),
@@ -109,9 +108,11 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
       ridges
     }
   )
+  res
 }
 
 
+#' @export
 to_basic.GeomDensityRidgesGradient <- function(data, prestats_data, layout, params, p, ...){
   
   res <- prepare_ridge_chart(data, prestats_data, layout, params, p, FALSE, ...)
@@ -122,60 +123,50 @@ to_basic.GeomDensityRidgesGradient <- function(data, prestats_data, layout, para
 
 #' @export
 to_basic.GeomDensityRidges <- function(data, prestats_data, layout, params, p, ...) {
-  
   to_basic(
     prefix_class(data, 'GeomDensityRidgesGradient'),
     prestats_data, layout, params, p, 
     closed = FALSE, 
     ...
   )
-  
 }
 
 
 #' @export
 to_basic.GeomDensityRidges2 <- function(data, prestats_data, layout, params, p, ...) {
-  
   to_basic(
     prefix_class(data, 'GeomDensityRidgesGradient'),
     prestats_data, layout, params, p, 
     closed = TRUE, 
     ...
   )
-  
 }
 
 
 
 #' @export
 to_basic.GeomDensityLine <- function(data, prestats_data, layout, params, p, ...) {
-  
   to_basic(prefix_class(data, 'GeomDensity'))
-  
 }
 
 
 
 #' @export
 to_basic.GeomRidgeline <- function(data, prestats_data, layout, params, p, ...) {
-
   to_basic(
     prefix_class(data, 'GeomDensityRidgesGradient'),
     prestats_data, layout, params, p, ...
   )
-
 }
 
 
-# TODO: Implement following
+#' @export
 to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, p, ...) {
-
-
   d <- get_ridge_data(data, params$na.rm)
-
+  
   # split data into separate groups
   groups <- split(d, factor(d$group))
-
+  
   # sort list so lowest ymin values are in the front (opposite of ggridges)
   o <- order(
     unlist(
@@ -187,36 +178,36 @@ to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, 
     decreasing = FALSE
   )
   groups <- groups[o]
-
+  
   # for each group create a density + vline + point as applicable
   res <- lapply(
     rev(groups),
     function(x){
-
+      
       draw_stuff <- split(x, x$datatype)
-
+      
       # first draw the basic density ridge part
-
+      
       stopifnot(!is.null(draw_stuff$ridgeline))
       d2 <- d1 <- draw_stuff$ridgeline
       d2$colour <- NA # no colour for density area
       d2$fill_plotlyDomain <- NA
-
+      
       d1$y <- d1$ymax
       d1$alpha <- 1 # don't use fill alpha for line alpha
-
+      
       # calculate all the positions where the fill type changes
       fillchange <- c(FALSE, d2$fill[2:nrow(d2)] != d2$fill[1:nrow(d2)-1])
-
+      
       # and where the id changes
       idchange <- c(TRUE, d2$group[2:nrow(d2)] != d2$group[1:nrow(d2)-1])
-
+      
       # make new ids from all changes in fill style or original id
       d2$ids <- cumsum(fillchange | idchange)
-
+      
       # get fill color for all ids
       fill <- d2$fill[fillchange | idchange]
-
+      
       # rows to be duplicated
       dupl_rows <- which(fillchange & !idchange)
       d2$y <- d2$ymax
@@ -227,43 +218,35 @@ to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, 
         # combine original and duplicated d2
         d2 <- rbind(d2, rows)
       }
-
+      
       # split by group to make polygons
-      # browser()
       d2 <- tibble::deframe(tidyr::nest(d2, .by = 'ids'))
-
+      
       ridges <- c(
         d2,
         list(
           to_basic(prefix_class(d1, "GeomLine"))
         )
       )
-
+      
       ridges
     }
   )
   # set list depth to 1
   unlist(res, recursive = FALSE)
-
-
 }
 
 
 
 #' @export
 geom2trace.GeomRidgelineGradient <- function(data, params, p) {
-  
-  # data <- group2NA(data)
-  
+
   # munching for polygon
   positions <- with(data, data.frame(
     x   = c(x   , rev(x)),
     y   = c(ymax, rev(ymin))
-    # ids = c(ids , rev(ids))
   ))
-  # positions <- group2NA(positions, groupNames = 'ids')
-  
-  
+
   L <- list(
     x          = positions[["x"]],
     y          = positions[["y"]],
@@ -283,7 +266,5 @@ geom2trace.GeomRidgelineGradient <- function(data, params, p) {
     fillcolor  = toRGB(unique(data$fill[1])),
     hoveron    = hover_on(data)
   )
-  
   compact(L)
-  
 }
