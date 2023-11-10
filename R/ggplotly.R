@@ -1524,13 +1524,10 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
   
   guides <- plot$guides$setup(scales, aesthetics = aesthetics)
   guides$train(scales, plot$labels)
-  
   if (length(guides$guides) > 0) {
     guides$merge()
-    # TODO: seems as though this should be dropping guides?
     guides$process_layers(layers, layer_data)
   }
-  
   # Add old legend/colorbar classes to guide params so that ggplotly() code
   # can continue to work the same way it always has
   for (i in which(vapply(guides$guides, inherits, logical(1), "GuideColourbar"))) {
