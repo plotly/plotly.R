@@ -9,9 +9,6 @@ test_that(
     data <- data.frame(x = 1:5, y = rep(1, 5), height = c(0, 1, 3, 4, 2))
     p <- ggplot(data, aes(x, y, height = height)) + geom_ridgeline()
     
-    expect_no_error(
-      p2 <- plotly_build(p)
-    )
     p2 <- ggplotly(p)
     
     expect_doppelganger(p2, 'basic_ridgeline')
@@ -23,7 +20,6 @@ test_that(
     
     ## Negative height cut off
     p <- plot_base + geom_ridgeline()
-    expect_no_error(plotly_build(p))
     
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'negative_height_cut')
@@ -31,7 +27,6 @@ test_that(
     
     ## Negative height allowed
     p <- plot_base + geom_ridgeline(min_height = -2)
-    expect_no_error(plotly_build(p))
     
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'negative_height_retained')
@@ -46,7 +41,6 @@ test_that(
     
     p <- ggplot(d, aes(x, y, height = height, group = y)) + 
       geom_ridgeline(fill = "lightblue")
-    expect_no_error(plotly_build(p))
     
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'multiple_ridgelines')
@@ -54,7 +48,6 @@ test_that(
     # stat = identity (works)
     p <- ggplot(d, aes(x, y, height = height, group = y)) + 
       geom_density_ridges(stat = "identity", scale = 1)
-    expect_no_error(plotly_build(p))
     
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'stat_identity')
@@ -69,13 +62,11 @@ test_that(
     
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       geom_density_ridges()
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'density_ridgeline')
     
     # geom_density_ridges2 (closed polygon)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) + geom_density_ridges2()
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'density_ridgeline2')
     
@@ -88,23 +79,18 @@ test_that(
                     y = Species_num,
                     group = Species_num)) + 
       geom_density_ridges()
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'numeric_grouping')
     
     # Cutting trailing tails (works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) + 
       geom_density_ridges(rel_min_height = 0.01)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'cutting_tails')
-    ggplotly(p)
-    
     
     # Non-overlapping ridges (Works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       geom_density_ridges(scale = 0.9)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'overlapping_none')
     
@@ -112,7 +98,6 @@ test_that(
     # Exactly touching (Works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) + 
       geom_density_ridges(scale = 1)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'overlapping_touching')
     
@@ -120,7 +105,6 @@ test_that(
     # scale = 5, substantial overlap (Works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       geom_density_ridges(scale = 5)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'overlapping_lot')
     
@@ -128,7 +112,6 @@ test_that(
     # Panel scaling (Works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) + 
       geom_density_ridges(scale = 1) + facet_wrap(~Species)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'overlapping_facet_touching')
     
@@ -150,7 +133,6 @@ test_that(
     p <- ggplot(d, aes(x, y, height = height, group = y, fill = factor(x+y))) +
       geom_ridgeline_gradient() +
       scale_fill_viridis_d(direction = -1, guide = "none")
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'varying_fill_colours')
     
@@ -168,14 +150,12 @@ test_that(
     # quantile multiple lines
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       stat_density_ridges(quantile_lines = TRUE)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'quantile_lines_multi')
     
     # quantile single line
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       stat_density_ridges(quantile_lines = TRUE, quantiles = 2)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'quantile_lines_1')
     
@@ -184,7 +164,6 @@ test_that(
       stat_density_ridges(quantile_lines = TRUE,
                           quantiles = c(0.025, 0.975),
                           alpha = 0.7)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'quantile_cut_points')
     
@@ -199,10 +178,10 @@ test_that(
         ) +
         scale_fill_viridis_d(name = "Quartiles")
     )
+    
     suppressWarnings(
-      expect_no_error(plotly_build(p))
+      p2 <- ggplotly(p)
     )
-    p2 <- ggplotly(p)
     expect_doppelganger(p2, 'quantile_colouring')
     
     
@@ -217,7 +196,6 @@ test_that(
         name = "Probability", values = c("#FF0000A0", "#A0A0A0A0", "#0000FFA0"),
         labels = c("(0, 0.025]", "(0.025, 0.975]", "(0.975, 1]")
       )
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'quantile_colouring_tails_only')
     
@@ -236,10 +214,10 @@ test_that(
   desc = "ggridges points", 
   code = {
     
+    set.seed(123) # make jittering reproducible
     # jittering points (works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species)) +
       geom_density_ridges(jittered_points = TRUE)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'jittering points')
     
@@ -249,7 +227,6 @@ test_that(
         jittered_points = TRUE, position = "raincloud",
         alpha = 0.7, scale = 0.9
       )
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'raincloud_effect')
     
@@ -270,7 +247,6 @@ test_that(
       ) +
       scale_point_color_hue(l = 40) +
       scale_discrete_manual(aesthetics = "point_shape", values = c(21, 22, 23))
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'styling_points')
     
@@ -282,7 +258,6 @@ test_that(
       ) +
       scale_point_color_hue(l = 40) + scale_point_size_continuous(range = c(0.5, 4)) +
       scale_discrete_manual(aesthetics = "point_shape", values = c(21, 22, 23))
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'styling_points2')
     
@@ -295,7 +270,6 @@ test_that(
         point_size = 0.4, point_alpha = 1,
         position = position_raincloud(adjust_vlines = TRUE)
       )
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'raincloud_vertical_line_points')
     
@@ -312,9 +286,8 @@ test_that(
       p <- ggplot(iris, aes(x = Sepal.Length, y = Species, height = stat(density))) + 
         geom_density_ridges(stat = "density")
       
-      expect_no_error(plotly_build(p))
+      p2 <- ggplotly(p)
     })
-    p2 <- ggplotly(p)
     expect_doppelganger(p2, 'stat_density')
     
     
@@ -326,14 +299,12 @@ test_that(
     
     p <- ggplot(iris_densities, aes(x = Sepal.Length, y = Species, height = density)) + 
       geom_density_ridges(stat = "identity")
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'manual_densities_stat_identity')
     
     ## histograms (works)
     p <- ggplot(iris, aes(x = Sepal.Length, y = Species, height = stat(density))) + 
       geom_density_ridges(stat = "binline", bins = 20, scale = 0.95, draw_baseline = FALSE)
-    expect_no_error(plotly_build(p))
     p2 <- ggplotly(p)
     expect_doppelganger(p2, 'histogram_ridges')
     
