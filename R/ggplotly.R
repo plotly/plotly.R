@@ -1005,7 +1005,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
     gdefs <- if (inherits(plot$guides, "ggproto")) {
-      get_gdefs_ggproto(npscales$scales, theme, plot, layers)
+      get_gdefs_ggproto(npscales$scales, theme, plot, layers, data)
     } else {
       get_gdefs(scales, theme, plot, layers)
     }
@@ -1511,7 +1511,7 @@ scales_add_missing <- function(plot, aesthetics) {
 # which away from guides_train(), guides_merge(), guides_geom() 
 # towards ggproto methods attached to `plot$guides`
 # -------------------------------------------------------------------------
-get_gdefs_ggproto <- function(scales, theme, plot, layers) {
+get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
   
   # Unfortunate duplication of logic in tidyverse/ggplot2#5428
   # which ensures a 1:1 mapping between aesthetics and scales
@@ -1520,10 +1520,10 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers) {
   aesthetics <- unlist(aesthetics, recursive = FALSE, use.names = FALSE)
   
   guides <- plot$guides$setup(scales, aesthetics = aesthetics)
-  guides$train(scales, theme$legend.direction, plot$labels)
+  guides$train(scales, plot$labels)
   if (length(guides$guides) > 0) {
     guides$merge()
-    guides$process_layers(layers)
+    guides$process_layers(layers, layer_data)
   }
   # Add old legend/colorbar classes to guide params so that ggplotly() code
   # can continue to work the same way it always has
