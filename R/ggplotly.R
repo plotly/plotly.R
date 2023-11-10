@@ -398,9 +398,6 @@ gg2list <- function(p, width = NULL, height = NULL,
     layout$setup_panel_params()
     data <- layout$map_position(data)
     
-    # Hand off position guides to layout
-    layout$setup_panel_guides(plot$guides, plot$layers)
-    
     # Train and map non-position scales
     npscales <- scales$non_position_scales()
     if (npscales$n() > 0) {
