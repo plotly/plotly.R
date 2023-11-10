@@ -419,8 +419,6 @@ gg2list <- function(p, width = NULL, height = NULL,
       data <- lapply(data, scales_map_df, scales = npscales)
     }
     
-    plot$guides <- guides_build(plot, npscales, data)
-    
     # Fill in defaults etc.
     data <- by_layer(function(l, d) l$compute_geom_2(d))
     
@@ -1542,17 +1540,6 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
     guides$params[[i]] <- prefix_class(guides$params[[i]], "legend")
   }
   guides$params
-}
-
-guides_build <- function(plot, npscales, data) {
-  if (!is.function(plot$guides$build)) {
-    return(plot$guides)
-  }
-  if (npscales$n() > 0) {
-    plot$guides$build(npscales, plot$layers, plot$labels, data)
-  } else {
-    ggfun("guides_list")()
-  }
 }
 
 get_gdefs <- function(scales, theme, plot, layers) {
