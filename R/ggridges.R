@@ -30,8 +30,7 @@ get_ridge_data <- function(data, na.rm) {
 #' Prepare plotting data for ggridges
 #' @param closed boolean, should the polygon be closed at bottom (TRUE for
 #'   geom_density_ridges2, FALSE for geom_density_ridges)
-prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed = FALSE, ...){
-  
+prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed = FALSE, ...) {
   d <- get_ridge_data(data, params$na.rm)
   
   # split data into separate groups
@@ -52,25 +51,27 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
   # for each group create a density + vline + point as applicable
   res <- lapply(
     rev(groups),
-    function(x){
-      
+    function(x) {
       draw_stuff <- split(x, x$datatype)
       
       # first draw the basic density ridge part
-      
       stopifnot(!is.null(draw_stuff$ridgeline))
+      
       d2 <- d1 <- draw_stuff$ridgeline
-      if(!closed) d2$colour <- NA # no colour for density bottom line
+      if (!closed) d2$colour <- NA # no colour for density bottom line
       
       d1$y <- d1$ymax
       d1$alpha <- 1 # don't use fill alpha for line alpha
+      
       ridges <- list(
         to_basic(prefix_class(d2, "GeomDensity")),
         to_basic(prefix_class(d1, "GeomLine"))
       )
+      # attach the crosstalk group/set
+      ridges[[1]] <- structure(ridges[[1]], set = attr(d2, 'set')) # Density
+      ridges[[2]] <- structure(ridges[[2]], set = attr(d1, 'set')) # Line
       
-      if('vline' %in% names(draw_stuff)){
-        
+      if ('vline' %in% names(draw_stuff)) {
         draw_stuff$vline$xend <- draw_stuff$vline$x
         draw_stuff$vline$yend <- draw_stuff$vline$ymax
         draw_stuff$vline$y    <- draw_stuff$vline$ymin
@@ -81,12 +82,13 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
           prefix_class(draw_stuff$vline, 'GeomSegment'), 
           prestats_data, layout, params, p, ...
         )
+        # attach the crosstalk group/set
+        vlines <- structure(vlines, set = attr(draw_stuff$vline, 'set'))
         ridges <- c(ridges, list(vlines))
-        
       }
       
       # points
-      if('point' %in% names(draw_stuff)){
+      if ('point' %in% names(draw_stuff)) {
         draw_stuff$point$y <- draw_stuff$point$ymin
         
         # use point aesthetics
@@ -102,6 +104,8 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
                        'GeomPoint'), 
           prestats_data, layout, params, p, ...
         )
+        # attach the crosstalk group/set
+        points <- structure(points, set = attr(draw_stuff$point, 'set'))
         ridges <- c(ridges, list(points))
       }
       
@@ -113,8 +117,7 @@ prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed =
 
 
 #' @export
-to_basic.GeomDensityRidgesGradient <- function(data, prestats_data, layout, params, p, ...){
-  
+to_basic.GeomDensityRidgesGradient <- function(data, prestats_data, layout, params, p, ...) {
   res <- prepare_ridge_chart(data, prestats_data, layout, params, p, FALSE, ...)
   # set list depth to 1
   unlist(res, recursive = FALSE)
@@ -182,7 +185,7 @@ to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, 
   # for each group create a density + vline + point as applicable
   res <- lapply(
     rev(groups),
-    function(x){
+    function(x) {
       
       draw_stuff <- split(x, x$datatype)
       
@@ -211,7 +214,7 @@ to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, 
       # rows to be duplicated
       dupl_rows <- which(fillchange & !idchange)
       d2$y <- d2$ymax
-      if (length(dupl_rows)>0){
+      if (length(dupl_rows) > 0) {
         rows <- d2[dupl_rows, ]
         rows$ids <- d2$ids[dupl_rows-1]
         rows <- rows[rev(seq_len(nrow(rows))), , drop = FALSE]
@@ -240,12 +243,11 @@ to_basic.GeomRidgelineGradient <- function(data, prestats_data, layout, params, 
 
 #' @export
 geom2trace.GeomRidgelineGradient <- function(data, params, p) {
-
   # munching for polygon
-  positions <- with(data, data.frame(
-    x   = c(x   , rev(x)),
-    y   = c(ymax, rev(ymin))
-  ))
+  positions <- data.frame(
+    x = c(data$x   , rev(data$x)),
+    y = c(data$ymax, rev(data$ymin))
+  )
 
   L <- list(
     x          = positions[["x"]],
