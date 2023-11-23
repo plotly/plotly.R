@@ -981,7 +981,7 @@ geom2trace.default <- function(data, params, p) {
     "geom_", class(data)[1], "() has yet to be implemented in plotly.\n",
     "  If you'd like to see this geom implemented,\n",
     "  Please open an issue with your example code at\n",
-    "  https://github.com/ropensci/plotly/issues"
+    "  https://github.com/plotly/plotly.R/issues"
   )
   list()
 }
@@ -1106,7 +1106,7 @@ aes2plotly <- function(data, params, aes = "size") {
     # If the first class of `data` is a data.frame,
     # ggfun() returns a function because ggplot2 now
     # defines data.frame in it's namespace
-    # https://github.com/ropensci/plotly/pull/1481
+    # https://github.com/plotly/plotly.R/pull/1481
     if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
   }
   
@@ -1127,7 +1127,7 @@ aes2plotly <- function(data, params, aes = "size") {
   if (is.null(converter)) {
     warning("A converter for ", aes, " wasn't found. \n",
             "Please report this issue to: \n",
-            "https://github.com/ropensci/plotly/issues/new", call. = FALSE)
+            "https://github.com/plotly/plotly.R/issues/new", call. = FALSE)
     converter <- identity
   }
   converter(vals)

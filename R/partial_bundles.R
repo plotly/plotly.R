@@ -134,7 +134,7 @@ verify_partial_bundle <- function(p) {
   # download the relevant bundle
   if (isTRUE(p$dependencies[[idx]]$local)) {
     # TODO: implement a caching mechanism?
-    try_library("curl", "partial_bundle")
+    rlang::check_installed("curl", "for `partial_bundle()`.")
     tmpfile <- file.path(tempdir(), bundle_script)
     p$dependencies[[idx]]$src$file <- dirname(tmpfile)
     if (!file.exists(tmpfile)) {

@@ -8,7 +8,7 @@
 #' @author Carson Sievert
 #' @export
 embed_notebook <- function(x, width = NULL, height = NULL, file = NULL) {
-  try_library("IRdisplay", "embed_notebook")
+  rlang::check_installed("IRdisplay", "for `embed_notebook()`.")
   if (!is.null(file)) {
     warning("The file argument is no longer used", call. = FALSE)
   }

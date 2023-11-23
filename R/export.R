@@ -59,7 +59,7 @@ export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
   
   # phantomjs doesn't support webgl or svg/webp output
   if (use_webshot) {
-    try_library("webshot", "export")
+    rlang::check_installed("webshot", "for `export()`.")
     return(webshot::webshot(f, file, ...))
   }
   

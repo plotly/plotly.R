@@ -91,7 +91,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
   if (isTRUE(mathjax)) args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
   
   # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
-  try_library("processx", "orca")
+  rlang::check_installed("processx", "for `orca()`.")
   invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE, ...))
 }
 
@@ -135,7 +135,7 @@ orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit
   
   # make sure we have the required infrastructure
   orca_available()
-  try_library("processx", "orca_serve")
+  rlang::check_installed("processx", "for `orca_serve()`.")
   
   # use main bundle since any plot can be thrown at the server
   plotlyjs_path <- plotlyMainBundlePath()

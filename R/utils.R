@@ -1139,16 +1139,6 @@ cat_profile <- function(key, value, path = "~") {
   cat(snippet, file = r_profile, append = TRUE)
 }
 
-
-# check that suggested packages are installed
-try_library <- function(pkg, fun = NULL) {
-  if (is_installed(pkg)) {
-    return(invisible())
-  }
-  stop("Package `", pkg, "` required",  if (!is.null(fun)) paste0(" for `", fun, "`"), ".\n", 
-       "Please install and try again.", call. = FALSE)
-}
-
 # similar logic to rstudioapi::isAvailable()
 is_rstudio <- function() {
   identical(.Platform$GUI, "RStudio")

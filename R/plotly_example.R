@@ -44,12 +44,12 @@ plotly_example <- function(type = c("demo", "shiny", "rmd"), name, edit = TRUE, 
   }
   
   if (type == "shiny") {
-    try_library("shiny", "plotly_example")
+    rlang::check_installed("shiny", "for `plotly_example()`.")
     getFromNamespace("runApp", asNamespace("shiny"))(finalDir, ...)
   }
   
   if (type == "rmd") {
-    try_library("rmarkdown", "plotly_example")
+    rlang::check_installed("rmarkdown", "for `plotly_example()`.")
     input <- file.path(finalDir, "index.Rmd")
     output <- tempfile(fileext = ".html")
     getFromNamespace("render", asNamespace("rmarkdown"))(input, output_file = output, ...)

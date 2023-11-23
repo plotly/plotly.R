@@ -17,7 +17,7 @@
 plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE, ...) {
   plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = pretty)
   if (jsonedit) {
-    try_library("listviewer", "plotly_json")
+    rlang::check_installed("listviewer", "to use `plotly_json()`.")
     listviewer::jsonedit(plotlyJSON, mode = "form", ...)
   } else {
     plotlyJSON
@@ -50,7 +50,7 @@ plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE
 schema <- function(jsonedit = interactive(), ...) {
   
   if (jsonedit) {
-    try_library("listviewer", "schema")
+    rlang::check_installed("listviewer", "for `schema()`.")
     print(listviewer::jsonedit(Schema, mode = "form"))
   }
   

@@ -217,7 +217,7 @@ plotly_empty <- function(...) {
 #'  ) 
 
 raster2uri <- function(r, ...) {
-  try_library("png", "raster2uri")
+  rlang::check_installed("png", "for `raster2uri()`.")
   # should be 4 x n matrix
   if (inherits(r, "nativeRaster")) {
     # png::writePNG directly supports nativeRaster objects
