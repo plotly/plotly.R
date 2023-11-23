@@ -2,7 +2,7 @@
 
 ## Opening issues
 
-See the [opening issues template](https://github.com/ropensci/plotly/blob/master/.github/ISSUE_TEMPLATE.md)
+See the [opening issues template](https://github.com/plotly/plotly.R/blob/master/.github/ISSUE_TEMPLATE.md)
 
 ## Development guidelines
 
@@ -15,7 +15,7 @@ If your pull request fixes a bug and/or implements a new feature, please [write 
 To ensure a consistent and reproducible environment, visual tests should be run against the [cpsievert/plotly-orca](https://hub.docker.com/r/cpsievert/plotly-orca/) docker image. If you add a new visual test and/or expect any differences, run a container like so:
 
 ```shell
-git clone https://github.com/ropensci/plotly.git
+git clone https://github.com/plotly/plotly.R.git
 cd plotly
 docker run -v $(pwd):/home/plotly --privileged -p 3838:3838 cpsievert/plotly-orca
 ```
@@ -28,4 +28,4 @@ docker run -e VMODE="ci" -v $(pwd):/home/plotly --privileged cpsievert/plotly-or
 
 ## Code of Conduct
 
-We want to encourage a warm, welcoming, and safe environment for contributing to this project. See the [code of conduct](https://github.com/ropensci/plotly/blob/master/CONDUCT.md) for more information.
+We want to encourage a warm, welcoming, and safe environment for contributing to this project. See the [code of conduct](https://github.com/plotly/plotly.R/blob/master/CONDUCT.md) for more information.

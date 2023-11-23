@@ -1,7 +1,7 @@
 
 test_that("sizemode is always respected", {
   
-  # https://github.com/ropensci/plotly/issues/1133
+  # https://github.com/plotly/plotly.R/issues/1133
   p <- plot_ly(mtcars, x = ~wt, y = ~wt, size = ~wt, color = ~as.factor(carb)) 
   d <- expect_doppelganger_built(p, "sizemode")$data
   expect_length(d, length(unique(mtcars$carb)))

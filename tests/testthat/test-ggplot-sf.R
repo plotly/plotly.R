@@ -40,7 +40,10 @@ test_that("geom_sf() polygons with fill/text.", {
   skip_if_not_installed("s2")
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-  p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME))
+  expect_warning(
+    p <- ggplot(nc) + geom_sf(aes(fill = AREA, text = NAME)),
+    "Ignoring unknown"
+  )
   
   l <- expect_doppelganger_built(p, "sf-fill-text")
   # one trace for every fillcolor, one for graticule, one for colorbar

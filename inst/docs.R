@@ -1,5 +1,5 @@
 # install the new/experimental plotly R package
-# devtools::install_github("ropensci/plotly@carson-dsl")
+# devtools::install_github("plotly/plotly.R@carson-dsl")
 
 ################################################################################
 # Basic Charts (https://plotly.com/r/#basic-charts)
@@ -1123,7 +1123,7 @@ plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot", fileopt = "overwrite")
 # ----------------------------------------------------------------------------
 
 # Maybe copy/paste relevant bits from this vignette? ->
-# https://github.com/ropensci/plotly/blob/carson-dsl/vignettes/intro.Rmd
+# https://github.com/plotly/plotly.R/blob/carson-dsl/vignettes/intro.Rmd
 
 # ----------------------------------------------------------------------------
 # https://plotly.com/r/shiny-tutorial/
@@ -1133,7 +1133,7 @@ plot_ly(x = c(1, 2), y = c(1, 2), filename = "myPlot", fileopt = "overwrite")
 # http://moderndata.plot.ly/dashboards-in-r-with-shiny-plotly/
 
 # If we want, we could copy/paste source from this folder ->
-# https://github.com/ropensci/plotly/tree/carson-dsl/inst/examples
+# https://github.com/plotly/plotly.R/tree/carson-dsl/inst/examples
 
 # ----------------------------------------------------------------------------
 # https://plotly.com/r/get-requests/

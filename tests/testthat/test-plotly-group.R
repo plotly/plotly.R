@@ -69,7 +69,7 @@ test_that("Groups are ignored if grouping is irrelevant for the geom", {
 
 test_that("Ordering of marker.color should not change in a simple scatterplot", {
   
-  # https://github.com/ropensci/plotly/issues/1351
+  # https://github.com/plotly/plotly.R/issues/1351
   l <- mtcars %>%
     mutate(id = seq_len(nrow(.))) %>%
     group_by(cyl) %>%

@@ -14,7 +14,7 @@ layout <- function(p, ..., data = NULL) {
 #' @export
 layout.matrix <- function(p, ..., data = NULL) {
   # workaround for the popular graphics::layout() function
-  # https://github.com/ropensci/plotly/issues/464
+  # https://github.com/plotly/plotly.R/issues/464
   graphics::layout(p, ...)
 }
 

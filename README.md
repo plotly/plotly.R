@@ -4,7 +4,7 @@
 <img src="man/figures/plotly.png" width="200" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ropensci/plotly/workflows/R-CMD-check/badge.svg)](https://github.com/plotly/plotly.R/actions)
+[![R-CMD-check](https://github.com/plotly/plotly.R/workflows/R-CMD-check/badge.svg)](https://github.com/plotly/plotly.R/actions)
 [![CRAN Status](https://www.r-pkg.org/badges/version/plotly)](https://cran.r-project.org/package=plotly)
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotly)](https://cranlogs.r-pkg.org/badges/grand-total/plotly)
 [![monthly](https://cranlogs.r-pkg.org/badges/plotly)](https://cranlogs.r-pkg.org/badges/plotly)

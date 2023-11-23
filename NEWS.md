@@ -677,37 +677,37 @@ sorted alphabetically before scales are applied. Also, when mapping a factor to 
 
 * Upgraded to plotly.js v1.14.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.14.1
 
-3.6.5 -- 10 June 2016
+# 3.6.5 -- 10 June 2016
 
 IMPROVEMENT:
 
 Multiple rows of facet strips will now be separated by <br> (i.e., line breaks) instead of ,. See #593.
 
-3.6.4 -- 31 May 2016
+# 3.6.4 -- 31 May 2016
 
 BUG FIX:
 
 embed_notebook() will no longer use a '.embed' extension in the iframe src attribute. See #613.
 
-3.6.3 -- 24 May 2016
+# 3.6.3 -- 24 May 2016
 
 CHANGES:
 
 Provided a better way of reexporting magrittr::`%>%`. See #597.
 
-3.6.2 -- 24 May 2016
+# 3.6.2 -- 24 May 2016
 
 CHANGES: 
 
 Removed unnecessary plyr dependency.
 
-3.6.1 -- 23 May 2016
+# 3.6.1 -- 23 May 2016
 
 BUG FIX: 
 
 Add a default method for plotly_build. Fixes #592.
 
-3.6.0 -- 16 May 2016
+# 3.6.0 -- 16 May 2016
 
 NEW FEATURES & CHANGES:
 
@@ -724,7 +724,7 @@ BUG FIX:
 
 Column facet strips will no longer be drawn when there is only one column.
 
-3.5.7 -- 13 May 2016
+# 3.5.7 -- 13 May 2016
 
 CHANGES:
 
@@ -734,13 +734,13 @@ BUG FIX:
 
 Pass knitr options to the named argument options. Fixes #582.
 
-3.5.6 -- 12 May 2016
+# 3.5.6 -- 12 May 2016
 
 BUG FIX:
 
 Use .embed suffix in iframe src attribute. Fixes #581.
 
-3.5.5 -- 5 May 2016
+# 3.5.5 -- 5 May 2016
 
 CHANGES:
 
@@ -752,26 +752,26 @@ BUG FIX:
 
 Space for interior facet_wrap() strips are now accounted for.
 
-3.5.4 -- 5 May 2016
+# 3.5.4 -- 5 May 2016
 
 BUG FIX:
 
 gg2list() now returns an object of class "plotly_built" instead of "plotly"
 to ensure a sensible print method is invoked.
 
-3.5.3 -- 3 May 2016
+# 3.5.3 -- 3 May 2016
 
 CHANGES:
 
 Upgrade to plotlyjs v1.10.1 -- https://github.com/plotly/plotly.js/releases/tag/v1.10.1
 
-3.5.2 -- 2 May 2016
+# 3.5.2 -- 2 May 2016
 
 BUG FIX:
 
 Added missing key properties in ggplotly() converter so selections can be accessible via event_data().
 
-3.5.1 -- 26 Apr 2016
+# 3.5.1 -- 26 Apr 2016
 
 CHANGES:
 
@@ -780,7 +780,7 @@ Upgrade to plotlyjs v1.10.0 -- https://github.com/plotly/plotly.js/releases/tag/
 Distinguish between "built" (plotly_built) and "non-built" (plotly_hash) plotly objects. See #562
 
 
-3.5.0 -- 19 Apr 2016
+# 3.5.0 -- 19 Apr 2016
 
 NEW FEATURES:
 
@@ -790,62 +790,62 @@ CHANGES:
 
 The toRGB() function will always output color codes with an alpha channel (e.g. toRGB('black') is now 'rgba(0,0,0,1)' instead of 'rgb(0,0,0)')
 
-3.4.15 -- 18 Apr 2016
+# 3.4.15 -- 18 Apr 2016
 
 BUGFIX:
 
 The alpha in geom_smooth was incorrectly inheriting from other layers. See #551.
 
-3.4.14 -- 15 Apr 2016
+# 3.4.14 -- 15 Apr 2016
 
 CHANGES:
 
 Upgrade to plotlyjs v1.9.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.9.0
 
-3.4.13 -- 6 Apr 2016
+# 3.4.13 -- 6 Apr 2016
 
 BUGFIX:
 
 In some cases, marker color was inheriting from the marker line color when
 it shouldn't have. See ##537.
 
-3.4.12 -- 5 Apr 2016
+# 3.4.12 -- 5 Apr 2016
 
 CHANGES:
 
 Upgrade to plotlyjs v1.8.0 -- https://github.com/plotly/plotly.js/releases/tag/v1.8.0
 
-3.4.11 -- 2 Apr 2016
+# 3.4.11 -- 2 Apr 2016
 
 BUGFIX:
 
 Fix bug when altering modebar button defaults
 
-3.4.10 -- 1 Apr 2016
+# 3.4.10 -- 1 Apr 2016
 
 BUGFIX:
 
 Fix a geom_errorbar bug introduced in 3.4.9. See #513.
 
-3.4.9 -- 25 Mar 2016
+# 3.4.9 -- 25 Mar 2016
 
 BUGFIX:
 
 Upgrade to plotlyjs 1.7.0. Fixes #513
 
-3.4.8 -- 23 Mar 2016
+# 3.4.8 -- 23 Mar 2016
 
 BUGFIX:
 
 * Safeguard against null fields in selections. See #530.
 
-3.4.7 -- 19 Mar 2016
+# 3.4.7 -- 19 Mar 2016
 
 BUGFIX:
 
 * Added custom CSS which allows plotly to work nicely in ioslides.
 
-3.4.6 -- 17 Mar 2016
+# 3.4.6 -- 17 Mar 2016
 
 NEW FEATURES:
 
@@ -853,37 +853,37 @@ The 'plotly_relayout' event is now accessible via the event_data() function.
 
 Fixed #514.
 
-3.4.5 -- 17 Mar 2016
+# 3.4.5 -- 17 Mar 2016
 
 BUGFIX:
 
 Fixed #514.
 
-3.4.4 -- 17 Mar 2016
+# 3.4.4 -- 17 Mar 2016
 
 BUGFIX:
 
 Show discrete positional values in tooltip (see #515); better GeomTile conversion; pass plot object into layers2traces.
 
-3.4.3 -- 14 Mar 2016
+# 3.4.3 -- 14 Mar 2016
 
 BUGFIX:
 
 Custom facet labeller functions will now translate correctly. See #507.
 
-3.4.2 -- 14 Mar 2016
+# 3.4.2 -- 14 Mar 2016
 
 BUGFIX:
 
 Automatic resizing will now occur only when layout.autosize is true (the default). See #403.
 
-3.4.1 -- 13 Mar 2016
+# 3.4.1 -- 13 Mar 2016
 
 BUGFIX:
 
 Legend titles are now supported.
 
-3.4.0 -- 12 Mar 2016
+# 3.4.0 -- 12 Mar 2016
 
 NEW FEATURES:
 
@@ -897,7 +897,7 @@ BUGFIX:
 
 * Made a number of bugfixes/improvements to hoverinfo & conversion of geom_tile()/geom_point().
 
-3.3.1 -- 10 Mar 2016
+# 3.3.1 -- 10 Mar 2016
 
 CHANGES:
 
@@ -907,13 +907,13 @@ BUGFIX:
 
 * Redundant legend entries are no longer shown.
 
-3.2.1 -- 10 Mar 2016
+# 3.2.1 -- 10 Mar 2016
 
 BUGFIX:
 
 * Proper formatting for date tooltips.
 
-3.2.0 -- 10 Mar 2016
+# 3.2.0 -- 10 Mar 2016
 
 CHANGES:
 
@@ -926,14 +926,14 @@ NEW FEATURES:
 * geom_violin() is now supported.
 * ggplotly() gains a mapping argument to control the set of aesthetics to appears in the tooltip as well as their order.
 
-3.1.0 -- 8 Mar 2016
+# 3.1.0 -- 8 Mar 2016
 
 CHANGES:
 
 * The "hidden" sharing option in plotly_POST() was renamed to "secret".
 * The default value in the scale argument in plotly_IMAGE() is now 1.
 
-3.0.0 -- 8 Mar 2016
+# 3.0.0 -- 8 Mar 2016
 
 NEW FEATURES:
 
@@ -947,12 +947,12 @@ BUG FIXES:
 
 * ggplotly() now supports most of scale_*()/theme()/guides(). As a result, this fixes a lot of issues (#482, #481, #479, #476, #473, #460, #456, #454, #453, #447, #443, #434, #422, #421, #399, #379, #378, #357, #318, #316, #242, #232, #211, #203, #185, #184, #161). In order to support all of scale_x_*() an scale_y_*(), we always use linear axis types, and supply ticktext/tickvals to plotly.js. This has some unfortunate consequences on hoverformatting, which may be addressed in future releases of plotly.js -- https://github.com/plotly/plotly.js/issues/320
 
-2.5.0 -- 1 Mar 2016
+# 2.5.0 -- 1 Mar 2016
 
 NEW FEATURES
 
 * New event_data() function provides easy access to plotly events in shiny.
-For an example, see https://github.com/ropensci/plotly/tree/master/inst/examples/plotlyEvents
+For an example, see https://github.com/plotly/plotly.R/tree/master/inst/examples/plotlyEvents
 
 * plot_ly() and ggplotly() gain a source argument to differentiate between 
 plotly events in shiny apps with multiple plots. ggplotly() also gains width 
@@ -963,209 +963,209 @@ CHANGES
 The arguments filename, fileopt, world_readable in ggplotly() were removed as
 they should be provided to plotly_POST() instead. 
 
-2.4.4 -- 13 Feb 2016
+# 2.4.4 -- 13 Feb 2016
 
 as.widget() now returns htmlwidget objects untouched. See #449.
 
-2.4.3 -- 11 Feb 2016
+# 2.4.3 -- 11 Feb 2016
 
 Ensure that we always return HTTPS links. Fixes #455
 
-2.4.2 -- 9 Feb 2016
+# 2.4.2 -- 9 Feb 2016
 
 Fix for on-premise domain configuration. 
 
-2.4.1 -- 2 Feb 2016
+# 2.4.1 -- 2 Feb 2016
 
 Attach base_url in as.widget() so it works in multiple contexts
 
-2.4.0 -- 1 Feb 2016
+# 2.4.0 -- 1 Feb 2016
 
 * Pass plot configuration using ... to avoid conflicts in defaults/documentation
 * Upgrade to plotly.js 1.5.1
 
-2.3.4 -- 1 Feb 2016
+# 2.3.4 -- 1 Feb 2016
 
 Added a plotly_api_domain environment variable for configuring the API domain. Fixes #441
 
-2.3.3 -- 27 Jan 2016
+# 2.3.3 -- 27 Jan 2016
 
 Bump axis number for each trace matching a panel number. fixes #318
 
-2.3.2 -- 25 Jan 2016
+# 2.3.2 -- 25 Jan 2016
 
 More accurate list of data_array properties. Fixes #415
 
-2.3.1 -- 25 Jan 2016
+# 2.3.1 -- 25 Jan 2016
 
 More accurate conversion of path width. Fixes #373.
 
-2.3.0 -- 19 Jan 2016
+# 2.3.0 -- 19 Jan 2016
 
 Add sharing argument and deprecate world_readable. Fixes #332
 
-2.2.4 -- 18 Jan 2016
+# 2.2.4 -- 18 Jan 2016
 
 Fix for error in embed_notebook(). See #409.
 
-2.2.3 -- 18 Jan 2016
+# 2.2.3 -- 18 Jan 2016
 
 Fix for geom_vline(). See #402.
 
-2.2.2 -- 18 Jan 2016
+# 2.2.2 -- 18 Jan 2016
 
 Fix bar orientation when we detect geom_bar() + coord_flip() in ggplotly(). Fixes #390.
 
-2.2.1 -- 18 Jan 2016
+# 2.2.1 -- 18 Jan 2016
 
 Search for axis title in scene object. fixes #393.
 
-2.2.0 -- 13 Jan 2016
+# 2.2.0 -- 13 Jan 2016
 
 The default for layout.hovermode is now 'closest' for non-line scatter traces
 
-2.1.3 -- 12 Jan 2016
+# 2.1.3 -- 12 Jan 2016
 
 Fix size and alpha translation for geom_point. Fixes #386
 
-2.1.2 -- 11 Jan 2016
+# 2.1.2 -- 11 Jan 2016
 
 Upgraded to plotlyjs 1.4.1. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.1
 
-2.1.1 -- 11 Jan 2016
+# 2.1.1 -- 11 Jan 2016
 
 Upgraded to plotlyjs 1.4. For a list of changes, see https://github.com/plotly/plotly.js/releases/tag/v1.4.0
 
-2.1.0 -- 29 Dec 2015
+# 2.1.0 -- 29 Dec 2015
 
 plot_ly() now defaults to inherit=FALSE and plotly_build() is now idempotent. Fixes #280 and #277. See #368 for details.
 
-2.0.19 -- 23 Dec 2015
+# 2.0.19 -- 23 Dec 2015
 
 Added as.widget() function for conveniency in converting plotly object to htmlwidget objects. See #294.
 
-2.0.18 -- 22 Dec 2015
+# 2.0.18 -- 22 Dec 2015
 
 Fix #365
 
-2.0.17 -- 22 Dec 2015
+# 2.0.17 -- 22 Dec 2015
 
 Fix #358
 
-2.0.16 -- 18 Dec 2015
+# 2.0.16 -- 18 Dec 2015
 
 Require ggplot2 2.0.0 or higher. For details, see #269.
 
-2.0.15 -- 13 Dec 2015
+# 2.0.15 -- 13 Dec 2015
 
 Fix #346
 
-2.0.14 -- 13 Dec 2015
+# 2.0.14 -- 13 Dec 2015
 
 Fix #212
 
-2.0.13 -- 12 Dec 2015
+# 2.0.13 -- 12 Dec 2015
 
 Fix #286
 
-2.0.12 -- 11 Dec 2015
+# 2.0.12 -- 11 Dec 2015
 
 Fix #221
 
-2.0.11 -- 11 Dec 2015
+# 2.0.11 -- 11 Dec 2015
 
 Fix #250
 
-2.0.10 -- 10 Dec 2015
+# 2.0.10 -- 10 Dec 2015
 
 Fix #225
 
-2.0.9 -- 10 Dec 2015
+# 2.0.9 -- 10 Dec 2015
 
 Fix #333
 
-2.0.8 -- 10 Dec 2015
+# 2.0.8 -- 10 Dec 2015
 
 Fix a bug with geom_segment (see #321 & #228) 
 
-2.0.7 -- 10 Dec 2015
+# 2.0.7 -- 10 Dec 2015
 
 Fix #233
 
-2.0.6 -- 2 Dec 2015
+# 2.0.6 -- 2 Dec 2015
 
 Upgrade to plotlyjs 1.1.1. Fixes #319.
 
-2.0.5 -- 1 Dec 2015
+# 2.0.5 -- 1 Dec 2015
 
 Fix for legend names. See #236.
 
-2.0.4 -- 28 Nov 2015
+# 2.0.4 -- 28 Nov 2015
 
 Fix #313.
 
-2.0.3 -- 18 Nov 2015
+# 2.0.3 -- 18 Nov 2015
 
 Fixed bug causing knitr options to be ignored. Also added VignetteBuilder to DESCRIPTION to vignette is available.
 
-2.0.2 -- 17 Nov 2015
+# 2.0.2 -- 17 Nov 2015
 
 Using plotly_build() on a ggplot object should always return a plotly object
 
-2.0.1 -- 17 Nov 2015
+# 2.0.1 -- 17 Nov 2015
 
 Better printing of server figures. Documentation and other fixes for initial CRAN release!
 
-2.0.0 -- 2 Nov 2015
+# 2.0.0 -- 2 Nov 2015
 
 Added a dependency on htmlwidgets and 'offline' plots are now the default. If you want to create a figure on a plotly server, you need to use `plotly_POST()`. Also added a `config()` function to control the default appearance of the interactive plot
 
-1.0.10 -- 3 Nov 2015
+# 1.0.10 -- 3 Nov 2015
 
 Fixed #292.
 
-1.0.9 -- 28 Sep 2015
+# 1.0.9 -- 28 Sep 2015
 
 Fixed filename, fileopt arguments in plot_ly. Specifying the same filename will now overwrite the plot if it exists.
 
-1.0.8 -- 14 Sep 2015
+# 1.0.8 -- 14 Sep 2015
 
 Added the plotly_IMAGES() function which interfaces to the images endpoint https://api.plot.ly/v2/#images
 
-Details -> https://github.com/ropensci/plotly/pull/279
+Details -> https://github.com/plotly/plotly.R/pull/279
 
-1.0.7 -- 26 Aug 2015
+# 1.0.7 -- 26 Aug 2015
 
-See https://github.com/ropensci/plotly/pull/275
+See https://github.com/plotly/plotly.R/pull/275
 
-1.0.6 -- 25 Aug 2015
+# 1.0.6 -- 25 Aug 2015
 
-Fix a bug with subplot domain calculations (see https://github.com/ropensci/plotly/pull/274)
+Fix a bug with subplot domain calculations (see https://github.com/plotly/plotly.R/pull/274)
 
-1.0.5 -- 20 Aug 2015
+# 1.0.5 -- 20 Aug 2015
 
 Fix issue converting plotly offline markdown documents to HTML when using `markdown::markdownToHTML`
 
-1.0.4 -- 14 Aug 2015
+# 1.0.4 -- 14 Aug 2015
 
 Bug fix for subplot. See #265
 
-1.0.3 -- 7 Aug 2015
+# 1.0.3 -- 7 Aug 2015
 
 Improved legend positioning. See #241
 
-1.0.2 -- 2 Aug 2015
+# 1.0.2 -- 2 Aug 2015
 
 * last_plot() will now look for the last plotly object; if not found, it will try to find the last ggplot object.
 * Officially added the filename, fileopt, and world_readable arguments to plot_ly() and ggplotly().
 * If plotly offline is not available, the shiny.launch.browser option is changed to open a web brower. See #245.
 * Various namespace/documentation improvements for R CMD check.
 
-1.0.1 -- 2 Aug 2015
+# 1.0.1 -- 2 Aug 2015
 
 Removed the stream() function as it wasn't ready to be included.
 
-1.0.0 -- 31 July 2015
+# 1.0.0 -- 31 July 2015
 
 A major reworking of package internals which includes a few backwards incompatible changes.
 
@@ -1177,152 +1177,152 @@ Major changes include:
 (4) Added the `renderPlotly()` and `plotlyOutput()` functions for embedding plotly graphs in shiny applications.
 (5) Added `offline()` function for creating standalone HTML pages via Plotly Offline (see http://purchasing.plot.ly/)
 
-For more details, see the new vignettes with `browseVignettes(package = "plotly")` and/or the pull request -> https://github.com/ropensci/plotly/pull/226
+For more details, see the new vignettes with `browseVignettes(package = "plotly")` and/or the pull request -> https://github.com/plotly/plotly.R/pull/226
 
-0.6.3 -- 2 June 2015
+# 0.6.3 -- 2 June 2015
 
 Add new tests inspired by the R Cookbook distributions #214
 
-0.6.2 -- 19 May 2015
+# 0.6.2 -- 19 May 2015
 
 In geom_bar(stat = "identity"), sum y values if multiple for a given x.
 
-0.6.1 -- 5 May 2015
+# 0.6.1 -- 5 May 2015
 
 Add test-cookbook-lines.R and fix bugs that showed up in those tests.
 
-0.6 -- 4 May 2015
+# 0.6 -- 4 May 2015
 
 Let gg2list() return a figure object (backwards incompatible change).
 
-0.5.29 -- 16 April 2015
+# 0.5.29 -- 16 April 2015
 
 geom_density() as filled area chart #202
 
-0.5.28 -- 15 April 2015
+# 0.5.28 -- 15 April 2015
 
 Let ggplot handle histogram binning. Fix #198
 
-0.5.27 -- 19 Mar 2015
+# 0.5.27 -- 19 Mar 2015
 
 Reimplement geom_ribbon as a basic polygon. Fix #191. Fix #192.
 
-0.5.26 -- 18 Mar 2015
+# 0.5.26 -- 18 Mar 2015
 
 Implemented geom_rect #178
 
-0.5.25 -- 10 March 2015
+# 0.5.25 -- 10 March 2015
 
 Implemented geom_smooth() #183
 
-0.5.24 -- 10 March 2015
+# 0.5.24 -- 10 March 2015
 
 Implemented facet_wrap(scales="free") #167
 
-0.5.23 -- 10 March 2015.
+# 0.5.23 -- 10 March 2015.
 
 geom_ribbon() now respects alpha transparency
 
-0.5.22 -- 2 March 2015.
+# 0.5.22 -- 2 March 2015.
 
 Fixes for ylim() #171.
 
-0.5.21 -- 23 February 2015.
+# 0.5.21 -- 23 February 2015.
 
 Fixes for error bars and tick marks.
 
-0.5.20 -- 9 February 2015.
+# 0.5.20 -- 9 February 2015.
 
 Add alpha transparency to fill conversion.
 Let geom_area support colour and fill aesthetics.
 
-0.5.19 -- 23 January 2015.
+# 0.5.19 -- 23 January 2015.
 
 Support class conversion such as as.Date() within ggplot code.
 
-0.5.18 -- 22 January 2015.
+# 0.5.18 -- 22 January 2015.
 
 Return proper filepath when filename contains directories.
 
-0.5.17 -- 30 December 2014.
+# 0.5.17 -- 30 December 2014.
 
 Support date-time binning in histograms.
 
-0.5.16 -- 29 December 2014.
+# 0.5.16 -- 29 December 2014.
 
 Support colour aesthetic in geom_text().
 
-0.5.15 -- 19 December 2014.
+# 0.5.15 -- 19 December 2014.
 
 Use proper RCurlOptions in get_figure() method.
 
-0.5.14 -- 1 December 2014.
+# 0.5.14 -- 1 December 2014.
 
 Make layers geom_line + geom_point only one trace in Plotly.
 
-0.5.13 -- 27 November 2014.
+# 0.5.13 -- 27 November 2014.
 
 Rename translation file and server endpoint parameter to be hip.
 
-0.5.12 -- 12 November 2014.
+# 0.5.12 -- 12 November 2014.
 
 Improve legend title position.
 
-0.5.11 -- 11 November 2014.
+# 0.5.11 -- 11 November 2014.
 
 Show legend title.
 
-0.5.10 -- 7 November 2014.
+#0.5.10 -- 7 November 2014.
 
 Improve showlegend and fix legend’s `x` position.
 
-0.5.9 -- 3 November 2014.
+# 0.5.9 -- 3 November 2014.
 
 Default colours for geom_polygon().
 
-0.5.8 -- 30 October 2014.
+# 0.5.8 -- 30 October 2014.
 
 Support hline over a factor x range.
 Default colours for geom_boxplot().
 
-0.5.7 -- 29 October 2014.
+# 0.5.7 -- 29 October 2014.
 
 Default colours for geom_area() and geom_ribbon().
 
-0.5.6 -- 28 October 2014.
+# 0.5.6 -- 28 October 2014.
 
 Convert line size faithfully.
 
-0.5.5 -- 24 October 2014.
+# 0.5.5 -- 24 October 2014.
 
 Support category histograms (with factors).
 
-0.5.4 -- 22 October 2014.
+# 0.5.4 -- 22 October 2014.
 
 Support conversion of geom_vline().
 
-0.5.3 -- 21 October 2014.
+# 0.5.3 -- 21 October 2014.
 
 Support conversion of geom_bar() with position_dodge().
 
-0.5.2 -- 18 October 2014.
+# 0.5.2 -- 18 October 2014.
 
 Support aesthetic shape in geom_path() and, hence, geom_line() (conversion).
 
-0.5.1 -- 15 October 2014.
+# 0.5.1 -- 15 October 2014.
 
 Do not show zero lines by default (as in ggplot2 plots).
 
-0.5.0 -- 15 October 2014.
+# 0.5.0 -- 15 October 2014.
 
 From now on, version numbers are meaningful again...
 Many changes meanwhile, especially support for more geoms.
 
-0.4 -- 7 April 2014.
+# 0.4 -- 7 April 2014.
 
 Re-write geom to trace conversion code.
 
-0.3.8 -- 21 March 2014.
+# 0.3.8 -- 21 March 2014.
 
 ggplotly takes the last_plot() by default.
 
@@ -1330,7 +1330,7 @@ Support for ggplotly layout elements title, tickcolor, gridcolor,
 showlegend, plot_bgcolor, paper_bgcolor, tickangle, axis titles, plot
 border colors.
 
-0.3.7 -- 14 March 2014.
+# 0.3.7 -- 14 March 2014.
 
 For ggplotly:
 
@@ -1338,8 +1338,7 @@ For ggplotly:
 
 - if in knitr/Rmd in a chunk with plotly=TRUE, embed the plot.
 
-0.3.6 -- 10 March 2014.
+# 0.3.6 -- 10 March 2014.
 
 Merge ggplotly code.
 
-0.3.5

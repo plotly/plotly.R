@@ -92,7 +92,7 @@ sf_default_attrs <- function(d) {
   if (inherits(d, "GeomPolygon")) return(list(mode = "lines", fill = "toself"))
   if (inherits(d, "GeomPath")) return(list(mode = "lines"))
   if (inherits(d, "GeomPoint")) return(list(mode = "markers"))
-  stop("Unexpected case. Please report an issue here https://github.com/ropensci/plotly/issues/new", call. = FALSE)
+  stop("Unexpected case. Please report an issue here https://github.com/plotly/plotly.R/issues/new", call. = FALSE)
 }
 
 

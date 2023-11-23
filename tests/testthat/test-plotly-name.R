@@ -81,7 +81,7 @@ test_that("adding trace name with frame does not throw frameOrder warning", {
 
 test_that("adding trace name does not throw error", {
   
-  #From ropensci/plotly/issues/1618
+  #From plotly/plotly.R/issues/1618
   df <- data.frame(category=c('a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'),
                    year=c(2000, 2000, 2000, 2000, 2001, 2001, 2001, 2001),
                    val_a=c(1,2,2,1,2,5,6,8),
@@ -106,7 +106,7 @@ test_that("adding trace name does not throw error", {
   expect_equal(l$x$data[[2]]$name, "Val_B")
   
   
-  #From ropensci/plotly/issues/1903
+  #From plotly/plotly.R/issues/1903
   df1 <- data.frame(frame = 1:10, x = 1:10, y = 0)
   df2 <- data.frame(frame = rep(1:10, 1:10), 
                     x = unlist(lapply(1:10, function(x) 1:x)),

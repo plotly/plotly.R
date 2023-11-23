@@ -70,7 +70,7 @@ test_that("share both axes", {
   expect_true(sum(grepl("^xaxis", names(l$layout))) == 2)
 })
 
-# https://github.com/ropensci/plotly/issues/376
+# https://github.com/plotly/plotly.R/issues/376
 d <- data.frame(
   x = rnorm(100),
   y = rnorm(100)
@@ -355,7 +355,7 @@ test_that("annotation xref/yref bumping", {
   expect_equal(yref2, rep(c("y", "y"), each = 32))
   
   # now, with more traces than annotations
-  # https://github.com/ropensci/plotly/issues/1444
+  # https://github.com/plotly/plotly.R/issues/1444
   p1 <- plot_ly() %>%
     add_markers(x = 1, y = 1) %>%
     add_markers(x = 2, y = 2) %>%
@@ -506,7 +506,7 @@ test_that("geo+cartesian behaves", {
 
 test_that("May specify legendgroup with through a vector of values", {
   
-  # example adapted from https://github.com/ropensci/plotly/issues/817
+  # example adapted from https://github.com/plotly/plotly.R/issues/817
   df <- dplyr::bind_rows(
     data.frame(x = rnorm(100,2), Name = "x1"),
     data.frame(x = rnorm(100,6), Name = "x2"),

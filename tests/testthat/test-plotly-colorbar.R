@@ -59,7 +59,7 @@ test_that("Can restrict z limits", {
 
 
 test_that("colorbar does not affect mode of other traces", {
-  # https://github.com/ropensci/plotly/issues/1196
+  # https://github.com/plotly/plotly.R/issues/1196
   p <- plot_ly() %>% 
     add_markers(data = mtcars, x= ~ hp, y= ~mpg, color = ~wt) %>% 
     add_lines(x = seq(100, 300, length.out = 20), y = seq(10, 30, length.out = 20),
@@ -140,7 +140,7 @@ test_that("positioning with multiple colorbars and legends", {
 
 test_that("Colorbar limits controls marker.color and line.color", {
   
-  # https://github.com/ropensci/plotly/issues/1236
+  # https://github.com/plotly/plotly.R/issues/1236
   p <- plot_ly(
     mtcars, x = ~hp, y = ~cyl, z = ~mpg, color = ~mpg,
     type = "scatter3d", mode = "lines+markers"

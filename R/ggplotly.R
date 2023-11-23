@@ -1214,7 +1214,7 @@ verifyUnit <- function(u) {
 }
 
 # Use public API for getting the unit's type, if available
-# https://github.com/ropensci/plotly/pull/1646#issue-331268260
+# https://github.com/plotly/plotly.R/pull/1646#issue-331268260
 getUnitType <- function(u) {
   tryNULL(get("unitType", envir = asNamespace("grid"))(u)) %||%
     attr(u, "unit")

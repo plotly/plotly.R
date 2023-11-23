@@ -219,7 +219,7 @@ test_that("span/size controls errorbar thickness/width", {
 
 test_that("Vector of redundant text is reduced to string when hoveron=fills", {
   
-  # see https://github.com/ropensci/plotly/issues/1233
+  # see https://github.com/plotly/plotly.R/issues/1233
   d <- data.frame(
     AA = c(2,3,3,2, NA, 6,7,7,6, NA),
     BB = c(2,2,3,2, NA, 6,6,7,6, NA),

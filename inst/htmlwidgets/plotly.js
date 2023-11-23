@@ -65,7 +65,7 @@ HTMLWidgets.widget({
       
       // lower the z-index of the modebar to prevent it from highjacking hover
       // (TODO: do this via CSS?)
-      // https://github.com/ropensci/plotly/issues/956
+      // https://github.com/plotly/plotly.R/issues/956
       // https://www.w3schools.com/jsref/prop_style_zindex.asp
       var modebars = document.querySelectorAll(".js-plotly-plot .plotly .modebar");
       for (var i = 0; i < modebars.length; i++) {

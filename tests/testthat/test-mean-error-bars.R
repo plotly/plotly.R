@@ -36,7 +36,7 @@ test_that("different colors for error bars, points, and lines", {
   L <- expect_doppelganger_built(one.line.gg, "error-simple-line-point-crazy")
 })
 
-# example from https://github.com/ropensci/plotly/issues/513
+# example from https://github.com/plotly/plotly.R/issues/513
 
 d <- data.frame(
   x = 1:5, 

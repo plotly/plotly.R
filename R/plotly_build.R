@@ -622,7 +622,7 @@ map_size <- function(traces, stroke = FALSE) {
       attrs <- Schema$traces[[type]]$attributes
       
       # `size` controls marker.size (note 'bar' traces have marker but not marker.size)
-      # TODO: always ensure an array? https://github.com/ropensci/plotly/pull/1176
+      # TODO: always ensure an array? https://github.com/plotly/plotly.R/pull/1176
       if (has_attr(type, "marker") && "size" %in% names(attrs$marker)) {
         s <- if (isSingular) size_ else if (array_ok(attrs$marker$size)) sizes
         trace$marker <- modify_list(list(size = default(s), sizemode = default("area")), trace$marker)
@@ -988,7 +988,7 @@ traceify <- function(dat, x = NULL) {
   lvls <- lvls[lvls %in% x]
   # the order of lvls determines the order in which traces are drawn
   # for ordered factors at least, it makes sense to draw the highest level first
-  # since that _should_ be the darkest color in a sequential pallette
+  # since that _should_ be the darkest color in a sequential palette
   if (is.ordered(x)) lvls <- rev(lvls)
   n <- length(x)
   # recursively search for a non-list of appropriate length (if it is, subset it)

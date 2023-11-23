@@ -70,7 +70,7 @@ test_that("can plot on sub-second time scale", {
 
 
 test_that("can flip axes", {
-  # https://github.com/ropensci/plotly/issues/1074
+  # https://github.com/plotly/plotly.R/issues/1074
   p <- ggplot(diamonds[sample(nrow(diamonds), 1000),]) +
     geom_point(aes(carat, price)) +
     expand_limits(y = 0) +

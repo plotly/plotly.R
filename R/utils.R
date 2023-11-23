@@ -338,7 +338,7 @@ supply_defaults <- function(p) {
     }
     tr
   })
-  # hack to avoid https://github.com/ropensci/plotly/issues/945
+  # hack to avoid https://github.com/plotly/plotly.R/issues/945
   if (is_type(p, "parcoords")) p$x$layout$margin$t <- NULL
   
   # supply domain defaults
@@ -521,7 +521,7 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
     
     # tag 'src-able' attributes (needed for api_create())
     # note that layout has 'src-able' attributes that shouldn't
-    # be turned into grids https://github.com/ropensci/plotly/pull/1489
+    # be turned into grids https://github.com/plotly/plotly.R/pull/1489
     isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
     if ((isDataArray || isSrcAble) && !isTRUE(layoutAttr)) {
       proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
@@ -575,7 +575,7 @@ attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
 }
 
 # make sure trace type is valid
-# TODO: add an argument to verify trace properties are valid (https://github.com/ropensci/plotly/issues/540)
+# TODO: add an argument to verify trace properties are valid (https://github.com/plotly/plotly.R/issues/540)
 verify_type <- function(trace) {
   if (is.null(trace$type)) {
     attrs <- names(trace)
