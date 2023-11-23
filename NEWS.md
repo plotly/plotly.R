@@ -3,6 +3,8 @@
 ## Improvements
 
 * `ggplotly()` now works better with the development version of ggplot2 (> v3.4.4). (#2315)
+* plotly no longer imports lazyeval (@olivroy, #2319)
+
 
 # 4.10.3
 
@@ -1342,3 +1344,4 @@ For ggplotly:
 
 Merge ggplotly code.
 
+# 0.3.5

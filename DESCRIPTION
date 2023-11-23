@@ -41,7 +41,6 @@ Imports:
     dplyr,
     vctrs,
     tibble,
-    lazyeval (>= 0.2.0),
     rlang (>= 0.4.10),
     crosstalk,
     purrr,

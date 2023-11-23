@@ -1120,10 +1120,10 @@ gg2list <- function(p, width = NULL, height = NULL,
   mappingFormulas <- lapply(layers, function(x) {
     mappings <- getAesMap(plot, x)
     if (originalData) {
-      lapply(mappings, lazyeval::f_new)
+      lapply(mappings, function(x) rlang::new_formula(lhs = NULL, rhs = x))
     } else {
       nms <- names(mappings)
-      setNames(lapply(nms, function(x) lazyeval::f_new(as.name(x))), nms)
+      setNames(lapply(nms, function(x) rlang::new_formula(lhs = NULL, rhs = as.name(x))), nms)
     }
   })
   

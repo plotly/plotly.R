@@ -8,13 +8,12 @@
 #' @importFrom jsonlite toJSON parse_json read_json
 #' @importFrom httr RETRY content config add_headers authenticate stop_for_status warn_for_status write_disk
 #' @importFrom htmlwidgets createWidget sizingPolicy saveWidget onRender prependContent
-#' @importFrom lazyeval f_eval is_formula all_dots is_lang f_new
 #' @importFrom tibble as_tibble
 #' @importFrom htmltools browsable tagList tags div
 #' @importFrom purrr transpose
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom data.table as.data.table setorderv
-#' @importFrom rlang eval_tidy !! !!!
+#' @importFrom rlang eval_tidy !! !!! is_formula
 NULL
 
 

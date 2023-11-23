@@ -1003,9 +1003,9 @@ traceify <- function(dat, x = NULL) {
   return(new_dat)
 }
 
-
+# Previously used lazyeval #2319
 eval_attr <- function(x, data = NULL) {
-  if (lazyeval::is_formula(x)) lazyeval::f_eval(x, data) else x
+  if (rlang::is_formula(x)) rlang::eval_tidy(rlang::f_rhs(x), data = data) else x
 }
 
 # overwrite defaults with the user defined palette
