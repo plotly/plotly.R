@@ -25,8 +25,7 @@
 #' `orca_serve()`, additional arguments passed along to `processx::process`.
 #' @export
 #' @author Carson Sievert
-#' @md
-#' @rdname orca
+#' @name orca
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
 #' \dontrun{

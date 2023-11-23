@@ -25,8 +25,7 @@
 #' all existing frames are animated to completion before the new animation
 #' is started.
 #' @export
-#' @rdname animation
-#' @aliases animation
+#' @name animation
 #' @author Carson Sievert
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
@@ -122,7 +121,6 @@ animation_opts_defaults <- function() {
 }
 
 
-#' @inheritParams animation_opts
 #' @param hide remove the animation slider?
 #' @param ... for `animation_slider`, attributes are passed to a special
 #' layout.sliders object tied to the animation frames. 

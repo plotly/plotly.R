@@ -42,7 +42,7 @@
 #' included in the body of the HTTP request.
 #' 
 #' @export
-#' @rdname api
+#' @name api
 #' @author Carson Sievert
 #' @references \url{https://api.plot.ly/v2}
 #' @seealso [signup()]
@@ -108,7 +108,7 @@
 #' 
 #' }
 #' 
-
+NULL
 
 #' @rdname api
 #' @export
