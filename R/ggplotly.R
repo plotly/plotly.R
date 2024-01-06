@@ -1005,7 +1005,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     theme$legend.box.just <- theme$legend.box.just %||% c("center", "center")
     # scales -> data for guides
     gdefs <- if (inherits(plot$guides, "ggproto")) {
-      get_gdefs_ggproto(npscales$scales, theme, plot, layers, data)
+      get_gdefs_ggproto(npscales$scales, theme, plot, layers, layer_data)
     } else {
       get_gdefs(scales, theme, plot, layers)
     }
