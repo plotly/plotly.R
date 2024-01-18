@@ -107,7 +107,3 @@ guidelines](https://github.com/plotly/plotly.R/blob/master/CONTRIBUTING.md).
 Included are directions for opening issues, asking questions,
 contributing changes to plotly, and our code of
 conduct.
-
------
-
-![<https://ropensci.org>](https://www.ropensci.org/public_images/github_footer.png)
