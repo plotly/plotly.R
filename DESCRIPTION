@@ -75,7 +75,8 @@ Suggests:
     palmerpenguins,
     rversions,
     reticulate,
-    rsvg
+    rsvg,
+    ggridges
 LazyData: true
 RoxygenNote: 7.2.3
 Encoding: UTF-8
