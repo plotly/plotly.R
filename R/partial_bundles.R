@@ -87,9 +87,9 @@ verify_partial_bundle <- function(p) {
   
   if (identical(bundleType, "auto")) {
     
-    # resolve an auto bundle by using the 1st bundle that supports all the types
-    # (ordering of bundleTraceMap is important!)
-    for (i in seq_along(bundleTraceMap)) {
+    # resolve an auto bundle by using the 1st bundle that supports all the types,
+    # except for the 'strict' bundle (ordering of bundleTraceMap is important!)
+    for (i in seq_along(bundleTraceMap[names(bundleTraceMap) != "strict"])) {
       if (all(types %in% bundleTraceMap[[i]])) {
         bundleType <- names(bundleTraceMap)[[i]]
         break
@@ -158,59 +158,3 @@ plotlyjsBundleIDX <- function(p) {
 plotlyjsBundle <- function(p) {
   p$dependencies[[plotlyjsBundleIDX(p)]]
 }
-
-# TODO: create this object in inst/plotlyjs.R from the dist/README.md
-bundleTraceMap <- list(
-  basic = c(
-    "scatter",
-    "bar",
-    "pie"
-  ),
-  cartesian = c(
-    "scatter",
-    "bar",
-    "pie",
-    "box",
-    "heatmap",
-    "histogram",
-    "histogram2d",
-    "histogram2dcontour",
-    "contour",
-    "scatterternary",
-    "violin"
-  ),
-  geo = c(
-    "scatter",
-    "scattergeo",
-    "choropleth"
-  ),
-  gl3d = c(
-    "scatter",
-    "scatter3d",
-    "surface",
-    "mesh3d",
-    "cone"
-  ),
-  gl2d = c(
-    "scatter",
-    "scattergl",
-    "splom",
-    "pointcloud",
-    "heatmapgl",
-    "contourgl",
-    "parcoords"
-  ),
-  mapbox = c(
-    "scatter",
-    "scattermapbox"
-  ),
-  finance = c(
-    "scatter",
-    "bar",
-    "pie",
-    "histogram",
-    "ohlc",
-    "candlestick",
-    "waterfall"
-  )
-)

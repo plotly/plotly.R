@@ -23,7 +23,7 @@ Description: Create interactive web graphics from 'ggplot2' graphs and/or a cust
 URL: https://plotly-r.com, https://github.com/plotly/plotly.R, https://plotly.com/r/
 BugReports: https://github.com/plotly/plotly.R/issues
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.5),
     ggplot2 (>= 3.0.0)
 Imports:
     tools,
@@ -77,7 +77,7 @@ Suggests:
     reticulate,
     rsvg
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/Needs/check:

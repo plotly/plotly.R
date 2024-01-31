@@ -65,10 +65,28 @@ withr::with_dir(tmpdir, {
         file.path(lib_dir, "locales", sub("^plotly-locale-", "", basename(locales))),
         overwrite = TRUE
       )
-      # update plot schema
+      # update plot schema and (partial) bundles
+      if (!nzchar(system.file(package = "yay"))) {
+        stop("pkg 'yay' must be installed via: remotes::install_gitlab('rpkg.dev/yay')")
+      }
       Schema <- jsonlite::fromJSON(Sys.glob("dist/plot-schema.json"))
+      bundleTraceMap <-
+        yay::gh_text_file(path = "tasks/util/constants.js",
+                          owner = "plotly",
+                          name = "plotly.js",
+                          rev = basename(zip)) |>
+        stringr::str_extract(pattern = "(?<=var partialBundleTraces = )\\{[^}]+\\}") |>
+        yaml::read_yaml(text = _)
+      
       withr::with_dir(
-        pkg_dir, usethis::use_data(Schema, overwrite = TRUE, internal = TRUE)
+        pkg_dir, usethis::use_data(
+          Schema,
+          bundleTraceMap,
+          internal = TRUE,
+          overwrite = TRUE,
+          compress = "xz",
+          version = 3L
+        )
       )
       
       # plotly.js used to bundle a typedarray polyfill to support older browsers,
@@ -81,7 +99,5 @@ withr::with_dir(tmpdir, {
       #)
       
       message("Update plotlyMainBundle()'s version with ", basename(zip))
-      
   })
-  
 })
