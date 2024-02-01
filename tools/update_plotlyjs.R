@@ -66,15 +66,16 @@ withr::with_dir(tmpdir, {
         overwrite = TRUE
       )
       # update plot schema and (partial) bundles
-      if (!nzchar(system.file(package = "yay"))) {
-        stop("pkg 'yay' must be installed via: remotes::install_gitlab('rpkg.dev/yay')")
-      }
       Schema <- jsonlite::fromJSON(Sys.glob("dist/plot-schema.json"))
+      tmp_file <- tempfile(pattern = "plotly_constants_", fileext = ".js")
+      utils::download.file(
+        url = paste0("https://raw.githubusercontent.com/plotly/plotly.js/", basename(zip), "/tasks/util/constants.js"),
+        destfile = tmp_file,
+        quiet = TRUE,
+        mode = "wb"
+      )
       bundleTraceMap <-
-        yay::gh_text_file(path = "tasks/util/constants.js",
-                          owner = "plotly",
-                          name = "plotly.js",
-                          rev = basename(zip)) |>
+        paste0(readLines(tmp_file), collapse = "\n") |>
         stringr::str_extract(pattern = "(?<=var partialBundleTraces = )\\{[^}]+\\}") |>
         yaml::read_yaml(text = _)
       
