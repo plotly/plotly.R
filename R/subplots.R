@@ -237,7 +237,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     
     # rescale domains according to the tabular layout
     xDom <- as.numeric(domainInfo[i, c("xstart", "xend")])
-    yDom <- as.numeric(domainInfo[i, c("yend", "ystart")])
+    yDom <- as.numeric(domainInfo[i, c("ystart", "yend")])
     reScale <- function(old, new) {
       sort(scales::rescale(
         old %||% c(0, 1), new, from = c(0, 1)
@@ -395,8 +395,8 @@ get_domains <- function(nplots = 1, nrows = 1, margins = 0.01,
   for (i in seq_len(nplots)) {
     j <- ceiling(i / ncols)
     ys[[i]] <- c(
-      ystart = 1 - (heights[j]) - if (j == 1) 0 else margins[3],
-      yend = 1 - (heights[j + 1]) + if (j == nrows) 0 else margins[4]
+      ystart = 1 - (heights[j + 1]) + if (j == nrows) 0 else margins[4],
+      yend = 1 - (heights[j]) - if (j == 1) 0 else margins[3]
     )
   }
   list2df(Map(c, xz, ys))
@@ -415,7 +415,7 @@ list2df <- function(x, nms) {
 reposition <- function(obj, domains) {
   # we need x and y in order to rescale them!
   xdom <- as.numeric(domains[c("xstart", "xend")])
-  ydom <- as.numeric(domains[c("yend", "ystart")])
+  ydom <- as.numeric(domains[c("ystart", "yend")])
   
   for (i in seq_along(obj)) {
     o <- obj[[i]]
