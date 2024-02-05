@@ -193,7 +193,7 @@ event_data <- function(
     
   } else {
     
-    eventHasStorage <- eventID %in% names(session$userData$plotlyInputStore)
+    eventHasStorage <- eventID %in% shiny::isolate(names(session$userData$plotlyInputStore))
     
     if (!eventHasStorage) {
       # store input value as a reactive value to leverage caching
