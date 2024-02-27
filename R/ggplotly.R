@@ -469,6 +469,15 @@ gg2list <- function(p, width = NULL, height = NULL,
   for (i in elements) {
     theme[[i]] <- ggplot2::calc_element(i, theme)
   }
+  # ensure element_text() sizes are interpreted as "points" and defaults to 
+  # "Helvetica" familyfont
+  isTextElement <- vapply(theme, inherits, logical(1), "element_text")
+  textElements <- names(isTextElement)[isTextElement]
+  for (i in textElements) {
+    theme[[i]]$size <- grid::unit(theme[[i]]$size, "points")
+    if (identical(theme[[i]]$family, "")) theme[[i]]$family <- "Helvetica"
+  }
+  
   # Translate plot wide theme elements to plotly.js layout
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
