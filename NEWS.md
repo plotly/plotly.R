@@ -1,5 +1,9 @@
 # plotly (development version)
 
+## Bug fixes
+
+* Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
+
 # 4.10.4
 
 ## Improvements
