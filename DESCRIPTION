@@ -65,6 +65,7 @@ Suggests:
     webshot,
     listviewer,
     dendextend,
+    s2,
     sf,
     png,
     IRdisplay,
