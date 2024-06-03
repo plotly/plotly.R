@@ -1397,7 +1397,8 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
       linetype = lty2dash(rekt$linetype)
     ),
     yref = "paper",
-    xref = "paper"
+    xref = "paper",
+    layer = "below"
   )
 }
 
