@@ -463,18 +463,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     assign(var, built_env[[var]], envir = envir)
   }
   
-  # Get the "complete" set of theme elements and calculate their values
-  if (is.function(asNamespace("ggplot2")$complete_theme)) {
-    theme <- ggplot2::complete_theme(plot$theme)
-    elements <- names(theme)
-  } else {
-    theme <- ggfun("plot_theme")(plot)
-    elements <- names(which(sapply(theme, inherits, "element")))
-  }
-  
-  for (i in elements) {
-    theme[[i]] <- ggplot2::calc_element(i, theme)
-  }
+  theme <- calculated_theme_elements(plot)
   
   # Translate plot wide theme elements to plotly.js layout
   pm <- unitConvert(theme$plot.margin, "pixels")
@@ -1160,6 +1149,23 @@ gg2list <- function(p, width = NULL, height = NULL,
 
 # Due to the non-standard use of assign() in g2list() (above)
 utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "sets"))
+
+# Get the "complete" set of theme elements and their calculated values
+calculated_theme_elements <- function(plot) {
+  if (is.function(asNamespace("ggplot2")$complete_theme)) {
+    theme <- ggplot2::complete_theme(plot$theme)
+    elements <- names(theme)
+  } else {
+    theme <- ggfun("plot_theme")(plot)
+    elements <- names(which(sapply(theme, inherits, "element")))
+  }
+  
+  for (i in elements) {
+    theme[[i]] <- ggplot2::calc_element(i, theme)
+  }
+  
+  theme
+}
 
 
 #-----------------------------------------------------------------------------
