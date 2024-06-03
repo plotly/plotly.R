@@ -45,13 +45,14 @@ method for converting R plots into static images. \code{save_image()} provides a
 \section{Installation}{
 
 
-\code{kaleido()} requires \href{https://github.com/plotly/Kaleido/}{the kaleido python package} to be usable via the \pkg{reticulate} package. Here is a recommended way to do the installation:
+\code{kaleido()} requires \href{https://github.com/plotly/Kaleido/}{the kaleido python package} to be usable via the
+\pkg{reticulate} package. If you're starting from scratch, you install
+eveything you need with the following R code:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{install.packages('reticulate')
-reticulate::install_miniconda()
-reticulate::conda_install('r-reticulate', 'python-kaleido')
-reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
-reticulate::use_miniconda('r-reticulate')
+\if{html}{\out{<div class="sourceCode">}}\preformatted{install.packages("reticulate")
+library(reticulate)
+use_python(install_python())
+py_install(c("kaleido", "plotly"))
 }\if{html}{\out{</div>}}
 }
 

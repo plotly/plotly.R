@@ -21,7 +21,7 @@ jpeg/png/pdf arguments are passed along to \code{webshot::webshot()}.
 Otherwise, they are ignored.}
 }
 \description{
-This function is in the process of being deprecated (use \link{orca} instead).
+This function is deprecated, use \link{save_image} instead.
 }
 \details{
 For SVG plots, a screenshot is taken via \code{webshot::webshot()}.

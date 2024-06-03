@@ -8,14 +8,15 @@
 #' @section Installation:
 #' 
 #' `kaleido()` requires [the kaleido python
-#' package](https://github.com/plotly/Kaleido/) to be usable via the \pkg{reticulate} package. Here is a recommended way to do the installation:
+#' package](https://github.com/plotly/Kaleido/) to be usable via the
+#' \pkg{reticulate} package. If you're starting from scratch, you install
+#' eveything you need with the following R code:
 #' 
 #' ```
-#' install.packages('reticulate')
-#' reticulate::install_miniconda()
-#' reticulate::conda_install('r-reticulate', 'python-kaleido')
-#' reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
-#' reticulate::use_miniconda('r-reticulate')
+#' install.packages("reticulate")
+#' library(reticulate)
+#' use_python(install_python())
+#' py_install(c("kaleido", "plotly"))
 #' ```
 #' 
 #' @param ... not currently used.
@@ -65,16 +66,40 @@ save_image <- function(p, file, ..., width = NULL, height = NULL, scale = NULL) 
 #' @rdname save_image
 #' @export
 kaleido <- function(...) {
-  if (!rlang::is_installed("reticulate")) {
-    stop("`kaleido()` requires the reticulate package.")
+  rlang::check_installed("reticulate")
+  
+  call_env <- rlang::caller_env()
+  
+  if (!reticulate::py_available()) {
+    rlang::abort(c("`{reticulate}` wasn't able to find a Python environment.",
+      i = "If you have an existing Python installation, use `reticulate::use_python()` to inform `{reticulate}` of it.",
+      i = "To have `{reticulate}` install Python for you, `reticulate::install_python()`."
+    ), call = call_env)
   }
-  if (!reticulate::py_available(initialize = TRUE)) {
-    stop("`kaleido()` requires `reticulate::py_available()`  to be `TRUE`. Do you need to install python?")
-  }
+  
+  tryCatch(
+    reticulate::import("plotly"),
+    error = function(e) {
+      rlang::abort(c(
+        "The `plotly` Python package is required for static image exporting.",
+        i = "Please install it via `reticulate::py_install('plotly')`."
+      ), call = call_env)
+    }
+  )
+  
+  kaleido <- tryCatch(
+    reticulate::import("kaleido"),
+    error = function(e) {
+      rlang::abort(c(
+        "The `kaleido` Python package is required for static image exporting.",
+        i = "Please install it via `reticulate::py_install('kaleido')`."
+      ), call = call_env)
+    }
+  )
   
   py <- reticulate::py
   scope_name <- paste0("scope_", new_id())
-  py[[scope_name]] <- reticulate::import("kaleido")$scopes$plotly$PlotlyScope(
+  py[[scope_name]] <- kaleido$scopes$plotly$PlotlyScope(
     plotlyjs = plotlyMainBundlePath()
   )
   

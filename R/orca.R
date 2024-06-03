@@ -1,6 +1,6 @@
 #' Static image exporting via orca
 #' 
-#' Superseded by [kaleido()].
+#' This function is deprecated, use [save_image()] instead.
 #' 
 #' @param p a plotly object.
 #' @param file output filename.
@@ -60,7 +60,7 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
                  safe = FALSE, more_args = NULL, ...) {
   
-  .Deprecated("kaleido")
+  .Deprecated("save_image")
   
   orca_available()
   

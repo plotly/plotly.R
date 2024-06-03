@@ -80,7 +80,7 @@ for specifying display and/or electron options, such as \code{--enable-webgl} or
 \item{quiet}{Suppress all logging info.}
 }
 \description{
-Superseded by \code{\link[=kaleido]{kaleido()}}.
+This function is deprecated, use \code{\link[=save_image]{save_image()}} instead.
 }
 \section{Methods}{
 
