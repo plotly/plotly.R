@@ -1421,6 +1421,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
     # N.B. ggplot2 >v3.4.2 (specifically #4879) renamed bar to decor and also 
     # started returning normalized values for the key field
     decor <- gdef$decor %||% gdef$bar
+    decor$value <- decor$value %||% decor$max
     rng <- range(decor$value)
     decor$value <- scales::rescale(decor$value, from = rng)
     if (!"decor" %in% names(gdef)) {
