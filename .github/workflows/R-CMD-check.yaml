@@ -66,13 +66,6 @@ jobs:
         run: |
           Rscript -e 'library(reticulate); use_python(install_python()); py_install(c("kaleido", "plotly"))'
         
-      - name: Install shinytest deps
-        if: matrix.config.shinytest == true
-        run: |
-          Rscript -e 'shinytest::installDependencies()'
-          R CMD install .
-        shell: bash
-        
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
         run: |

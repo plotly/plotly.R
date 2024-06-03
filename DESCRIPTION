@@ -57,7 +57,7 @@ Suggests:
     testthat,
     knitr,
     shiny (>= 1.1.0),
-    shinytest (>= 1.3.0),
+    shinytest2,
     curl,
     rmarkdown,
     Cairo,
