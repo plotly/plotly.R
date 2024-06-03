@@ -29,7 +29,7 @@ jobs:
           # vdiffr & shinytest only runs on mac r-release since the results aren't cross-platform
           - {os: macOS-latest,   r: 'release', visual_tests: true, node: "14.x", shinytest: true}
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: 'oldrel-1'}
+          # - {os: windows-latest, r: 'oldrel-1'} # pak is having issues
           - {os: ubuntu-latest,   r: 'devel'}
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
