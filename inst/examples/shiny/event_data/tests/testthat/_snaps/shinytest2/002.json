@@ -1,0 +1,496 @@
+{
+  "input": {
+    ".clientValue-default-plotlyCrosstalkOpts": {
+      "on": "plotly_click",
+      "persistent": false,
+      "dynamic": false,
+      "selectize": false,
+      "opacityDim": 0.2,
+      "selected": {
+        "opacity": 1
+      },
+      "debounce": 0,
+      "color": [
+
+      ]
+    },
+    "plotType": "ggplotly",
+    "plotly_afterplot-A": "\"plot\"",
+    "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
+    "plotly_hover-A": null,
+    "plotly_relayout-A": "{\"width\":962,\"height\":400}"
+  },
+  "output": {
+    "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
+    "brushing": "[1] \"Brush extents appear here (double-click to clear)\"",
+    "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
+    "hover": "[1] \"Hover events appear here (unhover to clear)\"",
+    "plot": {
+      "x": {
+        "data": [
+          {
+            "x": [
+              21,
+              21,
+              22.800000000000001,
+              21.399999999999999,
+              18.699999999999999,
+              18.100000000000001,
+              14.300000000000001,
+              24.399999999999999,
+              22.800000000000001,
+              19.199999999999999,
+              17.800000000000001,
+              16.399999999999999,
+              17.300000000000001,
+              15.199999999999999,
+              10.4,
+              10.4,
+              14.699999999999999,
+              32.399999999999999,
+              30.399999999999999,
+              33.899999999999999,
+              21.5,
+              15.5,
+              15.199999999999999,
+              13.300000000000001,
+              19.199999999999999,
+              27.300000000000001,
+              26,
+              30.399999999999999,
+              15.800000000000001,
+              19.699999999999999,
+              15,
+              21.399999999999999
+            ],
+            "y": [
+              2.6200000000000001,
+              2.875,
+              2.3199999999999998,
+              3.2149999999999999,
+              3.4399999999999999,
+              3.46,
+              3.5699999999999998,
+              3.1899999999999999,
+              3.1499999999999999,
+              3.4399999999999999,
+              3.4399999999999999,
+              4.0700000000000003,
+              3.73,
+              3.7799999999999998,
+              5.25,
+              5.4240000000000004,
+              5.3449999999999998,
+              2.2000000000000002,
+              1.615,
+              1.835,
+              2.4649999999999999,
+              3.52,
+              3.4350000000000001,
+              3.8399999999999999,
+              3.8450000000000002,
+              1.9350000000000001,
+              2.1400000000000001,
+              1.5129999999999999,
+              3.1699999999999999,
+              2.77,
+              3.5699999999999998,
+              2.7799999999999998
+            ],
+            "text": [
+              "mpg: 21.0<br />wt: 2.620<br />nms: Mazda RX4",
+              "mpg: 21.0<br />wt: 2.875<br />nms: Mazda RX4 Wag",
+              "mpg: 22.8<br />wt: 2.320<br />nms: Datsun 710",
+              "mpg: 21.4<br />wt: 3.215<br />nms: Hornet 4 Drive",
+              "mpg: 18.7<br />wt: 3.440<br />nms: Hornet Sportabout",
+              "mpg: 18.1<br />wt: 3.460<br />nms: Valiant",
+              "mpg: 14.3<br />wt: 3.570<br />nms: Duster 360",
+              "mpg: 24.4<br />wt: 3.190<br />nms: Merc 240D",
+              "mpg: 22.8<br />wt: 3.150<br />nms: Merc 230",
+              "mpg: 19.2<br />wt: 3.440<br />nms: Merc 280",
+              "mpg: 17.8<br />wt: 3.440<br />nms: Merc 280C",
+              "mpg: 16.4<br />wt: 4.070<br />nms: Merc 450SE",
+              "mpg: 17.3<br />wt: 3.730<br />nms: Merc 450SL",
+              "mpg: 15.2<br />wt: 3.780<br />nms: Merc 450SLC",
+              "mpg: 10.4<br />wt: 5.250<br />nms: Cadillac Fleetwood",
+              "mpg: 10.4<br />wt: 5.424<br />nms: Lincoln Continental",
+              "mpg: 14.7<br />wt: 5.345<br />nms: Chrysler Imperial",
+              "mpg: 32.4<br />wt: 2.200<br />nms: Fiat 128",
+              "mpg: 30.4<br />wt: 1.615<br />nms: Honda Civic",
+              "mpg: 33.9<br />wt: 1.835<br />nms: Toyota Corolla",
+              "mpg: 21.5<br />wt: 2.465<br />nms: Toyota Corona",
+              "mpg: 15.5<br />wt: 3.520<br />nms: Dodge Challenger",
+              "mpg: 15.2<br />wt: 3.435<br />nms: AMC Javelin",
+              "mpg: 13.3<br />wt: 3.840<br />nms: Camaro Z28",
+              "mpg: 19.2<br />wt: 3.845<br />nms: Pontiac Firebird",
+              "mpg: 27.3<br />wt: 1.935<br />nms: Fiat X1-9",
+              "mpg: 26.0<br />wt: 2.140<br />nms: Porsche 914-2",
+              "mpg: 30.4<br />wt: 1.513<br />nms: Lotus Europa",
+              "mpg: 15.8<br />wt: 3.170<br />nms: Ford Pantera L",
+              "mpg: 19.7<br />wt: 2.770<br />nms: Ferrari Dino",
+              "mpg: 15.0<br />wt: 3.570<br />nms: Maserati Bora",
+              "mpg: 21.4<br />wt: 2.780<br />nms: Volvo 142E"
+            ],
+            "customdata": [
+              "Mazda RX4",
+              "Mazda RX4 Wag",
+              "Datsun 710",
+              "Hornet 4 Drive",
+              "Hornet Sportabout",
+              "Valiant",
+              "Duster 360",
+              "Merc 240D",
+              "Merc 230",
+              "Merc 280",
+              "Merc 280C",
+              "Merc 450SE",
+              "Merc 450SL",
+              "Merc 450SLC",
+              "Cadillac Fleetwood",
+              "Lincoln Continental",
+              "Chrysler Imperial",
+              "Fiat 128",
+              "Honda Civic",
+              "Toyota Corolla",
+              "Toyota Corona",
+              "Dodge Challenger",
+              "AMC Javelin",
+              "Camaro Z28",
+              "Pontiac Firebird",
+              "Fiat X1-9",
+              "Porsche 914-2",
+              "Lotus Europa",
+              "Ford Pantera L",
+              "Ferrari Dino",
+              "Maserati Bora",
+              "Volvo 142E"
+            ],
+            "type": "scatter",
+            "mode": "markers",
+            "marker": {
+              "autocolorscale": false,
+              "color": "rgba(0,0,0,1)",
+              "opacity": 1,
+              "size": 5.6692913385826778,
+              "symbol": "circle",
+              "line": {
+                "width": 1.8897637795275593,
+                "color": "rgba(0,0,0,1)"
+              }
+            },
+            "hoveron": "points",
+            "showlegend": false,
+            "xaxis": "x",
+            "yaxis": "y",
+            "hoverinfo": "text",
+            "frame": null
+          }
+        ],
+        "layout": {
+          "margin": {
+            "t": 25.74124809741248,
+            "r": 7.3059360730593621,
+            "b": 39.69558599695587,
+            "l": 31.415525114155255
+          },
+          "plot_bgcolor": "rgba(235,235,235,1)",
+          "paper_bgcolor": "rgba(255,255,255,1)",
+          "font": {
+            "color": "rgba(0,0,0,1)",
+            "family": "",
+            "size": 14.611872146118724
+          },
+          "xaxis": {
+            "domain": [
+              0,
+              1
+            ],
+            "automargin": true,
+            "type": "linear",
+            "autorange": false,
+            "range": [
+              9.2249999999999996,
+              35.074999999999996
+            ],
+            "tickmode": "array",
+            "ticktext": [
+              "10",
+              "15",
+              "20",
+              "25",
+              "30",
+              "35"
+            ],
+            "tickvals": [
+              10,
+              15,
+              20,
+              25,
+              30,
+              35
+            ],
+            "categoryorder": "array",
+            "categoryarray": [
+              "10",
+              "15",
+              "20",
+              "25",
+              "30",
+              "35"
+            ],
+            "nticks": null,
+            "ticks": "outside",
+            "tickcolor": "rgba(51,51,51,1)",
+            "ticklen": 3.6529680365296811,
+            "tickwidth": 0.66417600664176002,
+            "showticklabels": true,
+            "tickfont": {
+              "color": "rgba(77,77,77,1)",
+              "family": "",
+              "size": 11.68949771689498
+            },
+            "tickangle": 0,
+            "showline": false,
+            "linecolor": null,
+            "linewidth": 0,
+            "showgrid": true,
+            "gridcolor": "rgba(255,255,255,1)",
+            "gridwidth": 0.66417600664176002,
+            "zeroline": false,
+            "anchor": "y",
+            "title": {
+              "text": "mpg",
+              "font": {
+                "color": "rgba(0,0,0,1)",
+                "family": "",
+                "size": 14.611872146118724
+              }
+            },
+            "hoverformat": ".2f"
+          },
+          "yaxis": {
+            "domain": [
+              0,
+              1
+            ],
+            "automargin": true,
+            "type": "linear",
+            "autorange": false,
+            "range": [
+              1.3174499999999998,
+              5.6195500000000003
+            ],
+            "tickmode": "array",
+            "ticktext": [
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "tickvals": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "categoryorder": "array",
+            "categoryarray": [
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "nticks": null,
+            "ticks": "outside",
+            "tickcolor": "rgba(51,51,51,1)",
+            "ticklen": 3.6529680365296811,
+            "tickwidth": 0.66417600664176002,
+            "showticklabels": true,
+            "tickfont": {
+              "color": "rgba(77,77,77,1)",
+              "family": "",
+              "size": 11.68949771689498
+            },
+            "tickangle": 0,
+            "showline": false,
+            "linecolor": null,
+            "linewidth": 0,
+            "showgrid": true,
+            "gridcolor": "rgba(255,255,255,1)",
+            "gridwidth": 0.66417600664176002,
+            "zeroline": false,
+            "anchor": "x",
+            "title": {
+              "text": "wt",
+              "font": {
+                "color": "rgba(0,0,0,1)",
+                "family": "",
+                "size": 14.611872146118724
+              }
+            },
+            "hoverformat": ".2f"
+          },
+          "shapes": [
+            {
+              "type": "rect",
+              "fillcolor": null,
+              "line": {
+                "color": null,
+                "width": 0,
+                "linetype": [
+
+                ]
+              },
+              "yref": "paper",
+              "xref": "paper",
+              "x0": 0,
+              "x1": 1,
+              "y0": 0,
+              "y1": 1
+            }
+          ],
+          "showlegend": false,
+          "legend": {
+            "bgcolor": "rgba(255,255,255,1)",
+            "bordercolor": "transparent",
+            "borderwidth": 1.8897637795275593,
+            "font": {
+              "color": "rgba(0,0,0,1)",
+              "family": "",
+              "size": 11.68949771689498
+            }
+          },
+          "hovermode": "closest",
+          "barmode": "relative",
+          "dragmode": "select"
+        },
+        "config": {
+          "doubleClick": "reset",
+          "modeBarButtonsToAdd": [
+            "hoverclosest",
+            "hovercompare"
+          ],
+          "showSendToCloud": false
+        },
+        "source": "A",
+        "shinyEvents": [
+          "plotly_hover",
+          "plotly_click",
+          "plotly_selected",
+          "plotly_relayout",
+          "plotly_brushed",
+          "plotly_brushing",
+          "plotly_clickannotation",
+          "plotly_doubleclick",
+          "plotly_deselect",
+          "plotly_afterplot",
+          "plotly_sunburstclick",
+          "plotly_selecting"
+        ],
+        "highlight": {
+          "on": "plotly_click",
+          "persistent": false,
+          "dynamic": false,
+          "selectize": false,
+          "opacityDim": 0.20000000000000001,
+          "selected": {
+            "opacity": 1
+          },
+          "debounce": 0
+        },
+        "base_url": "https://plot.ly"
+      },
+      "evals": [
+
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "setprototypeof",
+          "version": "0.1",
+          "src": {
+            "href": "setprototypeof-0.1"
+          },
+          "meta": null,
+          "script": "setprototypeof.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "typedarray",
+          "version": "0.1",
+          "src": {
+            "href": "typedarray-0.1"
+          },
+          "meta": null,
+          "script": "typedarray.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "jquery",
+          "version": "3.5.1",
+          "src": {
+            "href": "jquery-3.5.1"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.2.1",
+          "src": {
+            "href": "crosstalk-1.2.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "plotly-htmlwidgets-css",
+          "version": "2.11.1",
+          "src": {
+            "href": "plotly-htmlwidgets-css-2.11.1"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "plotly-htmlwidgets.css",
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "plotly-main",
+          "version": "2.11.1",
+          "src": {
+            "href": "plotly-main-2.11.1"
+          },
+          "meta": null,
+          "script": "plotly-latest.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        }
+      ]
+    },
+    "selected": "[1] \"Brushed points appear here (double-click to clear)\"",
+    "selecting": "[1] \"Brush points appear here (double-click to clear)\""
+  },
+  "export": {
+
+  }
+}
