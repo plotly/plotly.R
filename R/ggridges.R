@@ -1,10 +1,10 @@
-#' Get data for ridge plots
-#'
-#' @param data dataframe, the data returned by `ggplot2::ggplot_build()`.
-#' @param na.rm boolean, from params
-#'
-#' @return dataframe containing plotting data 
-#'
+# Get data for ridge plots
+#
+# @param data dataframe, the data returned by `ggplot2::ggplot_build()`.
+# @param na.rm boolean, from params
+#
+# @return dataframe containing plotting data 
+#
 get_ridge_data <- function(data, na.rm) {
   if (isTRUE(na.rm)) {
     data <- data[stats::complete.cases(data[c("x", "ymin", "ymax")]), ]
@@ -27,9 +27,9 @@ get_ridge_data <- function(data, na.rm) {
 }
 
 
-#' Prepare plotting data for ggridges
-#' @param closed boolean, should the polygon be closed at bottom (TRUE for
-#'   geom_density_ridges2, FALSE for geom_density_ridges)
+# Prepare plotting data for ggridges
+# @param closed boolean, should the polygon be closed at bottom (TRUE for
+#   geom_density_ridges2, FALSE for geom_density_ridges)
 prepare_ridge_chart <- function(data, prestats_data, layout, params, p, closed = FALSE, ...) {
   d <- get_ridge_data(data, params$na.rm)
   
