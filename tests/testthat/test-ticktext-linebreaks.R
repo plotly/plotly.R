@@ -2,11 +2,7 @@
 # Compute margin
 comp_margin <- function(gg, axisTickText) {
   plot <- ggfun("plot_clone")(gg)
-  theme <- ggfun("plot_theme")(plot)
-  elements <- names(which(sapply(theme, inherits, "element")))
-  for (i in elements) {
-    theme[[i]] <- ggplot2::calc_element(i, theme)
-  }
+  theme <- calculated_theme_elements(plot)
   
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(

@@ -1,6 +1,29 @@
 {
   "input": {
-    "plotType": "ggplotly"
+    ".clientValue-default-plotlyCrosstalkOpts": {
+      "on": "plotly_click",
+      "persistent": false,
+      "dynamic": false,
+      "selectize": false,
+      "opacityDim": 0.2,
+      "selected": {
+        "opacity": 1
+      },
+      "debounce": 0,
+      "color": [
+
+      ]
+    },
+    "plotType": "ggplotly",
+    "plotly_afterplot-A": "\"plot\"",
+    "plotly_brushed-A": null,
+    "plotly_brushing-A": null,
+    "plotly_click-A": null,
+    "plotly_deselect-A": "\"plot\"",
+    "plotly_hover-A": null,
+    "plotly_relayout-A": "{\"width\":962,\"height\":400}",
+    "plotly_selected-A": null,
+    "plotly_selecting-A": null
   },
   "output": {
     "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",

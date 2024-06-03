@@ -23,5 +23,5 @@ test_that("event_data shiny app works", {
   skip_shinytest_tests()
   
   appdir <- system.file(package = "plotly", "examples", "shiny", "event_data")
-  shinytest::expect_pass(shinytest::testApp(appdir))
+  shiny::runTests(appdir)
 })

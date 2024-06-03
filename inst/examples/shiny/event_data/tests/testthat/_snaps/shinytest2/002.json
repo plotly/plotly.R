@@ -14,19 +14,15 @@
 
       ]
     },
+    "plotType": "ggplotly",
     "plotly_afterplot-A": "\"plot\"",
-    "plotly_brushed-A": "{\"x\":[23.95978500551268,25.98332414553473],\"y\":[3.0020072289156627,3.5073743975903615]}",
-    "plotly_brushing-A": "{\"x\":[23.95978500551268,25.98332414553473],\"y\":[3.0020072289156627,3.5073743975903615]}",
     "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_hover-A": null,
-    "plotly_relayout-A": "{\"width\":962,\"height\":400}",
-    "plotly_selected-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
-    "plotly_selecting-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
-    "plotType": "ggplotly"
+    "plotly_relayout-A": "{\"width\":962,\"height\":400}"
   },
   "output": {
-    "brushed": "$x\n[1] 23.95979 25.98332\n\n$y\n[1] 3.002007 3.507374",
-    "brushing": "$x\n[1] 23.95979 25.98332\n\n$y\n[1] 3.002007 3.507374",
+    "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
+    "brushing": "[1] \"Brush extents appear here (double-click to clear)\"",
     "click": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
     "hover": "[1] \"Hover events appear here (unhover to clear)\"",
     "plot": {
@@ -491,8 +487,8 @@
         }
       ]
     },
-    "selected": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D",
-    "selecting": "  curveNumber pointNumber    x    y customdata\n1           0           7 24.4 3.19  Merc 240D"
+    "selected": "[1] \"Brushed points appear here (double-click to clear)\"",
+    "selecting": "[1] \"Brush points appear here (double-click to clear)\""
   },
   "export": {
 
