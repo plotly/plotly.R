@@ -42,7 +42,7 @@ test_that("Throws an informative error if wrong bundle is specified", {
   
   expect_error(
     partial_bundle(p1, type = "basic"),
-    "The 'basic' bundle supports the following trace types: 'scatter', 'bar', 'pie'"
+    "The 'basic' bundle supports the following trace types: 'bar', 'pie', 'scatter'"
   )
 })
 
