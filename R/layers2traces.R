@@ -1,7 +1,12 @@
 # layer -> trace conversion
 layers2traces <- function(data, prestats_data, layout, p) {
   # Attach a "geom class" to each layer of data for method dispatch
-  data <- Map(function(x, y) prefix_class(x, class(y$geom)[1]), data, p$layers)
+  data <- Map(function(x, y) {
+    cl <- class(y$geom)[1]
+    # is this layer coming from plotly::geom_boxplot2()?
+    cl <- if (isTRUE(y$plotlyGeomBoxplot2)) "GeomBoxplot2" else cl
+    prefix_class(x, cl)
+  }, data, p$layers)
   
   # Extract parameters (and "hovertext aesthetics") in each layer
   params <- Map(function(x, y) {
@@ -212,6 +217,105 @@ to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
 
 #' @export
 to_basic.GeomBoxplot <- function(data, prestats_data, layout, params, p, ...) {
+  # Code adapted from GeomBoxplot$draw_group()
+  data$fill <- scales::alpha(data$fill, data$alpha)
+  data$hovertext <- NULL
+  whiskers <- dplyr::bind_rows(
+    dplyr::mutate(data, xend = x, y = upper, yend = ymax),
+    dplyr::mutate(data, xend = x, y = lower, yend = ymin)
+  )
+  box <- dplyr::mutate(
+    data,
+    ymin = lower, 
+    y = middle, 
+    ymax = upper, 
+    ynotchlower = ifelse(params$notch, notchlower, NA), 
+    ynotchupper = ifelse(params$notch, notchupper, NA), 
+    notchwidth = params$notchwidth
+  )
+  outliers <- if (length(data$outliers) && !is.na(params$outlier.shape)) {
+    tidyr::unnest(data) %>%
+      dplyr::mutate(
+        y = outliers,
+        # TODO: respect tooltip
+        hovertext = paste("x:", x, "y:", y),
+        colour = params$outlier.colour %||% colour, 
+        fill = params$outlier.fill %||% fill, 
+        shape = params$outlier.shape %||% shape, 
+        size = params$outlier.size %||% size, 
+        stroke = params$outlier.stroke %||% stroke,
+        alpha = params$outlier.alpha %||% alpha
+      )
+  }
+  # place an invisible marker at the boxplot middle 
+  # for some sensible hovertext
+  hover_pts <- data %>% 
+    dplyr::mutate(
+      # TODO: 
+      # (1) respect tooltip argument
+      # (2) include varwidth and/or notch information, if relevant
+      hovertext = paste(
+        paste("Max:", format(ymax)),
+        paste("Upper:", format(upper)),
+        paste("Middle:", format(middle)),
+        paste("Lower:", format(lower)),
+        paste("Min:", format(ymin)),
+        sep = br()
+      ),
+      alpha = 0
+    ) %>%
+    dplyr::select(PANEL, x, y = middle, hovertext, alpha, fill)
+  
+  # If boxplot has notches, it needs to drawn as a polygon (instead of a crossbar/rect)
+  # This code is adapted from GeomCrossbar$draw_panel()
+  box_dat <- if (!params$notch) {
+    to_basic.GeomCrossbar(box, params = params)
+  } else {
+    # fatten is a parameter to GeomCrossbar$draw_panel() and is always 2 when called from GeomBoxplot$draw_panel()
+    fatten <- 2
+    middle <- transform(
+      box, x = xmin, xend = xmax, yend = y, 
+      size = size * fatten, alpha = NA
+    )
+    if (box$ynotchlower < box$ymin || box$ynotchupper > box$ymax) 
+      message("notch went outside hinges. Try setting notch=FALSE.")
+    notchindent <- (1 - box$notchwidth) * (box$xmax - box$xmin)/2
+    middle$x <- middle$x + notchindent
+    middle$xend <- middle$xend - notchindent
+    
+    box$notchindent <- notchindent
+    boxes <- split(box, seq_len(nrow(box)))
+    box <- dplyr::bind_rows(lapply(boxes, function(b) {
+      dplyr::bind_rows(
+        dplyr::mutate(b, x = xmin,               y = ymax),
+        dplyr::mutate(b, x = xmin,               y = notchupper),
+        dplyr::mutate(b, x = xmin + notchindent, y = middle),
+        dplyr::mutate(b, x = xmin,               y = notchlower),
+        dplyr::mutate(b, x = xmin,               y = ymin),
+        dplyr::mutate(b, x = xmax,               y = ymin),
+        dplyr::mutate(b, x = xmax,               y = notchlower),
+        dplyr::mutate(b, x = xmax - notchindent, y = middle),
+        dplyr::mutate(b, x = xmax,               y = notchupper),
+        dplyr::mutate(b, x = xmax,               y = ymax)
+      )
+    }))
+    
+    list(
+      prefix_class(box, "GeomPolygon"),
+      to_basic.GeomSegment(middle)
+    )
+  }
+  # box_dat is list of 2 data frames
+  c(
+    box_dat, 
+    list(to_basic.GeomSegment(whiskers)), 
+    list(prefix_class(hover_pts, "GeomPoint")), 
+    if (length(outliers)) list(prefix_class(outliers, "GeomPoint"))
+  )
+}
+
+#' @export
+to_basic.GeomBoxplot2 <- function(data, prestats_data, layout, params, p, ...) {
   aez <- names(GeomBoxplot$default_aes)
   for (i in aez) {
     prestats_data[[i]] <- NULL
@@ -865,7 +969,7 @@ geom2trace.GeomPolygon <- function(data, params, p) {
 }
 
 #' @export
-geom2trace.GeomBoxplot <- function(data, params, p) {
+geom2trace.GeomBoxplot2 <- function(data, params, p) {
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
@@ -895,6 +999,57 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       width = aes2plotly(data, params, linewidth_or_size(GeomBoxplot))
     )
   ))
+}
+
+#' @export
+geom2trace.GeomBoxplot <- function(data, params, p) {
+  trace <- compact(list(
+    x = data[["x"]],
+    y = data[["y"]],
+    hoverinfo = "y",
+    key = data[["key"]],
+    customdata = data[["customdata"]],
+    frame = data[["frame"]],
+    ids = data[["ids"]],
+    type = "box",
+    notched = params[["notch"]],
+    notchwidth = params[["notchwidth"]],
+    fillcolor = toRGB(
+      aes2plotly(data, params, "fill"),
+      aes2plotly(data, params, "alpha")
+    ),
+    line = list(
+      color = aes2plotly(data, params, "colour"),
+      width = aes2plotly(data, params, "size")
+    )
+  ))
+  
+  # handle special `outlier.shape=NA` case
+  if (is.na(params$outlier.shape)) {
+    params$outlier.alpha <- 0
+  }
+  
+  # redefine aes meaning using outlier params
+  data$alpha  <- params$outlier.alpha %||% data$alpha
+  data$fill   <- params$outlier.fill %||% data$fill
+  data$shape  <- params$outlier.shape %||% data$shape
+  data$stroke <- params$outlier.stroke %||% data$stroke
+  data$colour <- params$outlier.colour %||% data$colour
+  data$size   <- params$outlier.size %||% data$size
+  
+  trace$marker <- list(
+    opacity = aes2plotly(data, params, "alpha"),
+    # I don't think this is relevant if line.color is defined?
+    color = aes2plotly(data, params, "fill"),
+    symbol = aes2plotly(data, params, "shape"),
+    line = list(
+      width = aes2plotly(data, params, "stroke"),
+      color = aes2plotly(data, params, "colour")
+    ),
+    size = aes2plotly(data, params, "size")
+  )
+  
+  trace
 }
 
 
@@ -1109,7 +1264,6 @@ aes2plotly <- function(data, params, aes = "size") {
     # https://github.com/ropensci/plotly/pull/1481
     if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
   }
-  
   vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
   converter <- switch(
     aes, 
