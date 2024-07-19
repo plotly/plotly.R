@@ -1096,21 +1096,26 @@ ribbon_dat <- function(dat) {
 aes2plotly <- function(data, params, aes = "size") {
   geom <- class(data)[1]
   
-  # Hack to support this geom_sf hack 
-  # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
-  defaults <- if (inherits(data, "GeomSf")) {
-    type <- if (any(grepl("[P-p]oint", class(data)))) "point" else if (any(grepl("[L-l]ine", class(data)))) "line" else ""
-    ggfun("default_aesthetics")(type)
-  } else {
-    geom_obj <- ggfun(geom)
-    # If the first class of `data` is a data.frame,
-    # ggfun() returns a function because ggplot2 now
-    # defines data.frame in it's namespace
-    # https://github.com/ropensci/plotly/pull/1481
-    if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
-  }
+  vals <- uniq(data[[aes]]) %||% params[[aes]]
   
-  vals <- uniq(data[[aes]]) %||% params[[aes]] %||% defaults[[aes]] %||% NA
+  if (is.null(vals)) {
+    # Hack to support this geom_sf hack 
+    # https://github.com/tidyverse/ggplot2/blob/505e4bfb/R/sf.R#L179-L187
+    defaults <- if (inherits(data, "GeomSf")) {
+      type <- if (any(grepl("[P-p]oint", class(data)))) "point" else if (any(grepl("[L-l]ine", class(data)))) "line" else ""
+      ggfun("default_aesthetics")(type)
+    } else {
+      geom_obj <- ggfun(geom)
+      # If the first class of `data` is a data.frame,
+      # ggfun() returns a function because ggplot2 now
+      # defines data.frame in it's namespace
+      # https://github.com/ropensci/plotly/pull/1481
+      if ("default_aes" %in% names(geom_obj)) geom_obj$default_aes else NULL
+    }
+    vals <- defaults[[aes]]
+  }
+  vals <- vals %||% NA
+  
   converter <- switch(
     aes, 
     size = mm2pixels,
