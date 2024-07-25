@@ -1,21 +1,18 @@
-library(httr)
-library(rprojroot)
-
 # get zip URL to latest plotly.js release
-x <- RETRY(
+x <- httr::RETRY(
   verb = "GET",
   url = 'https://api.github.com/repos/plotly/plotly.js/releases/latest',
   times = 5,
   terminate_on = c(400, 401, 403, 404),
   terminate_on_success = TRUE
 )
-zip <- content(x)$zipball_url
+zip <- httr::content(x)$zipball_url
 
 # remember where to copy over assets
-pkg_dir <- find_package_root_file()
-lib_dir <- find_package_root_file("inst/htmlwidgets/lib/plotlyjs")
+pkg_dir <- rprojroot::find_package_root_file()
+lib_dir <- rprojroot::find_package_root_file("inst/htmlwidgets/lib/plotlyjs")
 patches <- list.files(
-  find_package_root_file("tools/patches"), 
+  rprojroot::find_package_root_file("tools/patches"), 
   full.names = TRUE
 )
 
@@ -25,8 +22,8 @@ dir.create(tmpdir)
 
 withr::with_dir(tmpdir, {
   # download source
-  download.file(zip, "plotly-js.zip")
-  unzip("plotly-js.zip", exdir = "plotly-js")
+  utils::download.file(zip, "plotly-js.zip")
+  utils::unzip("plotly-js.zip", exdir = "plotly-js")
   
   withr::with_dir(
     dir("plotly-js", full.names = TRUE), {
@@ -65,10 +62,29 @@ withr::with_dir(tmpdir, {
         file.path(lib_dir, "locales", sub("^plotly-locale-", "", basename(locales))),
         overwrite = TRUE
       )
-      # update plot schema
+      # update plot schema and (partial) bundles
       Schema <- jsonlite::fromJSON(Sys.glob("dist/plot-schema.json"))
+      tmp_file <- tempfile(pattern = "plotly_constants_", fileext = ".js")
+      utils::download.file(
+        url = paste0("https://raw.githubusercontent.com/plotly/plotly.js/", basename(zip), "/tasks/util/constants.js"),
+        destfile = tmp_file,
+        quiet = TRUE,
+        mode = "wb"
+      )
+      bundleTraceMap <-
+        paste0(readLines(tmp_file), collapse = "\n") |>
+        stringr::str_extract(pattern = "(?<=var partialBundleTraces = )\\{[^}]+\\}") |>
+        yaml::read_yaml(text = _)
+      
       withr::with_dir(
-        pkg_dir, usethis::use_data(Schema, overwrite = TRUE, internal = TRUE)
+        pkg_dir, usethis::use_data(
+          Schema,
+          bundleTraceMap,
+          internal = TRUE,
+          overwrite = TRUE,
+          compress = "xz",
+          version = 3L
+        )
       )
       
       # plotly.js used to bundle a typedarray polyfill to support older browsers,
@@ -81,7 +97,5 @@ withr::with_dir(tmpdir, {
       #)
       
       message("Update plotlyMainBundle()'s version with ", basename(zip))
-      
   })
-  
 })
