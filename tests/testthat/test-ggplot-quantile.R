@@ -20,7 +20,7 @@ test_that("Basic geom_quantile() works", {
     expect_equivalent(tr$type, "scatter")
     expect_equivalent(tr$mode, "lines")
     expect_equivalent(
-      tr$line$color, toRGB(GeomQuantile$default_aes[["colour"]])
+      tr$line$color, toRGB(GeomQuantile$use_defaults(NULL)[["colour"]])
     )
   }
   

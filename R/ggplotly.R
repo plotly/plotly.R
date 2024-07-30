@@ -277,6 +277,11 @@ gg2list <- function(p, width = NULL, height = NULL,
     
     # Compute aesthetics to produce data with generalised variable names
     data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
+    if (exists("setup_plot_labels", envir = asNamespace("ggplot2"))) {
+      # Mirror ggplot2/#5879
+      plot$labels <- ggfun("setup_plot_labels")(plot, layers, data)
+    }
+    
     
     # add frame to group if it exists
     data <- lapply(data, function(d) { 
