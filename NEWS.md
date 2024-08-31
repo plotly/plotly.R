@@ -12,6 +12,8 @@
 
 * Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
 
+* Closed #2385: `"parcoords"`, `"parcats"` and `"splom"` traces now work with one-dimensional data by accounting for the "data_array" property of the "values" attribute of "dimensions".
+
 # 4.10.4
 
 ## Improvements

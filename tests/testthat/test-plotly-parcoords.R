@@ -5,27 +5,15 @@ expect_traces <- function(p, n.traces, name) {
   L
 }
 
-test_that("No cartesian axes are supplied to a splom chart", {
-  
-  p <- plot_ly(
-    type = 'splom',
-    dimensions = list(
-      list(values=c(1,2,3), label="A"),
-      list(values=c(2,5,6), label="B")
-    )
-  )
-  
-})
-
 test_that("values property has a class of AsIs", {
   p <- plot_ly(
-    type = "splom",
     dimensions = list(
-      list(values = 1, label = "A"),
-      list(values = 2, label = "B")
-    )
+      list(label = "A", values = 3),
+      list(label = "B", values = 8)
+    ),
+    type = "parcoords"
   )
-  l <- expect_traces(p, 1, "parcats-data-array")
+  l <- expect_traces(p, 1, "parcoords-data-array")
   tr <- l$data[[1]]$dimensions
   expect_true(inherits(tr[[1]]$values, "AsIs"))
   expect_true(inherits(tr[[2]]$values, "AsIs"))
