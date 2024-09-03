@@ -29,7 +29,7 @@ test_that("marker color is non-transparent for open shapes", {
     grepl("open$", info$data[[1]]$marker$symbol)
   )
   expect_true(
-    info$data[[1]]$marker$color == toRGB(GeomPoint$default_aes$colour)
+    info$data[[1]]$marker$color == toRGB(GeomPoint$use_defaults(NULL)$colour)
   )
 })
 
