@@ -96,3 +96,6 @@ withr::with_dir(tmpdir, {
       message("Update plotlyMainBundle()'s version with ", basename(zip))
   })
 })
+
+# clean up
+unlink(tmpdir, recursive = TRUE)
