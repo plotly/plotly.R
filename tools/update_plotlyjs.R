@@ -66,8 +66,12 @@ withr::with_dir(tmpdir, {
       Schema <- jsonlite::fromJSON("dist/plot-schema.json")
       bundleTraceMap <-
         paste0(readLines("tasks/util/constants.js"), collapse = "\n") |>
-        stringr::str_extract(pattern = "(?<=\\b(const|var) partialBundleTraces = )\\{[^}]+\\}") |>
-        yaml::read_yaml(text = _)
+        stringr::str_extract(pattern = "(?<=\\b(const|var) partialBundleTraces = )\\{[^}]+\\}")
+      
+      if (is.na(bundleTraceMap)) {
+        stop("No `partialBundleTraces` variable definition found in Plotly source file `tasks/util/constants.js`. Does the regex pattern need an update?")
+      }
+      bundleTraceMap <- yaml::read_yaml(text = bundleTraceMap)
       
       withr::with_dir(
         pkg_dir, usethis::use_data(
