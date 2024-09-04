@@ -107,11 +107,6 @@
 #' api("folders", "POST", list(path = "/starts/at/root/and/ends/here"))
 #' 
 #' }
-#' 
-
-
-#' @rdname api
-#' @export
 api_create <- function(x = last_plot(), filename = NULL, 
                        fileopt = c("overwrite", "new"),
                        sharing = c("public", "private", "secret"), ...) {
