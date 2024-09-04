@@ -80,7 +80,8 @@ withr::with_dir(tmpdir, {
           internal = TRUE,
           overwrite = TRUE,
           compress = "xz",
-          version = 3L
+          # TODO: use `version = 3L` once we depend on R (>= 3.5.0)
+          version = 2L
         )
       )
       
