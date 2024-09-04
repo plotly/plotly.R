@@ -97,7 +97,6 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 
 #' Orca image export server
 #' 
-#' @inheritParams orca
 #' @param port Sets the server's port number.
 #' @param keep_alive Turn on keep alive mode where orca will (try to) relaunch server if process unexpectedly exits.
 #' @param window_max_number Sets maximum number of browser windows the server can keep open at a given time.
