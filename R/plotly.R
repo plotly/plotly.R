@@ -15,7 +15,8 @@
 #' help inform default axis/scale titles
 #' (e.g., `plot_ly(x = mtcars$wt)` vs `plot_ly(x = ~mtcars$wt)`)
 #'
-#' @param data A data frame (optional) or [crosstalk::SharedData] object.
+#' @param data A data frame (optional) or
+#' [`crosstalk::SharedData`][crosstalk::SharedData] object.
 #' @param ... Arguments (i.e., attributes) passed along to the trace `type`.
 #' See [schema()] for a list of acceptable attributes for a given trace `type`
 #' (by going to `traces` -> `type` -> `attributes`). Note that attributes

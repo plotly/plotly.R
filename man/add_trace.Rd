@@ -126,7 +126,8 @@ See \code{\link[=schema]{schema()}} for a list of acceptable attributes for a gi
 provided at this level may override other arguments
 (e.g. \code{plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))}).}
 
-\item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
+\item{data}{A data frame (optional) or
+\code{\link[crosstalk:SharedData]{crosstalk::SharedData}} object.}
 
 \item{inherit}{inherit attributes from \code{\link[=plot_ly]{plot_ly()}}?}
 
