@@ -29,14 +29,61 @@
 \alias{reexports}
 \alias{\%>\%}
 \title{Objects exported from other packages}
+\usage{
+mutate(.data, ...)
+
+mutate_(.data, ..., .dots = list())
+
+transmute(.data, ...)
+
+transmute_(.data, ..., .dots = list())
+
+select(.data, ...)
+
+select_(.data, ..., .dots = list())
+
+rename(.data, ...)
+
+rename_(.data, ..., .dots = list())
+
+group_by(.data, ..., .add = FALSE, .drop = group_by_drop_default(.data))
+
+group_by_(.data, ..., .dots = list(), add = FALSE)
+
+groups(x)
+
+ungroup(x, ...)
+
+summarise(.data, ..., .by = NULL, .groups = NULL)
+
+summarise_(.data, ..., .dots = list())
+
+do(.data, ...)
+
+do_(.data, ..., .dots = list())
+
+arrange(.data, ..., .by_group = FALSE)
+
+arrange_(.data, ..., .dots = list())
+
+distinct(.data, ..., .keep_all = FALSE)
+
+distinct_(.data, ..., .dots, .keep_all = FALSE)
+
+slice(.data, ..., .by = NULL, .preserve = FALSE)
+
+slice_(.data, ..., .dots = list())
+
+filter(.data, ..., .by = NULL, .preserve = FALSE)
+
+filter_(.data, ..., .dots = list())
+}
 \keyword{internal}
 \description{
 These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr:se-deprecated]{arrange_}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr:se-deprecated]{distinct_}}, \code{\link[dplyr]{do}}, \code{\link[dplyr:se-deprecated]{do_}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr:se-deprecated]{filter_}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr:se-deprecated]{group_by_}}, \code{\link[dplyr:group_data]{groups}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr:se-deprecated]{mutate_}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr:se-deprecated]{rename_}}, \code{\link[dplyr]{select}}, \code{\link[dplyr:se-deprecated]{select_}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr:se-deprecated]{slice_}}, \code{\link[dplyr]{summarise}}, \code{\link[dplyr:se-deprecated]{summarise_}}, \code{\link[dplyr]{transmute}}, \code{\link[dplyr:se-deprecated]{transmute_}}, \code{\link[dplyr:group_by]{ungroup}}}
-
   \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
 }}
 

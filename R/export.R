@@ -1,6 +1,6 @@
 #' Export a plotly graph to a static file
 #' 
-#' This function is in the process of being deprecated (use [orca] instead).
+#' This function is deprecated, use [save_image] instead.
 #' 
 #' @details For SVG plots, a screenshot is taken via `webshot::webshot()`.
 #' Since `phantomjs` (and hence `webshot`) does not support WebGL,
@@ -19,7 +19,7 @@
 #' @author Carson Sievert
 #'
 export <- function(p = last_plot(), file = "plotly.png", selenium = NULL, ...) {
-  .Deprecated("orca")
+  .Deprecated("save_image")
   
   # infer the file type
   fileType <- tolower(tools::file_ext(file))

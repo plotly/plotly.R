@@ -1,5 +1,17 @@
 # plotly (development version)
 
+## New features
+
+* `ggplotly()` now supports the `{ggridges}` package. (#2314)
+
+## Improvements
+
+* `ggplotly()` now works better with the development version of ggplot2 (> v3.4.4). (#2315, #2368)
+
+## Bug fixes
+
+* Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
+
 # 4.10.4
 
 ## Improvements

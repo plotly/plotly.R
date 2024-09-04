@@ -277,6 +277,11 @@ gg2list <- function(p, width = NULL, height = NULL,
     
     # Compute aesthetics to produce data with generalised variable names
     data <- by_layer(function(l, d) l$compute_aesthetics(d, plot))
+    if (exists("setup_plot_labels", envir = asNamespace("ggplot2"))) {
+      # Mirror ggplot2/#5879
+      plot$labels <- ggfun("setup_plot_labels")(plot, layers, data)
+    }
+    
     
     # add frame to group if it exists
     data <- lapply(data, function(d) { 
@@ -463,12 +468,8 @@ gg2list <- function(p, width = NULL, height = NULL,
     assign(var, built_env[[var]], envir = envir)
   }
   
-  # initiate plotly.js layout with some plot-wide theming stuff
-  theme <- ggfun("plot_theme")(plot)
-  elements <- names(which(sapply(theme, inherits, "element")))
-  for (i in elements) {
-    theme[[i]] <- ggplot2::calc_element(i, theme)
-  }
+  theme <- calculated_theme_elements(plot)
+  
   # Translate plot wide theme elements to plotly.js layout
   pm <- unitConvert(theme$plot.margin, "pixels")
   gglayout <- list(
@@ -1154,6 +1155,23 @@ gg2list <- function(p, width = NULL, height = NULL,
 # Due to the non-standard use of assign() in g2list() (above)
 utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "sets"))
 
+# Get the "complete" set of theme elements and their calculated values
+calculated_theme_elements <- function(plot) {
+  if (is.function(asNamespace("ggplot2")$complete_theme)) {
+    theme <- ggplot2::complete_theme(plot$theme)
+    elements <- names(theme)
+  } else {
+    theme <- ggfun("plot_theme")(plot)
+    elements <- names(which(sapply(theme, inherits, "element")))
+  }
+  
+  for (i in elements) {
+    theme[[i]] <- ggplot2::calc_element(i, theme)
+  }
+  
+  theme
+}
+
 
 #-----------------------------------------------------------------------------
 # ggplotly 'utility' functions
@@ -1384,7 +1402,8 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
       linetype = lty2dash(rekt$linetype)
     ),
     yref = "paper",
-    xref = "paper"
+    xref = "paper",
+    layer = "below"
   )
 }
 
@@ -1408,6 +1427,7 @@ gdef2trace <- function(gdef, theme, gglayout) {
     # N.B. ggplot2 >v3.4.2 (specifically #4879) renamed bar to decor and also 
     # started returning normalized values for the key field
     decor <- gdef$decor %||% gdef$bar
+    decor$value <- decor$value %||% decor$max
     rng <- range(decor$value)
     decor$value <- scales::rescale(decor$value, from = rng)
     if (!"decor" %in% names(gdef)) {
