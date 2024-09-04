@@ -85,4 +85,5 @@ Config/Needs/check:
     tidyverse/ggplot2,
     rcmdcheck,
     devtools,
-    reshape2
+    reshape2,
+    s2
