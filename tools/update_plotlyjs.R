@@ -64,16 +64,9 @@ withr::with_dir(tmpdir, {
       )
       # update plot schema and (partial) bundles
       Schema <- jsonlite::fromJSON(Sys.glob("dist/plot-schema.json"))
-      tmp_file <- tempfile(pattern = "plotly_constants_", fileext = ".js")
-      utils::download.file(
-        url = paste0("https://raw.githubusercontent.com/plotly/plotly.js/", basename(zip), "/tasks/util/constants.js"),
-        destfile = tmp_file,
-        quiet = TRUE,
-        mode = "wb"
-      )
       bundleTraceMap <-
-        paste0(readLines(tmp_file), collapse = "\n") |>
-        stringr::str_extract(pattern = "(?<=var partialBundleTraces = )\\{[^}]+\\}") |>
+        paste0(readLines("tasks/util/constants.js"), collapse = "\n") |>
+        stringr::str_extract(pattern = "(?<=\\b(const|var) partialBundleTraces = )\\{[^}]+\\}") |>
         yaml::read_yaml(text = _)
       
       withr::with_dir(
