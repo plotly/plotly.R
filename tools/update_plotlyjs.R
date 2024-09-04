@@ -63,7 +63,7 @@ withr::with_dir(tmpdir, {
         overwrite = TRUE
       )
       # update plot schema and (partial) bundles
-      Schema <- jsonlite::fromJSON(Sys.glob("dist/plot-schema.json"))
+      Schema <- jsonlite::fromJSON("dist/plot-schema.json")
       bundleTraceMap <-
         paste0(readLines("tasks/util/constants.js"), collapse = "\n") |>
         stringr::str_extract(pattern = "(?<=\\b(const|var) partialBundleTraces = )\\{[^}]+\\}") |>
