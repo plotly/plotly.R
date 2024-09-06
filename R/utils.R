@@ -551,14 +551,18 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
     
     # do the same for "sub-attributes"
     if (identical(role, "object") && is.recursive(proposed[[attr]])) {
-      # The "dimensions" attribute requires a special treatment as 
-      # it is an unnamed list and hence will be skipped by `for (attr in names(proposed))
-      if (attr == "dimensions") {
-        proposed[[attr]] <- lapply(proposed[[attr]], \(x) {
-          verify_attr(x, attrSchema$items$dimension, layoutAttr = layoutAttr)
-        })  
+      # Some attributes (e.g., dimensions, transforms) are actually 
+      # a list of objects (even though they, confusingly, have role: object)
+      # In those cases, we actually want to verify each list element
+      attr_ <- sub("s$", "", attr)
+      is_list_attr <- ("items" %in% names(attrSchema)) && 
+        (attr_ %in% names(attrSchema$items))
+      if (is_list_attr) {
+        proposed[[attr]] <- lapply(proposed[[attr]], function(x) {
+          verify_attr(x, attrSchema$items[[attr_]])
+        })
       } else {
-        proposed[[attr]] <- verify_attr(proposed[[attr]], attrSchema, layoutAttr = layoutAttr)  
+        proposed[[attr]] <- verify_attr(proposed[[attr]], attrSchema, layoutAttr = layoutAttr)
       }
     }
   }
