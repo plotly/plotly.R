@@ -917,15 +917,12 @@ gg2list <- function(p, width = NULL, height = NULL,
     # facet strips -> plotly annotations
     if (has_facet(plot)) {
       col_vars <- ifelse(inherits(plot$facet, "FacetWrap"), "facets", "cols")
-      col_txt <- if (!length(names(plot$facet$params[[col_vars]])) == 0) {
-        paste(
-          plot$facet$params$labeller(
-            lay[names(plot$facet$params[[col_vars]])]
-          ), collapse = br()
-        )
-      } else {
-        ""
-      }
+      col_txt <- paste(
+        plot$facet$params$labeller(
+          lay[names(plot$facet$params[[col_vars]])]
+        ), collapse = br()
+      )
+      if (length(names(plot$facet$params[[col_vars]])) == 0) col_txt <- ""
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
       if (robust_nchar(col_txt) > 0) {
