@@ -937,16 +937,13 @@ gg2list <- function(p, width = NULL, height = NULL,
       }
       # Only FacetGrid has no cols
       if (inherits(plot$facet, "FacetGrid")) {
-        row_txt <- if (!length(names(plot$facet$params$rows)) == 0) {
-          paste(
-            plot$facet$params$labeller(
-              lay[names(plot$facet$params$rows)]
-            ),
-            collapse = br()
-          )
-        } else {
-          ""
-        }
+        row_txt <- paste(
+          plot$facet$params$labeller(
+            lay[names(plot$facet$params$rows)]
+          ),
+          collapse = br()
+        )
+        if (length(names(plot$facet$params$rows)) == 0) row_txt <- ""
         if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
         if (lay$COL != nCols) row_txt <- ""
         if (robust_nchar(row_txt) > 0) {
