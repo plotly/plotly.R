@@ -16,10 +16,10 @@ highlight_key(x, ...)
 An object of class \code{\link[crosstalk:SharedData]{crosstalk::SharedData}}.
 }
 \description{
-This function simply creates an object of class
-\code{\link[crosstalk:SharedData]{crosstalk::SharedData}}. The reason it exists is to
-make it easier to teach others how to leverage its functionality in plotly.
-It also makes it more discoverable if one is already aware of \code{\link[=highlight]{highlight()}}.
+This function simply creates an object of class \code{\link[crosstalk:SharedData]{crosstalk::SharedData}}.
+The reason it exists is to make it easier to teach others how to leverage its
+functionality in plotly. It also makes it more discoverable if one is already
+aware of \code{\link[=highlight]{highlight()}}.
 }
 \seealso{
 \link{highlight}

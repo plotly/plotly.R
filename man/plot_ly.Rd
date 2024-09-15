@@ -31,8 +31,7 @@ plot_ly(
 )
 }
 \arguments{
-\item{data}{A data frame (optional) or
-\code{\link[crosstalk:SharedData]{crosstalk::SharedData}} object.}
+\item{data}{A data frame (optional) or \code{\link[crosstalk:SharedData]{crosstalk::SharedData}} object.}
 
 \item{...}{Arguments (i.e., attributes) passed along to the trace \code{type}.
 See \code{\link[=schema]{schema()}} for a list of acceptable attributes for a given trace \code{type}
