@@ -783,7 +783,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     isOrdered <- all(vapply(color[isDiscrete], is.ordered, logical(1)))
     lvls <- getLevels(unlist(color[isDiscrete]))
     N <- length(lvls)
-    pal <- palette %||% if (isOrdered) viridisLite::viridis(N) else RColorBrewer::brewer.pal(N, "Set2")
+    pal <- palette %||% if (isOrdered) viridisLite::viridis(N) else RColorBrewer::brewer.pal(max(N, 3L), "Set2")
     colScale <- scales::col_factor(pal, levels = names(pal) %||% lvls, na.color = na.color)
     color_codes <- Map(function(x, y) toRGB(colScale(as.character(x)), y), color[isDiscrete], alphas[isDiscrete])
     traces[isDiscrete] <- Map(mapColor, traces[isDiscrete], color_codes)
