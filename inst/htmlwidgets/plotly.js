@@ -84,6 +84,7 @@ HTMLWidgets.widget({
         var pickerDiv = document.createElement("div");
         
         var pickerInput = document.createElement("input");
+        pickerInput.style = pickerInput.style + "; cursor: pointer";
         pickerInput.id = el.id + "-colourpicker";
         pickerInput.placeholder = "asdasd";
         
