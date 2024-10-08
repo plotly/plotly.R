@@ -122,7 +122,6 @@ animation_opts_defaults <- function() {
 }
 
 
-#' @inheritParams animation_opts
 #' @param hide remove the animation slider?
 #' @param ... for `animation_slider`, attributes are passed to a special
 #' layout.sliders object tied to the animation frames. 
@@ -149,7 +148,6 @@ animation_slider <- function(p, hide = FALSE, ...) {
 }
 
 
-#' @inheritParams animation_slider
 #' @param label a character string used for the animation button's label
 #' @export
 #' @rdname animation
