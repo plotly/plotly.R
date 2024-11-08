@@ -201,11 +201,19 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       if (grepl("^geo|^mapbox", names(xAxes[[i]][j]))) next
       map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      if(!is.null(xAxes[[i]][[j]][['overlaying']])) {
+        map <- xMap[xMap %in% sub("x", "xaxis", xAxes[[i]][[j]]$overlaying)]
+        xAxes[[i]][[j]]$overlaying <- sub("axis", "", names(map))
+      }
     }
     for (j in seq_along(yAxes[[i]])) {
       if (grepl("^geo|^mapbox", names(yAxes[[i]][j]))) next
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
+      if(!is.null(yAxes[[i]][[j]][['overlaying']])) {
+        map <- yMap[yMap %in% sub("y", "yaxis", yAxes[[i]][[j]]$overlaying)]
+        yAxes[[i]][[j]]$overlaying <- sub("axis", "", names(map))
+      }
     }
     
     for (key in c("geo", "subplot", "xaxis", "yaxis")) {

@@ -557,3 +557,36 @@ test_that("May specify legendgroup with through a vector of values", {
   
 })
 
+test_that("dual y axis subplot works", {
+  p1 <- plot_ly() %>%
+    add_trace(x = 1:3, y = 10*(1:3)) %>%
+    add_trace(x = 2:4, y = 1:3, yaxis = "y2") %>%
+      layout(yaxis2 = list(overlaying = "y", side="right"))
+  p2 <- plot_ly() %>%
+    add_trace(x = 3:5, y = (1:3) ^ 2) %>%
+    add_trace(x = 4:6, y = (1:3) ^ 3, yaxis = "y2") %>%
+      layout(yaxis2 = list(overlaying = "y", side="right"))
+  s <- expect_traces(subplot(p1, p2, nrows = 2, shareX = T), 4, "dual-y-axis")
+  yAxes <- sapply(s$data, `[[`, 'yaxis')
+  names(yAxes) <- sub("y", "yaxis", yAxes)
+  
+  expect_identical(yAxes[[1]], s$layout[[names(yAxes)[[2]]]]$overlaying)
+  expect_identical(yAxes[[3]], s$layout[[names(yAxes)[[4]]]]$overlaying)
+})
+
+test_that("dual x axis subplot works", {
+  p1 <- plot_ly() %>%
+    add_trace(x = 1:3, y = 10*(1:3)) %>%
+    add_trace(x = 2:4, y = 1:3, name = "slope of 1", xaxis = "x2") %>%
+      layout(xaxis2 = list(overlaying = "x", side="top"))
+  p2 <- plot_ly() %>%
+    add_trace(x = 3:5, y = (1:3) ^ 2, name = "quadratic") %>%
+    add_trace(x = 4:6, y = (1:3) ^ 3, name = "cubic", xaxis = "x2") %>%
+    layout(xaxis2 = list(overlaying = "x", side="top"))
+  s <- expect_traces(subplot(p1, p2), 4, "dual-x-axis")
+  xAxes <- sapply(s$data, `[[`, 'xaxis')
+  names(xAxes) <- sub("x", "xaxis", xAxes)
+  
+  expect_identical(xAxes[[1]], s$layout[[names(xAxes)[[2]]]]$overlaying)
+  expect_identical(xAxes[[3]], s$layout[[names(xAxes)[[4]]]]$overlaying)
+})
