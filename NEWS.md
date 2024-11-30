@@ -11,7 +11,7 @@
 ## Bug fixes
 
 * Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
-* Support factor variables for x and/or y when numeric variable is used to set color
+* Closed #1883: Support factor variables for x and/or y when numeric variable is used to set color. (#1883)
 
 # 4.10.4
 
