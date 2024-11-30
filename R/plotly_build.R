@@ -872,9 +872,14 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
     colorObj$showscale <- default(TRUE)
+    # extract range for numeric variables
+    xValues <- unlist(lapply(traces, "[[", "x"))
+    xValues <- if (is.numeric(xValues)) range(xValues, na.rm = TRUE) else xValues
+    yValues <- unlist(lapply(traces, "[[", "y"))
+    yValues <- if (is.numeric(yValues)) range(yValues, na.rm = TRUE) else yValues
     colorBarTrace <- list(
-      x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
-      y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
+      x = xValues,
+      y = yValues,
       type = if (any(types %in% glTypes())) "scattergl" else "scatter",
       mode = "markers",
       opacity = 0,
