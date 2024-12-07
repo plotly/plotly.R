@@ -20,6 +20,13 @@ test_that("Mapping a factor variable to color works", {
   expect_equivalent(length(cols), 3)
 })
 
+test_that("A scatterplot with a factor variable and discrete color works", {
+  d <- palmerpenguins::penguins 
+  p <- plot_ly(d, x = ~bill_length_mm, y = ~sex, color = ~bill_depth_mm, 
+               type = 'scatter', mode = 'markers')
+  l <- expect_traces(p, 2, "scatterplot-factor-continous-color")
+})
+
 test_that("Custom RColorBrewer pallette works for factor variable", {
   d <- palmerpenguins::penguins %>% 
     filter(!is.na(bill_length_mm))

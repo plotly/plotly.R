@@ -890,7 +890,9 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # 3D needs a z property
     if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
-      colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+      zValues <- unlist(lapply(traces, "[[", "x"))
+      zValues <- if (is.numeric(zValues)) range(zValues, na.rm = TRUE) else zValues
+      colorBarTrace$z <- zValues
     }
     if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
       colorBarTrace$type <- type
