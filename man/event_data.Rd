@@ -12,7 +12,8 @@ event_data(
     "plotly_sunburstclick"),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
-  priority = c("input", "event")
+  priority = c("input", "event"),
+  suppress_unregistered_warning = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,11 @@ events emitted from that specific plot.}
 If equal to \code{"event"}, then \code{\link[=event_data]{event_data()}} always triggers re-execution,
 instead of re-executing only when the relevant shiny input value changes
 (the default).}
+
+\item{suppress_unregistered_warning}{If TRUE, do not throw a warning when
+this function is called before a plot renders and registers event handlers.
+(These warnings often occur spuriously in multi-tab apps, where not all plots
+are immediately rendered.)}
 }
 \description{
 This function must be called within a reactive shiny context.
