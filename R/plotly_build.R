@@ -49,7 +49,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     x <- rapply(x, eval_attr, data = d, how = "list")
     
     # if an annotation attribute is an array, expand into multiple annotations
-    nAnnotations <- max(lengths(x$annotations) %||% 0)
+    
+    # Remove any elements from x$annotations that are of class 'list'
+    # this will remove the 'font' attribute list while retaining relevent attributes
+    x_annotations_subset <- Filter(function(x) !inherits(x, "list"), x$annotations)
+    nAnnotations <- max(lengths(x_annotations_subset) %||% 0)
+                                   
     if (!is.null(names(x$annotations))) {
       # font is the only list object, so store it, and attach after transposing
       font <- x$annotations[["font"]]
