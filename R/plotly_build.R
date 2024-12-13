@@ -872,9 +872,14 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
     colorObj$showscale <- default(TRUE)
+    # extract range for numeric variables
+    xValues <- unlist(lapply(traces, "[[", "x"))
+    xValues <- if (is.numeric(xValues)) range(xValues, na.rm = TRUE) else xValues
+    yValues <- unlist(lapply(traces, "[[", "y"))
+    yValues <- if (is.numeric(yValues)) range(yValues, na.rm = TRUE) else yValues
     colorBarTrace <- list(
-      x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
-      y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
+      x = xValues,
+      y = yValues,
       type = if (any(types %in% glTypes())) "scattergl" else "scatter",
       mode = "markers",
       opacity = 0,
@@ -885,7 +890,9 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # 3D needs a z property
     if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
-      colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+      zValues <- unlist(lapply(traces, "[[", "x"))
+      zValues <- if (is.numeric(zValues)) range(zValues, na.rm = TRUE) else zValues
+      colorBarTrace$z <- zValues
     }
     if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
       colorBarTrace$type <- type
