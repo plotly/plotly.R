@@ -131,6 +131,47 @@ test_that("facet_grid translates simple labeller function", {
   )
 })
 
+g <- ggplot(mtcars, aes(mpg, wt)) + 
+  geom_point() +
+  facet_wrap( ~ vs + am, labeller = function(x) label_both(x, multi_line = FALSE))
+
+test_that("facet_wrap accounts for multi_line=FALSE", {
+  info <- expect_doppelganger_built(g, "facet_wrap-labeller-no-multi-line")
+  txt <- sapply(info$layout$annotations, "[[", "text")
+  expect_true(all(!grepl("expression(list())", txt, fixed = TRUE)))
+  expect_true(
+    all(c("vs, am: 0, 0", "vs, am: 0, 1", "vs, am: 1, 0", "vs, am: 1, 1") %in% txt)
+  )
+  expect_identical(length(txt), 6L)
+})
+
+g <- ggplot(mtcars, aes(mpg, wt)) + 
+  geom_point()
+
+g_no_col <- g +
+  facet_grid(vs + am ~ ., labeller = function(x) label_both(x, multi_line = FALSE))
+
+g_no_row <- g +
+  facet_grid(. ~ vs + am, labeller = function(x) label_both(x, multi_line = FALSE))
+
+test_that("facet_grid accounts for multi_line=FALSE", {
+  info <- expect_doppelganger_built(g_no_col, "facet_grid-labeller-no-col")
+  txt <- sapply(info$layout$annotations, "[[", "text")
+  expect_true(all(!grepl("expression(list())", txt, fixed = TRUE)))
+  expect_true(
+    all(c("vs, am: 0, 0", "vs, am: 0, 1", "vs, am: 1, 0", "vs, am: 1, 1") %in% txt)
+  )
+  expect_identical(length(txt), 6L)
+  
+  info <- expect_doppelganger_built(g_no_row, "facet_grid-labeller-no-col")
+  txt <- sapply(info$layout$annotations, "[[", "text")
+  expect_true(all(!grepl("expression(list())", txt, fixed = TRUE)))
+  expect_true(
+    all(c("vs, am: 0, 0", "vs, am: 0, 1", "vs, am: 1, 0", "vs, am: 1, 1") %in% txt)
+  )
+  expect_identical(length(txt), 6L)
+})
+
 p <- economics %>% tidyr::gather(variable, value, -date) %>% 
   qplot(data = ., date, value) + 
   facet_wrap(~variable, scale = "free_y", ncol = 2)
