@@ -113,6 +113,10 @@ register_plot_events <- function(p) {
 #' If equal to `"event"`, then [event_data()] always triggers re-execution, 
 #' instead of re-executing only when the relevant shiny input value changes 
 #' (the default).
+#' @param suppress_unregistered_warning If TRUE, do not throw a warning when
+#' this function is called before a plot renders and registers event handlers.
+#' (These warnings often occur spuriously in multi-tab apps, where not all plots
+#' are immediately rendered.)
 #' @export
 #' @seealso [event_register], [event_unregister]
 #' @references 
@@ -133,7 +137,8 @@ event_data <- function(
   ),
   source = "A",
   session = shiny::getDefaultReactiveDomain(),
-  priority = c("input", "event")
+  priority = c("input", "event"),
+  suppress_unregistered_warning = FALSE
 ) {
   if (is.null(session)) {
     stop("No reactive domain detected. This function can only be called \n",
@@ -143,25 +148,30 @@ event_data <- function(
   event <- match.arg(event)
   eventID <- paste(event, source, sep = "-")
   
-  # It's possible for event_data() to execute before any 
-  # relevant input values have been registered (i.e, before 
-  # relevant plotly graphs have been executed). Therefore, 
-  # we delay checking that a relevant input value has been 
-  # registered until shiny flushes
-  session$onFlushed(
-    function() {
-      eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
-      if (!eventIDRegistered) {
-        warning(
-          "The '", event, "' event tied a source ID of '", source, "' ",
-          "is not registered. In order to obtain this event data, ", 
-          "please add `event_register(p, '", event, "')` to the plot (`p`) ",
-          "that you wish to obtain event data from.",
-          call. = FALSE
-        )
+  if (!suppress_unregistered_warning) {
+    # It's possible for event_data() to execute before any
+    # relevant input values have been registered (i.e, before
+    # relevant plotly graphs have been executed). Therefore,
+    # we delay checking that a relevant input value has been
+    # registered until shiny flushes
+    session$onFlushed(
+      function() {
+        eventIDRegistered <- eventID %in% session$userData$plotlyShinyEventIDs
+        if (!eventIDRegistered) {
+          warning(
+            "The '", event, "' event tied a source ID of '", source, "' ",
+            "is not registered. In order to obtain this event data, ",
+            "please add `event_register(p, '", event, "')` to the plot (`p`) ",
+            "that you wish to obtain event data from, or set ",
+            "`suppress_unregistered_warning = TRUE` to suppress this warning ",
+            "if the plot will eventually register this event, but only ",
+            "renders conditionally.",
+            call. = FALSE
+          )
+        }
       }
-    }
-  )
+    )
+  }
   
   # legend clicking returns trace(s), which shouldn't be simplified...
   parseJSON <- if (event %in% c("plotly_legendclick", "plotly_legenddoubleclick")) {
