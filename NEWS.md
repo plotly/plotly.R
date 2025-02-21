@@ -12,6 +12,7 @@
 
 * Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
 * Closed #2376: Removes errant boxmode warning for grouped boxplot. (#2396)
+* Closed #2419: Issue with NA handling in scatter plots: Two NAs per category cause incorrect line connection (#2419)
 
 # 4.10.4
 
