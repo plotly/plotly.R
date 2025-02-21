@@ -995,10 +995,12 @@ traceify <- function(dat, x = NULL) {
   recurse <- function(z, n, idx) {
     if (is.list(z)) lapply(z, recurse, n, idx) else if (length(z) == n) z[idx] else z
   }
+  varMapping <- dat[[".plotlyVariableMapping"]] # Protect this value from recurse
   new_dat <- list()
   for (j in seq_along(lvls)) {
     new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
     new_dat[[j]]$name <- new_dat[[j]]$name %||% lvls[j]
+    new_dat[[j]]$.plotlyVariableMapping <- varMapping
   }
   return(new_dat)
 }
