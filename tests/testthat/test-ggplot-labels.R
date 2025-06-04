@@ -51,6 +51,6 @@ test_that("empty labels work", {
   p <- ggplot(palmerpenguins::penguins, 
               aes(bill_length_mm, bill_depth_mm, color = species)) + 
     geom_point() + 
-    labs(x = element_blank(), y = element_blank())
+    labs(x = NULL, y = NULL)
   b <- expect_doppelganger_built(p, "labs-element-blank")
 })
