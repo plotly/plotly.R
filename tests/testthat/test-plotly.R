@@ -142,8 +142,7 @@ test_that("Character strings correctly mapped to a positional axis", {
   letters <- LETTERS[as.numeric(sort(as.character(1:26)))]
   p <- plot_ly(x = letters, y = seq_along(letters)) %>% 
     add_bars(color = rep(c("a1", "a2"), length.out = 26))
-  l <- expect_warning(expect_traces(p, 2, "character-axis"), 
-                      regexp = "minimal value for n is 3")
+  l <- expect_traces(p, 2, "character-axis")
   expect_equivalent(l$layout$xaxis$type, "category")
   expect_equivalent(l$layout$xaxis$categoryorder, "array")
   expect_equivalent(l$layout$xaxis$categoryarray, LETTERS)

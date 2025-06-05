@@ -1157,8 +1157,9 @@ utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "s
 
 # Get the "complete" set of theme elements and their calculated values
 calculated_theme_elements <- function(plot) {
-  if (is.function(asNamespace("ggplot2")$complete_theme)) {
-    theme <- ggplot2::complete_theme(plot$theme)
+  complete_theme <- ggfun("complete_theme")
+  if (is.function(complete_theme)) {
+    theme <- complete_theme(plot$theme)
     elements <- names(theme)
   } else {
     theme <- ggfun("plot_theme")(plot)

@@ -78,11 +78,10 @@ Suggests:
     rsvg,
     ggridges
 LazyData: true
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/Needs/check:
-    tidyverse/ggplot2,
     rcmdcheck,
     devtools,
     reshape2,
