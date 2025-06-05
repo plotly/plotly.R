@@ -14,6 +14,8 @@
 * Closed #2376: Removes errant boxmode warning for grouped boxplot. (#2396)
 * Closed #2392: Trivial warning about RColorBrewer minimal n value is no longer thrown (#1999) 
 
+* Closed #2385: `"parcoords"`, `"parcats"` and `"splom"` traces now work when `values` is a length 1 vector (also, more generally, attributes that expect a list of objects should have those objects "verified" correctly now).
+
 # 4.10.4
 
 ## Improvements
