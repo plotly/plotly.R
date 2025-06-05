@@ -6,7 +6,7 @@
 
 ## Improvements
 
-* `ggplotly()` now works better with the development version of ggplot2 (> v3.4.4). (#2315, #2368)
+* Various updates to updates `ggplotly()` to better support recent versions of ggplot2. (#2315, #2368, #2442, thanks @teunbrand).
 
 ## Bug fixes
 
