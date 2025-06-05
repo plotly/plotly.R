@@ -668,7 +668,11 @@ gg2list <- function(p, width = NULL, height = NULL,
           "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
           gsub("\"", "", tickData[["degree_label"]])
         )
-        rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
+        # Downstream logic expects the 'break positions' to be on 0-1 scale
+        # (which is then rescaled back to the data scale)
+        rng[[paste0(xy, ".major")]] <- scales::rescale(
+          tickData[[paste0(xy, "_start")]]
+        )
         
         # If it doesn't already exist (for this panel), 
         # generate graticule (as done in, CoordSf$render_bg)
