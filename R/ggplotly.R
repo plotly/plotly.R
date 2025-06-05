@@ -742,8 +742,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
       hasTickText <- !(is.na(ticktext) | is.na(tickvals))
-      ticktext <- ticktext[hasTickText]
-      tickvals <- tickvals[hasTickText]
+      ticktext <- as.character(unlist(ticktext[hasTickText]))
+      tickvals <- as.numeric(unlist(tickvals[hasTickText]))
       
       axisObj <- list(
         # TODO: log type?
