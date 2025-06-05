@@ -784,7 +784,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       # the logic here is similar to what p$coordinates$aspect() does,
       # but the ratio is scaled to the data range by plotly.js 
       fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
-      if (inherits(p$coordinates, fixed_coords)) {
+      is_fixed <- isFALSE(p$coordinates$is_free())
+      if (inherits(p$coordinates, fixed_coords) || is_fixed) {
         axisObj$scaleanchor <- anchor
         ratio <- p$coordinates$ratio %||% 1
         axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
