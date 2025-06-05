@@ -668,11 +668,9 @@ gg2list <- function(p, width = NULL, height = NULL,
           "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
           gsub("\"", "", tickData[["degree_label"]])
         )
-        # Downstream logic expects the 'break positions' to be on 0-1 scale
+        # Downstream logic expects these 'break positions' to be on 0-1 scale
         # (which is then rescaled back to the data scale)
-        rng[[paste0(xy, ".major")]] <- scales::rescale(
-          tickData[[paste0(xy, "_start")]]
-        )
+        rng[[paste0(xy, ".major")]] <- scales::rescale(tickData[[paste0(xy, "_start")]])
         
         # If it doesn't already exist (for this panel), 
         # generate graticule (as done in, CoordSf$render_bg)
@@ -787,9 +785,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       # set scaleanchor/scaleratio if these are fixed coordinates
       # the logic here is similar to what p$coordinates$aspect() does,
       # but the ratio is scaled to the data range by plotly.js 
-      fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
-      is_fixed <- isFALSE(p$coordinates$is_free())
-      if (inherits(p$coordinates, fixed_coords) || is_fixed) {
+      is_fixed <- inherits(
+        p$coordinates,
+        c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
+      )
+      if (is_fixed || isFALSE(p$coordinates$is_free())) {
         axisObj$scaleanchor <- anchor
         ratio <- p$coordinates$ratio %||% 1
         axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
