@@ -746,8 +746,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
       hasTickText <- !(is.na(ticktext) | is.na(tickvals))
-      ticktext <- as.character(unlist(ticktext[hasTickText])) %||% NULL
-      tickvals <- as.numeric(unlist(tickvals[hasTickText])) %||% NULL
+      ticktext <- as.character(unlist(ticktext[hasTickText]))
+      tickvals <- as.numeric(unlist(tickvals[hasTickText]))
       
       axisObj <- list(
         # TODO: log type?
@@ -1441,7 +1441,9 @@ gdef2trace <- function(gdef, theme, gglayout) {
     }
     
     vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
-      if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+      res <- if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+      # if zero-length, return NULL to avoid subscript oob errors
+      res %||% NULL
     })
     
     list(
