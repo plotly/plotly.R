@@ -1112,7 +1112,7 @@ aes2plotly <- function(data, params, aes = "size") {
       # ggfun() returns a function because ggplot2 now
       # defines data.frame in it's namespace
       # https://github.com/ropensci/plotly/pull/1481
-      if ("default_aes" %in% names(geom_obj)) geom_obj$use_defaults(data) else NULL
+      if ("default_aes" %in% names(geom_obj)) geom_obj$use_defaults(NULL) else NULL
     }
     vals <- defaults[[aes]]
   }
