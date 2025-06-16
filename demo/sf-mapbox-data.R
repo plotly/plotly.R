@@ -11,10 +11,11 @@ plot_mapbox(res_mn, split = ~INDRESNAME, color = ~AREA, stroke = ~PERIMETER, spa
 
 # linking with DT
 mn <- highlight_key(res_mn)
+datatable <- getFromNamespace("datatable", "DT")
 bscols(
   plot_mapbox(mn, split = ~INDRESNAME, text = ~INDRESNAME, hoverinfo = "text", hoveron = "fills") %>%
     layout(title = "Click a reservation", showlegend = FALSE),
-  DT::datatable(mn)
+  datatable(mn)
 )
 
 # linking with plotly
@@ -31,5 +32,3 @@ bscols(
     layout(barmode = "overlay") %>% 
     highlight("plotly_selected", persistent = TRUE)
 )
-
-

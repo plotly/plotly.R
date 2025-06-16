@@ -1,7 +1,8 @@
 library(crosstalk)
 library(ggplot2)
-library(gapminder)
 library(plotly)
+
+data(gapminder, package = "gapminder")
 
 sd <- highlight_key(gapminder)
 
