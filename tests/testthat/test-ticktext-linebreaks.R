@@ -43,22 +43,29 @@ test_that("ggplotly takes account of linebreaks in ticktext", {
   expect_margin(L, gg, "long_ticktext")
 })
 
-# Linebreaks one category
-d <- data.frame(x = c(1), y = c("ticktext\nlong_ticktext\nticktext"))
-gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
-
 test_that("ggplotly takes account of linebreaks in ticktext with only one category", {
+  testthat::skip_if_not(getRversion() >= "4.3.0")
+
+  # Linebreaks one category
+  d <- data.frame(x = c(1), y = c("ticktext\nlong_ticktext\nticktext"))
+  gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
+
   # Visual Test
   L <- expect_doppelganger_built(gg, "ticktext-linebreaks-one-cat")
   # ggplotly returns correct margin 
   expect_margin(L, gg, "long_ticktext")
 })
 
-# No linebreaks
-d <- data.frame(x = c(1, 2, 3), y = c("ticktext long_ticktext ticktext", "ticktext", "ticktext"))
-gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
-
 test_that("ggplotly works with no linebreaks in ticktext", {
+  testthat::skip_if_not(getRversion() >= "4.3.0")
+
+  # No linebreaks
+  d <- data.frame(
+    x = c(1, 2, 3),
+    y = c("ticktext long_ticktext ticktext", "ticktext", "ticktext")
+  )
+  gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
+
   # Visual Test
   L <- expect_doppelganger_built(gg, "ticktext-linebreaks-no-linebreaks")
   # ggplotly returns correct margin 
