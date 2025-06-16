@@ -25,11 +25,18 @@ expect_margin <- function(L, gg, ticktext) {
   expect_equal(round(L$layout$margin$l, 10), round(margin_l, 10))
 }
 
-# Linebreaks
-d <- data.frame(x = c(1, 2, 3), y = c("ticktext\nlong_ticktext\nticktext", "ticktext", "ticktext"))
-gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
+
 
 test_that("ggplotly takes account of linebreaks in ticktext", {
+  testthat::skip_if_not(getRversion() >= "4.3.0")
+
+  # Linebreaks
+  d <- data.frame(
+    x = c(1, 2, 3),
+    y = c("ticktext\nlong_ticktext\nticktext", "ticktext", "ticktext")
+  )
+  gg <- ggplot(d, aes(x, y)) + geom_bar(stat = "identity")
+
   # Visual Test
   L <- expect_doppelganger_built(gg, "ticktext-linebreaks")
   # ggplotly returns correct margin 
