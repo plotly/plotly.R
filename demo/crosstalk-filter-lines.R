@@ -2,7 +2,12 @@ library(crosstalk)
 library(ggplot2)
 library(plotly)
 
-data(gapminder, package = "gapminder")
+# Equivalent to data(gapminder, package = "gapminder"), but avoids R CMD check NOTE 
+# about `gapminder` not being in DESCRIPTION. Install it `install.packages("gapminder")`
+lazyLoad(
+  file.path(system.file("data", package = "gapminder"), "Rdata"),
+  filter = function(x) x == "gapminder"
+)
 
 sd <- highlight_key(gapminder)
 

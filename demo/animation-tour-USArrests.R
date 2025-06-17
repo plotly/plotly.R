@@ -3,6 +3,8 @@ library(plotly)
 
 data("USArrests")
 
+# Avoids R CMD check NOTE about using `tourr` without mentioning it in DESCRIPTION
+# Install it via CRAN `install.packages("tourr")`
 rescale <- getFromNamespace("rescale", "tourr")
 new_tour <- getFromNamespace("new_tour", "tourr")
 grand_tour <- getFromNamespace("grand_tour", "tourr")
