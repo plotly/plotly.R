@@ -1,6 +1,6 @@
 Package: plotly
 Title: Create Interactive Web Graphics via 'plotly.js'
-Version: 4.10.4.9000
+Version: 4.11.0
 Authors@R: c(person("Carson", "Sievert", role = c("aut", "cre"),
     email = "cpsievert1@gmail.com", comment = c(ORCID = "0000-0002-4958-2844")),
     person("Chris", "Parmer", role = "aut",
@@ -83,6 +83,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/Needs/check:
     tidyverse/ggplot2,
+    ggobi/GGally,
     rcmdcheck,
     devtools,
     reshape2,

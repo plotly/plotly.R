@@ -9,4 +9,5 @@ map <- plot_ly(ncsd, split = ~NAME, color = I("gray"), hoveron = "fills") %>%
   layout(title = "Click on counties to query them", showlegend = FALSE) %>%
   config(displayModeBar = FALSE)
 
-bscols(map, DT::datatable(ncsd))
+datatable <- getFromNamespace("datatable", "DT")
+bscols(map, datatable(ncsd))

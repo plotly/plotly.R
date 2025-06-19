@@ -1,4 +1,4 @@
-# plotly (development version)
+# plotly 4.11.0
 
 ## New features
 
