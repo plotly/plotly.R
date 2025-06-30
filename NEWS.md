@@ -4,6 +4,8 @@
 
 * `ggplotly()` now supports the `{ggridges}` package. (#2314)
 
+* `event_data()` has a new `suppress_unregistered_warning` parameter. The relevant warning message has also been updated to reflect that it is often spurious in apps with conditionally-rendered plots (e.g. dashboard apps with multiple tabs). (#1528, #1538)
+
 ## Improvements
 
 * Various updates to `ggplotly()` to better support recent versions of ggplot2. (#2315, #2368, #2442, thanks @teunbrand).
