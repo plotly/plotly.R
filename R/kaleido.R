@@ -70,7 +70,7 @@ kaleido <- function(...) {
   
   call_env <- rlang::caller_env()
   
-  if (!reticulate::py_available()) {
+  if (!reticulate::py_available(TRUE)) {
     rlang::abort(c("`{reticulate}` wasn't able to find a Python environment.",
       i = "If you have an existing Python installation, use `reticulate::use_python()` to inform `{reticulate}` of it.",
       i = "To have `{reticulate}` install Python for you, `reticulate::install_python()`."
@@ -97,6 +97,67 @@ kaleido <- function(...) {
     }
   )
   
+  res <- if (is.null(tryNULL(kaleido$scopes))) {
+    newKaleidoScope(kaleido)
+  } else {
+    legacyKaleidoScope(kaleido)
+  }
+  
+  class(res) <- "kaleidoScope"
+  res
+}
+
+newKaleidoScope <- function(kaleido) {
+  list(
+    scopes = NULL,
+    transform = function(p, file, ..., width = NULL, height = NULL, scale = NULL) {
+      # Perform JSON conversion exactly how the R package would do it
+      fig <- to_JSON(
+        plotly_build(p)$x[c("data", "layout", "config")]
+      )
+      
+      # Write to JSON file
+      tmp_json <- tempfile(fileext = ".json")
+      on.exit(unlink(tmp_json))
+      writeLines(fig, tmp_json)
+      
+      # Import it as a fig (dict)
+      load_json <- sprintf(
+        "import json; fig = json.load(open('%s'))",
+        tmp_json
+      )
+      reticulate::py_run_string(load_json)
+      
+      # TODO: Pass plotlyMainBundlePath() (and mathjax?)
+      # to page level options
+      #reticulate::py_run_string(
+      #  "import kaleido; kaleido.PageGenerator()"
+      #)
+      
+      # Gather figure-level options
+      opts <- list(
+        format = tools::file_ext(file),
+        width = reticulate::r_to_py(width),
+        height = reticulate::r_to_py(height),
+        scale = reticulate::r_to_py(scale)
+      )
+      
+      # TODO: how to bring in Mapbox token?
+      # https://github.com/plotly/Kaleido/issues/348
+      #mapbox <- Sys.getenv("MAPBOX_TOKEN", NA)
+      #if (!is.na(mapbox)) {
+      #  opts$mapboxAccessToken <- mapbox
+      #}
+      
+      # Write the figure to a file using kaleido
+      kaleido$write_fig_sync(reticulate::py$fig, file, opts = opts)
+    },
+    shutdown = function() {}
+  )
+}
+
+
+legacyKaleidoScope <- function(kaleido) {
   py <- reticulate::py
   scope_name <- paste0("scope_", new_id())
   py[[scope_name]] <- kaleido$scopes$plotly$PlotlyScope(
@@ -151,7 +212,6 @@ kaleido <- function(...) {
     reticulate::py_run_string(paste("del", scope_name))
   })
   
-  class(res) <- "kaleidoScope"
   res
 }
 

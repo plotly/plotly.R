@@ -4,6 +4,7 @@ Rapp.history
 *.RData
 *.Rproj.user
 *.DS_Store
+.venv
 node_modules/
 build_site.R
 revdep_email.R
