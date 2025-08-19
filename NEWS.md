@@ -20,6 +20,10 @@
 
 * `ggplotly()` now works better with the development version of ggplot2 (> v3.4.4). (#2315)
 
+## Bug fixes
+
+* Closed #1582, #2296: Avoid `hoveron=` related warnings when converting a ggplot object toWebGL().
+
 # 4.10.3
 
 ## Improvements
