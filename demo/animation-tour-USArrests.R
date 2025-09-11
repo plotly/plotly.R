@@ -1,8 +1,13 @@
 # adapted from  https://github.com/rstudio/ggvis/blob/master/demo/tourr.r
-library(tourr)
 library(plotly)
 
 data("USArrests")
+
+# Avoids R CMD check NOTE about using `tourr` without mentioning it in DESCRIPTION
+# Install it via CRAN `install.packages("tourr")`
+rescale <- getFromNamespace("rescale", "tourr")
+new_tour <- getFromNamespace("new_tour", "tourr")
+grand_tour <- getFromNamespace("grand_tour", "tourr")
 
 mat <- rescale(USArrests[, 1:4])
 tour <- new_tour(mat, grand_tour(), NULL)
@@ -10,7 +15,7 @@ tour <- new_tour(mat, grand_tour(), NULL)
 # projection of each observation
 tour_dat <- function(step_size) {
   step <- tour(step_size)
-  proj <- center(mat %*% step$proj)
+  proj <- scale(mat %*% step$proj, center = TRUE, scale = FALSE)
   data.frame(x = proj[,1], y = proj[,2], state = rownames(mat))
 }
 

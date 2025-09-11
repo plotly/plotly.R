@@ -1,4 +1,4 @@
-# plotly (development version)
+# plotly 4.11.0
 
 ## New features
 
@@ -6,11 +6,13 @@
 
 ## Improvements
 
-* `ggplotly()` now works better with the development version of ggplot2 (> v3.4.4). (#2315, #2368)
+* Various updates to `ggplotly()` to better support recent versions of ggplot2. (#2315, #2368, #2442, thanks @teunbrand).
 
 ## Bug fixes
 
 * Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
+* Closed #2376: Removes errant boxmode warning for grouped boxplot. (#2396)
+* Closed #2392: Trivial warning about RColorBrewer minimal n value is no longer thrown (#1999) 
 
 # 4.10.4
 

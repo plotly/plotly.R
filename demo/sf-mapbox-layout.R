@@ -7,7 +7,8 @@ nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 sf_to_geojson <- function(x) {
   tmp <- tempfile(fileext = ".geojson")
   st_write(x, tmp, driver = "GEOJSON")
-  geojsonio::geojson_read(tmp, "local")
+  geojson_read <- getFromNamespace("geojson_read", "geojsonio")
+  geojson_read(tmp, "local")
 }
 
 # By converting sf to geojson and routing to mapbox.layers, rendering 

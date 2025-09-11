@@ -6,14 +6,17 @@ process <- function(resp) {
   UseMethod("process")
 }
 
+#' @export
 process.default <- function(resp) {
   json_content(relay_error(resp))
 }
 
+#' @export
 process.api_plot <- function(resp) {
   json_content(relay_error(resp))
 }
 
+#' @export
 process.api_image <- function(resp) {
   relay_error(resp)
   type <- resp[["headers"]][["content-type"]]
