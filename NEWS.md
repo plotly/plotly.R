@@ -1,3 +1,9 @@
+# 4.x
+
+## Improvements
+
+* Create the proper `bundleTraceMap` list as internal package data object directly from the upstream JS file when plotly.js is updated. As a consequence, it's now possible to use the [`strict` bundle](https://github.com/plotly/plotly.js/blob/master/dist/README.md#plotlyjs-strict) via `plotly::partial_bundle(type = "strict")`.
+
 # plotly 4.11.0
 
 ## New features
