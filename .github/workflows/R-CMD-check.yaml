@@ -35,7 +35,7 @@ jobs:
           - {os: ubuntu-latest,   r: 'oldrel-1'}
           - {os: ubuntu-latest,   r: 'oldrel-2'}
           - {os: ubuntu-latest,   r: 'oldrel-3'}
-          - {os: ubuntu-latest,   r: 'oldrel-4'}
+          # - {os: ubuntu-latest,   r: 'oldrel-4'} # dependency issues with oldrel-4
 
     env:
       VISUAL_TESTS: ${{ matrix.config.visual_tests }}
@@ -46,7 +46,7 @@ jobs:
       plotly_api_key: ${{ secrets.PLOTLY_API_KEY }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
@@ -63,10 +63,16 @@ jobs:
           cache-version: 3
           needs: check
 
+      - name: Set up Python (for reticulate)
+        if: matrix.config.visual_tests == true
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
-          Rscript -e 'library(reticulate); use_python(install_python()); py_install(c("kaleido", "plotly"))'
+          Rscript -e 'library(reticulate); use_python(Sys.which("python")); py_install(c("kaleido", "plotly"))'
         
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
