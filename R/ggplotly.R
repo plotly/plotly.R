@@ -668,7 +668,9 @@ gg2list <- function(p, width = NULL, height = NULL,
           "\\*\\s+degree[ ]?[\\*]?", "&#176;", 
           gsub("\"", "", tickData[["degree_label"]])
         )
-        rng[[paste0(xy, ".major")]] <- tickData[[paste0(xy, "_start")]]
+        # Downstream logic expects these 'break positions' to be on 0-1 scale
+        # (which is then rescaled back to the data scale)
+        rng[[paste0(xy, ".major")]] <- scales::rescale(tickData[[paste0(xy, "_start")]])
         
         # If it doesn't already exist (for this panel), 
         # generate graticule (as done in, CoordSf$render_bg)
@@ -742,8 +744,8 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # https://github.com/tidyverse/ggplot2/pull/3566#issuecomment-565085809
       hasTickText <- !(is.na(ticktext) | is.na(tickvals))
-      ticktext <- ticktext[hasTickText]
-      tickvals <- tickvals[hasTickText]
+      ticktext <- as.character(unlist(ticktext[hasTickText]))
+      tickvals <- as.numeric(unlist(tickvals[hasTickText]))
       
       axisObj <- list(
         # TODO: log type?
@@ -783,8 +785,11 @@ gg2list <- function(p, width = NULL, height = NULL,
       # set scaleanchor/scaleratio if these are fixed coordinates
       # the logic here is similar to what p$coordinates$aspect() does,
       # but the ratio is scaled to the data range by plotly.js 
-      fixed_coords <- c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
-      if (inherits(p$coordinates, fixed_coords)) {
+      is_fixed <- inherits(
+        p$coordinates,
+        c("CoordSf", "CoordFixed", "CoordMap", "CoordQuickmap")
+      )
+      if (is_fixed || isFALSE(p$coordinates$is_free())) {
         axisObj$scaleanchor <- anchor
         ratio <- p$coordinates$ratio %||% 1
         axisObj$scaleratio <- if (xy == "y") ratio else 1 / ratio
@@ -1157,8 +1162,9 @@ utils::globalVariables(c("groupDomains", "layers", "prestats_data", "scales", "s
 
 # Get the "complete" set of theme elements and their calculated values
 calculated_theme_elements <- function(plot) {
-  if (is.function(asNamespace("ggplot2")$complete_theme)) {
-    theme <- ggplot2::complete_theme(plot$theme)
+  complete_theme <- ggfun("complete_theme")
+  if (is.function(complete_theme)) {
+    theme <- complete_theme(plot$theme)
     elements <- names(theme)
   } else {
     theme <- ggfun("plot_theme")(plot)
@@ -1435,7 +1441,9 @@ gdef2trace <- function(gdef, theme, gglayout) {
     }
     
     vals <- lapply(gglayout[c("xaxis", "yaxis")], function(ax) {
-      if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+      res <- if (identical(ax$tickmode, "auto")) ax$ticktext else ax$tickvals
+      # if zero-length, return NULL to avoid subscript oob errors
+      res %||% NULL
     })
     
     list(

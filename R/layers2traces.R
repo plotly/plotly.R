@@ -197,6 +197,7 @@ to_basic.GeomCol <- function(data, prestats_data, layout, params, p, ...) {
 #' @export
 to_basic.GeomViolin <- function(data, prestats_data, layout, params, p, ...) {
   n <- nrow(data)
+  data <- data[order(data[["y"]], decreasing = FALSE), ]
   revData <- data[order(data[["y"]], decreasing = TRUE), ]
   idx <- !names(data) %in% c("x", "xmin", "xmax")
   data <- rbind(

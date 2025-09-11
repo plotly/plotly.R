@@ -108,9 +108,6 @@
 #' 
 #' }
 #' 
-
-
-#' @rdname api
 #' @export
 api_create <- function(x = last_plot(), filename = NULL, 
                        fileopt = c("overwrite", "new"),

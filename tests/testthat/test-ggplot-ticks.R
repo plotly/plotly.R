@@ -171,7 +171,7 @@ test_that("Set the X tick mark locations", {
 test_that("The breaks can be spaced unevenly", {
   boxes.uneven <- boxes +
     scale_y_continuous(breaks = c(4, 4.25, 4.5, 5, 6, 8))
-  info <- expect_traces(no.breaks, 1, "uneven")
+  info <- expect_traces(boxes.uneven, 1, "uneven")
 })
 
 test_that("R line breaks are translated to HTML line breaks", {

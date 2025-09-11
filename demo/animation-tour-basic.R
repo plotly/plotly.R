@@ -1,13 +1,22 @@
 # adapted from  https://github.com/rstudio/ggvis/blob/master/demo/tourr.r
-library(tourr)
 library(plotly)
+
+# Avoids R CMD check NOTE about using `tourr` without mentioning it in DESCRIPTION
+# Install it `install.packages("tourr")`
+rescale <- getFromNamespace("rescale", "tourr")
+new_tour <- getFromNamespace("new_tour", "tourr")
+grand_tour <- getFromNamespace("grand_tour", "tourr")
+lazyLoad(
+  file.path(system.file("data", package = "tourr"), "Rdata"),
+  filter = function(x) x == "flea"
+)
 
 mat <- rescale(as.matrix(flea[1:6]))
 tour <- new_tour(mat, grand_tour(), NULL)
 
 tour_dat <- function(step_size) {
   step <- tour(step_size)
-  proj <- center(mat %*% step$proj)
+  proj <- scale(mat %*% step$proj, center = TRUE, scale = FALSE)
   data.frame(x = proj[,1], y = proj[,2], 
              species = flea$species)
 }
