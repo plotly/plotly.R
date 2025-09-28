@@ -359,6 +359,7 @@ test_that("group_by() on a plotly object doesn't produce warning", {
 })
 
 test_that("Check QTables dont cause errors", {
+    n <- 5
     s <- data.frame(
         x = array(runif(n), dim = n),
         x2 = array(runif(n), dim = n),
