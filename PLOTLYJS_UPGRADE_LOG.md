@@ -219,6 +219,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.17.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.17.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed line redraw regression from v2.15.0
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.18.0
 - **Status**: Not started
 
 ---
