@@ -177,6 +177,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.16.3
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.3
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed hover on multicategory axes
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.16.4
 - **Status**: Not started
 
 ---
