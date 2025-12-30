@@ -92,6 +92,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.13.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.13.2
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed sankey select error introduced in v2.13.0
+  - Fixed handling of missing drag layer for invisible sankey traces
+  - Fixed selection event emission in shape drawing dragmodes
+- **Issues/Concerns**: None - bug fixes only
+
+---
+
+### v2.13.3
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
