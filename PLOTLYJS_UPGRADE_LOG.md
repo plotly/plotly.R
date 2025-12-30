@@ -261,6 +261,18 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.19.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.19.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added shape `label` attribute
+  - Added `labelalias` for various axes types
+  - Fixed hover label overlap for hovermode: 'x'|'y'
+- **Issues/Concerns**:
+  - New shape label feature may need R wrapper support
+
+---
+
+### v2.19.1
 - **Status**: Not started
 
 ---

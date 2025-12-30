@@ -479,7 +479,7 @@ typedArrayPolyfill <- function() {
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     name = "plotly-main", 
-    version = "2.18.2",
+    version = "2.19.0",
     package = "plotly",
     src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",
