@@ -412,3 +412,65 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.25.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.25.2
+- **Status**: Complete
+- **Key Changes**:
+  - Updated Croatian translations (hr locale)
+  - Security fix: addressed potential prototype pollution in plot API calls
+- **Issues/Concerns**: None
+
+---
+
+## Summary of Key Features Added (v2.12.0 - v2.25.2)
+
+### New Trace/Chart Features
+- Pattern support for pie, funnelarea, sunburst, icicle, treemap charts (v2.24.0)
+- Sankey links with arrows (v2.14.0)
+- Scattermapbox clustering options and bounds support (v2.16.0)
+
+### Axis/Layout Features
+- `griddash` axis property for multiple plot types (v2.12.0)
+- Minor tick and grid line styling options (v2.12.0)
+- Y-axes `shift` and `autoshift` to avoid overlapping (v2.17.0)
+- `sync` tickmode option (v2.18.0)
+- `labelalias` for various axes types (v2.19.0)
+- `title.automargin` for automatic top/bottom margining (v2.20.0)
+- Equal Earth projection for geo subplots (v2.25.0)
+
+### Marker/Styling Features
+- New marker properties: `angle`, `angleref`, `standoff` (v2.15.0)
+- `marker.cornerradius` for treemap trace (v2.17.0)
+
+### Legend Features
+- Multiple legend support (legend2, legend3, etc.) with `visible` option (v2.22.0)
+- Legend `entrywidth` and `entrywidthmode` (v2.15.0)
+- Container-referenced legend/colorbar positioning (v2.23.0)
+- Shape legend support (v2.25.0)
+
+### Selection/Interaction Features
+- Persistent and editable selections over cartesian subplots (v2.13.0)
+- `editSelection` config option (v2.14.0)
+
+### Shape Features
+- Shape `label` attribute (v2.19.0)
+- `label.texttemplate` for parametric shapes (v2.21.0)
+- `Plotly.deleteActiveShape` command (v2.25.0)
+
+### Other Features
+- Scatter trace group attributes: `alignmentgroup`, `offsetgroup` (v2.17.0)
+- Enhanced violin trace with additional quartile algorithms (v2.13.0)
+- `minreducedwidth` and `minreducedheight` for automargin control (v2.15.0)
+- Delta prefix/suffix for indicator traces (v2.13.0)
+- Parallel coordinates unselected line color/opacity (v2.13.0)
+- More flexible `automargin` control (v2.13.0)
+
+### Potential R Wrapper Considerations
+- New selection features (v2.13.0)
+- New violin quartile methods (v2.13.0)
+- Marker angle properties (v2.15.0)
+- Scatter grouping attributes (v2.17.0)
+- Shape label features (v2.19.0, v2.21.0)
+- Multiple legends (v2.22.0)
+- Shape legend support (v2.25.0)
+
