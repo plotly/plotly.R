@@ -112,6 +112,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.14.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.14.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added support for sankey links with arrows
+  - Added `editSelection` option to config
+  - Updated Dutch translations and fixed dateMonth format for 'nl' locale
+- **Issues/Concerns**: None - additive changes only
+
+---
+
+### v2.15.0
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
