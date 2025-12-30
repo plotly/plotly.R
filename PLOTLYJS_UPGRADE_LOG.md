@@ -1,0 +1,63 @@
+# plotly.js Upgrade Log
+
+Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
+
+## Versions to Upgrade (28 total)
+
+1. 2.12.0
+2. 2.12.1
+3. 2.13.0
+4. 2.13.1
+5. 2.13.2
+6. 2.13.3
+7. 2.14.0
+8. 2.15.0
+9. 2.15.1
+10. 2.16.0
+11. 2.16.1
+12. 2.16.2
+13. 2.16.3
+14. 2.16.4
+15. 2.16.5
+16. 2.17.0
+17. 2.17.1
+18. 2.18.0
+19. 2.18.1
+20. 2.18.2
+21. 2.19.0
+22. 2.19.1
+23. 2.20.0
+24. 2.21.0
+25. 2.22.0
+26. 2.23.0
+27. 2.23.1
+28. 2.23.2
+29. 2.24.0
+30. 2.24.1
+31. 2.24.2
+32. 2.24.3
+33. 2.25.0
+34. 2.25.1
+35. 2.25.2
+
+## Upgrade Progress
+
+### v2.12.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.12.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added `griddash` axis property for multiple plot types (cartesian, polar, smith, ternary, geo, carpet)
+  - Added minor tick and grid line styling options (minor.tickmode, minor.tickvals, minor.tickcolor, etc.)
+  - Performance improvement: Used "willReadFrequently" 2D context creation attribute
+  - Fixed blank tick labels on cartesian axes
+- **Issues/Concerns**: None - additive changes only
+
+---
+
+### v2.12.1
+- **Release Notes**: (to be filled)
+- **Status**: Not started
+- **Issues/Concerns**:
+
+---
+
