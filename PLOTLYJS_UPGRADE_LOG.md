@@ -291,6 +291,18 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.21.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.21.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added `label.texttemplate` for parametric shapes
+  - Added strict option for custom bundle command
+  - Fixed legend dragging with non-default anchors
+  - Fixed heatmap zsmooth: "fast" rendering/performance
+- **Issues/Concerns**: None
+
+---
+
+### v2.22.0
 - **Status**: Not started
 
 ---
