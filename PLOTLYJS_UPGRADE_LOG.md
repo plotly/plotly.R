@@ -55,6 +55,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.12.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.12.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed disabling polar rotation when `dragmode` is false
+  - Fixed custom modebar buttons mutating input
+  - Corrected missing and duplicate spaces in plot schema descriptions
+- **Issues/Concerns**: None - bug fixes only
+
+---
+
+### v2.13.0
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
