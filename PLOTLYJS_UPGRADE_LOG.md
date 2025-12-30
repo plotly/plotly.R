@@ -329,7 +329,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.23.1
-- **Status**: Not started
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.23.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed heatmap rendering on iOS and Safari when zsmooth is false
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.23.2 to v2.25.2
+- **Status**: Remaining to upgrade
+- **Note**: Continue incremental upgrade from v2.23.2 through v2.25.2
 
 ---
 
