@@ -195,6 +195,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.16.5
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.5
+- **Status**: Complete
+- **Key Changes**:
+  - Disabled slider interactions when staticPlot is true
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.17.0
 - **Status**: Not started
 
 ---
