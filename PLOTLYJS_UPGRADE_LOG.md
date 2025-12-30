@@ -228,6 +228,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.18.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.18.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added new `sync` tickmode option
+  - Improved mobile & tablet device detection for WebGL rendering
+  - Fixed requirejs AMD loader import name issue (regression from v2.17.0)
+- **Issues/Concerns**: None
+
+---
+
+### v2.18.1
 - **Status**: Not started
 
 ---
