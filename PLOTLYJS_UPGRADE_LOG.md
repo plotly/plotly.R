@@ -149,7 +149,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.16.0
-- **Release Notes**: (to be filled)
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.0
+- **Status**: Complete
+- **Key Changes**:
+  - Clustering options for `scattermapbox`
+  - Bounds support for mapbox subplots
+- **Issues/Concerns**: None - new mapbox features
+
+---
+
+### v2.16.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.1
 - **Status**: Not started
 - **Issues/Concerns**:
 
