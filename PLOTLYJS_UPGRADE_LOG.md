@@ -103,6 +103,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.13.3
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.13.3
+- **Status**: Complete
+- **Key Changes**:
+  - Emit `plotly_selected` event on plot API calls and GUI edits
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.14.0
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
