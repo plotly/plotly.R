@@ -318,6 +318,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.23.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.23.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added legend.xref and legend.yref for container-referenced positioning
+  - Added colorbar.xref and colorbar.yref for container-referenced positioning
+  - Improved heatmap rendering performance when zsmooth is false
+- **Issues/Concerns**: None
+
+---
+
+### v2.23.1
 - **Status**: Not started
 
 ---
