@@ -66,6 +66,23 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.13.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.13.0
+- **Status**: Complete
+- **Key Changes**:
+  - Persistent and editable selections over cartesian subplots
+  - New parallel coordinates options (unselected line color/opacity)
+  - Enhanced violin trace with additional quartile computing algorithms
+  - More flexible `automargin` control on cartesian axes
+  - Added `delta.prefix` and `delta.suffix` to indicator traces
+  - Added Chinese (Taiwan) and Sinhala locales
+  - Updated modebar logo
+- **Issues/Concerns**:
+  - New selection features may need testing
+  - Consider exposing new violin quartile methods in R
+
+---
+
+### v2.13.1
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
