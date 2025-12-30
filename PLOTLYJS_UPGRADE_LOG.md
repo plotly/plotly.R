@@ -160,8 +160,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ### v2.16.1
 - **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed choroplethmapbox selection when adding new traces
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.16.2
 - **Status**: Not started
-- **Issues/Concerns**:
 
 ---
 
