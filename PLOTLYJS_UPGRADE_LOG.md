@@ -204,6 +204,21 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.17.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.17.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added y-axes `shift` and `autoshift` to avoid axis overlapping
+  - Added group attributes for scatter trace: `alignmentgroup`, `offsetgroup`
+  - Added `marker.cornerradius` for treemap trace
+  - Switched bundler from browserify to webpack
+  - Fixed auto backoff for marker symbols and sizes arrays
+- **Issues/Concerns**:
+  - Webpack bundler change - watch for bundle size changes
+  - New scatter grouping attributes may need R wrapper support
+
+---
+
+### v2.17.1
 - **Status**: Not started
 
 ---
