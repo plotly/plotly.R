@@ -123,6 +123,23 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.15.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.15.0
+- **Status**: Complete
+- **Key Changes**:
+  - New marker properties: `angle`, `angleref`, `standoff`
+  - Legend control: `entrywidth` and `entrywidthmode`
+  - Layout: `minreducedwidth` and `minreducedheight` for automargin control
+  - Updated pie chart `rotation` to use `angle` value type
+  - Fixed automargin axis title updates
+  - Fixed pattern and slice export issues
+  - Disabled interactions for static plot modes in treemap, icicle, sunburst, etc.
+- **Issues/Concerns**:
+  - New marker angle properties may need R wrapper support
+  - Pie chart rotation change might affect existing code
+
+---
+
+### v2.15.1
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
