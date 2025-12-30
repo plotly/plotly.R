@@ -346,3 +346,14 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.24.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.24.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added pattern support for pie, funnelarea, sunburst, icicle, and treemap charts
+  - Fixed hover text access when all markers have "hoverinfo: none"
+  - Fixed margin spacing for container-referenced legends and colorbars
+- **Issues/Concerns**: None
+
+---
+
