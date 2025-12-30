@@ -140,6 +140,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.15.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.15.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fix for npm module issue
+- **Issues/Concerns**: None - npm packaging fix only
+
+---
+
+### v2.16.0
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
