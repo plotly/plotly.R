@@ -387,3 +387,19 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.25.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.25.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added "Equal Earth" projection for geo subplots
+  - Added options to include legends for shapes and `newshape`
+  - Added `Plotly.deleteActiveShape` command
+  - Fixed contour plot colorscale domain calculation
+  - Fixed text markers on non-mapbox styled maps
+  - Fixed unhiding isolated traces in multi-legend scenarios
+- **Issues/Concerns**:
+  - New Equal Earth projection available for geo plots
+  - Shape legend support may warrant R wrapper updates
+
+---
+
