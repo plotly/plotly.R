@@ -239,6 +239,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.18.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.18.1
+- **Status**: Complete
+- **Key Changes**:
+  - Upgraded d3-interpolate and d3-color to v3 (audit warnings)
+  - Fixed SVG export scaling by removing vector-effect CSS for static plots
+  - Fixed hover on IE (regression from v2.5.0)
+- **Issues/Concerns**: None
+
+---
+
+### v2.18.2
 - **Status**: Not started
 
 ---
