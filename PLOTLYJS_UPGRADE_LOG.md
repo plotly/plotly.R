@@ -83,6 +83,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.13.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.13.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed regression where selections were improperly attached to undefined event data
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.13.2
 - **Release Notes**: (to be filled)
 - **Status**: Not started
 - **Issues/Concerns**:
