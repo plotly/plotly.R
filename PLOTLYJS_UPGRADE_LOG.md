@@ -337,9 +337,12 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
-### v2.23.2 to v2.25.2
-- **Status**: Remaining to upgrade
-- **Note**: Continue incremental upgrade from v2.23.2 through v2.25.2
+### v2.23.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.23.2
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed text rendering while drawing new shapes
+- **Issues/Concerns**: None - bug fix only
 
 ---
 
