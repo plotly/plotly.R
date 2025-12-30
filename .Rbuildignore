@@ -21,3 +21,7 @@ README.Rmd
 abbvie.R
 ^\.httr-oauth$
 ^\.github$
+^\.venv$
+CLAUDE\.md
+PLOTLYJS_UPGRADE_LOG\.md
+PLOTLYJS_UPGRADE_TODO\.md
