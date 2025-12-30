@@ -376,3 +376,14 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.24.3
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.24.3
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed double-click hiding traces in other legends
+  - Fixed double-click behavior for pie chart slices with multiple legends
+  - Fixed legend group and trace order defaults with multiple legends
+- **Issues/Concerns**: None - bug fixes only
+
+---
+
