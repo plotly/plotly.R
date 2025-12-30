@@ -303,6 +303,21 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.22.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.22.0
+- **Status**: Complete
+- **Key Changes**:
+  - Multiple legend support with legend2, legend3, etc.
+  - Added `visible` option for legends
+  - Fixed plotly_click on touch devices for gl3d scenes
+  - Fixed scatter3d when marker.opacity is zero
+  - Fixed scattermapbox visibility restyle
+  - Updated Norwegian and Slovak translations
+- **Issues/Concerns**:
+  - Multiple legends is a significant feature - may need R wrapper support
+
+---
+
+### v2.23.0
 - **Status**: Not started
 
 ---
