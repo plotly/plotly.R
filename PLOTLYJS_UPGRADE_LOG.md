@@ -250,6 +250,17 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.18.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.18.2
+- **Status**: Complete
+- **Key Changes**:
+  - Prevented attaching internal d3 object to window (regression from v2.17.0)
+  - Fixed lower/upper fence order in French locale
+  - Fixed formats in Peruvian Spanish (es-pe) locale
+- **Issues/Concerns**: None
+
+---
+
+### v2.19.0
 - **Status**: Not started
 
 ---
