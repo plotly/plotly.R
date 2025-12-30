@@ -186,6 +186,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.16.4
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.4
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed regression with scattermapbox redraw from v2.16.0
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.16.5
 - **Status**: Not started
 
 ---
