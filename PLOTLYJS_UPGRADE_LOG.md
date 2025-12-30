@@ -168,6 +168,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.16.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.16.2
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed regression in mapbox clearOutline from v2.13.0
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.16.3
 - **Status**: Not started
 
 ---
