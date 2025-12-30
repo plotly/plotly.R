@@ -273,6 +273,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.19.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.19.1
+- **Status**: Complete
+- **Key Changes**:
+  - Ensure slider range stays in bounds during drag
+- **Issues/Concerns**: None - bug fix only
+
+---
+
+### v2.20.0
 - **Status**: Not started
 
 ---
