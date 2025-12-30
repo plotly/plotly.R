@@ -2,7 +2,7 @@ library(httr)
 library(rprojroot)
 
 # Specify the version to update to (set to NULL for latest)
-PLOTLY_JS_VERSION <- "2.19.1"
+PLOTLY_JS_VERSION <- "2.20.0"
 
 # get zip URL to plotly.js release
 if (is.null(PLOTLY_JS_VERSION)) {

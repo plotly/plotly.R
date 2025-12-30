@@ -282,6 +282,15 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 ---
 
 ### v2.20.0
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.20.0
+- **Status**: Complete
+- **Key Changes**:
+  - Added `title.automargin` for automatic top/bottom margining
+- **Issues/Concerns**: None
+
+---
+
+### v2.21.0
 - **Status**: Not started
 
 ---
