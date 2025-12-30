@@ -366,3 +366,13 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.24.2
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.24.2
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed legend groups toggle (regression from v2.22.0)
+  - Fixed waterfall chart hover template delta display on total values
+- **Issues/Concerns**: None - bug fixes only
+
+---
+
