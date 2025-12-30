@@ -357,3 +357,12 @@ Tracking the upgrade of plotly.js from v2.11.1 to v2.25.2.
 
 ---
 
+### v2.24.1
+- **Release Notes**: https://github.com/plotly/plotly.js/releases/tag/v2.24.1
+- **Status**: Complete
+- **Key Changes**:
+  - Fixed minimal copying of arrays in minExtend function (regression from v2.24.0)
+- **Issues/Concerns**: None - bug fix only
+
+---
+
