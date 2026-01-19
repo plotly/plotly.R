@@ -119,3 +119,19 @@ test_that("Hoverinfo is only displayed if no tooltip variables are present", {
   expect_true(all(grepl("^label", L$data[[2]]$text)))
 })
 
+test_that("variable named 'group' is shown in tooltip when mapped to aesthetic (#2415)", {
+  # When a user has a column named "group" and maps it to colour,
+  # it should appear in the tooltip
+  df <- data.frame(
+    x = 1:6,
+    y = 1:6,
+    group = rep(c("A", "B"), each = 3)
+  )
+  p <- ggplot(df, aes(x, y, colour = group)) + geom_point()
+  L <- plotly_build(ggplotly(p))$x
+  # Check that "group: A" or "group: B" appears in the tooltip text
+  txt <- unlist(lapply(L$data, function(d) d$text))
+  expect_true(any(grepl("group: A", txt)))
+  expect_true(any(grepl("group: B", txt)))
+})
+

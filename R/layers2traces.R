@@ -56,8 +56,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
       if (!aesName %in% names(x)) next
       # TODO: should we be getting the name from scale_*(name) first?
       varName <- y[[i]]
-      # "automatically" generated group aes is not informative
-      if (identical("group", unique(varName, aesName))) next
+      # Skip auto-generated group aesthetic (where both aes name and var name are "group"),
+      # but allow: (1) variables named "group" mapped to other aesthetics like colour,
+      # and (2) other variables mapped to the "group" aesthetic
+      if (identical(aesName, "group") && identical(varName, "group")) next
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)

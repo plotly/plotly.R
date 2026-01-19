@@ -26,6 +26,7 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 ## Bug fixes
 
 * `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+* Closed #2415: `ggplotly()` now shows variables named 'group' in tooltips when mapped to aesthetics like `colour`.
 
 # plotly 4.11.0
 
