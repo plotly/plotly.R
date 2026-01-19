@@ -331,24 +331,7 @@
             "hoverformat": ".2f"
           },
           "shapes": [
-            {
-              "type": "rect",
-              "fillcolor": null,
-              "line": {
-                "color": null,
-                "width": 0,
-                "linetype": [
 
-                ]
-              },
-              "yref": "paper",
-              "xref": "paper",
-              "layer": "below",
-              "x0": 0,
-              "x1": 1,
-              "y0": 0,
-              "y1": 1
-            }
           ],
           "showlegend": false,
           "legend": {
