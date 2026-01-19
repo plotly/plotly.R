@@ -16,7 +16,7 @@ ensures the provided string is surrounded with \code{$} (this is what plotly.js
 uses to declare a string as TeX).
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 plot_ly(x = c(1, 2, 3, 4), y = c(1, 4, 9, 16)) \%>\%
   layout(title = TeX("\\\\text{Some mathjax: }\\\\alpha+\\\\beta x")) \%>\%

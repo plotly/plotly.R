@@ -22,7 +22,7 @@ the scattergeo trace type, and enables higher level geometries
 like \code{\link[=add_polygons]{add_polygons()}} to work
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 map_data("world", "canada") \%>\%
   group_by(group) \%>\%

@@ -165,7 +165,7 @@ If \code{z} is a raster object (see \code{\link[=as.raster]{as.raster()}}), the 
 Add trace(s) to a plotly visualization
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 # the `plot_ly()` function initiates an object, and if no trace type
 # is specified, it sets a sensible default

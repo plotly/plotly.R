@@ -25,7 +25,7 @@ interactive dendrogram. Selecting a node selects all the labels (i.e. leafs)
 under that node.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 \dontrun{
 hc <- hclust(dist(USArrests), "ave")

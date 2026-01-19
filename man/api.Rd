@@ -92,7 +92,7 @@ plotly objects via \code{api_download_plot()}/\code{api_download_grid()}.
 For anything else, use \code{api()}.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 \dontrun{
 
