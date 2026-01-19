@@ -411,7 +411,6 @@ gg2list <- function(p, width = NULL, height = NULL,
       # of each non-positional scale for display in tooltips
       for (sc in npscales$scales) {
         data <- lapply(data, function(d) {
-          # Only process aesthetics that actually exist in this layer's data
           present_aes <- intersect(sc$aesthetics, names(d))
           if (length(present_aes) > 0) {
             d[paste0(present_aes, "_plotlyDomain")] <- d[present_aes]
@@ -573,12 +572,9 @@ gg2list <- function(p, width = NULL, height = NULL,
     tr$hoverinfo <- tr$hoverinfo %||%"text"
     tr
   })
-  # show only one legend entry per legendgroup
-  # For deduplication, skip invisible traces (like GeomBlank) so they don't
-  # "claim" the legendgroup and prevent visible traces from showing in legend
+  # show only one legend entry per legendgroup (skip invisible traces for dedup)
   grps <- sapply(traces, "[[", "legendgroup")
   is_visible <- sapply(traces, function(tr) !isFALSE(tr$visible))
-  # Only consider visible traces for deduplication - invisible traces shouldn't claim legendgroup
   grps_for_dedup <- ifelse(is_visible, grps, paste0(grps, "_invisible_", seq_along(grps)))
   traces <- Map(function(x, y) {
     if (!is.null(x[["frame"]])) return(x)
@@ -990,7 +986,7 @@ gg2list <- function(p, width = NULL, height = NULL,
     font = text2font(theme$legend.text)
   )
 
-  # Translate legend.position from ggplot2 theme to plotly layout (fixes #2407, #2187)
+  # Translate legend.position to plotly layout
   legend_pos <- theme$legend.position %||% theme[["legend.position"]]
   if (!is.null(legend_pos) && !identical(legend_pos, "none")) {
     if (is.character(legend_pos)) {
@@ -1005,7 +1001,6 @@ gg2list <- function(p, width = NULL, height = NULL,
           x = -0.15, y = 0.5, xanchor = "right", yanchor = "middle"
         )),
         "inside" = {
-          # In ggplot2 >= 3.5.0, numeric position is stored in legend.position.inside
           inside_pos <- theme$legend.position.inside %||% theme[["legend.position.inside"]]
           if (is.numeric(inside_pos) && length(inside_pos) == 2) {
             modifyList(gglayout$legend, list(
@@ -1015,10 +1010,9 @@ gg2list <- function(p, width = NULL, height = NULL,
             gglayout$legend
           }
         },
-        gglayout$legend  # "right" is default, no change needed
+        gglayout$legend
       )
     } else if (is.numeric(legend_pos) && length(legend_pos) == 2) {
-      # Handle numeric position like c(0.8, 0.2) for older ggplot2 versions
       gglayout$legend <- modifyList(gglayout$legend, list(
         x = legend_pos[1], y = legend_pos[2], xanchor = "left", yanchor = "bottom"
       ))
@@ -1431,7 +1425,6 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
 # theme(panel.border) -> plotly.js rect shape
 make_panel_border <- function(xdom, ydom, theme) {
   border <- theme[["panel.border"]]
-  # Don't draw anything if panel.border is blank or NULL
   if (is.null(border) || is_blank(border)) {
     return(list())
   }
