@@ -78,11 +78,15 @@ layers2traces <- function(data, prestats_data, layout, p) {
   }, data, hoverTextAes)
   
   # draw legends only for discrete scales
+  # Register each aesthetic separately for proper legend matching (fixes #2467)
+  # When a scale has multiple aesthetics (e.g., c("colour", "fill")), we need
+  # individual entries so "colour_plotlyDomain" matches discreteScales[["colour"]]
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
     if (sc$is_discrete()) {
-      nm <- paste(sc$aesthetics, collapse = "_")
-      discreteScales[[nm]] <- sc
+      for (aes_name in sc$aesthetics) {
+        discreteScales[[aes_name]] <- sc
+      }
     }
   }
   # Convert "high-level" geoms to their "low-level" counterpart
