@@ -21,7 +21,7 @@
     "plotly_click-A": null,
     "plotly_deselect-A": "\"plot\"",
     "plotly_hover-A": null,
-    "plotly_relayout-A": "{\"width\":962,\"height\":400}",
+    "plotly_relayout-A": "{\"width\":947,\"height\":400}",
     "plotly_selected-A": null,
     "plotly_selecting-A": null
   },
@@ -336,24 +336,7 @@
             "hoverformat": ".2f"
           },
           "shapes": [
-            {
-              "type": "rect",
-              "fillcolor": null,
-              "line": {
-                "color": null,
-                "width": 0,
-                "linetype": [
 
-                ]
-              },
-              "yref": "paper",
-              "xref": "paper",
-              "layer": "below",
-              "x0": 0,
-              "x1": 1,
-              "y0": 0,
-              "y1": 1
-            }
           ],
           "showlegend": false,
           "legend": {

@@ -27,6 +27,7 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 
 * `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
 * Closed #2415: `ggplotly()` now shows variables named 'group' in tooltips when mapped to aesthetics like `colour`.
+* Closed #2455, #2460: `ggplotly()` no longer creates empty shapes when `panel.border` is `element_blank()` (ggplot2 4.0.0 compatibility).
 
 # plotly 4.11.0
 

@@ -1159,7 +1159,8 @@ linewidth_or_size.Geom <- function(x) {
 
 #' @export
 linewidth_or_size.element <- function(x) {
-  if ("linewidth" %in% names(x)) "linewidth" else "size"
+  # S7 objects (ggplot2 >= 4.0) don't have traditional names(), check for slot
+  if (!is.null(x$linewidth) || "linewidth" %in% names(x)) "linewidth" else "size"
 }
 
 #' @export

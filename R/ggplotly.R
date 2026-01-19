@@ -1389,7 +1389,12 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
 
 # theme(panel.border) -> plotly.js rect shape
 make_panel_border <- function(xdom, ydom, theme) {
-  rekt <- rect2shape(theme[["panel.border"]])
+  # Use calc_element to get fully resolved element with inherited values
+  border <- ggplot2::calc_element("panel.border", theme)
+  if (is.null(border) || is_blank(border)) {
+    return(list())
+  }
+  rekt <- rect2shape(border)
   rekt$x0 <- xdom[1]
   rekt$x1 <- xdom[2]
   rekt$y0 <- ydom[1]

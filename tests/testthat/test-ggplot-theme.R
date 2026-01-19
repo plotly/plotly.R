@@ -65,12 +65,28 @@ test_that("marker default shape is a circle", {
 test_that("plot panel border is translated correctly", {
   ggpenguin <- penguin.base + theme_grey() # has no panel.border
   info <- expect_doppelganger_built(ggpenguin, "theme-panel-border-1")
-  
+
   red <- ggplot(palmerpenguins::penguins) +
     theme_grey() +
     geom_point(aes(bill_length_mm, bill_depth_mm)) +
     theme(panel.border = element_rect(colour = "red", fill = NA))
-  
+
   info <- expect_doppelganger_built(red, "theme-panel-border-2")
   expect_true(info$layout$shapes[[1]]$line$color == toRGB("red"))
+})
+
+test_that("element_blank panel.border does not create empty shapes (#2455, #2460)", {
+  # theme_grey() has element_blank() panel.border - should NOT create a shape
+  p_grey <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + theme_grey()
+  L_grey <- plotly_build(ggplotly(p_grey))$x
+  # No panel border shapes should be created for element_blank
+  grey_shapes <- Filter(function(s) identical(s$xref, "paper") && identical(s$yref, "paper"), L_grey$layout$shapes)
+  expect_equal(length(grey_shapes), 0)
+
+  # theme_bw() has visible panel.border - SHOULD create a shape
+  p_bw <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + theme_bw()
+  L_bw <- plotly_build(ggplotly(p_bw))$x
+  bw_shapes <- Filter(function(s) identical(s$xref, "paper") && identical(s$yref, "paper"), L_bw$layout$shapes)
+  expect_true(length(bw_shapes) > 0)
+  expect_false(is.na(bw_shapes[[1]]$line$color))
 })

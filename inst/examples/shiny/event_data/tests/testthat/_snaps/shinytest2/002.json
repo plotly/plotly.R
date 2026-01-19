@@ -18,7 +18,7 @@
     "plotly_afterplot-A": "\"plot\"",
     "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_hover-A": null,
-    "plotly_relayout-A": "{\"width\":962,\"height\":400}"
+    "plotly_relayout-A": "{\"width\":947,\"height\":400}"
   },
   "output": {
     "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
@@ -331,24 +331,7 @@
             "hoverformat": ".2f"
           },
           "shapes": [
-            {
-              "type": "rect",
-              "fillcolor": null,
-              "line": {
-                "color": null,
-                "width": 0,
-                "linetype": [
 
-                ]
-              },
-              "yref": "paper",
-              "xref": "paper",
-              "layer": "below",
-              "x0": 0,
-              "x1": 1,
-              "y0": 0,
-              "y1": 1
-            }
           ],
           "showlegend": false,
           "legend": {
