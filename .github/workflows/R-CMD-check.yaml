@@ -62,6 +62,8 @@ jobs:
         with:
           cache-version: 3
           needs: check
+          # GGally doesn't install on R 4.2 (oldrel-3); tests skip via skip_if_not_installed()
+          packages: ${{ matrix.config.r == 'oldrel-3' && '"deps::., !GGally"' || 'NULL' }}
 
       - name: Set up Python (for reticulate)
         if: matrix.config.visual_tests == true
