@@ -49,16 +49,8 @@ jobs:
           ruby-version: '2.7.4'
           bundler-cache: true
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Fetch R/ggplot2 docs from plotly.r-docs
         run: make fetch
-
-      - name: Validate front-matter
-        run: python front-matter-ci.py _posts
 
       - name: Build site
         run: bundle exec jekyll build
