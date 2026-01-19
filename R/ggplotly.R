@@ -1389,7 +1389,12 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
 
 # theme(panel.border) -> plotly.js rect shape
 make_panel_border <- function(xdom, ydom, theme) {
-  rekt <- rect2shape(theme[["panel.border"]])
+  border <- theme[["panel.border"]]
+  # Don't draw anything if panel.border is blank or NULL
+  if (is.null(border) || is_blank(border)) {
+    return(list())
+  }
+  rekt <- rect2shape(border)
   rekt$x0 <- xdom[1]
   rekt$x1 <- xdom[2]
   rekt$y0 <- ydom[1]
