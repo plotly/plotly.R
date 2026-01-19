@@ -1,3 +1,13 @@
+# plotly (development version)
+
+## Improvements
+
+* `save_image()` now works with kaleido v1.0 and higher. (#2447)
+
+## Bug fixes
+
+* `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+
 # plotly 4.11.0
 
 ## New features
@@ -10,7 +20,6 @@
 
 ## Bug fixes
 
-* `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`).
 * Closed #2337: Creating a new `event_data()` handler no longer causes a spurious reactive update of existing `event_data()`s. (#2339)
 * Closed #2376: Removes errant boxmode warning for grouped boxplot. (#2396)
 * Closed #2392: Trivial warning about RColorBrewer minimal n value is no longer thrown (#1999) 
