@@ -112,28 +112,31 @@ newKaleidoScope <- function(kaleido) {
     scopes = NULL,
     transform = function(p, file, ..., width = NULL, height = NULL, scale = NULL) {
       # Perform JSON conversion exactly how the R package would do it
-      fig <- to_JSON(
-        plotly_build(p)$x[c("data", "layout", "config")]
-      )
-      
+      fig_data <- plotly_build(p)$x[c("data", "layout", "config")]
+
+      # Inject mapbox token into layout.mapbox.accesstoken if available
+      # We use layout instead of config because Kaleido's parser preserves
+      # layout but drops config. This handles the case where users set
+      # MAPBOX_TOKEN env var but don't use plot_mapbox()
+      mapbox <- Sys.getenv("MAPBOX_TOKEN", NA)
+      if (!is.na(mapbox) && is.null(fig_data$layout$mapbox$accesstoken)) {
+        fig_data$layout$mapbox$accesstoken <- mapbox
+      }
+
+      fig <- to_JSON(fig_data)
+
       # Write to JSON file
       tmp_json <- tempfile(fileext = ".json")
       on.exit(unlink(tmp_json))
       writeLines(fig, tmp_json)
-      
+
       # Import it as a fig (dict)
       load_json <- sprintf(
         "import json; fig = json.load(open('%s'))",
         tmp_json
       )
       reticulate::py_run_string(load_json)
-      
-      # TODO: Pass plotlyMainBundlePath() (and mathjax)
-      # to page level options
-      #reticulate::py_run_string(
-      #  "import kaleido; kaleido.PageGenerator()"
-      #)
-      
+
       # Gather figure-level options
       opts <- list(
         format = tools::file_ext(file),
@@ -141,16 +144,12 @@ newKaleidoScope <- function(kaleido) {
         height = reticulate::r_to_py(height),
         scale = reticulate::r_to_py(scale)
       )
-      
-      # TODO: how to bring in Mapbox token?
-      # https://github.com/plotly/Kaleido/issues/348
-      #mapbox <- Sys.getenv("MAPBOX_TOKEN", NA)
-      #if (!is.na(mapbox)) {
-      #  opts$mapboxAccessToken <- mapbox
-      #}
-      
+
+      # Pass the R plotly.js bundle path to Kaleido
+      kopts <- list(plotlyjs = plotlyMainBundlePath())
+
       # Write the figure to a file using kaleido
-      kaleido$write_fig_sync(reticulate::py$fig, file, opts = opts)
+      kaleido$write_fig_sync(reticulate::py$fig, file, opts = opts, kopts = kopts)
     },
     shutdown = function() {}
   )
