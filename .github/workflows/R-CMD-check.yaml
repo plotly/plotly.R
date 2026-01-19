@@ -34,7 +34,8 @@ jobs:
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
           - {os: ubuntu-latest,   r: 'oldrel-2'}
-          - {os: ubuntu-latest,   r: 'oldrel-3'}
+          # GGally requires R >= 4.3, so exclude it on oldrel-3 (R 4.2)
+          - {os: ubuntu-latest,   r: 'oldrel-3', packages: 'any::sessioninfo, !GGally'}
           # - {os: ubuntu-latest,   r: 'oldrel-4'} # dependency issues with oldrel-4
 
     env:
@@ -62,8 +63,7 @@ jobs:
         with:
           cache-version: 3
           needs: check
-          # GGally doesn't install on R 4.2 (oldrel-3); tests skip via skip_if_not_installed()
-          packages: ${{ matrix.config.r == 'oldrel-3' && '"deps::., !GGally"' || 'NULL' }}
+          packages: ${{ matrix.config.packages || 'any::sessioninfo' }}
 
       - name: Set up Python (for reticulate)
         if: matrix.config.visual_tests == true
