@@ -56,9 +56,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
       if (!aesName %in% names(x)) next
       # TODO: should we be getting the name from scale_*(name) first?
       varName <- y[[i]]
-      # Skip auto-generated group aesthetic (where both aes name and var name are "group"),
-      # but allow: (1) variables named "group" mapped to other aesthetics like colour,
-      # and (2) other variables mapped to the "group" aesthetic
+      # Skip auto-generated group aesthetic, but keep explicit group mappings
       if (identical(aesName, "group") && identical(varName, "group")) next
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
@@ -77,11 +75,7 @@ layers2traces <- function(data, prestats_data, layout, p) {
     x
   }, data, hoverTextAes)
   
-  # draw legends only for discrete scales
-  # Register each aesthetic separately for proper legend matching (fixes #2467)
-  # When a scale has multiple aesthetics (e.g., c("colour", "fill")), we need
-  # individual entries so "colour_plotlyDomain" matches discreteScales[["colour"]]
-  # Skip identity scales (guide = "none") as they don't produce legends or trace splitting
+  # draw legends only for discrete scales (skip scales with guide = "none")
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
     if (sc$is_discrete() && !identical(sc$guide, "none")) {
@@ -713,7 +707,7 @@ geom2trace <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list(visible = FALSE)
+  list(visible = FALSE, showlegend = FALSE)
 }
 
 #' @export
@@ -877,11 +871,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   # marker styling must inherit from GeomPoint$default_aes
   # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L7
   point_defaults <- GeomPoint$use_defaults(NULL)
-
-  # Determine if outliers should be hidden
-  # Hide outliers if: outliers = FALSE, or outlier.shape = NA (via outlier_gp$shape)
-  hide_outliers <- isFALSE(params$outliers) ||
-    isTRUE(is.na(params$outlier_gp$shape))
+  hide_outliers <- isFALSE(params$outliers) || isTRUE(is.na(params$outlier_gp$shape))
 
   compact(list(
     x = data[["x"]],
@@ -896,7 +886,6 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
     ),
-    # Control whether outlier points are shown
     boxpoints = if (hide_outliers) FALSE,
     # markers/points
     marker = list(

@@ -32,6 +32,7 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 * Closed #2305: `ggplotly()` now respects `geom_boxplot(outlier.shape = NA)` to hide outlier points.
 * Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
 * Closed #2407, #2187: `ggplotly()` now translates `legend.position` theme element to plotly layout (supports "bottom", "top", "left", and numeric positions).
+* Closed #2281: `ggplotly()` no longer drops legends when `geom_blank()` is present in the plot.
 
 # plotly 4.11.0
 
