@@ -899,7 +899,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       aes2plotly(data, params, "alpha")
     ),
     # Control whether outlier points are shown
-    boxpoints = if (hide_outliers) FALSE else "outliers",
+    boxpoints = if (hide_outliers) FALSE,
     # markers/points
     marker = list(
       opacity = point_defaults$alpha,
