@@ -31,6 +31,7 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 * Closed #2466: `ggplotly()` no longer errors when `scale_*_manual()` has unused aesthetics (e.g., `aesthetics = c("colour", "fill")` when only colour is used).
 * Closed #2305: `ggplotly()` now respects `geom_boxplot(outlier.shape = NA)` to hide outlier points.
 * Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
+* Closed #2407, #2187: `ggplotly()` now translates `legend.position` theme element to plotly layout (supports "bottom", "top", "left", and numeric positions).
 
 # plotly 4.11.0
 

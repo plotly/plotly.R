@@ -979,12 +979,47 @@ gg2list <- function(p, width = NULL, height = NULL,
     bgcolor = toRGB(theme$legend.background$fill),
     bordercolor = toRGB(theme$legend.background$colour),
     borderwidth = unitConvert(
-      theme$legend.background[[linewidth_or_size(theme$legend.background)]], 
+      theme$legend.background[[linewidth_or_size(theme$legend.background)]],
       "pixels", "width"
     ),
     font = text2font(theme$legend.text)
   )
-  
+
+  # Translate legend.position from ggplot2 theme to plotly layout (fixes #2407, #2187)
+  legend_pos <- theme$legend.position %||% theme[["legend.position"]]
+  if (!is.null(legend_pos) && !identical(legend_pos, "none")) {
+    if (is.character(legend_pos)) {
+      gglayout$legend <- switch(legend_pos,
+        "bottom" = modifyList(gglayout$legend, list(
+          orientation = "h", x = 0.5, y = -0.15, xanchor = "center", yanchor = "top"
+        )),
+        "top" = modifyList(gglayout$legend, list(
+          orientation = "h", x = 0.5, y = 1.02, xanchor = "center", yanchor = "bottom"
+        )),
+        "left" = modifyList(gglayout$legend, list(
+          x = -0.15, y = 0.5, xanchor = "right", yanchor = "middle"
+        )),
+        "inside" = {
+          # In ggplot2 >= 3.5.0, numeric position is stored in legend.position.inside
+          inside_pos <- theme$legend.position.inside %||% theme[["legend.position.inside"]]
+          if (is.numeric(inside_pos) && length(inside_pos) == 2) {
+            modifyList(gglayout$legend, list(
+              x = inside_pos[1], y = inside_pos[2], xanchor = "left", yanchor = "bottom"
+            ))
+          } else {
+            gglayout$legend
+          }
+        },
+        gglayout$legend  # "right" is default, no change needed
+      )
+    } else if (is.numeric(legend_pos) && length(legend_pos) == 2) {
+      # Handle numeric position like c(0.8, 0.2) for older ggplot2 versions
+      gglayout$legend <- modifyList(gglayout$legend, list(
+        x = legend_pos[1], y = legend_pos[2], xanchor = "left", yanchor = "bottom"
+      ))
+    }
+  }
+
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
