@@ -81,9 +81,10 @@ layers2traces <- function(data, prestats_data, layout, p) {
   # Register each aesthetic separately for proper legend matching (fixes #2467)
   # When a scale has multiple aesthetics (e.g., c("colour", "fill")), we need
   # individual entries so "colour_plotlyDomain" matches discreteScales[["colour"]]
+  # Skip identity scales (guide = "none") as they don't produce legends or trace splitting
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
-    if (sc$is_discrete()) {
+    if (sc$is_discrete() && !identical(sc$guide, "none")) {
       for (aes_name in sc$aesthetics) {
         discreteScales[[aes_name]] <- sc
       }
