@@ -53,7 +53,7 @@ jobs:
         run: make fetch
 
       - name: Build site
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build --config _config.yml,_config_production.yml
         env:
           JEKYLL_ENV: production
 
