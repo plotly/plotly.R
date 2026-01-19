@@ -712,7 +712,9 @@ geom2trace <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list(visible = FALSE)
+  # GeomBlank should never show in legend - it would claim the legendgroup
+  # and cause visible traces with the same group to not show their legend entry
+  list(visible = FALSE, showlegend = FALSE)
 }
 
 #' @export

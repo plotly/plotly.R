@@ -574,12 +574,17 @@ gg2list <- function(p, width = NULL, height = NULL,
     tr
   })
   # show only one legend entry per legendgroup
+  # For deduplication, skip invisible traces (like GeomBlank) so they don't
+  # "claim" the legendgroup and prevent visible traces from showing in legend
   grps <- sapply(traces, "[[", "legendgroup")
+  is_visible <- sapply(traces, function(tr) !isFALSE(tr$visible))
+  # Only consider visible traces for deduplication - invisible traces shouldn't claim legendgroup
+  grps_for_dedup <- ifelse(is_visible, grps, paste0(grps, "_invisible_", seq_along(grps)))
   traces <- Map(function(x, y) {
     if (!is.null(x[["frame"]])) return(x)
     x$showlegend <- isTRUE(x$showlegend) && y
     x
-  }, traces, !duplicated(grps))
+  }, traces, !duplicated(grps_for_dedup))
   
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
