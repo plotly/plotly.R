@@ -1,5 +1,24 @@
 # plotly (development version)
 
+## Changes to plotly.js
+
+Upgrades plotly.js from v2.11.1 to v2.25.2 (35 releases). Key new features now available:
+
+* **Multiple legends**: Support for `legend2`, `legend3`, etc. with separate positioning and visibility control
+* **Shape labels**: New `label` attribute for shapes and `label.texttemplate` for parametric shapes
+* **Marker direction**: New `marker.angle`, `marker.angleref`, and `marker.standoff` properties for directional markers
+* **Y-axis positioning**: `shift` and `autoshift` properties to avoid y-axis overlapping in multi-axis plots
+* **Mapbox clustering**: Clustering options and bounds support for `scattermapbox` traces
+* **Equal Earth projection**: New map projection option for geo subplots
+* **Pattern fills**: Pattern support extended to pie, funnelarea, sunburst, icicle, and treemap charts
+* **Editable selections**: Persistent and editable selections over cartesian subplots with `editSelection` config option
+* **Axis label aliases**: `labelalias` for simplified axis label customization
+* **Grid styling**: `griddash` property and minor tick/grid line styling options
+
+Also includes a security fix for prototype pollution and ~90KB bundle size reduction.
+
+See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) for the full changelog.
+
 ## Improvements
 
 * `save_image()` now works with kaleido v1.0 and higher. (#2447)
