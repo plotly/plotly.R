@@ -140,7 +140,13 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
   if (!is.data.frame(data) && !crosstalk::is.SharedData(data)) {
     stop("First argument, `data`, must be a data frame or shared data.", call. = FALSE)
   }
-  
+
+  if (is.data.frame(data) && nrow(data) > 0L) {
+    qtables <- vapply(data, inherits, logical(1L), "QTable")
+    if (any(qtables))
+      data[qtables] <- lapply(data[qtables], as.vector)
+  }
+
   # "native" plotly arguments
   attrs <- list(...)
   
@@ -479,7 +485,7 @@ typedArrayPolyfill <- function() {
 plotlyMainBundle <- function() {
   htmltools::htmlDependency(
     name = "plotly-main", 
-    version = "2.11.1",
+    version = "2.35.2",
     package = "plotly",
     src = dependency_dir("plotlyjs"),
     script = "plotly-latest.min.js",

@@ -1,0 +1,42 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # - checkout
+      # Replace this with a real test runner invocation
+      - run:
+          name: Run tests
+          command: echo 'replace me with real tests!' && true
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with steps to build a package, or executable
+      - run:
+          name: Build an artifact
+          command: touch example.txt
+      - store_artifacts:
+          path: example.txt
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  example:
+    jobs:
+      - test
+      #- build:
+      #    requires:
+      #      - test
+      - deploy:
+          requires:
+            - test
+

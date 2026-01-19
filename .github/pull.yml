@@ -1,0 +1,9 @@
+version: "1"
+rules:
+  - base: master
+    upstream: ropensci:master    # change `wei` to the owner of upstream repo
+    mergeMethod: none
+    assignees:
+      - chschan
+    reviewers:
+      - chschan

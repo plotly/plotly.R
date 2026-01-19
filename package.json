@@ -1,0 +1,23 @@
+{
+  "name": "plotly",
+  "private": true,
+  "engines": {
+    "node": ">=12.9.0"
+  },
+  "scripts": {
+    "preinstall": "([ \"$CI\" != true ] && npx npm-force-resolutions) || true"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "husky": "^0.13.3",
+    "npm-force-resolutions": "0.0.10",
+    "rhtmlBuildUtils": "github:Displayr/rhtmlBuildUtils#7.2.3"
+  },
+  "resolutions": {
+    "glob-parent": "5.1.2",
+    "ini": "1.3.8",
+    "minimist": "1.2.5",
+    "y18n": "4.0.3",
+    "yargs-parser": "18.1.3"
+  }
+}
