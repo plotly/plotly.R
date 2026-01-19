@@ -128,7 +128,7 @@ newKaleidoScope <- function(kaleido) {
       )
       reticulate::py_run_string(load_json)
       
-      # TODO: Pass plotlyMainBundlePath() (and mathjax?)
+      # TODO: Pass plotlyMainBundlePath() (and mathjax)
       # to page level options
       #reticulate::py_run_string(
       #  "import kaleido; kaleido.PageGenerator()"
