@@ -15,8 +15,7 @@
       ]
     },
     "plotType": "ggplotly",
-    "plotly_afterplot-A": "\"plot\"",
-    "plotly_hover-A": null
+    "plotly_afterplot-A": "\"plot\""
   },
   "output": {
     "brushed": "[1] \"Brush extents appear here (double-click to clear)\"",
