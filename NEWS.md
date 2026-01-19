@@ -30,6 +30,7 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 * Closed #2455, #2460: `ggplotly()` no longer creates empty shapes when `panel.border` is `element_blank()` (ggplot2 4.0.0 compatibility).
 * Closed #2466: `ggplotly()` no longer errors when `scale_*_manual()` has unused aesthetics (e.g., `aesthetics = c("colour", "fill")` when only colour is used).
 * Closed #2305: `ggplotly()` now respects `geom_boxplot(outlier.shape = NA)` to hide outlier points.
+* Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
 
 # plotly 4.11.0
 

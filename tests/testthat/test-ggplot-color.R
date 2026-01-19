@@ -17,7 +17,25 @@ test_that("scale_*_manual with unused aesthetics does not error (#2466)", {
       aesthetics = c("colour", "fill")
     )
   # Should not error with "undefined columns selected"
-  # (Note: trace splitting with multi-aesthetic scales is a separate issue #2467)
   expect_error(plotly_build(ggplotly(p)), NA)
+})
+
+test_that("multi-aesthetic scales show legend and split traces correctly (#2467)", {
+  # When scale has aesthetics = c('colour', 'fill') and both are used,
+  # traces should be split by the variable and legend should appear
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species, fill = Species)) +
+    geom_point(shape = 21) +
+    scale_colour_manual(
+      values = c("setosa" = "red", "versicolor" = "blue", "virginica" = "green"),
+      aesthetics = c("colour", "fill")
+    )
+  L <- plotly_build(ggplotly(p))$x
+  # Should have 3 traces (one per Species level)
+  expect_equal(length(L$data), 3)
+  # Should show legend
+  expect_true(any(sapply(L$data, function(d) isTRUE(d$showlegend))))
+  # Trace names should be the species names
+  trace_names <- sapply(L$data, function(d) d$name)
+  expect_true(all(c("setosa", "versicolor", "virginica") %in% trace_names))
 })
 
