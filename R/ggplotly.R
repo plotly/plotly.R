@@ -1153,6 +1153,14 @@ gg2list <- function(p, width = NULL, height = NULL,
   l$cur_data <- ids[[layerData]]
   l$visdat <- setNames(lapply(return_dat, function(x) function(y) x), ids)
 
+  # automatically assign zorder values based on trace positionAdd commentMore actions
+  # this ensures proper layering (later traces on top) for ggplot2 without manual intervention
+  for (i in seq_along(l$data)) {
+    if (is.null(l$data[[i]]$zorder)) {
+      l$data[[i]]$zorder <- i
+    }
+  }
+
   l
 }
 
