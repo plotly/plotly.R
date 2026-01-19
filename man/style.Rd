@@ -19,7 +19,7 @@ Modify trace(s) of an existing plotly visualization. Useful when used in
 conjunction with \code{\link[=get_figure]{get_figure()}}.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 # style() is especially useful in conjunction with ggplotly()
 # It allows you to leverage the underlying plotly.js library to change 

@@ -1,3 +1,13 @@
+# plotly (development version)
+
+## Improvements
+
+* `save_image()` now works with kaleido v1.0 and higher. (#2447)
+
+## Bug fixes
+
+* `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+
 # plotly 4.11.0
 
 ## New features

@@ -95,7 +95,7 @@ a plotly visualization (if there are multiple data frames, by default,
 it returns the most recent one).
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 # use group_by() to define groups of visual markings
 p <- txhousing \%>\%

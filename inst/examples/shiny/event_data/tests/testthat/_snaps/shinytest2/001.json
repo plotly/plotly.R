@@ -185,9 +185,9 @@
         ],
         "layout": {
           "margin": {
-            "t": 25.74124809741248,
+            "t": 23.305936073059364,
             "r": 7.3059360730593621,
-            "b": 39.69558599695587,
+            "b": 37.260273972602747,
             "l": 31.415525114155255
           },
           "plot_bgcolor": "rgba(235,235,235,1)",
@@ -239,7 +239,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0.66417600664176002,
+            "tickwidth": 0,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -252,7 +252,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0.66417600664176002,
+            "gridwidth": 0,
             "zeroline": false,
             "anchor": "y",
             "title": {
@@ -301,7 +301,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0.66417600664176002,
+            "tickwidth": 0,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -314,7 +314,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0.66417600664176002,
+            "gridwidth": 0,
             "zeroline": false,
             "anchor": "x",
             "title": {
@@ -340,6 +340,7 @@
               },
               "yref": "paper",
               "xref": "paper",
+              "layer": "below",
               "x0": 0,
               "x1": 1,
               "y0": 0,
@@ -350,7 +351,7 @@
           "legend": {
             "bgcolor": "rgba(255,255,255,1)",
             "bordercolor": "transparent",
-            "borderwidth": 1.8897637795275593,
+            "borderwidth": 0,
             "font": {
               "color": "rgba(0,0,0,1)",
               "family": "",
@@ -445,9 +446,9 @@
         },
         {
           "name": "crosstalk",
-          "version": "1.2.1",
+          "version": "1.2.2",
           "src": {
-            "href": "crosstalk-1.2.1"
+            "href": "crosstalk-1.2.2"
           },
           "meta": null,
           "script": "js/crosstalk.min.js",

@@ -20,7 +20,7 @@ rangeslider(p, start = NULL, end = NULL, ...)
 Add a range slider to the x-axis
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 plot_ly(x = time(USAccDeaths), y = USAccDeaths) \%>\% 
   add_lines() \%>\%

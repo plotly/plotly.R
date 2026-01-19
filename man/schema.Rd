@@ -16,7 +16,7 @@ The schema contains valid attributes names, their value type,
 default values (if any), and min/max values (if applicable).
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 s <- schema()
 
 # retrieve acceptable `layout.mapbox.style` values

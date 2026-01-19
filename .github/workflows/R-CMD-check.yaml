@@ -34,7 +34,7 @@ jobs:
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
           - {os: ubuntu-latest,   r: 'oldrel-2'}
-          - {os: ubuntu-latest,   r: 'oldrel-3'}
+          # - {os: ubuntu-latest,   r: 'oldrel-3'} # dependency issues with oldrel-3
           # - {os: ubuntu-latest,   r: 'oldrel-4'} # dependency issues with oldrel-4
 
     env:
@@ -72,7 +72,8 @@ jobs:
       - name: Install kaleido
         if: matrix.config.visual_tests == true
         run: |
-          Rscript -e 'library(reticulate); use_python(Sys.which("python")); py_install(c("kaleido", "plotly"))'
+          # We pin kaleido to v0.2.1 here since >=v1.0 doesn't appear to be correctly rendering some plots
+          Rscript -e 'library(reticulate); use_python(Sys.which("python")); py_install(c("kaleido==0.2.1", "plotly"))'
         
         # Run test() before R CMD check since, for some reason, rcmdcheck::rcmdcheck() skips vdiffr tests
       - name: Run Tests
