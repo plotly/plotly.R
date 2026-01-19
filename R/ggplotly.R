@@ -411,9 +411,10 @@ gg2list <- function(p, width = NULL, height = NULL,
       # of each non-positional scale for display in tooltips
       for (sc in npscales$scales) {
         data <- lapply(data, function(d) {
-          # scale may not be relevant for every layer data
-          if (any(names(d) %in% sc$aesthetics)) {
-            d[paste0(sc$aesthetics, "_plotlyDomain")] <- d[sc$aesthetics]
+          # Only process aesthetics that actually exist in this layer's data
+          present_aes <- intersect(sc$aesthetics, names(d))
+          if (length(present_aes) > 0) {
+            d[paste0(present_aes, "_plotlyDomain")] <- d[present_aes]
           }
           d
         })
