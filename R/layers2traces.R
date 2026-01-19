@@ -872,6 +872,12 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   # marker styling must inherit from GeomPoint$default_aes
   # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L7
   point_defaults <- GeomPoint$use_defaults(NULL)
+
+  # Determine if outliers should be hidden
+  # Hide outliers if: outliers = FALSE, or outlier.shape = NA (via outlier_gp$shape)
+  hide_outliers <- isFALSE(params$outliers) ||
+    isTRUE(is.na(params$outlier_gp$shape))
+
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
@@ -885,6 +891,8 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
     ),
+    # Control whether outlier points are shown
+    boxpoints = if (hide_outliers) FALSE,
     # markers/points
     marker = list(
       opacity = point_defaults$alpha,
