@@ -26,6 +26,10 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 ## Bug fixes
 
 * `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+* Cross-trace layout attributes (`bargroupgap`, `boxmode`, `violingap`, etc.) no longer produce errant warnings. (#2458)
+* `ggplotly()` now correctly uses custom legend labels from `scale_*_manual(labels = ...)`. (#2420)
+* `ggplotly()` with `dynamicTicks = TRUE` no longer errors on grouped `geom_line()` plots. (#2462)
+* `plot_ly()` with color mapping no longer resets Date/POSIXct x-axis values to 1970. (#2446)
 
 # plotly 4.11.0
 
