@@ -242,7 +242,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0,
+            "tickwidth": 0.66417600664176002,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -255,7 +255,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0,
+            "gridwidth": 0.66417600664176002,
             "zeroline": false,
             "anchor": "y",
             "title": {
@@ -304,7 +304,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0,
+            "tickwidth": 0.66417600664176002,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -317,7 +317,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0,
+            "gridwidth": 0.66417600664176002,
             "zeroline": false,
             "anchor": "x",
             "title": {
@@ -337,7 +337,7 @@
           "legend": {
             "bgcolor": "rgba(255,255,255,1)",
             "bordercolor": "transparent",
-            "borderwidth": 0,
+            "borderwidth": 1.8897637795275593,
             "font": {
               "color": "rgba(0,0,0,1)",
               "family": "",
