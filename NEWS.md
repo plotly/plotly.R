@@ -26,6 +26,13 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 ## Bug fixes
 
 * `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+* Closed #2415: `ggplotly()` now shows variables named 'group' in tooltips when mapped to aesthetics like `colour`.
+* Closed #2455, #2460: `ggplotly()` no longer creates empty shapes when `panel.border` is `element_blank()` (ggplot2 4.0.0 compatibility).
+* Closed #2466: `ggplotly()` no longer errors when `scale_*_manual()` has unused aesthetics (e.g., `aesthetics = c("colour", "fill")` when only colour is used).
+* Closed #2305: `ggplotly()` now respects `geom_boxplot(outlier.shape = NA)` to hide outlier points.
+* Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
+* Closed #2407, #2187: `ggplotly()` now translates `legend.position` theme element to plotly layout (supports "bottom", "top", "left", and numeric positions).
+* Closed #2281: `ggplotly()` no longer drops legends when `geom_blank()` is present in the plot.
 
 # plotly 4.11.0
 

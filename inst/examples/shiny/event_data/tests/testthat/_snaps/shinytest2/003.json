@@ -20,7 +20,7 @@
     "plotly_brushing-A": "{\"x\":[23.95978500551268,25.98332414553473],\"y\":[3.0020072289156627,3.5073743975903615]}",
     "plotly_click-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_hover-A": null,
-    "plotly_relayout-A": "{\"width\":962,\"height\":400}",
+    "plotly_relayout-A": "{\"width\":947,\"height\":400}",
     "plotly_selected-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]",
     "plotly_selecting-A": "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]"
   },
@@ -246,7 +246,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0,
+            "tickwidth": 0.66417600664176002,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -259,7 +259,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0,
+            "gridwidth": 0.66417600664176002,
             "zeroline": false,
             "anchor": "y",
             "title": {
@@ -308,7 +308,7 @@
             "ticks": "outside",
             "tickcolor": "rgba(51,51,51,1)",
             "ticklen": 3.6529680365296811,
-            "tickwidth": 0,
+            "tickwidth": 0.66417600664176002,
             "showticklabels": true,
             "tickfont": {
               "color": "rgba(77,77,77,1)",
@@ -321,7 +321,7 @@
             "linewidth": 0,
             "showgrid": true,
             "gridcolor": "rgba(255,255,255,1)",
-            "gridwidth": 0,
+            "gridwidth": 0.66417600664176002,
             "zeroline": false,
             "anchor": "x",
             "title": {
@@ -335,30 +335,13 @@
             "hoverformat": ".2f"
           },
           "shapes": [
-            {
-              "type": "rect",
-              "fillcolor": null,
-              "line": {
-                "color": null,
-                "width": 0,
-                "linetype": [
 
-                ]
-              },
-              "yref": "paper",
-              "xref": "paper",
-              "layer": "below",
-              "x0": 0,
-              "x1": 1,
-              "y0": 0,
-              "y1": 1
-            }
           ],
           "showlegend": false,
           "legend": {
             "bgcolor": "rgba(255,255,255,1)",
             "bordercolor": "transparent",
-            "borderwidth": 0,
+            "borderwidth": 1.8897637795275593,
             "font": {
               "color": "rgba(0,0,0,1)",
               "family": "",
