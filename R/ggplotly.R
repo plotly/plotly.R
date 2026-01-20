@@ -411,9 +411,9 @@ gg2list <- function(p, width = NULL, height = NULL,
       # of each non-positional scale for display in tooltips
       for (sc in npscales$scales) {
         data <- lapply(data, function(d) {
-          # scale may not be relevant for every layer data
-          if (any(names(d) %in% sc$aesthetics)) {
-            d[paste0(sc$aesthetics, "_plotlyDomain")] <- d[sc$aesthetics]
+          present_aes <- intersect(sc$aesthetics, names(d))
+          if (length(present_aes) > 0) {
+            d[paste0(present_aes, "_plotlyDomain")] <- d[present_aes]
           }
           d
         })
@@ -572,13 +572,15 @@ gg2list <- function(p, width = NULL, height = NULL,
     tr$hoverinfo <- tr$hoverinfo %||%"text"
     tr
   })
-  # show only one legend entry per legendgroup
+  # show only one legend entry per legendgroup (skip invisible traces for dedup)
   grps <- sapply(traces, "[[", "legendgroup")
+  is_visible <- sapply(traces, function(tr) !isFALSE(tr$visible))
+  grps_for_dedup <- ifelse(is_visible, grps, paste0(grps, "_invisible_", seq_along(grps)))
   traces <- Map(function(x, y) {
     if (!is.null(x[["frame"]])) return(x)
     x$showlegend <- isTRUE(x$showlegend) && y
     x
-  }, traces, !duplicated(grps))
+  }, traces, !duplicated(grps_for_dedup))
   
   # ------------------------------------------------------------------------
   # axis/facet/margin conversion
@@ -980,12 +982,45 @@ gg2list <- function(p, width = NULL, height = NULL,
     bgcolor = toRGB(theme$legend.background$fill),
     bordercolor = toRGB(theme$legend.background$colour),
     borderwidth = unitConvert(
-      theme$legend.background[[linewidth_or_size(theme$legend.background)]], 
+      theme$legend.background[[linewidth_or_size(theme$legend.background)]],
       "pixels", "width"
     ),
     font = text2font(theme$legend.text)
   )
-  
+
+  # Translate legend.position to plotly layout
+  legend_pos <- theme$legend.position %||% theme[["legend.position"]]
+  if (!is.null(legend_pos) && !identical(legend_pos, "none")) {
+    if (is.character(legend_pos)) {
+      gglayout$legend <- switch(legend_pos,
+        "bottom" = modifyList(gglayout$legend, list(
+          orientation = "h", x = 0.5, y = -0.15, xanchor = "center", yanchor = "top"
+        )),
+        "top" = modifyList(gglayout$legend, list(
+          orientation = "h", x = 0.5, y = 1.02, xanchor = "center", yanchor = "bottom"
+        )),
+        "left" = modifyList(gglayout$legend, list(
+          x = -0.15, y = 0.5, xanchor = "right", yanchor = "middle"
+        )),
+        "inside" = {
+          inside_pos <- theme$legend.position.inside %||% theme[["legend.position.inside"]]
+          if (is.numeric(inside_pos) && length(inside_pos) == 2) {
+            modifyList(gglayout$legend, list(
+              x = inside_pos[1], y = inside_pos[2], xanchor = "left", yanchor = "bottom"
+            ))
+          } else {
+            gglayout$legend
+          }
+        },
+        gglayout$legend
+      )
+    } else if (is.numeric(legend_pos) && length(legend_pos) == 2) {
+      gglayout$legend <- modifyList(gglayout$legend, list(
+        x = legend_pos[1], y = legend_pos[2], xanchor = "left", yanchor = "bottom"
+      ))
+    }
+  }
+
   # if theme(legend.position = "none") is used, don't show a legend _or_ guide
   if (npscales$n() == 0 || identical(theme$legend.position, "none")) {
     gglayout$showlegend <- FALSE
@@ -1391,7 +1426,12 @@ make_strip_rect <- function(xdom, ydom, theme, side = "top") {
 
 # theme(panel.border) -> plotly.js rect shape
 make_panel_border <- function(xdom, ydom, theme) {
-  rekt <- rect2shape(theme[["panel.border"]])
+  # Use calc_element to get fully resolved element with inherited values
+  border <- ggplot2::calc_element("panel.border", theme)
+  if (is.null(border) || is_blank(border)) {
+    return(list())
+  }
+  rekt <- rect2shape(border)
   rekt$x0 <- xdom[1]
   rekt$x1 <- xdom[2]
   rekt$y0 <- ydom[1]
