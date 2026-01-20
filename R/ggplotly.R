@@ -843,10 +843,12 @@ gg2list <- function(p, width = NULL, height = NULL,
       
       # inverse transform categorical data based on tickvals/ticktext
       if (isDiscreteType) {
-        traces <- lapply(traces, function(tr) { 
+        traces <- lapply(traces, function(tr) {
           # map x/y trace data back to the 'closest' ticktext label
           # http://r.789695.n4.nabble.com/check-for-nearest-value-in-a-vector-td4369339.html
           tr[[xy]]<- vapply(tr[[xy]], function(val) {
+            # NA values (e.g., geom_line gaps) should remain NA
+            if (is.na(val)) return(NA_character_)
             with(axisObj, ticktext[[which.min(abs(tickvals - val))]])
           }, character(1))
           tr
