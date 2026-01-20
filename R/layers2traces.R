@@ -138,8 +138,28 @@ layers2traces <- function(data, prestats_data, layout, p) {
     # note: this allows us to control multiple traces from one legend entry
     if (any(split_legend %in% names(d))) {
       nms <- strsplit(names(trs), separator, fixed = TRUE)
+      # Build mapping from domain values to scale labels (for custom labels)
+      legend_aes <- sub("_plotlyDomain$", "", split_legend)
+      value_to_label <- list()
+      for (aes in legend_aes) {
+        sc <- discreteScales[[aes]]
+        if (!is.null(sc)) {
+          breaks <- tryCatch(sc$get_breaks(), error = function(e) NULL)
+          labels <- tryCatch(sc$get_labels(), error = function(e) NULL)
+          if (length(breaks) > 0 && length(breaks) == length(labels)) {
+            value_to_label[[aes]] <- setNames(as.character(labels), as.character(breaks))
+          }
+        }
+      }
       nms <- vapply(nms, function(x) {
         y <- unique(x[seq_along(split_legend)])
+        # Map domain values to scale labels if custom labels exist
+        for (j in seq_along(y)) {
+          aes <- legend_aes[j]
+          if (aes %in% names(value_to_label) && y[j] %in% names(value_to_label[[aes]])) {
+            y[j] <- value_to_label[[aes]][y[j]]
+          }
+        }
         if (length(y) > 1) paste0("(", paste(y, collapse = ","), ")") else y
       }, character(1))
       trs <- Map(function(x, y) {
