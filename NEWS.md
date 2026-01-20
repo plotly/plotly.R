@@ -33,6 +33,8 @@ See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) 
 * Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
 * Closed #2407, #2187: `ggplotly()` now translates `legend.position` theme element to plotly layout (supports "bottom", "top", "left", and numeric positions).
 * Closed #2281: `ggplotly()` no longer drops legends when `geom_blank()` is present in the plot.
+* Closed #2419: `plot_ly()` with color mapping and `hovertemplate` no longer incorrectly connects line segments that should be separated by NA values.
+* Closed #2437: `subplot()` with pie charts no longer creates invalid "NA" layout attributes.
 
 # plotly 4.11.0
 
