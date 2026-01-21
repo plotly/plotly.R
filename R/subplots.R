@@ -167,7 +167,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     if (length(unique(yAxisN)) > 1) {
       warning("Must have a consistent number of axes per 'subplot' to share them.")
     } else {
-      yAxisID <- rep(rep(seq_len(nrows * unique(xAxisN)), each = ncols, length.out = length(plots)), unique(yAxisN))
+      yAxisID <- rep(rep(seq_len(nrows * unique(yAxisN)), each = ncols, length.out = length(plots)), unique(yAxisN))
     }
   }
   # current "axis" names
