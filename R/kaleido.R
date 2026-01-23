@@ -97,10 +97,10 @@ kaleido <- function(...) {
     }
   )
   
-  res <- if (is.null(tryNULL(kaleido$scopes))) {
-    newKaleidoScope(kaleido)
-  } else {
+  res <- if (reticulate::py_has_attr(kaleido, "scopes")) {
     legacyKaleidoScope(kaleido)
+  } else {
+    newKaleidoScope(kaleido)
   }
   
   class(res) <- "kaleidoScope"
@@ -108,6 +108,7 @@ kaleido <- function(...) {
 }
 
 newKaleidoScope <- function(kaleido) {
+  force(kaleido)
   list(
     scopes = NULL,
     transform = function(p, file, ..., width = NULL, height = NULL, scale = NULL) {
