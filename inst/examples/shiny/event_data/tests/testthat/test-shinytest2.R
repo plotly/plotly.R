@@ -4,13 +4,22 @@ app <- AppDriver$new(
   options = list(display.mode = "normal")
 )
 
+# Scrub width/height from plotly_relayout-A since it varies by environment
+scrub_relayout <- function(json) {
+  gsub(
+    '"plotly_relayout-A": "\\{[^}]*\\}"',
+    '"plotly_relayout-A": "<variable>"',
+    json
+  )
+}
+
 test_that("Plotly input values in Shiny", {
-  app$expect_values()
+  app$expect_values(transform = scrub_relayout)
   app$set_inputs(`plotly_hover-A` = "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]", allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_click-A` = "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]", allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_hover-A` = character(0), allow_no_input_binding_ = TRUE)
   Sys.sleep(1)
-  app$expect_values()
+  app$expect_values(transform = scrub_relayout)
   app$set_inputs(`plotly_brushing-A` = "{\"x\":[25.726819184123485,25.98332414553473],\"y\":[1.3174499999999998,5.61955]}", allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_selecting-A` = "[]", allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_brushing-A` = "{\"x\":[24.64379823594267,25.98332414553473],\"y\":[3.2093373493975905,3.5073743975903615]}", allow_no_input_binding_ = TRUE)
@@ -22,7 +31,7 @@ test_that("Plotly input values in Shiny", {
   app$set_inputs(`plotly_hover-A` = "[{\"curveNumber\":0,\"pointNumber\":7,\"x\":24.4,\"y\":3.19,\"customdata\":\"Merc 240D\"}]", allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_hover-A` = character(0), allow_no_input_binding_ = TRUE)
   Sys.sleep(1)
-  app$expect_values()
+  app$expect_values(transform = scrub_relayout)
   app$set_inputs(`plotly_selected-A` = character(0), allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_brushed-A` = character(0), allow_no_input_binding_ = TRUE)
   #app$set_inputs(`plotly_selected-A` = character(0), allow_no_input_binding_ = TRUE)
@@ -32,5 +41,5 @@ test_that("Plotly input values in Shiny", {
   app$set_inputs(`plotly_click-A` = character(0), allow_no_input_binding_ = TRUE)
   app$set_inputs(`plotly_deselect-A` = "\"plot\"", allow_no_input_binding_ = TRUE)
   Sys.sleep(1)
-  app$expect_values()
+  app$expect_values(transform = scrub_relayout)
 })
