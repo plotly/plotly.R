@@ -97,10 +97,11 @@ kaleido <- function(...) {
     }
   )
   
-  res <- if (reticulate::py_has_attr(kaleido, "scopes")) {
-    legacyKaleidoScope(kaleido)
-  } else {
+  # Check for kaleido v1 by looking for v1-specific function
+  res <- if (reticulate::py_has_attr(kaleido, "write_fig_sync")) {
     newKaleidoScope(kaleido)
+  } else {
+    legacyKaleidoScope(kaleido)
   }
   
   class(res) <- "kaleidoScope"
