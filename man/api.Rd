@@ -126,37 +126,33 @@ layout(
 api()
 
 # search the entire platform!
-# see https://api.plot.ly/v2/search
 api("search?q=overdose")
 api("search?q=plottype:pie trump fake")
 
 # these examples will require a user account
 usr <- Sys.getenv("plotly_username", NA)
 if (!is.na(usr)) {
-  # your account info https://api.plot.ly/v2/#users
+  # your account info
   api(sprintf("users/\%s", usr))
-  # your folders/files https://api.plot.ly/v2/folders#user
+  # your folders/files
   api(sprintf("folders/home?user=\%s", usr))
 }
 
-# Retrieve a specific file https://api.plot.ly/v2/files#retrieve
+# Retrieve a specific file
 api("files/cpsievert:14681")
 
-# change the filename https://api.plot.ly/v2/files#update
+# change the filename
 # (note: this won't work unless you have proper credentials to the relevant account)
-api("files/cpsievert:14681", "PATCH", list(filename = "toy file")) 
+api("files/cpsievert:14681", "PATCH", list(filename = "toy file"))
 
-# Copy a file https://api.plot.ly/v2/files#lookup
+# Copy a file
 api("files/cpsievert:14681/copy", "POST")
 
-# Create a folder https://api.plot.ly/v2/folders#create
+# Create a folder
 api("folders", "POST", list(path = "/starts/at/root/and/ends/here"))
 
 }
 \dontshow{\}) # examplesIf}
-}
-\references{
-\url{https://api.plot.ly/v2}
 }
 \seealso{
 \code{\link[=signup]{signup()}}
