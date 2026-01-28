@@ -53,6 +53,42 @@ is.discrete <- function(x) {
 # standard way to specify a line break
 br <- function() "<br />"
 
+# Replace Inf values in all coordinate columns of a data frame (fixes #2364)
+# JSON doesn't support Inf, so they become null and shapes won't render.
+# This handles x, y, xmin, xmax, xend, ymin, ymax, yend columns generically.
+# Called after to_basic() returns, when panel limits are available.
+replace_inf_in_data <- function(data, layout) {
+  if (!is.data.frame(data) || nrow(data) == 0) return(data)
+  if (is.null(data$PANEL)) return(data)
+
+  # Use match() for robustness in case PANEL values aren't consecutive integers
+  panel_idx <- match(data$PANEL, layout$layout$PANEL)
+  x_cols <- intersect(names(data), c("x", "xmin", "xmax", "xend"))
+  y_cols <- intersect(names(data), c("y", "ymin", "ymax", "yend"))
+
+  replace_inf_vec <- function(vals, min_vals, max_vals) {
+    neg_inf <- is.infinite(vals) & vals < 0
+    pos_inf <- is.infinite(vals) & vals > 0
+    vals[neg_inf] <- min_vals[panel_idx[neg_inf]]
+    vals[pos_inf] <- max_vals[panel_idx[pos_inf]]
+    vals
+  }
+
+  for (col in x_cols) {
+    if (is.numeric(data[[col]]) && any(is.infinite(data[[col]]))) {
+      data[[col]] <- replace_inf_vec(data[[col]],
+                                     layout$layout$x_min, layout$layout$x_max)
+    }
+  }
+  for (col in y_cols) {
+    if (is.numeric(data[[col]]) && any(is.infinite(data[[col]]))) {
+      data[[col]] <- replace_inf_vec(data[[col]],
+                                     layout$layout$y_min, layout$layout$y_max)
+    }
+  }
+  data
+}
+
 is.default <- function(x) {
   inherits(x, "plotly_default")
 }
