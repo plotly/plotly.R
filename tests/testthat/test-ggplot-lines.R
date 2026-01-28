@@ -139,3 +139,30 @@ test_that("NA values do not cause a lot of warnings when ploting (#1299)", {
   expect_warning(plotly_build(p), "Ignoring")
   expect_failure(expect_warning(plotly_build(p), "structure"))
 })
+
+test_that('geom_line handles Inf values correctly (#2364)', {
+  # This is the original issue: geom_line with Inf y values
+  df <- data.frame(x = 1:10, y = 1:10)
+  line_df <- data.frame(x = c(3, 6), y = c(-Inf, Inf))
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_line(data = line_df, aes(x = x, y = y), color = "blue")
+
+  L <- plotly_build(p)
+
+  # Find the line trace
+  line_traces <- Filter(function(tr) identical(tr$mode, "lines"), L$x$data)
+  expect_length(line_traces, 1)
+
+  line_trace <- line_traces[[1]]
+
+  # Inf values should be replaced with finite panel limits
+  expect_false(any(is.infinite(line_trace$y), na.rm = TRUE))
+  expect_false(any(is.infinite(line_trace$x), na.rm = TRUE))
+
+  # Verify the replaced values match the panel limits
+  y_range <- L$x$layout$yaxis$range
+  expect_equal(min(line_trace$y), y_range[1])
+  expect_equal(max(line_trace$y), y_range[2])
+})

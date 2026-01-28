@@ -138,3 +138,84 @@ test_that('Specifying alpha in hex color code works', {
   expect_match(info$data[[1]]$fillcolor, "rgba\\(0,0,0,0\\.0[6]+")
 })
 
+test_that('geom_rect handles Inf values correctly (#2364)', {
+  df <- data.frame(x = 1:10, y = 1:10)
+  rect_df <- data.frame(xmin = 3, xmax = 6, ymin = -Inf, ymax = Inf)
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_rect(
+      data = rect_df,
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      fill = "blue", alpha = 0.2, inherit.aes = FALSE
+    )
+
+  L <- plotly_build(p)
+
+  # Find the rect trace (polygon with fill="toself")
+  rect_traces <- Filter(function(tr) identical(tr$fill, "toself"), L$x$data)
+  expect_length(rect_traces, 1)
+
+  rect_trace <- rect_traces[[1]]
+
+  # Inf values should be replaced with finite panel limits
+  expect_false(any(is.infinite(rect_trace$y), na.rm = TRUE))
+  expect_false(any(is.infinite(rect_trace$x), na.rm = TRUE))
+
+  # Verify the replaced values match the panel limits
+  y_range <- L$x$layout$yaxis$range
+  expect_equal(min(rect_trace$y, na.rm = TRUE), y_range[1])
+  expect_equal(max(rect_trace$y, na.rm = TRUE), y_range[2])
+
+  # Test with x Inf values as well
+  rect_df2 <- data.frame(xmin = -Inf, xmax = Inf, ymin = 4, ymax = 6)
+
+  p2 <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_rect(
+      data = rect_df2,
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      fill = "red", alpha = 0.2, inherit.aes = FALSE
+    )
+
+  L2 <- plotly_build(p2)
+  rect_trace2 <- Filter(function(tr) identical(tr$fill, "toself"), L2$x$data)[[1]]
+
+  expect_false(any(is.infinite(rect_trace2$x), na.rm = TRUE))
+  expect_false(any(is.infinite(rect_trace2$y), na.rm = TRUE))
+
+  # Verify the replaced x values match the panel limits
+  x_range <- L2$x$layout$xaxis$range
+  expect_equal(min(rect_trace2$x, na.rm = TRUE), x_range[1])
+  expect_equal(max(rect_trace2$x, na.rm = TRUE), x_range[2])
+})
+
+test_that('geom_rect handles Inf values correctly with facets (#2364)', {
+  df <- data.frame(
+    x = c(1:10, 11:20),
+    y = c(1:10, 21:30),
+    facet = rep(c("A", "B"), each = 10)
+  )
+  rect_df <- data.frame(xmin = 3, xmax = 6, ymin = -Inf, ymax = Inf)
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_rect(
+      data = rect_df,
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      fill = "blue", alpha = 0.2, inherit.aes = FALSE
+    ) +
+    facet_wrap(~facet, scales = "free_y")
+
+  L <- plotly_build(p)
+
+  # Find rect traces (one per facet panel)
+  rect_traces <- Filter(function(tr) identical(tr$fill, "toself"), L$x$data)
+
+  # All traces should have finite coordinates
+ for (tr in rect_traces) {
+    expect_false(any(is.infinite(tr$y), na.rm = TRUE))
+    expect_false(any(is.infinite(tr$x), na.rm = TRUE))
+  }
+})
+

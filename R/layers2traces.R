@@ -97,6 +97,9 @@ layers2traces <- function(data, prestats_data, layout, p) {
     d <- to_basic(data[[i]], prestats_data[[i]], layout, params[[i]], p)
     d <- structure(d, set = set)
     if (is.data.frame(d)) d <- list(d)
+    # Replace Inf values with panel limits for all coordinate columns (fixes #2364)
+    # JSON doesn't support Inf, so they become null and shapes won't render
+    d <- lapply(d, replace_inf_in_data, layout = layout)
     for (j in seq_along(d)) {
       datz <- c(datz, d[j])
       paramz <- c(paramz, params[i])
