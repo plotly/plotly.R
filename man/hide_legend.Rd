@@ -13,7 +13,7 @@ hide_legend(p)
 Hide legend
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 p <- plot_ly(mtcars, x = ~wt, y = ~cyl, color = ~factor(cyl))
 hide_legend(p)

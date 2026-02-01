@@ -18,7 +18,7 @@ This is especially convenient for embedding raster images on a plot in
 a self-contained fashion (i.e., so they don't depend on external URL links).
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 # a red gradient (from ?as.raster)
 r <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))

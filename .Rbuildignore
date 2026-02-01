@@ -21,3 +21,5 @@ README.Rmd
 abbvie.R
 ^\.httr-oauth$
 ^\.github$
+^\.venv$
+CLAUDE\.md

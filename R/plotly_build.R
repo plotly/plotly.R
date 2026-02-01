@@ -38,6 +38,11 @@ plotly_build.gg <- function(p, registerFrames = TRUE) {
 }
 
 #' @export
+plotly_build.ggmatrix <- function(p, registerFrames = TRUE) {
+  plotly_build(ggplotly(p))
+}
+
+#' @export
 plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # make this plot retrievable
