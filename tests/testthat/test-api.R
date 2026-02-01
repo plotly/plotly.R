@@ -1,3 +1,5 @@
+skip("plotly seems to no longer support the 'Chart Studio' API https://plotly.com/chart-studio-updates/")
+
 test_that("api() returns endpoints", {
   skip_cloud_tests()
 
@@ -207,5 +209,3 @@ test_that("posting a hidden plot returns a secret key", {
   expect_true(res$share_key_enabled)
   expect_true(nchar(res$share_key) > 1)
 })
-
-

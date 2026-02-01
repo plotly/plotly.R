@@ -1,7 +1,19 @@
-# get zip URL to latest plotly.js release
+# Specify the version to update to (set to NULL for latest)
+PLOTLY_JS_VERSION <- "2.25.2"
+
+# get zip URL to plotly.js release
+if (is.null(PLOTLY_JS_VERSION)) {
+  release_url <- 'https://api.github.com/repos/plotly/plotly.js/releases/latest'
+} else {
+  release_url <- sprintf(
+    'https://api.github.com/repos/plotly/plotly.js/releases/tags/v%s',
+    PLOTLY_JS_VERSION
+  )
+}
+
 x <- httr::RETRY(
   verb = "GET",
-  url = 'https://api.github.com/repos/plotly/plotly.js/releases/latest',
+  url = release_url,
   times = 5,
   terminate_on = c(400, 401, 403, 404),
   terminate_on_success = TRUE
@@ -94,7 +106,9 @@ withr::with_dir(tmpdir, {
       #  "inst/htmlwidgets/lib/typedarray/typedarray.min.js"
       #)
       
-      message("Update plotlyMainBundle()'s version with ", basename(zip))
+      version <- content(x)$tag_name
+      message("Update plotlyMainBundle()'s version to ", version)
+      
   })
 })
 

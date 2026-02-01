@@ -65,7 +65,7 @@ Both the play button and slider component transition between frames according
 rules specified by \code{\link[=animation_opts]{animation_opts()}}.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 df <- data.frame(
   x = c(1, 2, 2, 1, 1, 2),

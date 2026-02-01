@@ -83,3 +83,29 @@ test_that("correct # of unique fillcolors", {
   fills <- sapply(L$data, "[[", "fillcolor")
   expect_equivalent(length(unique(fills)), length(unique(dat$col)))
 })
+
+test_that("outlier.shape = NA hides outlier points (#2305)", {
+  # With outlier.shape = NA, plotly should not show outlier points
+  p <- ggplot(iris, aes(Species, Sepal.Length)) + geom_boxplot(outlier.shape = NA)
+  L <- plotly_build(ggplotly(p))$x
+  expect_equal(L$data[[1]]$type, "box")
+  # boxpoints should be FALSE or "false" to hide outliers
+  expect_true(isFALSE(L$data[[1]]$boxpoints) || identical(L$data[[1]]$boxpoints, "false"))
+
+  # With default (no outlier.shape specified), outliers should show
+  p_default <- ggplot(iris, aes(Species, Sepal.Length)) + geom_boxplot()
+  L_default <- plotly_build(ggplotly(p_default))$x
+  # Default should either be NULL (plotly default shows outliers) or "outliers"/"suspectedoutliers"
+  expect_true(
+    is.null(L_default$data[[1]]$boxpoints) ||
+    L_default$data[[1]]$boxpoints %in% c("outliers", "suspectedoutliers", TRUE)
+  )
+})
+
+test_that("outliers = FALSE hides outlier points", {
+  # ggplot2 also supports outliers = FALSE parameter
+  p <- ggplot(iris, aes(Species, Sepal.Length)) + geom_boxplot(outliers = FALSE)
+  L <- plotly_build(ggplotly(p))$x
+  expect_equal(L$data[[1]]$type, "box")
+  expect_true(isFALSE(L$data[[1]]$boxpoints) || identical(L$data[[1]]$boxpoints, "false"))
+})
