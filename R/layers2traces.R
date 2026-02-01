@@ -56,8 +56,8 @@ layers2traces <- function(data, prestats_data, layout, p) {
       if (!aesName %in% names(x)) next
       # TODO: should we be getting the name from scale_*(name) first?
       varName <- y[[i]]
-      # "automatically" generated group aes is not informative
-      if (identical("group", unique(varName, aesName))) next
+      # Skip auto-generated group aesthetic, but keep explicit group mappings
+      if (identical(aesName, "group") && identical(varName, "group")) next
       # add a line break if hovertext already exists
       if ("hovertext" %in% names(x)) x$hovertext <- paste0(x$hovertext, br())
       # text aestheic should be taken verbatim (for custom tooltips)
@@ -75,12 +75,13 @@ layers2traces <- function(data, prestats_data, layout, p) {
     x
   }, data, hoverTextAes)
   
-  # draw legends only for discrete scales
+  # draw legends only for discrete scales (skip scales with guide = "none")
   discreteScales <- list()
   for (sc in p$scales$non_position_scales()$scales) {
-    if (sc$is_discrete()) {
-      nm <- paste(sc$aesthetics, collapse = "_")
-      discreteScales[[nm]] <- sc
+    if (sc$is_discrete() && !identical(sc$guide, "none")) {
+      for (aes_name in sc$aesthetics) {
+        discreteScales[[aes_name]] <- sc
+      }
     }
   }
   # Convert "high-level" geoms to their "low-level" counterpart
@@ -706,7 +707,7 @@ geom2trace <- function(data, params, p) {
 
 #' @export
 geom2trace.GeomBlank <- function(data, params, p) {
-  list(visible = FALSE)
+  list(visible = FALSE, showlegend = FALSE)
 }
 
 #' @export
@@ -870,6 +871,8 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
   # marker styling must inherit from GeomPoint$default_aes
   # https://github.com/hadley/ggplot2/blob/ab42c2ca81458b0cf78e3ba47ed5db21f4d0fc30/NEWS#L73-L7
   point_defaults <- GeomPoint$use_defaults(NULL)
+  hide_outliers <- isFALSE(params$outliers) || isTRUE(is.na(params$outlier_gp$shape))
+
   compact(list(
     x = data[["x"]],
     y = data[["y"]],
@@ -883,6 +886,7 @@ geom2trace.GeomBoxplot <- function(data, params, p) {
       aes2plotly(data, params, "fill"),
       aes2plotly(data, params, "alpha")
     ),
+    boxpoints = if (hide_outliers) FALSE,
     # markers/points
     marker = list(
       opacity = point_defaults$alpha,
@@ -1157,7 +1161,8 @@ linewidth_or_size.Geom <- function(x) {
 
 #' @export
 linewidth_or_size.element <- function(x) {
-  if ("linewidth" %in% names(x)) "linewidth" else "size"
+  # S7 objects (ggplot2 >= 4.0) don't have traditional names(), check for slot
+  if (!is.null(x$linewidth) || "linewidth" %in% names(x)) "linewidth" else "size"
 }
 
 #' @export

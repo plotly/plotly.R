@@ -1,3 +1,44 @@
+# plotly (development version)
+
+
+
+
+# plotly 4.12.0
+
+## Changes to plotly.js
+
+Upgrades plotly.js from v2.11.1 to v2.25.2 (35 releases). Key new features now available:
+
+* **Multiple legends**: Support for `legend2`, `legend3`, etc. with separate positioning and visibility control
+* **Shape labels**: New `label` attribute for shapes and `label.texttemplate` for parametric shapes
+* **Marker direction**: New `marker.angle`, `marker.angleref`, and `marker.standoff` properties for directional markers
+* **Y-axis positioning**: `shift` and `autoshift` properties to avoid y-axis overlapping in multi-axis plots
+* **Mapbox clustering**: Clustering options and bounds support for `scattermapbox` traces
+* **Equal Earth projection**: New map projection option for geo subplots
+* **Pattern fills**: Pattern support extended to pie, funnelarea, sunburst, icicle, and treemap charts
+* **Editable selections**: Persistent and editable selections over cartesian subplots with `editSelection` config option
+* **Axis label aliases**: `labelalias` for simplified axis label customization
+* **Grid styling**: `griddash` property and minor tick/grid line styling options
+
+Also includes a security fix for prototype pollution and ~90KB bundle size reduction.
+
+See the [plotly.js releases page](https://github.com/plotly/plotly.js/releases) for the full changelog.
+
+## Improvements
+
+* `save_image()` now works with kaleido v1.0 and higher. (#2447)
+
+## Bug fixes
+
+* `plotly_build()` now works with `ggmatrix` objects (e.g., from `GGally::ggpairs()`). (#2447)
+* Closed #2415: `ggplotly()` now shows variables named 'group' in tooltips when mapped to aesthetics like `colour`.
+* Closed #2455, #2460: `ggplotly()` no longer creates empty shapes when `panel.border` is `element_blank()` (ggplot2 4.0.0 compatibility).
+* Closed #2466: `ggplotly()` no longer errors when `scale_*_manual()` has unused aesthetics (e.g., `aesthetics = c("colour", "fill")` when only colour is used).
+* Closed #2305: `ggplotly()` now respects `geom_boxplot(outlier.shape = NA)` to hide outlier points.
+* Closed #2467: `ggplotly()` now correctly shows legends and splits traces when scales have multiple aesthetics.
+* Closed #2407, #2187: `ggplotly()` now translates `legend.position` theme element to plotly layout (supports "bottom", "top", "left", and numeric positions).
+* Closed #2281: `ggplotly()` no longer drops legends when `geom_blank()` is present in the plot.
+
 # plotly 4.11.0
 
 ## New features
@@ -369,7 +410,7 @@ This is minor patch release with a few minor bug fixes and updates test expectat
 * Added the `highlight()` function for configuring selection modes/sequences/options.
 * Added support for animation. For some relatively basic examples, see the examples section of `help(animation)`. For a more thorough overview, see <https://plotly-r.com/animating-views.html>
 * Added a `frame` argument to `plot_ly()` for creating animations. Also added the `animation_opts()`, `animation_slider()`, and `animation_button()` functions for configuring animation defaults.
-* Added a new interface to [v2 of the REST API](https://api.plot.ly/v2). This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
+* Added a new interface to v2 of the REST API. This new interface makes the  `plotly_POST()` and `get_figure()` functions obsolete (use `api_create()` and `api_download_plot()` instead), and thus, are now deprecated, but remain around for backwards-compatibility. For more details, see `help(api)`.
 * Added support for conversion of more **ggplot2** geoms via `ggplotly()`: `GeomCol`, `GeomRug`, `GeomCrossbar`, `GeomQuantile`, `GeomSpoke`, `GeomDotplot`, `GeomRasterAnn` (i.e., `annotation_raster()`), and `GeomAnnotationMap` (i.e., `annotation_map()`).
 * Added a new function `raster2uri()` which makes it easier to embed raster objects as [images](https://plotly.com/r/reference/#layout-images) via data URIs. For examples, see `help(raster2uri)`.
 * `ggplotly()` gains a new argument, `dynamicTicks`, which allows axis ticks to update upon zoom/pan interactions (fixes #485).
@@ -1146,7 +1187,7 @@ Fixed filename, fileopt arguments in plot_ly. Specifying the same filename will 
 
 1.0.8 -- 14 Sep 2015
 
-Added the plotly_IMAGES() function which interfaces to the images endpoint https://api.plot.ly/v2/#images
+Added the plotly_IMAGES() function which interfaces to the images endpoint.
 
 Details -> https://github.com/ropensci/plotly/pull/279
 

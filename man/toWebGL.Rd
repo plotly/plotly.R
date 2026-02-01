@@ -13,7 +13,7 @@ toWebGL(p)
 Convert trace types to WebGL
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 # currently no bargl trace type
 toWebGL(ggplot() + geom_bar(aes(1:10)))

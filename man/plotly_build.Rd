@@ -18,7 +18,7 @@ provided by \code{ggplotly}/\code{plot_ly} or for debugging rendering
 errors.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 p <- plot_ly(economics, x = ~date, y = ~pce)
 # the unevaluated plotly object

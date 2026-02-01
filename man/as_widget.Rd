@@ -15,7 +15,7 @@ as_widget(x, ...)
 Convert a list to a plotly htmlwidget object
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
 
 trace <- list(x = 1, y = 1)
 obj <- list(data = list(trace), layout = list(title = "my plot"))

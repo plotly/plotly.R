@@ -21,7 +21,7 @@ This function is useful for obtaining/viewing/debugging JSON
 sent to plotly.js.
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
   
 plotly_json(plot_ly())
 plotly_json(plot_ly(), FALSE)
