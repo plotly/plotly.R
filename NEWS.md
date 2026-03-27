@@ -1,6 +1,6 @@
 # plotly (development version)
 
-
+* Removed the dependency on the `{lazyeval}` package.
 
 
 # plotly 4.12.0
