@@ -303,6 +303,12 @@ test_that("Informative deprecation message for titlefont", {
   expect_warning(config(plot_ly(), cloud = TRUE), "cloud")
 })
 
+test_that("Informative deprecation message for collaborate", {
+  p <- plot_ly(x = 1:3, mode = "markers", type = "scatter")
+  expect_warning(config(p, collaborate=TRUE), regexp = "collaborate button")
+  expect_warning(config(p, collaborate=FALSE), regexp = "collaborate button")
+})
+
 test_that("Informative warning for invalid config attr", {
   p <- config(plot_ly(), foobar = TRUE)
   expect_warning(plotly_build(p), "foobar")
