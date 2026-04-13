@@ -217,10 +217,10 @@ legacyKaleidoScope <- function(kaleido) {
 }
 
 .py_run_string_with_context <- function(code, context = list(), convert = TRUE) {
-  py <- reticulate::py
   context_names <- names(context)
   old_values <- vector("list", length(context))
   had_value <- logical(length(context))
+  was_set <- logical(length(context))
   
   if (length(context) > 0) {
     if (is.null(context_names) || any(context_names == "")) {
@@ -229,26 +229,28 @@ legacyKaleidoScope <- function(kaleido) {
     if (any(!grepl("^[A-Za-z_][A-Za-z0-9_]*$", context_names))) {
       rlang::abort("`context` names must be valid Python identifiers.")
     }
+
+    py <- reticulate::py
+    on.exit({
+      for (i in rev(which(was_set))) {
+        name <- context_names[[i]]
+        if (had_value[[i]]) {
+          reticulate::py_set_attr(py, name, old_values[[i]])
+        } else {
+          reticulate::py_del_attr(py, name)
+        }
+      }
+    }, add = TRUE)
     
     for (i in seq_along(context)) {
       name <- context_names[[i]]
       had_value[[i]] <- reticulate::py_has_attr(py, name)
       if (had_value[[i]]) {
-        old_values[[i]] <- py[[name]]
+        old_values[[i]] <- reticulate::py_get_attr(py, name)
       }
-      py[[name]] <- context[[i]]
+      reticulate::py_set_attr(py, name, context[[i]])
+      was_set[[i]] <- TRUE
     }
-    
-    on.exit({
-      for (i in rev(seq_along(context))) {
-        name <- context_names[[i]]
-        if (had_value[[i]]) {
-          py[[name]] <- old_values[[i]]
-        } else {
-          reticulate::py_run_string(paste("del", name))
-        }
-      }
-    }, add = TRUE)
   }
   
   reticulate::py_run_string(code, convert = convert)

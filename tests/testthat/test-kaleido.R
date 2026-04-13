@@ -1,6 +1,14 @@
 test_that("newKaleidoScope does not inline Windows temp paths into Python code", {
   skip_if_not_installed("reticulate")
   skip_if_not(suppressWarnings(reticulate::py_available(TRUE)))
+  withr::defer({
+    py <- reticulate::py
+    for (name in c("fig", "tmp_json_path")) {
+      if (reticulate::py_has_attr(py, name)) {
+        reticulate::py_del_attr(py, name)
+      }
+    }
+  })
 
   win_path <- "C:\\users\\name\\AppData\\Local\\Temp\\Rtmp\\file.json"
   py_calls <- character()
@@ -52,6 +60,8 @@ test_that("newKaleidoScope does not inline Windows temp paths into Python code",
 })
 
 test_that("py_run_string_with_context rejects invalid Python identifiers", {
+  skip_if_not_installed("reticulate")
+
   expect_error(
     plotly:::.py_run_string_with_context(
       "value = 1",
@@ -59,4 +69,39 @@ test_that("py_run_string_with_context rejects invalid Python identifiers", {
     ),
     "`context` names must be valid Python identifiers\\."
   )
+})
+
+test_that("py_run_string_with_context cleans up partial assignments", {
+  skip_if_not_installed("reticulate")
+  skip_if_not(suppressWarnings(reticulate::py_available(TRUE)))
+
+  deleted <- character()
+
+  testthat::local_mocked_bindings(
+    py_has_attr = function(x, name) FALSE,
+    py_get_attr = function(x, name, silent = FALSE) stop("unexpected py_get_attr call"),
+    py_set_attr = function(x, name, value) {
+      if (identical(name, "second")) {
+        stop("boom")
+      }
+      invisible(NULL)
+    },
+    py_del_attr = function(x, name) {
+      deleted <<- c(deleted, name)
+      invisible(NULL)
+    },
+    py_run_string = function(code, local = FALSE, convert = TRUE) {
+      stop("unexpected py_run_string call")
+    },
+    .package = "reticulate"
+  )
+
+  expect_error(
+    plotly:::.py_run_string_with_context(
+      "value = 1",
+      context = list(first = 1, second = 2)
+    ),
+    "boom"
+  )
+  expect_identical(deleted, "first")
 })
