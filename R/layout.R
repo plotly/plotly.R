@@ -105,8 +105,8 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' @export
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
-#' # remove the plotly logo and collaborate button from modebar
-#' config(plot_ly(), displaylogo = FALSE, collaborate = FALSE)
+#' # remove the plotly logo and 2D lasso option from modebar
+#' config(plot_ly(), displaylogo = FALSE, modeBarButtonsToRemove = list("lasso2d"))
 #' 
 #' # enable mathjax
 #' # see more examples at https://plotly.com/r/LaTeX/
