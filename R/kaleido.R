@@ -226,6 +226,9 @@ legacyKaleidoScope <- function(kaleido) {
     if (is.null(context_names) || any(context_names == "")) {
       rlang::abort("`context` must be a named list.")
     }
+    if (any(!grepl("^[A-Za-z_][A-Za-z0-9_]*$", context_names))) {
+      rlang::abort("`context` names must be valid Python identifiers.")
+    }
     
     for (i in seq_along(context)) {
       name <- context_names[[i]]
