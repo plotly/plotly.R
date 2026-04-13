@@ -39,7 +39,8 @@ test_that("newKaleidoScope does not inline Windows temp paths into Python code",
   scope <- newKaleidoScope(kaleido)
   scope$transform(list(), "figure.png")
 
-  expect_identical(py_calls, "import json; fig = json.load(open(tmp_json_path))")
+  expect_identical(py_calls[[1]], "import json; fig = json.load(open(tmp_json_path))")
+  expect_identical(py_calls[[2]], "del tmp_json_path")
   expect_identical(write_fig_args$fig, "fake-fig")
   expect_identical(write_fig_args$file, "figure.png")
 })

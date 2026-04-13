@@ -133,11 +133,10 @@ newKaleidoScope <- function(kaleido) {
       writeLines(fig, tmp_json)
 
       # Import it as a fig (dict)
-      load_json <- sprintf(
-        "import json; fig = json.load(open('%s'))",
-        tmp_json
+      .py_run_string_with_context(
+        "import json; fig = json.load(open(tmp_json_path))",
+        context = list(tmp_json_path = tmp_json)
       )
-      reticulate::py_run_string(load_json)
 
       # Gather figure-level options
       opts <- list(
@@ -193,8 +192,9 @@ legacyKaleidoScope <- function(kaleido) {
       )
       # Write the base64 encoded string that transform() returns to disk
       # https://github.com/plotly/Kaleido/blame/master/README.md#L52
-      reticulate::py_run_string(
-        sprintf("import sys; open('%s', 'wb').write(%s)", file, transform_cmd)
+      .py_run_string_with_context(
+        sprintf("import sys; open(output_file, 'wb').write(%s)", transform_cmd),
+        context = list(output_file = file)
       )
       
       invisible(file)
@@ -214,6 +214,41 @@ legacyKaleidoScope <- function(kaleido) {
   })
   
   res
+}
+
+.py_run_string_with_context <- function(code, context = list(), convert = TRUE) {
+  py <- reticulate::py
+  context_names <- names(context)
+  old_values <- vector("list", length(context))
+  had_value <- logical(length(context))
+  
+  if (length(context) > 0) {
+    if (is.null(context_names) || any(context_names == "")) {
+      rlang::abort("`context` must be a named list.")
+    }
+    
+    for (i in seq_along(context)) {
+      name <- context_names[[i]]
+      had_value[[i]] <- reticulate::py_has_attr(py, name)
+      if (had_value[[i]]) {
+        old_values[[i]] <- py[[name]]
+      }
+      py[[name]] <- context[[i]]
+    }
+    
+    on.exit({
+      for (i in rev(seq_along(context))) {
+        name <- context_names[[i]]
+        if (had_value[[i]]) {
+          py[[name]] <- old_values[[i]]
+        } else {
+          reticulate::py_run_string(paste("del", name))
+        }
+      }
+    }, add = TRUE)
+  }
+  
+  reticulate::py_run_string(code, convert = convert)
 }
 
 
