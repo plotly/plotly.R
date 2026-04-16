@@ -2,6 +2,10 @@
 
 * Removed the dependency on the `{lazyeval}` package.
 
+## Bug fixes
+
+* Closed #2483: `save_image()` no longer embeds Windows file paths directly into Python source passed to `reticulate`, fixing static image export with Kaleido on Windows.
+
 
 # plotly 4.12.0
 
