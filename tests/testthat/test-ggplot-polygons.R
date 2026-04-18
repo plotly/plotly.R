@@ -210,3 +210,63 @@ test_that("geom_polygon(aes(group, fill), color) -> 2 trace", {
   expect_equivalent(traces.by.name[[1]]$x, c(0, -1, 2, -2, 1, 0))
   expect_equivalent(traces.by.name[[2]]$x, c(10, 9, 12, 8, 11, 10))
 })
+
+test_that('geom_polygon handles Inf values correctly (#2364)', {
+  df <- data.frame(x = 1:10, y = 1:10)
+
+  # Polygon with Inf y values (like a vertical band)
+  poly_df <- data.frame(
+    x = c(3, 3, 6, 6),
+    y = c(-Inf, Inf, Inf, -Inf)
+  )
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_polygon(
+      data = poly_df,
+      aes(x = x, y = y),
+      fill = "blue", alpha = 0.2, inherit.aes = FALSE
+    )
+
+  L <- plotly_build(p)
+
+  # Find the polygon trace
+  poly_traces <- Filter(function(tr) identical(tr$fill, "toself"), L$x$data)
+  expect_length(poly_traces, 1)
+
+  poly_trace <- poly_traces[[1]]
+
+  # Inf values should be replaced with finite panel limits
+  expect_false(any(is.infinite(poly_trace$y), na.rm = TRUE))
+  expect_false(any(is.infinite(poly_trace$x), na.rm = TRUE))
+
+  # Verify the replaced values match the panel limits
+  y_range <- L$x$layout$yaxis$range
+  expect_equal(min(poly_trace$y, na.rm = TRUE), y_range[1])
+  expect_equal(max(poly_trace$y, na.rm = TRUE), y_range[2])
+
+  # Test with x Inf values as well
+  poly_df2 <- data.frame(
+    x = c(-Inf, -Inf, Inf, Inf),
+    y = c(4, 6, 6, 4)
+  )
+
+  p2 <- ggplot(df, aes(x, y)) +
+    geom_point() +
+    geom_polygon(
+      data = poly_df2,
+      aes(x = x, y = y),
+      fill = "red", alpha = 0.2, inherit.aes = FALSE
+    )
+
+  L2 <- plotly_build(p2)
+  poly_trace2 <- Filter(function(tr) identical(tr$fill, "toself"), L2$x$data)[[1]]
+
+  expect_false(any(is.infinite(poly_trace2$x), na.rm = TRUE))
+  expect_false(any(is.infinite(poly_trace2$y), na.rm = TRUE))
+
+  # Verify the replaced x values match the panel limits
+  x_range <- L2$x$layout$xaxis$range
+  expect_equal(min(poly_trace2$x, na.rm = TRUE), x_range[1])
+  expect_equal(max(poly_trace2$x, na.rm = TRUE), x_range[2])
+})
