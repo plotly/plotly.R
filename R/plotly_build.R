@@ -877,9 +877,10 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
     colorObj$showscale <- default(TRUE)
+    # Use do.call(c, ...) instead of unlist() to preserve Date/POSIXct classes
     colorBarTrace <- list(
-      x = range(unlist(lapply(traces, "[[", "x")), na.rm = TRUE),
-      y = range(unlist(lapply(traces, "[[", "y")), na.rm = TRUE),
+      x = range(do.call(c, lapply(traces, "[[", "x")), na.rm = TRUE),
+      y = range(do.call(c, lapply(traces, "[[", "y")), na.rm = TRUE),
       type = if (any(types %in% glTypes())) "scattergl" else "scatter",
       mode = "markers",
       opacity = 0,
@@ -890,7 +891,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # 3D needs a z property
     if ("scatter3d" %in% types) {
       colorBarTrace$type <- "scatter3d"
-      colorBarTrace$z <- range(unlist(lapply(traces, "[[", "z")), na.rm = TRUE)
+      colorBarTrace$z <- range(do.call(c, lapply(traces, "[[", "z")), na.rm = TRUE)
     }
     if (length(type <- intersect(c("scattergeo", "scattermapbox"), types))) {
       colorBarTrace$type <- type
