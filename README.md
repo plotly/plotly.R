@@ -28,10 +28,10 @@ Install from CRAN:
 install.packages("plotly")
 ```
 
-Or install the latest development version (on GitHub) via `{remotes}`:
+Or install the latest development version (on GitHub) via `{pak}`:
 
 ``` r
-remotes::install_github("plotly/plotly")
+pak::pak("plotly=plotly/plotly.R")
 ```
 
 ## Getting started
