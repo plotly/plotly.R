@@ -460,10 +460,14 @@ verify_attr_names <- function(p) {
   for (tr in seq_along(p$x$data)) {
     thisTrace <- p$x$data[[tr]]
     attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
+    attrSpec_names <- c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox", "fill")
+    if(!is.null(thisTrace$type) && thisTrace$type == "box"){
+      attrSpec_names <- c(attrSpec_names, "box")
+    }
     # make sure attribute names are valid
     attrs_name_check(
       names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox"), 
+      attrSpec_names, 
       thisTrace$type
     )
   }
