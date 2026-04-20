@@ -127,8 +127,11 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     x$annotations[!axes]
   })
   # collect axis objects (note a _single_ geo/mapbox object counts a both an x and y)
+  # Note: only extract axes that actually exist in the layout. Plots like pie charts
+  # don't have cartesian axes and shouldn't contribute NA-named axis objects (#2437)
   xAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^xaxis", names(lay), value = TRUE) %||% "xaxis"
+    keys <- grep("^geo|^mapbox|^xaxis", names(lay), value = TRUE)
+    if (!length(keys)) return(list())
     for (k in keys) {
       dom <- lay[[k]]$domain %||% c(0, 1)
       if ("x" %in% names(dom)) dom <- dom[["x"]]
@@ -136,7 +139,8 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     lay[keys]
   })
   yAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^yaxis", names(lay), value = TRUE) %||% "yaxis"
+    keys <- grep("^geo|^mapbox|^yaxis", names(lay), value = TRUE)
+    if (!length(keys)) return(list())
     for (k in keys) {
       dom <- lay[[k]]$domain %||% c(0, 1)
       if ("y" %in% names(dom)) dom <- dom[["y"]]
@@ -191,9 +195,9 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     length(plots), nrows, margin, widths = widths, heights = heights
   )
   for (i in seq_along(plots)) {
-    # map axis object names
-    xMap <- xAxisMap[[i]]
-    yMap <- yAxisMap[[i]]
+    # map axis object names (plots without axes, like pie charts, have no mapping)
+    xMap <- if (i <= length(xAxisMap)) xAxisMap[[i]] else character(0)
+    yMap <- if (i <= length(yAxisMap)) yAxisMap[[i]] else character(0)
     xAxes[[i]] <- setNames(xAxes[[i]], names(xMap))
     yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
     # for cartesian, bump corresponding axis anchor
