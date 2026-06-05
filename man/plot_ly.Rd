@@ -40,7 +40,8 @@ provided at this level may override other arguments
 (e.g. \code{plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))}).}
 
 \item{type}{A character string specifying the trace type (e.g. \code{"scatter"}, \code{"bar"}, \code{"box"}, etc).
-If specified, it \emph{always} creates a trace, otherwise}
+If specified, it \emph{always} creates a trace. Otherwise, a trace type is
+inferred from the supplied arguments when the plot is built.}
 
 \item{name}{Values mapped to the trace's name attribute. Since a trace can
 only have one name, this argument acts very much like \code{split} in that it

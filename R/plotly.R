@@ -22,7 +22,8 @@
 #' provided at this level may override other arguments 
 #' (e.g. `plot_ly(x = 1:10, y = 1:10, color = I("red"), marker = list(color = "blue"))`).
 #' @param type A character string specifying the trace type (e.g. `"scatter"`, `"bar"`, `"box"`, etc).
-#' If specified, it *always* creates a trace, otherwise 
+#' If specified, it *always* creates a trace. Otherwise, a trace type is
+#' inferred from the supplied arguments when the plot is built.
 #' @param name Values mapped to the trace's name attribute. Since a trace can 
 #' only have one name, this argument acts very much like `split` in that it 
 #' creates one trace for every unique value.

@@ -1,5 +1,8 @@
 # plotly (development version)
 
+* Completed the `plot_ly()` documentation for what happens when `type` is not
+  specified (#2362).
+
 * Removed the dependency on the `{lazyeval}` package.
 
 ## Bug fixes
