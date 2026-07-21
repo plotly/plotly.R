@@ -63,7 +63,7 @@ test_that("group2NA() yields the correct result", {
     id = c(27L, NA, 3L, 8L, 9L, 18L, 19L, 20L, 21L, 26L, 28L, 32L, 1L, 2L, 30L, 
            NA, 4L, 6L, 10L, 11L, 5L, 7L, 12L, 13L, 14L, 15L, 16L, 17L, 22L, 
            23L, 24L, 25L, 29L, 31L)), 
-    .Names = c("mpg", "cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb", "id"), 
+    names = c("mpg", "cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb", "id"), 
     class = "data.frame", 
     row.names = c(NA, 34L))
   

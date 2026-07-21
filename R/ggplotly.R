@@ -1592,6 +1592,23 @@ get_gdefs_ggproto <- function(scales, theme, plot, layers, layer_data) {
   if (length(guides$guides) > 0) {
     guides$merge()
     guides$process_layers(layers, layer_data)
+    # guides$merge() sorts guides by their explicit `order` (guide_legend(order=)),
+    # but breaks ties (the common case, since `order` defaults to 0/unset for
+    # everyone) using a content hash that bears no relation to aesthetic
+    # declaration order (ggplot2's `Guides$merge()`, via rlang::hash()).
+    # layers2traces() names legend entries in aesthetic declaration order (see
+    # `discreteScales`), so on ties, guides must be put back in that same
+    # order for the combined legend title (built below) to agree with the
+    # entries it labels -- while still respecting any explicit `order`.
+    guide_order <- vapply(guides$params, function(p) {
+      o <- p$order %||% 0
+      if (identical(o, 0)) 99L else as.integer(o)
+    }, integer(1))
+    declaration_order <- match(guides$aesthetics, aesthetics)
+    ord <- order(guide_order, declaration_order)
+    guides$guides <- guides$guides[ord]
+    guides$params <- guides$params[ord]
+    guides$aesthetics <- guides$aesthetics[ord]
   }
   # Add old legend/colorbar classes to guide params so that ggplotly() code
   # can continue to work the same way it always has

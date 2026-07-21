@@ -9,6 +9,8 @@
 
 * Closed #2483: `save_image()` no longer embeds Windows file paths directly into Python source passed to `reticulate`, fixing static image export with Kaleido on Windows.
 
+* #2495: `ggplotly()` now keeps merged legend titles in sync with their legend entries, fixing a case where an upstream change in `{rlang}`'s hashing could silently reorder combined legend titles (e.g. `factor(vs)<br />factor(cyl)`) out of step with the entries they label.
+
 
 # plotly 4.12.0
 
