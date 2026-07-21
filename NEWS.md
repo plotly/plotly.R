@@ -1,4 +1,4 @@
-# plotly (development version)
+# plotly 4.12.1
 
 * Completed the `plot_ly()` documentation for what happens when `type` is not
   specified (#2362).
