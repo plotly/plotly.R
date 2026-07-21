@@ -1,5 +1,4 @@
 
-
 expect_traces <- function(gg, n.traces, name){
   stopifnot(is.numeric(n.traces))
   L <- expect_doppelganger_built(gg, paste0("legend-", name))
@@ -29,8 +28,8 @@ test_that("Discrete colour and shape get merged into one legend", {
     nms, paste0("(", d$vs, ",", d$cyl, ")")
   )
   legend_title <- info$layout$legend$title$text
-  expect_match(legend_title, "^factor\\(vs\\)")
-  expect_match(legend_title, "factor\\(cyl\\)$")
+  expect_match(legend_title, "factor(vs)", fixed = TRUE)
+  expect_match(legend_title, "factor(cyl)", fixed = TRUE)
 })
 
 
