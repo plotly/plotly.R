@@ -27,9 +27,11 @@ test_that("Discrete colour and shape get merged into one legend", {
   expect_identical(
     nms, paste0("(", d$vs, ",", d$cyl, ")")
   )
+  # legend title segments must appear in the same order as the aesthetics
+  # within each entry's name (e.g. "(vs_value,cyl_value)" above), since both
+  # describe the same combined legend
   legend_title <- info$layout$legend$title$text
-  expect_match(legend_title, "factor(vs)", fixed = TRUE)
-  expect_match(legend_title, "factor(cyl)", fixed = TRUE)
+  expect_identical(legend_title, "factor(vs)<br />factor(cyl)")
 })
 
 
@@ -88,8 +90,11 @@ test_that("legend can be manipulated via guides(aes = guide_xxx())", {
     theme(axis.text.x = element_text(angle = 90))
   
   info <- expect_doppelganger_built(gg, "respect-guides")
-  
+
   expect_equivalent(sum(sapply(info$data, "[[", "showlegend")), 4)
+  # explicit guide `order` must be respected, even though it disagrees with
+  # the shape-before-color order the aesthetics were declared in above
+  expect_identical(info$layout$legend$title$text, "Period<br />")
 })
 
 p <- ggplot(mtcars, aes(x = mpg, y = wt, color = factor(vs))) + 
