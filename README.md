@@ -100,7 +100,7 @@ ggplot2 API won’t ever support (e.g., surface,
 plot_ly(z = ~volcano, type = "surface")
 ```
 
-![<https://plotly.com/~brnvg/1134>](https://plotly.com/~brnvg/1134.png)
+<img src="man/figures/README-volcano-surface.png" width="600" />
 
 ## Learn more
 
