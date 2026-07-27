@@ -447,9 +447,19 @@ supply_highlight_attrs <- function(p) {
 # make sure plot attributes adhere to the plotly.js schema
 verify_attr_names <- function(p) {
   # some layout attributes (e.g., [x-y]axis can have trailing numbers)
+  # Cross-trace layout attrs (bar/box/violin/funnel/waterfall) are not in the
+  # plotly.js schema's layoutAttributes, but are valid and must be whitelisted
+  cross_trace_attrs <- c(
+    "barmode", "barnorm", "bargap", "bargroupgap",
+    "boxmode", "boxgap", "boxgroupgap",
+    "violinmode", "violingap", "violingroupgap",
+    "funnelmode", "funnelgap", "funnelgroupgap",
+    "waterfallmode", "waterfallgap", "waterfallgroupgap",
+    "mapType"
+  )
   attrs_name_check(
     sub("[0-9]+$", "", names(p$x$layout)),
-    c(names(Schema$layout$layoutAttributes), c("boxmode", "barmode", "bargap", "mapType")),
+    c(names(Schema$layout$layoutAttributes), cross_trace_attrs),
     "layout"
   )
   attrs_name_check(
