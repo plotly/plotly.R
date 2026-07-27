@@ -273,9 +273,21 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   traces <- list()
   for (i in seq_along(dats)) {
     d <- dats[[i]]
-    scaleAttrs <- names(d) %in% paste0(npscales(), "s")
-    traces <- c(traces, traceify(d[!scaleAttrs], d$.plotlyTraceIndex))
-    if (i == 1) traces[[1]] <- c(traces[[1]], d[scaleAttrs])
+    # Save .plotlyVariableMapping before traceify - it's metadata (column names)
+    # that shouldn't be subsetted like data columns. When its length happens to
+    # equal the number of rows, traceify would incorrectly subset it. (#2419)
+    variableMapping <- d$.plotlyVariableMapping
+    # Exclude .plotlyVariableMapping from traceify input
+    attrsToTraceify <- setdiff(names(d), ".plotlyVariableMapping")
+    scaleAttrs <- attrsToTraceify %in% paste0(npscales(), "s")
+    newTraces <- traceify(d[attrsToTraceify[!scaleAttrs]], d$.plotlyTraceIndex)
+    # Restore .plotlyVariableMapping to all new traces
+    newTraces <- lapply(newTraces, function(tr) {
+      tr$.plotlyVariableMapping <- variableMapping
+      tr
+    })
+    traces <- c(traces, newTraces)
+    if (i == 1) traces[[1]] <- c(traces[[1]], d[attrsToTraceify[scaleAttrs]])
   }
   
   # insert NAs to differentiate groups
