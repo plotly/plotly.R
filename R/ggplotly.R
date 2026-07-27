@@ -934,6 +934,7 @@ gg2list <- function(p, width = NULL, height = NULL,
           lay[names(plot$facet$params[[col_vars]])]
         ), collapse = br()
       )
+      if (length(names(plot$facet$params[[col_vars]])) == 0) col_txt <- ""
       if (is_blank(theme[["strip.text.x"]])) col_txt <- ""
       if (inherits(plot$facet, "FacetGrid") && lay$ROW != 1) col_txt <- ""
       if (robust_nchar(col_txt) > 0) {
@@ -946,22 +947,27 @@ gg2list <- function(p, width = NULL, height = NULL,
         strip <- make_strip_rect(xdom, ydom, theme, "top")
         gglayout$shapes <- c(gglayout$shapes, strip)
       }
-      row_txt <- paste(
-        plot$facet$params$labeller(
-          lay[names(plot$facet$params$rows)]
-        ), collapse = br()
-      )
-      if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
-      if (inherits(plot$facet, "FacetGrid") && lay$COL != nCols) row_txt <- ""
-      if (robust_nchar(row_txt) > 0) {
-        row_lab <- make_label(
-          row_txt, x = max(xdom), y = mean(ydom),
-          el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
-          xanchor = "left", yanchor = "middle"
+      # Only FacetGrid has no cols
+      if (inherits(plot$facet, "FacetGrid")) {
+        row_txt <- paste(
+          plot$facet$params$labeller(
+            lay[names(plot$facet$params$rows)]
+          ),
+          collapse = br()
         )
-        gglayout$annotations <- c(gglayout$annotations, row_lab)
-        strip <- make_strip_rect(xdom, ydom, theme, "right")
-        gglayout$shapes <- c(gglayout$shapes, strip)
+        if (length(names(plot$facet$params$rows)) == 0) row_txt <- ""
+        if (is_blank(theme[["strip.text.y"]])) row_txt <- ""
+        if (lay$COL != nCols) row_txt <- ""
+        if (robust_nchar(row_txt) > 0) {
+          row_lab <- make_label(
+            row_txt, x = max(xdom), y = mean(ydom),
+            el = theme[["strip.text.y"]] %||% theme[["strip.text"]],
+            xanchor = "left", yanchor = "middle"
+          )
+          gglayout$annotations <- c(gglayout$annotations, row_lab)
+          strip <- make_strip_rect(xdom, ydom, theme, "right")
+          gglayout$shapes <- c(gglayout$shapes, strip)
+        }  
       }
     }
   } # end of panel loop
