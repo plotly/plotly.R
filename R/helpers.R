@@ -162,11 +162,24 @@ hide_legend <- function(p) {
 toWebGL <- function(p) {
   if (ggplot2::is.ggplot(p)) {
     p <- plotly_build(p)
+    p <- remove_hoveron_from_gl_traces(p)
   }
   p$x$.plotlyWebGl <- TRUE
   p
 }
 
+# ggplotly automatically assigns hoveron mappings that are incompatible with
+# webGL based traces, we remove those mappings during toWebGL() conversion
+# (See #1582)
+remove_hoveron_from_gl_traces <- function(p) {
+  traces_without_hoveron <- glTypes()
+  trace_idx <- vapply(
+    p$x$data,
+    function(trace) trace$type %in% traces_without_hoveron,
+    logical(1)
+  )
+  p <- style(p, hoveron = NULL, traces = which(trace_idx))
+}
 
 #' Create a complete empty plotly graph.
 #' 
