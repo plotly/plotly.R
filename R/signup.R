@@ -34,4 +34,32 @@
 #' # (see help(.Rprofile) for more details)
 #' 
 #' }
-signup <- function(username, email, save = TRUE) defunct("signup", LP_CHART_STUDIO)
+signup <- function(username, email, save = TRUE) {
+  if (missing(username)) username <- verify("username")
+  if (missing(email)) stop("Must specify a valid email")
+  # construct body of message to plotly server
+  bod <- list(
+    un = username,
+    email = email,
+    platform = "R",
+    version = as.character(get_package_version("plotly"))
+  )
+  base_url <- file.path(get_domain(), "apimkacct")
+  resp <- httr::RETRY(
+    verb = "POST",
+    base_url,
+    body = bod,
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE
+  )
+  con <- process(append_class(resp, "signup"))
+  if (save) {
+    # store API key as an environment variable in .Rprofile
+    cat_profile("username", con$un)
+    cat_profile("api_key", con$api_key)
+  }
+  Sys.setenv("plotly_username" = con$un)
+  Sys.setenv("plotly_api_key" = con$api_key)
+  invisible(con)
+}

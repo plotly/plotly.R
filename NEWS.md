@@ -31,12 +31,6 @@
 * Building a heatmap (or another trace with a `z` matrix) is faster: checking
   whether `z` holds a single value no longer runs `unique()` on its rows.
 
-## Deprecated
-
-* `orca()` and `export()` use `save_image()`; `orca_serve()` is defunct.
-  `remove_typedarray_polyfill()` returns the plot unchanged. The Chart Studio functions (`api_create()`, `api()`, `signup()`,
-  `plotly_POST()`, `get_figure()`, `plotly_IMAGE()`, ...) are defunct.
-
 # plotly 4.12.1
 
 * Completed the `plot_ly()` documentation for what happens when `type` is not

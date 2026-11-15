@@ -109,20 +109,90 @@
 #' @export
 api_create <- function(x = last_plot(), filename = NULL, 
                        fileopt = c("overwrite", "new"),
-                       sharing = c("public", "private", "secret"), ...) defunct("api_create", LP_CHART_STUDIO)
+                       sharing = c("public", "private", "secret"), ...) {
+  fileopt <- match.arg(fileopt, c("overwrite", "new"))
+  sharing <- match.arg(sharing, c("public", "private", "secret"))
+  UseMethod("api_create")
+}
+
+
+#' @rdname api
+#' @export
+api_create.plotly <- api_create_plot
+
+#' @rdname api
+#' @export
+api_create.ggplot <- api_create_plot
+
+#' @rdname api
+#' @export
+api_create.data.frame <- api_create_grid
 
 
 
 #' @rdname api
 #' @export
-api_download_plot <- function(id, username) defunct("api_download_plot", LP_CHART_STUDIO)
+api_download_plot <- function(id, username) {
+  f <- api_download_file(id, username)
+  api_expect_filetype(f, "plot")
+  
+  as_widget(
+    api_download_file(id, username, "plots", "content?inline_data=true")
+  )
+}
 
 
 #' @rdname api
 #' @export
-api_download_grid <- function(id, username) defunct("api_download_grid", LP_CHART_STUDIO)
+api_download_grid <- function(id, username) {
+  f <- api_download_file(id, username)
+  api_expect_filetype(f, "grid")
+  
+  prefix_class(
+    api_download_file(id, username, "grids"), "api_grid_local"
+  )
+}
+
+# TODO: should this be exposed to users?
+api_download_file <- function(id, username, endpoint = "files", ...) {
+  if (missing(id)) stop("Please provide a figure id number")
+  if (missing(username)) username <- verify("username")
+  fid <- paste(username, id, sep = ":")
+  prefix_class(
+    api(file.path(endpoint, fid, ...)), "api_file"
+  )
+}
 
 
 #' @rdname api
 #' @export
-api <- function(endpoint = "/", verb = "GET", body = NULL, ...) defunct("api", LP_CHART_STUDIO)
+api <- function(endpoint = "/", verb = "GET", body = NULL, ...) {
+  api_check_endpoint(endpoint)
+  
+  # construct the url
+  url <- httr::modify_url(
+    get_domain("api"), 
+    scheme = "https",
+    # TODO: should anything else in the endpoint (besides whitespace) be escaped?
+    path = file.path("v2", gsub("\\s+", "+", endpoint))
+  )
+  
+  # default to unboxing (i.e., no arrays of length 1)
+  if (!is.null(body) && !inherits(body, "json")) {
+    body <- to_JSON(body)
+  }
+  
+  resp <- httr::RETRY(
+    verb = verb,
+    url = url,
+    api_headers(),
+    api_auth(),
+    body = body,
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE,
+    ...
+  )
+  
+  structure(process(resp), class = "api")
+}

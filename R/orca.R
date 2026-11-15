@@ -59,9 +59,40 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
                  scale = NULL, width = NULL, height = NULL, mathjax = FALSE,
                  parallel_limit = NULL, verbose = FALSE, debug = FALSE, 
                  safe = FALSE, more_args = NULL, ...) {
-  deprecated("orca", "use save_image() (needs Kaleido) instead.")
-  if (!identical(tolower(format), tolower(tools::file_ext(file)))) file <- paste0(tools::file_path_sans_ext(file), ".", format)
-  save_image(p, file, width = width, height = height, scale = scale)
+  
+  .Deprecated("save_image")
+  
+  orca_available()
+  
+  b <- plotly_build(p)
+  
+  # find the relevant plotly.js bundle
+  plotlyjs_path <- plotlyMainBundlePath()
+  
+  tmp <- tempfile(fileext = ".json")
+  cat(to_JSON(b$x[c("data", "layout")]), file = tmp)
+  
+  args <- c(
+    "graph", tmp, 
+    "-o", file,
+    "--format", format,
+    "--plotlyjs", plotlyjs_path,
+    if (debug) "--debug",
+    if (verbose) "--verbose",
+    if (safe) "--safe-mode",
+    more_args
+  )
+  
+  if (!is.null(scale)) args <- c(args, "--scale", scale)
+  if (!is.null(width)) args <- c(args, "--width", width)
+  if (!is.null(height)) args <- c(args, "--height", height)
+  if (!is.null(parallel_limit)) args <- c(args, "--parallel-limit", parallel_limit)
+  if (!is.null(tryNULL(mapbox_token()))) args <- c(args, "--mapbox-access-token", mapbox_token())
+  if (isTRUE(mathjax)) args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
+  
+  # TODO: point to local topojson? Should this only work if plot_geo(standalone = TRUE)?
+  try_library("processx", "orca")
+  invisible(processx::run("orca", args, echo = TRUE, spinner = TRUE, ...))
 }
 
 #' Orca image export server
@@ -97,4 +128,95 @@ orca <- function(p, file = "plot.png", format = tools::file_ext(file),
 
 orca_serve <- function(port = 5151, mathjax = FALSE, safe = FALSE, request_limit = NULL,
                        keep_alive = TRUE, window_max_number = NULL, quiet = FALSE, 
-                       debug = FALSE, more_args = NULL, ...) defunct("orca_serve", "orca is no longer supported; use save_image() instead.")
+                       debug = FALSE, more_args = NULL, ...) {
+  
+  .Deprecated("kaleido")
+  
+  # make sure we have the required infrastructure
+  orca_available()
+  try_library("processx", "orca_serve")
+  
+  # use main bundle since any plot can be thrown at the server
+  plotlyjs_path <- plotlyMainBundlePath()
+  
+  args <- c(
+    "serve",
+    "-p", port,
+    "--plotly", plotlyjs_path,
+    if (safe) "--safe-mode",
+    if (orca_version() >= "1.1.1") "--graph-only",
+    if (keep_alive) "--keep-alive",
+    if (debug) "--debug",
+    if (quiet) "--quiet",
+    more_args
+  )
+  
+  if (!is.null(request_limit))
+    args <- c(args, "--request-limit", request_limit)
+  
+  if (!is.null(window_max_number))
+    args <- c(args, "--window-max-number", window_max_number)
+  
+  if (!is.null(tryNULL(mapbox_token()))) 
+    args <- c(args, "--mapbox-access-token", mapbox_token())
+  
+  if (isTRUE(mathjax)) 
+    args <- c(args, "--mathjax", file.path(mathjax_path(), "MathJax.js"))
+  
+  process <- processx::process$new("orca", args, ...)
+  
+  list(
+    port = port,
+    process = process,
+    close = function() process$kill(),
+    export = function(p, file = "plot.png", format = tools::file_ext(file), scale = NULL, width = NULL, height = NULL) {
+      # request/response model works similarly to plotly_IMAGE()
+      bod <- list(
+        figure = plotly_build(p)$x[c("data", "layout")],
+        format = format,
+        width = width,
+        height = height,
+        scale = scale
+      )
+      res <- httr::RETRY(
+        verb = "POST",
+        url = paste0("http://127.0.0.1:", port),
+        body = to_JSON(bod),
+        times = 5,
+        terminate_on = c(400, 401, 403, 404),
+        terminate_on_success = TRUE
+      )
+      httr::stop_for_status(res)
+      httr::warn_for_status(res)
+      con <- httr::content(res, as = "raw")
+      writeBin(con, file)
+    }
+  )
+}
+
+correct_orca <- function() {
+  orca_help <- processx::run("orca", "-h")
+  grepl("plotly", orca_help[["stdout"]], ignore.case = TRUE)
+}
+
+
+orca_available <- function() {
+  if (Sys.which("orca") == "" || !correct_orca()) {
+    stop(
+      "The orca command-line utility is required for this functionality.\n\n",
+      "Please follow the installation instructions here -- https://github.com/plotly/orca#installation",
+      call. = FALSE
+    )
+  }
+  
+  TRUE
+}
+
+orca_version <- function() {
+  orca_available()
+  # default to initial release if we can't correctly parse version
+  tryCatch(
+    as.package_version(system("orca --version", intern = TRUE)), 
+    error = function(e) "1.0.0"
+  )
+}

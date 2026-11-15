@@ -79,7 +79,15 @@ to_milliseconds <- function(x) {
 
 # apply a function to x, retaining class and "special" plotly attributes
 retain <- function(x, f = identity) {
-  structure(f(x), class = oldClass(x))
+  y <- structure(f(x), class = oldClass(x))
+  attrs <- attributes(x)
+  # TODO: do we set any other "special" attributes internally 
+  # (grepping "structure(" suggests no)
+  attrs <- attrs[names(attrs) %in% "apiSrc"]
+  if (length(attrs)) {
+    attributes(y) <- attrs
+  }
+  y
 }
 
 deparse2 <- function(x) {
@@ -493,6 +501,14 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
     # plotly.js so it does something sensible 
     if (identical(proposed[["hoveron"]], "fills")) {
       proposed[["text"]] <- paste(uniq(proposed[["text"]]), collapse = "\n")
+    }
+    
+    # tag 'src-able' attributes (needed for api_create())
+    # note that layout has 'src-able' attributes that shouldn't
+    # be turned into grids https://github.com/ropensci/plotly/pull/1489
+    isSrcAble <- !is.null(schema[[paste0(attr, "src")]]) && length(proposed[[attr]]) > 1
+    if ((isDataArray || isSrcAble) && !isTRUE(layoutAttr)) {
+      proposed[[attr]] <- structure(proposed[[attr]], apiSrc = TRUE)
     }
     
     if (length(proposed[["name"]]) > 0) {
@@ -1051,6 +1067,25 @@ get_domain <- function(type = "") {
 get_kwargs <- function() {
   c("filename", "fileopt", "style", "traces", "layout", "frames", "world_readable")
 }
+
+# "common" POST header fields
+api_headers <- function() {
+  v <- as.character(get_package_version("plotly"))
+  httr::add_headers(
+    plotly_version = v,
+    `Plotly-Client-Platform` = paste("R", v),
+    `Content-Type` = "application/json",
+    Accept = "*/*"
+  )
+}
+
+api_auth <- function() {
+  httr::authenticate(
+    verify("username"),
+    verify("api_key")
+  )
+}
+
 
 # try to write environment variables to an .Rprofile
 cat_profile <- function(key, value, path = "~") {

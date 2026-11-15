@@ -29,6 +29,7 @@ Imports:
     plotly.core,
     tools,
     scales,
+    httr (>= 1.3.0),
     jsonlite (>= 1.6),
     magrittr,
     digest,
@@ -46,7 +47,6 @@ Imports:
     purrr,
     data.table
 Suggests:
-    httr,
     MASS,
     maps,
     hexbin,

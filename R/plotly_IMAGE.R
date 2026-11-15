@@ -22,5 +22,30 @@
 
 plotly_IMAGE <- function(x, width = 1000, height = 500, format = "png", 
                          scale = 1, out_file, ...) {
-  defunct("plotly_IMAGE", "use save_image() instead.")
+  x <- plotly_build(x)[["x"]]
+  
+  bod <- list(
+    figure = x[c("data", "layout")],
+    width = width,
+    height = height,
+    format = format,
+    scale = scale,
+    encoded = FALSE,
+    filename = Sys.time()
+  )
+  base_url <- file.path(get_domain("api"), "v2", "images")
+  resp <- httr::RETRY(
+    verb = "POST",
+    url = base_url,
+    body = to_JSON(bod),
+    times = 5,
+    terminate_on = c(400, 401, 403, 404),
+    terminate_on_success = TRUE,
+    api_headers(),
+    api_auth(),
+    if (!missing(out_file)) httr::write_disk(out_file, overwrite = TRUE),
+    ...
+  )
+  con <- process(append_class(resp, "api_image"))
+  invisible(con)
 }

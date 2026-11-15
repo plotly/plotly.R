@@ -2,6 +2,9 @@
 % Please edit documentation in R/api_exports.R
 \name{api_create}
 \alias{api_create}
+\alias{api_create.plotly}
+\alias{api_create.ggplot}
+\alias{api_create.data.frame}
 \alias{api_download_plot}
 \alias{api_download_grid}
 \alias{api}
@@ -14,6 +17,24 @@ api_create(
   sharing = c("public", "private", "secret"),
   ...
 )
+
+\method{api_create}{plotly}(
+  x = last_plot(),
+  filename = NULL,
+  fileopt = "overwrite",
+  sharing = "public",
+  ...
+)
+
+\method{api_create}{ggplot}(
+  x = last_plot(),
+  filename = NULL,
+  fileopt = "overwrite",
+  sharing = "public",
+  ...
+)
+
+\method{api_create}{data.frame}(x, filename = NULL, fileopt = "overwrite", sharing = "public", ...)
 
 api_download_plot(id, username)
 

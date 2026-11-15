@@ -462,6 +462,12 @@ as_widget.list <- function(x, ...) {
 #' }
 
 remove_typedarray_polyfill <- function(p) {
-  deprecated("remove_typedarray_polyfill", "there is no polyfill to remove (plotly.core bundles plotly.js); the plot is returned unchanged.")
+  isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))
+  p$dependencies <- p$dependencies[!isTA]
   p
+}
+
+# plotly.js, now bundled with plotly.core (used by orca())
+plotlyMainBundlePath <- function() {
+  system_file("htmlwidgets", "lib", "plotlyjs", "plotly.min.js", package = "plotly.core")
 }

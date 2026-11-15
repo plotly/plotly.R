@@ -1,13 +1,3 @@
-defunct <- function(fn, instead) {
-  stop("`", fn, "()` is no longer available: ", instead, call. = FALSE)
-}
-
-deprecated <- function(fn, instead) {
-  warning("`", fn, "()` is deprecated: ", instead, call. = FALSE)
-}
-
-LP_CHART_STUDIO <- "Chart Studio's API has been retired. Use htmlwidgets::saveWidget() to share a plot as HTML, or save_image() for a static image."
-
 #' Create/Modify plotly graphs
 #'
 #' Deprecated: see [api_create()].
@@ -37,7 +27,10 @@ LP_CHART_STUDIO <- "Chart Studio's API has been retired. Use htmlwidgets::saveWi
 #' @export
 #' @seealso [plot_ly()], [signup()]
 plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite", 
-                        sharing = c("public", "private", "secret"), ...) defunct("plotly_POST", LP_CHART_STUDIO)
+                        sharing = c("public", "private", "secret"), ...) {
+  .Deprecated("api_create")
+  api_create(x, filename = filename, sharing = sharing, fileopt = fileopt, ...)
+}
 
 #' Request a figure object
 #' 
@@ -46,7 +39,10 @@ plotly_POST <- function(x = last_plot(), filename = NULL, fileopt = "overwrite",
 #' @param username corresponding username for the figure.
 #' @param id of the Plotly figure.
 #' @export
-get_figure <- function(username, id) defunct("get_figure", LP_CHART_STUDIO)
+get_figure <- function(username, id) {
+  .Deprecated("api_download_plot")
+  api_download_plot(id, username)
+}
 
 #' Main interface to plotly 
 #' 
@@ -62,7 +58,25 @@ get_figure <- function(username, id) defunct("get_figure", LP_CHART_STUDIO)
 #' @param key plotly API key
 #' @export
 #' @seealso [ggplotly()], [plot_ly()], [signup()]
-plotly <- function(username, key) defunct("plotly", "credentials are no longer used; see plot_ly() and ggplotly().")
+plotly <- function(username, key) {
+  
+  if (!missing(username)) {
+    message("Storing 'username' as the environment variable 'plotly_username'")
+    Sys.setenv("plotly_username" = username)
+  } else {
+    usr <- verify("username")
+  }
+  if (!missing(key)) {
+    message("Storing 'key' as the environment variable 'plotly_api_key'")
+    Sys.setenv("plotly_api_key" = key)
+  } else {
+    key <- verify("api_key")
+  }
+  
+  .Deprecated("ggplotly")
+  .Deprecated("plot_ly")
+  invisible(NULL)
+}
 
 #' Plotly Offline
 #' 
@@ -98,5 +112,8 @@ offline <- function(p, height, width, out_dir, open_browser) {
 
 as.widget <- function(x, ...) {
   .Deprecated("as_widget")
-  as_widget(x, ...)
+  x
 }
+
+# for legacy reasons
+toWidget <- as.widget
