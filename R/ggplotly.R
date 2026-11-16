@@ -684,16 +684,9 @@ gg2list <- function(p, width = NULL, height = NULL,
         
         if (sum(isGrill) == 0) {
           # TODO: reduce the number of points (via coord_munch?)
-          # extended beyond the panel so the lines reach the edges of the
-          # plot area however plotly.js widens it (see extend_graticule())
-          ext <- extend_graticule(rng, p$coordinates)
-          if (is.null(ext)) {
-            d <- fortify_sf(rng$graticule)
-            d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
-            d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
-          } else {
-            d <- fortify_sf(ext)
-          }
+          d <- fortify_sf(rng$graticule)
+          d$x <- scales::rescale(d$x, rng$x_range, from = c(0, 1))
+          d$y <- scales::rescale(d$y, rng$y_range, from = c(0, 1))
           params <- list(
             colour = panelGrid$colour, 
             linetype = panelGrid$linetype
