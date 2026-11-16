@@ -15,7 +15,7 @@ plotly is an R package for creating interactive web graphics via the plotly.js J
 # Run all tests
 devtools::test()
 
-# Run visual tests (requires kaleido via reticulate)
+# Run visual tests (requires Chrome, via plotly.core's chrome_exporter())
 Sys.setenv("VISUAL_TESTS" = "true")
 devtools::test()
 
@@ -72,7 +72,7 @@ The conversion from ggplot2 to plotly follows this flow:
 - `R/subplots.R`: Combining multiple plots
 - `R/highlight.R`: Linked brushing/crosstalk support
 - `R/animate.R`: Animation support
-- `R/kaleido.R`, `R/orca.R`: Static image export
+- `R/kaleido.R` (deprecated `kaleido()`), `R/orca.R`: Static image export; `save_image()` is plotly.core's
 
 ## Testing Patterns
 

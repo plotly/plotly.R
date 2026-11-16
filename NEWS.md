@@ -14,8 +14,12 @@
 * `partial_bundle()` is plotly.core's, which ships plotly.js's partial
   bundles: it picks the smallest one with the plot's trace types.
 * Shiny (`plotlyOutput()`, `renderPlotly()`, `event_data()`, `plotlyProxy()`),
-  `save_image()`/`kaleido()`, `plotly_json()`, `last_plot()` and `TeX()` are
-  re-exported from plotly.core.
+  `save_image()`, `plotly_json()`, `last_plot()` and `TeX()` are re-exported
+  from plotly.core.
+* `save_image()` makes static images with headless Chrome (via chromote)
+  instead of the kaleido Python package, so Python and reticulate are no
+  longer needed; it also writes EPS (with the rsvg package). `kaleido()` is
+  deprecated and returns plotly.core's Chrome exporter.
 * Features plotly.js has removed are upgraded when a plot is built: Mapbox
   traces and `layout.mapbox` become their MapLibre `map` equivalents (no
   access token is needed), `heatmapgl` becomes `heatmap`, legacy polar charts
