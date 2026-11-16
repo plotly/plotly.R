@@ -29,6 +29,9 @@
 * `add_trace()` and the trace helpers (`add_markers()`, `add_lines()`,
   `add_bars()`, ...) are unchanged; their documentation points to the
   plotly.core functions that document every supported attribute.
+* `ggplotly()` of `coord_sf()` maps extends the graticule beyond the data, so
+  gridlines reach the edges of the plot area when plotly.js widens an axis to
+  keep the map's aspect ratio.
 * `subplot()` accepts plotly.core figures (`go_figure()`) as well as
   `plot_ly()` and `ggplotly()` objects.
 * Minimum R version is now 4.1 so base R pipe `|>` is available for plotly.core.

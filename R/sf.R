@@ -100,3 +100,71 @@ is_sf <- function(dat) {
   if (crosstalk::is.SharedData(dat)) dat <- dat$origData()
   inherits(dat, "sf")
 }
+
+# The graticule of a coord_sf() panel, extended well beyond the data: plotly.js
+# widens one axis range to keep the map's aspect ratio, so ggplot2's
+# graticule (which covers only the panel's ranges) would stop short of the
+# plot area's edges. The lines keep ggplot2's spacing and are clipped to the
+# plot area by plotly.js. NULL when there is no graticule or it can't be
+# computed (the panel's own graticule is used then).
+extend_graticule <- function(rng, coord, k = 2) {
+  g <- rng$graticule
+  crs <- rng$crs
+  datum <- coord$datum
+  if (is.null(g) || !NROW(g) || is.null(crs) || is.na(crs)) return(NULL)
+  if (is.null(datum) || (is.atomic(datum) && length(datum) == 1 && is.na(datum))) return(NULL)
+  xr <- rng$x_range
+  yr <- rng$y_range
+  dx <- diff(xr)
+  dy <- diff(yr)
+  bb <- sf::st_bbox(
+    c(xmin = xr[1] - k * dx, ymin = yr[1] - k * dy, xmax = xr[2] + k * dx, ymax = yr[2] + k * dy),
+    crs = crs
+  )
+  tryCatch({
+    # the extended area in the datum's degrees, to extend the breaks over:
+    # from a grid of points over it (points outside the projection's valid
+    # area don't transform, and are dropped)
+    grid <- expand.grid(
+      x = seq(bb[["xmin"]], bb[["xmax"]], length.out = 25),
+      y = seq(bb[["ymin"]], bb[["ymax"]], length.out = 25)
+    )
+    pts <- sf::st_as_sf(grid, coords = c("x", "y"), crs = crs)
+    xy <- sf::st_coordinates(suppressWarnings(sf::st_transform(pts, datum)))
+    xy <- xy[is.finite(xy[, 1]) & is.finite(xy[, 2]), , drop = FALSE]
+    if (!nrow(xy)) return(NULL)
+    deg <- c(
+      xmin = min(xy[, 1]), xmax = max(xy[, 1]),
+      ymin = min(xy[, 2]), ymax = max(xy[, 2])
+    )
+    extend <- function(type, lo, hi, limit) {
+      v <- sort(unique(g$degree[g$type == type]))
+      if (length(v) < 2) return(v)
+      step <- min(diff(v))
+      # two steps beyond the area sampled (whose edges may lie outside the
+      # projection's valid area, e.g. towards the poles); clipped anyway
+      lo <- lo - 2 * step
+      hi <- hi + 2 * step
+      out <- seq(v[1] - ceiling((v[1] - lo) / step) * step, hi, by = step)
+      out[out >= limit[1] & out <= limit[2]]
+    }
+    lon <- extend("E", deg[["xmin"]], deg[["xmax"]], c(-180, 180))
+    lat <- extend("N", deg[["ymin"]], deg[["ymax"]], c(-90, 90))
+    # meridians run between the outermost parallels, which st_graticule()
+    # can't place at the poles: near them, so meridians reach the poles
+    if (length(lat) > 1) {
+      step <- min(diff(lat))
+      if (deg[["ymax"]] + 2 * step > 90) lat <- c(lat[lat < 90], 89.999)
+      if (deg[["ymin"]] - 2 * step < -90) lat <- c(-89.999, lat[lat > -90])
+    }
+    out <- sf::st_graticule(
+      bb,
+      crs = crs,
+      datum = datum,
+      lon = lon,
+      lat = lat,
+      ndiscr = coord$ndiscr %||% 100
+    )
+    if (NROW(out)) out else NULL
+  }, error = function(e) NULL)
+}

@@ -131,3 +131,17 @@ test_that("resolves overlapping axis ticks", {
     geom_sf(data = cities, aes(size = pop), color = "red", alpha = 0.3)
   expect_doppelganger_built(ggplotly(p), "sf-axis-ticks")
 })
+
+test_that("the graticule extends beyond the panel, to the plot area's edges", {
+  skip_if_not_installed("sf")
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  l <- plotly_build(ggplotly(ggplot(nc) + geom_sf()))$x
+  grill <- Filter(function(tr) isTRUE(tr$`_isGraticule`), l$data)
+  expect_length(grill, 1)
+  x <- range(grill[[1]]$x, na.rm = TRUE)
+  y <- range(grill[[1]]$y, na.rm = TRUE)
+  # plotly.js widens an axis range to keep the aspect ratio: the lines must
+  # reach past the panel's own ranges in both directions
+  expect_true(x[1] < l$layout$xaxis$range[1] && x[2] > l$layout$xaxis$range[2])
+  expect_true(y[1] < l$layout$yaxis$range[1] && y[2] > l$layout$yaxis$range[2])
+})
