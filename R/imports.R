@@ -19,6 +19,18 @@
 NULL
 
 
+#' @importFrom plotly.core highlight
+#' @name highlight
+#' @rdname reexports
+#' @export
+plotly.core::highlight
+
+#' @importFrom plotly.core attrs_selected
+#' @name attrs_selected
+#' @rdname reexports
+#' @export
+plotly.core::attrs_selected
+
 #' @importFrom dplyr mutate 
 #' @name mutate
 #' @rdname reexports
