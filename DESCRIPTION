@@ -77,7 +77,7 @@ Suggests:
     rsvg,
     ggridges
 Remotes:
-    msummersgill/plotly.R.core@master
+    plotly.core=msummersgill/plotly.R.core@master
 LazyData: true
 RoxygenNote: 7.3.3
 Encoding: UTF-8
