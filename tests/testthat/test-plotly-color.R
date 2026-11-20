@@ -124,9 +124,11 @@ test_that("attributes are boxed-up correctly", {
   
   expect_length(l$data, 5)
   
+  # one-value x and y are sent to plotly.js as arrays
+  json <- jsonlite::fromJSON(plotly_json(p, jsonedit = FALSE), simplifyVector = FALSE)
   for (i in seq_along(l$data)) {
-    expect_is(l$data[[i]]$x, "AsIs")
-    expect_is(l$data[[i]]$y, "AsIs")
+    expect_type(json$data[[i]]$x, "list")
+    expect_type(json$data[[i]]$y, "list")
     expect_length(l$data[[i]]$text, 1)
   }
   

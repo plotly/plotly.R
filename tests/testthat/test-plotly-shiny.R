@@ -12,7 +12,8 @@ test_that("event_register() registers an event", {
 test_that("event_unregister() de-registers an event", {
   p <- plotly_build(plot_ly(x = 1))
   
-  expect_true("plotly_selected" %in% p$x$shinyEvents)
+  # (plotly.core's widget registers the default events)
+  expect_true("plotly_selected" %in% as_widget(p)$x$shinyEvents)
   
   p <- event_unregister(p, "plotly_selected")
   

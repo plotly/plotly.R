@@ -1,3 +1,42 @@
+# plotly (development version)
+
+## Rendering with plotly.core
+
+* Plots are now rendered by the plotly.core package, which bundles a current
+  plotly.js (4.3). `plot_ly()` and `ggplotly()` objects are still built by
+  `plotly_build()`; the result is converted to a plotly.core figure (see the
+  new `as_go_figure()`), adding each trace with plotly.core's `add_<type>()`
+  and the layout with `update_layout()`, which validate them. Invalid
+  attributes are dropped with a warning.
+* plotly.core's `add_<trace type>()` functions (e.g. `add_scatter()`,
+  `add_bar()`, `add_violin()`) are re-exported and add a layer of that type to
+  a `plot_ly()` object, evaluated when the plot is built, like `add_trace()`.
+* `partial_bundle()` is plotly.core's, which ships plotly.js's partial
+  bundles: it picks the smallest one with the plot's trace types.
+* Shiny (`plotlyOutput()`, `renderPlotly()`, `event_data()`, `plotlyProxy()`),
+  `save_image()`, `plotly_json()`, `last_plot()` and `TeX()` are re-exported
+  from plotly.core.
+* `save_image()` makes static images with headless Chrome (via chromote)
+  instead of the kaleido Python package, so Python and reticulate are no
+  longer needed; it also writes EPS (with the rsvg package). `kaleido()` is
+  deprecated and returns plotly.core's Chrome exporter.
+* Features plotly.js has removed are upgraded when a plot is built: Mapbox
+  traces and `layout.mapbox` become their MapLibre `map` equivalents (no
+  access token is needed), `heatmapgl` becomes `heatmap`, legacy polar charts
+  (`r`/`t`) become `scatterpolar`, `titlefont`/`titleside`/`titleposition`
+  move into `title`, and trace `transforms` are applied in R (so buttons that
+  restyle a transform have no effect), with a deprecation warning: transforms
+  are kept only for backwards compatibility and may be removed in a future
+  version.
+* `add_trace()` and the trace helpers (`add_markers()`, `add_lines()`,
+  `add_bars()`, ...) are unchanged; their documentation points to the
+  plotly.core functions that document every supported attribute.
+* `subplot()` accepts plotly.core figures (`go_figure()`) as well as
+  `plot_ly()` and `ggplotly()` objects.
+* Minimum R version is now 4.1 so base R pipe `|>` is available for plotly.core.
+* Building a heatmap (or another trace with a `z` matrix) is faster: checking
+  whether `z` holds a single value no longer runs `unique()` on its rows.
+
 # plotly 4.12.1
 
 * Completed the `plot_ly()` documentation for what happens when `type` is not

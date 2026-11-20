@@ -58,7 +58,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     if (!is.null(names(x$annotations))) {
       # font is the only list object, so store it, and attach after transposing
       font <- x$annotations[["font"]]
-      x$annotations <- purrr::transpose(lapply(x$annotations, function(x) {
+      x$annotations <- transpose_list(lapply(x$annotations, function(x) {
         as.list(rep(x, length.out = nAnnotations))
       }))
       for (i in seq_len(nAnnotations)) {
@@ -156,7 +156,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     }
     
     # if appropriate, tack on a group index
-    grps <- if (has_group(trace)) tryNULL(dplyr::group_vars(dat))
+    grps <- if (has_group(trace)) data_groups(dat)
     if (length(grps) && any(lengths(trace) == NROW(dat))) {
       trace[[".plotlyGroupIndex"]] <- interaction(dat[, grps, drop = F])
     }
@@ -204,7 +204,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     tr <- tr[vapply(tr, function(x) is.null(dim(x)) && is.atomic(x), logical(1))]
     # white-list customdata as this can be a non-atomic vector
     tr$customdata <- trace$customdata
-    builtData <- tibble::as_tibble(tr)
+    builtData <- columns_df(tr)
     # avoid clobbering I() (i.e., variables that shouldn't be scaled)
     for (i in seq_along(tr)) {
       if (inherits(tr[[i]], "AsIs")) builtData[[i]] <- I(builtData[[i]])
@@ -240,13 +240,14 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
         warning("Ignoring ", sum(!isComplete), " observations", call. = FALSE)
       }
       builtData[[".plotlyMissingIndex"]] <- cumsum(!isComplete)
-      builtData <- builtData[isComplete, ]
+      if (!all(isComplete)) builtData <- builtData[isComplete, , drop = FALSE]
       if (length(grps) && has_group(trace) && isTRUE(trace[["connectgaps"]])) {
         stop(
           "Can't use connectgaps=TRUE when data has group(s).", call. = FALSE
         )
       }
-      builtData[[".plotlyGroupIndex"]] <- interaction(
+      # (only traces drawn by group use it, see group2NA() below)
+      if (has_group(trace)) builtData[[".plotlyGroupIndex"]] <- interaction(
         builtData[[".plotlyGroupIndex"]] %||% "",
         builtData[[".plotlyMissingIndex"]]
       )
@@ -280,7 +281,7 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # insert NAs to differentiate groups
   traces <- lapply(traces, function(x) {
-    d <- tibble::as_tibble(x[names(x) %in% x$.plotlyVariableMapping])
+    d <- columns_df(x[names(x) %in% x$.plotlyVariableMapping])
     d <- group2NA(
       d, if (has_group(x)) ".plotlyGroupIndex",
       ordered = if (inherits(x, "plotly_line")) "x",
@@ -334,6 +335,10 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   # (like figures pulled from a plotly server)
   p$x$data <- setNames(c(p$x$data, traces), NULL)
   
+  # features plotly.js has removed: legacy polar charts and trace transforms
+  # (see R/go_figure.R and R/transforms.R)
+  p <- apply_transforms(upgrade_legacy_polar(p))
+  
   # supply linked highlighting options/features
   p <- supply_highlight_attrs(p)
   
@@ -382,24 +387,22 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     p <- registerFrames(p, frameMapping = frameMapping)
   }
   
-  # set the default plotly.js events to register in shiny
-  p <- shiny_defaults_set(p)
-  
   p <- verify_guides(p)
   
   # verify colorscale attributes are in a sensible data structure
   p <- verify_colorscale(p)
   
-  # verify plot attributes are legal according to the plotly.js spec
-  p <- verify_attr_names(p)
+  # upgrade Mapbox traces/layout, heatmapgl and title aliases, which plotly.js
+  # has removed (see R/go_figure.R)
+  p <- upgrade_removed(p)
+  
+  # (attributes are validated by plotly.core when the plot is rendered)
   # box up 'data_array' attributes where appropriate
   p <- verify_attr_spec(p)
   
   # make sure we're including mathjax (if TeX() is used)
   p <- verify_mathjax(p)
   
-  # if a partial bundle was specified, make sure it supports the visualization
-  p <- verify_partial_bundle(p)
 
   # make sure plots don't get sent out of the network (for enterprise)
   p$x$base_url <- get_domain()
@@ -567,7 +570,7 @@ train_data <- function(data, trace) {
     idx2 <- seq.int(2, NROW(dat), by = 2)
     dat[idx2, "x"] <- data[["xend"]]
     dat[idx2, "y"] <- data[["yend"]]
-    data <- group_by_add(dat, !!rlang::sym(".plotlyGroupIndex"))
+    data <- dat
   }
   
   # TODO: a lot more geoms!!!
@@ -674,8 +677,16 @@ map_size <- function(traces, stroke = FALSE) {
 }
 
 # appends a new (empty) trace to generate (plot-wide) colorbar/colorscale
-#' @importFrom rlang is_na
-#
+# length(uniq(x)) == 1, without unique() on the rows of a matrix (e.g. a
+# heatmap's z), which is slow for large ones: for a matrix that's when its
+# distinct rows hold exactly one non-missing value between them
+is_singular <- function(x) {
+  if (!is.matrix(x) || length(x) <= 1) return(length(uniq(x)) == 1)
+  n <- rowSums(!is.na(x))
+  if (any(n > 1) || !any(n == 1)) return(FALSE)
+  nrow(unique(x[n == 1, , drop = FALSE])) == 1
+}
+
 map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "transparent") {
   color <- if (stroke) {
     lapply(traces, function(x) { x[["stroke"]] %||% x[["color"]] })
@@ -692,8 +703,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
   isNumeric <- vapply(color, is.numeric, logical(1)) & !isConstant
   isDiscrete <- vapply(color, is.discrete, logical(1)) & !isConstant
   if (any(isNumeric & isDiscrete)) stop("Can't have both discrete and numeric color mappings", call. = FALSE)
-  uniqColor <- lapply(color, uniq)
-  isSingular <- lengths(uniqColor) == 1
+  isSingular <- vapply(color, is_singular, logical(1))
   
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   # TODO: remove these and make numeric colorscale mapping more like the rest
@@ -1002,7 +1012,8 @@ traceify <- function(dat, x = NULL) {
   }
   new_dat <- list()
   for (j in seq_along(lvls)) {
-    new_dat[[j]] <- lapply(dat, function(y) recurse(y, n, x %in% lvls[j]))
+    idx <- x %in% lvls[j]
+    new_dat[[j]] <- if (all(idx)) dat else lapply(dat, function(y) recurse(y, n, idx))
     new_dat[[j]]$name <- new_dat[[j]]$name %||% lvls[j]
   }
   return(new_dat)
@@ -1010,8 +1021,8 @@ traceify <- function(dat, x = NULL) {
 
 
 eval_attr <- function(x, data = NULL) {
-  if (rlang::is_formula(x)) rlang::eval_tidy(rlang::f_rhs(x), data = data,
-                                             env = rlang::f_env(x)) else x
+  if (!inherits(x, "formula")) return(x)
+  eval(x[[length(x)]], c(as.list(data), list(.data = data)), environment(x))
 }
 
 # overwrite defaults with the user defined palette

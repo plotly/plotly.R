@@ -1,29 +1,3 @@
-#' Inspect JSON sent to plotly.js
-#' 
-#' This function is useful for obtaining/viewing/debugging JSON 
-#' sent to plotly.js.
-#' 
-#' @param p a plotly or ggplot object.
-#' @param jsonedit use [listviewer::jsonedit] to view the JSON?
-#' @param pretty adds indentation whitespace to JSON output. Can be TRUE/FALSE
-#' or a number specifying the number of spaces to indent. See [jsonlite::prettify].
-#' @param ... other options passed onto [listviewer::jsonedit]
-#' @export
-#' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
-#'   
-#' plotly_json(plot_ly())
-#' plotly_json(plot_ly(), FALSE)
-
-plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE, ...) {
-  plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = pretty)
-  if (jsonedit) {
-    try_library("listviewer", "plotly_json")
-    listviewer::jsonedit(plotlyJSON, mode = "form", ...)
-  } else {
-    plotlyJSON
-  }
-}
-
 #' Acquire (and optionally display) plotly's plot schema
 #' 
 #' The schema contains valid attributes names, their value type, 

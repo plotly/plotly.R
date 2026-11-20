@@ -109,6 +109,21 @@ getLevels <- function(x) {
 
 tryNULL <- function(expr) tryCatch(expr, error = function(e) NULL)
 
+# Base R helpers for plotly_build() (rather than tidyverse functions):
+# a data frame of the columns in `x` (length-1 ones recycled; list columns kept)
+columns_df <- function(x) {
+  n <- max(c(0L, lengths(x)))
+  x[] <- lapply(x, function(v) if (length(v) == 1L && n != 1L) v[rep(1L, n)] else v)
+  structure(x, class = "data.frame", row.names = .set_row_names(n))
+}
+# the grouping variables of grouped (dplyr) data
+data_groups <- function(d) if (inherits(d, "grouped_df")) setdiff(names(attr(d, "groups")), ".rows")
+# a list of lists, inside out (as purrr::transpose())
+transpose_list <- function(l) lapply(seq_along(l[[1]]), function(i) lapply(l, `[[`, i))
+# a single missing value (as rlang::is_na())
+is_na <- function(x) length(x) == 1L && is.atomic(x) && is.na(x)
+tryFALSE <- function(expr) tryCatch(expr, error = function(e) FALSE)
+
 # Don't attempt to do "tidy" data training on these trace types
 # Note that non-tidy traces expect/anticipate data_array's of varying lengths
 is_tidy <- function(trace) {
@@ -142,7 +157,9 @@ crosstalk_key <- function() ".crossTalkKey"
 # arrange data if the vars exist, don't throw error if they don't
 arrange_safe <- function(data, vars) {
   vars <- vars[vars %in% names(data)]
-  if (length(vars)) dplyr::arrange(data, !!!rlang::syms(vars)) else data
+  if (!length(vars)) return(data)
+  idx <- do.call(order, c(unname(as.list(data)[vars]), method = "radix"))
+  if (is.unsorted(idx)) columns_df(lapply(data, `[`, idx)) else data
 }
 
 is_mapbox <- function(p) {
@@ -410,7 +427,7 @@ supply_highlight_attrs <- function(p) {
       }
       # Hash i (the crosstalk group id) so that it can be used
       # as an HTML id client-side (i.e., key shouldn't contain spaces)
-      groupId <- rlang::hash(i)
+      groupId <- digest::digest(i)
       
       # If the selectize payload has already been built, use that already built payload
       # (since it may have been modified at this point), unless there are new keys to consider
@@ -442,34 +459,6 @@ supply_highlight_attrs <- function(p) {
   
   p
 }
-
-
-# make sure plot attributes adhere to the plotly.js schema
-verify_attr_names <- function(p) {
-  # some layout attributes (e.g., [x-y]axis can have trailing numbers)
-  attrs_name_check(
-    sub("[0-9]+$", "", names(p$x$layout)),
-    c(names(Schema$layout$layoutAttributes), c("boxmode", "barmode", "bargap", "mapType")),
-    "layout"
-  )
-  attrs_name_check(
-    names(p$x$config),
-    names(Schema$config),
-    "config"
-  )
-  for (tr in seq_along(p$x$data)) {
-    thisTrace <- p$x$data[[tr]]
-    attrSpec <- Schema$traces[[thisTrace$type %||% "scatter"]]$attributes
-    # make sure attribute names are valid
-    attrs_name_check(
-      names(thisTrace), 
-      c(names(attrSpec), "key", "set", "frame", "transforms", "_isNestedKey", "_isSimpleKey", "_isGraticule", "_bbox"), 
-      thisTrace$type
-    )
-  }
-  invisible(p)
-}
-
 
 
 # ensure both the layout and trace attributes adhere to the plot schema
@@ -514,11 +503,6 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
       proposed[["text"]] <- paste(uniq(proposed[["text"]]), collapse = "\n")
     }
     
-    # ensure data_arrays of length 1 are boxed up by to_JSON()
-    if (isDataArray) {
-      proposed[[attr]] <- i(proposed[[attr]])
-    }
-    
     # tag 'src-able' attributes (needed for api_create())
     # note that layout has 'src-able' attributes that shouldn't
     # be turned into grids https://github.com/ropensci/plotly/pull/1489
@@ -556,22 +540,6 @@ verify_attr <- function(proposed, schema, layoutAttr = FALSE) {
   }
   
   proposed
-}
-
-attrs_name_check <- function(proposedAttrs, validAttrs, type = "scatter") {
-  illegalAttrs <- setdiff(proposedAttrs, validAttrs)
-  if ("titlefont" %in% illegalAttrs) {
-    warning("The titlefont attribute is deprecated. Use title = list(font = ...) instead.", call. = FALSE)
-    illegalAttrs <- setdiff(illegalAttrs, "titlefont")
-  }
-  if (length(illegalAttrs)) {
-    warning("'", type, "' objects don't have these attributes: '",
-            paste(illegalAttrs, collapse = "', '"), "'\n", 
-            "Valid attributes include:\n'",
-            paste(validAttrs, collapse = "', '"), "'\n", 
-            call. = FALSE)
-  }
-  invisible(proposedAttrs)
 }
 
 # make sure trace type is valid
@@ -837,7 +805,7 @@ verify_key_type <- function(p) {
       p$x$data[[i]]$`_isSimpleKey` <- TRUE
       p$x$data[[i]]$`_isNestedKey` <- FALSE
     }
-    p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !rlang::is_atomic(k)
+    p$x$data[[i]]$`_isNestedKey` <- p$x$data[[i]]$`_isNestedKey` %||% !is.atomic(k)
     # key values should always be strings
     if (p$x$data[[i]]$`_isNestedKey`) {
       p$x$data[[i]]$key <- lapply(p$x$data[[i]]$key, function(x) I(as.character(x)))
@@ -932,10 +900,11 @@ verify_guides <- function(p) {
 }
 
 verify_mathjax <- function(p) {
-  hasMathjax <- "mathjax" %in% sapply(p$dependencies, "[[", "name")
+  hasMathjax <- !is.null(p$x$mathjax)
   if (hasMathjax) return(p)
   
-  hasTeX <- any(rapply(p$x, is.TeX))
+  # (TeX() wraps text in $...$)
+  hasTeX <- any(unlist(rapply(p$x, function(x) is.character(x) && any(grepl("^\\$.+\\$$", x)), how = "unlist")))
   if (!hasTeX) return(p)
   
   # TODO: it would be much better to add the dependency here, but

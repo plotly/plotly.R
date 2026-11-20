@@ -35,8 +35,12 @@ g <- p + geom_errorbar(aes(ymin = lower, ymax = upper))
 
 test_that("geom_errorbar boxes an array of length 1", {
   L <- expect_doppelganger_built(g, "errorbar-unique-groups")
-  expect_equivalent(L$data[[1]]$error_y$array, I(0.1))
-  expect_equivalent(L$data[[1]]$error_y$arrayminus, I(0.2))
+  expect_equivalent(L$data[[1]]$error_y$array, 0.1)
+  expect_equivalent(L$data[[1]]$error_y$arrayminus, 0.2)
+  # (sent to plotly.js as arrays)
+  json <- jsonlite::fromJSON(plotly_json(g, jsonedit = FALSE), simplifyVector = FALSE)
+  expect_type(json$data[[1]]$error_y$array, "list")
+  expect_type(json$data[[1]]$error_y$arrayminus, "list")
 })
 
 # TODO fix and add a test for width of errorbars

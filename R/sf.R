@@ -41,7 +41,7 @@ fortify_sf <- function(model, ...) {
   coords[[sf_key()]] <- coords[[ncol(coords)]]
   
   # join back together
-  d <- dplyr::left_join(coords, model, by = sf_key())
+  d <- cbind(coords, model[coords[[sf_key()]], setdiff(names(model), sf_key()), drop = FALSE])
   
   # drop simple feature row id
   d[[sf_key()]] <- NULL

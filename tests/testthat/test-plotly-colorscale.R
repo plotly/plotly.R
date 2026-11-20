@@ -70,3 +70,18 @@ test_that("contour colorscale supports alpha", {
   p <- plot_ly(z = volcano, type = "contour", stroke = I("black"), alpha = 0.1)
   l <- expect_doppelganger_built(p, "contour-alpha")
 })
+
+test_that("is_singular() agrees with uniq() for matrices", {
+  same <- function(x) expect_identical(is_singular(x), length(uniq(x)) == 1)
+  same(volcano)
+  same(matrix(1, 3, 3))
+  same(matrix(1, 3, 1))
+  same(matrix(c(NA, 1, NA, 1), 2, 2))
+  same(matrix(c(1, NA, NA, 1), 2, 2))
+  same(rbind(c(NA, 5), c(NA, 5), c(NA, NA)))
+  same(matrix(NA_real_, 2, 2))
+  same(matrix(NA_real_, 1, 1))
+  same(matrix(2, 1, 1))
+  same(c(1, 1, NA))
+  same(NULL)
+})

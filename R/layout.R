@@ -73,10 +73,13 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
     stop("Can only add a rangeslider to a plot with one x-axis", call. = FALSE)
   }
   
-  p$x$layout$xaxis$range <- c(
-    to_milliseconds(start),
-    to_milliseconds(end)
-  )
+  # (plotly.js ignored a range with only a start or an end)
+  if (!is.null(start) && !is.null(end)) {
+    p$x$layout$xaxis$range <- c(
+      to_milliseconds(start),
+      to_milliseconds(end)
+    )
+  }
   
   p$x$layout$xaxis$rangeslider <- list(visible = TRUE, ...)
   p
@@ -102,6 +105,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' for an **rmarkdown** example and 
 #' [here](https://github.com/plotly/plotly.R/blob/master/inst/examples/rmd/MathJax/index.Rmd) for a **shiny** example).
 #' @author Carson Sievert
+#' @name config
 #' @export
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
@@ -131,7 +135,7 @@ rangeslider <- function(p, start = NULL, end = NULL, ...) {
 #' config(p, locale = "zh-CN")
 #' 
 
-config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL, mathjax = NULL) {
+config.plotly <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL, mathjax = NULL) {
   
   if (!is.null(locale)) {
     p$x$config$locale <- locale
@@ -140,24 +144,18 @@ config <- function(p, ..., cloud = FALSE, showSendToCloud = cloud, locale = NULL
     if (!locale %in% c("en", "en-US")) {
       p$dependencies <- c(
         p$dependencies,
-        list(locale_dependency(locale))
+        list(plotly.core::locale_dependency(tolower(locale)))
       )
     }
   }
   
   if (!is.null(mathjax)) {
-    mj <- switch(
-      match.arg(mathjax, c("cdn", "local")),
-      cdn = mathjax_cdn(),
-      local = mathjax_local()
-    )
-    # if mathjax is already supplied overwrite it; otherwise, prepend it
-    depNames <- sapply(p$dependencies, "[[", "name")
-    if (any(idx <- depNames %in% "mathjax")) {
-      p$dependencies[[which(idx)]] <- mathjax
-    } else {
-      p$dependencies <- c(list(mj), p$dependencies)
+    # MathJax is loaded from a CDN
+    if (identical(match.arg(mathjax, c("cdn", "local")), "local")) {
+      warning("`mathjax = \"local\"` is no longer supported; MathJax is loaded from a CDN", call. = FALSE)
     }
+    p$x$mathjax <- "cdn"
+    p$dependencies <- c(list(plotly.core::mathjax_dependency()), p$dependencies)
   }
   
   args <- list(...)
