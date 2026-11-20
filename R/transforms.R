@@ -54,6 +54,23 @@ subset_trace <- function(tr, n, idx) {
 
 apply_transforms <- function(p) {
   if (!any(vapply(p$x$data, function(tr) length(tr[["transforms"]]) > 0, logical(1)))) return(p)
+  # every transform type (filter, groupby, aggregate, sort) is applied here
+  rlang::warn(
+    c(
+      "Trace `transforms` are deprecated.",
+      i = paste(
+        "plotly.js removed transforms in version 3; plotly applies them in R",
+        "only for backwards compatibility, and they may be removed in a future version."
+      ),
+      i = paste(
+        "Filter, sort or aggregate the data in R instead (e.g. with dplyr),",
+        "and use `split` or `color` to make one trace per group."
+      )
+    ),
+    class = c("plotly_transforms_deprecated", "deprecatedWarning"),
+    .frequency = "regularly",
+    .frequency_id = "plotly_transforms"
+  )
   n_traces <- length(p$x$data)
   p$x$data <- unlist(lapply(p$x$data, function(tr) {
     tfs <- tr[["transforms"]]

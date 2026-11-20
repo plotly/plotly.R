@@ -25,7 +25,9 @@
   access token is needed), `heatmapgl` becomes `heatmap`, legacy polar charts
   (`r`/`t`) become `scatterpolar`, `titlefont`/`titleside`/`titleposition`
   move into `title`, and trace `transforms` are applied in R (so buttons that
-  restyle a transform have no effect).
+  restyle a transform have no effect), with a deprecation warning: transforms
+  are kept only for backwards compatibility and may be removed in a future
+  version.
 * `add_trace()` and the trace helpers (`add_markers()`, `add_lines()`,
   `add_bars()`, ...) are unchanged; their documentation points to the
   plotly.core functions that document every supported attribute.
