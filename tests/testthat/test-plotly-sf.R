@@ -50,12 +50,13 @@ test_that("plot_geo() lat/lon range is set", {
 
 test_that("plot_mapbox() fitbounds is set", {
   skip_if_not_installed("sf")
-  skip_if_not(has_mapbox())
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  # Mapbox subplots are upgraded to MapLibre ("map"), and the bounds to fit
+  # become the widget's fitBounds setting (see R/go_figure.R)
   p <- plotly_build(plot_mapbox(nc))
   expect_equal(
-    p$x$layout$mapbox$`_fitBounds`$bounds, 
+    as.numeric(p$x$fitBounds$map), 
     c(-84.41252, 33.85492, -75.36831, 36.61673),
     tolerance = 1e-5
   )
@@ -64,12 +65,12 @@ test_that("plot_mapbox() fitbounds is set", {
 
 test_that("sf defaults can be overriden", {
   skip_if_not_installed("sf")
-  skip_if_not(has_mapbox())
   
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   # when applied to fillcolor, alpha defaults to 0.5
   p <- plotly_build(plot_mapbox(nc, color = I("red")))
-  expect_true(p$x$data[[1]]$type == "scattermapbox")
+  # (scattermapbox is upgraded to scattermap)
+  expect_true(p$x$data[[1]]$type == "scattermap")
   expect_true(p$x$data[[1]]$fill == "toself")
   expect_true(p$x$data[[1]]$line$color == toRGB("red"))
   expect_true(p$x$data[[1]]$fillcolor == toRGB("red", 0.5))

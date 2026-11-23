@@ -15,7 +15,8 @@
 #' plotly_json(plot_ly(), FALSE)
 
 plotly_json <- function(p = last_plot(), jsonedit = interactive(), pretty = TRUE, ...) {
-  plotlyJSON <- to_JSON(plotly_build(p)$x, pretty = pretty)
+  # the JSON plotly.core sends to plotly.js
+  plotlyJSON <- plotly.core::plotly_json(p, jsonedit = FALSE, pretty = pretty)
   if (jsonedit) {
     try_library("listviewer", "plotly_json")
     listviewer::jsonedit(plotlyJSON, mode = "form", ...)

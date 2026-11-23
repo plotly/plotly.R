@@ -896,7 +896,7 @@ gg2list <- function(p, width = NULL, height = NULL,
               x = if (is_x) 0.5 else 0,
               y = if (is_x) 0 else 0.5,
               xanchor = if (is_x) "center" else "right", 
-              yanchor = if (is_x) "top" else "center", 
+              yanchor = if (is_x) "top" else "middle", 
               annotationType = "axis"
             )
             
@@ -1445,7 +1445,7 @@ rect2shape <- function(rekt = ggplot2::element_rect()) {
     line = list(
       color = toRGB(rekt$colour),
       width = unitConvert(rekt, "pixels", "width"),
-      linetype = lty2dash(rekt$linetype)
+      dash = lty2dash(rekt$linetype)
     ),
     yref = "paper",
     xref = "paper",

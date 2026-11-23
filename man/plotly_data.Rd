@@ -56,27 +56,27 @@ plotly_data(p, id = p$x$cur_data)
 
 \method{transmute}{plotly}(.data, ...)
 
-\method{group_by_}{plotly}(.data, ...)
+group_by_.plotly(.data, ...)
 
-\method{mutate_}{plotly}(.data, ...)
+mutate_.plotly(.data, ...)
 
-\method{do_}{plotly}(.data, ...)
+do_.plotly(.data, ...)
 
-\method{summarise_}{plotly}(.data, ...)
+summarise_.plotly(.data, ...)
 
-\method{arrange_}{plotly}(.data, ...)
+arrange_.plotly(.data, ...)
 
-\method{select_}{plotly}(.data, ...)
+select_.plotly(.data, ...)
 
-\method{filter_}{plotly}(.data, ...)
+filter_.plotly(.data, ...)
 
-\method{distinct_}{plotly}(.data, ...)
+distinct_.plotly(.data, ...)
 
-\method{slice_}{plotly}(.data, ...)
+slice_.plotly(.data, ...)
 
-\method{rename_}{plotly}(.data, ...)
+rename_.plotly(.data, ...)
 
-\method{transmute_}{plotly}(.data, ...)
+transmute_.plotly(.data, ...)
 }
 \arguments{
 \item{p}{a plotly visualization.}
@@ -95,7 +95,7 @@ a plotly visualization (if there are multiple data frames, by default,
 it returns the most recent one).
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # use group_by() to define groups of visual markings
 p <- txhousing \%>\%

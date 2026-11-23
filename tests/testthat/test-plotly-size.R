@@ -4,6 +4,7 @@ test_that("sizemode is always respected", {
   # https://github.com/ropensci/plotly/issues/1133
   p <- plot_ly(mtcars, x = ~wt, y = ~wt, size = ~wt, color = ~as.factor(carb)) 
   d <- expect_doppelganger_built(p, "sizemode")$data
+  json <- jsonlite::fromJSON(plotly_json(p, jsonedit = FALSE), simplifyVector = FALSE)
   expect_length(d, length(unique(mtcars$carb)))
   
   for (i in seq_along(d)) {
@@ -13,7 +14,7 @@ test_that("sizemode is always respected", {
     # Make sure size is always translated as an array in this case, because plotly.js
     # https://github.com/plotly/plotly.js/issues/2735
     s <- d[[i]]$marker$size
-    if (length(s) == 1) expect_is(s, "AsIs")
+    if (length(s) == 1) expect_type(json$data[[i]]$marker$size, "list")
   }
 })
 

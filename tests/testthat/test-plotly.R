@@ -85,10 +85,11 @@ p <- plot_ly(palmerpenguins::penguins, x = ~species) %>%
 test_that("x/y/z properties have a class of AsIs", {
   p <- plot_ly(x = 1, y = 1, z = 1, type = "scatter3d")
   l <- expect_traces(p, 1, "box-data-array")
-  tr <- l$data[[1]]
-  expect_true(inherits(tr$x, "AsIs"))
-  expect_true(inherits(tr$y, "AsIs"))
-  expect_true(inherits(tr$z, "AsIs"))
+  # (one-value data arrays are sent to plotly.js as arrays)
+  tr <- jsonlite::fromJSON(plotly_json(p, jsonedit = FALSE), simplifyVector = FALSE)$data[[1]]
+  expect_type(tr$x, "list")
+  expect_type(tr$y, "list")
+  expect_type(tr$z, "list")
 })
 
 test_that("grouping within multiples traces works", {
@@ -311,7 +312,8 @@ test_that("Informative deprecation message for collaborate", {
 
 test_that("Informative warning for invalid config attr", {
   p <- config(plot_ly(), foobar = TRUE)
-  expect_warning(plotly_build(p), "foobar")
+  # (config options are checked when the plot is rendered)
+  expect_warning(as_widget(p), "foobar")
 })
 
 test_that("Informative deprecation message for titlefont", {

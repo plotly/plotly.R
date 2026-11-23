@@ -405,15 +405,13 @@ test_that("animation frames are boxed up correctly", {
   dallas <- subset(txhousing, city == "Dallas" & month == 1)
   p <- ggplot(dallas, aes(x = volume, y = sales, frame = year)) +
     geom_point()
-  l <- plotly_build(p)$x
+  l <- jsonlite::fromJSON(plotly_json(p, jsonedit = FALSE), simplifyVector = FALSE)
   
   for (i in seq_along(l$frames)) {
     traces <- l$frames[[i]]$data
     for (j in seq_along(traces)) {
-      x <- traces[[j]]$x
-      y <- traces[[j]]$y
-      expect_true(length(x) > 1 || inherits(x, "AsIs"))
-      expect_true(length(y) > 1 || inherits(y, "AsIs"))
+      expect_type(traces[[j]]$x, "list")
+      expect_type(traces[[j]]$y, "list")
     }
   }
   

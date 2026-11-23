@@ -2,6 +2,7 @@
 % Please edit documentation in R/add.R
 \name{add_trace}
 \alias{add_trace}
+\alias{add_trace.plotly}
 \alias{add_markers}
 \alias{add_text}
 \alias{add_paths}
@@ -9,25 +10,25 @@
 \alias{add_segments}
 \alias{add_polygons}
 \alias{add_sf}
-\alias{add_table}
+\alias{add_table.plotly}
 \alias{add_ribbons}
-\alias{add_image}
+\alias{add_image.plotly}
 \alias{add_area}
-\alias{add_pie}
+\alias{add_pie.plotly}
 \alias{add_bars}
-\alias{add_histogram}
-\alias{add_histogram2d}
-\alias{add_histogram2dcontour}
-\alias{add_heatmap}
-\alias{add_contour}
+\alias{add_histogram.plotly}
+\alias{add_histogram2d.plotly}
+\alias{add_histogram2dcontour.plotly}
+\alias{add_heatmap.plotly}
+\alias{add_contour.plotly}
 \alias{add_boxplot}
-\alias{add_surface}
+\alias{add_surface.plotly}
 \alias{add_mesh}
-\alias{add_scattergeo}
-\alias{add_choropleth}
+\alias{add_scattergeo.plotly}
+\alias{add_choropleth.plotly}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-add_trace(p, ..., data = NULL, inherit = TRUE)
+\method{add_trace}{plotly}(p, ..., data = NULL, inherit = TRUE)
 
 add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
@@ -61,7 +62,7 @@ add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
-add_table(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
+\method{add_table}{plotly}(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
 
 add_ribbons(
   p,
@@ -73,17 +74,17 @@ add_ribbons(
   inherit = TRUE
 )
 
-add_image(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_image}{plotly}(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
 
 add_area(p, r = NULL, theta = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
 
-add_pie(p, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_pie}{plotly}(p, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
 
 add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_histogram}{plotly}(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_histogram2d(
+\method{add_histogram2d}{plotly}(
   p,
   x = NULL,
   y = NULL,
@@ -93,7 +94,7 @@ add_histogram2d(
   inherit = TRUE
 )
 
-add_histogram2dcontour(
+\method{add_histogram2dcontour}{plotly}(
   p,
   x = NULL,
   y = NULL,
@@ -103,19 +104,19 @@ add_histogram2dcontour(
   inherit = TRUE
 )
 
-add_heatmap(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_heatmap}{plotly}(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_contour(p, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_contour}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-add_surface(p, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_surface}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-add_scattergeo(p, ...)
+\method{add_scattergeo}{plotly}(p, ...)
 
-add_choropleth(p, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_choropleth}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
 \item{p}{a plotly object}
@@ -162,10 +163,27 @@ If \code{z} is a raster object (see \code{\link[=as.raster]{as.raster()}}), the 
 \item{labels}{the labels (categories) corresponding to \code{values}.}
 }
 \description{
-Add trace(s) to a plotly visualization
+\strong{Full documentation of the supported trace attributes is in
+plotly.core.} These functions build traces with plotly.core's
+\verb{add_<type>()} functions, which validate the attributes passed via \code{...}
+and document every one of them:
+\itemize{
+\item \code{add_trace()}: \link[plotly.core:add_traces]{plotly.core::add_trace()}
+\item \code{add_markers()}, \code{add_text()}, \code{add_paths()}, \code{add_lines()},
+\code{add_segments()}, \code{add_polygons()}, \code{add_ribbons()}:
+\link[plotly.core:go_scatter]{plotly.core::add_scatter()} (or
+\link[plotly.core:go_scattergl]{plotly.core::add_scattergl()})
+\item \code{add_bars()}: \link[plotly.core:go_bar]{plotly.core::add_bar()}
+\item \code{add_boxplot()}: \link[plotly.core:go_box]{plotly.core::add_box()}
+\item \code{add_area()}: \link[plotly.core:go_barpolar]{plotly.core::add_barpolar()}
+\item \code{add_mesh()}: \link[plotly.core:go_mesh3d]{plotly.core::add_mesh3d()}
+\item \code{add_pie()}, \code{add_histogram()}, \code{add_heatmap()}, \code{add_contour()}, ...:
+the plotly.core function of the same name (e.g.
+\link[plotly.core:go_pie]{plotly.core::add_pie()})
+}
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 # the `plot_ly()` function initiates an object, and if no trace type
 # is specified, it sets a sensible default

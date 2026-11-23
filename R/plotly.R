@@ -242,7 +242,8 @@ plot_ly <- function(data = data.frame(), ..., type = NULL, name,
 #' }
 #' 
 plot_mapbox <- function(data = data.frame(), ...) {
-  p <- config(plot_ly(data, ...), mapboxAccessToken = mapbox_token())
+  # (plotly.js's MapLibre-based maps need no access token)
+  p <- plot_ly(data, ...)
   # not only do we use this for is_mapbox(), but also setting the layout attr
   # https://plotly.com/r/reference/#layout-mapbox
   p$x$layout$mapType <- "mapbox"
@@ -400,6 +401,7 @@ get_xy <- function(node) {
 #' 
 #' @param x a plotly object.
 #' @param ... other options passed onto `htmlwidgets::createWidget`
+#' @name as_widget
 #' @export
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' 
@@ -408,13 +410,13 @@ get_xy <- function(node) {
 #' as_widget(obj)
 #' 
 
-as_widget <- function(x, ...) {
+as_widget.list <- function(x, ...) {
   if (inherits(x, "htmlwidget")) return(x)
   # add plotly class mainly for printing method
   # customize the JSON serializer (for htmlwidgets)
   attr(x, 'TOJSON_FUNC') <- to_JSON
-  htmlwidgets::createWidget(
-    name = "plotly",
+  w <- htmlwidgets::createWidget(
+    name = "plotly_core",
     x = x,
     width = x$layout$width,
     height = x$layout$height,
@@ -424,123 +426,16 @@ as_widget <- function(x, ...) {
       defaultHeight = 400,
       padding = 0
     ),
-    preRenderHook = plotly_build,
-    dependencies = c(
-      # phantomjs doesn't support Object.setPrototypeOf() and a
-      # plotly.js dependency (buffer) uses it to detect TypedArray support.
-      # Thus, we add a polyfill if this is running in shinytest, but otherwise
-      # we shouldn't need it because Object.setPrototypeOf() is pretty widely supported
-      # https://github.com/plotly/plotly.js/issues/4556#issuecomment-583061419
-      # https://caniuse.com/#search=setPrototypeOf
-      if (needsPrototypePolyfill()) {
-        list(setPrototypeOfPolyfill())
-      },
-      list(typedArrayPolyfill()),
-      crosstalk::crosstalkLibs(),
-      list(plotlyHtmlwidgetsCSS()),
-      list(plotlyMainBundle())
-    )
+    # built and rendered as a plotly.core figure (see as_go_figure())
+    preRenderHook = render_go_figure,
+    package = "plotly.core"
   )
-}
-
-needsPrototypePolyfill <- function() {
-  if (isTRUE(getOption("shiny.testmode"))) {
-    return(TRUE)
-  }
-  
-  if (isTRUE(getOption("knitr.in.progress"))) {
-    return(!knitr::is_html_output())
-  }
-  
-  return(FALSE)
-}
-
-setPrototypeOfPolyfill <- function() {
-  htmltools::htmlDependency(
-    name = "setprototypeof", 
-    version = "0.1",
-    package = "plotly",
-    src = dependency_dir("setprototypeof"),
-    script = "setprototypeof.js",
-    all_files = FALSE
-  )
-}
-
-typedArrayPolyfill <- function() {
-  htmltools::htmlDependency(
-    name = "typedarray", 
-    version = "0.1",
-    package = "plotly",
-    src = dependency_dir("typedarray"),
-    script = "typedarray.min.js",
-    all_files = FALSE
-  )
-}
-
-plotlyMainBundle <- function() {
-  htmltools::htmlDependency(
-    name = "plotly-main", 
-    version = "2.25.2",
-    package = "plotly",
-    src = dependency_dir("plotlyjs"),
-    script = "plotly-latest.min.js",
-    all_files = FALSE
-  )
-}
-
-plotlyMainBundlePath <- function() {
-  dep <- plotlyMainBundle()
-  path <- file.path(dep$src$file, dep$script)
-  if (!is.null(dep$package)) {
-    path <- system_file(path, package = dep$package)
-  }
-  path
-}
-
-plotlyHtmlwidgetsCSS <- function() {
-  htmltools::htmlDependency(
-    name = "plotly-htmlwidgets-css", 
-    version = plotlyMainBundle()$version,
-    package = "plotly",
-    src = dependency_dir("plotlyjs"),
-    stylesheet = "plotly-htmlwidgets.css",
-    all_files = FALSE
-  )
-}
-
-locale_dependency <- function(locale) {
-  if (!is.character(locale) || length(locale) != 1) {
-    stop("locale must be a character string (vector of length 1)", call. = FALSE)
-  }
-  
-  locale_dir <- dependency_dir("plotlyjs", "locales")
-  locales_all <- sub("\\.js$", "", list.files(system_file(locale_dir, package = "plotly")))
-  if (!tolower(locale) %in% locales_all) {
-    stop(
-      "Invalid locale: '", locale, "'.\n\n",
-      sprintf("Supported locales include: '%s'", paste(locales_all, collapse = "', '")),
-      call. = FALSE
-    )
-  }
-  
-  # some locales rely on a base/main locale (e.g. de-CH relies on de)
-  # https://codepen.io/etpinard/pen/pKvLVX?editors=1010
-  scripts <- paste0(locale, ".js")
-  if (grepl("-", locale)) {
-    locale_main <- strsplit(locale, "-")[[1]][1]
-    if (locale_main %in% locales_all) {
-      scripts <- c(scripts, paste0(locale_main, ".js"))
-    }
-  }
-  
-  htmltools::htmlDependency(
-    name = paste0("plotly-locale-", locale),
-    version = plotlyMainBundle()$version,
-    package = "plotly",
-    src = list(file = locale_dir),
-    script = tolower(scripts),
-    all_files = FALSE
-  )
+  class(w) <- c("plotly_core", "plotly", "htmlwidget")
+  # plotly.js (the full bundle; see partial_bundle()) must be attached now:
+  # htmlwidgets collects dependencies before the preRenderHook runs
+  w <- plotly.core::set_plotlyjs_dependency(w, "full")
+  w$dependencies <- c(w$dependencies, crosstalk::crosstalkLibs())
+  w
 }
 
 #' Remove TypedArray polyfill
@@ -570,4 +465,9 @@ remove_typedarray_polyfill <- function(p) {
   isTA <- vapply(p$dependencies, function(x) identical(x[["name"]], "typedarray"), logical(1))
   p$dependencies <- p$dependencies[!isTA]
   p
+}
+
+# plotly.js, now bundled with plotly.core (used by orca())
+plotlyMainBundlePath <- function() {
+  system_file("htmlwidgets", "lib", "plotlyjs", "plotly.min.js", package = "plotly.core")
 }

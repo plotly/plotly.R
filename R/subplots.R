@@ -69,7 +69,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   
   # some plotly functions call plotly_build()...subplot() doesn't like that
   for (i in seq_along(plots)) {
-    if (!is.null(plots[[i]][["frames"]])) {
+    if (length(plots[[i]][["frames"]])) {
       warning(
         sprintf("`subplot()` detected plot #%s was 'pre-built' and already has registered\n", i),
         "animation frames. This can cause problems and may happen by calling a \n", 
@@ -90,7 +90,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
   plots <- list()
   for (i in seq_along(plotz)) {
     p <- plots[[i]] <- plotz[[i]]
-    layoutAttrs <- c(names(p$layout), c("mapbox", "geo", "xaxis", "yaxis"))
+    layoutAttrs <- c(names(p$layout), c("map", "geo", "xaxis", "yaxis"))
     xTraceAttrs <- sub("^x", "xaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["xaxis"]] %||% "x"))
     yTraceAttrs <- sub("^y", "yaxis", sapply(p$data, function(tr) tr[["subplot"]] %||% tr[["geo"]] %||% tr[["yaxis"]] %||% "y"))
     missingAttrs <- setdiff(c(xTraceAttrs, yTraceAttrs), layoutAttrs)
@@ -107,7 +107,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
       )
       # reset the anchors
       newPlot$data <- lapply(newPlot$data, function(tr) {
-        for (k in c("mapbox", "geo", "xaxis", "yaxis")) {
+        for (k in c("subplot", "geo", "xaxis", "yaxis")) {
           tr[[k]] <- sub("[0-9]+", "", tr[[k]]) %||% NULL
         }
         tr
@@ -126,9 +126,9 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     axes <- vapply(x$annotations, function(a) identical(a$annotationType, "axis"), logical(1))
     x$annotations[!axes]
   })
-  # collect axis objects (note a _single_ geo/mapbox object counts a both an x and y)
+  # collect axis objects (note a _single_ geo/map object counts a both an x and y)
   xAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^xaxis", names(lay), value = TRUE) %||% "xaxis"
+    keys <- grep("^geo|^map[0-9]*$|^xaxis", names(lay), value = TRUE) %||% "xaxis"
     for (k in keys) {
       dom <- lay[[k]]$domain %||% c(0, 1)
       if ("x" %in% names(dom)) dom <- dom[["x"]]
@@ -136,7 +136,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     lay[keys]
   })
   yAxes <- lapply(layouts, function(lay) {
-    keys <- grep("^geo|^mapbox|^yaxis", names(lay), value = TRUE) %||% "yaxis"
+    keys <- grep("^geo|^map[0-9]*$|^yaxis", names(lay), value = TRUE) %||% "yaxis"
     for (k in keys) {
       dom <- lay[[k]]$domain %||% c(0, 1)
       if ("y" %in% names(dom)) dom <- dom[["y"]]
@@ -198,12 +198,12 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
     yAxes[[i]] <- setNames(yAxes[[i]], names(yMap))
     # for cartesian, bump corresponding axis anchor
     for (j in seq_along(xAxes[[i]])) {
-      if (grepl("^geo|^mapbox", names(xAxes[[i]][j]))) next
+      if (grepl("^geo|^map[0-9]*$", names(xAxes[[i]][j]))) next
       map <- yMap[yMap %in% sub("y", "yaxis", xAxes[[i]][[j]]$anchor %||% "y")]
       xAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
     }
     for (j in seq_along(yAxes[[i]])) {
-      if (grepl("^geo|^mapbox", names(yAxes[[i]][j]))) next
+      if (grepl("^geo|^map[0-9]*$", names(yAxes[[i]][j]))) next
       map <- xMap[xMap %in% sub("x", "xaxis", yAxes[[i]][[j]]$anchor %||% "x")]
       yAxes[[i]][[j]]$anchor <- sub("axis", "", names(map))
     }
@@ -281,7 +281,7 @@ subplot <- function(..., nrows = 1, widths = NULL, heights = NULL, margin = 0.02
 
   # merge non-axis layout stuff
   layouts <- lapply(layouts, function(x) {
-    x[!grepl("^[x-y]axis|^geo|^mapbox|annotations|shapes|images", names(x))] %||% list()
+    x[!grepl("^[x-y]axis|^geo|^map[0-9]*$|annotations|shapes|images", names(x))] %||% list()
   })
   if (which_layout != "merge") {
     if (!is.numeric(which_layout)) warning("which_layout must be numeric")
@@ -314,7 +314,7 @@ dots2plots <- function(...) {
   
   # if ... is a list (or a tibble), list(...) is a (length 1) list 
   # containing a list of plotly objects
-  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]])) {
+  if (length(dotz) == 1 && is.list(dotz[[1]]) && !is.plotly(dotz[[1]]) && !inherits(dotz[[1]], "go_figure")) {
     dotz <- dotz[[1]]
   }
   

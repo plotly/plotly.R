@@ -2,9 +2,10 @@
 % Please edit documentation in R/plotly.R
 \name{as_widget}
 \alias{as_widget}
+\alias{as_widget.list}
 \title{Convert a list to a plotly htmlwidget object}
 \usage{
-as_widget(x, ...)
+\method{as_widget}{list}(x, ...)
 }
 \arguments{
 \item{x}{a plotly object.}
@@ -15,7 +16,7 @@ as_widget(x, ...)
 Convert a list to a plotly htmlwidget object
 }
 \examples{
-\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 trace <- list(x = 1, y = 1)
 obj <- list(data = list(trace), layout = list(title = "my plot"))

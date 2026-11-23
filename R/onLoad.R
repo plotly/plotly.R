@@ -1,4 +1,7 @@
 .onLoad <- function(...) {
+  # plotly.js's plot schema (plotly.core's; see plotly_schema()), read when
+  # first needed
+  delayedAssign("Schema", plotly_schema(), assign.env = parent.env(environment()))
   # These generics are defined in R/plotly_data.R
   dplyr_generics <- c(
     "groups", "ungroup", "group_by", "summarise", "mutate", "do", "arrange",
