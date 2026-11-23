@@ -167,7 +167,7 @@ upgrade_removed <- function(p) {
 #' @export
 #' @examplesIf interactive() || !identical(.Platform$OS.type, "windows")
 #' fig <- as_go_figure(plot_ly(mtcars, x = ~wt, y = ~mpg))
-#' plotly.core::update_traces(fig, marker_size = 10)
+#' plotly.core::update_traces(fig, marker = list(size = 10))
 as_go_figure <- function(p) {
   b <- plotly_build(p)$x
   # values the build supplies by default for attributes a trace type doesn't

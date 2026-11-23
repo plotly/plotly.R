@@ -28,7 +28,7 @@
 \alias{add_choropleth.plotly}
 \title{Add trace(s) to a plotly visualization}
 \usage{
-\method{add_trace}{plotly}(fig, ..., data = NULL, inherit = TRUE)
+\method{add_trace}{plotly}(p, ..., data = NULL, inherit = TRUE)
 
 add_markers(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
@@ -62,7 +62,7 @@ add_polygons(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 add_sf(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE)
 
-\method{add_table}{plotly}(fig, ..., rownames = TRUE, data = NULL, inherit = TRUE)
+\method{add_table}{plotly}(p, ..., rownames = TRUE, data = NULL, inherit = TRUE)
 
 add_ribbons(
   p,
@@ -74,18 +74,18 @@ add_ribbons(
   inherit = TRUE
 )
 
-\method{add_image}{plotly}(fig, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_image}{plotly}(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE)
 
 add_area(p, r = NULL, theta = NULL, t = NULL, ..., data = NULL, inherit = TRUE)
 
-\method{add_pie}{plotly}(fig, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_pie}{plotly}(p, values = NULL, labels = NULL, ..., data = NULL, inherit = TRUE)
 
 add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-\method{add_histogram}{plotly}(fig, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_histogram}{plotly}(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
 \method{add_histogram2d}{plotly}(
-  fig,
+  p,
   x = NULL,
   y = NULL,
   z = NULL,
@@ -95,7 +95,7 @@ add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 )
 
 \method{add_histogram2dcontour}{plotly}(
-  fig,
+  p,
   x = NULL,
   y = NULL,
   z = NULL,
@@ -104,29 +104,23 @@ add_bars(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
   inherit = TRUE
 )
 
-\method{add_heatmap}{plotly}(
-  fig,
-  x = NULL,
-  y = NULL,
-  z = NULL,
-  ...,
-  data = NULL,
-  inherit = TRUE
-)
+\method{add_heatmap}{plotly}(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-\method{add_contour}{plotly}(fig, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_contour}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_boxplot(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 
-\method{add_surface}{plotly}(fig, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_surface}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 
 add_mesh(p, x = NULL, y = NULL, z = NULL, ..., data = NULL, inherit = TRUE)
 
-\method{add_scattergeo}{plotly}(fig, ...)
+\method{add_scattergeo}{plotly}(p, ...)
 
-\method{add_choropleth}{plotly}(fig, z = NULL, ..., data = NULL, inherit = TRUE)
+\method{add_choropleth}{plotly}(p, z = NULL, ..., data = NULL, inherit = TRUE)
 }
 \arguments{
+\item{p}{a plotly object}
+
 \item{...}{Arguments (i.e., attributes) passed along to the trace \code{type}.
 See \code{\link[=schema]{schema()}} for a list of acceptable attributes for a given trace \code{type}
 (by going to \code{traces} -> \code{type} -> \code{attributes}). Note that attributes
@@ -136,8 +130,6 @@ provided at this level may override other arguments
 \item{data}{A data frame (optional) or \link[crosstalk:SharedData]{crosstalk::SharedData} object.}
 
 \item{inherit}{inherit attributes from \code{\link[=plot_ly]{plot_ly()}}?}
-
-\item{p, fig}{a plotly object}
 
 \item{x}{the x variable.}
 

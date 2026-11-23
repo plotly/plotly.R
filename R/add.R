@@ -41,7 +41,7 @@ add_data <- function(p, data = NULL) {
 #'   [plotly.core::add_pie()][plotly.core::go_pie])
 #' 
 #' @inheritParams plot_ly
-#' @param p,fig a plotly object
+#' @param p a plotly object
 #' @param inherit inherit attributes from [plot_ly()]?
 #' @param z a numeric matrix (unless [add_image()], which wants a raster object, see [as.raster()]).
 #' @param x the x variable.
@@ -168,7 +168,7 @@ add_data <- function(p, data = NULL) {
 #'   add_mesh()
 #' }
 #' 
-add_trace.plotly <- function(fig, ...,
+add_trace.plotly <- function(p, ...,
                              data = NULL, inherit = TRUE) {
   
   # "native" plotly arguments
@@ -179,7 +179,7 @@ add_trace.plotly <- function(fig, ...,
     warning("The group argument has been deprecated. Use group_by() or split instead.")
   }
   
-  p <- add_data(fig, data)
+  p <- add_data(p, data)
   
   # inherit attributes from the "first layer" (except the plotly_eval class)
   if (inherit) {
@@ -374,8 +374,7 @@ add_sf <- function(p, ..., x = ~x, y = ~y, data = NULL, inherit = TRUE) {
 #' @param rownames whether or not to display the rownames of `data`.
 #' @rdname add_trace
 #' @export
-add_table.plotly <- function(fig, ..., rownames = TRUE, data = NULL, inherit = TRUE) {
-  p <- fig
+add_table.plotly <- function(p, ..., rownames = TRUE, data = NULL, inherit = TRUE) {
   attrs <- list(...)
   dat <- plotly_data(add_data(p, data))
   if (is.data.frame(dat)) {
@@ -424,8 +423,7 @@ add_ribbons <- function(p, x = NULL, ymin = NULL, ymax = NULL, ...,
 #' @param colormodel Sets the colormodel for image traces if `z` is not a raster object. 
 #' If `z` is a raster object (see [as.raster()]), the `'rgba'` colormodel is always used.
 #' @export
-add_image.plotly <- function(fig, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE) {
-  p <- fig
+add_image.plotly <- function(p, z = NULL, colormodel = NULL, ..., data = NULL, inherit = TRUE) {
   
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
@@ -491,9 +489,8 @@ add_area <- function(p, r = NULL, theta = NULL, t = NULL, ...,
 #' @param values the value to associated with each slice of the pie.
 #' @param labels the labels (categories) corresponding to `values`.
 #' @export
-add_pie.plotly <- function(fig, values = NULL, labels = NULL, ...,
+add_pie.plotly <- function(p, values = NULL, labels = NULL, ...,
                      data = NULL, inherit = TRUE) {
-  p <- fig
   if (inherit) {
     values <- values %||% p$x$attrs[[1]][["values"]]
     labels <- labels %||% p$x$attrs[[1]][["labels"]]
@@ -530,9 +527,8 @@ add_bars <- function(p, x = NULL, y = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_histogram.plotly <- function(fig, x = NULL, y = NULL, ...,
+add_histogram.plotly <- function(p, x = NULL, y = NULL, ...,
                           data = NULL, inherit = TRUE) {
-  p <- fig
   if (inherit) {
     x <- x %||% p$x$attrs[[1]][["x"]]
     y <- y %||% p$x$attrs[[1]][["y"]]
@@ -551,9 +547,8 @@ add_histogram.plotly <- function(fig, x = NULL, y = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_histogram2d.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ...,
+add_histogram2d.plotly <- function(p, x = NULL, y = NULL, z = NULL, ...,
                             data = NULL, inherit = TRUE) {
-  p <- fig
   if (inherit) {
     x <- x %||% p$x$attrs[[1]][["x"]]
     y <- y %||% p$x$attrs[[1]][["y"]]
@@ -574,9 +569,8 @@ add_histogram2d.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_histogram2dcontour.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ...,
+add_histogram2dcontour.plotly <- function(p, x = NULL, y = NULL, z = NULL, ...,
                                    data = NULL, inherit = TRUE) {
-  p <- fig
   if (inherit) {
     x <- x %||% p$x$attrs[[1]][["x"]]
     y <- y %||% p$x$attrs[[1]][["y"]]
@@ -599,9 +593,8 @@ add_histogram2dcontour.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ...
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_heatmap.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ..., 
+add_heatmap.plotly <- function(p, x = NULL, y = NULL, z = NULL, ..., 
                         data = NULL, inherit = TRUE) {
-  p <- fig
   if (inherit) {
     x <- x %||% p$x$attrs[[1]][["x"]]
     y <- y %||% p$x$attrs[[1]][["y"]]
@@ -619,8 +612,7 @@ add_heatmap.plotly <- function(fig, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_contour.plotly <- function(fig, z = NULL, ..., data = NULL, inherit = TRUE) {
-  p <- fig
+add_contour.plotly <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
   }
@@ -655,8 +647,7 @@ add_boxplot <- function(p, x = NULL, y = NULL, ..., data = NULL, inherit = TRUE)
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_surface.plotly <- function(fig, z = NULL, ..., data = NULL, inherit = TRUE) {
-  p <- fig
+add_surface.plotly <- function(p, z = NULL, ..., data = NULL, inherit = TRUE) {
   if (inherit) {
     z <- z %||% p$x$attrs[[1]][["z"]]
   }
@@ -692,8 +683,7 @@ add_mesh <- function(p, x = NULL, y = NULL, z = NULL, ...,
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_scattergeo.plotly <- function(fig, ...) {
-  p <- fig
+add_scattergeo.plotly <- function(p, ...) {
   .Deprecated("geo")
   p
 }
@@ -701,9 +691,8 @@ add_scattergeo.plotly <- function(fig, ...) {
 #' @inheritParams add_trace
 #' @rdname add_trace
 #' @export
-add_choropleth.plotly <- function(fig, z = NULL, ..., 
+add_choropleth.plotly <- function(p, z = NULL, ..., 
                            data = NULL, inherit = TRUE) {
-  p <- fig
   .Deprecated("geo")
   p
 }

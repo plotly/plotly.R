@@ -24,6 +24,6 @@ are not valid are dropped with a warning.
 \examples{
 \dontshow{if (interactive() || !identical(.Platform$OS.type, "windows")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 fig <- as_go_figure(plot_ly(mtcars, x = ~wt, y = ~mpg))
-plotly.core::update_traces(fig, marker_size = 10)
+plotly.core::update_traces(fig, marker = list(size = 10))
 \dontshow{\}) # examplesIf}
 }
