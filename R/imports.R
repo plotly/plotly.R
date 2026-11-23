@@ -1,4 +1,4 @@
-#' @rawNamespace import(ggplot2, except = c(last_plot, set_last_plot))
+#' @import ggplot2
 #' @importFrom grDevices col2rgb extendrange dev.list dev.off rgb as.raster
 #' @importFrom graphics layout
 #' @importFrom utils getFromNamespace modifyList data packageVersion browseURL str file.edit
@@ -215,10 +215,6 @@ plotly.core::save_image
 plotly.core::partial_bundle
 #' @export
 plotly.core::TeX
-#' @export
-plotly.core::last_plot
-#' @export
-plotly.core::plotly_json
 #' @export
 plotly.core::add_bar
 #' @export
