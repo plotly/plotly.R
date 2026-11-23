@@ -364,8 +364,14 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_mode(p)
   # annotations & shapes must be an array of objects
   # TODO: should we add anything else to this?
+  # NOTE: plotly.core makes a single object an array of one when the plot is
+  # rendered (for every object array), so this is a candidate for removal;
+  # plotly_build()'s output (e.g. subplot()'s shape repositioning) still
+  # relies on it
   p <- verify_arrays(p)
   # set a sensible hovermode if it hasn't been specified already
+  # NOTE: "closest" is plotly.js 4's default (the plotly.js plotly.core
+  # bundles), so this is a candidate for removal
   p <- verify_hovermode(p)
   # try to convert to webgl if toWebGl was used
   p <- verify_webgl(p)
@@ -390,6 +396,9 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   p <- verify_guides(p)
   
   # verify colorscale attributes are in a sensible data structure
+  # NOTE: plotly.core's validation takes these forms (names, colour vectors,
+  # matrices, data frames, list(stops, colours)) when the plot is rendered, so
+  # this is a candidate for removal
   p <- verify_colorscale(p)
   
   # upgrade Mapbox traces/layout, heatmapgl and title aliases, which plotly.js
@@ -398,9 +407,14 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
   
   # (attributes are validated by plotly.core when the plot is rendered)
   # box up 'data_array' attributes where appropriate
+  # NOTE: plotly.core's validation keeps data arrays as arrays when the plot is
+  # rendered, so this is a candidate for removal; plotly_build()'s output
+  # (boxed arrays, repeated text reduced to a string) still relies on it
   p <- verify_attr_spec(p)
   
   # make sure we're including mathjax (if TeX() is used)
+  # NOTE: plotly.core adds MathJax when a plot with TeX is rendered, so this
+  # warning is a candidate for removal
   p <- verify_mathjax(p)
   
 
