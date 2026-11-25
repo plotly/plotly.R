@@ -885,15 +885,12 @@ verify_showlegend <- function(p) {
 
 verify_guides <- function(p) {
   
-  # since colorbars are implemented as "invisible" traces, prevent a "trivial" legend
-  if (has_colorbar(p) && has_legend(p) && length(p$x$data) <= 2) {
+  # Suppress a trivial legend for a plot with a separate colorbar trace.
+  isBar <- vapply(p$x$data, is_visible_colorbar, logical(1))
+  splom <- vapply(p$x$data, function(tr) identical(tr[["type"]], "splom"), logical(1))
+  if (any(isBar & !splom) && has_legend(p) && length(p$x$data) <= 2) {
     p$x$layout$showlegend <- default(FALSE)
   }
-  
-  isVisibleBar <- function(tr) {
-    is.colorbar(tr) && (tr$showscale %||% TRUE)
-  }
-  isBar <- vapply(p$x$data, isVisibleBar, logical(1))
   nGuides <- sum(isBar) + has_legend(p)
   
   if (nGuides > 1) {
@@ -980,11 +977,13 @@ has_legend <- function(p) {
     isTRUE(p$x$layout$showlegend %|D|% TRUE)
 }
 
-has_colorbar <- function(p) {
-  isVisibleBar <- function(tr) {
-    is.colorbar(tr) && isTRUE(tr$showscale %||% TRUE)
+is_visible_colorbar <- function(tr) {
+  if (!is.colorbar(tr)) return(FALSE)
+  if (identical(tr[["type"]], "splom")) {
+    isTRUE(as.logical(tr$marker[["showscale"]]))
+  } else {
+    isTRUE(tr$showscale %||% TRUE)
   }
-  any(vapply(p$x$data, isVisibleBar, logical(1)))
 }
 
 # is a given trace type 3d?

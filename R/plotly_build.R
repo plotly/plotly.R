@@ -288,7 +288,12 @@ plotly_build.plotly <- function(p, registerFrames = TRUE) {
     )
     for (i in x$.plotlyVariableMapping) {
       # try to reduce the amount of data we have to send for non-positional scales
-      entry <- if (i %in% npscales()) uniq(d[[i]]) else d[[i]]
+      entry <- d[[i]]
+      # Numeric splom colors can supply a shared scale even when constant in
+      # this trace. Keep one color value per point in that case.
+      splom_color <- identical(i, "color") && identical(x[["type"]], "splom") &&
+        is.numeric(entry) && !inherits(x[[i]], "AsIs")
+      if (i %in% npscales() && !splom_color) entry <- uniq(entry)
       if (is.null(entry)) {
         x[[i]] <- NULL  
       } else {
@@ -698,6 +703,7 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
   # color/colorscale/colorbar attribute placement depends on trace type and marker mode
   # TODO: remove these and make numeric colorscale mapping more like the rest
   types <- vapply(traces, function(tr) tr$type %||% "scatter", character(1))
+  splom_colors <- !stroke && all(types == "splom")
   modes <- vapply(traces, function(tr) tr$mode %||% "lines", character(1))
   hasLine <- has_line(types, modes)
   hasLineColor <- has_color_array(types, "line")
@@ -801,20 +807,20 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     rng <- range(allColor, na.rm = TRUE)
     colScale <- scales::col_numeric(pal, rng, na.color = na.color)
     # generate the colorscale to be shared across traces
-    vals <- if (diff(rng) > 0) {
+    varies <- diff(rng) > 0
+    vals <- if (varies) {
       seq(rng[1], rng[2], length.out = 25)
     } else {
       c(0, 1)
     }
-    colorScale <- matrix(
-      c(scales::rescale(vals), toRGB(colScale(vals), alphas[[1]])),
-      ncol = 2
-    )
+    make_colorscale <- function(alpha) {
+      matrix(c(scales::rescale(vals), toRGB(colScale(vals), alpha)), ncol = 2)
+    }
     colorObj <- list(
       colorbar = lapply(list(title = as.character(title), ticklen = 2), default),
       cmin = default(rng[1]),
       cmax = default(rng[2]),
-      colorscale = default(colorScale),
+      colorscale = default(make_colorscale(alphas[[1]])),
       showscale = default(FALSE)
     )
     for (i in which(isNumeric)) {
@@ -830,17 +836,25 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
       
       # if trace is singular (i.e., one unique color in this trace), then there 
       # is no need for a colorscale, and both stroke/color have relevancy
-      if (isSingular[[i]]) {
+      if (isSingular[[i]] && !(splom_colors && varies)) {
         col <- colScale(uniq(color[[i]]))
         traces[[i]] <- mapColor(traces[[i]], toRGB(col, alphas[[i]]))
       } else {
         
-        colorObj$color <- default(color[[i]])
+        mapped_color <- color[[i]]
+        if (splom_colors && length(mapped_color) == 1L) {
+          mapped_color <- I(rep(mapped_color, splom_point_count(traces[[i]])))
+        }
+        colorObj$color <- default(mapped_color)
         
         if (stroke) {
           traces[[i]]$marker$line <- modify_list(colorObj, traces[[i]]$marker$line)
         } else {
-          traces[[i]]$marker <- modify_list(colorObj, traces[[i]]$marker)
+          marker <- colorObj
+          if (splom_colors && isSingular[[i]] && !identical(alphas[[i]], alphas[[1]])) {
+            marker$colorscale <- default(make_colorscale(alphas[[i]]))
+          }
+          traces[[i]]$marker <- modify_list(marker, traces[[i]]$marker)
         }
         
         if (hasLine[[i]]) {
@@ -873,6 +887,11 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     # exit early if no additional colorbar trace is needed
     if (any(hasZ)) return(traces)
     if (stroke && sum(lengths(lapply(traces, "[[", "stroke"))) == 0) return(traces)
+
+    # A Cartesian colorbar trace introduces axes outside the splom matrix.
+    if (splom_colors) {
+      return(map_splom_colorbar(traces, which(isNumeric)))
+    }
     
     # add an "empty" trace with the colorbar
     colorObj$color <- rng
@@ -902,6 +921,46 @@ map_color <- function(traces, stroke = FALSE, title = "", colorway, na.color = "
     traces[[length(traces) + 1]] <- structure(colorBarTrace, class = "plotly_colorbar")
   }
   
+  traces
+}
+
+splom_point_count <- function(trace) {
+  dims <- Filter(function(dim) !identical(dim[["visible"]], FALSE), trace$dimensions)
+  sizes <- lengths(lapply(dims, `[[`, "values"))
+  sizes <- sizes[sizes > 0L]
+  if (length(sizes)) min(sizes) else 1L
+}
+
+map_splom_colorbar <- function(traces, indices) {
+  shown <- vapply(traces[indices], function(trace) {
+    !any(trace[["visible"]] %in% c(FALSE, "legendonly"))
+  }, logical(1))
+  indices <- indices[shown]
+  markers <- lapply(traces[indices], `[[`, "marker")
+  local_scale <- vapply(markers, function(marker) {
+    is.null(marker[["coloraxis"]]) && is.numeric(marker[["color"]])
+  }, logical(1))
+  visible <- local_scale & vapply(markers, function(marker) {
+    isTRUE(marker[["showscale"]])
+  }, logical(1))
+
+  if (!any(visible)) {
+    automatic <- local_scale & vapply(markers, function(marker) {
+      is.default(marker[["showscale"]])
+    }, logical(1))
+    customized <- vapply(markers, function(marker) {
+      user_specified(marker[["colorbar"]])
+    }, logical(1))
+    first <- c(which(automatic & customized), which(automatic))[1L]
+    if (!is.na(first)) {
+      traces[[indices[[first]]]]$marker$showscale <- default(TRUE)
+      visible[[first]] <- TRUE
+    }
+  }
+
+  for (i in indices[visible]) {
+    traces[[i]] <- prefix_class(traces[[i]], "plotly_colorbar")
+  }
   traces
 }
 
