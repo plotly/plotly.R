@@ -1,3 +1,8 @@
+# plotly (development version)
+
+* Fixed numeric color mappings in scatterplot matrices (`splom`) so the
+  colorbar appears on the matrix trace (#2500).
+
 # plotly 4.12.1
 
 * Completed the `plot_ly()` documentation for what happens when `type` is not
